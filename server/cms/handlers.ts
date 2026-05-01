@@ -18,6 +18,7 @@ import {
   getSetupStatus,
 } from './repositories'
 import { loadDraftProject, saveDraftProject } from './projectRepository'
+import { publishDraftProject } from './publishRepository'
 import type { AdminUserRow } from './types'
 import { validateProject, ValidationError } from '../../src/core/persistence/validate'
 import {
@@ -155,6 +156,14 @@ export async function handleCmsRequest(req: Request, db: DbClient): Promise<Resp
     }
 
     return methodNotAllowed()
+  }
+
+  if (url.pathname === '/api/cms/publish') {
+    const admin = await getAuthenticatedAdmin(req, db)
+    if (!admin) return jsonResponse({ error: 'Unauthorized' }, { status: 401 })
+    if (req.method !== 'POST') return methodNotAllowed()
+
+    return jsonResponse(await publishDraftProject(db, admin.id))
   }
 
   return jsonResponse({ error: 'Not found' }, { status: 404 })
