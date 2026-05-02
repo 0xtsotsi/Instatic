@@ -28,6 +28,8 @@ function shouldProxyPublicSiteRequest(req: IncomingMessage): boolean {
   const { pathname } = new URL(req.url, CMS_DEV_SERVER_ORIGIN)
   if (isEditorAppPath(pathname)) return false
 
+  if (pathname.startsWith('/_pb/assets/')) return true
+
   return pathname === '/' || !FILE_EXTENSION_RE.test(pathname)
 }
 

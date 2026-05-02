@@ -192,6 +192,8 @@ export function makeSite(overrides: Partial<SiteDocument> = {}): SiteDocument {
     files: overrides.files ?? [],
     // visualComponents is required on SiteDocument; default to no reusable components.
     visualComponents: overrides.visualComponents ?? [],
+    ...(overrides.packageJson !== undefined ? { packageJson: overrides.packageJson } : {}),
+    ...(overrides.runtime !== undefined ? { runtime: overrides.runtime } : {}),
     createdAt: overrides.createdAt ?? 1_700_000_000_000,
     updatedAt: overrides.updatedAt ?? 1_700_000_000_000,
   }

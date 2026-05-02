@@ -255,6 +255,23 @@ export const CMS_MIGRATIONS: Migration[] = [
         add column if not exists fields_json jsonb not null default '{"builtIn":{"body":true,"featuredMedia":true,"seo":true},"custom":[]}'::jsonb;
     `,
   },
+  {
+    id: '011_published_runtime_assets',
+    sql: `
+      create table if not exists published_runtime_assets (
+        id text primary key,
+        page_version_id text not null references page_versions(id) on delete cascade,
+        asset_path text not null,
+        public_path text not null unique,
+        content_type text not null,
+        content_bytes bytea not null,
+        created_at timestamptz not null default now()
+      );
+
+      create index if not exists published_runtime_assets_page_version_idx
+        on published_runtime_assets (page_version_id);
+    `,
+  },
 ]
 
 export async function runMigrations(db: DbClient): Promise<void> {

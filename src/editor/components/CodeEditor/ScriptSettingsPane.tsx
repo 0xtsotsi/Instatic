@@ -1,0 +1,179 @@
+import { useMemo } from 'react'
+import { useEditorStore } from '../../../core/editor-store/store'
+import type { SiteFile } from '../../../core/files/types'
+import {
+  analyzeRuntimeScriptImports,
+  DEFAULT_SCRIPT_RUNTIME_CONFIG,
+  normalizeScriptRuntimeConfig,
+  type SiteScriptPlacement,
+  type SiteScriptScope,
+  type SiteScriptTiming,
+} from '../../../core/site-runtime'
+import { Button } from '@ui/components/Button'
+import { Input } from '@ui/components/Input'
+import { Select } from '@ui/components/Select'
+import { Switch } from '@ui/components/Switch'
+import styles from './ScriptSettingsPane.module.css'
+
+interface ScriptSettingsPaneProps {
+  file: SiteFile
+}
+
+const EMPTY_PAGES: NonNullable<ReturnType<typeof useEditorStore.getState>['site']>['pages'] = []
+
+export function ScriptSettingsPane({ file }: ScriptSettingsPaneProps) {
+  const site = useEditorStore((s) => s.site)
+  const activePageId = useEditorStore((s) => s.activePageId)
+  const packageJson = useEditorStore((s) => s.packageJson)
+  const siteRuntime = useEditorStore((s) => s.siteRuntime)
+  const patchScriptRuntimeConfig = useEditorStore((s) => s.patchScriptRuntimeConfig)
+
+  const pages = site?.pages ?? EMPTY_PAGES
+  const config = normalizeScriptRuntimeConfig(
+    siteRuntime.scripts[file.id] ?? DEFAULT_SCRIPT_RUNTIME_CONFIG,
+  )
+  const importAnalysis = useMemo(
+    () => analyzeRuntimeScriptImports([file], packageJson),
+    [file, packageJson],
+  )
+  const runtimePackages = [...importAnalysis.usage.values()]
+  const diagnostics = importAnalysis.diagnostics
+  const scopeValue = scopeToControlValue(config.scope)
+  const currentPage = pages.find((page) => page.id === activePageId) ?? pages[0] ?? null
+  const templatePageIds = pages
+    .filter((page) => page.template)
+    .map((page) => page.id)
+
+  function patch(patchValue: Parameters<typeof patchScriptRuntimeConfig>[1]) {
+    patchScriptRuntimeConfig(file.id, patchValue)
+  }
+
+  function setScope(value: string) {
+    if (value === 'current-page') {
+      const pageIds = currentPage ? [currentPage.id] : []
+      patch({ scope: { type: 'pages', pageIds } })
+      return
+    }
+
+    if (value === 'templates') {
+      patch({ scope: { type: 'templates', templatePageIds } })
+      return
+    }
+
+    patch({ scope: { type: 'all-pages' } })
+  }
+
+  return (
+    <aside className={styles.pane} aria-label="Script runtime settings">
+      <div className={styles.header}>
+        <span className={styles.title}>Runtime</span>
+        <Button
+          variant={config.enabled ? 'secondary' : 'ghost'}
+          size="xs"
+          pressed={config.enabled}
+          onClick={() => patch({ enabled: !config.enabled })}
+          aria-label="Script enabled"
+        >
+          {config.enabled ? 'On' : 'Off'}
+        </Button>
+      </div>
+
+      <label className={styles.switchRow}>
+        <span>Run in canvas</span>
+        <Switch
+          checked={config.runInCanvas}
+          onCheckedChange={(checked) => patch({ runInCanvas: checked })}
+          switchSize="sm"
+          aria-label="Run in canvas"
+        />
+      </label>
+
+      <div className={styles.field}>
+        <span className={styles.label}>Placement</span>
+        <Select
+          aria-label="Script placement"
+          fieldSize="xs"
+          value={config.placement}
+          onChange={(event) => patch({ placement: event.target.value as SiteScriptPlacement })}
+          options={[
+            { value: 'body-end', label: 'Body end' },
+            { value: 'head', label: 'Head' },
+          ]}
+        />
+      </div>
+
+      <div className={styles.field}>
+        <span className={styles.label}>Timing</span>
+        <Select
+          aria-label="Script timing"
+          fieldSize="xs"
+          value={config.timing}
+          onChange={(event) => patch({ timing: event.target.value as SiteScriptTiming })}
+          options={[
+            { value: 'dom-ready', label: 'DOM ready' },
+            { value: 'immediate', label: 'Immediate' },
+            { value: 'idle', label: 'Idle' },
+          ]}
+        />
+      </div>
+
+      <div className={styles.field}>
+        <span className={styles.label}>Scope</span>
+        <Select
+          aria-label="Script scope"
+          fieldSize="xs"
+          value={scopeValue}
+          onChange={(event) => setScope(event.target.value)}
+          options={[
+            { value: 'all-pages', label: 'All pages' },
+            { value: 'current-page', label: 'Current page' },
+            { value: 'templates', label: 'Templates' },
+          ]}
+        />
+      </div>
+
+      <label className={styles.field}>
+        <span className={styles.label}>Priority</span>
+        <Input
+          aria-label="Script priority"
+          fieldSize="xs"
+          type="number"
+          value={String(config.priority)}
+          onChange={(event) => {
+            const next = Number(event.target.value)
+            patch({ priority: Number.isFinite(next) ? next : DEFAULT_SCRIPT_RUNTIME_CONFIG.priority })
+          }}
+        />
+      </label>
+
+      {(runtimePackages.length > 0 || diagnostics.length > 0) && (
+        <div className={styles.imports} aria-label="Script imports">
+          {runtimePackages.length > 0 && (
+            <div className={styles.importList}>
+              {runtimePackages.map((dependency) => (
+                <span key={dependency.name} className={styles.importBadge}>
+                  {dependency.name}
+                </span>
+              ))}
+            </div>
+          )}
+          {diagnostics.map((diagnostic) => (
+            <div
+              key={`${diagnostic.code}:${diagnostic.packageName ?? diagnostic.message}`}
+              className={styles.diagnostic}
+              data-severity={diagnostic.severity}
+            >
+              {diagnostic.packageName ?? diagnostic.message}
+            </div>
+          ))}
+        </div>
+      )}
+    </aside>
+  )
+}
+
+function scopeToControlValue(scope: SiteScriptScope): 'all-pages' | 'current-page' | 'templates' {
+  if (scope.type === 'templates') return 'templates'
+  if (scope.type === 'pages') return 'current-page'
+  return 'all-pages'
+}

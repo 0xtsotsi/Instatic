@@ -46,6 +46,12 @@ describe('development workflow', () => {
     expect(viteConfig).toContain('proxyPublicSiteRequest')
   })
 
+  it('Vite forwards published runtime assets to the CMS server in local dev', () => {
+    const viteConfig = readSiteFile('vite.config.ts')
+
+    expect(viteConfig).toContain("pathname.startsWith('/_pb/assets/')")
+  })
+
   it('Docker Postgres uses a non-default host port for local dev', () => {
     const compose = readSiteFile('docker-compose.yml')
 

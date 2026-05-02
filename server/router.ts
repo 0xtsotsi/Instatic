@@ -8,6 +8,7 @@ import {
 import { renderContentDocumentHtml } from './cms/contentRenderer'
 import { getLatestPublishedSiteSnapshot, getPublishedPageBySlug } from './cms/publishRepository'
 import { renderPublishedContentTemplate, renderPublishedSnapshot } from './cms/publicRenderer'
+import { getPublishedRuntimeAsset } from './cms/runtimeAssetRepository'
 import { jsonResponse } from './http'
 import { serveAdminApp, serveStaticFile } from './static'
 
@@ -47,6 +48,20 @@ export async function handleServerRequest(
 
   if (url.pathname === '/api/agent') {
     return handleAgentRequest(req)
+  }
+
+  if (req.method === 'GET' && url.pathname.startsWith('/_pb/assets/')) {
+    const runtimeAsset = await getPublishedRuntimeAsset(runtime.db, url.pathname)
+    if (runtimeAsset) {
+      const body = new ArrayBuffer(runtimeAsset.bytes.byteLength)
+      new Uint8Array(body).set(runtimeAsset.bytes)
+      return new Response(body, {
+        headers: {
+          'content-type': runtimeAsset.contentType,
+          'cache-control': 'public, max-age=31536000, immutable',
+        },
+      })
+    }
   }
 
   if (runtime.staticDir && url.pathname.startsWith('/assets/')) {

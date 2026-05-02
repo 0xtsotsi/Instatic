@@ -12,10 +12,11 @@
  * - Non-image assets: renders "Binary file" placeholder (handled in ImagePreview).
  * - Text files (component/script/style/config/doc): lazy-loads CodeMirrorEditor.
  * - Content sync: debounced 250ms to updateFileContent(); flush on file switch.
+ * - Script files show runtime settings that feed canvas preview and publishing.
  *
  * Security:
  * - File content treated as plaintext. No dangerouslySetInnerHTML, no eval.
- * - No live preview/execution — files become code only at publisher export.
+ * - Script execution is delegated to the sandboxed site runtime preview path.
  *
  * Architecture source: Contribution 595 section 3
  * Amendment: Contribution 613 section A.2 — image preview and binary placeholder
@@ -30,6 +31,7 @@ import { useEditorStore } from '../../../core/editor-store/store'
 import { PanelHeader } from '../shared/PanelHeader'
 import { useDraggablePanel } from '../../hooks/useDraggablePanel'
 import { ImagePreview, RemoteAssetPreview } from './ImagePreview'
+import { ScriptSettingsPane } from './ScriptSettingsPane'
 import { cn } from '@ui/cn'
 import styles from './CodeEditorPanel.module.css'
 
@@ -106,6 +108,7 @@ export const CodeEditorPanel = memo(function CodeEditorPanel() {
   const isImageAsset = isAsset && (activeFile?.blob?.mimeType.startsWith('image/') ?? false)
   const isNonImageAsset = isAsset && !isImageAsset
   const isTextFile = activeFile && !isAsset
+  const isScriptFile = activeFile?.type === 'script'
 
   // Panel title: show filename when a file is active
   const panelTitle = activeFile
@@ -154,14 +157,19 @@ export const CodeEditorPanel = memo(function CodeEditorPanel() {
 
           ) : isTextFile ? (
             /* Text file — lazy-load the heavy CodeMirror 6 bundle */
-            <Suspense
-              fallback={<div className={styles.loading}>Loading editor…</div>}
-            >
-              <CodeMirrorEditor
-                file={activeFile}
-                updateFileContent={updateFileContent}
-              />
-            </Suspense>
+            <div className={styles.editorWorkspace}>
+              {isScriptFile && <ScriptSettingsPane file={activeFile} />}
+              <div className={styles.editorSurface}>
+                <Suspense
+                  fallback={<div className={styles.loading}>Loading editor…</div>}
+                >
+                  <CodeMirrorEditor
+                    file={activeFile}
+                    updateFileContent={updateFileContent}
+                  />
+                </Suspense>
+              </div>
+            </div>
 
           ) : null}
         </div>

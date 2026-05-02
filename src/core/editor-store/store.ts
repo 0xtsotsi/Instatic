@@ -37,7 +37,7 @@ import { createSitePanelSlice } from './slices/sitePanelSlice'
  *   - visualComponentsSlice: VisualComponent CRUD (Contribution #619 / Task #436)
  *   - settingsSlice:       settings modal open/close + active section (Guideline #193/#323)
  *   - agentSlice:          AI Agent Panel state + streaming (Phase D)
- *   - sitePanelSlice:   Dependency manifest state
+ *   - sitePanelSlice:      dependency manifest + site runtime settings
  *
  * All mutations are wrapped in Immer for structural sharing.
  * Use subscribeWithSelector for granular Zustand subscriptions without Context re-renders.

@@ -313,6 +313,54 @@ describe('validateSite — site package manifest', () => {
     expect(result.packageJson?.dependencies['three; rm -rf /']).toBeUndefined()
     expect(result.packageJson?.devDependencies['@types/react']).toBe('^18.2.0')
   })
+
+  it('preserves normalized site runtime dependency lock and script config', () => {
+    const p = {
+      ...validSite(),
+      runtime: {
+        dependencyLock: {
+          version: 1,
+          packages: {
+            'canvas-confetti': {
+              name: 'canvas-confetti',
+              requested: '^1.9.3',
+              version: '1.9.3',
+              resolvedAt: 123,
+            },
+            'bad;pkg': {
+              name: 'bad;pkg',
+              requested: '*',
+              version: '1.0.0',
+              resolvedAt: 123,
+            },
+          },
+          updatedAt: 123,
+        },
+        scripts: {
+          'script-1': {
+            enabled: true,
+            runInCanvas: false,
+            placement: 'head',
+            timing: 'idle',
+            scope: { type: 'pages', pageIds: ['page-1'] },
+            priority: 25,
+          },
+        },
+      },
+    }
+
+    const result = validateSite(p as unknown)
+    expect(result.runtime?.dependencyLock.packages['canvas-confetti']?.version).toBe('1.9.3')
+    expect(result.runtime?.dependencyLock.packages['bad;pkg']).toBeUndefined()
+    expect(result.runtime?.scripts['script-1']).toEqual({
+      enabled: true,
+      runInCanvas: false,
+      placement: 'head',
+      timing: 'idle',
+      scope: { type: 'pages', pageIds: ['page-1'] },
+      priority: 25,
+    })
+  })
 })
 
 // ── classes round-trip (Task #428 helper-audit) ───────────────────────────────

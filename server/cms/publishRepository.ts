@@ -1,12 +1,18 @@
 import { nanoid } from 'nanoid'
 import type { SiteDocument } from '../../src/core/page-tree/types'
+import type { PublishedPageRuntimeAssets } from '../../src/core/site-runtime'
+import { normalizeSiteRuntimeConfig } from '../../src/core/site-runtime'
 import type { DbClient } from './db'
 import { loadDraftSite } from './siteRepository'
+import { buildSiteRuntimeScripts } from './runtime/bundleScripts'
+import { ensureRuntimeDependencyCache } from './runtime/dependencyCache'
+import { savePublishedRuntimeAssets } from './runtimeAssetRepository'
 
 export interface PublishedPageSnapshot {
   cmsSnapshotVersion: 1
   pageId: string
   site: SiteDocument
+  runtimeAssets?: PublishedPageRuntimeAssets
 }
 
 interface PublishResult {
@@ -40,11 +46,16 @@ function canonicalJson(value: unknown): string {
   return JSON.stringify(value)
 }
 
-function createSnapshot(site: SiteDocument, pageId: string): PublishedPageSnapshot {
+function createSnapshot(
+  site: SiteDocument,
+  pageId: string,
+  runtimeAssets?: PublishedPageRuntimeAssets,
+): PublishedPageSnapshot {
   return {
     cmsSnapshotVersion: 1,
     pageId,
     site: structuredClone(site),
+    ...(runtimeAssets && runtimeAssets.scripts.length > 0 ? { runtimeAssets } : {}),
   }
 }
 
@@ -101,6 +112,10 @@ export async function publishDraftSite(
   try {
     const site = await loadDraftSite(db)
     if (!site) throw new Error('draft site not found')
+    const runtime = normalizeSiteRuntimeConfig(site.runtime)
+    const dependencyCache = Object.keys(runtime.dependencyLock.packages).length > 0
+      ? await ensureRuntimeDependencyCache(runtime.dependencyLock)
+      : undefined
 
     for (const page of site.pages) {
       const versionResult = await db.query<{ next_version: number }>(
@@ -111,12 +126,24 @@ export async function publishDraftSite(
       )
       const version = Number(versionResult.rows[0]?.next_version ?? 1)
       const versionId = nanoid()
+      const runtimeBuild = await buildSiteRuntimeScripts({
+        site,
+        page,
+        target: 'publish',
+        assetBasePath: `/_pb/assets/${versionId}/`,
+        dependencyCache,
+      })
+      const runtimeErrors = runtimeBuild.diagnostics.filter((diagnostic) => diagnostic.severity === 'error')
+      if (runtimeErrors.length > 0) {
+        throw new Error(`runtime build failed: ${runtimeErrors.map((diagnostic) => diagnostic.message).join('; ')}`)
+      }
 
       await db.query(
         `insert into page_versions (id, page_id, version, snapshot_json, published_by)
          values ($1, $2, $3, $4, $5)`,
-        [versionId, page.id, version, createSnapshot(site, page.id), adminUserId],
+        [versionId, page.id, version, createSnapshot(site, page.id, runtimeBuild.runtimeAssets), adminUserId],
       )
+      await savePublishedRuntimeAssets(db, versionId, runtimeBuild.files)
       await db.query(
         `update pages
          set active_version_id = $1,

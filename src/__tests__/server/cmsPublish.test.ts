@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'bun:test'
 import type { SiteDocument } from '../../core/page-tree/types'
+import { normalizeSiteRuntimeConfig } from '../../core/site-runtime'
 import type { DbClient, DbResult } from '../../../server/cms/db'
 import { saveDraftSite } from '../../../server/cms/siteRepository'
 import {
@@ -12,6 +13,7 @@ class PublishFakeDb implements DbClient {
   site: Record<string, unknown> | null = null
   pages: Record<string, unknown>[] = []
   versions: Record<string, unknown>[] = []
+  runtimeAssets: Record<string, unknown>[] = []
 
   async query<Row extends Record<string, unknown> = Record<string, unknown>>(
     sql: string,
@@ -71,6 +73,17 @@ class PublishFakeDb implements DbClient {
         version: params[2],
         snapshot_json: params[3],
         published_by: params[4],
+      })
+      return { rows: [], rowCount: 1 }
+    }
+    if (normalized.startsWith('insert into published_runtime_assets')) {
+      this.runtimeAssets.push({
+        id: params[0],
+        page_version_id: params[1],
+        asset_path: params[2],
+        public_path: params[3],
+        content_type: params[4],
+        content_bytes: params[5],
       })
       return { rows: [], rowCount: 1 }
     }
@@ -207,5 +220,38 @@ describe('CMS publishing', () => {
       draftPages: 1,
       publishedPages: 1,
     })
+  })
+
+  it('stores built runtime assets with the published page version', async () => {
+    const db = new PublishFakeDb()
+    const draft = site('Runtime page')
+    draft.files = [
+      {
+        id: 'entry',
+        path: 'src/scripts/entry.ts',
+        type: 'script',
+        content: `window.__publishedRuntime = 'ok'`,
+        createdAt: 1,
+        updatedAt: 1,
+      },
+    ]
+    draft.packageJson = { dependencies: {}, devDependencies: {} }
+    draft.runtime = normalizeSiteRuntimeConfig({
+      scripts: {
+        entry: {
+          placement: 'body-end',
+          priority: 10,
+        },
+      },
+    })
+    await saveDraftSite(db, draft)
+
+    await publishDraftSite(db, 'admin_1')
+    const published = await getPublishedPageBySlug(db, 'index')
+
+    expect(db.runtimeAssets.length).toBeGreaterThan(0)
+    expect(String(db.runtimeAssets[0].public_path)).toContain('/_pb/assets/')
+    expect(published?.runtimeAssets?.scripts).toHaveLength(1)
+    expect(published?.runtimeAssets?.scripts[0].src).toBe(db.runtimeAssets[0].public_path)
   })
 })

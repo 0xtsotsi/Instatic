@@ -36,6 +36,7 @@ import { isSafePath, normalizePath } from '../files/pathValidation'
 import { validateComponentName } from '../visualComponents/nameValidation'
 import { sanitizeRichtext, isRichtextPropKey } from '../sanitize'
 import { normalizeSitePackageJson } from '../site-dependencies/manifest'
+import { normalizeSiteRuntimeConfig } from '../site-runtime'
 import { pageSlugDuplicateError, pageSlugError } from '../page-tree/slugs'
 import { generateDefaultDarkColor, normalizeFrameworkColorSlug } from '../framework/colors'
 
@@ -585,6 +586,7 @@ export function validateSite(raw: unknown): SiteDocument {
 
   const settings = validateSettings(raw.settings ?? {}, 'site.settings')
   const packageJson = normalizeSitePackageJson(raw.packageJson)
+  const runtime = normalizeSiteRuntimeConfig(raw.runtime)
 
   // Validate class registry — coerce any legacy projects that lack this field
   const rawClasses = raw.classes
@@ -680,6 +682,7 @@ export function validateSite(raw: unknown): SiteDocument {
     files,
     visualComponents,
     packageJson,
+    runtime,
     breakpoints,
     settings,
     classes,

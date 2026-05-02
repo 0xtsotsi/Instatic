@@ -1,0 +1,101 @@
+.pane {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 216px;
+  min-width: 216px;
+  height: 100%;
+  padding: 10px;
+  overflow-y: auto;
+  border-right: 1px solid var(--panel-border, var(--editor-border));
+  background: rgba(255, 255, 255, 0.025);
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  min-height: 26px;
+}
+
+.title {
+  overflow: hidden;
+  color: var(--editor-text);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0;
+  line-height: 1.2;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.switchRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  min-height: 28px;
+  color: var(--editor-text-secondary);
+  cursor: pointer;
+  font-size: 11px;
+  user-select: none;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.label {
+  color: var(--editor-text-muted);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0;
+  line-height: 1.2;
+}
+
+.imports {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  margin-top: 2px;
+  padding-top: 8px;
+  border-top: 1px solid var(--panel-border, var(--editor-border));
+}
+
+.importList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.importBadge {
+  max-width: 100%;
+  overflow: hidden;
+  padding: 2px 5px;
+  border: 1px solid rgba(99, 102, 241, 0.22);
+  border-radius: 999px;
+  background: rgba(99, 102, 241, 0.12);
+  color: #c4b5fd;
+  font-family: monospace;
+  font-size: 9px;
+  font-weight: 700;
+  line-height: 1.4;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.diagnostic {
+  overflow: hidden;
+  color: var(--editor-warning, #fbbf24);
+  font-size: 10px;
+  line-height: 1.35;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.diagnostic[data-severity='error'] {
+  color: var(--editor-danger-light, #fecaca);
+}

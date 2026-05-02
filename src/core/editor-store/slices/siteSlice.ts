@@ -39,6 +39,10 @@ import {
   DEFAULT_SITE_PACKAGE_JSON,
 } from '../../site-dependencies/manifest'
 import {
+  cloneSiteRuntimeConfig,
+  DEFAULT_SITE_RUNTIME,
+} from '../../site-runtime'
+import {
   generateDefaultDarkColor,
   generateFrameworkColorUtilityClasses,
   normalizeFrameworkColorSlug,
@@ -159,6 +163,7 @@ function createDefaultSiteDocument(name: string): SiteDocument {
     files: [],             // Contribution #595 — files data layer
     visualComponents: [],  // Contribution #619 — visual components data layer
     packageJson: clonePackageJson(DEFAULT_SITE_PACKAGE_JSON),
+    runtime: cloneSiteRuntimeConfig(DEFAULT_SITE_RUNTIME),
     breakpoints: DEFAULT_BREAKPOINTS,
     settings: structuredClone(DEFAULT_SITE_SETTINGS),
     classes: {},
@@ -472,7 +477,11 @@ export const createSiteSlice: StateCreator<EditorStore, [], [], SiteSlice> = (se
         produce((state: EditorStore) => {
           state._historyPast.pop()
           state._historyFuture.push(structuredClone(site))
-          state.site = previous
+          const packageJson = clonePackageJson(previous.packageJson)
+          const siteRuntime = cloneSiteRuntimeConfig(previous.runtime)
+          state.site = { ...previous, packageJson, runtime: siteRuntime }
+          state.packageJson = packageJson
+          state.siteRuntime = siteRuntime
           state.canUndo = state._historyPast.length > 0
           state.canRedo = true
           state.hasUnsavedChanges = true
@@ -492,7 +501,11 @@ export const createSiteSlice: StateCreator<EditorStore, [], [], SiteSlice> = (se
         produce((state: EditorStore) => {
           state._historyFuture.pop()
           state._historyPast.push(structuredClone(site))
-          state.site = next
+          const packageJson = clonePackageJson(next.packageJson)
+          const siteRuntime = cloneSiteRuntimeConfig(next.runtime)
+          state.site = { ...next, packageJson, runtime: siteRuntime }
+          state.packageJson = packageJson
+          state.siteRuntime = siteRuntime
           state.canUndo = true
           state.canRedo = state._historyFuture.length > 0
           state.hasUnsavedChanges = true
@@ -507,9 +520,11 @@ export const createSiteSlice: StateCreator<EditorStore, [], [], SiteSlice> = (se
     // ─── SiteDocument lifecycle ────────────────────────────────────────────────────
     createSite: (name) => {
       const site = createDefaultSiteDocument(name)
+      const siteRuntime = cloneSiteRuntimeConfig(site.runtime)
       set({
-        site,
+        site: { ...site, runtime: siteRuntime },
         packageJson: clonePackageJson(site.packageJson),
+        siteRuntime,
         activePageId: site.pages[0].id,
         _historyPast: [],
         _historyFuture: [],
@@ -530,9 +545,11 @@ export const createSiteSlice: StateCreator<EditorStore, [], [], SiteSlice> = (se
         reconcileFrameworkColorClasses(migratedSite)
       }
       const packageJson = clonePackageJson(migratedSite.packageJson)
+      const siteRuntime = cloneSiteRuntimeConfig(migratedSite.runtime)
       set({
-        site: { ...migratedSite, packageJson },
+        site: { ...migratedSite, packageJson, runtime: siteRuntime },
         packageJson,
+        siteRuntime,
         activePageId: migratedSite.pages[0]?.id ?? null,
         _historyPast: [],
         _historyFuture: [],
@@ -546,6 +563,7 @@ export const createSiteSlice: StateCreator<EditorStore, [], [], SiteSlice> = (se
       set({
         site: null,
         packageJson: clonePackageJson(DEFAULT_SITE_PACKAGE_JSON),
+        siteRuntime: cloneSiteRuntimeConfig(DEFAULT_SITE_RUNTIME),
         activePageId: null,
         selectedNodeId: null,
         _historyPast: [],

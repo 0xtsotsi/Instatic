@@ -8,7 +8,9 @@ import type { PublishedPageSnapshot } from './publishRepository'
 export function renderPublishedSnapshot(snapshot: PublishedPageSnapshot): string {
   const page = snapshot.site.pages.find((candidate) => candidate.id === snapshot.pageId)
   if (!page) throw new Error(`Published page "${snapshot.pageId}" not found in snapshot`)
-  return publishPage(page, snapshot.site, registry).html
+  return publishPage(page, snapshot.site, registry, {
+    runtimeAssets: snapshot.runtimeAssets,
+  }).html
 }
 
 export function renderPublishedContentTemplate(
@@ -18,7 +20,10 @@ export function renderPublishedContentTemplate(
   const template = selectEntryTemplate(snapshot.site, entry.collectionId)
   if (!template) return null
 
-  return publishPage(template, snapshot.site, registry, undefined, {
-    currentEntry: entry,
+  return publishPage(template, snapshot.site, registry, {
+    templateContext: {
+      currentEntry: entry,
+    },
+    runtimeAssets: snapshot.runtimeAssets,
   }).html
 }

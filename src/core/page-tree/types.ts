@@ -18,6 +18,7 @@ import type { SiteFile } from '../files/types'
 import type { VisualComponent } from '../visualComponents/types'
 
 import type { SitePackageJson } from '../site-dependencies/manifest'
+import type { SiteRuntimeConfig } from '../site-runtime/types'
 
 // ---------------------------------------------------------------------------
 // Phase C — CSS Class System types
@@ -456,6 +457,12 @@ export interface SiteDocument {
    * defaults before normal editor use.
    */
   packageJson?: SitePackageJson
+  /**
+   * Runtime configuration for dependency-backed user scripts.
+   * Optional for legacy fixtures/projects; validation and site creation fill
+   * defaults before normal editor use.
+   */
+  runtime?: SiteRuntimeConfig
   breakpoints: Breakpoint[]
   settings: SiteSettings
   /**

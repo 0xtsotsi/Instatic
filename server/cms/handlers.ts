@@ -79,6 +79,15 @@ import {
   serverPluginRuntime,
 } from './serverPluginRuntime'
 import { validateSite, SiteValidationError } from '../../src/core/persistence/validate'
+import type { SitePackageJson } from '../../src/core/site-dependencies/manifest'
+import { isSafePackageName } from '../../src/core/site-dependencies/packageNames'
+import { normalizeSiteRuntimeConfig } from '../../src/core/site-runtime'
+import type { TemplateRenderDataContext } from '../../src/core/templates/dynamicBindings'
+import '../../src/modules/base'
+import { registry } from '../../src/core/module-engine/registry'
+import { resolveSiteDependencyLock } from './runtime/dependencyResolver'
+import { ensureRuntimeDependencyCache } from './runtime/dependencyCache'
+import { buildRuntimePreviewDocument } from './runtime/previewRuntime'
 import {
   badRequest,
   jsonResponse,
@@ -96,6 +105,13 @@ const MAX_MEDIA_BYTES = 50 * 1024 * 1024
 function readString(body: Record<string, unknown>, key: string): string {
   const value = body[key]
   return typeof value === 'string' ? value.trim() : ''
+}
+
+function readObject<T>(body: Record<string, unknown>, key: string): T | undefined {
+  const value = body[key]
+  return value && typeof value === 'object' && !Array.isArray(value)
+    ? value as T
+    : undefined
 }
 
 function readNullableString(body: Record<string, unknown>, key: string): string | null {
@@ -272,6 +288,28 @@ function safeStorageName(filename: string): string {
   return safe || 'upload.bin'
 }
 
+function runtimeDependencyMap(raw: unknown): Record<string, string> {
+  if (!raw || typeof raw !== 'object' || Array.isArray(raw)) return {}
+  const dependencies: Record<string, string> = {}
+  for (const [rawName, rawVersion] of Object.entries(raw as Record<string, unknown>)) {
+    const name = rawName.trim()
+    const version = typeof rawVersion === 'string' ? rawVersion.trim() : ''
+    if (!name || !version || !isSafePackageName(name)) continue
+    dependencies[name] = version
+  }
+  return dependencies
+}
+
+function runtimeRequestPackageJson(raw: unknown): SitePackageJson {
+  const manifest = raw && typeof raw === 'object' && !Array.isArray(raw)
+    ? raw as Record<string, unknown>
+    : {}
+  return {
+    dependencies: runtimeDependencyMap(manifest.dependencies),
+    devDependencies: runtimeDependencyMap(manifest.devDependencies),
+  }
+}
+
 async function readUploadedFile(req: Request): Promise<File | null> {
   const body = await req.formData()
   const file = body.get('file')
@@ -377,6 +415,68 @@ export async function handleCmsRequest(
     }
 
     return methodNotAllowed()
+  }
+
+  if (url.pathname === '/api/cms/runtime/dependencies/resolve') {
+    const admin = await getAuthenticatedAdmin(req, db)
+    if (!admin) return jsonResponse({ error: 'Unauthorized' }, { status: 401 })
+    if (req.method !== 'POST') return methodNotAllowed()
+
+    const body = await readJsonObject(req)
+    try {
+      const packageJson = runtimeRequestPackageJson(body.packageJson)
+      const dependencyLock = await resolveSiteDependencyLock(packageJson)
+      return jsonResponse({ dependencyLock })
+    } catch (err) {
+      return badRequest(err instanceof Error ? err.message : 'Runtime dependency resolution failed')
+    }
+  }
+
+  if (url.pathname === '/api/cms/runtime/preview') {
+    const admin = await getAuthenticatedAdmin(req, db)
+    if (!admin) return jsonResponse({ error: 'Unauthorized' }, { status: 401 })
+    if (req.method !== 'POST') return methodNotAllowed()
+
+    const body = await readJsonObject(req)
+    const pageId = readString(body, 'pageId')
+    const breakpointId = readString(body, 'breakpointId') || undefined
+    const templateContext = readObject<TemplateRenderDataContext>(body, 'templateContext')
+    if (!pageId) return badRequest('Missing pageId')
+
+    try {
+      const site = validateSite(body.site)
+      const page = site.pages.find((candidate) => candidate.id === pageId)
+      if (!page) return jsonResponse({ error: 'Page not found' }, { status: 404 })
+
+      const runtime = normalizeSiteRuntimeConfig(site.runtime)
+      const dependencyCache = Object.keys(runtime.dependencyLock.packages).length > 0
+        ? await ensureRuntimeDependencyCache(runtime.dependencyLock)
+        : undefined
+      const preview = await buildRuntimePreviewDocument({
+        site,
+        page,
+        registry,
+        assetBasePath: '/_pb/preview/runtime/',
+        dependencyCache,
+        breakpointId,
+        templateContext,
+      })
+
+      return jsonResponse({
+        html: preview.html,
+        assets: preview.files.map((file) => ({
+          path: file.path,
+          publicPath: file.publicPath,
+          content: file.content,
+          contentType: file.contentType,
+        })),
+        runtimeAssets: preview.runtimeAssets,
+        diagnostics: preview.diagnostics,
+      })
+    } catch (err) {
+      if (err instanceof SiteValidationError) return badRequest(err.message)
+      return badRequest(err instanceof Error ? err.message : 'Runtime preview build failed')
+    }
   }
 
   if (url.pathname === '/api/cms/media') {

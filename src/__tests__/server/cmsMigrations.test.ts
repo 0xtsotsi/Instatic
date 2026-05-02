@@ -10,6 +10,7 @@ describe('CMS migrations', () => {
     expect(sql).toContain('create table if not exists pages')
     expect(sql).toContain('create table if not exists page_versions')
     expect(sql).toContain('create table if not exists media_assets')
+    expect(sql).toContain('create table if not exists published_runtime_assets')
   })
 
   it('stores draft and published page documents as jsonb', () => {

@@ -118,6 +118,8 @@ export const createFilesSlice: StateCreator<EditorStore, [], [], FilesSlice> = (
         const idx = state.site.files.findIndex((f) => f.id === id)
         if (idx === -1) return
         state.site.files.splice(idx, 1)
+        if (state.site.runtime?.scripts) delete state.site.runtime.scripts[id]
+        delete state.siteRuntime.scripts[id]
         if (state.activeEditorFileId === id) state.activeEditorFileId = null
         state.site.updatedAt = Date.now()
       }),

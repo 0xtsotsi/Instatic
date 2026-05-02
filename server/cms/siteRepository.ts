@@ -31,6 +31,7 @@ function siteShell(site: SiteDocument): StoredSiteShell {
       files: site.files,
       visualComponents: site.visualComponents,
       packageJson: site.packageJson,
+      runtime: site.runtime,
       breakpoints: site.breakpoints,
       settings: site.settings,
       classes: site.classes,
@@ -55,6 +56,9 @@ function readStoredShell(row: SiteRow): SiteShell {
       : [],
     packageJson: isRecord(site.packageJson)
       ? site.packageJson as unknown as SiteDocument['packageJson']
+      : undefined,
+    runtime: isRecord(site.runtime)
+      ? site.runtime as unknown as SiteDocument['runtime']
       : undefined,
     breakpoints: Array.isArray(site.breakpoints)
       ? site.breakpoints as SiteDocument['breakpoints']

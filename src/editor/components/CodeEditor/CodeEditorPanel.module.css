@@ -51,6 +51,22 @@
   overflow: hidden;
 }
 
+.editorWorkspace {
+  display: flex;
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
+}
+
+.editorSurface {
+  display: flex;
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
+  flex-direction: column;
+  overflow: hidden;
+}
+
 /* ── Loading / empty state ───────────────────────────────────────────────── */
 .loading {
   flex: 1;

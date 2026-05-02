@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'bun:test'
 import type { SiteDocument } from '../../core/page-tree/types'
+import { normalizeSiteRuntimeConfig } from '../../core/site-runtime'
 import type { DbClient, DbResult } from '../../../server/cms/db'
 import {
   loadDraftSite,
@@ -149,6 +150,27 @@ describe('CMS draft site persistence', () => {
       settings: { metaTitle: 'Example' },
       classes: { class_1: { name: 'Hero' } },
       pages: [{ id: 'page_home', title: 'Home', slug: 'index' }],
+    })
+  })
+
+  it('round-trips site runtime settings in the site shell', async () => {
+    const db = new SiteFakeDb()
+    await saveDraftSite(db, validSite({
+      runtime: normalizeSiteRuntimeConfig({
+        scripts: {
+          script_1: {
+            placement: 'head',
+            priority: 10,
+          },
+        },
+      }),
+    }))
+
+    const loaded = await loadDraftSite(db)
+
+    expect(loaded?.runtime?.scripts.script_1).toMatchObject({
+      placement: 'head',
+      priority: 10,
     })
   })
 
