@@ -21,6 +21,7 @@ describe('publishPage runtime assets', () => {
     const { html } = publishPage(page, site, registry)
 
     expect(html).toContain("script-src 'none'")
+    expect(html).toContain("worker-src 'none'")
     expect(html).not.toContain('data-pb-runtime-script')
   })
 
@@ -47,6 +48,7 @@ describe('publishPage runtime assets', () => {
     const { html } = publishPage(page, site, registry, { runtimeAssets })
 
     expect(html).toContain("script-src 'self'")
+    expect(html).toContain("worker-src 'self' blob:")
     expect(html).not.toContain("script-src 'none'")
     expect(html).toContain(
       '<script type="module" src="/_pb/assets/runtime/head.123.js" data-pb-runtime-script="head-script"></script>',

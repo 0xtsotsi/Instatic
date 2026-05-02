@@ -330,14 +330,17 @@ export function publishPage(
 
   const headRuntimeScripts = scriptTagsForRuntimeAssets(runtimeAssets, 'head')
   const bodyEndRuntimeScripts = scriptTagsForRuntimeAssets(runtimeAssets, 'body-end')
-  const scriptSource = hasPublishedRuntimeScripts(runtimeAssets) ? "'self'" : "'none'"
+  const hasRuntimeScripts = hasPublishedRuntimeScripts(runtimeAssets)
+  const scriptSource = hasRuntimeScripts ? "'self'" : "'none'"
+  const workerSource = hasRuntimeScripts ? "'self' blob:" : "'none'"
 
   // Constraint #227: every published page must carry a Content-Security-Policy meta tag.
   // Runtime-enabled pages only allow self-hosted external script assets.
   const csp =
     `\n  <meta http-equiv="Content-Security-Policy"` +
     ` content="default-src 'self'; script-src ${scriptSource};` +
-    ` style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; frame-src 'none';">`
+    ` style-src 'self' 'unsafe-inline'; img-src 'self' data: https:;` +
+    ` frame-src 'none'; worker-src ${workerSource};">`
 
   // WCAG 2.1 AA SC 3.1.1: lang attribute must reflect the site's declared language.
   // Escape the tag value — even a BCP-47 tag is user-controlled and must be safe for HTML output.

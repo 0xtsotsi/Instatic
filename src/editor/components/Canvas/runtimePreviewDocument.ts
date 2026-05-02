@@ -40,7 +40,47 @@ function replaceAll(input: string, search: string, replacement: string): string 
 }
 
 function allowSandboxPreviewAssetUrls(html: string): string {
-  return html
-    .replace(/script-src 'self'/g, "script-src 'self' data:")
-    .replace(/style-src 'self' 'unsafe-inline'/g, "style-src 'self' 'unsafe-inline' data:")
+  return html.replace(
+    /(<meta http-equiv="Content-Security-Policy" content=")([^"]*)(")/,
+    (_match, prefix: string, policy: string, suffix: string) =>
+      `${prefix}${allowSandboxPreviewAssetPolicy(policy)}${suffix}`,
+  )
+}
+
+function allowSandboxPreviewAssetPolicy(policy: string): string {
+  const directives = policy
+    .split(';')
+    .map((directive) => directive.trim())
+    .filter(Boolean)
+
+  let hasWorkerSrc = false
+  const previewDirectives = directives.map((directive) => {
+    if (directive.startsWith('script-src ') && directive.includes("'self'")) {
+      return appendCspSources(directive, ['data:'])
+    }
+    if (directive.startsWith('style-src ') && directive.includes("'self'")) {
+      return appendCspSources(directive, ['data:'])
+    }
+    if (directive.startsWith('worker-src ')) {
+      hasWorkerSrc = true
+      return "worker-src 'self' blob: data:"
+    }
+    return directive
+  })
+
+  if (!hasWorkerSrc) {
+    previewDirectives.push("worker-src 'self' blob: data:")
+  }
+
+  return `${previewDirectives.join('; ')};`
+}
+
+function appendCspSources(directive: string, sources: string[]): string {
+  const parts = directive.split(/\s+/)
+  for (const source of sources) {
+    if (!parts.includes(source)) {
+      parts.push(source)
+    }
+  }
+  return parts.join(' ')
 }
