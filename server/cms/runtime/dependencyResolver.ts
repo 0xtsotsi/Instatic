@@ -1,21 +1,38 @@
 import { maxSatisfying } from 'semver'
+import { z } from 'zod'
 import type { SitePackageJson } from '@core/site-dependencies/manifest'
 import { isSafePackageName } from '@core/site-dependencies/packageNames'
+import { parseJsonResponse } from '@core/utils/jsonValidate'
 import type {
   LockedSiteDependency,
   SiteDependencyLock,
 } from '@core/site-runtime'
 
-interface NpmPackageMetadata {
-  name?: string
-  'dist-tags'?: Record<string, string>
-  versions?: Record<string, {
-    dist?: {
-      integrity?: string
-      tarball?: string
-    }
-  }>
-}
+// Validates the npm registry response. Permissive on extra fields (npm's
+// metadata schema is large and we only consume the fields below). Surfaced
+// by /audit-types — was `await response.json() as NpmPackageMetadata`.
+const NpmPackageMetadataSchema = z.object({
+  name: z.string().optional(),
+  'dist-tags': z.record(z.string(), z.string()).optional(),
+  versions: z
+    .record(
+      z.string(),
+      z
+        .object({
+          dist: z
+            .object({
+              integrity: z.string().optional(),
+              tarball: z.string().optional(),
+            })
+            .passthrough()
+            .optional(),
+        })
+        .passthrough(),
+    )
+    .optional(),
+}).passthrough()
+
+type NpmPackageMetadata = z.infer<typeof NpmPackageMetadataSchema>
 
 export interface ResolveSiteDependencyLockOptions {
   fetch?: typeof fetch
@@ -71,7 +88,7 @@ export async function resolveRuntimeDependency(
     throw new Error(`[runtime dependencies] Failed to resolve ${safeName}: ${response.status}`)
   }
 
-  const metadata = await response.json() as NpmPackageMetadata
+  const metadata = await parseJsonResponse(response, NpmPackageMetadataSchema)
   const version = resolveVersion(metadata, requested)
   const dist = metadata.versions?.[version]?.dist
   const resolvedAt = now()

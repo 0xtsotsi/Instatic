@@ -2,11 +2,13 @@
  * PreferencesSection — local editor preferences.
  */
 import { useState } from 'react'
+import { z } from 'zod'
 import { Switch } from '@ui/components/Switch'
 import {
   EDITOR_PREFS_KEY,
   notifyEditorPrefsChanged,
 } from '@editor/preferences/editorPreferences'
+import { parseJsonWithFallback } from '@core/utils/jsonValidate'
 import s from '../Settings.module.css'
 
 interface EditorPrefs {
@@ -19,14 +21,21 @@ const defaultPrefs: EditorPrefs = {
   classHoverPreview: true,
 }
 
+// Same shape lives in editorPreferences.ts as a separate Zod schema. We keep
+// this local copy to avoid creating a cross-module dependency on the schema
+// just for reading; both readers tolerate extra/missing fields via
+// .passthrough() and partial defaults. Surfaced by /audit-types.
+const EditorPrefsPartialSchema = z.object({
+  autoSave: z.boolean().optional(),
+  classHoverPreview: z.boolean().optional(),
+}).passthrough()
+
 function loadPrefs(): EditorPrefs {
-  try {
-    const raw = localStorage.getItem(EDITOR_PREFS_KEY)
-    return raw
-      ? { ...defaultPrefs, ...(JSON.parse(raw) as Partial<EditorPrefs>) }
-      : defaultPrefs
-  } catch { /* ignore */ }
-  return defaultPrefs
+  const raw = (() => {
+    try { return localStorage.getItem(EDITOR_PREFS_KEY) } catch { return null }
+  })()
+  const parsed = parseJsonWithFallback(raw, EditorPrefsPartialSchema, {})
+  return { ...defaultPrefs, ...parsed }
 }
 
 function savePrefs(prefs: EditorPrefs) {

@@ -28,10 +28,12 @@ import type {
   PropertyControl,
   PropertySchema,
 } from '../module-engine/types'
+import { z } from 'zod'
 import { executeAgentActions } from './executor'
 import { AGENT_API_PATH } from './agentConfig'
 import { stripAgentActionBlocks } from './actionBlocks'
 import { collectAgentRenderSnapshots } from './renderEvidence'
+import { safeParseJson } from '@core/utils/jsonValidate'
 import type {
   AgentModuleContext,
   AgentModulePropContext,
@@ -42,6 +44,37 @@ import type {
   ServerStreamEvent,
   PageContext,
 } from './types'
+
+// ---------------------------------------------------------------------------
+// Stream event schema
+//
+// Discriminated union mirrors ServerStreamEvent from ./types. Deep fields
+// (actions[], result) pass through as unknown — those have their own
+// validators downstream (executor.ts uses Zod schemas per AgentAction). The
+// schema here catches malformed envelopes from the server, which is the
+// failure mode we actually need to defend against in the streaming reader.
+// Surfaced by /audit-types.
+
+const ServerStreamEventSchema = z.discriminatedUnion('type', [
+  z.object({ type: z.literal('text'), text: z.string() }),
+  z.object({ type: z.literal('actions'), actions: z.array(z.unknown()) }),
+  z.object({
+    type: z.literal('actionResult'),
+    actionType: z.string(),
+    result: z.unknown(),
+  }),
+  z.object({
+    type: z.literal('toolStatus'),
+    toolCallId: z.string(),
+    name: z.string(),
+    status: z.enum(['pending', 'success', 'error']),
+    input: z.unknown().optional(),
+    error: z.string().optional(),
+  }),
+  z.object({ type: z.literal('session'), sessionId: z.string() }),
+  z.object({ type: z.literal('done') }),
+  z.object({ type: z.literal('error'), message: z.string() }),
+])
 
 // ---------------------------------------------------------------------------
 // Slice interface
@@ -285,12 +318,11 @@ export const createAgentSlice: StateCreator<EditorStore, [], [], AgentSlice> = (
           for (const line of lines) {
             const trimmed = line.trim()
             if (!trimmed) continue
-            let event: ServerStreamEvent
-            try {
-              event = JSON.parse(trimmed) as ServerStreamEvent
-            } catch {
-              continue // skip malformed lines
-            }
+            const parsed = safeParseJson(trimmed, ServerStreamEventSchema)
+            if (!parsed.ok) continue // skip malformed or wrong-shape lines
+            // Cast back to the source-of-truth interface; deep fields
+            // (actions, result) are validated downstream.
+            const event = parsed.value as ServerStreamEvent
             await processStreamEvent(event, assistantId, appendTextDelta, set, get)
           }
         }
