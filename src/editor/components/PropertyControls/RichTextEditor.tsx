@@ -210,10 +210,26 @@ export function RichTextEditor({
       document.execCommand('createLink', false, url)
     } else {
       // No selection — insert a new link with the URL as visible text.
+      // Use Range.insertNode rather than execCommand('insertHTML', outerHTML)
+      // to avoid a text→HTML round-trip (CodeQL js/xss-through-dom). The
+      // sanitizeRichtext pass below is still the authoritative defence
+      // against javascript: hrefs, but inserting the DOM node directly
+      // means we never re-parse a serialized string in the first place.
       const anchor = document.createElement('a')
       anchor.href = url
       anchor.textContent = url
-      document.execCommand('insertHTML', false, anchor.outerHTML)
+
+      if (selection && selection.rangeCount > 0) {
+        const range = selection.getRangeAt(0)
+        range.deleteContents()
+        range.insertNode(anchor)
+        range.setStartAfter(anchor)
+        range.collapse(true)
+        selection.removeAllRanges()
+        selection.addRange(range)
+      } else {
+        editorRef.current?.appendChild(anchor)
+      }
     }
 
     setShowLinkStrip(false)
