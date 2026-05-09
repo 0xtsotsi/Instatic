@@ -15,14 +15,15 @@ import type {
   CmsPluginsPayload,
   InstalledPlugin,
   PluginManifest,
+  PluginPermission,
 } from "@core/plugin-sdk";
 import {
   collectEnabledAdminPages,
   parsePluginManifest,
-  permissionLabel,
 } from "@core/plugins/manifest";
-import { permissionDescription, safeUrl } from "@core/plugin-sdk";
+import { safeUrl } from "@core/plugin-sdk";
 import { PluginRemoveDialog } from "./components/PluginRemoveDialog/PluginRemoveDialog";
+import { PermissionReviewSection } from "./components/PermissionReviewSection";
 import {
   inspectCmsPluginPackage,
   installCmsPluginPackage,
@@ -58,6 +59,14 @@ interface PendingInstall {
    * confirm.
    */
   upgradeFromVersion?: string;
+  /**
+   * Permissions the user previously granted to the existing install. Used to
+   * compute the diff against the new manifest's requested permissions:
+   *   • `manifest.permissions ∩ previouslyGranted` — already approved (no re-confirmation needed, but we still show them so the user has full context).
+   *   • `manifest.permissions \ previouslyGranted` — NEW in this upgrade. These are the ones we highlight prominently.
+   *   • `previouslyGranted \ manifest.permissions` — dropped (the new manifest no longer requests them; they get auto-revoked).
+   */
+  previouslyGrantedPermissions?: PluginPermission[];
 }
 
 function updatePlugin(
@@ -164,6 +173,12 @@ export function PluginsPage() {
         existing && existing.version !== manifest.version
           ? existing.version
           : undefined;
+      // Previously-granted permissions on the existing install. The dialog
+      // uses this to highlight NEW permissions in the upgrade so the site
+      // owner can spot a permission expansion before clicking "Update".
+      const previouslyGrantedPermissions = existing
+        ? existing.grantedPermissions
+        : undefined;
 
       // Always show the dialog for upgrades, even with zero new permissions.
       // The site owner deserves to see a "yes, upgrade 1.0.0 → 1.1.0"
@@ -173,6 +188,7 @@ export function PluginsPage() {
           manifest,
           file: file.name.toLowerCase().endsWith(".zip") ? file : undefined,
           upgradeFromVersion,
+          previouslyGrantedPermissions,
         });
       } else {
         await installPendingPlugin(
@@ -379,58 +395,12 @@ export function PluginsPage() {
             )}
 
             {pendingInstall && (
-              <section
-                className={styles.permissionReview}
-                aria-labelledby="plugin-permissions-title"
-              >
-                <div>
-                  <h2 id="plugin-permissions-title">
-                    {pendingInstall.upgradeFromVersion
-                      ? `Update ${pendingInstall.manifest.name}`
-                      : "Approve Plugin Permissions"}
-                  </h2>
-                  <p>
-                    {pendingInstall.upgradeFromVersion
-                      ? `Updating from ${pendingInstall.upgradeFromVersion} to ${pendingInstall.manifest.version}. Existing settings and stored data are preserved; the plugin runs its migrate hook before re-activating.`
-                      : `${pendingInstall.manifest.name} requests access before activation.`}
-                  </p>
-                </div>
-                {pendingInstall.manifest.permissions.length > 0 && (
-                  <ul>
-                    {pendingInstall.manifest.permissions.map((permission) => (
-                      <li key={permission}>
-                        <strong>{permissionLabel(permission)}</strong>
-                        <span>{permissionDescription(permission)}</span>
-                      </li>
-                    ))}
-                  </ul>
-                )}
-                <div className={styles.permissionActions}>
-                  <Button
-                    variant="secondary"
-                    size="sm"
-                    onClick={() => setPendingInstall(null)}
-                  >
-                    <span>Cancel</span>
-                  </Button>
-                  <Button
-                    variant="primary"
-                    size="sm"
-                    disabled={uploading}
-                    onClick={() => void installPendingPlugin(pendingInstall)}
-                  >
-                    <span>
-                      {uploading
-                        ? pendingInstall.upgradeFromVersion
-                          ? "Updating"
-                          : "Installing"
-                        : pendingInstall.upgradeFromVersion
-                          ? `Update to ${pendingInstall.manifest.version}`
-                          : "Approve and Install"}
-                    </span>
-                  </Button>
-                </div>
-              </section>
+              <PermissionReviewSection
+                pending={pendingInstall}
+                uploading={uploading}
+                onCancel={() => setPendingInstall(null)}
+                onConfirm={() => void installPendingPlugin(pendingInstall)}
+              />
             )}
 
             <div className={styles.pluginsList} aria-label="Installed plugins">
@@ -449,11 +419,10 @@ export function PluginsPage() {
                   const homepage = plugin.manifest.homepage;
                   const repository = plugin.manifest.repository;
                   const license = plugin.manifest.license;
-                  const keywords = plugin.manifest.keywords ?? [];
                   return (
                     <article key={plugin.id} className={styles.pluginCard}>
-                      <div className={styles.pluginMeta}>
-                        <div className={styles.pluginNameRow}>
+                      <header className={styles.pluginHeader}>
+                        <div className={styles.pluginHeaderInfo}>
                           {iconSrc && (
                             <img
                               src={iconSrc}
@@ -464,25 +433,140 @@ export function PluginsPage() {
                               loading="lazy"
                             />
                           )}
-                          <h2>{plugin.name}</h2>
-                          <span
-                            className={styles.pluginVersionPill}
-                            aria-label={`Version ${plugin.version}`}
-                          >
-                            v{plugin.version}
-                          </span>
-                          <span data-status={status.status}>
-                            {status.label}
-                          </span>
+                          <div className={styles.pluginHeaderTitle}>
+                            <h2>{plugin.name}</h2>
+                            <span
+                              className={styles.pluginVersionPill}
+                              aria-label={`Version ${plugin.version}`}
+                            >
+                              v{plugin.version}
+                            </span>
+                            <span
+                              className={styles.pluginStatusPill}
+                              data-status={status.status}
+                            >
+                              {status.label}
+                            </span>
+                          </div>
                         </div>
-                        <p>
+
+                        <div className={styles.pluginActions}>
+                          {plugin.manifest.settings && plugin.manifest.settings.length > 0 && (
+                            <Button
+                              variant="secondary"
+                              size="sm"
+                              disabled={busyPluginId === plugin.id}
+                              onClick={() => setSettingsPluginId(plugin.id)}
+                              aria-label={`Edit settings for ${plugin.name}`}
+                            >
+                              <span>Settings</span>
+                            </Button>
+                          )}
+                          {plugin.manifest.pack &&
+                            plugin.grantedPermissions.includes("visualComponents.register") &&
+                            // Re-syncing a disabled plugin's pack would inject
+                            // its VCs / pages / classes into the user's site —
+                            // the opposite of what "disabled" should mean.
+                            // Hide the button and gate the server endpoint
+                            // (server returns 400 if called directly on a
+                            // disabled plugin).
+                            plugin.enabled && (
+                              <Button
+                                variant="secondary"
+                                size="sm"
+                                disabled={busyPluginId === plugin.id}
+                                onClick={() => void installPluginPack(plugin)}
+                                aria-label={`Re-sync ${plugin.name} pack from the plugin's latest version`}
+                              >
+                                <span>Re-sync pack</span>
+                              </Button>
+                            )}
+                          {plugin.enabled && plugin.lifecycleStatus === "error" && (
+                            <Button
+                              variant="primary"
+                              size="sm"
+                              disabled={busyPluginId === plugin.id}
+                              onClick={() => void restartPlugin(plugin)}
+                              aria-label={`Restart ${plugin.name}`}
+                            >
+                              <ReloadIcon size={14} aria-hidden="true" />
+                              <span>Restart</span>
+                            </Button>
+                          )}
+                          <Button
+                            variant="secondary"
+                            size="sm"
+                            disabled={busyPluginId === plugin.id}
+                            onClick={() => void togglePlugin(plugin)}
+                            aria-label={`${plugin.enabled ? "Disable" : "Enable"} ${plugin.name}`}
+                          >
+                            {plugin.enabled ? (
+                              <PowerOffIcon size={14} aria-hidden="true" />
+                            ) : (
+                              <PowerIcon size={14} aria-hidden="true" />
+                            )}
+                            <span>{plugin.enabled ? "Disable" : "Enable"}</span>
+                          </Button>
+                          <Button
+                            variant="destructive"
+                            size="sm"
+                            disabled={busyPluginId === plugin.id}
+                            onClick={() => setPendingRemove(plugin)}
+                            aria-label={`Remove ${plugin.name}`}
+                          >
+                            <DeleteIcon size={14} aria-hidden="true" />
+                            <span>Remove</span>
+                          </Button>
+                        </div>
+                      </header>
+
+                      <div className={styles.pluginBody}>
+                        <p className={styles.pluginDescription}>
                           {plugin.manifest.description ??
                             `${plugin.id} v${plugin.version}`}
                         </p>
-                        {(author || homepage || repository || license) && (
-                          <p className={styles.pluginAttribution}>
+                        {(author || homepage || repository || license || plugin.manifest.adminPages.length > 0) && (
+                          <div className={styles.pluginLinksRow}>
+                            <div className={styles.pluginLinksLeft}>
+                              {license && (
+                                <span className={styles.pluginAttributionItem}>
+                                  <span className={styles.pluginLicenseBadge}>
+                                    {license}
+                                  </span>
+                                </span>
+                              )}
+                              {homepage && (
+                                <a
+                                  className={styles.pluginAttributionItem}
+                                  href={safeUrl(homepage)}
+                                  target="_blank"
+                                  rel="noreferrer noopener"
+                                >
+                                  Homepage
+                                </a>
+                              )}
+                              {repository && (
+                                <a
+                                  className={styles.pluginAttributionItem}
+                                  href={safeUrl(repository)}
+                                  target="_blank"
+                                  rel="noreferrer noopener"
+                                >
+                                  Source
+                                </a>
+                              )}
+                              {plugin.manifest.adminPages.map((page) => (
+                                <Link
+                                  key={page.id}
+                                  className={styles.pluginPageLink}
+                                  to={page.route ?? `/admin/plugins/${plugin.id}/${page.id}`}
+                                >
+                                  {page.navLabel ?? page.title}
+                                </Link>
+                              ))}
+                            </div>
                             {author && (
-                              <span className={styles.pluginAttributionItem}>
+                              <span className={styles.pluginAuthor}>
                                 by{" "}
                                 {author.url ? (
                                   <a
@@ -497,41 +581,7 @@ export function PluginsPage() {
                                 )}
                               </span>
                             )}
-                            {license && (
-                              <span className={styles.pluginAttributionItem}>
-                                <span className={styles.pluginLicenseBadge}>
-                                  {license}
-                                </span>
-                              </span>
-                            )}
-                            {homepage && (
-                              <a
-                                className={styles.pluginAttributionItem}
-                                href={safeUrl(homepage)}
-                                target="_blank"
-                                rel="noreferrer noopener"
-                              >
-                                Homepage
-                              </a>
-                            )}
-                            {repository && (
-                              <a
-                                className={styles.pluginAttributionItem}
-                                href={safeUrl(repository)}
-                                target="_blank"
-                                rel="noreferrer noopener"
-                              >
-                                Source
-                              </a>
-                            )}
-                          </p>
-                        )}
-                        {keywords.length > 0 && (
-                          <ul className={styles.pluginKeywords} aria-label="Keywords">
-                            {keywords.map((keyword) => (
-                              <li key={keyword}>{keyword}</li>
-                            ))}
-                          </ul>
+                          </div>
                         )}
                         {plugin.lastError && (
                           <p className={styles.pluginError}>
@@ -560,90 +610,6 @@ export function PluginsPage() {
                             </ul>
                           </details>
                         )}
-                        {plugin.manifest.pack &&
-                          plugin.grantedPermissions.includes("visualComponents.register") && (
-                            <p className={styles.pluginPackHint}>
-                              Bundled Visual Components, templates, and CSS
-                              classes are imported into your site on upload.
-                              &ldquo;Re-sync pack&rdquo; replaces them with the
-                              plugin&rsquo;s latest version &mdash; useful
-                              after upgrading the plugin.
-                            </p>
-                          )}
-                        {plugin.manifest.adminPages.length > 0 && (
-                          <div className={styles.pageLinks}>
-                            {plugin.manifest.adminPages.map((page) => (
-                              <Link
-                                key={page.id}
-                                to={page.route ?? `/admin/plugins/${plugin.id}/${page.id}`}
-                              >
-                                {page.navLabel ?? page.title}
-                              </Link>
-                            ))}
-                          </div>
-                        )}
-                      </div>
-
-                      <div className={styles.pluginActions}>
-                        {plugin.manifest.settings && plugin.manifest.settings.length > 0 && (
-                          <Button
-                            variant="secondary"
-                            size="sm"
-                            disabled={busyPluginId === plugin.id}
-                            onClick={() => setSettingsPluginId(plugin.id)}
-                            aria-label={`Edit settings for ${plugin.name}`}
-                          >
-                            <span>Settings</span>
-                          </Button>
-                        )}
-                        {plugin.manifest.pack &&
-                          plugin.grantedPermissions.includes("visualComponents.register") && (
-                            <Button
-                              variant="secondary"
-                              size="sm"
-                              disabled={busyPluginId === plugin.id}
-                              onClick={() => void installPluginPack(plugin)}
-                              aria-label={`Re-sync ${plugin.name} pack from the plugin's latest version`}
-                            >
-                              <span>Re-sync pack</span>
-                            </Button>
-                          )}
-                        {plugin.enabled && plugin.lifecycleStatus === "error" && (
-                          <Button
-                            variant="primary"
-                            size="sm"
-                            disabled={busyPluginId === plugin.id}
-                            onClick={() => void restartPlugin(plugin)}
-                            aria-label={`Restart ${plugin.name}`}
-                          >
-                            <ReloadIcon size={14} aria-hidden="true" />
-                            <span>Restart</span>
-                          </Button>
-                        )}
-                        <Button
-                          variant="secondary"
-                          size="sm"
-                          disabled={busyPluginId === plugin.id}
-                          onClick={() => void togglePlugin(plugin)}
-                          aria-label={`${plugin.enabled ? "Disable" : "Enable"} ${plugin.name}`}
-                        >
-                          {plugin.enabled ? (
-                            <PowerOffIcon size={14} aria-hidden="true" />
-                          ) : (
-                            <PowerIcon size={14} aria-hidden="true" />
-                          )}
-                          <span>{plugin.enabled ? "Disable" : "Enable"}</span>
-                        </Button>
-                        <Button
-                          variant="destructive"
-                          size="sm"
-                          disabled={busyPluginId === plugin.id}
-                          onClick={() => setPendingRemove(plugin)}
-                          aria-label={`Remove ${plugin.name}`}
-                        >
-                          <DeleteIcon size={14} aria-hidden="true" />
-                          <span>Remove</span>
-                        </Button>
                       </div>
                     </article>
                   );

@@ -19,8 +19,8 @@
 
 .error,
 .emptyState,
-.pluginMeta p,
-.pluginMeta small {
+.pluginBody p,
+.pluginBody small {
     margin: 0;
     font-size: 12px;
     line-height: 1.5;
@@ -102,9 +102,7 @@
 
 .pluginCard {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) auto;
-    align-items: center;
-    gap: 16px;
+    gap: 12px;
     padding: 14px;
     border-radius: 16px;
     background: var(--editor-surface-2);
@@ -115,24 +113,36 @@
     background: var(--editor-surface-3);
 }
 
-.pluginMeta {
-    display: grid;
-    gap: 8px;
-    min-width: 0;
-}
-
-.pluginNameRow {
+/* Card header — base info on the left, action buttons on the right.
+   The body below sits at the card's full width. */
+.pluginHeader {
     display: flex;
-    flex-wrap: wrap;
     align-items: center;
-    gap: 8px;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: wrap;
 }
 
-.pluginNameRow {
+.pluginHeaderInfo {
     display: flex;
     align-items: center;
     gap: 10px;
+    min-width: 0;
+    flex: 1 1 auto;
+}
+
+.pluginHeaderTitle {
+    display: flex;
+    align-items: center;
+    gap: 8px;
     flex-wrap: wrap;
+    min-width: 0;
+}
+
+.pluginBody {
+    display: grid;
+    gap: 8px;
+    min-width: 0;
 }
 
 .pluginIcon {
@@ -145,7 +155,7 @@
     border: 1px solid var(--panel-border);
 }
 
-.pluginNameRow h2 {
+.pluginHeaderTitle h2 {
     margin: 0;
     overflow-wrap: anywhere;
     font-size: 15px;
@@ -153,13 +163,27 @@
     letter-spacing: 0;
 }
 
-.pluginAttribution {
+/* Single row that combines license + homepage/source + admin page links
+   on the left with the author byline on the right. The links cluster
+   stays compact so the card reads as a tidy list of related items;
+   author goes right because it's metadata about the plugin's origin,
+   not something the user clicks to act on. */
+.pluginLinksRow {
     display: flex;
     flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
     gap: 10px;
-    margin: 0;
     font-size: 12px;
     color: var(--editor-text-muted);
+}
+
+.pluginLinksLeft {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px;
+    min-width: 0;
 }
 
 .pluginAttributionItem {
@@ -170,12 +194,35 @@
 .pluginAttributionItem a,
 a.pluginAttributionItem {
     color: var(--editor-text);
-    text-decoration: underline;
-    text-underline-offset: 2px;
+    text-decoration: none;
 }
 
 .pluginAttributionItem a:hover,
 a.pluginAttributionItem:hover {
+    color: var(--editor-accent);
+}
+
+.pluginPageLink {
+    color: var(--editor-accent);
+    font-weight: 750;
+    text-decoration: none;
+}
+
+.pluginPageLink:hover {
+    color: var(--editor-text);
+}
+
+.pluginAuthor {
+    color: var(--editor-text-muted);
+    font-size: 12px;
+}
+
+.pluginAuthor a {
+    color: var(--editor-text);
+    text-decoration: none;
+}
+
+.pluginAuthor a:hover {
     color: var(--editor-accent);
 }
 
@@ -191,24 +238,7 @@ a.pluginAttributionItem:hover {
     background: var(--panel-bg);
 }
 
-.pluginKeywords {
-    list-style: none;
-    margin: 0;
-    padding: 0;
-    display: flex;
-    flex-wrap: wrap;
-    gap: 6px;
-}
-
-.pluginKeywords li {
-    padding: 2px 8px;
-    border: 1px solid var(--panel-border);
-    border-radius: 999px;
-    font-size: 11px;
-    color: var(--editor-text-muted);
-}
-
-.pluginNameRow span {
+.pluginHeaderTitle span {
     padding: 3px 7px;
     border: 1px solid var(--panel-border);
     border-radius: 999px;
@@ -217,42 +247,34 @@ a.pluginAttributionItem:hover {
     font-weight: 750;
 }
 
-.pluginNameRow span[data-status="active"] {
+.pluginHeaderTitle .pluginStatusPill[data-status="active"] {
     color: var(--editor-success-green);
 }
 
-.pluginNameRow span[data-status="error"] {
+.pluginHeaderTitle .pluginStatusPill[data-status="error"] {
     color: var(--editor-danger);
 }
 
-.pluginNameRow span[data-status="installed"] {
+.pluginHeaderTitle .pluginStatusPill[data-status="installed"] {
     color: var(--editor-accent);
 }
 
 /* Version pill — sits between the heading and the status badge so the
    reader's eye gets "Plugin Name · v1.2.3 · Active" in one line. Inherits
-   the generic .pluginNameRow span pill chrome (border, radius, muted
-   text). Mono font so version numbers align neatly when comparing two
-   cards at a glance. */
-.pluginNameRow .pluginVersionPill {
+   the generic header-pill chrome (border, radius, muted text). Mono font
+   so version numbers align neatly when comparing two cards at a glance. */
+.pluginHeaderTitle .pluginVersionPill {
     font-family: var(--font-mono);
     font-weight: 600;
 }
 
-.pluginMeta p {
+.pluginBody p {
     color: var(--editor-text-muted);
 }
 
-.pluginMeta .pluginError {
+.pluginBody .pluginError {
     color: var(--editor-danger);
     font-weight: 700;
-}
-
-.pluginMeta .pluginPackHint {
-    margin-top: 4px;
-    font-size: 12px;
-    color: var(--editor-text-muted);
-    line-height: 1.4;
 }
 
 .pluginCrashLog {
@@ -285,28 +307,13 @@ a.pluginAttributionItem:hover {
     color: var(--editor-text);
 }
 
-.pageLinks {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-}
-
-.pageLinks a {
-    color: var(--editor-accent);
-    font-size: 12px;
-    font-weight: 750;
-    text-decoration: none;
-}
-
-.pageLinks a:hover {
-    text-decoration: underline;
-}
-
 .pluginActions {
     display: flex;
     flex-wrap: wrap;
     justify-content: flex-end;
+    align-items: center;
     gap: 8px;
+    flex-shrink: 0;
 }
 
 /* Plugin admin page body — same gap rhythm as the Plugins list. The
@@ -495,8 +502,8 @@ a.pluginAttributionItem:hover {
 }
 
 @media (max-width: 720px) {
-    .pluginCard {
-        grid-template-columns: 1fr;
+    .pluginHeader {
+        flex-direction: column;
         align-items: stretch;
     }
 
