@@ -114,7 +114,7 @@ export function createNodeActions(helpers: SiteSliceHelpers): NodeActions {
       return newNode.id
     },
 
-    insertComponentRef: (parentId, componentId) => {
+    insertComponentRef: (parentId, componentId, index) => {
       if (!componentId) return null
 
       const { activeDocument, site } = get()
@@ -128,10 +128,13 @@ export function createNodeActions(helpers: SiteSliceHelpers): NodeActions {
       }
 
       // Insert the VC ref node (no props beyond componentId + propOverrides).
+      // `index` forwards through to insertNode so callers using
+      // resolveInsertLocation can drop the ref at a precise sibling position.
       const refNodeId = actions.insertNode(
         'base.visual-component-ref',
         { componentId, propOverrides: {} },
         parentId,
+        index,
       )
 
       // Immediately materialize slot-instance children for each slot param the VC declares.

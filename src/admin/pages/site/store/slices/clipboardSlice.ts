@@ -37,7 +37,6 @@ import {
   getParent,
   pasteSubtree,
 } from '@core/page-tree'
-import { registry } from '@core/module-engine/registry'
 import {
   CLIPBOARD_VERSION,
   type ClipboardPayload,
@@ -45,6 +44,7 @@ import {
   readClipboardPayload,
   writeClipboardPayload,
 } from '@site/store/clipboard/clipboardStorage'
+import { resolveInsertLocation } from '@site/store/insertLocation'
 import type { EditorStoreSliceCreator } from '@site/store/types'
 
 /**
@@ -184,35 +184,6 @@ function collectReferencedClasses(
   return classes
 }
 
-/**
- * Decide where to paste relative to a target node.
- * - If `target` accepts children (or is the page root), paste inside as the last child.
- * - Otherwise, paste as the next sibling under the target's parent.
- * Returns null if the target is invalid for any reason (e.g. orphan node).
- */
-function resolvePasteLocation(
-  page: Page,
-  targetNodeId: string,
-): { parentId: string; index: number | undefined } | null {
-  const target = page.nodes[targetNodeId]
-  if (!target) return null
-
-  // The page root always accepts children; module registry may or may not have
-  // an entry for it depending on registration order. Treat root as a container.
-  const isRoot = page.rootNodeId === targetNodeId
-  const definition = registry.get(target.moduleId)
-  const acceptsChildren = isRoot || definition?.canHaveChildren === true
-
-  if (acceptsChildren) {
-    return { parentId: targetNodeId, index: undefined }
-  }
-
-  const parent = getParent(page, targetNodeId)
-  if (!parent) return null
-  const idx = parent.children.indexOf(targetNodeId)
-  return { parentId: parent.id, index: idx >= 0 ? idx + 1 : undefined }
-}
-
 const FRAMEWORK_ID_PREFIX = 'framework:'
 
 // ---------------------------------------------------------------------------
@@ -315,7 +286,7 @@ export const createClipboardSlice: EditorStoreSliceCreator<ClipboardSlice> = (
 
       const page = getActivePage(state)
       if (!page) return null
-      const location = resolvePasteLocation(page, targetNodeId)
+      const location = resolveInsertLocation(page, targetNodeId)
       if (!location) return null
 
       // Pre-compute new node IDs across ALL roots so scoped-class scope.nodeId

@@ -6,8 +6,12 @@
  * Visual Components) as a true second-level dropdown — same primitive,
  * same styling, same hover/focus/colors as every other submenu.
  *
- * Selection of a base module routes through `useInsertModule` with the
- * right-clicked nodeId as an explicit parent — no smart-resolution fallback.
+ * The submenu is *always* offered: every node is a legal target, because the
+ * shared `resolveInsertLocation` helper (in `@site/store/insertLocation`)
+ * places the new node inside container targets and as a sibling-after under
+ * the parent of leaf targets (Text, Button, Image, etc.). Without that
+ * fallback the right-click flow used to silently no-op on leaf nodes — see
+ * `LayerNodeContextMenu — sibling fallback` tests for the regression gate.
  *
  * The Paste item is rendered conditionally: it appears only when the
  * clipboard slice has a captured subtree. The clipboard is editor-wide and
@@ -38,8 +42,8 @@ import {
 } from '@ui/components/ContextMenu'
 import { useEditorStore, selectActiveCanvasPage } from '@site/store/store'
 import { useShallow } from 'zustand/react/shallow'
-import { registry } from '@core/module-engine/registry'
 import { useInsertModule } from '@site/hooks/useInsertModule'
+import { resolveInsertLocation } from '@site/store/insertLocation'
 import { ModulePicker } from '@site/module-picker'
 import { useConfirmDelete } from '@admin/shared/dialogs/ConfirmDeleteDialog'
 import type { AnyModuleDefinition } from '@core/module-engine/types'
@@ -154,26 +158,11 @@ export function LayerNodeContextMenu({
     ),
   )
 
-  // Whether the right-clicked node can host children. "Insert module here"
-  // is meaningless on a non-container (Text, Button, Image, etc.) — there's
-  // nowhere for the new node to land. Hide the submenu for those nodes.
-  // Always shown for slot-instances (which are containers — `canHaveChildren:
-  // true` — their whole purpose is to host content).
-  const canHostChildren = useEditorStore(
-    useCallback(
-      (s) => {
-        if (isMulti) return false  // Insert-here is single-anchor only.
-        if (!nodeId) return false
-        const tree = selectActiveCanvasPage(s)
-        if (!tree) return false
-        const node = tree.nodes[nodeId]
-        if (!node) return false
-        const def = registry.get(node.moduleId)
-        return Boolean(def?.canHaveChildren)
-      },
-      [nodeId, isMulti],
-    ),
-  )
+  // "Insert module here" is hidden ONLY for multi-select (the new node has no
+  // single anchor in that case) — for single-select every node is a legal
+  // target because resolveInsertLocation handles container vs. leaf targets
+  // uniformly (leaves land as sibling-after under their parent).
+  const showInsertHere = !isMulti && nodeId !== null
 
   useEffect(() => {
     firstItemRef.current?.focus()
@@ -190,7 +179,13 @@ export function LayerNodeContextMenu({
   const handleSelectVC = useCallback(
     (vcId: string) => {
       if (!nodeId) return
-      insertComponentRef(nodeId, vcId)
+      // Mirror useInsertModule's resolution so VC drops obey the same
+      // "sibling-after on a leaf target" rule that the module submenu uses.
+      const page = selectActiveCanvasPage(useEditorStore.getState())
+      if (!page) return
+      const location = resolveInsertLocation(page, nodeId)
+      if (!location) return
+      insertComponentRef(location.parentId, vcId, location.index)
     },
     [insertComponentRef, nodeId],
   )
@@ -345,12 +340,13 @@ export function LayerNodeContextMenu({
       )}
 
       {/*
-        "Insert module here" is hidden when the right-clicked node can't host
-        children (Text, Button, Image, etc.) and for multi-select (which has
-        no single anchor for the new node). Containers and slot-instances in
-        single-select always show it.
+        "Insert module here" is hidden only for multi-select (the new node has
+        no single anchor when 2+ layers are selected). For single-select it is
+        always offered: container targets receive the new node as a last child,
+        leaf targets (Text, Button, Image, etc.) receive a sibling-after under
+        their parent — resolved by `resolveInsertLocation`.
       */}
-      {canHostChildren && (
+      {showInsertHere && (
         <ContextMenuSubmenu
           label="Insert module here"
           icon={<PlusIcon size={13} />}

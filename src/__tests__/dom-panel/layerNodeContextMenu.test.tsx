@@ -394,14 +394,15 @@ describe('LayerNodeContextMenu — orphan slot-instance is NOT locked', () => {
 })
 
 /**
- * "Insert module here" must be hidden on non-container nodes (Text, Button,
- * Image, etc.). With the always-wrap invariant in place, the canvas root is
- * always a container and the smart-resolve path ascends from non-container
- * selections, so the only remaining way `useInsertModule` could be called
- * with a non-container parent is via this submenu's explicit-parent path.
- * Hiding the menu item upstream is simpler than ascending or aborting downstream.
+ * "Insert module here" is offered for every single-select target — container
+ * AND leaf alike. Right-clicking a leaf (Text, Button, Image, etc.) and
+ * inserting must land the new node as the next sibling under the leaf's
+ * parent; the shared `resolveInsertLocation` helper handles that fallback
+ * uniformly with clipboard paste. Hiding the submenu on leaf targets was the
+ * old bug — see the right-click "place doesn't do anything on non-container"
+ * report that motivated this gate.
  */
-describe('LayerNodeContextMenu — "Insert module here" hidden on non-container nodes', () => {
+describe('LayerNodeContextMenu — "Insert module here" sibling fallback on leaf targets', () => {
   function setupPageWithMixedNodes() {
     localStorage.clear()
     const home = makePage({
@@ -420,7 +421,7 @@ describe('LayerNodeContextMenu — "Insert module here" hidden on non-container 
       site: makeSite({ pages: [home], files: [], visualComponents: [] }),
       activePageId: 'page-mixed',
       selectedNodeId: null,
-    selectedNodeIds: [],
+      selectedNodeIds: [],
       hoveredNodeId: null,
       activeDocument: null,
       _historyPast: [],
@@ -457,18 +458,90 @@ describe('LayerNodeContextMenu — "Insert module here" hidden on non-container 
     ).toBeDefined()
   })
 
-  it('"Insert module here" is NOT shown for a base.text node', () => {
+  it('"Insert module here" IS shown for a base.text node (leaf — places as sibling)', () => {
     renderMenuFor('txt')
     expect(
-      screen.queryByRole('menuitem', { name: /insert module here/i }),
-    ).toBeNull()
+      screen.getByRole('menuitem', { name: /insert module here/i }),
+    ).toBeDefined()
   })
 
-  it('"Insert module here" is NOT shown for a base.button node', () => {
+  it('"Insert module here" IS shown for a base.button node (leaf — places as sibling)', () => {
     renderMenuFor('btn')
     expect(
-      screen.queryByRole('menuitem', { name: /insert module here/i }),
-    ).toBeNull()
+      screen.getByRole('menuitem', { name: /insert module here/i }),
+    ).toBeDefined()
+  })
+
+  it('inserts a module as the NEXT SIBLING when the target is a leaf', () => {
+    renderMenuFor('txt')
+    const trigger = screen.getByRole('menuitem', { name: /insert module here/i })
+    fireEvent.mouseEnter(trigger)
+
+    const submenu = screen.getByRole('menu', { name: 'Insert module here' })
+    const buttonOption = within(submenu).getAllByRole('menuitem').find(
+      (el) => el.getAttribute('data-module-id') === 'base.button',
+    )
+    expect(buttonOption).toBeDefined()
+    fireEvent.click(buttonOption!)
+
+    const state = useEditorStore.getState()
+    const page = state.site?.pages.find((p) => p.id === 'page-mixed')
+    // root.children was [ctr, txt, btn]; right-clicking txt and inserting a
+    // base.button should land the new node at index 2 (right after txt),
+    // shifting the original btn to index 3.
+    const root = page?.nodes['root']
+    expect(root?.children.length).toBe(4)
+    expect(root?.children[0]).toBe('ctr')
+    expect(root?.children[1]).toBe('txt')
+    const insertedId = root?.children[2]
+    expect(insertedId).toBeDefined()
+    expect(page?.nodes[insertedId!]?.moduleId).toBe('base.button')
+    expect(root?.children[3]).toBe('btn')
+  })
+
+  it('inserts a Visual Component as the NEXT SIBLING when the target is a leaf', () => {
+    const vc = makeVC('vc-sibling', 'Hero')
+    setupPageWithMixedNodes()
+    // Re-set site with the VC available.
+    useEditorStore.setState((s) => ({
+      ...s,
+      site: s.site
+        ? { ...s.site, visualComponents: [vc] }
+        : s.site,
+    }) as Parameters<typeof useEditorStore.setState>[0])
+
+    render(
+      <LayerNodeContextMenu
+        x={100}
+        y={200}
+        nodeId="btn"
+        onClose={noop}
+        onDelete={noop}
+        onDuplicate={noop}
+        onRename={noop}
+        onWrapInContainer={noop}
+        onCopy={noop}
+        onCut={noop}
+        onPaste={noop}
+      />,
+    )
+    const trigger = screen.getByRole('menuitem', { name: /insert module here/i })
+    fireEvent.mouseEnter(trigger)
+    const submenu = screen.getByRole('menu', { name: 'Insert module here' })
+    const vcItem = submenu.querySelector('[data-vc-id="vc-sibling"]') as HTMLElement
+    expect(vcItem).not.toBeNull()
+    fireEvent.click(vcItem)
+
+    const state = useEditorStore.getState()
+    const page = state.site?.pages.find((p) => p.id === 'page-mixed')
+    const root = page?.nodes['root']
+    // Right-clicking btn (last child) → new VC ref lands at the very end.
+    expect(root?.children.length).toBe(4)
+    expect(root?.children[2]).toBe('btn')
+    const insertedId = root?.children[3]
+    expect(insertedId).toBeDefined()
+    expect(page?.nodes[insertedId!]?.moduleId).toBe('base.visual-component-ref')
+    expect(page?.nodes[insertedId!]?.props.componentId).toBe('vc-sibling')
   })
 })
 

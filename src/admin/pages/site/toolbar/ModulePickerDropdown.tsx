@@ -17,8 +17,8 @@
  */
 
 import { useCallback, useRef, useState } from 'react'
-import { useEditorStore, selectActivePage } from '@site/store/store'
-import { registry } from '@core/module-engine/registry'
+import { useEditorStore, selectActiveCanvasPage } from '@site/store/store'
+import { resolveInsertLocation } from '@site/store/insertLocation'
 import type { AnyModuleDefinition } from '@core/module-engine/types'
 import { PlusIcon } from 'pixel-art-icons/icons/plus'
 import { Button } from '@ui/components/Button'
@@ -37,11 +37,11 @@ export function ModulePickerDropdown({
   const [open, setOpen] = useState(false)
   const triggerRef = useRef<HTMLButtonElement>(null)
 
-  const activeDocument = useEditorStore((s) => s.activeDocument)
-  const visualComponents = useEditorStore((s) => s.site?.visualComponents)
+  // selectActiveCanvasPage unifies page mode and VC-canvas mode — Components
+  // dropped from the toolbar use the same resolver as the right-click menu.
+  const canvasPage = useEditorStore(selectActiveCanvasPage)
   const insertComponentRef = useEditorStore((s) => s.insertComponentRef)
   const selectedNodeId = useEditorStore((s) => s.selectedNodeId)
-  const page = useEditorStore(selectActivePage)
   const insertModule = useInsertModule()
 
   const handleOpen = useCallback(() => setOpen(true), [])
@@ -59,48 +59,23 @@ export function ModulePickerDropdown({
 
   const handleInsertVC = useCallback(
     (vcId: string) => {
-      if (activeDocument?.kind === 'visualComponent') {
-        // VC edit mode: prefer the selected node as parent, else the VC root.
-        const vc = visualComponents?.find((v) => v.id === activeDocument.vcId)
-        if (!vc) {
-          handleClose()
-          return
-        }
-        const parentId = selectedNodeId ?? vc.tree.rootNodeId
-        insertComponentRef(parentId, vcId)
-      } else {
-        // Page mode: mirror useInsertModule's parent resolution.
-        if (!page) {
-          handleClose()
-          return
-        }
-        let parentId = page.rootNodeId
-        if (selectedNodeId) {
-          const selectedNode = page.nodes[selectedNodeId]
-          if (selectedNode) {
-            const def = registry.get(selectedNode.moduleId)
-            if (def?.canHaveChildren) {
-              parentId = selectedNodeId
-            } else {
-              const parentNode = Object.values(page.nodes).find((node) =>
-                node.children.includes(selectedNodeId),
-              )
-              if (parentNode) parentId = parentNode.id
-            }
-          }
-        }
-        insertComponentRef(parentId, vcId)
+      if (!canvasPage) {
+        handleClose()
+        return
       }
+      // Same target → location resolution as every other insert flow: explicit
+      // selection acts as the target, no selection drops at root, leaf targets
+      // become a sibling-after under their parent (see resolveInsertLocation).
+      const targetId = selectedNodeId ?? canvasPage.rootNodeId
+      const location = resolveInsertLocation(canvasPage, targetId)
+      if (!location) {
+        handleClose()
+        return
+      }
+      insertComponentRef(location.parentId, vcId, location.index)
       handleClose()
     },
-    [
-      activeDocument,
-      visualComponents,
-      page,
-      selectedNodeId,
-      insertComponentRef,
-      handleClose,
-    ],
+    [canvasPage, selectedNodeId, insertComponentRef, handleClose],
   )
 
   return (

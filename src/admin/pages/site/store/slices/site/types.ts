@@ -116,9 +116,12 @@ export interface SiteSlice {
    *   Returns `null` if the insertion would create a cycle.
    * - In page mode: inserts via `insertNode`. Returns `null` if `componentId` is empty.
    * - Auto-materializes `base.slot-instance` children after insertion via `syncSlotInstances`.
+   * - `index` is forwarded to `insertNode` so callers can drop the new ref at a
+   *   specific sibling position (used by the resolveInsertLocation flow when
+   *   pasting / right-clicking a leaf target).
    * - Returns the new node's id on success, or `null` on no-op / cycle prevented.
    */
-  insertComponentRef: (parentId: string, componentId: string) => string | null
+  insertComponentRef: (parentId: string, componentId: string, index?: number) => string | null
   deleteNode: (nodeId: string) => void
   /** Multi-delete: removes every id and its descendants in one undo step. */
   deleteNodes: (nodeIds: string[]) => void

@@ -55,6 +55,7 @@ import { useEditorSelectPreference } from '@admin/pages/site/preferences/editorP
 import { usePersistence } from '@admin/pages/site/hooks/usePersistence'
 import { useEditorLayoutPersistence } from '@admin/pages/site/hooks/useEditorLayoutPersistence'
 import { selectActiveCanvasPage, selectRightSidebarExpanded, useEditorStore } from '@admin/pages/site/store/store'
+import { resolveInsertLocation } from '@admin/pages/site/store/insertLocation'
 import { cmsAdapter } from '@core/persistence'
 import { cn } from '@ui/cn'
 import { useInstalledEditorPlugins } from '@admin/pages/plugins/hooks/useInstalledEditorPlugins'
@@ -148,18 +149,22 @@ export function AdminCanvasLayout({
 
     const state = useEditorStore.getState()
     const page = selectActiveCanvasPage(state)
+    if (!page) return
 
-    // Determine parent: canvas root drop → page root; node drop → that node.
-    let parentId: string | undefined
-    if (String(event.over.id) === CANVAS_ROOT_DROPPABLE_ID) {
-      parentId = page?.rootNodeId
-    } else {
-      parentId = String(event.over.id)
-    }
+    // Determine the drop target: canvas root drop → page root; node drop →
+    // that node. resolveInsertLocation then maps the target onto an actual
+    // (parent, index) pair, so drops onto leaf nodes (Text, Button, Image)
+    // land as a sibling-after instead of silently failing inside a node that
+    // doesn't accept children.
+    const targetId =
+      String(event.over.id) === CANVAS_ROOT_DROPPABLE_ID
+        ? page.rootNodeId
+        : String(event.over.id)
 
-    if (!parentId) return
+    const location = resolveInsertLocation(page, targetId)
+    if (!location) return
 
-    const result = state.insertComponentRef(parentId, componentId)
+    const result = state.insertComponentRef(location.parentId, componentId, location.index)
     if (result === null) {
       console.warn('[component-system] insertComponentRef returned null — cycle prevented or empty componentId')
     }
