@@ -1,11 +1,11 @@
-import { useEffect, useMemo, useRef, useState, type KeyboardEvent, type MouseEvent, type ReactNode } from 'react'
+import { useMemo, useRef, useState, type KeyboardEvent, type MouseEvent, type ReactNode } from 'react'
 import { useDraggable } from '@dnd-kit/core'
 import { useEditorStore } from '@site/store/store'
 import type { SiteFile } from '@core/files/schemas'
 import type { Page } from '@core/page-tree'
 import type { VisualComponent } from '@core/visualComponents/schemas'
 import { createUniquePageSlug, pagePublicPath } from '@core/page-tree/slugs'
-import { PanelHeader } from '@admin/shared/PanelHeader'
+import { Panel, useAutoFocusPanel } from '@admin/shared/Panel'
 import { Button } from '@ui/components/Button'
 import { EmptyState } from '@ui/components/EmptyState'
 import type { IconComponent } from 'pixel-art-icons/types'
@@ -115,11 +115,7 @@ export function SiteExplorerPanel({
   const files = site?.files ?? EMPTY_FILES
   const fileBuckets = useMemo(() => groupSiteFiles(files), [files])
 
-  useEffect(() => {
-    if (isOpen) {
-      requestAnimationFrame(() => panelRef.current?.focus())
-    }
-  }, [isOpen])
+  useAutoFocusPanel(panelRef, isOpen)
 
   if (!isOpen || variant !== 'docked') return null
 
@@ -266,24 +262,15 @@ export function SiteExplorerPanel({
 
   return (
     <>
-      <aside
+      <Panel
         ref={panelRef}
-        role="complementary"
-        aria-label="Site Explorer"
-        data-panel=""
-        data-testid="site-explorer-panel"
-        tabIndex={-1}
-        onClick={(e) => e.stopPropagation()}
-        className={styles.panel}
+        panelId="site-explorer"
+        title="Site"
+        ariaLabel="Site Explorer"
+        testId="site-explorer-panel"
+        onClose={() => setSiteExplorerPanelOpen(false)}
       >
-        <PanelHeader
-          panelId="site-explorer"
-          title="Site"
-          onClose={() => setSiteExplorerPanelOpen(false)}
-        />
-
-        <div className={styles.content}>
-          {!site ? (
+        {!site ? (
             <EmptyState compact title="Loading site..." />
           ) : (
             <>
@@ -427,8 +414,7 @@ export function SiteExplorerPanel({
               </ExplorerSection>
             </>
           )}
-        </div>
-      </aside>
+      </Panel>
 
       {createKind && (
         <SiteCreateDialog

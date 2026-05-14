@@ -15,7 +15,7 @@ import { DeleteIcon } from 'pixel-art-icons/icons/delete'
 import { EditIcon } from 'pixel-art-icons/icons/edit'
 import { FilePlusIcon } from 'pixel-art-icons/icons/file-plus'
 import { PaintBucketIcon } from 'pixel-art-icons/icons/paint-bucket'
-import { PanelHeader } from '@admin/shared/PanelHeader'
+import { Panel } from '@admin/shared/Panel'
 import dialogStyles from '../../../../shared/dialogs/SiteCreateDialog/SiteCreateDialog.module.css'
 import {
   formatSelectorUsage,
@@ -187,20 +187,12 @@ export function SelectorsPanel({ variant = 'docked' }: SelectorsPanelProps) {
 
   return (
     <>
-      <aside
-        role="complementary"
-        aria-label="Selectors"
-        data-panel=""
-        data-testid="selectors-panel"
-        tabIndex={-1}
-        onClick={(event) => event.stopPropagation()}
-        className={styles.panel}
-      >
-        <PanelHeader
-          panelId="selectors"
-          title="Selectors"
-          onClose={() => setSelectorsPanelOpen(false)}
-        >
+      <Panel
+        panelId="selectors"
+        title="Selectors"
+        testId="selectors-panel"
+        onClose={() => setSelectorsPanelOpen(false)}
+        headerActions={
           <Button
             variant="ghost"
             size="xs"
@@ -211,10 +203,9 @@ export function SelectorsPanel({ variant = 'docked' }: SelectorsPanelProps) {
           >
             <FilePlusIcon size={13} aria-hidden="true" />
           </Button>
-        </PanelHeader>
-
-        <div className={styles.content}>
-          <FilterBar<SelectorFilter>
+        }
+      >
+        <FilterBar<SelectorFilter>
             items={SELECTOR_FILTER_ITEMS}
             value={filter}
             onValueChange={setFilter}
@@ -255,8 +246,7 @@ export function SelectorsPanel({ variant = 'docked' }: SelectorsPanelProps) {
               ))}
             </div>
           )}
-        </div>
-      </aside>
+      </Panel>
 
       {contextMenu && contextClass && (
         <SelectorContextMenu

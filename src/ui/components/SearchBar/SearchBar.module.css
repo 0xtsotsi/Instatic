@@ -23,7 +23,10 @@
 /* The inner Input primitive carries its own chrome by default. Inside the
    SearchBar the wrapper owns the chrome so the icon sits visually inside the
    field — strip the input's own border/background/padding via descendant
-   specificity. */
+   specificity. The wrapper already shows the focus state via
+   `.searchBar:focus-within`, so the inner input also drops its `:focus-visible`
+   outline (otherwise users see a double ring — the wrapper border AND the
+   browser/global focus outline). */
 .searchBar .input {
     background: transparent;
     border: none;
@@ -32,13 +35,16 @@
     border-radius: 0;
     flex: 1;
     min-width: 0;
+    outline: none;
 }
 
 .searchBar .input:hover,
 .searchBar .input:focus,
+.searchBar .input:focus-visible,
 .searchBar .input:focus-within {
     background: transparent;
     border-color: transparent;
+    outline: none;
 }
 
 .input::-webkit-search-cancel-button,

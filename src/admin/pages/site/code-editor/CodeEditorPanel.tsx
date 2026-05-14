@@ -99,10 +99,19 @@ export const CodeEditorPanel = memo(function CodeEditorPanel() {
     const prev = prevFileIdRef.current
     prevFileIdRef.current = activeEditorFileId
     if (prev === null && activeEditorFileId !== null && codeEditorPanelOpen) {
-      requestAnimationFrame(() => {
-        panelRef.current?.focus()
+      const handle = requestAnimationFrame(() => {
+        const panel = panelRef.current
+        if (!panel) return
+        // Don't steal focus if the user has already clicked into the
+        // panel — the deferred rAF would otherwise yank focus away from
+        // an element they just chose. (Same race we guard against in
+        // `useAutoFocusPanel` for the docked sidebar panels.)
+        if (panel.contains(document.activeElement)) return
+        panel.focus()
       })
+      return () => cancelAnimationFrame(handle)
     }
+    return undefined
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeEditorFileId, codeEditorPanelOpen])
 

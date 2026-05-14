@@ -6,7 +6,7 @@ import { Button } from '@ui/components/Button'
 import { EmptyState } from '@ui/components/EmptyState'
 import { FilterBar, type FilterBarItem } from '@ui/components/FilterBar'
 import { FilePlusIcon } from 'pixel-art-icons/icons/file-plus'
-import { PanelHeader } from '@admin/shared/PanelHeader'
+import { Panel } from '@admin/shared/Panel'
 import { useFrameworkChangeConfirm } from '@admin/shared/dialogs/FrameworkChangeConfirmDialog'
 import { applyColorTokenPatchPreview } from '@site/store/slices/site/framework/colors'
 import { ColorTokenCard } from './ColorTokenCard'
@@ -158,20 +158,12 @@ export function ColorsPanel() {
 
   return (
     <>
-      <aside
-        role="complementary"
-        aria-label="Colors"
-        data-panel=""
-        data-testid="colors-panel"
-        tabIndex={-1}
-        onClick={(event) => event.stopPropagation()}
-        className={styles.panel}
-      >
-        <PanelHeader
-          panelId="colors"
-          title="Colors"
-          onClose={() => setColorsPanelOpen(false)}
-        >
+      <Panel
+        panelId="colors"
+        title="Colors"
+        testId="colors-panel"
+        onClose={() => setColorsPanelOpen(false)}
+        headerActions={
           <Button
             variant="ghost"
             size="xs"
@@ -182,10 +174,9 @@ export function ColorsPanel() {
           >
             <FilePlusIcon size={13} aria-hidden="true" />
           </Button>
-        </PanelHeader>
-
-        <div className={styles.content}>
-          <FilterBar<string | null>
+        }
+      >
+        <FilterBar<string | null>
             items={[
               { value: null, label: 'All' },
               ...categories.map<FilterBarItem<string | null>>((category) => ({
@@ -241,8 +232,7 @@ export function ColorsPanel() {
               ))}
             </div>
           )}
-        </div>
-      </aside>
+      </Panel>
 
       {createDialogOpen && (
         <CreateColorDialog

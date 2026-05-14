@@ -18,7 +18,7 @@ import {
   uploadCmsMediaAsset,
   type CmsMediaAsset,
 } from '@core/persistence/cmsMedia'
-import { PanelHeader } from '@admin/shared/PanelHeader'
+import { Panel, useAutoFocusPanel } from '@admin/shared/Panel'
 import { Button } from '@ui/components/Button'
 import { EmptyState } from '@ui/components/EmptyState'
 import { FileUpload } from '@ui/components/FileUpload'
@@ -229,11 +229,7 @@ export function MediaExplorerPanel({
     setMediaExplorerPanelOpen(false)
   }
 
-  useEffect(() => {
-    if (isOpen) {
-      requestAnimationFrame(() => panelRef.current?.focus())
-    }
-  }, [isOpen])
+  useAutoFocusPanel(panelRef, isOpen)
 
   useEffect(() => {
     if (!isOpen) return
@@ -403,128 +399,118 @@ export function MediaExplorerPanel({
   }
 
   return (
-    <aside
-      ref={panelRef}
-      role="complementary"
-      aria-label="Media Explorer"
-      data-panel=""
-      data-testid="media-explorer-panel"
-      tabIndex={-1}
-      onClick={(e) => e.stopPropagation()}
-      className={styles.panel}
-    >
-      <PanelHeader
+    <>
+      <Panel
+        ref={panelRef}
         panelId="media-explorer"
         title="Media"
+        ariaLabel="Media Explorer"
+        testId="media-explorer-panel"
         onClose={closePanel}
-      />
+      >
+        <FilterBar<MediaFilter>
+          items={(['all', 'images', 'videos', 'other'] as MediaFilter[]).map<FilterBarItem<MediaFilter>>((filter) => ({
+            value: filter,
+            label: filter === 'all' ? 'All' : BUCKET_LABELS[filter],
+          }))}
+          value={mediaFilter}
+          onValueChange={setMediaFilter}
+          search={{
+            value: searchQuery,
+            onValueChange: setSearchQuery,
+            onClear: () => setSearchQuery(''),
+            placeholder: 'Search media',
+            ariaLabel: 'Search media',
+          }}
+          groupLabel="Filter media type"
+          trailing={
+            <div role="group" aria-label="Media view" className={styles.mediaViewGroup}>
+              <Button
+                variant={viewMode === 'list' ? 'secondary' : 'ghost'}
+                size="xs"
+                iconOnly
+                pressed={viewMode === 'list'}
+                tooltip="List view"
+                aria-label="List view"
+                onClick={() => setViewMode('list')}
+              >
+                <BulletlistIcon size={13} />
+              </Button>
+              <Button
+                variant={viewMode === 'grid' ? 'secondary' : 'ghost'}
+                size="xs"
+                iconOnly
+                pressed={viewMode === 'grid'}
+                tooltip="Grid view"
+                aria-label="Grid view"
+                onClick={() => setViewMode('grid')}
+              >
+                <Grid2x22Icon size={13} />
+              </Button>
+            </div>
+          }
+        />
 
-      <div className={styles.content}>
-        <>
-            <FilterBar<MediaFilter>
-              items={(['all', 'images', 'videos', 'other'] as MediaFilter[]).map<FilterBarItem<MediaFilter>>((filter) => ({
-                value: filter,
-                label: filter === 'all' ? 'All' : BUCKET_LABELS[filter],
-              }))}
-              value={mediaFilter}
-              onValueChange={setMediaFilter}
-              search={{
-                value: searchQuery,
-                onValueChange: setSearchQuery,
-                onClear: () => setSearchQuery(''),
-                placeholder: 'Search media',
-                ariaLabel: 'Search media',
-              }}
-              groupLabel="Filter media type"
-              trailing={
-                <div role="group" aria-label="Media view" className={styles.mediaViewGroup}>
-                  <Button
-                    variant={viewMode === 'list' ? 'secondary' : 'ghost'}
-                    size="xs"
-                    iconOnly
-                    pressed={viewMode === 'list'}
-                    tooltip="List view"
-                    aria-label="List view"
-                    onClick={() => setViewMode('list')}
-                  >
-                    <BulletlistIcon size={13} />
-                  </Button>
-                  <Button
-                    variant={viewMode === 'grid' ? 'secondary' : 'ghost'}
-                    size="xs"
-                    iconOnly
-                    pressed={viewMode === 'grid'}
-                    tooltip="Grid view"
-                    aria-label="Grid view"
-                    onClick={() => setViewMode('grid')}
-                  >
-                    <Grid2x22Icon size={13} />
-                  </Button>
-                </div>
-              }
+        {shouldShowBucket('images') && (
+          <ExplorerSection
+            title="Images"
+            bucket="images"
+            viewMode={viewMode}
+            count={counts.images.length}
+            emptyLabel={emptyLabel}
+            uploadAction={renderUploadAction()}
+          >
+            <CmsMediaRows
+              assets={visibleCmsBuckets.images}
+              bucket="images"
+              viewMode={viewMode}
+              onOpen={openMediaAssetPreview}
+              onContextMenu={openContextMenu}
+              onKeyDown={openKeyboardContextMenu}
             />
+          </ExplorerSection>
+        )}
 
-            {shouldShowBucket('images') && (
-            <ExplorerSection
-                title="Images"
-                bucket="images"
-                viewMode={viewMode}
-                count={counts.images.length}
-                emptyLabel={emptyLabel}
-                uploadAction={renderUploadAction()}
-              >
-                <CmsMediaRows
-                  assets={visibleCmsBuckets.images}
-                  bucket="images"
-                  viewMode={viewMode}
-                  onOpen={openMediaAssetPreview}
-                  onContextMenu={openContextMenu}
-                  onKeyDown={openKeyboardContextMenu}
-                />
-              </ExplorerSection>
-            )}
+        {shouldShowBucket('videos') && (
+          <ExplorerSection
+            title="Videos"
+            bucket="videos"
+            viewMode={viewMode}
+            count={counts.videos.length}
+            emptyLabel={emptyLabel}
+            uploadAction={renderUploadAction()}
+          >
+            <CmsMediaRows
+              assets={visibleCmsBuckets.videos}
+              bucket="videos"
+              viewMode={viewMode}
+              onOpen={openMediaAssetPreview}
+              onContextMenu={openContextMenu}
+              onKeyDown={openKeyboardContextMenu}
+            />
+          </ExplorerSection>
+        )}
 
-            {shouldShowBucket('videos') && (
-              <ExplorerSection
-                title="Videos"
-                bucket="videos"
-                viewMode={viewMode}
-                count={counts.videos.length}
-                emptyLabel={emptyLabel}
-                uploadAction={renderUploadAction()}
-              >
-                <CmsMediaRows
-                  assets={visibleCmsBuckets.videos}
-                  bucket="videos"
-                  viewMode={viewMode}
-                  onOpen={openMediaAssetPreview}
-                  onContextMenu={openContextMenu}
-                  onKeyDown={openKeyboardContextMenu}
-                />
-              </ExplorerSection>
-            )}
-
-            {shouldShowBucket('other') && (
-              <ExplorerSection
-                title="Other"
-                bucket="other"
-                viewMode={viewMode}
-                count={counts.other.length}
-                emptyLabel={emptyLabel}
-                uploadAction={renderUploadAction()}
-              >
-                <CmsMediaRows
-                  assets={visibleCmsBuckets.other}
-                  bucket="other"
-                  viewMode={viewMode}
-                  onOpen={openMediaAssetPreview}
-                  onContextMenu={openContextMenu}
-                  onKeyDown={openKeyboardContextMenu}
-                />
-              </ExplorerSection>
-            )}
-          </>
-      </div>
+        {shouldShowBucket('other') && (
+          <ExplorerSection
+            title="Other"
+            bucket="other"
+            viewMode={viewMode}
+            count={counts.other.length}
+            emptyLabel={emptyLabel}
+            uploadAction={renderUploadAction()}
+          >
+            <CmsMediaRows
+              assets={visibleCmsBuckets.other}
+              bucket="other"
+              viewMode={viewMode}
+              onOpen={openMediaAssetPreview}
+              onContextMenu={openContextMenu}
+              onKeyDown={openKeyboardContextMenu}
+            />
+          </ExplorerSection>
+        )}
+      </Panel>
 
       {contextMenu && (
         <ExplorerItemContextMenu
@@ -550,7 +536,7 @@ export function MediaExplorerPanel({
           onRename={handleRename}
         />
       )}
-    </aside>
+    </>
   )
 }
 

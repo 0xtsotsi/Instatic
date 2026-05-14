@@ -1,30 +1,6 @@
-/*
- * Mirrors the docked-panel idiom used by `FrameworkScalePanel` and
- * `DependenciesPanel`: a transparent flex column (the LeftSidebar slot
- * already provides the surface background), a fixed-height shared
- * `PanelHeader`, and a scrollable content area.
- */
-.panel {
-    position: relative;
-    display: flex;
-    width: 100%;
-    height: 100%;
-    min-height: 0;
-    flex-direction: column;
-    overflow: hidden;
-    background: transparent;
-    outline: none;
-}
-
-.content {
-    display: flex;
-    min-height: 0;
-    flex: 1;
-    flex-direction: column;
-    gap: 10px;
-    overflow: auto;
-    padding: 8px;
-}
+/* Plugin editor panel — only retains the surfaces specific to the plugin
+ * mount (unavailable fallback, error banner). Panel shell + scrollable
+ * content area come from the shared `@admin/shared/Panel`. */
 
 .unavailable {
     padding: 16px;

@@ -31,10 +31,9 @@ import { FilePlusIcon } from 'pixel-art-icons/icons/file-plus'
 import { ReloadIcon } from 'pixel-art-icons/icons/reload'
 import { useEditorStore } from '@site/store/store'
 import { resolveFrameworkPreferences } from '@core/framework/preferences'
-import { PanelHeader } from '@admin/shared/PanelHeader'
+import { Panel } from '@admin/shared/Panel'
 import { PanelBody } from './PanelBody'
 import type { GeneratorShape, GroupShape, ScaleAdapter } from './adapter'
-import styles from './FrameworkScalePanel.module.css'
 
 interface FrameworkScalePanelProps {
   isOpen: boolean
@@ -101,20 +100,12 @@ export function FrameworkScalePanel<G extends GroupShape, C extends GeneratorSha
 
   return (
     <>
-      <aside
-        role="complementary"
-        aria-label={adapter.title}
-        data-panel=""
-        data-testid={`${adapter.panelId}-panel`}
-        tabIndex={-1}
-        onClick={(event) => event.stopPropagation()}
-        className={styles.panel}
-      >
-        <PanelHeader
-          panelId={adapter.panelId}
-          title={adapter.title}
-          onClose={onClose}
-        >
+      <Panel
+        panelId={adapter.panelId}
+        title={adapter.title}
+        testId={`${adapter.panelId}-panel`}
+        onClose={onClose}
+        headerActions={
           <Button
             variant="ghost"
             size="xs"
@@ -126,23 +117,21 @@ export function FrameworkScalePanel<G extends GroupShape, C extends GeneratorSha
           >
             <FilePlusIcon size={13} aria-hidden="true" />
           </Button>
-        </PanelHeader>
-
-        <div className={styles.content}>
-          <PanelBody<G, C>
-            key={activeGroup?.id ?? 'empty'}
-            group={(activeGroup ?? null) as G | null}
-            groups={sortedGroups as G[]}
-            isDisabled={isDisabled}
-            adapter={adapter}
-            preferences={preferences}
-            onContextMenu={(e) => activeGroup && handleTabContextMenu(activeGroup.id, e)}
-            onActivateGroup={(value) => setActiveTabId(value)}
-            onAddGroup={handleAddGroup}
-            classGenerators={classGenerators}
-          />
-        </div>
-      </aside>
+        }
+      >
+        <PanelBody<G, C>
+          key={activeGroup?.id ?? 'empty'}
+          group={(activeGroup ?? null) as G | null}
+          groups={sortedGroups as G[]}
+          isDisabled={isDisabled}
+          adapter={adapter}
+          preferences={preferences}
+          onContextMenu={(e) => activeGroup && handleTabContextMenu(activeGroup.id, e)}
+          onActivateGroup={(value) => setActiveTabId(value)}
+          onAddGroup={handleAddGroup}
+          classGenerators={classGenerators}
+        />
+      </Panel>
 
       {contextMenu && (
         <ContextMenu

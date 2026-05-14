@@ -1,14 +1,15 @@
 /**
- * DepsSection — dependency management content.
+ * DepsSection — dependency management content body.
+ *
+ * Mounted as the sole child of the shared `Panel`'s padded body in
+ * `DependenciesPanel`. Owns no panel chrome — the outer `<aside>`,
+ * header, and 8px content padding all come from `Panel`.
  *
  * Behaviour:
  *   - SAFE_PACKAGE_NAME validation on every add (Constraint #361 Rule 5 / CWE-78)
  *   - Inline remove confirmation (Guideline #258)
  *   - Search with aria-live result count (WCAG 2.1 AA)
  *   - setDependency / removeDependency store actions
- *
- * When used as a standalone Dependencies panel, the body is always visible.
- * The collapsible mode remains available for any compact embedded surface.
  *
  * @see Constraint #361 — Phase G Security (Rule 5: package-name validation, CWE-78)
  * @see Guideline #258 — Inline Confirmation UI Pattern
@@ -23,8 +24,6 @@ import { Switch } from '@ui/components/Switch'
 import { PackageIcon } from 'pixel-art-icons/icons/package'
 import { PlusIcon } from 'pixel-art-icons/icons/plus'
 import { CloseIcon } from 'pixel-art-icons/icons/close'
-import { ChevronRightIcon } from 'pixel-art-icons/icons/chevron-right'
-import { cn } from '@ui/cn'
 import { isSafePackageName } from '@core/site-dependencies/packageNames'
 import {
   getSiteModuleDependencyUsage,
@@ -66,24 +65,13 @@ interface RuntimeDependencyIssue {
 // DepsSection
 // ---------------------------------------------------------------------------
 
-interface DepsSectionProps {
-  collapsible?: boolean
-  defaultExpanded?: boolean
-}
-
-export function DepsSection({
-  collapsible = true,
-  defaultExpanded = false,
-}: DepsSectionProps) {
+export function DepsSection() {
   const site = useEditorStore((s) => s.site)
   const packageJson = useEditorStore((s) => s.packageJson)
   const siteRuntime = useEditorStore((s) => s.siteRuntime)
   const setDependency = useEditorStore((s) => s.setDependency)
   const removeDependency = useEditorStore((s) => s.removeDependency)
   const setSiteDependencyLock = useEditorStore((s) => s.setSiteDependencyLock)
-
-  // ── Section collapse state ───────────────────────────────────────────────
-  const [isExpanded, setIsExpanded] = useState(defaultExpanded)
 
   // ── Local state ─────────────────────────────────────────────────────────
   const [searchQuery, setSearchQuery] = useState('')
@@ -228,7 +216,6 @@ export function DepsSection({
     }
   }, [])
 
-  const depCount = totalAll
   const runtimeDependencyCount = Object.keys(packageJson.dependencies).length
 
   const handleResolveDependencies = useCallback(() => {
@@ -246,33 +233,31 @@ export function DepsSection({
       })
   }, [packageJson, setSiteDependencyLock])
 
-  const body = (
+  return (
     <div
       id="deps-section-body"
-      className={cn(styles.body, !collapsible && styles.bodyStandalone)}
-      data-testid="deps-tab"
+      className={styles.body}
+      data-testid="deps-section"
     >
-      <div>
-        <SearchBar
-          value={searchQuery}
-          onValueChange={setSearchQuery}
-          placeholder="Search packages..."
-          aria-label="Search packages"
-        />
-        {/* Live region for search results (Guideline #221) */}
-        <div
-          aria-live="polite"
-          aria-atomic="true"
-          className={styles.srLiveRegion}
-        >
-          {searchQuery
-            ? `${totalFiltered} of ${totalAll} packages shown`
-            : ''}
-        </div>
+      <SearchBar
+        value={searchQuery}
+        onValueChange={setSearchQuery}
+        placeholder="Search packages..."
+        aria-label="Search packages"
+      />
+      {/* Live region for search results (Guideline #221) */}
+      <div
+        aria-live="polite"
+        aria-atomic="true"
+        className={styles.srLiveRegion}
+      >
+        {searchQuery
+          ? `${totalFiltered} of ${totalAll} packages shown`
+          : ''}
       </div>
 
       {/* ─── Package list ──────────────────────────────────────────── */}
-      <div className={styles.packageList}>
+      <div className={styles.packageList} data-testid="deps-tab">
         {runtimeIssues.length > 0 && (
           <div
             className={styles.runtimeIssues}
@@ -448,42 +433,6 @@ export function DepsSection({
           <span className={styles.devLabel}>devDependency</span>
         </label>
       </div>
-    </div>
-  )
-
-  return (
-    <div
-      className={cn(styles.section, !collapsible && styles.sectionStandalone)}
-      data-testid="deps-section"
-    >
-      {!collapsible ? body : (
-        <>
-      {/* ─── Collapsible section header ────────────────────────────────── */}
-      <button
-        type="button"
-        aria-expanded={isExpanded}
-        aria-controls="deps-section-body"
-        onClick={() => setIsExpanded((v) => !v)}
-        className={styles.sectionToggle}
-      >
-        <span aria-hidden="true" className={cn(styles.chevron, isExpanded && styles.chevronOpen)}>
-          <ChevronRightIcon size={10} />
-        </span>
-        <span aria-hidden="true" className={styles.sectionIcon}>
-          <PackageIcon size={11} />
-        </span>
-        <span className={styles.sectionTitle}>Dependencies</span>
-        {depCount > 0 && (
-          <span className={styles.depCount} aria-label={`${depCount} packages`}>
-            {depCount}
-          </span>
-        )}
-      </button>
-
-      {/* ─── Section body (collapsed by default) ──────────────────────── */}
-      {isExpanded && body}
-      </>
-      )}
     </div>
   )
 }

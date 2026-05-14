@@ -47,7 +47,7 @@ beforeEach(resetStore)
 
 describe('DepsSection runtime script dependency usage', () => {
   it('marks packages imported by site scripts as in use', () => {
-    render(<DepsSection collapsible={false} defaultExpanded />)
+    render(<DepsSection />)
 
     const row = screen.getByTestId('dep-row-canvas-confetti')
     expect(within(row).getByText('in use')).toBeDefined()
@@ -55,7 +55,7 @@ describe('DepsSection runtime script dependency usage', () => {
   })
 
   it('surfaces missing runtime imports and can add them as dependencies', () => {
-    render(<DepsSection collapsible={false} defaultExpanded />)
+    render(<DepsSection />)
 
     const issues = screen.getByLabelText('Runtime dependency issues')
     expect(within(issues).getByText('motion')).toBeDefined()
@@ -87,7 +87,7 @@ describe('DepsSection runtime script dependency usage', () => {
       siteRuntime: lockedRuntime,
     } as Parameters<typeof useEditorStore.setState>[0])
 
-    render(<DepsSection collapsible={false} defaultExpanded />)
+    render(<DepsSection />)
 
     const row = screen.getByTestId('dep-row-canvas-confetti')
     expect(within(row).getByTitle('Locked at 1.9.4')).toBeDefined()
@@ -124,7 +124,7 @@ describe('DepsSection runtime script dependency usage', () => {
       siteRuntime: lockedRuntime,
     } as Parameters<typeof useEditorStore.setState>[0])
 
-    render(<DepsSection collapsible={false} defaultExpanded />)
+    render(<DepsSection />)
 
     const banner = screen.getByTestId('deps-lock-stale')
     expect(banner.textContent).toContain('1 new')
@@ -148,7 +148,7 @@ describe('DepsSection runtime script dependency usage', () => {
         },
       }), { status: 200 })) as typeof fetch
 
-    render(<DepsSection collapsible={false} defaultExpanded />)
+    render(<DepsSection />)
 
     fireEvent.click(screen.getByRole('button', { name: 'Resolve runtime' }))
     expect(await screen.findByText('1 locked')).toBeDefined()

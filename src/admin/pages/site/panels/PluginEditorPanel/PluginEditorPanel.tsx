@@ -23,7 +23,7 @@ import {
   useState,
 } from 'react'
 import { ErrorBoundary } from '@ui/components/ErrorBoundary'
-import { PanelHeader } from '@admin/shared/PanelHeader'
+import { Panel } from '@admin/shared/Panel'
 import { useEditorStore } from '@site/store/store'
 import { pluginRuntime } from '@core/plugins/runtime'
 import { buildPluginRoutesHelper } from '@core/plugins/adminRuntime'
@@ -67,21 +67,16 @@ function PluginEditorPanelContent({ panelId }: PluginEditorPanelProps) {
 
   if (!panel || !manifest) {
     return (
-      <aside
-        role="complementary"
-        aria-label="Plugin panel"
-        className={styles.panel}
-        data-testid={`panel-plugin-${panelId}`}
+      <Panel
+        panelId={`plugin-${panelId}`}
+        title="Plugin panel"
+        testId={`panel-plugin-${panelId}`}
+        onClose={handleClose}
       >
-        <PanelHeader
-          panelId={`plugin-${panelId}`}
-          title="Plugin panel"
-          onClose={handleClose}
-        />
         <div className={styles.unavailable}>
           Panel <code>{panelId}</code> is not currently registered.
         </div>
-      </aside>
+      </Panel>
     )
   }
 
@@ -89,29 +84,21 @@ function PluginEditorPanelContent({ panelId }: PluginEditorPanelProps) {
   const settings = pluginRuntime.getPluginSettings(panel.pluginId)
 
   return (
-    <aside
-      role="complementary"
-      aria-label={panel.label}
-      className={styles.panel}
-      data-testid={`panel-plugin-${panel.id}`}
-      data-panel-id={panel.id}
+    <Panel
+      panelId={`plugin-${panel.id}`}
+      title={panel.label}
+      testId={`panel-plugin-${panel.id}`}
+      onClose={handleClose}
     >
-      <PanelHeader
-        panelId={`plugin-${panel.id}`}
-        title={panel.label}
-        onClose={handleClose}
+      <PluginPanelSubtree
+        panelId={panel.id}
+        pluginId={panel.pluginId}
+        pluginVersion={manifest.version}
+        label={panel.label}
+        settings={settings}
+        PanelComponent={PanelComponent}
       />
-      <div className={styles.content}>
-        <PluginPanelSubtree
-          panelId={panel.id}
-          pluginId={panel.pluginId}
-          pluginVersion={manifest.version}
-          label={panel.label}
-          settings={settings}
-          PanelComponent={PanelComponent}
-        />
-      </div>
-    </aside>
+    </Panel>
   )
 }
 

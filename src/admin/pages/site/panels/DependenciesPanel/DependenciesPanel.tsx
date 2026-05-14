@@ -1,8 +1,7 @@
-import { useEffect, useRef } from 'react'
+import { useRef } from 'react'
 import { useEditorStore } from '@site/store/store'
-import { PanelHeader } from '@admin/shared/PanelHeader'
+import { Panel, useAutoFocusPanel } from '@admin/shared/Panel'
 import { DepsSection } from './DepsSection'
-import styles from './DependenciesPanel.module.css'
 
 interface DependenciesPanelProps {
   variant?: 'docked'
@@ -13,31 +12,19 @@ export function DependenciesPanel({ variant = 'docked' }: DependenciesPanelProps
   const setDependenciesPanelOpen = useEditorStore((s) => s.setDependenciesPanelOpen)
   const panelRef = useRef<HTMLElement>(null)
 
-  useEffect(() => {
-    if (isOpen) {
-      requestAnimationFrame(() => panelRef.current?.focus())
-    }
-  }, [isOpen])
+  useAutoFocusPanel(panelRef, isOpen)
 
   if (!isOpen || variant !== 'docked') return null
 
   return (
-    <aside
+    <Panel
       ref={panelRef}
-      role="complementary"
-      aria-label="Dependencies"
-      data-panel=""
-      data-testid="dependencies-panel"
-      tabIndex={-1}
-      onClick={(e) => e.stopPropagation()}
-      className={styles.panel}
+      panelId="dependencies"
+      title="Dependencies"
+      testId="dependencies-panel"
+      onClose={() => setDependenciesPanelOpen(false)}
     >
-      <PanelHeader
-        panelId="dependencies"
-        title="Dependencies"
-        onClose={() => setDependenciesPanelOpen(false)}
-      />
-      <DepsSection collapsible={false} defaultExpanded />
-    </aside>
+      <DepsSection />
+    </Panel>
   )
 }

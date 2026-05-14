@@ -15,7 +15,7 @@ import { UploadIcon } from 'pixel-art-icons/icons/upload'
 import type { ContentCollection, ContentEntry, UpdateContentCollectionInput } from '@core/content/schemas'
 import { ExplorerItemContextMenu, type ExplorerContextMenuItem } from '@site/explorer-actions'
 import explorerStyles from '../../../site/panels/SiteExplorerPanel/SiteExplorerPanel.module.css'
-import { PanelHeader } from '@admin/shared/PanelHeader'
+import { Panel } from '@admin/shared/Panel'
 import { ContentCollectionSettingsDialog } from '@content/components/ContentCollectionSettingsDialog/ContentCollectionSettingsDialog'
 import {
   ContentItemRenameDialog,
@@ -264,22 +264,14 @@ export function ContentExplorerPanel({
 
   return (
     <>
-      <aside
-        role="complementary"
-        aria-label="Content Explorer"
-        data-panel=""
-        data-testid="content-explorer-panel"
-        tabIndex={-1}
-        className={explorerStyles.panel}
+      <Panel
+        panelId="content-explorer"
+        title="Content"
+        ariaLabel="Content Explorer"
+        testId="content-explorer-panel"
+        onClose={onClose}
       >
-        <PanelHeader
-          panelId="content-explorer"
-          title="Content"
-          onClose={onClose}
-        />
-
-        <div className={explorerStyles.content}>
-          {error && <p className={styles.error} role="alert">{error}</p>}
+        {error && <p className={styles.error} role="alert">{error}</p>}
 
           <section className={explorerStyles.section} aria-label="Collections">
             <div className={explorerStyles.sectionHeader}>
@@ -368,8 +360,7 @@ export function ContentExplorerPanel({
               </div>
             )}
           </section>
-        </div>
-      </aside>
+      </Panel>
 
       {contextMenu && (
         <ExplorerItemContextMenu

@@ -53,9 +53,13 @@
     pointer-events: none;
 }
 
-/* ── Search bar — match PanelHeader's horizontal inset ───────────────────── */
+/* ── Search bar — match the 8px content inset used by every other docked
+ *    panel (see `@admin/shared/Panel/Panel.module.css → .contentPadded`).
+ *    DomPanel can't use the shared shell directly because it owns a custom
+ *    scroll surface (the tree), but the spacing between header → search bar
+ *    must stay aligned with Site / Selectors / Colors / Media etc. */
 .searchBar {
-    margin: 0 8px;
+    margin: 8px 8px 0;
 }
 
 /* ── Tree / scrollable content area ─────────────────────────────────────── */
@@ -64,7 +68,9 @@
     min-height: 0;
     overflow-y: auto;
     overflow-x: hidden;
-    padding-top: 2px;
+    /* 10px gap below the search bar mirrors the `gap: 10px` on the shared
+     * Panel content area so the visual rhythm matches sibling panels. */
+    padding-top: 10px;
     padding-bottom: 6px;
     padding-right: 8px;
 }
