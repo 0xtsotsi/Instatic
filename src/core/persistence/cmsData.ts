@@ -155,20 +155,6 @@ export async function listCmsDataRows(
   return (body.rows ?? []) as DataRow[]
 }
 
-export async function getCmsDataRow(
-  rowId: string,
-  fetchImpl: FetchLike = globalThis.fetch.bind(globalThis),
-  basePath = '/admin/api/cms',
-): Promise<DataRow | null> {
-  const res = await fetchImpl(`${basePath}/data/rows/${encodeURIComponent(rowId)}`, {
-    method: 'GET',
-    credentials: 'include',
-  })
-  if (res.status === 404) return null
-  const body = await readEnvelope(res, RowEnvelope, `CMS data row fetch failed with ${res.status}`)
-  return (body.row ?? null) as DataRow | null
-}
-
 export async function createCmsDataRow(
   tableId: string,
   input: CreateDataRowInput,

@@ -14,7 +14,7 @@ export function readStringCell(cells: DataRowCells, fieldId: string, fallback = 
   return typeof value === 'string' ? value : fallback
 }
 
-export function readNullableStringCell(cells: DataRowCells, fieldId: string): string | null {
+function readNullableStringCell(cells: DataRowCells, fieldId: string): string | null {
   const value = cells[fieldId]
   return typeof value === 'string' && value.length > 0 ? value : null
 }

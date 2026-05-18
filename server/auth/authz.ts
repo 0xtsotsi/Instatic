@@ -56,19 +56,6 @@ export async function requireCapability(
   return user
 }
 
-export async function requireAllCapabilities(
-  req: Request,
-  db: DbClient,
-  capabilities: readonly CoreCapability[],
-): Promise<AuthUser | Response> {
-  const user = await requireAuthenticatedUser(req, db)
-  if (user instanceof Response) return user
-  if (!capabilities.every((capability) => userHasCapability(user, capability))) {
-    return jsonResponse({ error: 'Forbidden' }, { status: 403 })
-  }
-  return user
-}
-
 export function userHasCapability(user: Pick<AuthUser, 'capabilities'>, capability: CoreCapability): boolean {
   return roleHasCapability(user.capabilities, capability)
 }

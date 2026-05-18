@@ -92,21 +92,11 @@ export function assertPluginPathWithin(uploadsDir: string, child: string): void 
 
 const pluginSettingsCache = new Map<string, Record<string, string | number | boolean>>()
 
-export function getPluginSettingsSnapshot(
-  pluginId: string,
-): Record<string, string | number | boolean> {
-  return pluginSettingsCache.get(pluginId) ?? {}
-}
-
 export function updatePluginSettingsCache(
   pluginId: string,
   settings: Record<string, string | number | boolean>,
 ): void {
   pluginSettingsCache.set(pluginId, settings)
-}
-
-export function clearPluginSettingsCache(pluginId: string): void {
-  pluginSettingsCache.delete(pluginId)
 }
 
 export async function refreshPluginSettingsCache(
@@ -387,6 +377,13 @@ export async function activateInstalledServerPlugins(
   await resetPluginWorker()
   resetPluginModulePacks()
   hookBus.reset()
+
+  // Start the scheduler tick. Idempotent — a re-bind with the same
+  // process keeps the existing interval pointed at the same DbClient.
+  // (We deliberately do NOT stop and restart, to avoid the brief gap
+  // where a scheduled fire could land on an unbound DbClient.)
+  const { startScheduler } = await import('./scheduler')
+  startScheduler(db)
 
   const plugins = await listInstalledPlugins(db)
   for (const plugin of plugins) {

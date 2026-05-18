@@ -14,9 +14,6 @@
  * Row shapes and mappers stay co-located with the queries that produce them.
  */
 
-export { userRefAt, toIso, toIsoOrNull } from './shared'
-export type { UserJoinPrefix, UserJoinColumns } from './shared'
-
 export {
   listDataTables,
   getDataTable,
@@ -37,7 +34,6 @@ export {
   updateDataRowStatus,
   updateDataRowAuthor,
 } from './rows'
-export type { UpdateDataRowTableResult, DataRowSearchResult } from './rows'
 
 export {
   publishDataRow,

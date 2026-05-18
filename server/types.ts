@@ -41,16 +41,3 @@ export interface UserRow {
   deleted_at: Date | string | null
 }
 
-export interface SessionRow {
-  id_hash: string
-  user_id: string
-  device_label: string
-  ip_address: string | null
-  user_agent: string | null
-  created_at: Date | string
-  last_seen_at: Date | string
-  expires_at: Date | string
-  revoked_at: Date | string | null
-  mfa_passed_at: Date | string | null
-  step_up_expires_at: Date | string | null
-}

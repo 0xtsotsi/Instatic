@@ -2,7 +2,7 @@ import { afterEach, beforeEach, describe, expect, it } from 'bun:test'
 import { useRef } from 'react'
 import { act, cleanup, fireEvent, render, screen } from '@testing-library/react'
 import { useEditorStore } from '@site/store/store'
-import { DEFAULT_ZOOM } from '@site/store/slices/canvasSlice'
+import { DEFAULT_ZOOM } from '@site/canvas/math'
 import { useCanvas } from '@site/hooks/useCanvas'
 
 function TestCanvas() {

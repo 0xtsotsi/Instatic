@@ -2,6 +2,10 @@ import type { EditorStoreSliceCreator } from '@site/store/types'
 import {
   computeFitTransform,
   type ScreenRect,
+  DEFAULT_ZOOM,
+  clampZoom,
+  clampPan,
+  nearestZoomStep,
 } from '@site/canvas/math'
 
 type CanvasMode = 'select' | 'pan' | 'insert'
@@ -21,17 +25,6 @@ type CanvasMode = 'select' | 'pan' | 'insert'
  * keystroke" problem the previous overlay design caused.
  */
 export type CanvasView = 'design' | 'preview'
-
-export const MIN_ZOOM = 0.1
-export const MAX_ZOOM = 4
-export const DEFAULT_ZOOM = 1
-
-/**
- * Maximum pan offset in each direction (pixels in document space).
- * Belt-and-suspenders guard against agent tool writes that bypass call-site guards.
- * Architecture spec: Contribution #435, Security Auditor review (message #1270).
- */
-export const MAX_PAN = 50_000
 
 export interface CanvasSlice {
   zoom: number
@@ -88,24 +81,6 @@ export interface CanvasSlice {
     viewport: { width: number; height: number },
     padding?: number,
   ) => void
-}
-
-const ZOOM_STEPS = [0.1, 0.25, 0.5, 0.75, 1, 1.25, 1.5, 2, 3, 4]
-
-function clampZoom(z: number): number {
-  return Math.max(MIN_ZOOM, Math.min(MAX_ZOOM, z))
-}
-
-function clampPan(v: number): number {
-  return Math.max(-MAX_PAN, Math.min(MAX_PAN, v))
-}
-
-function nearestZoomStep(current: number, direction: 1 | -1): number {
-  if (direction === 1) {
-    return ZOOM_STEPS.find((z) => z > current + 1e-9) ?? MAX_ZOOM
-  } else {
-    return [...ZOOM_STEPS].reverse().find((z) => z < current - 1e-9) ?? MIN_ZOOM
-  }
 }
 
 // Contribute this slice's fields to the combined `EditorStore` type via TS
@@ -196,8 +171,3 @@ export const createCanvasSlice: EditorStoreSliceCreator<CanvasSlice> = (set, get
   },
 })
 
-// ---------------------------------------------------------------------------
-// Zoom math utilities — exported as pure functions for unit testing
-// ---------------------------------------------------------------------------
-
-export { clampZoom, clampPan, nearestZoomStep, ZOOM_STEPS }

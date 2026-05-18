@@ -21,43 +21,6 @@ export function getViewportLocalPoint(
   }
 }
 
-export function measureCanvasNodeRect(
-  viewport: HTMLElement,
-  nodeId: string,
-): CanvasRect | null {
-  const target = getCanvasNodeRenderElement(viewport, nodeId)
-  if (!target) return null
-
-  const targetRect = target.getBoundingClientRect()
-  if (targetRect.width === 0 && targetRect.height === 0) return null
-
-  return clientRectToViewportRect(viewport, targetRect)
-}
-
-export function measureCanvasNodeUnionRect(
-  viewport: HTMLElement,
-  nodeIds: readonly string[],
-): CanvasRect | null {
-  let union: CanvasRect | null = null
-
-  for (const id of nodeIds) {
-    const rect = measureCanvasNodeRect(viewport, id)
-    if (!rect) continue
-    union = union
-      ? {
-          left: Math.min(union.left, rect.left),
-          top: Math.min(union.top, rect.top),
-          right: Math.max(union.right, rect.right),
-          bottom: Math.max(union.bottom, rect.bottom),
-          width: Math.max(union.right, rect.right) - Math.min(union.left, rect.left),
-          height: Math.max(union.bottom, rect.bottom) - Math.min(union.top, rect.top),
-        }
-      : rect
-  }
-
-  return union
-}
-
 export function measureCanvasNodeClientUnionRect(
   viewport: HTMLElement,
   nodeIds: readonly string[],

@@ -110,17 +110,6 @@ export function recordTelemetryRun(commandId: string): void {
 }
 
 /**
- * Return the `limit` most-run command ids, ordered by run count descending.
- * Returns an empty array when telemetry is disabled or no data exists.
- */
-export function getTopCommands(limit: number): string[] {
-  if (!isTelemetryEnabled()) return []
-  return readTelemetry()
-    .slice(0, limit)
-    .map((entry) => entry[0])
-}
-
-/**
  * Erase all telemetry data. Used by the "Clear spotlight history" button in
  * Settings → Preferences → Spotlight.
  */

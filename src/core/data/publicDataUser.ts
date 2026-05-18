@@ -17,7 +17,7 @@ interface DataUserLike {
   roleName?: string | null
 }
 
-export function publicDataUserReference(
+function publicDataUserReference(
   user: DataUserLike | null | undefined,
 ): PublicDataUserReference | null {
   if (!user) return null

@@ -484,31 +484,6 @@
     white-space: nowrap;
 }
 
-/* ─── SpotlightArgInput (legacy stub, keep for backward compat) ───────────── */
-
-.argInput {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding: 8px 16px 8px 32px;
-}
-
-.argLabel {
-    font-size: 12px;
-    color: var(--editor-text-muted);
-    flex-shrink: 0;
-}
-
-.argInputField {
-    flex: 1;
-    background: transparent;
-    border: none;
-    outline: none;
-    font-family: var(--font-sans);
-    font-size: 13px;
-    color: var(--editor-text);
-}
-
 /* ─── Reduced motion ──────────────────────────────────────────────────────── */
 /*
  * The global prefers-reduced-motion block in globals.css already sets

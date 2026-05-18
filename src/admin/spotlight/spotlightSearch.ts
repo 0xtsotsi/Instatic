@@ -21,7 +21,7 @@ import { rankCommands, type ScoredCommand } from './matcher'
 import { filterCommands, getAllCommands, getScope } from './commandRegistry'
 import { readRecentCommands } from './recentStore'
 
-export const PHASE1_CAP = 30
+const PHASE1_CAP = 30
 
 /** Compute the row element id for a command. */
 export function rowId(commandId: string): string {

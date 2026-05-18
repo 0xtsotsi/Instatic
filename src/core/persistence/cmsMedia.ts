@@ -99,21 +99,6 @@ export interface ListCmsMediaAssetsOptions extends ClientBase {
   trash?: boolean
 }
 
-/**
- * Fetch a subset of assets by their IDs. Implemented as a filtered list
- * call — there is no batch-by-id endpoint yet. The caller is responsible
- * for caching results to avoid redundant requests.
- */
-export async function getCmsMediaAssetsByIds(
-  ids: readonly string[],
-  options: ClientBase = {},
-): Promise<CmsMediaAsset[]> {
-  if (ids.length === 0) return []
-  const all = await listCmsMediaAssets(options)
-  const idSet = new Set(ids)
-  return all.filter((a) => idSet.has(a.id))
-}
-
 export async function listCmsMediaAssets(
   options: ListCmsMediaAssetsOptions | FetchLike = {},
   legacyBasePath = '/admin/api/cms',

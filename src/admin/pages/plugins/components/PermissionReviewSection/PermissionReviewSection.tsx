@@ -34,7 +34,7 @@ import {
 } from './computePermissionDiff'
 import styles from './PermissionReviewSection.module.css'
 
-export interface PermissionReviewPending {
+interface PermissionReviewPending {
   manifest: PluginManifest
   upgradeFromVersion?: string
   previouslyGrantedPermissions?: PluginPermission[]

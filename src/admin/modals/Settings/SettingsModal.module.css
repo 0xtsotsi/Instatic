@@ -194,53 +194,6 @@
   gap: 8px;
 }
 
-/* ── Shortcut table ──────────────────────────────────────────────────────── */
-.shortcutTable {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 12px;
-}
-
-.shortcutRow {
-  border-bottom: 1px solid var(--editor-border);
-}
-
-.shortcutCell {
-  padding: 6px 0;
-  width: 45%;
-}
-
-.shortcutAction {
-  padding: 6px 0 6px 12px;
-  color: var(--editor-text-secondary);
-}
-
-.shortcutKeys {
-  display: flex;
-  gap: 4px;
-  flex-wrap: wrap;
-}
-
-.kbd {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-width: 24px;
-  padding: 1px 6px;
-  background: var(--editor-border);
-  border: 1px solid var(--editor-border-med);
-  border-radius: 4px;
-  font-size: 10px;
-  color: var(--editor-text-secondary);
-  font-family: var(--font-mono);
-  white-space: nowrap;
-}
-
-/* ── ShortcutsSection ─────────────────────────────────────────────────────── */
-.shortcutCategory {
-  margin-bottom: 24px;
-}
-
 /* ── PreferencesSection ──────────────────────────────────────────────────── */
 .preferenceCategoryDesc {
   font-size: 11px;

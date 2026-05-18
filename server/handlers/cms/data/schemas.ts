@@ -51,4 +51,3 @@ export const RowTableBodySchema = Type.Object({
 })
 
 export type TablePatchBody = Static<typeof TablePatchBodySchema>
-export type RowUpsertBody = Static<typeof RowUpsertBodySchema>

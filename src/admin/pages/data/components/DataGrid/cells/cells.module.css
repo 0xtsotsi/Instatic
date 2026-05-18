@@ -1,21 +1,5 @@
 /* Shared styles for all DataGrid cell editors. */
 
-/* ---- Base wrappers ---- */
-
-.cellGrid {
-  display: flex;
-  align-items: center;
-  width: 100%;
-  min-width: 0;
-}
-
-.cellDetail {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  width: 100%;
-}
-
 /* ---- Text / Input cells ---- */
 
 .inputFull {

@@ -118,6 +118,13 @@ export const PLUGIN_CAPABILITIES: PluginCapability[] = [
     surfaces: ['frontend', 'server', 'manifest'],
   },
   {
+    permission: 'cms.schedule',
+    label: 'Register scheduled jobs',
+    description: 'Allows the plugin to register handlers that fire on a cadence (hourly / daily / weekly / monthly / every-N-minutes). Each handler runs inside the QuickJS sandbox with a per-fire wall-clock budget; the host scheduler tick drives dispatch and records run history.',
+    risk: 'high',
+    surfaces: ['server'],
+  },
+  {
     permission: 'unstable.internals',
     label: 'Use unstable internal APIs',
     description: 'Reserved for trusted first-party plugins that need unstable host internals.',
@@ -140,10 +147,6 @@ export function permissionLabel(permission: PluginPermission): string {
 
 export function permissionDescription(permission: PluginPermission): string {
   return capabilityByPermission.get(permission)?.description ?? ''
-}
-
-export function permissionRisk(permission: PluginPermission): PluginCapabilityRisk {
-  return capabilityByPermission.get(permission)?.risk ?? 'medium'
 }
 
 export function permissionsForSurface(surface: PluginCapabilitySurface): PluginPermission[] {

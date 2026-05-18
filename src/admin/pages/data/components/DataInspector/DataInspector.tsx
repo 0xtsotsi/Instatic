@@ -14,7 +14,7 @@ import { TableSettings } from './TableSettings'
 // ---------------------------------------------------------------------------
 
 /** Inspector shows either a selected row's detail or the table settings. */
-export type InspectorMode = 'row' | 'settings'
+type InspectorMode = 'row' | 'settings'
 
 export interface DataInspectorProps {
   table: DataTable

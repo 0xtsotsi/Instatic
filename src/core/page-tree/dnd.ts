@@ -3,7 +3,7 @@ import type { NodeTree } from './treeSchema'
 import { getParent, isAncestor } from './selectors'
 
 export type PageTreeDropPosition = 'before' | 'after' | 'inside'
-export type PageTreeDropZone = PageTreeDropPosition
+type PageTreeDropZone = PageTreeDropPosition
 
 export interface PageTreeDropTarget {
   /** The pivot drag id: the row/handle the user grabbed. */

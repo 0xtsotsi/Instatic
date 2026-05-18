@@ -28,15 +28,7 @@ export interface EditorPermissions {
   canEditStyle: boolean
 }
 
-/**
- * `canSave` is true when the caller can make at least one kind of change.
- * Use it to gate the Save button.
- */
-export function canSaveDraft(permissions: EditorPermissions): boolean {
-  return permissions.canEditStructure || permissions.canEditContent || permissions.canEditStyle
-}
-
-export const FULL_EDITOR_PERMISSIONS: EditorPermissions = {
+const FULL_EDITOR_PERMISSIONS: EditorPermissions = {
   canEditStructure: true,
   canEditContent: true,
   canEditStyle: true,

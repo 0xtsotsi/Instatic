@@ -1,7 +1,7 @@
 import { createContext, useContext } from 'react'
 import type { CmsCurrentUser } from '@core/persistence'
 
-export interface AdminSessionValue {
+interface AdminSessionValue {
   user: CmsCurrentUser | null
   /**
    * Replace the cached current user. Called after self-mutations

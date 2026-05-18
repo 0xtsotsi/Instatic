@@ -6,8 +6,6 @@
  *     bindings on template pages.
  *   - `src/core/loops/sources/dataRows.ts` to extract the first inline image from
  *     a row's body cell.
- *   - `server/publish/contentRenderer.ts` to render a standalone published data
- *     row document.
  *
  * URL safety: all `href`/`src` values pass through `isSafeUrl` from the
  * publisher utils — the same allow/deny-list used everywhere else in the

@@ -22,7 +22,7 @@
 
 import type { PropertyControl } from '@core/module-engine/types'
 
-export const BUILTIN_HTML_TAGS = [
+const BUILTIN_HTML_TAGS = [
   'div',
   'section',
   'article',
@@ -34,8 +34,6 @@ export const BUILTIN_HTML_TAGS = [
   'ul',
   'ol',
 ] as const
-
-export type BuiltinHtmlTag = (typeof BUILTIN_HTML_TAGS)[number]
 
 /** Sentinel select-value indicating "use the user-typed `customTag` instead". */
 export const CUSTOM_HTML_TAG_VALUE = 'custom'

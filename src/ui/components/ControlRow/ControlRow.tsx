@@ -19,7 +19,7 @@ import { cn } from '@ui/cn'
 import styles from './ControlRow.module.css'
 
 /** Row layout variant. Mirrors `PropertyControlLayout` from the module engine. */
-export type ControlRowLayout = 'inline' | 'stacked'
+type ControlRowLayout = 'inline' | 'stacked'
 
 interface ControlRowProps {
   /** Property key — used for the `htmlFor`/`id` linkage when `inputId` is omitted. */

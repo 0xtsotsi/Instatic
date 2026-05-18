@@ -17,8 +17,7 @@
  * requires `editor.store.write`).
  */
 import { useContext, useEffect, useMemo, useState } from 'react'
-import { useEditorStore as useEditorStoreNative } from '@site/store/store'
-import type { EditorStore } from '@site/store/types'
+import { useEditorStore } from '@site/store/store'
 import { PluginContext } from './pluginContext'
 
 /** Marker attribute the host puts on the canvas overlay layer host element. */
@@ -30,10 +29,11 @@ export const CANVAS_OVERLAY_LAYER_ATTRIBUTE = 'data-canvas-overlay-layer'
  * to react to. Returns `undefined` if called outside an editor surface
  * (admin pages don't have an editor mounted, so the underlying store is
  * empty there).
+ *
+ * Re-exported under the plugin SDK's `@pagebuilder/host-hooks` import-map
+ * name so plugin bundles don't need to know the host's internal store path.
  */
-export function useEditorStore<T>(selector: (state: EditorStore) => T): T {
-  return useEditorStoreNative(selector)
-}
+export { useEditorStore }
 
 /**
  * Read the current plugin's persisted settings as a typed snapshot.
@@ -151,7 +151,7 @@ export function useCanvasNodeRect(nodeId: string | null): CanvasNodeRect | null 
   // Re-measure on every editor render (selection changes, breakpoint
   // changes, store mutations) by depending on a tick that bumps with each
   // editor-store emission.
-  const editorTick = useEditorStoreNative((s) => s)
+  const editorTick = useEditorStore((s) => s)
   void editorTick
 
   useEffect(() => {

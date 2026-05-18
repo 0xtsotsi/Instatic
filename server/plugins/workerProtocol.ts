@@ -76,6 +76,7 @@ export type MainToWorkerMessage =
   | RunHookFilterRequest
   | RunLoopFetchRequest
   | RunLoopPreviewRequest
+  | RunScheduleRequest
   | ApiReply
 
 export interface LoadPluginRequest {
@@ -154,6 +155,22 @@ export interface RunLoopPreviewRequest {
   ctx: unknown
 }
 
+/**
+ * Fire a scheduled job inside the plugin's worker. Sent by the host
+ * `scheduler.ts` tick when a schedule's `next_run_at` has passed and the
+ * row has been claimed via the HA lock. The worker invokes the stored
+ * handler inside the QuickJS sandbox and replies with a `schedule-result`
+ * carrying the status + measured duration.
+ */
+export interface RunScheduleRequest {
+  kind: 'run-schedule'
+  correlationId: string
+  pluginId: string
+  scheduleId: string
+  /** Wall-clock budget for this fire. Overrides the VM's default 5s deadline. */
+  maxDurationMs: number
+}
+
 /** Host's reply to a worker-initiated `api-call`. */
 export interface ApiReply {
   kind: 'api-reply'
@@ -174,8 +191,9 @@ export type WorkerToMainMessage =
   | RouteResult
   | HookListenerResult
   | HookFilterResult
-  | LoopFetchResult
+  | LoopFetchResultMessage
   | LoopPreviewResult
+  | ScheduleResult
   | ApiCall
   | WorkerLogEvent
 
@@ -228,7 +246,7 @@ export interface HookFilterResult {
   error?: string
 }
 
-export interface LoopFetchResult {
+export interface LoopFetchResultMessage {
   kind: 'loop-fetch-result'
   correlationId: string
   ok: boolean
@@ -243,6 +261,23 @@ export interface LoopPreviewResult {
   ok: boolean
   value?: unknown[]
   error?: string
+}
+
+/**
+ * Outcome of a scheduled fire. `durationMs` is measured inside the worker
+ * (start of handler call to handler return / throw) so the host's
+ * recorded latency reflects the plugin's actual work, not transport
+ * overhead. `status='timeout'` is set when the VM aborted via its
+ * deadline interrupt — the error message will reflect that.
+ */
+export interface ScheduleResult {
+  kind: 'schedule-result'
+  correlationId: string
+  ok: boolean
+  /** 'ok' on success, 'error' on a throw, 'timeout' when the deadline aborted. */
+  status: 'ok' | 'error' | 'timeout'
+  error?: string
+  durationMs: number
 }
 
 /**
@@ -276,7 +311,7 @@ export interface WorkerLogEvent {
 // Allowlist of API targets the host accepts from a worker
 // ---------------------------------------------------------------------------
 
-export const ALLOWED_API_TARGETS = [
+const ALLOWED_API_TARGETS = [
   // Routes — recorded but not actually invoked from worker (worker is the
   // origin of registration; main is the consumer). Host stores route
   // handler ids per pluginId+method+path.
@@ -298,11 +333,21 @@ export const ALLOWED_API_TARGETS = [
   // `networkAllowedHosts`. Host validates the URL host BEFORE making the
   // outbound request.
   'network.fetch',
+  // Companion to network.fetch: cancels an in-flight request when the
+  // plugin's AbortSignal fires. Cheap no-op if the host has already
+  // returned for that abortId (e.g. the response landed first).
+  'network.abort',
+  // Scheduled jobs — gated by `cms.schedule`. Plugin calls register/cancel
+  // during activate; the host upserts a row in `plugin_schedules` and the
+  // scheduler tick (server/plugins/scheduler.ts) fires the registered
+  // handler on cadence.
+  'cms.schedule.register',
+  'cms.schedule.cancel',
 ] as const
 
-export type AllowedApiTarget = typeof ALLOWED_API_TARGETS[number]
+type AllowedApiTarget = typeof ALLOWED_API_TARGETS[number]
 
-export function isAllowedApiTarget(target: string): target is AllowedApiTarget {
+function isAllowedApiTarget(target: string): target is AllowedApiTarget {
   return (ALLOWED_API_TARGETS as readonly string[]).includes(target)
 }
 
@@ -391,6 +436,92 @@ const NetworkFetchInitSchema = Type.Object(
     method: Type.Optional(Type.String({ maxLength: 16 })),
     headers: Type.Optional(Type.Record(Type.String(), Type.String())),
     body: Type.Optional(Type.String()),
+    // Plugin-minted correlation id for AbortSignal cancellation. The
+    // bootstrap's fetch polyfill assigns this when the call has a signal;
+    // if the signal fires, the polyfill posts `network.abort` with the
+    // same id so the host can drop the in-flight request. Plain JS
+    // identifier shape — the bootstrap generates `'a' + counter + '_' + ts36`.
+    abortId: Type.Optional(Type.String({ minLength: 1, maxLength: 128, pattern: '^[a-zA-Z0-9_]+$' })),
+  },
+  { additionalProperties: false },
+)
+
+const NetworkAbortArgSchema = Type.Object(
+  {
+    abortId: Type.String({ minLength: 1, maxLength: 128, pattern: '^[a-zA-Z0-9_]+$' }),
+  },
+  { additionalProperties: false },
+)
+
+// Cadence shapes the plugin can pass to `cms.schedule.register`. Mirrors
+// the `Cadence` union in `server/repositories/pluginSchedules.ts` — both
+// must move in lockstep. The validator rejects anything that doesn't
+// match one of the documented intervals.
+const TimeOfDayPattern = '^([01][0-9]|2[0-3]):[0-5][0-9]$'
+
+const CadenceSchema = Type.Union([
+  Type.Object({ interval: Type.Literal('hourly') }, { additionalProperties: false }),
+  Type.Object(
+    {
+      interval: Type.Literal('daily'),
+      at: Type.String({ pattern: TimeOfDayPattern }),
+    },
+    { additionalProperties: false },
+  ),
+  Type.Object(
+    {
+      interval: Type.Literal('weekly'),
+      at: Type.String({ pattern: TimeOfDayPattern }),
+      day: Type.Union([
+        Type.Literal('mon'), Type.Literal('tue'), Type.Literal('wed'),
+        Type.Literal('thu'), Type.Literal('fri'), Type.Literal('sat'),
+        Type.Literal('sun'),
+      ]),
+    },
+    { additionalProperties: false },
+  ),
+  Type.Object(
+    {
+      interval: Type.Literal('monthly'),
+      at: Type.String({ pattern: TimeOfDayPattern }),
+      // Capped at 28 so February never breaks. Schedules that need
+      // last-day-of-month behaviour can use 'every' with 1440-minute
+      // intervals plus an in-handler check.
+      dayOfMonth: Type.Integer({ minimum: 1, maximum: 28 }),
+    },
+    { additionalProperties: false },
+  ),
+  Type.Object(
+    {
+      interval: Type.Literal('every'),
+      // Lower bound of 1 minute is deliberate — sub-minute schedules
+      // collide with the 10s tick polling resolution and would surprise
+      // authors who expect them to fire on the second.
+      minutes: Type.Integer({ minimum: 1, maximum: 1440 }),
+    },
+    { additionalProperties: false },
+  ),
+])
+
+const ScheduleRegisterArgSchema = Type.Object(
+  {
+    scheduleId: Type.String({ minLength: 1, maxLength: 120 }),
+    cadence: CadenceSchema,
+    overlap: Type.Union([
+      Type.Literal('skip'),
+      Type.Literal('queue'),
+      Type.Literal('parallel'),
+    ]),
+    // Per-schedule wall-clock budget. Bounded so a plugin can't pin a
+    // worker indefinitely; longer work should chunk and yield.
+    maxDurationMs: Type.Integer({ minimum: 100, maximum: 5 * 60_000 }),
+  },
+  { additionalProperties: false },
+)
+
+const ScheduleCancelArgSchema = Type.Object(
+  {
+    scheduleId: Type.String({ minLength: 1, maxLength: 120 }),
   },
   { additionalProperties: false },
 )
@@ -433,6 +564,13 @@ const ApiCallSchemas = {
     Type.String({ minLength: 1, maxLength: 2048 }),
     NetworkFetchInitSchema,
   ])),
+  // The host is intentionally permissive about `network.abort` — it does
+  // NOT require `network.outbound` to be granted. A plugin without the
+  // permission can never have minted a live `abortId` in the first place,
+  // so the worst case is a missed lookup that no-ops (see dispatchApiCall).
+  'network.abort': apiCallSchema('network.abort', Type.Tuple([NetworkAbortArgSchema])),
+  'cms.schedule.register': apiCallSchema('cms.schedule.register', Type.Tuple([ScheduleRegisterArgSchema])),
+  'cms.schedule.cancel': apiCallSchema('cms.schedule.cancel', Type.Tuple([ScheduleCancelArgSchema])),
 } satisfies Record<AllowedApiTarget, TSchema>
 
 export type RouteRegistrationApiCall = Static<typeof ApiCallSchemas['cms.routes.register']>
@@ -446,6 +584,9 @@ export type StorageUpdateApiCall = Static<typeof ApiCallSchemas['cms.storage.upd
 export type StorageDeleteApiCall = Static<typeof ApiCallSchemas['cms.storage.delete']>
 export type SettingsReplaceApiCall = Static<typeof ApiCallSchemas['cms.settings.replace']>
 export type NetworkFetchApiCall = Static<typeof ApiCallSchemas['network.fetch']>
+export type NetworkAbortApiCall = Static<typeof ApiCallSchemas['network.abort']>
+export type ScheduleRegisterApiCall = Static<typeof ApiCallSchemas['cms.schedule.register']>
+export type ScheduleCancelApiCall = Static<typeof ApiCallSchemas['cms.schedule.cancel']>
 
 export type ValidatedApiCall =
   | RouteRegistrationApiCall
@@ -459,6 +600,9 @@ export type ValidatedApiCall =
   | StorageDeleteApiCall
   | SettingsReplaceApiCall
   | NetworkFetchApiCall
+  | NetworkAbortApiCall
+  | ScheduleRegisterApiCall
+  | ScheduleCancelApiCall
 
 export class ApiCallValidationError extends Error {
   constructor(message: string) {
@@ -523,6 +667,12 @@ function decodeApiCall(target: AllowedApiTarget, value: unknown): ValidatedApiCa
       return Value.Decode(ApiCallSchemas['cms.settings.replace'], value)
     case 'network.fetch':
       return Value.Decode(ApiCallSchemas['network.fetch'], value)
+    case 'network.abort':
+      return Value.Decode(ApiCallSchemas['network.abort'], value)
+    case 'cms.schedule.register':
+      return Value.Decode(ApiCallSchemas['cms.schedule.register'], value)
+    case 'cms.schedule.cancel':
+      return Value.Decode(ApiCallSchemas['cms.schedule.cancel'], value)
   }
 }
 
@@ -548,14 +698,3 @@ export function parseApiCall(value: unknown): ValidatedApiCall {
   return parsed
 }
 
-// ---------------------------------------------------------------------------
-// Permissions snapshot — sent with `load-plugin` so the worker can enforce
-// `assertPluginPermission` BEFORE round-tripping back to the host.
-// ---------------------------------------------------------------------------
-
-export interface ManifestSnapshotForWorker {
-  id: string
-  version: string
-  permissions: PluginPermission[]
-  grantedPermissions: PluginPermission[]
-}

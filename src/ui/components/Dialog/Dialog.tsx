@@ -47,10 +47,10 @@ import { CloseIcon } from 'pixel-art-icons/icons/close'
 import { cn } from '@ui/cn'
 import styles from './Dialog.module.css'
 
-export type DialogSize = 'sm' | 'md' | 'lg' | 'xl'
-export type DialogTone = 'neutral' | 'danger'
+type DialogSize = 'sm' | 'md' | 'lg' | 'xl'
+type DialogTone = 'neutral' | 'danger'
 
-export interface DialogProps {
+interface DialogProps {
   /** Whether the dialog is currently visible. */
   open: boolean
   /** Called when the dialog requests to close (Esc, backdrop, X button). */

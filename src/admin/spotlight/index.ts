@@ -1,33 +1,13 @@
 /**
  * spotlight — public module exports.
  *
- * Import from '@admin/spotlight' to access the provider, hooks, and the
- * keybindings registry.
+ * Import from '@admin/spotlight' to mount the global ⌘K palette via
+ * <SpotlightRoot>. Everything else (hooks, types, the keybindings registry)
+ * is consumed via direct module paths inside the spotlight feature, not
+ * through this barrel.
  *
  * The heavy dialog chunk (Spotlight.tsx, SpotlightResults.tsx, …) is
- * lazy-loaded on first ⌘K press via React.lazy inside SpotlightProvider.
+ * lazy-loaded on first ⌘K press via React.lazy inside SpotlightRoot.
  */
 
-export { SpotlightProvider } from './SpotlightProvider'
-export { useSpotlight } from './useSpotlight'
-export { useShortcutHint } from './useShortcutHint'
-export type { SpotlightControls } from './useSpotlight'
-export type {
-  Command,
-  CommandId,
-  CommandGroup,
-  CommandShortcut,
-  CommandArg,
-  CommandContext,
-  CommandRunContext,
-  Scope,
-  SpotlightProvider as SpotlightProviderType,
-  ActiveDocument,
-} from './types'
-export {
-  KEYBINDINGS,
-  getKeybindingForCommand,
-  formatShortcut,
-  isPlatformMac,
-} from './keybindings'
-export type { KeybindingDefinition, KeyEventLike } from './keybindings'
+export { SpotlightRoot } from './SpotlightRoot'

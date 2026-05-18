@@ -12,9 +12,9 @@ import { safeParseJson } from '@core/utils/jsonValidate'
 
 const STORAGE_KEY = 'pb-data-grid-primary-widths-v1'
 
-export const PRIMARY_COLUMN_DEFAULT_WIDTH = 280
-export const PRIMARY_COLUMN_MIN_WIDTH = 200
-export const PRIMARY_COLUMN_MAX_WIDTH = 720
+const PRIMARY_COLUMN_DEFAULT_WIDTH = 280
+const PRIMARY_COLUMN_MIN_WIDTH = 200
+const PRIMARY_COLUMN_MAX_WIDTH = 720
 
 const StoredWidthsSchema = Type.Object(
   {

@@ -17,7 +17,7 @@
 const GRAVATAR_BASE = 'https://www.gravatar.com/avatar'
 
 /** Default Gravatar style when the email is unknown to Gravatar. */
-export const GRAVATAR_DEFAULT = 'identicon'
+const GRAVATAR_DEFAULT = 'identicon'
 
 interface GravatarOptions {
   /** Rendered pixel size — Gravatar caps at 2048. We retina-scale by 2×. */
@@ -29,7 +29,7 @@ interface GravatarOptions {
  * so the image renders crisp on retina displays; CSS still scales it back
  * down to `size` CSS pixels.
  */
-export function gravatarUrl(gravatarHash: string, options: GravatarOptions): string {
+function gravatarUrl(gravatarHash: string, options: GravatarOptions): string {
   const px = Math.max(16, Math.min(512, Math.round(options.size * 2)))
   return `${GRAVATAR_BASE}/${gravatarHash}?s=${px}&d=${GRAVATAR_DEFAULT}`
 }

@@ -37,14 +37,20 @@
  *   • `api.cms.loops.registerSource`
  *   • `api.cms.settings.{get,getAll,replace}`
  *
- * Denied inside the VM (verified by `scripts/spike-quickjs-host.ts`):
+ * Denied inside the VM:
  *   • `Bun`, `process`, `require`, `import('node:*' | 'bun:*')`
  *   • `fetch`, `WebSocket`, `XMLHttpRequest` — to be re-introduced under
  *     `network.outbound` permission as a gated host function (separate step).
  *   • `eval` cannot escape — the VM has no references into the host's heap.
  */
 
-import { getQuickJS, type QuickJSContext, type QuickJSHandle, type QuickJSWASMModule } from 'quickjs-emscripten'
+import {
+  getQuickJS,
+  shouldInterruptAfterDeadline,
+  type QuickJSContext,
+  type QuickJSHandle,
+  type QuickJSWASMModule,
+} from 'quickjs-emscripten'
 
 // ---------------------------------------------------------------------------
 // Public types
@@ -55,6 +61,12 @@ export interface PluginVmEnv {
   manifestVersion: string
   /** Permissions granted at install time — surfaced via api.plugin.permissions. */
   grantedPermissions: string[]
+  /**
+   * Asset base path for the plugin's installed files, e.g.
+   * `/uploads/plugins/<id>/<version>`. Used by `api.plugin.assetUrl(path)`
+   * to build URLs for static files the plugin shipped in its zip.
+   */
+  assetBasePath: string
   /** Initial settings snapshot — read synchronously inside the VM via api.cms.settings.get. */
   settings: Record<string, string | number | boolean>
   /**
@@ -82,6 +94,12 @@ export interface PluginVm {
   runHookFilter: (filterId: string, value: unknown) => Promise<unknown>
   runLoopFetch: (sourceId: string, ctx: unknown) => Promise<{ items: unknown[]; totalItems: number }>
   runLoopPreview: (sourceId: string, ctx: unknown) => Promise<unknown[]>
+  /**
+   * Fire a scheduled job's handler. `maxDurationMs` overrides the VM's
+   * default 5s deadline for this call only — schedules can declare a
+   * larger budget at registration time (host-capped at 5 minutes).
+   */
+  runSchedule: (scheduleId: string, maxDurationMs: number) => Promise<void>
   /** Update the VM's settings mirror so subsequent api.cms.settings.get() sees the new values. */
   updateSettings: (next: Record<string, string | number | boolean>) => Promise<void>
   dispose: () => void
@@ -97,6 +115,36 @@ export interface VmRouteContext {
   body: Record<string, unknown>
   user: { id: string; email: string; capabilities: string[] } | null
 }
+
+// ---------------------------------------------------------------------------
+// Resource limits — defense against runaway / malicious plugins.
+//
+// Plugin VMs get:
+//   • A hard memory ceiling enforced by the QuickJS runtime
+//     (`setMemoryLimit`). Allocations beyond the limit throw an
+//     `OutOfMemory` error inside the VM.
+//   • A bounded stack size (`setMaxStackSize`) so a recursive plugin can't
+//     exhaust the host's WASM stack.
+//   • A wall-clock interrupt per eval call (`shouldInterruptAfterDeadline`).
+//     The VM cooperatively checks the interrupt flag during execution; a
+//     plugin stuck in an infinite loop is aborted within the deadline.
+//
+// Defaults are picked to be invisible for normal plugin work and harsh
+// for runaways. Plugins that legitimately need higher caps will surface
+// memory errors and we can add a per-plugin override field later.
+// ---------------------------------------------------------------------------
+
+/** 64 MB max heap per plugin VM. */
+const DEFAULT_MEMORY_LIMIT_BYTES = 64 * 1024 * 1024
+/** 1 MB max stack — plenty for normal use, fatal for runaway recursion. */
+const DEFAULT_STACK_SIZE_BYTES = 1 * 1024 * 1024
+/**
+ * 5 second wall-clock deadline per eval call. Lifecycle hooks, route
+ * handlers, hook listeners, and loop fetches all use this same budget.
+ * If a plugin needs more, it should yield back to the host (e.g. emit
+ * progress events) rather than block in a tight loop.
+ */
+const DEFAULT_EVAL_TIMEOUT_MS = 5_000
 
 // ---------------------------------------------------------------------------
 // Singleton WASM module — one per worker, shared across plugin contexts.
@@ -186,21 +234,199 @@ globalThis.console = {
   trace: __consoleProxy('info'),
 };
 
+// ------- timers (setTimeout/setInterval) — host-bridged via __hostSleep --
+// The QuickJS VM has no built-in event loop, so timers can't be a pure JS
+// polyfill — somebody has to actually wait. We thread that wait through a
+// worker-local __hostSleep(ms) host function that resolves a VM Promise
+// after ms real milliseconds (via the worker's setTimeout). Plugin
+// timers are therefore real wall-clock timers, not VM-internal "ticks",
+// and they integrate with the existing __hostCall pump (microtasks get
+// drained when the host-side resolve lands).
+//
+// Cancellation is recorded in __timer_tokens; the fire path checks the
+// token's flag before invoking the callback. The host also tracks each
+// scheduled native setTimeout via its host-side handle so the whole set
+// can be torn down when the VM is disposed (preventing fires into a dead
+// VM after the plugin is uninstalled / upgraded).
+let __timer_seq = 0;
+const __timer_tokens = new Map();
+const __TIMER_MAX_MS = 24 * 60 * 60 * 1000; // 1 day ceiling — silently clamped.
+
+function __scheduleTimer(handler, delayMs, repeating) {
+  if (typeof handler !== 'function') throw new TypeError('Timer callback must be a function');
+  __timer_seq += 1;
+  const id = __timer_seq;
+  const raw = Number(delayMs);
+  let ms = Number.isFinite(raw) && raw > 0 ? raw : 0;
+  if (ms > __TIMER_MAX_MS) ms = __TIMER_MAX_MS;
+  const token = { cancelled: false };
+  __timer_tokens.set(id, token);
+
+  function tick() {
+    if (token.cancelled) return;
+    __hostSleep(ms).then(function () {
+      if (token.cancelled) return;
+      try {
+        handler();
+      } catch (err) {
+        __log('error', '[timer] callback threw: ' + (err && err.stack ? err.stack : String(err)));
+      }
+      if (repeating && !token.cancelled) tick();
+      else __timer_tokens.delete(id);
+    });
+  }
+  tick();
+  return id;
+}
+
+globalThis.setTimeout = function setTimeout(handler, delayMs) {
+  return __scheduleTimer(handler, delayMs, false);
+};
+globalThis.clearTimeout = function clearTimeout(id) {
+  const token = __timer_tokens.get(id);
+  if (token) { token.cancelled = true; __timer_tokens.delete(id); }
+};
+globalThis.setInterval = function setInterval(handler, periodMs) {
+  // Browser-ish floor of 4ms so a misuse (setInterval(fn, 0)) doesn't pin
+  // a worker. The 1-day ceiling above already covers the upper end.
+  const safeMs = Number(periodMs) >= 4 ? Number(periodMs) : 4;
+  return __scheduleTimer(handler, safeMs, true);
+};
+globalThis.clearInterval = function clearInterval(id) {
+  const token = __timer_tokens.get(id);
+  if (token) { token.cancelled = true; __timer_tokens.delete(id); }
+};
+globalThis.queueMicrotask = function queueMicrotask(handler) {
+  if (typeof handler !== 'function') throw new TypeError('queueMicrotask callback must be a function');
+  // The VM has a native Promise scheduler — a resolved Promise's .then is a
+  // proper microtask. This polyfill matches the WHATWG ordering closely
+  // enough for plugin code that just wants to defer until the current
+  // synchronous task finishes.
+  Promise.resolve().then(function () {
+    try { handler(); }
+    catch (err) { __log('error', '[microtask] threw: ' + (err && err.stack ? err.stack : String(err))); }
+  });
+};
+
+// ------- AbortController / AbortSignal — pure JS polyfill ----------------
+// Plugins routinely receive AbortSignals from libraries and need to thread
+// them through fetch. We implement just enough of the WHATWG surface
+// (aborted, reason, addEventListener('abort'), throwIfAborted) for
+// realistic usage. AbortSignal.timeout() and AbortSignal.any() are static
+// helpers most users expect.
+function __makeAbortSignal() {
+  const listeners = [];
+  const signal = {
+    aborted: false,
+    reason: undefined,
+    onabort: null,
+    addEventListener: function (type, listener) {
+      if (type !== 'abort' || typeof listener !== 'function') return;
+      if (signal.aborted) {
+        try { listener({ type: 'abort', target: signal }); } catch (_) {}
+        return;
+      }
+      listeners.push(listener);
+    },
+    removeEventListener: function (type, listener) {
+      if (type !== 'abort') return;
+      const i = listeners.indexOf(listener);
+      if (i >= 0) listeners.splice(i, 1);
+    },
+    dispatchEvent: function () { return true; },
+    throwIfAborted: function () {
+      if (signal.aborted) {
+        const r = signal.reason;
+        if (r && typeof r === 'object') throw r;
+        const err = new Error(typeof r === 'string' ? r : 'The operation was aborted');
+        err.name = 'AbortError';
+        throw err;
+      }
+    },
+  };
+  signal.__fire = function (reason) {
+    if (signal.aborted) return;
+    signal.aborted = true;
+    if (reason === undefined) {
+      const err = new Error('The operation was aborted');
+      err.name = 'AbortError';
+      signal.reason = err;
+    } else {
+      signal.reason = reason;
+    }
+    const event = { type: 'abort', target: signal };
+    if (typeof signal.onabort === 'function') {
+      try { signal.onabort(event); } catch (_) {}
+    }
+    const snapshot = listeners.slice();
+    listeners.length = 0;
+    for (let i = 0; i < snapshot.length; i++) {
+      try { snapshot[i](event); } catch (_) {}
+    }
+  };
+  return signal;
+}
+
+function AbortControllerCtor() {
+  if (!(this instanceof AbortControllerCtor)) {
+    throw new TypeError("AbortController constructor: must be called with 'new'");
+  }
+  const signal = __makeAbortSignal();
+  this.signal = signal;
+  this.abort = function abort(reason) { signal.__fire(reason); };
+}
+globalThis.AbortController = AbortControllerCtor;
+
+globalThis.AbortSignal = {
+  abort: function (reason) {
+    const s = __makeAbortSignal();
+    s.__fire(reason);
+    return s;
+  },
+  timeout: function (ms) {
+    const controller = new AbortControllerCtor();
+    const delay = Number(ms);
+    if (Number.isFinite(delay) && delay >= 0) {
+      setTimeout(function () {
+        const err = new Error('Signal timed out');
+        err.name = 'TimeoutError';
+        controller.abort(err);
+      }, delay);
+    }
+    return controller.signal;
+  },
+  any: function (signals) {
+    const merged = new AbortControllerCtor();
+    if (!signals || typeof signals.length !== 'number') return merged.signal;
+    for (let i = 0; i < signals.length; i++) {
+      const s = signals[i];
+      if (!s) continue;
+      if (s.aborted) { merged.abort(s.reason); return merged.signal; }
+    }
+    for (let i = 0; i < signals.length; i++) {
+      const s = signals[i];
+      if (!s) continue;
+      s.addEventListener('abort', function () { merged.abort(s.reason); });
+    }
+    return merged.signal;
+  },
+};
+
 // ------- gated fetch -------
 // Plugins with the 'network.outbound' permission AND a matching entry in
 // the manifest's networkAllowedHosts can issue outbound HTTP. The host
 // enforces both checks (kernel-of-correctness); this shim provides a
 // Response-like façade so plugin code can use the familiar fetch API.
-globalThis.fetch = async function fetch(input, init) {
-  const url = typeof input === 'string' ? input : (input && input.url ? input.url : String(input));
-  const opts = init && typeof init === 'object' ? init : {};
-  const serialized = {
-    method: typeof opts.method === 'string' ? opts.method : 'GET',
-    headers: opts.headers && typeof opts.headers === 'object' ? opts.headers : {},
-    body: typeof opts.body === 'string' ? opts.body : (opts.body == null ? undefined : String(opts.body)),
-  };
-  // hostCall returns { status, ok, headers, body } — see performGatedFetch.
-  const result = await __hostCall('network.fetch', [url, serialized]);
+//
+// AbortSignal threading: each call mints a unique abortId and registers
+// it on the host. If the plugin's signal aborts before the host fetch
+// completes, the polyfill fires the network.abort api-call so the host's
+// AbortController cancels the in-flight request instead of waiting for
+// it to settle. The host fetch's pending promise is also raced against
+// a local rejection so the plugin's await resolves immediately.
+let __fetch_abort_seq = 0;
+
+function __materializeResponse(result) {
   return {
     status: result.status,
     ok: result.ok,
@@ -217,6 +443,57 @@ globalThis.fetch = async function fetch(input, init) {
       return buf.buffer;
     },
   };
+}
+
+function __abortError(reason) {
+  if (reason && typeof reason === 'object') return reason;
+  const err = new Error(typeof reason === 'string' ? reason : 'The operation was aborted');
+  err.name = 'AbortError';
+  return err;
+}
+
+globalThis.fetch = async function fetch(input, init) {
+  const url = typeof input === 'string' ? input : (input && input.url ? input.url : String(input));
+  const opts = init && typeof init === 'object' ? init : {};
+  const serialized = {
+    method: typeof opts.method === 'string' ? opts.method : 'GET',
+    headers: opts.headers && typeof opts.headers === 'object' ? opts.headers : {},
+    body: typeof opts.body === 'string' ? opts.body : (opts.body == null ? undefined : String(opts.body)),
+  };
+  const signal = opts.signal && typeof opts.signal === 'object' ? opts.signal : null;
+  if (signal && signal.aborted) throw __abortError(signal.reason);
+
+  __fetch_abort_seq += 1;
+  const abortId = 'a' + __fetch_abort_seq + '_' + Date.now().toString(36);
+  serialized.abortId = abortId;
+
+  const hostPromise = __hostCall('network.fetch', [url, serialized]);
+
+  if (!signal) {
+    const result = await hostPromise;
+    return __materializeResponse(result);
+  }
+
+  // Race the host fetch against the signal — if abort wins, also tell the
+  // host to cancel the in-flight request so its socket / response stream
+  // is torn down instead of leaking until natural completion.
+  let abortListener = null;
+  const abortPromise = new Promise(function (_, reject) {
+    abortListener = function () {
+      reject(__abortError(signal.reason));
+      // Fire-and-forget — if the host call already returned, the host's
+      // map entry is gone and this is a no-op.
+      try { __hostCall('network.abort', [{ abortId: abortId }]); } catch (_) {}
+    };
+    signal.addEventListener('abort', abortListener);
+  });
+
+  try {
+    const result = await Promise.race([hostPromise, abortPromise]);
+    return __materializeResponse(result);
+  } finally {
+    if (abortListener) signal.removeEventListener('abort', abortListener);
+  }
 };
 
 // ------- handler registries (live inside the VM, host has metadata) -------
@@ -225,6 +502,7 @@ globalThis.__plugin_handlers = {
   listeners: {},
   filters: {},
   loopSources: {},
+  schedules: {},
 };
 
 // ------- the api object plugins receive -------
@@ -321,6 +599,57 @@ globalThis.__buildApi = function buildApi() {
     };
   }
 
+  // ---- scheduled jobs --------------------------------------------------
+  // Plugin declares cadence + handler at activate-time. The host upserts
+  // a row; the scheduler tick fires the handler via __runSchedule(id).
+  // Handler is stored INSIDE the VM (not serialised) — the host carries
+  // only the schedule metadata in plugin_schedules.
+
+  function scheduleRegister(def) {
+    assertPermission('cms.schedule');
+    if (!def || typeof def !== 'object') throw new TypeError('schedule.register: argument must be an object');
+    if (typeof def.id !== 'string' || def.id.length === 0) throw new TypeError("schedule.register: 'id' is required");
+    if (typeof def.handler !== 'function') throw new TypeError("schedule.register: 'handler' must be a function");
+    if (!def.cadence || typeof def.cadence !== 'object') throw new TypeError("schedule.register: 'cadence' is required");
+    const scheduleId = String(def.id);
+    globalThis.__plugin_handlers.schedules[scheduleId] = def.handler;
+    const overlap = def.overlap === 'queue' || def.overlap === 'parallel' ? def.overlap : 'skip';
+    // Cap at the host-side maximum (5 minutes); a stricter cap can be
+    // negotiated later via a per-plugin manifest field. Default 5_000ms
+    // matches the VM's default eval deadline so behaviour is consistent
+    // with route / hook / loop calls.
+    let maxDurationMs = typeof def.maxDurationMs === 'number' ? def.maxDurationMs : 5000;
+    if (maxDurationMs < 100) maxDurationMs = 100;
+    if (maxDurationMs > 5 * 60 * 1000) maxDurationMs = 5 * 60 * 1000;
+    return call('cms.schedule.register', [{
+      scheduleId: scheduleId,
+      cadence: def.cadence,
+      overlap: overlap,
+      maxDurationMs: maxDurationMs,
+    }]);
+  }
+
+  function scheduleCancel(id) {
+    assertPermission('cms.schedule');
+    const scheduleId = String(id);
+    delete globalThis.__plugin_handlers.schedules[scheduleId];
+    return call('cms.schedule.cancel', [{ scheduleId: scheduleId }]);
+  }
+
+  const scheduleApi = {
+    register: scheduleRegister,
+    cancel: scheduleCancel,
+    daily: function (id, at, handler) {
+      return scheduleRegister({ id: id, cadence: { interval: 'daily', at: at }, handler: handler });
+    },
+    hourly: function (id, handler) {
+      return scheduleRegister({ id: id, cadence: { interval: 'hourly' }, handler: handler });
+    },
+    every: function (minutes, id, handler) {
+      return scheduleRegister({ id: id, cadence: { interval: 'every', minutes: minutes }, handler: handler });
+    },
+  };
+
   const settingsApi = {
     get: function (key) { return globalThis.__plugin_settings[key]; },
     getAll: function () { return Object.assign({}, globalThis.__plugin_settings); },
@@ -348,6 +677,17 @@ globalThis.__buildApi = function buildApi() {
         }
         __log('info', parts.join(' '));
       },
+      // Build a URL for a static file the plugin shipped in its zip.
+      // assetBasePath looks like '/uploads/plugins/<id>/<version>'; we
+      // join it with the package-relative path and normalize the slashes.
+      assetUrl: function (path) {
+        if (typeof path !== 'string' || path.length === 0) {
+          throw new TypeError('assetUrl: path must be a non-empty string');
+        }
+        const base = (meta.assetBasePath || '').replace(/\\/+$/g, '');
+        const rel = String(path).replace(/^\\/+/g, '');
+        return base + '/' + rel;
+      },
     },
     cms: {
       routes: {
@@ -361,6 +701,7 @@ globalThis.__buildApi = function buildApi() {
       hooks: { on: on, filter: filter, emit: emit },
       loops: { registerSource: registerSource },
       settings: settingsApi,
+      schedule: scheduleApi,
     },
   };
 };
@@ -370,14 +711,46 @@ function __nextId(prefix) { __idCounter += 1; return prefix + '_' + __idCounter 
 
 // ------- runners — host calls these to dispatch into plugin code -------
 
+/**
+ * Resolve the actual plugin module from __plugin_exports. Plugin authors
+ * write one of two shapes:
+ *   - named lifecycle exports: \`export function activate(api) { ... }\`
+ *   - a default-export module: \`export default { install, activate, ... }\`
+ *
+ * Both code paths land on __plugin_exports — but with named exports the
+ * hooks are direct properties, while with default-export the hooks live
+ * one level deeper (under .default). We unwrap the latter so the runners
+ * find the hooks either way. The SDK build's facade ALSO unwraps, but
+ * keeping this here as belt-and-suspenders means raw-ESM single-file
+ * plugins (test fixtures, hand-authored modules going through the
+ * worker's \`ensureIifeForm\` shim) work too.
+ */
+function __resolvePluginModule() {
+  const root = globalThis.__plugin_exports;
+  if (!root || typeof root !== 'object') return null;
+  const def = root.default;
+  const isPluginModule = function (v) {
+    return v && typeof v === 'object' && (
+      typeof v.install === 'function' ||
+      typeof v.activate === 'function' ||
+      typeof v.deactivate === 'function' ||
+      typeof v.uninstall === 'function' ||
+      typeof v.migrate === 'function'
+    );
+  };
+  return isPluginModule(def) ? def : root;
+}
+
 globalThis.__runLifecycle = async function runLifecycle(hook) {
-  const fn = globalThis.__plugin_exports && globalThis.__plugin_exports[hook];
+  const mod = __resolvePluginModule();
+  const fn = mod && mod[hook];
   if (typeof fn !== 'function') return;
   await fn(globalThis.__buildApi());
 };
 
 globalThis.__runMigrate = async function runMigrate(fromVersion) {
-  const fn = globalThis.__plugin_exports && globalThis.__plugin_exports.migrate;
+  const mod = __resolvePluginModule();
+  const fn = mod && mod.migrate;
   if (typeof fn !== 'function') return;
   await fn({ fromVersion: fromVersion }, globalThis.__buildApi());
 };
@@ -424,6 +797,21 @@ globalThis.__runLoopPreview = function runLoopPreview(sourceId, ctxJson) {
   return JSON.stringify(source.preview(JSON.parse(ctxJson)));
 };
 
+/**
+ * Fire a scheduled job. Resolves with no value on success; throws on
+ * handler error. The host wraps this call in its eval deadline (set per
+ * schedule to maxDurationMs) so a runaway handler is interrupted cleanly.
+ *
+ * If the handler isn't registered (e.g. plugin upgraded between tick and
+ * dispatch), we no-op rather than throw — the schedule row will eventually
+ * be GC'd by the host once the boot-claim grace window expires.
+ */
+globalThis.__runSchedule = async function runSchedule(scheduleId) {
+  const handler = globalThis.__plugin_handlers.schedules[scheduleId];
+  if (typeof handler !== 'function') return;
+  await handler();
+};
+
 globalThis.__updateSettings = function updateSettings(nextJson) {
   const next = JSON.parse(nextJson);
   for (const k of Object.keys(globalThis.__plugin_settings)) delete globalThis.__plugin_settings[k];
@@ -431,13 +819,18 @@ globalThis.__updateSettings = function updateSettings(nextJson) {
 };
 
 globalThis.__detectExportedHooks = function detectExportedHooks() {
+  // Returns an Array (not a JSON string) because the host invokes this via
+  // evalJson, which already wraps the result in JSON.stringify. Returning
+  // a string would double-encode and the host would receive a string like
+  // [["activate"]]. The runner-style helpers (__runRoute / __runLoopFetch
+  // / ...) DO return JSON strings because their callers use evalString.
   const known = ['install', 'activate', 'deactivate', 'uninstall', 'migrate'];
-  const exp = globalThis.__plugin_exports || {};
+  const mod = __resolvePluginModule() || {};
   const out = [];
   for (const name of known) {
-    if (typeof exp[name] === 'function') out.push(name);
+    if (typeof mod[name] === 'function') out.push(name);
   }
-  return JSON.stringify(out);
+  return out;
 };
 `
 
@@ -461,6 +854,14 @@ export async function createPluginVm(args: {
 }): Promise<PluginVm> {
   const wasm = await getWasmModule()
   const ctx = wasm.newContext()
+
+  // Apply per-plugin resource limits BEFORE evaluating any plugin code.
+  // setMemoryLimit / setMaxStackSize live on the runtime, not the context,
+  // and bind to all contexts created from this runtime. Each `wasm.newContext`
+  // creates its own runtime in this binding, so limits are effectively
+  // per-plugin.
+  ctx.runtime.setMemoryLimit(DEFAULT_MEMORY_LIMIT_BYTES)
+  ctx.runtime.setMaxStackSize(DEFAULT_STACK_SIZE_BYTES)
   /**
    * Host function handles MUST be kept alive for the lifetime of the
    * context — QuickJS's emscripten binding holds them via a HostRefMap and
@@ -468,6 +869,38 @@ export async function createPluginVm(args: {
    * They get released alongside the context in `dispose()` below.
    */
   const hostFunctionHandles: QuickJSHandle[] = []
+
+  /**
+   * Pending host-side timers. Bun.setTimeout returns a Timer handle (Node-
+   * compatible) that we keep here so `dispose()` can stop every in-flight
+   * fire before tearing down the VM — otherwise a timer scheduled by the
+   * plugin would fire into a dead context and crash the worker.
+   *
+   * We use any-typed handles because the cross-platform Timer / Timeout
+   * shape differs between Bun, Node, and the WebWorker DOM lib. We only
+   * pass them to clearTimeout, which accepts all three.
+   */
+  const pendingTimers = new Set<ReturnType<typeof setTimeout>>()
+
+  /**
+   * Set to true by `dispose()`. Used by the __hostCall / __hostSleep
+   * callbacks as a cheap pre-check before touching VM handles, so a host
+   * promise that resolves moments after `dispose()` can drop silently
+   * instead of trying to call `ctx.newObject()` on a freed context (which
+   * fails with "Lifetime not alive").
+   */
+  let vmDisposed = false
+
+  /**
+   * Pending VM-side `Deferred`s created by `__hostCall` / `__hostSleep`.
+   * Each `ctx.newPromise()` allocates VM-tracked handles for the resolve
+   * and reject callbacks; if the VM is disposed while one is unsettled,
+   * QuickJS asserts `list_empty(&rt->gc_obj_list)` at runtime-free time
+   * because those handles are still in the GC list. Disposing the deferred
+   * up front in `vm.dispose()` releases them cleanly. Deferreds are
+   * removed once they settle (resolve / reject paths handle this).
+   */
+  const pendingDeferreds = new Set<ReturnType<QuickJSContext['newPromise']>>()
 
   try {
     // 1. Wire __hostCall as a SYNCHRONOUS VM function. The host returns a
@@ -480,30 +913,75 @@ export async function createPluginVm(args: {
       const argsArray = Array.isArray(dumpedArgs) ? dumpedArgs : []
 
       const deferred = ctx.newPromise()
+      pendingDeferreds.add(deferred)
       args.env.hostCall(target, argsArray).then(
         (value) => {
-          if (!deferred.alive) return
-          const valueHandle = jsToHandle(ctx, value)
-          deferred.resolve(valueHandle)
-          if (valueHandle !== ctx.undefined && valueHandle !== ctx.null && valueHandle !== ctx.true && valueHandle !== ctx.false) {
-            valueHandle.dispose()
+          // If the VM was disposed while we were awaiting (e.g. plugin
+          // upgrade, crash, uninstall) drop the result silently — there's
+          // no one to deliver to, and touching context handles would crash.
+          // The try/catch protects against the gap between deferred being
+          // marked dead and the underlying context lifetime being invalidated.
+          if (vmDisposed || !deferred.alive) {
+            pendingDeferreds.delete(deferred)
+            return
           }
-          // Drain plugin-side microtasks queued by the resolve.
-          ctx.runtime.executePendingJobs()
+          try {
+            const valueHandle = jsToHandle(ctx, value)
+            deferred.resolve(valueHandle)
+            if (valueHandle !== ctx.undefined && valueHandle !== ctx.null && valueHandle !== ctx.true && valueHandle !== ctx.false) {
+              valueHandle.dispose()
+            }
+            // Drain plugin-side microtasks queued by the resolve.
+            ctx.runtime.executePendingJobs()
+          } catch { /* VM gone — silent drop. */ }
+          pendingDeferreds.delete(deferred)
         },
         (err) => {
-          if (!deferred.alive) return
-          const message = err instanceof Error ? err.message : String(err)
-          const errHandle = ctx.newError(message)
-          deferred.reject(errHandle)
-          errHandle.dispose()
-          ctx.runtime.executePendingJobs()
+          if (vmDisposed || !deferred.alive) {
+            pendingDeferreds.delete(deferred)
+            return
+          }
+          try {
+            const message = err instanceof Error ? err.message : String(err)
+            const errHandle = ctx.newError(message)
+            deferred.reject(errHandle)
+            errHandle.dispose()
+            ctx.runtime.executePendingJobs()
+          } catch { /* VM gone — silent drop. */ }
+          pendingDeferreds.delete(deferred)
         },
       )
       return deferred.handle
     })
     ctx.setProp(ctx.global, '__hostCall', hostCallHandle)
     hostFunctionHandles.push(hostCallHandle)
+
+    // 1b. Wire __hostSleep — sync VM function that returns a VM Promise
+    //     resolved after `ms` real wall-clock milliseconds. Used by the
+    //     bootstrap's setTimeout/setInterval polyfills. Worker-local
+    //     setTimeout (no IPC roundtrip to the main thread).
+    const hostSleepHandle = ctx.newFunction('__hostSleep', (msHandle) => {
+      const ms = ctx.getNumber(msHandle)
+      const safeMs = Number.isFinite(ms) && ms > 0 ? ms : 0
+      const deferred = ctx.newPromise()
+      pendingDeferreds.add(deferred)
+      const timer = setTimeout(() => {
+        pendingTimers.delete(timer)
+        if (vmDisposed || !deferred.alive) {
+          pendingDeferreds.delete(deferred)
+          return
+        }
+        try {
+          deferred.resolve(ctx.undefined)
+          ctx.runtime.executePendingJobs()
+        } catch { /* VM gone — silent drop. */ }
+        pendingDeferreds.delete(deferred)
+      }, safeMs)
+      pendingTimers.add(timer)
+      return deferred.handle
+    })
+    ctx.setProp(ctx.global, '__hostSleep', hostSleepHandle)
+    hostFunctionHandles.push(hostSleepHandle)
 
     // 2. Wire __log — fire-and-forget log channel.
     const logHandle = ctx.newFunction('__log', (levelHandle, messageHandle) => {
@@ -519,6 +997,7 @@ export async function createPluginVm(args: {
       id: args.env.pluginId,
       version: args.env.manifestVersion,
       permissions: args.env.grantedPermissions,
+      assetBasePath: args.env.assetBasePath,
     })
     ctx.setProp(ctx.global, '__plugin_meta', metaHandle)
     metaHandle.dispose()
@@ -588,12 +1067,39 @@ export async function createPluginVm(args: {
         return Array.isArray(parsed) ? parsed : []
       },
 
+      async runSchedule(scheduleId, maxDurationMs) {
+        // Per-schedule deadline replaces the VM's default 5s budget for
+        // this single call. The interrupt is reset by withDeadline's
+        // finally block so subsequent calls fall back to the default.
+        await evalVoid(ctx, `__runSchedule(${JSON.stringify(scheduleId)})`, maxDurationMs)
+      },
+
       async updateSettings(next) {
         const json = JSON.stringify(next)
         await evalVoid(ctx, `__updateSettings(${JSON.stringify(json)})`)
       },
 
       dispose() {
+        // Mark disposed FIRST so any host-call resolution arriving after
+        // this call (the VM has no way to cancel in-flight host promises)
+        // short-circuits before touching freed handles.
+        vmDisposed = true
+        // Stop pending timers next so a timer fire doesn't try to touch a
+        // disposed context. The deferred.alive checks inside the fire
+        // callback are belt-and-suspenders, but cancelling up front avoids
+        // even calling them.
+        for (const timer of pendingTimers) {
+          try { clearTimeout(timer) } catch {/* ignore */}
+        }
+        pendingTimers.clear()
+        // Dispose any still-pending deferreds. Each one owns VM-tracked
+        // resolve/reject closures that count against the runtime's GC list;
+        // leaving them alive trips a `list_empty(&rt->gc_obj_list)` assertion
+        // at runtime-free time.
+        for (const deferred of pendingDeferreds) {
+          try { deferred.dispose() } catch {/* already disposed */}
+        }
+        pendingDeferreds.clear()
         for (const h of hostFunctionHandles) {
           try { if (h.alive) h.dispose() } catch {/* already disposed */}
         }
@@ -601,12 +1107,36 @@ export async function createPluginVm(args: {
       },
     }
   } catch (err) {
+    vmDisposed = true
+    for (const timer of pendingTimers) {
+      try { clearTimeout(timer) } catch {/* ignore */}
+    }
+    pendingTimers.clear()
+    for (const deferred of pendingDeferreds) {
+      try { deferred.dispose() } catch {/* ignore */}
+    }
+    pendingDeferreds.clear()
     for (const h of hostFunctionHandles) {
       try { if (h.alive) h.dispose() } catch {/* ignore */}
     }
     try { ctx.dispose() } catch {/* ignore */}
     throw err
   }
+}
+
+// ---------------------------------------------------------------------------
+// Deadline guard — installs a wall-clock interrupt handler on the runtime
+// for the duration of one eval call, then removes it. The QuickJS VM
+// cooperatively polls this handler during execution; a plugin stuck in a
+// tight loop is aborted within the deadline.
+// ---------------------------------------------------------------------------
+
+function withDeadline<T>(ctx: QuickJSContext, timeoutMs: number, body: () => Promise<T>): Promise<T> {
+  const deadline = Date.now() + timeoutMs
+  ctx.runtime.setInterruptHandler(shouldInterruptAfterDeadline(deadline))
+  return body().finally(() => {
+    try { ctx.runtime.removeInterruptHandler() } catch { /* runtime may already be disposed */ }
+  })
 }
 
 // ---------------------------------------------------------------------------
@@ -622,7 +1152,20 @@ export async function createPluginVm(args: {
 //   5. Once fulfilled/rejected, return the value or throw the error
 // ---------------------------------------------------------------------------
 
-async function evalResolved<T>(
+function evalResolved<T>(
+  ctx: QuickJSContext,
+  code: string,
+  read: (handle: QuickJSHandle) => T,
+  timeoutMs: number = DEFAULT_EVAL_TIMEOUT_MS,
+): Promise<T> {
+  // Run inside a wall-clock deadline — runaway plugin code is aborted
+  // with a QuickJS `InternalError: interrupted` rather than blocking
+  // the worker forever. Callers can override the default (5s) for cases
+  // like scheduled jobs that declare a higher `maxDurationMs`.
+  return withDeadline(ctx, timeoutMs, () => evalResolvedInner(ctx, code, read))
+}
+
+async function evalResolvedInner<T>(
   ctx: QuickJSContext,
   code: string,
   read: (handle: QuickJSHandle) => T,
@@ -703,8 +1246,8 @@ function drainJobs(ctx: QuickJSContext): number {
   return 0
 }
 
-function evalVoid(ctx: QuickJSContext, code: string): Promise<void> {
-  return evalResolved(ctx, code, () => undefined)
+function evalVoid(ctx: QuickJSContext, code: string, timeoutMs?: number): Promise<void> {
+  return evalResolved(ctx, code, () => undefined, timeoutMs)
 }
 
 function evalString(ctx: QuickJSContext, code: string): Promise<string> {

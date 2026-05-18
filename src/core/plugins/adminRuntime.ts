@@ -36,7 +36,7 @@ export type PluginAdminAppImport = (url: string, cacheKey?: string) => Promise<L
 const defaultImportModule: PluginAdminAppImport = async (url, cacheKey) =>
   await import(/* @vite-ignore */ withPluginCacheBuster(url, cacheKey ?? '')) as LoadedAdminAppModule
 
-export function pluginAdminAssetUrl(assetPath: string, entrypoint: string): string {
+function pluginAdminAssetUrl(assetPath: string, entrypoint: string): string {
   return `${assetPath.replace(/\/+$/g, '')}/${entrypoint.replace(/^\/+/g, '')}`
 }
 

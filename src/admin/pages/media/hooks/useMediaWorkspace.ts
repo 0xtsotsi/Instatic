@@ -85,7 +85,7 @@ export type FolderSelection =
   | typeof FOLDER_TRASH
   | SmartFolderId
 
-export function isSmartFolderId(value: FolderSelection): value is SmartFolderId {
+function isSmartFolderId(value: FolderSelection): value is SmartFolderId {
   return SMART_FOLDER_IDS.has(value)
 }
 

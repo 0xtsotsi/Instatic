@@ -43,7 +43,7 @@ export interface PluginPackSummary {
  * auto-install path (zip upload + upgrade) and the explicit
  * `POST /pack/install` route.
  */
-export async function installPluginPackToSite(
+async function installPluginPackToSite(
   db: DbClient,
   plugin: InstalledPlugin,
   uploadsDir: string,

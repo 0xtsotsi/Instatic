@@ -70,10 +70,6 @@ export function subscribePluginIssues(listener: Listener): () => void {
   }
 }
 
-export function getPluginsInError(): Readonly<Set<string>> {
-  return snapshot
-}
-
 /**
  * Convenience hook value — number of plugins currently in error state.
  * Bound to `useSyncExternalStore` by the nav badge.

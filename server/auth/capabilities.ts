@@ -40,7 +40,7 @@ const CoreCapabilitySchema = Type.Union([
 
 export type CoreCapability = Static<typeof CoreCapabilitySchema>
 
-export const CORE_CAPABILITIES: CoreCapability[] = [
+const CORE_CAPABILITIES: CoreCapability[] = [
   'site.read',
   'site.structure.edit',
   'site.content.edit',

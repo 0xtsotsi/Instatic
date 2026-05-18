@@ -1,4 +1,4 @@
-import type { DataField, DataRow, DataRowCells } from '@core/data/schemas'
+import type { DataField, DataRow } from '@core/data/schemas'
 
 export type CellEditorContext = 'grid' | 'detail'
 
@@ -23,13 +23,3 @@ export interface CellEditorProps<TField extends DataField = DataField> {
   resolveRelationTarget?: (rowId: string) => DataRow | null
 }
 
-/**
- * Lightweight shape for an in-memory draft of a single row's cells.
- * Consumed by `useDataRowDraft`.
- */
-export interface RowDraftState {
-  cells: DataRowCells
-  isDirty: boolean
-  isSaving: boolean
-  saveError: string | null
-}

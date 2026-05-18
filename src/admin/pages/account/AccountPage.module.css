@@ -102,31 +102,6 @@
     color: var(--editor-success-green);
 }
 
-.identity {
-    display: grid;
-    gap: 5px;
-    min-width: 0;
-}
-
-.identity strong {
-    color: var(--editor-text-bright);
-    font-size: 14px;
-    font-weight: 800;
-    line-height: 1.2;
-}
-
-.identity span {
-    color: var(--editor-text-muted);
-    font-size: 12px;
-    line-height: 1.45;
-}
-
-.badges {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-}
-
 .badge,
 .badgeMuted {
     display: inline-flex;

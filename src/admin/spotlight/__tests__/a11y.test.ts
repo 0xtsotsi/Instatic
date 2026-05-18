@@ -17,7 +17,7 @@
  *
  * Tests 4-9 scan the TypeScript source to confirm the attributes exist in the
  * markup — a lightweight "source truth" check that doesn't require a full DOM
- * render of the portal component (which would need the entire SpotlightProvider
+ * render of the portal component (which would need the entire SpotlightRoot
  * + routing + editor-store context chain).
  */
 

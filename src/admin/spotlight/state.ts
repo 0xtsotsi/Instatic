@@ -27,7 +27,7 @@ export interface ArgModeState {
 
 // ─── State ────────────────────────────────────────────────────────────────────
 
-export type SpotlightPhase = 'closed' | 'open'
+type SpotlightPhase = 'closed' | 'open'
 
 export interface SpotlightOpenState {
   phase: 'open'

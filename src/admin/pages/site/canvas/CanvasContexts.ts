@@ -15,7 +15,7 @@ export const CanvasSelectionContext = createContext<CanvasSelectionContextValue>
   onNodeDoubleClick: () => {},
 })
 
-export interface CanvasViewportActionsContextValue {
+interface CanvasViewportActionsContextValue {
   canvasRootRef: RefObject<HTMLElement | null>
   panBy: (dx: number, dy: number) => void
 }

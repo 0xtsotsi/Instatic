@@ -26,7 +26,7 @@ import {
   MAX_PAN,
   clampZoom,
   clampPan,
-} from '@site/store/slices/canvasSlice'
+} from '@site/canvas/math'
 
 // ---------------------------------------------------------------------------
 // Store reset helper

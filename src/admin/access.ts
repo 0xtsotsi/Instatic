@@ -20,7 +20,7 @@ function hasAnyCapability(user: CmsCurrentUser | null, capabilities: readonly Co
   return capabilities.some((capability) => hasCapability(user, capability))
 }
 
-export function hasAllCapabilities(user: CmsCurrentUser | null, capabilities: readonly CoreCapability[]): boolean {
+function hasAllCapabilities(user: CmsCurrentUser | null, capabilities: readonly CoreCapability[]): boolean {
   return capabilities.every((capability) => hasCapability(user, capability))
 }
 

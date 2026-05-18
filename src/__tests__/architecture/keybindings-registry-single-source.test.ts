@@ -15,9 +15,8 @@
  *   - PanelRail.tsx            — uses getKeybindingForCommand().match(e)
  *   - CanvasRoot.tsx           — uses getKeybindingForCommand().match(e)
  *   - usePersistence.ts        — uses getKeybindingForCommand().match(e)
- *   - SpotlightProvider.tsx    — uses getKeybindingForCommand().match(e)
+ *   - SpotlightRoot.tsx        — uses getKeybindingForCommand().match(e)
  *   - UndoRedoButtons.tsx      — uses getKeybindingForCommand().match(e)
- *   - useShortcutHint.ts       — thin registry wrapper
  *   - useCanvas.ts             — canvas-specific zoom/pan shortcuts (not global)
  *   - Spotlight.tsx            — ⌘ symbol appears only in a JSDoc comment
  */
@@ -43,10 +42,8 @@ const ALLOWLIST = new Set([
   'admin/pages/site/sidebars/PanelRail/PanelRail.tsx',
   'admin/pages/site/canvas/CanvasRoot.tsx',
   'admin/pages/site/hooks/usePersistence.ts',
-  'admin/spotlight/SpotlightProvider.tsx',
+  'admin/spotlight/SpotlightRoot.tsx',
   'admin/pages/site/canvas/UndoRedoButtons.tsx',
-  // useShortcutHint helper — thin wrapper over the registry
-  'admin/spotlight/useShortcutHint.ts',
   // Canvas-specific zoom/pan shortcuts (Ctrl+0, f, 1, 2) — not global commands.
   // These are canvas viewport controls that don't belong in the palette registry.
   'admin/pages/site/hooks/useCanvas.ts',
@@ -186,7 +183,7 @@ describe('Keybindings registry — single source of truth', () => {
     if (violations.length > 0) {
       throw new Error(
         '[keybindings-registry] Hand-written shortcut symbols (⌘, ⌃, ⌥, ⇧) found in TSX outside renderers.\n' +
-          'Use useShortcutHint(commandId) or formatShortcut(getKeybindingForCommand(id).shortcut)\n' +
+          'Use formatShortcut(getKeybindingForCommand(id).shortcut)\n' +
           'to get the platform-aware label from the registry.\n\n' +
           violations.map((v) => `  ${v}`).join('\n'),
       )

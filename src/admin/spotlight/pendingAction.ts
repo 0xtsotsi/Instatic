@@ -32,7 +32,7 @@ import { safeParseJson } from '@core/utils/jsonValidate'
  *   1. Add it to the union below.
  *   2. Add a `case` arm in the receiving page's `useEffect` consumer.
  */
-export const PENDING_ACTION_TYPES = [
+const PENDING_ACTION_TYPES = [
   'site.newPage',
   'site.newVisualComponent',
   'content.newCollection',

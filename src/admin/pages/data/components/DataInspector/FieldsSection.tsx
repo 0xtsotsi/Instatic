@@ -43,7 +43,7 @@ import styles from './DataInspector.module.css'
 // Types
 // ---------------------------------------------------------------------------
 
-export interface FieldsSectionProps {
+interface FieldsSectionProps {
   table: DataTable
   tables: DataTable[]
   /** Total row count — used in the field-delete confirmation message. */

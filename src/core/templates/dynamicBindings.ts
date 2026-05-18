@@ -24,7 +24,6 @@
 
 import type { DynamicPropBinding } from '@core/page-tree'
 import type { LoopItem } from '@core/loops/types'
-import type { DataField, DataTable } from '@core/data/schemas'
 import { renderMarkdownToHtml } from '@core/markdown/renderMarkdown'
 import type {
   PageFrame,
@@ -38,74 +37,6 @@ import {
   readFrame,
   walkFieldPath,
 } from './tokenInterpolation'
-
-// ---------------------------------------------------------------------------
-// Field-type filters for binding pickers
-//
-// Each module type can only meaningfully bind certain field types. These
-// filters are used by the Properties Panel's binding picker to narrow the
-// list of offered fields to only those that are semantically compatible.
-// ---------------------------------------------------------------------------
-
-/** Field types that supply meaningful values for image/media slots. */
-const MEDIA_FIELD_TYPES: ReadonlySet<DataField['type']> = new Set(['media'])
-
-/** Field types that supply meaningful values for text content slots. */
-const TEXT_FIELD_TYPES: ReadonlySet<DataField['type']> = new Set([
-  'text', 'longText', 'richText', 'url', 'email',
-])
-
-/** Field types that supply meaningful values for rich-text / markdown slots. */
-const RICH_TEXT_FIELD_TYPES: ReadonlySet<DataField['type']> = new Set([
-  'text', 'longText', 'richText',
-])
-
-/** Field types that supply meaningful values for URL slots. */
-const URL_FIELD_TYPES: ReadonlySet<DataField['type']> = new Set(['url', 'text'])
-
-/** Field types that supply meaningful values for numeric slots. */
-const NUMBER_FIELD_TYPES: ReadonlySet<DataField['type']> = new Set(['number'])
-
-/** All field types — no filter applied. */
-const ANY_FIELD_TYPES: ReadonlySet<DataField['type']> = new Set([
-  'text', 'longText', 'richText', 'url', 'email',
-  'number', 'boolean', 'date', 'dateTime',
-  'select', 'multiSelect', 'media', 'relation',
-])
-
-/**
- * Hint supplied by the module rendering the binding picker. Each hint maps
- * to the subset of `DataField` types that can provide a useful value.
- */
-export type BindingModuleHint = 'image' | 'media' | 'text' | 'richText' | 'url' | 'number' | 'any'
-
-const FIELD_TYPES_BY_HINT: Record<BindingModuleHint, ReadonlySet<DataField['type']>> = {
-  image: MEDIA_FIELD_TYPES,
-  media: MEDIA_FIELD_TYPES,
-  text: TEXT_FIELD_TYPES,
-  richText: RICH_TEXT_FIELD_TYPES,
-  url: URL_FIELD_TYPES,
-  number: NUMBER_FIELD_TYPES,
-  any: ANY_FIELD_TYPES,
-}
-
-/**
- * Return the subset of a table's fields that can supply values for the given
- * module hint. Pass `'any'` (the default) to receive all fields unfiltered.
- *
- * Used by the Properties Panel binding picker so only semantically compatible
- * fields are shown for each prop slot:
- *   - image module  → `'image'` → only `media` fields
- *   - text module   → `'text'`  → `text`, `longText`, `richText`, `url`, `email`
- *   - etc.
- */
-export function getBindableFields(
-  table: DataTable,
-  hint: BindingModuleHint = 'any',
-): DataField[] {
-  const allowed = FIELD_TYPES_BY_HINT[hint]
-  return table.fields.filter((field) => allowed.has(field.type))
-}
 
 /**
  * Render-time context handed to the publisher.

@@ -3,7 +3,7 @@
  * React Fast Refresh doesn't complain about mixing context exports with
  * component exports (react-refresh/only-export-components rule).
  *
- * SpotlightContext       — public API consumed by useSpotlight().
+ * SpotlightContext       — palette controls produced by <SpotlightRoot>.
  * SpotlightInternalContext — private API consumed by <Spotlight> dialog.
  */
 
@@ -11,9 +11,9 @@ import { createContext } from 'react'
 import type { SpotlightState } from './state'
 import type { SpotlightAction } from './state'
 import type { Command, CommandContext } from './types'
-import type { SpotlightControls } from './useSpotlight'
+import type { SpotlightControls } from './spotlightControls'
 
-/** Public context exposed to any component via useSpotlight(). */
+/** Palette controls context produced by <SpotlightRoot>. */
 export const SpotlightContext = createContext<SpotlightControls | null>(null)
 
 /**

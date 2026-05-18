@@ -55,5 +55,3 @@ const PLUGIN_PANEL_ICONS: Record<string, IconComponent> = {
 export function resolvePluginPanelIcon(name: string): IconComponent {
   return PLUGIN_PANEL_ICONS[name] ?? BoxSolidIcon
 }
-
-export const PLUGIN_PANEL_ICON_NAMES: ReadonlyArray<string> = Object.keys(PLUGIN_PANEL_ICONS)

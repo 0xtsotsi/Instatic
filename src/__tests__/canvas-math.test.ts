@@ -16,8 +16,9 @@ import {
   MIN_ZOOM,
   MAX_ZOOM,
   DEFAULT_ZOOM,
-} from '@site/store/slices/canvasSlice'
-import { computeFitTransform, unionRects } from '@site/canvas/math'
+  computeFitTransform,
+  unionRects,
+} from '@site/canvas/math'
 
 // ---------------------------------------------------------------------------
 // clampZoom

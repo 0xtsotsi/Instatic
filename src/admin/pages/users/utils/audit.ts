@@ -11,12 +11,12 @@
 import type { CmsAuditEvent, CmsCurrentUser, CmsRole } from '@core/persistence'
 import { displayUserName, statusLabel } from './format'
 
-export function metadataString(metadata: Record<string, unknown>, key: string): string | null {
+function metadataString(metadata: Record<string, unknown>, key: string): string | null {
   const value = metadata[key]
   return typeof value === 'string' && value.trim() ? value : null
 }
 
-export function auditUserLabel(
+function auditUserLabel(
   userId: string | null,
   usersById: Map<string, CmsCurrentUser>,
   fallback: string | null,
@@ -31,11 +31,11 @@ export function auditActor(event: CmsAuditEvent, usersById: Map<string, CmsCurre
   return `by ${auditUserLabel(event.actorUserId, usersById, event.actorLabel)}`
 }
 
-export function auditTargetUser(event: CmsAuditEvent, usersById: Map<string, CmsCurrentUser>): string {
+function auditTargetUser(event: CmsAuditEvent, usersById: Map<string, CmsCurrentUser>): string {
   return auditUserLabel(event.targetId, usersById, event.targetLabel) ?? 'Unknown user'
 }
 
-export function roleName(
+function roleName(
   roleId: string | null,
   rolesById: Map<string, CmsRole>,
   fallback: string | null = null,
@@ -44,7 +44,7 @@ export function roleName(
   return rolesById.get(roleId)?.name ?? fallback ?? roleId
 }
 
-export function auditTargetRole(event: CmsAuditEvent, rolesById: Map<string, CmsRole>): string | null {
+function auditTargetRole(event: CmsAuditEvent, rolesById: Map<string, CmsRole>): string | null {
   if (event.targetType !== 'role') return null
   return roleName(
     event.targetId,

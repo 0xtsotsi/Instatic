@@ -33,7 +33,7 @@ export function normalizeDataTableFields(value: unknown): DataField[] {
   return filterArray(DataFieldSchema, value)
 }
 
-export function findField(table: Pick<DataTable, 'fields'>, fieldId: string): DataField | null {
+function findField(table: Pick<DataTable, 'fields'>, fieldId: string): DataField | null {
   return table.fields.find((field) => field.id === fieldId) ?? null
 }
 

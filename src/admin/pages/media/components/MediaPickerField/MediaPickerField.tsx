@@ -24,7 +24,7 @@ import type { CmsMediaAsset } from '@core/persistence/cmsMedia'
 import { blurHashToDataUrl, pickVariantUrl } from '@admin/pages/media/utils/variants'
 import styles from './MediaPickerField.module.css'
 
-export type MediaPickerFieldKind = 'image' | 'video'
+type MediaPickerFieldKind = 'image' | 'video'
 
 interface MediaPickerFieldProps {
   /** Currently resolved asset, or `null` when empty / not yet loaded. */

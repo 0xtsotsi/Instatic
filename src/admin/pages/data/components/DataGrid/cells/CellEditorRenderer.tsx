@@ -16,7 +16,6 @@ import { EmailCell } from './EmailCell'
 import { MediaCell } from './MediaCell'
 import { RelationCell } from './RelationCell'
 
-export type { CellEditorProps }
 
 /**
  * Additional props that are only meaningful for specific cell types but are

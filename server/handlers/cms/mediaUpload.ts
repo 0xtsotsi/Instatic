@@ -86,7 +86,7 @@ const MEDIA_MAGIC_SIGNATURES: ReadonlyArray<{
   { mime: 'video/webm', bytes: [[0, 0x1a], [1, 0x45], [2, 0xdf], [3, 0xa3]] },
 ]
 
-export function detectAcceptedMime(bytes: Uint8Array): AcceptedMediaMime | null {
+function detectAcceptedMime(bytes: Uint8Array): AcceptedMediaMime | null {
   for (const sig of MEDIA_MAGIC_SIGNATURES) {
     let matches = true
     for (const [offset, expected] of sig.bytes) {
@@ -111,7 +111,7 @@ export function detectAcceptedMime(bytes: Uint8Array): AcceptedMediaMime | null 
  * have the static handler serve it as `text/html`. The fix is structural:
  * never trust user-supplied extensions for an on-disk filename.
  */
-export function safeStorageStem(filename: string): string {
+function safeStorageStem(filename: string): string {
   const normalized = filename.replace(/\\/g, '/')
   const stem = basename(normalized).replace(/\.[^.]*$/, '')
   const safe = stem.replace(/[^a-zA-Z0-9_-]/g, '_').replace(/^_+/, '')

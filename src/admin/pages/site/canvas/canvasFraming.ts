@@ -30,9 +30,9 @@ const CANVAS_ROOT_SELECTOR = '[data-testid="canvas-root"]'
 const TRANSFORM_LAYER_SELECTOR = '[data-testid="canvas-transform-layer"]'
 
 /** Default padding (in viewport CSS pixels) around the framed rect. */
-export const FRAME_PADDING = 48
+const FRAME_PADDING = 48
 /** Larger padding used when fitting the whole document — leaves room for breakpoint labels. */
-export const FIT_PADDING = 80
+const FIT_PADDING = 80
 
 interface CanvasGeometry {
   canvasEl: HTMLElement
@@ -164,31 +164,6 @@ export function fitContentCanvas(padding = FIT_PADDING): boolean {
   if (!target) return false
 
   useEditorStore.getState().zoomToRect(target, geom.viewport, padding)
-  return true
-}
-
-/**
- * Fit just the **active breakpoint** frame (label + viewport) into the viewport.
- * Useful when you have several breakpoints open but want to focus the one
- * you're editing without losing scale entirely.
- */
-export function fitActiveBreakpointCanvas(padding = FIT_PADDING): boolean {
-  const geom = getCanvasGeometry()
-  if (!geom) return false
-  const store = useEditorStore.getState()
-  const bpId = store.activeBreakpointId
-  const frame = document.querySelector<HTMLElement>(
-    `[data-breakpoint-id="${escapeAttribute(bpId)}"]`,
-  )
-  // The viewport-level element is the breakpoint frame's children — fit the
-  // closest framing wrapper so the breakpoint label is included too.
-  const labelledFrame = (frame?.closest('[data-breakpoint-id]') ?? frame)
-    ?.parentElement
-    ?? frame
-  if (!labelledFrame) return false
-  const target = toCanvasLocal(labelledFrame.getBoundingClientRect(), geom.canvasRect)
-  if (!target) return false
-  store.zoomToRect(target, geom.viewport, padding)
   return true
 }
 

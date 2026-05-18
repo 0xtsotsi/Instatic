@@ -459,7 +459,7 @@ export type SaveDataRowDraftInput = Static<typeof SaveDataRowDraftInputSchema>
 // omitted — keep the payload lean.
 // ---------------------------------------------------------------------------
 
-export const DataMetaFieldSchema = Type.Object({
+const DataMetaFieldSchema = Type.Object({
   id: Type.String(),
   label: Type.String(),
   type: Type.Union([
@@ -478,7 +478,7 @@ export const DataMetaFieldSchema = Type.Object({
   targetTableSlug: Type.Optional(Type.String()),
 })
 
-export const DataMetaTableSchema = Type.Object({
+const DataMetaTableSchema = Type.Object({
   id: Type.String(),
   slug: Type.String(),
   name: Type.String(),

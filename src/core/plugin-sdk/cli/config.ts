@@ -28,7 +28,7 @@ export interface PluginDevTargets {
   source: 'flag' | 'env' | 'auto-detect'
 }
 
-export class PluginDevConfigError extends Error {
+class PluginDevConfigError extends Error {
   constructor(message: string) {
     super(message)
     this.name = 'PluginDevConfigError'

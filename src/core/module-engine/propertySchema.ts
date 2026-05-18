@@ -1,6 +1,6 @@
 import { Type, type Static } from '@core/utils/typeboxHelpers'
 
-export const PropertyConditionSchema = Type.Recursive((Self) => Type.Union([
+const PropertyConditionSchema = Type.Recursive((Self) => Type.Union([
   Type.Object(
     { field: Type.String({ minLength: 1 }), eq: Type.Unknown() },
     { additionalProperties: false },
@@ -27,7 +27,7 @@ export const PropertyConditionSchema = Type.Recursive((Self) => Type.Union([
   ),
 ]))
 
-export const PropertyControlLayoutSchema = Type.Union([
+const PropertyControlLayoutSchema = Type.Union([
   Type.Literal('inline'),
   Type.Literal('stacked'),
 ])
@@ -50,7 +50,7 @@ export const PropertyControlLayoutSchema = Type.Union([
  * content from a copy-editor's point of view and should be opted into
  * 'content' explicitly).
  */
-export const PropertyControlCategorySchema = Type.Union([
+const PropertyControlCategorySchema = Type.Union([
   Type.Literal('content'),
   Type.Literal('layout'),
 ])
@@ -65,7 +65,7 @@ const PropertyControlBaseSchema = {
   category: Type.Optional(PropertyControlCategorySchema),
 }
 
-export const PropertyControlOptionSchema = Type.Object(
+const PropertyControlOptionSchema = Type.Object(
   {
     label: Type.String({ minLength: 1 }),
     value: Type.Unknown(),

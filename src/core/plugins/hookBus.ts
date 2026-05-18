@@ -20,8 +20,8 @@
  * cleanly tears everything down on disable/uninstall.
  */
 
-export type HookListener = (payload: unknown) => void | Promise<void>
-export type HookFilterHandler = (
+type HookListener = (payload: unknown) => void | Promise<void>
+type HookFilterHandler = (
   value: unknown,
   context: { pluginId: string },
 ) => unknown | Promise<unknown>

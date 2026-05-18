@@ -9,11 +9,3 @@
     text-align: center;
 }
 
-.error {
-    margin: 8px;
-    padding: 10px 12px;
-    border-radius: var(--editor-radius);
-    border: 1px solid var(--editor-danger-border);
-    color: var(--editor-danger-light);
-    font-size: 12px;
-}

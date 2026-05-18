@@ -96,7 +96,7 @@ function mergeRanges(ranges: Array<[number, number]>): Array<[number, number]> {
 
 // ─── Score function ───────────────────────────────────────────────────────────
 
-export function scoreCommand(
+function scoreCommand(
   command: Command,
   query: string,
   ctx: CommandContext,
@@ -238,20 +238,3 @@ export function rankCommands(
   return scored.slice(0, MAX_RESULTS)
 }
 
-/**
- * Compute highlighted ranges for a label string given a raw query string.
- * Used in SpotlightRow to render <mark> elements.
- */
-export function computeMatchRanges(
-  label: string,
-  query: string,
-): Array<[number, number]> {
-  const q = query.trim().toLowerCase()
-  if (!q) return []
-  const tokens = tokenize(q)
-  const ranges: Array<[number, number]> = []
-  for (const token of tokens) {
-    ranges.push(...findTokenRanges(label, token))
-  }
-  return mergeRanges(ranges)
-}

@@ -225,7 +225,7 @@ export function manualSizeVariableName(rawName: string): string {
  * presses the "+" / "−" buttons in the step list. Indexed pivot is the small
  * cluster around `m`; either end fans out to `25xs` / `25xl`.
  */
-export const SIZE_RING: ReadonlyArray<string> = [
+const SIZE_RING: ReadonlyArray<string> = [
   '25xs', '24xs', '23xs', '22xs', '21xs', '20xs', '19xs', '18xs', '17xs', '16xs',
   '15xs', '14xs', '13xs', '12xs', '11xs', '10xs', '9xs', '8xs', '7xs', '6xs',
   '5xs', '4xs', '3xs', '2xs', 'xs', 's', 'm', 'l', 'xl', '2xl', '3xl', '4xl',
@@ -235,13 +235,13 @@ export const SIZE_RING: ReadonlyArray<string> = [
 ]
 
 /** Next ring entry after `label`, clamped to the last entry. */
-export function nextSizeAfter(label: string): string {
+function nextSizeAfter(label: string): string {
   const idx = SIZE_RING.indexOf(label)
   return SIZE_RING[Math.min(idx + 1, SIZE_RING.length - 1)] ?? `${label}+`
 }
 
 /** Previous ring entry before `label`, clamped to the first entry. */
-export function nextSizeBefore(label: string): string {
+function nextSizeBefore(label: string): string {
   const idx = SIZE_RING.indexOf(label)
   return SIZE_RING[Math.max(idx - 1, 0)] ?? `pre-${label}`
 }

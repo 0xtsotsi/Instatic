@@ -47,7 +47,7 @@ describe('Spotlight router import policy', () => {
     const importers = files.filter((f) =>
       ROUTER_IMPORT_RE.test(readFileSync(f, 'utf8')),
     )
-    // SpotlightProvider.tsx imports the router — if this list is empty,
+    // SpotlightRoot.tsx imports the router — if this list is empty,
     // something has been refactored incorrectly.
     expect(importers.length).toBeGreaterThanOrEqual(1)
   })

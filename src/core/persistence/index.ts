@@ -1,19 +1,15 @@
 export { cmsAdapter } from './cms'
 export { getCmsPublishStatus, publishCmsDraft } from './cmsPublish'
-export { getCmsMediaAssetsByIds, listCmsMediaAssets } from './cmsMedia'
+export { listCmsMediaAssets } from './cmsMedia'
 export type { CmsMediaAsset } from './cmsMedia'
 export {
   createCmsDataRow,
   createCmsDataTable,
   deleteCmsDataRow,
   deleteCmsDataTable,
-  getCmsDataRow,
-  getCmsDataTable,
-  getCmsDataTableBySlug,
   listCmsDataAuthors,
   listCmsDataRows,
   listCmsDataTables,
-  previewCmsDataLoopItems,
   publishCmsDataRow,
   saveCmsDataRowDraft,
   updateCmsDataRowAuthor,
@@ -27,11 +23,19 @@ export {
   installCmsPluginManifest,
   installCmsPluginPack,
   listCmsPlugins,
+  listCmsPluginSchedules,
+  pauseCmsPluginSchedule,
   removeCmsPlugin,
   restartCmsPlugin,
+  resumeCmsPluginSchedule,
+  runCmsPluginScheduleNow,
   setCmsPluginEnabled,
 } from './cmsPlugins'
-export type { CmsPluginPackInstallSummary } from './cmsPlugins'
+export type {
+  CmsPluginScheduleRunSummary,
+  CmsPluginScheduleSummary,
+  CmsPluginSchedulesResponse,
+} from './cmsPlugins'
 export {
   createCmsPluginResourceRecord,
   deleteCmsPluginResourceRecord,

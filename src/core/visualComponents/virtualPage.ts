@@ -26,13 +26,13 @@ import type { VisualComponent } from './schemas'
  * ids never collide with this prefix because they are generated from
  * `crypto.randomUUID()` (32 hex chars + dashes).
  */
-export const VC_VIRTUAL_PAGE_PREFIX = 'vc-virtual:'
+const VC_VIRTUAL_PAGE_PREFIX = 'vc-virtual:'
 
 /**
  * Build the synthetic page id used by the canvas / runtime preview when
  * the user is editing a VC.
  */
-export function virtualPageIdForVC(vcId: string): string {
+function virtualPageIdForVC(vcId: string): string {
   return `${VC_VIRTUAL_PAGE_PREFIX}${vcId}`
 }
 

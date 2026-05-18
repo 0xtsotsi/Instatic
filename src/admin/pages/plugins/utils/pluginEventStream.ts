@@ -12,7 +12,7 @@
  * that don't care about plugin events don't pay for the open socket.
  */
 
-export type PluginEventKind =
+type PluginEventKind =
   | 'crash'
   | 'recovered'
   | 'parked'

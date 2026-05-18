@@ -21,7 +21,7 @@ import { StepUpProvider } from './shared/StepUp'
 import { canAccessWorkspace, firstAccessibleWorkspace, workspacePath } from './access'
 import { Navigate } from './lib/routing'
 import { useInRouterContext } from './lib/routing'
-import { SpotlightProvider } from './spotlight'
+import { SpotlightRoot } from './spotlight'
 import styles from './AdminEntry.module.css'
 
 // Section pages are split into per-workspace chunks so that admins who only
@@ -344,7 +344,7 @@ function AuthenticatedAdmin({
 
   return (
     <AdminSessionProvider user={currentUser}>
-      {/* StepUpProvider wraps SpotlightProvider so spotlight commands can
+      {/* StepUpProvider wraps SpotlightRoot so spotlight commands can
           consume `useStepUp()` — required by step-up-gated actions invoked
           from the palette (e.g. `editor.publish`). Both providers stay
           inside AdminSessionProvider (the palette's CommandContext reads
@@ -352,7 +352,7 @@ function AuthenticatedAdmin({
           palette and the step-up dialog are available across every
           workspace. */}
       <StepUpProvider>
-        <SpotlightProvider>
+        <SpotlightRoot>
           <Suspense fallback={<AppLoadingScreen />}>
             {section === 'content' ? <ContentPage /> :
               section === 'data' ? <DataPage /> :
@@ -363,7 +363,7 @@ function AuthenticatedAdmin({
               section === 'account' ? <AccountPage /> :
               <SitePage />}
           </Suspense>
-        </SpotlightProvider>
+        </SpotlightRoot>
       </StepUpProvider>
     </AdminSessionProvider>
   )

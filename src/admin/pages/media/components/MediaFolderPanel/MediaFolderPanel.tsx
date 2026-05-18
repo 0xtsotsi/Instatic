@@ -12,7 +12,7 @@
  *   - Inline create (opens a small input row under the active parent).
  *   - Rename / delete via the existing ExplorerItemContextMenu.
  */
-import { useState, type FormEvent, type KeyboardEvent, type MouseEvent, type ReactNode } from 'react'
+import { useState, type FormEvent, type KeyboardEvent, type MouseEvent } from 'react'
 import { Button } from '@ui/components/Button'
 import { Input } from '@ui/components/Input'
 import { EmptyState } from '@ui/components/EmptyState'
@@ -489,5 +489,3 @@ function CreateRow({ depth, value, onValueChange, onSubmit, onCancel }: CreateRo
   )
 }
 
-// Helper to keep the ReactNode type stable across renamed JSX subtrees.
-export type { ReactNode }
