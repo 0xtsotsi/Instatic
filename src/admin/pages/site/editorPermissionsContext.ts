@@ -17,7 +17,7 @@
  * The values flow from `AdminCanvasLayout` which computes them from the
  * authenticated user's capabilities (via `src/admin/access.ts`).
  */
-import { createContext, useContext } from 'react'
+import { createContext, use } from 'react'
 
 export interface EditorPermissions {
   /** Caller can perform structural edits (DnD, add/remove/move nodes, pages). */
@@ -37,5 +37,5 @@ const FULL_EDITOR_PERMISSIONS: EditorPermissions = {
 export const EditorPermissionsContext = createContext<EditorPermissions>(FULL_EDITOR_PERMISSIONS)
 
 export function useEditorPermissions(): EditorPermissions {
-  return useContext(EditorPermissionsContext)
+  return use(EditorPermissionsContext)
 }

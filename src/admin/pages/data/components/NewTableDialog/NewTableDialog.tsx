@@ -1,4 +1,4 @@
-import { memo, useRef, useState, type FormEvent } from 'react'
+import { memo, useId, useRef, useState, type FormEvent } from 'react'
 import { Button } from '@ui/components/Button'
 import { Dialog } from '@ui/components/Dialog'
 import { Input } from '@ui/components/Input'
@@ -66,6 +66,10 @@ export const NewTableDialog = memo(function NewTableDialog({
   const [submitError, setSubmitError] = useState<string | null>(null)
 
   const inputRef = useRef<HTMLInputElement>(null)
+  const nameId = useId()
+  const slugId = useId()
+  const singularId = useId()
+  const pluralId = useId()
 
   // Derived values
   const trimmedName = name.trim()
@@ -155,9 +159,10 @@ export const NewTableDialog = memo(function NewTableDialog({
     >
       <form id={FORM_ID} className={styles.form} onSubmit={handleSubmit}>
         {/* Name */}
-        <label className={styles.field}>
-          <span className={styles.label}>Name</span>
+        <div className={styles.field}>
+          <label htmlFor={nameId} className={styles.label}>Name</label>
           <Input
+            id={nameId}
             ref={inputRef}
             fieldSize="sm"
             value={name}
@@ -169,12 +174,13 @@ export const NewTableDialog = memo(function NewTableDialog({
             autoComplete="off"
             spellCheck={false}
           />
-        </label>
+        </div>
 
         {/* Slug */}
-        <label className={styles.field}>
-          <span className={styles.label}>Slug</span>
+        <div className={styles.field}>
+          <label htmlFor={slugId} className={styles.label}>Slug</label>
           <Input
+            id={slugId}
             fieldSize="sm"
             value={displayedSlug}
             onChange={(event) => {
@@ -189,7 +195,7 @@ export const NewTableDialog = memo(function NewTableDialog({
           {!slugTouched && (
             <span className={styles.caption}>Auto-generated from name</span>
           )}
-        </label>
+        </div>
 
         {/* Kind */}
         <div className={styles.field}>
@@ -204,9 +210,10 @@ export const NewTableDialog = memo(function NewTableDialog({
         </div>
 
         {/* Singular label */}
-        <label className={styles.field}>
-          <span className={styles.label}>Singular label</span>
+        <div className={styles.field}>
+          <label htmlFor={singularId} className={styles.label}>Singular label</label>
           <Input
+            id={singularId}
             fieldSize="sm"
             value={displayedSingular}
             onChange={(event) => {
@@ -218,12 +225,13 @@ export const NewTableDialog = memo(function NewTableDialog({
             autoComplete="off"
             spellCheck={false}
           />
-        </label>
+        </div>
 
         {/* Plural label */}
-        <label className={styles.field}>
-          <span className={styles.label}>Plural label</span>
+        <div className={styles.field}>
+          <label htmlFor={pluralId} className={styles.label}>Plural label</label>
           <Input
+            id={pluralId}
             fieldSize="sm"
             value={displayedPlural}
             onChange={(event) => {
@@ -235,7 +243,7 @@ export const NewTableDialog = memo(function NewTableDialog({
             autoComplete="off"
             spellCheck={false}
           />
-        </label>
+        </div>
 
         {submitError && (
           <p role="alert" className={styles.errorText}>

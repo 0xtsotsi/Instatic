@@ -17,7 +17,7 @@
  *     async) so keyboard navigation covers async rows.
  */
 
-import { useContext, useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
+import { use, useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import { SpotlightInternalContext } from './spotlightContext'
 import { SpotlightRow } from './SpotlightRow'
 import { SpotlightSkeleton } from './SpotlightSkeleton'
@@ -215,7 +215,7 @@ export function SpotlightResults({
   onRun,
   activeScopeId,
 }: SpotlightResultsProps): ReactNode {
-  const ctx = useContext(SpotlightInternalContext)
+  const ctx = use(SpotlightInternalContext)
 
   const query = ctx?.state.phase === 'open' ? ctx.state.query : ''
   const commandContext = ctx?.commandContext ?? null

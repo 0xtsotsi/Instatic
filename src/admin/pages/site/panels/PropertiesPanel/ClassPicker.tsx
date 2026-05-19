@@ -23,12 +23,13 @@ import {
   useRef,
   useEffect,
   useCallback,
-  forwardRef,
+  useId,
   useImperativeHandle,
   type FormEvent,
   type KeyboardEvent,
   type MouseEvent,
   type ReactNode,
+  type Ref,
 } from 'react'
 import { createPortal } from 'react-dom'
 import { useEditorStore, selectActiveCanvasPage } from '@site/store/store'
@@ -98,10 +99,11 @@ interface ClassPickerProps {
    * dropdown spans both cells so search results can use the full row width.
    */
   trailingAction?: ReactNode
+  /** React 19: ref is a regular prop on function components. */
+  ref?: Ref<ClassPickerHandle>
 }
 
-export const ClassPicker = forwardRef<ClassPickerHandle, ClassPickerProps>(
-function ClassPickerInner({ nodeId, trailingAction }: ClassPickerProps, ref) {
+export function ClassPicker({ nodeId, trailingAction, ref }: ClassPickerProps) {
   const site = useEditorStore((s) => s.site)
   const node = useEditorStore(
     useCallback(
@@ -488,7 +490,7 @@ function ClassPickerInner({ nodeId, trailingAction }: ClassPickerProps, ref) {
       )}
     </div>
   )
-})
+}
 
 // ---------------------------------------------------------------------------
 // PillContextMenuPortal — portals the right-click menu over a single pill.
@@ -859,6 +861,7 @@ function ClassRenameDialog({
   const [error, setError] = useState<string | null>(null)
   const inputRef = useRef<HTMLInputElement>(null)
   const trimmedName = name.trim()
+  const nameInputId = useId()
 
   useEffect(() => {
     requestAnimationFrame(() => inputRef.current?.select())
@@ -900,9 +903,10 @@ function ClassRenameDialog({
       }
     >
       <form id={CLASS_RENAME_FORM_ID} className={dialogStyles.form} onSubmit={handleSubmit}>
-        <label className={dialogStyles.field}>
-          <span className={dialogStyles.label}>Name</span>
+        <div className={dialogStyles.field}>
+          <label htmlFor={nameInputId} className={dialogStyles.label}>Name</label>
           <Input
+            id={nameInputId}
             ref={inputRef}
             fieldSize="sm"
             value={name}
@@ -914,7 +918,7 @@ function ClassRenameDialog({
             autoComplete="off"
             spellCheck={false}
           />
-        </label>
+        </div>
         {error && <p role="alert" className={dialogStyles.errorText}>{error}</p>}
       </form>
     </Dialog>

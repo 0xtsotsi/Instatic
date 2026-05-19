@@ -16,7 +16,7 @@
  * matching permission to call mutating hooks (e.g. `useEditorTransaction`
  * requires `editor.store.write`).
  */
-import { useContext, useEffect, useMemo, useState } from 'react'
+import { use, useEffect, useMemo, useState } from 'react'
 import { useEditorStore } from '@site/store/store'
 import { PluginContext } from './pluginContext'
 
@@ -43,7 +43,7 @@ export { useEditorStore }
 export function usePluginSettings<
   T extends Record<string, string | number | boolean> = Record<string, string | number | boolean>,
 >(): T {
-  const ctx = useContext(PluginContext)
+  const ctx = use(PluginContext)
   // Memoised so plugins can use settings as a hook dep without a churn loop.
   return useMemo(() => ({ ...ctx.settings } as T), [ctx.settings])
 }
@@ -58,7 +58,7 @@ export function usePluginContext(): {
   surfaceId: string
   surfaceLabel: string
 } {
-  const ctx = useContext(PluginContext)
+  const ctx = use(PluginContext)
   return {
     pluginId: ctx.pluginId,
     pluginVersion: ctx.pluginVersion,
@@ -79,7 +79,7 @@ export function usePluginRoutes(): {
     init?: RequestInit,
   ) => Promise<import('@sinclair/typebox').Static<T>>
 } {
-  const ctx = useContext(PluginContext)
+  const ctx = use(PluginContext)
   return ctx.routes
 }
 
@@ -88,7 +88,7 @@ export function usePluginRoutes(): {
  * result. Throws if the command id is unknown.
  */
 export function useEditorCommand(): (commandId: string) => Promise<{ message?: string } | void> {
-  const ctx = useContext(PluginContext)
+  const ctx = use(PluginContext)
   return ctx.runCommand
 }
 

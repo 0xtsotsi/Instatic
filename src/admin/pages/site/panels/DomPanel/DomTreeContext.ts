@@ -4,7 +4,7 @@
  * This is UI-only state — it is NOT part of the Zustand site store.
  * (Constraint #182: no document-model state outside the store.)
  */
-import { createContext, useContext } from 'react'
+import { createContext, use } from 'react'
 
 interface DomTreeContextValue {
   /** Set of expanded node IDs */
@@ -27,5 +27,5 @@ export const DomTreeContext = createContext<DomTreeContextValue>({
 })
 
 export function useDomTree() {
-  return useContext(DomTreeContext)
+  return use(DomTreeContext)
 }

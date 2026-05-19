@@ -1,4 +1,4 @@
-import { memo, useEffect, useRef, useState, type FormEvent } from 'react'
+import { memo, useEffect, useId, useRef, useState, type FormEvent } from 'react'
 import type { Page } from '@core/page-tree/schemas'
 import {
   createUniquePageSlug,
@@ -45,6 +45,8 @@ export const SiteCreateDialog = memo(function SiteCreateDialog({
   const [slug, setSlug] = useState('')
   const [slugTouched, setSlugTouched] = useState(false)
   const inputRef = useRef<HTMLInputElement>(null)
+  const nameInputId = useId()
+  const slugInputId = useId()
   const copy = COPY[kind]
   const trimmedName = name.trim()
   const isPage = kind === 'page'
@@ -95,9 +97,10 @@ export const SiteCreateDialog = memo(function SiteCreateDialog({
       }
     >
       <form id={FORM_ID} className={styles.form} onSubmit={handleSubmit}>
-        <label className={styles.field}>
-          <span className={styles.label}>Name</span>
+        <div className={styles.field}>
+          <label htmlFor={nameInputId} className={styles.label}>Name</label>
           <Input
+            id={nameInputId}
             ref={inputRef}
             fieldSize="sm"
             value={name}
@@ -106,12 +109,13 @@ export const SiteCreateDialog = memo(function SiteCreateDialog({
             autoComplete="off"
             spellCheck={false}
           />
-        </label>
+        </div>
 
         {isPage && (
-          <label className={styles.field}>
-            <span className={styles.label}>Slug</span>
+          <div className={styles.field}>
+            <label htmlFor={slugInputId} className={styles.label}>Slug</label>
             <Input
+              id={slugInputId}
               fieldSize="sm"
               value={pageSlug}
               onChange={(event) => {
@@ -129,7 +133,7 @@ export const SiteCreateDialog = memo(function SiteCreateDialog({
                 {slugError}
               </p>
             )}
-          </label>
+          </div>
         )}
       </form>
     </Dialog>

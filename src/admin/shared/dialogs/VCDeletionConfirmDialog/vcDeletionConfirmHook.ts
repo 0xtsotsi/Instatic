@@ -6,7 +6,7 @@
  * as `frameworkChangeConfirmHook.ts`.
  */
 
-import { createContext, useContext } from 'react'
+import { createContext, use } from 'react'
 import type { VCDeletionImpact } from '@core/visualComponents/deletionImpact'
 
 export interface ConfirmVCDeletionRequest {
@@ -42,7 +42,7 @@ export const VCDeletionConfirmContext =
  * Falls back to immediate commit when no provider is mounted (test isolation).
  */
 export function useVCDeletionConfirm(): (request: ConfirmVCDeletionRequest) => void {
-  const ctx = useContext(VCDeletionConfirmContext)
+  const ctx = use(VCDeletionConfirmContext)
   if (ctx) return ctx.confirm
   return (request) => request.commit()
 }

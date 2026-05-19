@@ -1,5 +1,4 @@
 import {
-  forwardRef,
   useCallback,
   useEffect,
   useLayoutEffect,
@@ -9,6 +8,7 @@ import {
   type HTMLAttributes,
   type KeyboardEvent,
   type ReactNode,
+  type Ref,
   type RefObject,
 } from 'react'
 import { createPortal } from 'react-dom'
@@ -130,32 +130,32 @@ interface ContextMenuProps extends Omit<HTMLAttributes<HTMLDivElement>, 'childre
    * SpacingBoxControl) where the dropdown should span the input row.
    */
   matchAnchorWidth?: boolean
+  /** React 19: ref is a regular prop on function components. */
+  ref?: Ref<HTMLDivElement>
 }
 
-export const ContextMenu = forwardRef<HTMLDivElement, ContextMenuProps>(function ContextMenu(
-  {
-    ariaLabel,
-    onClose,
-    children,
-    minWidth = 176,
-    width = minWidth,
-    maxHeight,
-    zIndex = 1000,
-    menuClassName,
-    triggerRef,
-    x: pointX,
-    y: pointY,
-    anchorRef,
-    getAnchorRect,
-    side = 'auto',
-    align = 'start',
-    offset = 6,
-    matchAnchorWidth = false,
-    onKeyDown,
-    ...domProps
-  },
+export function ContextMenu({
+  ariaLabel,
+  onClose,
+  children,
+  minWidth = 176,
+  width = minWidth,
+  maxHeight,
+  zIndex = 1000,
+  menuClassName,
+  triggerRef,
+  x: pointX,
+  y: pointY,
+  anchorRef,
+  getAnchorRect,
+  side = 'auto',
+  align = 'start',
+  offset = 6,
+  matchAnchorWidth = false,
+  onKeyDown,
   ref,
-) {
+  ...domProps
+}: ContextMenuProps) {
 
   const menuRef = useRef<HTMLDivElement | null>(null)
   const setMenuRef = (node: HTMLDivElement | null) => {
@@ -395,7 +395,7 @@ export const ContextMenu = forwardRef<HTMLDivElement, ContextMenuProps>(function
       {menu}
     </>
   )
-})
+}
 
 /**
  * Stable callback wrapper — the latest function is read on each invocation,
@@ -418,28 +418,34 @@ function useEvent<TArgs extends unknown[], TReturn>(
   return useCallback((...args: TArgs) => ref.current(...args), [])
 }
 
-interface ContextMenuItemProps extends Omit<ButtonProps, 'variant' | 'size' | 'menuItem' | 'tone'> {
+interface ContextMenuItemProps extends Omit<ButtonProps, 'variant' | 'size' | 'menuItem' | 'tone' | 'ref'> {
   danger?: boolean
+  /** React 19: ref is a regular prop on function components. */
+  ref?: Ref<HTMLButtonElement>
 }
 
-export const ContextMenuItem = forwardRef<HTMLButtonElement, ContextMenuItemProps>(
-  function ContextMenuItem({ danger = false, className, children, ...props }, ref) {
-    return (
-      <Button
-        ref={ref}
-        variant="ghost"
-        size="xs"
-        menuItem
-        role="menuitem"
-        tone={danger ? 'danger' : 'default'}
-        className={cn(styles.item, className)}
-        {...props}
-      >
-        {children}
-      </Button>
-    )
-  },
-)
+export function ContextMenuItem({
+  danger = false,
+  className,
+  children,
+  ref,
+  ...props
+}: ContextMenuItemProps) {
+  return (
+    <Button
+      ref={ref}
+      variant="ghost"
+      size="xs"
+      menuItem
+      role="menuitem"
+      tone={danger ? 'danger' : 'default'}
+      className={cn(styles.item, className)}
+      {...props}
+    >
+      {children}
+    </Button>
+  )
+}
 
 export function ContextMenuSeparator() {
   return <Separator spacing="compact" className={styles.separator} />

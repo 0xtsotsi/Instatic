@@ -9,7 +9,7 @@
  * See useCanvas.ts for the RAF-batched write pattern.
  */
 
-import { forwardRef } from 'react'
+import type { Ref } from 'react'
 import type { Page, Breakpoint } from '@core/page-tree/schemas'
 import type { TemplateRenderDataContext } from '@core/templates/dynamicBindings'
 import { BreakpointFrame } from './BreakpointFrame'
@@ -23,39 +23,44 @@ interface CanvasTransformLayerProps {
   dimInactiveBreakpoints?: boolean
   onBreakpointActivate: (id: string) => void
   templateContext?: TemplateRenderDataContext
+  /** React 19: ref is a regular prop on function components. */
+  ref?: Ref<HTMLDivElement>
 }
 
-export const CanvasTransformLayer = forwardRef<HTMLDivElement, CanvasTransformLayerProps>(
-  function CanvasTransformLayer(
-    { page, breakpoints, activeBreakpointId, dimInactiveBreakpoints = false, onBreakpointActivate, templateContext },
-    ref,
-  ) {
-    return (
-      <div
-        ref={ref}
-        data-testid="canvas-transform-layer"
-        // will-change toggled via modifier class (avoids compositing overhead on empty canvas)
-        className={cn(styles.transformLayer, page && styles.transformLayerActive)}
-      >
-        {page ? (
-          breakpoints.map((bp) => (
-            <BreakpointFrame
-              key={bp.id}
-              page={page}
-              breakpoint={bp}
-              isActive={activeBreakpointId === bp.id}
-              isDimmed={dimInactiveBreakpoints && activeBreakpointId !== bp.id}
-              onActivate={onBreakpointActivate}
-              templateContext={templateContext}
-            />
-          ))
-        ) : (
-          <NoSiteState />
-        )}
-      </div>
-    )
-  },
-)
+export function CanvasTransformLayer({
+  page,
+  breakpoints,
+  activeBreakpointId,
+  dimInactiveBreakpoints = false,
+  onBreakpointActivate,
+  templateContext,
+  ref,
+}: CanvasTransformLayerProps) {
+  return (
+    <div
+      ref={ref}
+      data-testid="canvas-transform-layer"
+      // will-change toggled via modifier class (avoids compositing overhead on empty canvas)
+      className={cn(styles.transformLayer, page && styles.transformLayerActive)}
+    >
+      {page ? (
+        breakpoints.map((bp) => (
+          <BreakpointFrame
+            key={bp.id}
+            page={page}
+            breakpoint={bp}
+            isActive={activeBreakpointId === bp.id}
+            isDimmed={dimInactiveBreakpoints && activeBreakpointId !== bp.id}
+            onActivate={onBreakpointActivate}
+            templateContext={templateContext}
+          />
+        ))
+      ) : (
+        <NoSiteState />
+      )}
+    </div>
+  )
+}
 
 function NoSiteState() {
   return (

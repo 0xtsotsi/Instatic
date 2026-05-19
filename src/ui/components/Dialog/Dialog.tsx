@@ -34,11 +34,11 @@
  *   • Focus is restored to the previously-focused element on close
  */
 import {
-  forwardRef,
   useEffect,
   useId,
   useRef,
   type ReactNode,
+  type Ref,
   type RefObject,
 } from 'react'
 import { createPortal } from 'react-dom'
@@ -98,29 +98,29 @@ interface DialogProps {
    * so Enter activates it) to override.
    */
   initialFocusRef?: RefObject<HTMLElement | null>
+  /** React 19: ref is a regular prop on function components. */
+  ref?: Ref<HTMLDivElement>
 }
 
-export const Dialog = forwardRef<HTMLDivElement, DialogProps>(function Dialog(
-  {
-    open,
-    onClose,
-    title,
-    eyebrow,
-    children,
-    footer,
-    size = 'md',
-    tone = 'neutral',
-    hideCloseButton = false,
-    closeOnEscape = true,
-    closeOnBackdrop = true,
-    className,
-    bodyClassName,
-    footerClassName,
-    ariaLabel,
-    initialFocusRef,
-  },
+export function Dialog({
+  open,
+  onClose,
+  title,
+  eyebrow,
+  children,
+  footer,
+  size = 'md',
+  tone = 'neutral',
+  hideCloseButton = false,
+  closeOnEscape = true,
+  closeOnBackdrop = true,
+  className,
+  bodyClassName,
+  footerClassName,
+  ariaLabel,
+  initialFocusRef,
   ref,
-) {
+}: DialogProps) {
   const titleId = useId()
   const descId = useId()
   const dialogRef = useRef<HTMLDivElement | null>(null)
@@ -224,4 +224,4 @@ export const Dialog = forwardRef<HTMLDivElement, DialogProps>(function Dialog(
     </div>,
     document.body,
   )
-})
+}

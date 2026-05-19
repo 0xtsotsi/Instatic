@@ -16,7 +16,7 @@
  *   - No !important (#403)
  *   - default type="button" (never accidentally submits forms)
  */
-import { forwardRef, type ReactNode } from "react";
+import { type Ref, type ReactNode } from "react";
 import { cn } from "@ui/cn";
 import { Tooltip, type TooltipSide } from "@ui/components/Tooltip";
 import styles from "./Button.module.css";
@@ -45,39 +45,40 @@ export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElemen
   tooltip?: ReactNode;
   /** Which side the tooltip should prefer. Default: 'auto'. */
   tooltipSide?: TooltipSide;
+  /** React 19: ref is a regular prop on function components. */
+  ref?: Ref<HTMLButtonElement>;
 }
 
-export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
-  function Button(
-    {
-      variant,
-      size = "sm",
-      align = "center",
-      shape = "default",
-      tone = "default",
-      iconOnly = false,
-      pressed,
-      active = false,
-      accentFill: _accentFill = false,
-      fullWidth = false,
-      menuItem = false,
-      navItem = false,
-      dangerHover = false,
-      numeric = false,
-      className,
-      children,
-      type = "button",
-      "aria-label": ariaLabel,
-      tooltip,
-      tooltipSide,
-      // Explicitly destructured so we can intercept disabled+tooltip combos
-      // and preserve any direct aria-disabled prop passed by callers.
-      disabled,
-      onClick,
-      ...rest
-    },
+export function Button(
+  {
+    variant,
+    size = "sm",
+    align = "center",
+    shape = "default",
+    tone = "default",
+    iconOnly = false,
+    pressed,
+    active = false,
+    accentFill: _accentFill = false,
+    fullWidth = false,
+    menuItem = false,
+    navItem = false,
+    dangerHover = false,
+    numeric = false,
+    className,
+    children,
+    type = "button",
+    "aria-label": ariaLabel,
+    tooltip,
+    tooltipSide,
+    // Explicitly destructured so we can intercept disabled+tooltip combos
+    // and preserve any direct aria-disabled prop passed by callers.
+    disabled,
+    onClick,
     ref,
-  ) {
+    ...rest
+  }: ButtonProps,
+) {
     if (import.meta.env.DEV && iconOnly && !ariaLabel) {
       console.warn(
         "[Button] iconOnly={true} requires an aria-label prop for accessibility.",
@@ -140,5 +141,4 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
     }
 
     return button;
-  },
-);
+}

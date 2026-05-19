@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useId, useMemo, useState } from 'react'
 import {
   generateFrameworkColorVariableSets,
   normalizeFrameworkColorSlug,
@@ -26,6 +26,7 @@ export function ColorTokenEditor({
   onPatch,
 }: ColorTokenEditorProps) {
   const [slug, setSlug] = useState(token.slug)
+  const slugInputId = useId()
   const [lightValue, setLightValue] = useState(token.lightValue)
   const [alternateValue, setAlternateValue] = useState(
     token.darkModeEnabled ? token.darkValue : '',
@@ -127,9 +128,10 @@ export function ColorTokenEditor({
 
   return (
     <div className={styles.editor}>
-      <label className={styles.field}>
-        <span>Token name</span>
+      <div className={styles.field}>
+        <label htmlFor={slugInputId}>Token name</label>
         <Input
+          id={slugInputId}
           fieldSize="sm"
           value={slug}
           aria-label="Token name"
@@ -141,7 +143,7 @@ export function ColorTokenEditor({
             onPatch({ slug: nextSlug })
           }}
         />
-      </label>
+      </div>
 
       <CategoryComboBox
         label="Category"

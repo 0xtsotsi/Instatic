@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type FormEvent } from 'react'
+import { useEffect, useId, useRef, useState, type FormEvent } from 'react'
 import { Button } from '@ui/components/Button'
 import { Dialog } from '@ui/components/Dialog'
 import { Input } from '@ui/components/Input'
@@ -26,6 +26,7 @@ export function CreateColorDialog({
   const [category, setCategory] = useState(defaultCategory)
   const [lightValue, setLightValue] = useState(DEFAULT_NEW_TOKEN_COLOR)
   const nameInputRef = useRef<HTMLInputElement>(null)
+  const nameInputId = useId()
   const canSubmit = Boolean(name.trim() && lightValue.trim())
 
   useEffect(() => {
@@ -68,9 +69,10 @@ export function CreateColorDialog({
       }
     >
       <form id={FORM_ID} className={dialogStyles.form} onSubmit={handleSubmit}>
-        <label className={dialogStyles.field}>
-          <span className={dialogStyles.label}>Token name</span>
+        <div className={dialogStyles.field}>
+          <label htmlFor={nameInputId} className={dialogStyles.label}>Token name</label>
           <Input
+            id={nameInputId}
             ref={nameInputRef}
             fieldSize="sm"
             value={name}
@@ -80,7 +82,7 @@ export function CreateColorDialog({
             spellCheck={false}
             prefix="--"
           />
-        </label>
+        </div>
         <CategoryComboBox
           label="Category"
           suggestions={categories}

@@ -21,8 +21,8 @@
  */
 
 import {
+  use,
   useCallback,
-  useContext,
   useEffect,
   useMemo,
   useRef,
@@ -58,7 +58,7 @@ export interface SpotlightProps {
 }
 
 export function Spotlight({ isClosing = false }: SpotlightProps): ReactNode {
-  const ctx = useContext(SpotlightInternalContext)
+  const ctx = use(SpotlightInternalContext)
   const inputRef = useRef<HTMLInputElement>(null)
   const dialogRef = useRef<HTMLDivElement>(null)
   const previouslyFocusedRef = useRef<Element | null>(null)

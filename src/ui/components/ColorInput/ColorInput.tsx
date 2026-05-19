@@ -1,9 +1,9 @@
 import {
-  forwardRef,
   useState,
   type CSSProperties,
   type ChangeEvent,
   type InputHTMLAttributes,
+  type Ref,
 } from 'react'
 import { cn } from '@ui/cn'
 import { getColorInputValue, getColorSwatchValue } from './ColorInput.utils'
@@ -14,24 +14,24 @@ type ColorInputSize = 'xs' | 'sm' | 'md'
 interface ColorInputProps extends Omit<InputHTMLAttributes<HTMLInputElement>, 'type' | 'size'> {
   fieldSize?: ColorInputSize
   swatchValue?: string
+  /** React 19: ref is a regular prop on function components. */
+  ref?: Ref<HTMLInputElement>
 }
 
 type ColorInputStyle = CSSProperties & { '--color-input-value'?: string }
 
-export const ColorInput = forwardRef<HTMLInputElement, ColorInputProps>(function ColorInput(
-  {
-    className,
-    fieldSize = 'sm',
-    swatchValue,
-    value,
-    defaultValue,
-    disabled,
-    onChange,
-    style,
-    ...props
-  },
+export function ColorInput({
+  className,
+  fieldSize = 'sm',
+  swatchValue,
+  value,
+  defaultValue,
+  disabled,
+  onChange,
+  style,
   ref,
-) {
+  ...props
+}: ColorInputProps) {
   const [uncontrolledValue, setUncontrolledValue] = useState(getColorInputValue(defaultValue))
   const currentValue = value === undefined
     ? uncontrolledValue
@@ -71,4 +71,4 @@ export const ColorInput = forwardRef<HTMLInputElement, ColorInputProps>(function
       />
     </span>
   )
-})
+}

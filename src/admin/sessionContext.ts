@@ -1,4 +1,4 @@
-import { createContext, useContext } from 'react'
+import { createContext, use } from 'react'
 import type { CmsCurrentUser } from '@core/persistence'
 
 interface AdminSessionValue {
@@ -23,7 +23,7 @@ export const AdminSessionContext = createContext<AdminSessionValue | null>(null)
  * render under the authenticated branch use `useAuthenticatedAdminUser`.
  */
 export function useCurrentAdminUser(): CmsCurrentUser | null {
-  const value = useContext(AdminSessionContext)
+  const value = use(AdminSessionContext)
   return value?.user ?? null
 }
 
@@ -39,7 +39,7 @@ export function useCurrentAdminUser(): CmsCurrentUser | null {
  * programming error, not a soft-fail.
  */
 export function useAuthenticatedAdminUser(): CmsCurrentUser {
-  const value = useContext(AdminSessionContext)
+  const value = use(AdminSessionContext)
   if (!value?.user) {
     throw new Error(
       'useAuthenticatedAdminUser must be called inside <AdminSessionProvider>',
@@ -54,6 +54,6 @@ export function useAuthenticatedAdminUser(): CmsCurrentUser {
  * of plumbing a real setter when they only render a single tab.
  */
 export function useAdminSessionSetter(): (user: CmsCurrentUser) => void {
-  const value = useContext(AdminSessionContext)
+  const value = use(AdminSessionContext)
   return value?.setUser ?? (() => {})
 }

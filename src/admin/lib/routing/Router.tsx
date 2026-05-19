@@ -31,8 +31,8 @@
 
 import {
   createElement,
+  use,
   useCallback,
-  useContext,
   useEffect,
   useMemo,
   useRef,
@@ -249,7 +249,7 @@ export function Link({ to, replace = false, onClick, children, ...rest }: LinkPr
   // Calling useNavigate without router context throws — only call when
   // we have one. Falling back to a plain anchor preserves SSR / pre-mount
   // rendering in places that render outside a Router (rare but safe).
-  const ctx = useContext(RouterContext)
+  const ctx = use(RouterContext)
   const inRouter = ctx !== null
   const handleClick = useCallback(
     (event: MouseEvent<HTMLAnchorElement>) => {

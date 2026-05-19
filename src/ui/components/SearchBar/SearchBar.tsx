@@ -1,4 +1,4 @@
-import { forwardRef, type InputHTMLAttributes } from "react";
+import { type InputHTMLAttributes, type Ref } from "react";
 import { Button } from "@ui/components/Button";
 import { Input } from "@ui/components/Input";
 import { CloseIcon } from "pixel-art-icons/icons/close";
@@ -14,52 +14,50 @@ interface SearchBarProps extends Omit<
   onValueChange: (value: string) => void;
   onClear?: () => void;
   clearLabel?: string;
+  /** React 19: ref is a regular prop on function components. */
+  ref?: Ref<HTMLInputElement>;
 }
 
-export const SearchBar = forwardRef<HTMLInputElement, SearchBarProps>(
-  function SearchBar(
-    {
-      value,
-      onValueChange,
-      onClear,
-      clearLabel = "Clear search",
-      className,
-      ...inputProps
-    },
-    ref,
-  ) {
-    function handleClear() {
-      if (onClear) onClear();
-      else onValueChange("");
-    }
+export function SearchBar({
+  value,
+  onValueChange,
+  onClear,
+  clearLabel = "Clear search",
+  className,
+  ref,
+  ...inputProps
+}: SearchBarProps) {
+  function handleClear() {
+    if (onClear) onClear();
+    else onValueChange("");
+  }
 
-    return (
-      <div className={cn(styles.searchBar, className)}>
-        <SearchSolidIcon
-          size={11}
-          color="var(--editor-text-subtle)"
-          aria-hidden="true"
-        />
-        <Input
-          ref={ref}
-          type="search"
-          value={value}
-          onChange={(event) => onValueChange(event.target.value)}
-          className={styles.input}
-          {...inputProps}
-        />
-        {value && (
-          <Button
-            variant="ghost"
-            size="xs"
-            iconOnly
-            onClick={handleClear}
-            aria-label={clearLabel}
-          >
-            <CloseIcon size={10} aria-hidden="true" />
-          </Button>
-        )}
-      </div>
-    );
-  },
-);
+  return (
+    <div className={cn(styles.searchBar, className)}>
+      <SearchSolidIcon
+        size={11}
+        color="var(--editor-text-subtle)"
+        aria-hidden="true"
+      />
+      <Input
+        ref={ref}
+        type="search"
+        value={value}
+        onChange={(event) => onValueChange(event.target.value)}
+        className={styles.input}
+        {...inputProps}
+      />
+      {value && (
+        <Button
+          variant="ghost"
+          size="xs"
+          iconOnly
+          onClick={handleClear}
+          aria-label={clearLabel}
+        >
+          <CloseIcon size={10} aria-hidden="true" />
+        </Button>
+      )}
+    </div>
+  );
+}

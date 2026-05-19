@@ -1,4 +1,4 @@
-import { memo, useEffect, useRef, useState, type FormEvent } from 'react'
+import { memo, useEffect, useId, useRef, useState, type FormEvent } from 'react'
 import { Button } from '@ui/components/Button'
 import { Checkbox } from '@ui/components/Checkbox'
 import { Dialog } from '@ui/components/Dialog'
@@ -53,6 +53,14 @@ export const ContentCollectionCreateDialog = memo(function ContentCollectionCrea
   const [seoField, setSeoField] = useState(true)
   const [submitError, setSubmitError] = useState<string | null>(null)
   const inputRef = useRef<HTMLInputElement>(null)
+  const nameId = useId()
+  const slugId = useId()
+  const routeId = useId()
+  const singularId = useId()
+  const pluralId = useId()
+  const bodyFieldId = useId()
+  const featuredMediaFieldId = useId()
+  const seoFieldId = useId()
 
   const trimmedName = name.trim()
   const displayedPluralLabel = pluralTouched ? pluralLabel : trimmedName
@@ -118,9 +126,10 @@ export const ContentCollectionCreateDialog = memo(function ContentCollectionCrea
       }
     >
       <form id={FORM_ID} className={dialogStyles.form} onSubmit={handleSubmit}>
-        <label className={dialogStyles.field}>
-          <span className={dialogStyles.label}>Name</span>
+        <div className={dialogStyles.field}>
+          <label htmlFor={nameId} className={dialogStyles.label}>Name</label>
           <Input
+            id={nameId}
             ref={inputRef}
             fieldSize="sm"
             value={name}
@@ -132,11 +141,12 @@ export const ContentCollectionCreateDialog = memo(function ContentCollectionCrea
             autoComplete="off"
             spellCheck={false}
           />
-        </label>
+        </div>
 
-        <label className={dialogStyles.field}>
-          <span className={dialogStyles.label}>Slug</span>
+        <div className={dialogStyles.field}>
+          <label htmlFor={slugId} className={dialogStyles.label}>Slug</label>
           <Input
+            id={slugId}
             fieldSize="sm"
             value={displayedSlug}
             onChange={(event) => {
@@ -148,11 +158,12 @@ export const ContentCollectionCreateDialog = memo(function ContentCollectionCrea
             autoComplete="off"
             spellCheck={false}
           />
-        </label>
+        </div>
 
-        <label className={dialogStyles.field}>
-          <span className={dialogStyles.label}>URL path</span>
+        <div className={dialogStyles.field}>
+          <label htmlFor={routeId} className={dialogStyles.label}>URL path</label>
           <Input
+            id={routeId}
             fieldSize="sm"
             value={effectiveRouteBase}
             onChange={(event) => {
@@ -164,11 +175,12 @@ export const ContentCollectionCreateDialog = memo(function ContentCollectionCrea
             autoComplete="off"
             spellCheck={false}
           />
-        </label>
+        </div>
 
-        <label className={dialogStyles.field}>
-          <span className={dialogStyles.label}>Singular label</span>
+        <div className={dialogStyles.field}>
+          <label htmlFor={singularId} className={dialogStyles.label}>Singular label</label>
           <Input
+            id={singularId}
             fieldSize="sm"
             value={displayedSingularLabel}
             onChange={(event) => {
@@ -180,11 +192,12 @@ export const ContentCollectionCreateDialog = memo(function ContentCollectionCrea
             autoComplete="off"
             spellCheck={false}
           />
-        </label>
+        </div>
 
-        <label className={dialogStyles.field}>
-          <span className={dialogStyles.label}>Plural label</span>
+        <div className={dialogStyles.field}>
+          <label htmlFor={pluralId} className={dialogStyles.label}>Plural label</label>
           <Input
+            id={pluralId}
             fieldSize="sm"
             value={displayedPluralLabel}
             onChange={(event) => {
@@ -196,31 +209,34 @@ export const ContentCollectionCreateDialog = memo(function ContentCollectionCrea
             autoComplete="off"
             spellCheck={false}
           />
-        </label>
+        </div>
 
         <fieldset className={styles.collectionFields}>
           <legend>Fields</legend>
-          <label>
+          <div>
             <Checkbox
+              id={bodyFieldId}
               checked={bodyField}
               onCheckedChange={setBodyField}
             />
-            <span>Body</span>
-          </label>
-          <label>
+            <label htmlFor={bodyFieldId}>Body</label>
+          </div>
+          <div>
             <Checkbox
+              id={featuredMediaFieldId}
               checked={featuredMediaField}
               onCheckedChange={setFeaturedMediaField}
             />
-            <span>Featured media</span>
-          </label>
-          <label>
+            <label htmlFor={featuredMediaFieldId}>Featured media</label>
+          </div>
+          <div>
             <Checkbox
+              id={seoFieldId}
               checked={seoField}
               onCheckedChange={setSeoField}
             />
-            <span>SEO fields</span>
-          </label>
+            <label htmlFor={seoFieldId}>SEO fields</label>
+          </div>
         </fieldset>
 
         {submitError && (

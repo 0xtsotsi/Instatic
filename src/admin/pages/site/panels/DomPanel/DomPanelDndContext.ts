@@ -1,4 +1,4 @@
-import { createContext, useContext } from 'react'
+import { createContext, use } from 'react'
 import type { DomDropTarget } from './domPanelDnd'
 
 export interface DomPanelDndContextValue {
@@ -20,5 +20,5 @@ export const DomPanelDndContext = createContext<DomPanelDndContextValue>({
 })
 
 export function useDomPanelDndContext(): DomPanelDndContextValue {
-  return useContext(DomPanelDndContext)
+  return use(DomPanelDndContext)
 }

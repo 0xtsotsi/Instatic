@@ -1,4 +1,4 @@
-import { memo, useEffect, useRef, useState, type FormEvent } from 'react'
+import { memo, useEffect, useId, useRef, useState, type FormEvent } from 'react'
 import type { Page, PageTemplateConfig } from '@core/page-tree'
 import {
   normalizePageSlug,
@@ -56,6 +56,10 @@ export const TemplateSettingsDialog = memo(function TemplateSettingsDialog({
   const [priority, setPriority] = useState(String(page.template?.priority ?? 100))
   const [collections, setCollections] = useState<DataTable[]>(FALLBACK_COLLECTIONS)
   const inputRef = useRef<HTMLInputElement>(null)
+  const nameInputId = useId()
+  const slugInputId = useId()
+  const tableSelectId = useId()
+  const priorityInputId = useId()
 
   const trimmedTitle = title.trim()
   const normalizedSlug = normalizePageSlug(slug)
@@ -127,9 +131,10 @@ export const TemplateSettingsDialog = memo(function TemplateSettingsDialog({
       }
     >
       <form id={FORM_ID} className={dialogStyles.form} onSubmit={handleSubmit}>
-        <label className={dialogStyles.field}>
-          <span className={dialogStyles.label}>Name</span>
+        <div className={dialogStyles.field}>
+          <label htmlFor={nameInputId} className={dialogStyles.label}>Name</label>
           <Input
+            id={nameInputId}
             ref={inputRef}
             fieldSize="sm"
             value={title}
@@ -137,11 +142,12 @@ export const TemplateSettingsDialog = memo(function TemplateSettingsDialog({
             autoComplete="off"
             spellCheck={false}
           />
-        </label>
+        </div>
 
-        <label className={dialogStyles.field}>
-          <span className={dialogStyles.label}>Slug</span>
+        <div className={dialogStyles.field}>
+          <label htmlFor={slugInputId} className={dialogStyles.label}>Slug</label>
           <Input
+            id={slugInputId}
             fieldSize="sm"
             value={slug}
             onChange={(event) => setSlug(normalizePageSlug(event.target.value))}
@@ -152,11 +158,12 @@ export const TemplateSettingsDialog = memo(function TemplateSettingsDialog({
           {slugValidation && (
             <p role="alert" className={dialogStyles.errorText}>{slugValidation}</p>
           )}
-        </label>
+        </div>
 
         <div className={dialogStyles.field}>
-          <span className={dialogStyles.label}>Table</span>
+          <label htmlFor={tableSelectId} className={dialogStyles.label}>Table</label>
           <Select
+            id={tableSelectId}
             aria-label="Table"
             fieldSize="sm"
             value={tableSlug}
@@ -169,8 +176,9 @@ export const TemplateSettingsDialog = memo(function TemplateSettingsDialog({
         </div>
 
         <div className={dialogStyles.field}>
-          <span className={dialogStyles.label}>Priority</span>
+          <label htmlFor={priorityInputId} className={dialogStyles.label}>Priority</label>
           <Input
+            id={priorityInputId}
             aria-label="Priority"
             fieldSize="sm"
             type="number"

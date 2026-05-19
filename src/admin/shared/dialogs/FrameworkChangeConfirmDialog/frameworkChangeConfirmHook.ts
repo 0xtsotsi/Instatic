@@ -5,7 +5,7 @@
  * module can keep Fast Refresh-friendly "components-only" exports.
  */
 
-import { createContext, useContext } from 'react'
+import { createContext, use } from 'react'
 import type { FrameworkChangeImpact } from '@core/framework/changeImpact'
 import type { SiteDocument } from '@core/page-tree/schemas'
 
@@ -59,7 +59,7 @@ export const FrameworkChangeConfirmContext =
 export function useFrameworkChangeConfirm(): (
   request: ConfirmFrameworkChangeRequest,
 ) => void {
-  const ctx = useContext(FrameworkChangeConfirmContext)
+  const ctx = use(FrameworkChangeConfirmContext)
   if (ctx) return ctx.confirm
   return (request) => request.commit()
 }

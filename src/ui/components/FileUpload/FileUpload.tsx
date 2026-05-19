@@ -1,5 +1,4 @@
 import {
-  forwardRef,
   useRef,
   type InputHTMLAttributes,
   type MouseEvent,
@@ -18,6 +17,8 @@ type UploadButtonProps = Omit<ButtonProps, 'children' | 'type' | 'onClick'> & {
 interface FileUploadProps extends Omit<InputHTMLAttributes<HTMLInputElement>, 'type' | 'children'> {
   buttonProps: UploadButtonProps
   children: ReactNode
+  /** React 19: ref is a regular prop on function components. */
+  ref?: Ref<HTMLInputElement>
 }
 
 function assignRef(ref: Ref<HTMLInputElement> | undefined, value: HTMLInputElement | null) {
@@ -29,17 +30,15 @@ function assignRef(ref: Ref<HTMLInputElement> | undefined, value: HTMLInputEleme
   ref.current = value
 }
 
-export const FileUpload = forwardRef<HTMLInputElement, FileUploadProps>(function FileUpload(
-  {
-    buttonProps,
-    children,
-    className,
-    'aria-hidden': ariaHidden = true,
-    tabIndex = -1,
-    ...inputProps
-  },
-  forwardedRef,
-) {
+export function FileUpload({
+  buttonProps,
+  children,
+  className,
+  'aria-hidden': ariaHidden = true,
+  tabIndex = -1,
+  ref: forwardedRef,
+  ...inputProps
+}: FileUploadProps) {
   const inputRef = useRef<HTMLInputElement | null>(null)
   const { onClick, ...buttonRest } = buttonProps
 
@@ -74,4 +73,4 @@ export const FileUpload = forwardRef<HTMLInputElement, FileUploadProps>(function
       />
     </span>
   )
-})
+}

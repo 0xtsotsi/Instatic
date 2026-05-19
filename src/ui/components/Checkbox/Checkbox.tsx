@@ -1,4 +1,4 @@
-import { forwardRef, type InputHTMLAttributes } from 'react'
+import { type InputHTMLAttributes, type Ref } from 'react'
 import { cn } from '@ui/cn'
 import { CheckIcon } from 'pixel-art-icons/icons/check'
 import styles from './Checkbox.module.css'
@@ -12,6 +12,8 @@ interface CheckboxProps
   onCheckedChange?: (checked: boolean) => void
   /** Visual size of the box. `sm` ≈ 12px, `md` ≈ 16px. Default `md`. */
   boxSize?: BoxSize
+  /** React 19: ref is a regular prop on function components. */
+  ref?: Ref<HTMLInputElement>
 }
 
 /**
@@ -23,10 +25,16 @@ interface CheckboxProps
  * The native input is visually hidden but kept in the accessibility tree;
  * the rendered box is a sibling `<span>` styled via `:checked` selectors.
  */
-export const Checkbox = forwardRef<HTMLInputElement, CheckboxProps>(function Checkbox(
-  { checked, onCheckedChange, boxSize = 'md', className, disabled, onChange, ...props },
+export function Checkbox({
+  checked,
+  onCheckedChange,
+  boxSize = 'md',
+  className,
+  disabled,
+  onChange,
   ref,
-) {
+  ...props
+}: CheckboxProps) {
   const iconSize = boxSize === 'sm' ? 9 : 11
   return (
     <span className={cn(styles.checkbox, className)} data-size={boxSize}>
@@ -49,4 +57,4 @@ export const Checkbox = forwardRef<HTMLInputElement, CheckboxProps>(function Che
       </span>
     </span>
   )
-})
+}

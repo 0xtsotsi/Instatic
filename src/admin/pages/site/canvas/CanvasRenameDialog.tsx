@@ -6,7 +6,7 @@
  * one-file change going forward.
  */
 
-import { useCallback, useRef, type FormEvent, type RefObject } from 'react'
+import { useCallback, useId, useRef, type FormEvent, type RefObject } from 'react'
 import { Button } from '@ui/components/Button'
 import { Dialog } from '@ui/components/Dialog'
 import { Input } from '@ui/components/Input'
@@ -27,6 +27,7 @@ export function CanvasRenameDialog({
   onClose,
 }: CanvasRenameDialogProps) {
   const inputRef = useRef<HTMLInputElement>(null) as RefObject<HTMLInputElement>
+  const nameId = useId()
 
   const handleSubmit = useCallback(
     (event: FormEvent<HTMLFormElement>) => {
@@ -61,9 +62,10 @@ export function CanvasRenameDialog({
       }
     >
       <form className={styles.renameForm} onSubmit={handleSubmit}>
-        <label className={styles.renameField}>
-          <span className={styles.renameLabel}>Name</span>
+        <div className={styles.renameField}>
+          <label htmlFor={nameId} className={styles.renameLabel}>Name</label>
           <Input
+            id={nameId}
             ref={inputRef}
             fieldSize="sm"
             value={state.value}
@@ -75,7 +77,7 @@ export function CanvasRenameDialog({
               onChange({ ...state, value: event.currentTarget.value, error: null })
             }}
           />
-        </label>
+        </div>
         {state.error && (
           <p id="canvas-rename-error" role="alert" className={styles.renameError}>
             {state.error}

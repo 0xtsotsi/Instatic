@@ -19,7 +19,7 @@
  *   - Close affordance + optional action use the Button primitive
  *   - Pixel-art icons only (close, circle-alert, warning-diamond)
  */
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { Button } from '@ui/components/Button'
 import { cn } from '@ui/cn'
@@ -71,9 +71,6 @@ function ToastIcon({ kind }: { kind: ToastKind }) {
 export function ToastProvider() {
   const [items, setItems] = useState<ReadonlyArray<Toast>>([])
   const [paused, setPaused] = useState(false)
-  // Per-toast timer handles, keyed by toast id. Refs because timers are
-  // imperative — putting them in state would cause re-render loops.
-  const timersRef = useRef<Map<string, ReturnType<typeof setTimeout>>>(new Map())
   const portalRoot = useMemo(
     () => (typeof document !== 'undefined' ? getToastRoot() : null),
     [],
@@ -83,20 +80,20 @@ export function ToastProvider() {
     return subscribeToasts((next) => setItems(next))
   }, [])
 
+  // Single timer-lifecycle effect: arm a setTimeout per visible toast (unless
+  // paused or opted-out), and clean them up on re-render / unmount.
+  //
+  // Cleanup clears every timer this effect created, so when `items` or
+  // `paused` flips we drop the previous set entirely and the next setup phase
+  // re-arms a fresh batch. That means a toast's countdown restarts whenever
+  // the items list changes (e.g. a new toast arrives) — acceptable trade-off
+  // because durations are short (4–8s) and the alternative was carrying timer
+  // state across renders via a ref, which leaves setTimeout without a
+  // matching cleanup in the same effect.
   useEffect(() => {
-    const timers = timersRef.current
-
-    if (paused) {
-      // Pause: cancel pending timers; we'll re-arm on resume.
-      for (const timer of timers.values()) clearTimeout(timer)
-      timers.clear()
-      return
-    }
-
-    // Resume / fresh subscribe: arm a timer for each toast that doesn't have
-    // one and hasn't opted out of auto-dismiss.
+    if (paused) return
+    const timers = new Map<string, ReturnType<typeof setTimeout>>()
     for (const toast of items) {
-      if (timers.has(toast.id)) continue
       if (toast.durationMs === null) continue
       const duration = toast.durationMs ?? DEFAULT_DURATION_MS[toast.kind]
       const timer = setTimeout(() => {
@@ -105,26 +102,11 @@ export function ToastProvider() {
       }, duration)
       timers.set(toast.id, timer)
     }
-
-    // Drop timers for toasts that have been removed externally.
-    for (const id of Array.from(timers.keys())) {
-      if (!items.some((t) => t.id === id)) {
-        clearTimeout(timers.get(id)!)
-        timers.delete(id)
-      }
-    }
-  }, [items, paused])
-
-  useEffect(() => {
-    // Capture the Map identity at effect setup so the cleanup never reads
-    // a possibly-rotated ref. timersRef itself never changes, but the lint
-    // rule treats `.current` as mutable and we want to honour it cleanly.
-    const timers = timersRef.current
     return () => {
       for (const timer of timers.values()) clearTimeout(timer)
       timers.clear()
     }
-  }, [])
+  }, [items, paused])
 
   if (!portalRoot || items.length === 0) return null
 

@@ -139,7 +139,7 @@
     font-weight: 700;
 }
 
-.collectionFields label {
+.collectionFields > div {
     display: grid;
     grid-template-columns: 14px minmax(0, 1fr);
     align-items: center;

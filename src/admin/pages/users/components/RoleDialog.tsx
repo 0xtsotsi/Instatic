@@ -11,7 +11,7 @@
  * `onSetCapabilityGroup`. The "Clear" button only appears when at least
  * one capability in that group is currently selected.
  */
-import type { FormEvent } from 'react'
+import { useId, type FormEvent } from 'react'
 import { Button } from '@ui/components/Button'
 import { Checkbox } from '@ui/components/Checkbox'
 import { Dialog } from '@ui/components/Dialog'
@@ -50,6 +50,9 @@ export function RoleDialog({
   const title = mode === 'create' ? 'Create Role' : mode === 'edit' ? 'Edit Role' : 'View Role'
   const readonly = mode === 'view'
   const selectedCapabilities = new Set(form.capabilities)
+  const nameId = useId()
+  const slugId = useId()
+  const descriptionId = useId()
   return (
     <Dialog
       open
@@ -71,31 +74,34 @@ export function RoleDialog({
       }
     >
       <form id={ROLE_FORM_ID} className={dialogStyles.form} onSubmit={(event) => void onSubmit(event)}>
-        <label className={dialogStyles.field}>
-          <span className={dialogStyles.label}>Name</span>
+        <div className={dialogStyles.field}>
+          <label htmlFor={nameId} className={dialogStyles.label}>Name</label>
           <Input
+            id={nameId}
             value={form.name}
             required
             disabled={readonly}
             onChange={(event) => onChange({ ...form, name: event.currentTarget.value })}
           />
-        </label>
-        <label className={dialogStyles.field}>
-          <span className={dialogStyles.label}>Slug</span>
+        </div>
+        <div className={dialogStyles.field}>
+          <label htmlFor={slugId} className={dialogStyles.label}>Slug</label>
           <Input
+            id={slugId}
             value={form.slug}
             disabled={readonly}
             onChange={(event) => onChange({ ...form, slug: event.currentTarget.value })}
           />
-        </label>
-        <label className={dialogStyles.field}>
-          <span className={dialogStyles.label}>Description</span>
+        </div>
+        <div className={dialogStyles.field}>
+          <label htmlFor={descriptionId} className={dialogStyles.label}>Description</label>
           <Input
+            id={descriptionId}
             value={form.description}
             disabled={readonly}
             onChange={(event) => onChange({ ...form, description: event.currentTarget.value })}
           />
-        </label>
+        </div>
         <div className={styles.capabilityPicker}>
           {CAPABILITY_GROUPS.map((group) => {
             const selectedCount = group.capabilities.filter((capability) => selectedCapabilities.has(capability)).length

@@ -12,7 +12,7 @@
  *   affected nodes re-render per selection/hover event (O(2) not O(N)).
  */
 
-import { memo, useCallback, useContext, useSyncExternalStore } from 'react'
+import { memo, use, useCallback, useSyncExternalStore } from 'react'
 import { useEditorStore, selectActiveCanvasPage } from '@site/store/store'
 import { resolveProps } from '@core/page-tree/selectors'
 import { registry } from '@core/module-engine/registry'
@@ -41,8 +41,8 @@ export const NodeRenderer = memo(function NodeRenderer({ nodeId }: NodeRendererP
   const node = useEditorStore(
     useCallback((s) => selectActiveCanvasPage(s)?.nodes[nodeId] ?? null, [nodeId]),
   )
-  const breakpointId = useContext(CanvasBreakpointContext)
-  const templateContext = useContext(CanvasTemplateContext)
+  const breakpointId = use(CanvasBreakpointContext)
+  const templateContext = use(CanvasTemplateContext)
 
   // Per-node selection/hover subscriptions (Perf fix — Contribution #495).
   // Only the 2 nodes whose boolean flips will re-render on any selection/hover
@@ -95,7 +95,7 @@ export const NodeRenderer = memo(function NodeRenderer({ nodeId }: NodeRendererP
     setInlineEditing(null)
   }, [setInlineEditing])
 
-  const { onNodeClick, onNodeHover, onNodeContextMenu, onNodeDoubleClick } = useContext(CanvasSelectionContext)
+  const { onNodeClick, onNodeHover, onNodeContextMenu, onNodeDoubleClick } = use(CanvasSelectionContext)
 
   const handleNodeClick = useCallback(
     (clickedNodeId: string, e: React.MouseEvent) => {

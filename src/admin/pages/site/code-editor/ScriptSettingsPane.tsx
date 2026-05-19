@@ -1,4 +1,4 @@
-import { useMemo } from 'react'
+import { useId, useMemo } from 'react'
 import { useEditorStore } from '@site/store/store'
 import type { SiteFile } from '@core/files/schemas'
 import {
@@ -27,6 +27,7 @@ export function ScriptSettingsPane({ file }: ScriptSettingsPaneProps) {
   const packageJson = useEditorStore((s) => s.packageJson)
   const siteRuntime = useEditorStore((s) => s.siteRuntime)
   const patchScriptRuntimeConfig = useEditorStore((s) => s.patchScriptRuntimeConfig)
+  const runInCanvasId = useId()
 
   const pages = site?.pages ?? EMPTY_PAGES
   const config = normalizeScriptRuntimeConfig(
@@ -78,15 +79,16 @@ export function ScriptSettingsPane({ file }: ScriptSettingsPaneProps) {
         </Button>
       </div>
 
-      <label className={styles.switchRow}>
-        <span>Run in canvas</span>
+      <div className={styles.switchRow}>
+        <label htmlFor={runInCanvasId}>Run in canvas</label>
         <Switch
+          id={runInCanvasId}
           checked={config.runInCanvas}
           onCheckedChange={(checked) => patch({ runInCanvas: checked })}
           switchSize="sm"
           aria-label="Run in canvas"
         />
-      </label>
+      </div>
 
       <div className={styles.field}>
         <span className={styles.label}>Placement</span>

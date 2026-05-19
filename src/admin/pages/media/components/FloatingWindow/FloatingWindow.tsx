@@ -9,7 +9,7 @@
  * Visibility is owned by the caller — pass `open` from your component
  * state. Closing fires `onClose`.
  */
-import { forwardRef, useImperativeHandle, type CSSProperties, type ReactNode } from 'react'
+import { useImperativeHandle, type CSSProperties, type ReactNode, type Ref } from 'react'
 import { createPortal } from 'react-dom'
 import { PanelHeader } from '@admin/shared/PanelHeader'
 import { useDraggablePanel } from '@site/hooks/useDraggablePanel'
@@ -36,25 +36,25 @@ interface FloatingWindowProps {
   testId?: string
   onClose: () => void
   children?: ReactNode
+  /** React 19: ref is a regular prop on function components. */
+  ref?: Ref<HTMLDivElement>
 }
 
-export const FloatingWindow = forwardRef<HTMLDivElement, FloatingWindowProps>(function FloatingWindow(
-  {
-    panelId,
-    open,
-    title,
-    defaultPosition,
-    headerActions,
-    width = 320,
-    maxHeight,
-    className,
-    ariaLabel,
-    testId,
-    onClose,
-    children,
-  },
-  forwardedRef,
-) {
+export function FloatingWindow({
+  panelId,
+  open,
+  title,
+  defaultPosition,
+  headerActions,
+  width = 320,
+  maxHeight,
+  className,
+  ariaLabel,
+  testId,
+  onClose,
+  children,
+  ref: forwardedRef,
+}: FloatingWindowProps) {
   const { panelRef, headerDragProps, panelPositionStyle } = useDraggablePanel(
     panelId,
     () => defaultPosition,
@@ -99,4 +99,4 @@ export const FloatingWindow = forwardRef<HTMLDivElement, FloatingWindowProps>(fu
     </aside>,
     document.body,
   )
-})
+}

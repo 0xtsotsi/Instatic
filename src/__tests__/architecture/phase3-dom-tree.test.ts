@@ -416,7 +416,7 @@ describe('Phase 3 Gate 4 — DomTreeContext must not carry selectedNodeId/hovere
     expect(violations).toHaveLength(0)
   })
 
-  it('TreeNode.tsx must use per-node Zustand selectors for isSelected/isHovered, not useContext()', () => {
+  it('TreeNode.tsx must use per-node Zustand selectors for isSelected/isHovered, not use()/useContext()', () => {
     if (!DOM_PANEL_IMPLEMENTED) {
       console.log(
         '[Phase3 gate] DomPanel not yet implemented — ' +
@@ -467,14 +467,16 @@ describe('Phase 3 Gate 4 — DomTreeContext must not carry selectedNodeId/hovere
       )
     }
 
-    // 4c — Must NOT destructure selectedNodeId or hoveredNodeId from useContext / useDomTree
-    // Strategy: find useContext()/useDomTree() call sites and check the destructuring block
+    // 4c — Must NOT destructure selectedNodeId or hoveredNodeId from useContext / use / useDomTree
+    // Strategy: find useContext()/use()/useDomTree() call sites and check the destructuring block
     // that follows for selectedNodeId / hoveredNodeId.
     //
     // We walk backwards from any "selectedNodeId" or "hoveredNodeId" occurrence to find if
-    // it's inside a destructuring block that originated from a useContext/useDomTree call.
+    // it's inside a destructuring block that originated from a context-read call.
     // (Same false-positive-safe approach as Phase 2 Gate 7.)
-    const USE_CONTEXT_RE = /\buseDomTree\s*\(|\buseContext\s*\(\s*DomTreeContext/
+    // Matches both the legacy `useContext(DomTreeContext)` form and the React 19
+    // `use(DomTreeContext)` form, plus the `useDomTree()` wrapper hook.
+    const USE_CONTEXT_RE = /\buseDomTree\s*\(|\buseContext\s*\(\s*DomTreeContext|\buse\s*\(\s*DomTreeContext/
     const contextCallLines: number[] = []
     const lines = src.split('\n')
 
@@ -498,7 +500,7 @@ describe('Phase 3 Gate 4 — DomTreeContext must not carry selectedNodeId/hovere
                 contextCallLines.some((cl) => Math.abs(cl - j) <= 2)) {
               const field = /\bselectedNodeId\b/.test(line) ? 'selectedNodeId' : 'hoveredNodeId'
               violations.push(
-                `${rel}:${i + 1} — '${field}' destructured from useDomTree/useContext() ` +
+                `${rel}:${i + 1} — '${field}' destructured from useDomTree/use()/useContext() ` +
                 '(must use per-node Zustand selector instead — context read causes O(N) re-renders)'
               )
             }

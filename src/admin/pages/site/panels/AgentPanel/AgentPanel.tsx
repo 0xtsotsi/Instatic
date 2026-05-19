@@ -86,11 +86,14 @@ export const AgentPanel = memo(function AgentPanel({ variant = 'floating' }: { v
     if (el) el.scrollTop = el.scrollHeight
   }, [messages])
 
-  // Focus input when panel becomes active (isOpen transitions to true)
+  // Focus input when panel becomes active (isOpen transitions to true).
+  // The 50ms delay lets the panel's open transition settle before we steal
+  // focus; cleanup cancels the pending focus if the panel closes again
+  // (or the component unmounts) before the timer fires.
   useEffect(() => {
-    if (isOpen) {
-      setTimeout(() => inputRef.current?.focus(), 50)
-    }
+    if (!isOpen) return
+    const id = setTimeout(() => inputRef.current?.focus(), 50)
+    return () => clearTimeout(id)
   }, [isOpen])
 
   // Escape key — close the AI panel

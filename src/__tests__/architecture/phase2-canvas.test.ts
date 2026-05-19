@@ -693,39 +693,45 @@ describe('Phase 2 — NodeRenderer must use per-node Zustand selectors (not cont
         )
       }
 
-      // 7c — Must NOT destructure selectedNodeId/hoveredNodeId from the useContext result.
-      // We scan for `const { ... } = useContext(...)` blocks (potentially multi-line)
-      // by looking for lines that contain a useContext() call and walking backwards
-      // to find the opening `{` of the destructuring and forwards to the closing `}`.
+      // 7c — Must NOT destructure selectedNodeId/hoveredNodeId from the use()/useContext() result.
+      // We scan for `const { ... } = use(...)` or `const { ... } = useContext(...)` blocks
+      // (potentially multi-line) by looking for lines that contain such a call and walking
+      // backwards to find the opening `{` of the destructuring and forwards to the closing `}`.
       //
       // Example of the bad pattern:
-      //   const { onNodeClick, onNodeHover, selectedNodeId } = useContext(CanvasSelectionContext)
+      //   const { onNodeClick, onNodeHover, selectedNodeId } = use(CanvasSelectionContext)
       //
       // We do NOT flag `selectedNodeId` that appears in other contexts (e.g. the
-      // per-node Zustand selector two lines above the useContext call).
+      // per-node Zustand selector two lines above the context-read call).
+      //
+      // Note: the React 19 migration replaced `useContext(X)` with `use(X)` everywhere
+      // (Spec react-doctor #1, May 2026), so the regex matches both. `\buse\s*\(` is
+      // intentionally word-bounded so it doesn't match `useState(`, `useEffect(`, etc.
+      const CONTEXT_READ_RE = /\buse(Context)?\s*\(/
+      const CONTEXT_READ_RHS_RE = /=\s*use(Context)?\s*\(/
       const lines = src.split('\n')
       for (let i = 0; i < lines.length; i++) {
-        if (!/useContext\s*\(/.test(lines[i])) continue
+        if (!CONTEXT_READ_RE.test(lines[i])) continue
 
-        // Walk backward from the useContext line to find the `{` that starts
+        // Walk backward from the context-read line to find the `{` that starts
         // the const destructuring (handles multi-line destructures where the
-        // `{` might be 3-5 lines above the `= useContext(...)` line).
+        // `{` might be 3-5 lines above the `= use(...)` line).
         // We stop if we've gone too far back or hit a statement boundary (`;` / empty).
         let destructureContent = ''
         let foundOpenBrace = false
 
         // First check if the entire destructure is on one line
-        // e.g.: const { onNodeClick, hoveredNodeId } = useContext(...)
-        const singleLineMatch = lines[i].match(/const\s*\{([^}]*)\}\s*=\s*useContext\s*\(/)
+        // e.g.: const { onNodeClick, hoveredNodeId } = use(...)
+        const singleLineMatch = lines[i].match(/const\s*\{([^}]*)\}\s*=\s*use(?:Context)?\s*\(/)
         if (singleLineMatch) {
           destructureContent = singleLineMatch[1]
           foundOpenBrace = true
-        } else {
+        } else if (CONTEXT_READ_RHS_RE.test(lines[i])) {
           // Multi-line: scan backwards for the opening `{` with `const` before it
           for (let j = i; j >= Math.max(0, i - 10); j--) {
             const jl = lines[j]
             if (/const\s*\{/.test(jl)) {
-              // Collect from opening brace to the useContext line
+              // Collect from opening brace to the context-read line
               const block = lines.slice(j, i + 1).join('\n')
               const match = block.match(/const\s*\{([^}]*)\}/)
               if (match) {
@@ -743,13 +749,13 @@ describe('Phase 2 — NodeRenderer must use per-node Zustand selectors (not cont
 
         if (/\bselectedNodeId\b/.test(destructureContent)) {
           violations.push(
-            `${rel}:${i + 1} — 'selectedNodeId' destructured from useContext(). ` +
+            `${rel}:${i + 1} — 'selectedNodeId' destructured from use()/useContext(). ` +
             'Remove from context; subscribe via per-node Zustand selector instead.'
           )
         }
         if (/\bhoveredNodeId\b/.test(destructureContent)) {
           violations.push(
-            `${rel}:${i + 1} — 'hoveredNodeId' destructured from useContext(). ` +
+            `${rel}:${i + 1} — 'hoveredNodeId' destructured from use()/useContext(). ` +
             'Remove from context; subscribe via per-node Zustand selector instead.'
           )
         }
@@ -762,7 +768,7 @@ describe('Phase 2 — NodeRenderer must use per-node Zustand selectors (not cont
         'Per-node Zustand boolean selectors are required:\n' +
         '  const isSelected = useEditorStore(useCallback((s) => s.selectedNodeId === nodeId, [nodeId]))\n' +
         '  const isHovered  = useEditorStore(useCallback((s) => s.hoveredNodeId  === nodeId, [nodeId]))\n' +
-        'And selectedNodeId/hoveredNodeId must NOT be destructured from useContext().\n' +
+        'And selectedNodeId/hoveredNodeId must NOT be destructured from use()/useContext().\n' +
         'Result: only the ≤ 2 nodes whose boolean flips re-render per event (O(2) not O(N)).\n' +
         'See Contribution #495 (audit), #497 (fix), Guideline #352.\n' +
         'Violations:\n' +

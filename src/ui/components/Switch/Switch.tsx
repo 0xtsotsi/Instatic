@@ -1,4 +1,4 @@
-import { forwardRef, type ButtonHTMLAttributes } from 'react'
+import { type ButtonHTMLAttributes, type Ref } from 'react'
 import { cn } from '@ui/cn'
 import styles from './Switch.module.css'
 
@@ -8,23 +8,23 @@ interface SwitchProps
   onCheckedChange?: (checked: boolean) => void
   hitArea?: boolean
   switchSize?: 'sm' | 'md'
+  /** React 19: ref is a regular prop on function components. */
+  ref?: Ref<HTMLButtonElement>
 }
 
-export const Switch = forwardRef<HTMLButtonElement, SwitchProps>(function Switch(
-  {
-    checked,
-    onCheckedChange,
-    hitArea = false,
-    switchSize = 'md',
-    className,
-    disabled,
-    onClick,
-    type = 'button',
-    children,
-    ...props
-  },
+export function Switch({
+  checked,
+  onCheckedChange,
+  hitArea = false,
+  switchSize = 'md',
+  className,
+  disabled,
+  onClick,
+  type = 'button',
+  children,
   ref,
-) {
+  ...props
+}: SwitchProps) {
   return (
     <button
       ref={ref}
@@ -55,4 +55,4 @@ export const Switch = forwardRef<HTMLButtonElement, SwitchProps>(function Switch
       {children}
     </button>
   )
-})
+}

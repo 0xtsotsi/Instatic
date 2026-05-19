@@ -1,8 +1,8 @@
 import {
-  forwardRef,
   type CSSProperties,
   type HTMLAttributes,
   type ReactNode,
+  type Ref,
 } from 'react'
 import type { IconComponent } from 'pixel-art-icons/types'
 import { ChevronRightIcon } from 'pixel-art-icons/icons/chevron-right'
@@ -22,26 +22,26 @@ interface TreeRowProps extends HTMLAttributes<HTMLDivElement> {
   hidden?: boolean
   dragging?: boolean
   generated?: boolean
+  /** React 19: ref is a regular prop on function components. */
+  ref?: Ref<HTMLDivElement>
 }
 
-export const TreeRow = forwardRef<HTMLDivElement, TreeRowProps>(function TreeRow(
-  {
-    depth,
-    selected = false,
-    hovered = false,
-    focused = false,
-    muted = false,
-    locked = false,
-    hidden = false,
-    dragging = false,
-    generated = false,
-    className,
-    style,
-    children,
-    ...props
-  },
+export function TreeRow({
+  depth,
+  selected = false,
+  hovered = false,
+  focused = false,
+  muted = false,
+  locked = false,
+  hidden = false,
+  dragging = false,
+  generated = false,
+  className,
+  style,
+  children,
   ref,
-) {
+  ...props
+}: TreeRowProps) {
   const paddingLeft = TREE_ROW_BASE_INDENT + depth * TREE_ROW_INDENT_STEP
 
   return (
@@ -68,7 +68,7 @@ export const TreeRow = forwardRef<HTMLDivElement, TreeRowProps>(function TreeRow
       {children}
     </div>
   )
-})
+}
 
 interface TreeChevronProps extends HTMLAttributes<HTMLSpanElement> {
   expanded?: boolean

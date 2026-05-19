@@ -106,8 +106,8 @@ export function StepUpDialog({
           )}
         </p>
         <form className={styles.form} onSubmit={handleSubmit}>
-          <label className={styles.field}>
-            <span className={styles.label}>Password</span>
+          <div className={styles.field}>
+            <label htmlFor={passwordId} className={styles.label}>Password</label>
             <Input
               id={passwordId}
               type="password"
@@ -118,10 +118,10 @@ export function StepUpDialog({
               onChange={(event) => setPassword(event.currentTarget.value)}
               data-testid="step-up-password"
             />
-          </label>
+          </div>
           {mfaRequired && (
-            <label className={styles.field}>
-              <span className={styles.label}>Authentication or recovery code</span>
+            <div className={styles.field}>
+              <label htmlFor={mfaCodeId} className={styles.label}>Authentication or recovery code</label>
               <Input
                 id={mfaCodeId}
                 type="text"
@@ -131,7 +131,7 @@ export function StepUpDialog({
                 onChange={(event) => setMfaCode(event.currentTarget.value)}
                 data-testid="step-up-mfa-code"
               />
-            </label>
+            </div>
           )}
           {error && <p className={styles.error} role="alert">{error}</p>}
           <div className={styles.actions}>

@@ -1,4 +1,4 @@
-import { memo, useState, type FormEvent } from 'react'
+import { memo, useId, useState, type FormEvent } from 'react'
 import { Button } from '@ui/components/Button'
 import { Dialog } from '@ui/components/Dialog'
 import { Input, Textarea } from '@ui/components/Input'
@@ -154,6 +154,17 @@ export const NewFieldDialog = memo(function NewFieldDialog({
   // Submit state
   const [saving, setSaving] = useState(false)
   const [submitError, setSubmitError] = useState<string | null>(null)
+
+  // Form field ids — pair labels with their controls via htmlFor.
+  const idInputId = useId()
+  const labelInputId = useId()
+  const descriptionInputId = useId()
+  const textMaxLengthId = useId()
+  const textPlaceholderId = useId()
+  const numberMinId = useId()
+  const numberMaxId = useId()
+  const numberStepId = useId()
+  const numberCurrencyId = useId()
 
   const trimmedId = id.trim()
   const trimmedLabel = label.trim()
@@ -428,9 +439,10 @@ export const NewFieldDialog = memo(function NewFieldDialog({
         </div>
 
         {/* ID */}
-        <label className={styles.field}>
-          <span className={styles.label}>ID</span>
+        <div className={styles.field}>
+          <label htmlFor={idInputId} className={styles.label}>ID</label>
           <Input
+            id={idInputId}
             fieldSize="sm"
             value={id}
             invalid={Boolean(idErr)}
@@ -451,12 +463,13 @@ export const NewFieldDialog = memo(function NewFieldDialog({
           {!idErr && (
             <span className={styles.caption}>Machine name: lowercase letters, numbers, underscores.</span>
           )}
-        </label>
+        </div>
 
         {/* Label */}
-        <label className={styles.field}>
-          <span className={styles.label}>Label</span>
+        <div className={styles.field}>
+          <label htmlFor={labelInputId} className={styles.label}>Label</label>
           <Input
+            id={labelInputId}
             fieldSize="sm"
             value={label}
             onChange={(event) => {
@@ -467,7 +480,7 @@ export const NewFieldDialog = memo(function NewFieldDialog({
             autoComplete="off"
             spellCheck={false}
           />
-        </label>
+        </div>
 
         {/* Required */}
         <div className={styles.switchRow}>
@@ -476,24 +489,26 @@ export const NewFieldDialog = memo(function NewFieldDialog({
         </div>
 
         {/* Description */}
-        <label className={styles.field}>
-          <span className={styles.label}>Description <span className={styles.optional}>(optional)</span></span>
+        <div className={styles.field}>
+          <label htmlFor={descriptionInputId} className={styles.label}>Description <span className={styles.optional}>(optional)</span></label>
           <Textarea
+            id={descriptionInputId}
             fieldSize="sm"
             value={description}
             onChange={(event) => setDescription(event.target.value)}
             placeholder="Shown next to the field in the editor"
             rows={2}
           />
-        </label>
+        </div>
 
         {/* ── Type-specific fields ── */}
 
         {type === 'text' && (
           <>
-            <label className={styles.field}>
-              <span className={styles.label}>Max length <span className={styles.optional}>(optional)</span></span>
+            <div className={styles.field}>
+              <label htmlFor={textMaxLengthId} className={styles.label}>Max length <span className={styles.optional}>(optional)</span></label>
               <Input
+                id={textMaxLengthId}
                 fieldSize="sm"
                 type="number"
                 value={textMaxLength}
@@ -501,16 +516,17 @@ export const NewFieldDialog = memo(function NewFieldDialog({
                 placeholder="255"
                 min={1}
               />
-            </label>
-            <label className={styles.field}>
-              <span className={styles.label}>Placeholder <span className={styles.optional}>(optional)</span></span>
+            </div>
+            <div className={styles.field}>
+              <label htmlFor={textPlaceholderId} className={styles.label}>Placeholder <span className={styles.optional}>(optional)</span></label>
               <Input
+                id={textPlaceholderId}
                 fieldSize="sm"
                 value={textPlaceholder}
                 onChange={(event) => setTextPlaceholder(event.target.value)}
                 placeholder="Enter a value…"
               />
-            </label>
+            </div>
           </>
         )}
 
@@ -529,18 +545,18 @@ export const NewFieldDialog = memo(function NewFieldDialog({
         {type === 'number' && (
           <>
             <div className={styles.fieldRow}>
-              <label className={styles.field}>
-                <span className={styles.label}>Min <span className={styles.optional}>(optional)</span></span>
-                <Input fieldSize="sm" type="number" value={numberMin} onChange={(event) => setNumberMin(event.target.value)} />
-              </label>
-              <label className={styles.field}>
-                <span className={styles.label}>Max <span className={styles.optional}>(optional)</span></span>
-                <Input fieldSize="sm" type="number" value={numberMax} onChange={(event) => setNumberMax(event.target.value)} />
-              </label>
-              <label className={styles.field}>
-                <span className={styles.label}>Step <span className={styles.optional}>(optional)</span></span>
-                <Input fieldSize="sm" type="number" value={numberStep} onChange={(event) => setNumberStep(event.target.value)} />
-              </label>
+              <div className={styles.field}>
+                <label htmlFor={numberMinId} className={styles.label}>Min <span className={styles.optional}>(optional)</span></label>
+                <Input id={numberMinId} fieldSize="sm" type="number" value={numberMin} onChange={(event) => setNumberMin(event.target.value)} />
+              </div>
+              <div className={styles.field}>
+                <label htmlFor={numberMaxId} className={styles.label}>Max <span className={styles.optional}>(optional)</span></label>
+                <Input id={numberMaxId} fieldSize="sm" type="number" value={numberMax} onChange={(event) => setNumberMax(event.target.value)} />
+              </div>
+              <div className={styles.field}>
+                <label htmlFor={numberStepId} className={styles.label}>Step <span className={styles.optional}>(optional)</span></label>
+                <Input id={numberStepId} fieldSize="sm" type="number" value={numberStep} onChange={(event) => setNumberStep(event.target.value)} />
+              </div>
             </div>
             <div className={styles.switchRow}>
               <span className={styles.switchLabel}>Integer only</span>
@@ -556,16 +572,17 @@ export const NewFieldDialog = memo(function NewFieldDialog({
               />
             </div>
             {numberFormat === 'currency' && (
-              <label className={styles.field}>
-                <span className={styles.label}>Currency code <span className={styles.optional}>(e.g. USD)</span></span>
+              <div className={styles.field}>
+                <label htmlFor={numberCurrencyId} className={styles.label}>Currency code <span className={styles.optional}>(e.g. USD)</span></label>
                 <Input
+                  id={numberCurrencyId}
                   fieldSize="sm"
                   value={numberCurrency}
                   onChange={(event) => setNumberCurrency(event.target.value)}
                   placeholder="USD"
                   maxLength={10}
                 />
-              </label>
+              </div>
             )}
           </>
         )}

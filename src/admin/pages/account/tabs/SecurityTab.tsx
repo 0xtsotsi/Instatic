@@ -1,4 +1,4 @@
-import { useEffect, useState, type FormEvent, type ReactNode } from 'react'
+import { useEffect, useId, useState, type FormEvent, type ReactNode } from 'react'
 import type { CmsCurrentUser } from '@core/persistence'
 import {
   changeCurrentUserPassword,
@@ -95,6 +95,9 @@ export function SecurityTab({ user }: SecurityTabProps) {
   const [passwordError, setPasswordError] = useState<string | null>(null)
   const [mfaError, setMfaError] = useState<string | null>(null)
   const [status, setStatus] = useState<string | null>(null)
+  const newPasswordId = useId()
+  const confirmPasswordId = useId()
+  const totpCodeId = useId()
 
   const passwordStatus = user.passwordUpdatedAt
     ? `Last changed: ${formatDateTime(user.passwordUpdatedAt)}`
@@ -429,26 +432,28 @@ export function SecurityTab({ user }: SecurityTabProps) {
         }
       >
         <form id="security-password-form" className={styles.dialogFields} onSubmit={(event) => void handlePasswordSubmit(event)}>
-          <label className={styles.dialogField}>
-            <span className={styles.dialogLabel}>New password</span>
+          <div className={styles.dialogField}>
+            <label htmlFor={newPasswordId} className={styles.dialogLabel}>New password</label>
             <Input
+              id={newPasswordId}
               type="password"
               autoComplete="new-password"
               value={newPassword}
               onChange={(event) => setNewPassword(event.currentTarget.value)}
               data-testid="security-password-new"
             />
-          </label>
-          <label className={styles.dialogField}>
-            <span className={styles.dialogLabel}>Confirm new password</span>
+          </div>
+          <div className={styles.dialogField}>
+            <label htmlFor={confirmPasswordId} className={styles.dialogLabel}>Confirm new password</label>
             <Input
+              id={confirmPasswordId}
               type="password"
               autoComplete="new-password"
               value={confirmPassword}
               onChange={(event) => setConfirmPassword(event.currentTarget.value)}
               data-testid="security-password-confirm"
             />
-          </label>
+          </div>
           {passwordError && <p className={styles.error} role="alert">{passwordError}</p>}
         </form>
       </Dialog>
@@ -529,16 +534,17 @@ export function SecurityTab({ user }: SecurityTabProps) {
                   Open authenticator app
                 </a>
 
-                <label className={styles.dialogField}>
-                  <span className={styles.dialogLabel}>Authentication code</span>
+                <div className={styles.dialogField}>
+                  <label htmlFor={totpCodeId} className={styles.dialogLabel}>Authentication code</label>
                   <Input
+                    id={totpCodeId}
                     inputMode="numeric"
                     autoComplete="one-time-code"
                     value={totpCode}
                     onChange={(event) => setTotpCode(event.currentTarget.value)}
                     data-testid="security-mfa-code"
                   />
-                </label>
+                </div>
               </div>
             </div>
             {mfaError && <p className={styles.error} role="alert">{mfaError}</p>}

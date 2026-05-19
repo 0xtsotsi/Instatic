@@ -1,8 +1,8 @@
 import {
-  forwardRef,
   useRef,
   type InputHTMLAttributes,
   type ReactNode,
+  type Ref,
   type TextareaHTMLAttributes,
 } from 'react'
 import { cn } from '@ui/cn'
@@ -49,6 +49,8 @@ interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
    * Pass `false` to opt out (e.g. for read-only numeric displays).
    */
   numberSpinner?: boolean
+  /** React 19: ref is a regular prop on function components. */
+  ref?: Ref<HTMLInputElement>
 }
 
 interface TextareaProps extends TextareaHTMLAttributes<HTMLTextAreaElement> {
@@ -57,24 +59,24 @@ interface TextareaProps extends TextareaHTMLAttributes<HTMLTextAreaElement> {
   monospace?: boolean
   emphasis?: TextEmphasis
   resize?: 'none' | 'vertical' | 'both'
+  /** React 19: ref is a regular prop on function components. */
+  ref?: Ref<HTMLTextAreaElement>
 }
 
-export const Input = forwardRef<HTMLInputElement, InputProps>(function Input(
-  {
-    className,
-    invalid = false,
-    fieldSize = 'md',
-    monospace = false,
-    emphasis = 'default',
-    prefix,
-    unit,
-    trailingSlot,
-    numberSpinner,
-    type,
-    ...props
-  },
+export function Input({
+  className,
+  invalid = false,
+  fieldSize = 'md',
+  monospace = false,
+  emphasis = 'default',
+  prefix,
+  unit,
+  trailingSlot,
+  numberSpinner,
+  type,
   ref,
-) {
+  ...props
+}: InputProps) {
   const isNumber = type === 'number'
   // Only number inputs get the spinner. Default on for number, off otherwise.
   const showSpinner = isNumber && (numberSpinner ?? true)
@@ -164,20 +166,18 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(function Input(
       )}
     </span>
   )
-})
+}
 
-export const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(function Textarea(
-  {
-    className,
-    invalid = false,
-    fieldSize = 'md',
-    monospace = false,
-    emphasis = 'default',
-    resize = 'vertical',
-    ...props
-  },
+export function Textarea({
+  className,
+  invalid = false,
+  fieldSize = 'md',
+  monospace = false,
+  emphasis = 'default',
+  resize = 'vertical',
   ref,
-) {
+  ...props
+}: TextareaProps) {
   return (
     <textarea
       ref={ref}
@@ -195,4 +195,4 @@ export const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(function 
       {...props}
     />
   )
-})
+}

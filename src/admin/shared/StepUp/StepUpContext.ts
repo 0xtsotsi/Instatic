@@ -25,7 +25,7 @@
  * with `Error('step_up_cancelled')` so the caller can swallow that
  * specific failure without conflating it with "the action errored".
  */
-import { createContext, useContext } from 'react'
+import { createContext, use } from 'react'
 
 export interface StepUpContextValue {
   runStepUp: <T>(action: () => Promise<T>) => Promise<T>
@@ -36,7 +36,7 @@ export const StepUpCancelledMessage = 'step_up_cancelled'
 export const StepUpContext = createContext<StepUpContextValue | null>(null)
 
 export function useStepUp(): StepUpContextValue {
-  const ctx = useContext(StepUpContext)
+  const ctx = use(StepUpContext)
   if (!ctx) {
     throw new Error('useStepUp must be called inside <StepUpProvider>')
   }

@@ -15,7 +15,7 @@
  * @see Guideline #258 — Inline Confirmation UI Pattern
  * @see Contribution #512 — Phase E+ Site Panel UX Spec §4
  */
-import { useState, useRef, useCallback, useMemo } from 'react'
+import { useState, useRef, useCallback, useId, useMemo } from 'react'
 import { useEditorStore } from '@site/store/store'
 import { Button } from '@ui/components/Button'
 import { Input } from '@ui/components/Input'
@@ -80,6 +80,7 @@ export function DepsSection() {
   const [addName, setAddName] = useState('')
   const [addDev, setAddDev] = useState(false)
   const [addError, setAddError] = useState<string | null>(null)
+  const devToggleId = useId()
   const [removeConfirm, setRemoveConfirm] = useState<RemoveConfirmState | null>(null)
 
   const cancelRef = useRef<HTMLButtonElement>(null)
@@ -416,14 +417,15 @@ export function DepsSection() {
         </div>
 
         {/* dev toggle */}
-        <label className={styles.devToggle}>
+        <div className={styles.devToggle}>
           <Switch
+            id={devToggleId}
             checked={addDev}
             onCheckedChange={setAddDev}
             switchSize="sm"
           />
-          <span className={styles.devLabel}>devDependency</span>
-        </label>
+          <label htmlFor={devToggleId} className={styles.devLabel}>devDependency</label>
+        </div>
       </div>
     </div>
   )

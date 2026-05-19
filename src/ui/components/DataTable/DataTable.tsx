@@ -1,6 +1,6 @@
 import {
-  forwardRef,
   type HTMLAttributes,
+  type Ref,
   type TableHTMLAttributes,
   type TdHTMLAttributes,
   type ThHTMLAttributes,
@@ -11,12 +11,17 @@ import styles from './DataTable.module.css'
 interface DataTableProps extends TableHTMLAttributes<HTMLTableElement> {
   density?: 'default' | 'compact'
   wrapperClassName?: string
+  /** React 19: ref is a regular prop on function components. */
+  ref?: Ref<HTMLTableElement>
 }
 
-export const DataTable = forwardRef<HTMLTableElement, DataTableProps>(function DataTable(
-  { className, density = 'default', wrapperClassName, ...props },
+export function DataTable({
+  className,
+  density = 'default',
+  wrapperClassName,
   ref,
-) {
+  ...props
+}: DataTableProps) {
   return (
     <div className={cn(styles.wrapper, wrapperClassName)}>
       <table
@@ -27,7 +32,7 @@ export const DataTable = forwardRef<HTMLTableElement, DataTableProps>(function D
       />
     </div>
   )
-})
+}
 
 export function DataTableHead(props: HTMLAttributes<HTMLTableSectionElement>) {
   return <thead {...props} />

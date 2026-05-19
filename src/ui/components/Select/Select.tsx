@@ -1,5 +1,4 @@
 import {
-  forwardRef,
   useCallback,
   useId,
   useMemo,
@@ -55,34 +54,34 @@ interface SelectProps extends Omit<SelectHTMLAttributes<HTMLSelectElement>, 'siz
   options?: SelectOption[]
   placeholder?: string
   'data-testid'?: string
+  /** React 19: ref is a regular prop on function components. */
+  ref?: Ref<HTMLSelectElement>
 }
 
-export const Select = forwardRef<HTMLSelectElement, SelectProps>(function Select(
-  {
-    className,
-    invalid = false,
-    fieldSize = 'md',
-    emphasis = 'default',
-    options,
-    children,
-    disabled = false,
-    value,
-    defaultValue,
-    onChange,
-    id,
-    name,
-    required,
-    placeholder,
-    menuMinWidth,
-    menuPlacement = 'bottom-start',
-    menuAnchorRef,
-    'aria-label': ariaLabel,
-    'aria-labelledby': ariaLabelledBy,
-    'data-testid': dataTestId,
-    ...props
-  },
+export function Select({
+  className,
+  invalid = false,
+  fieldSize = 'md',
+  emphasis = 'default',
+  options,
+  children,
+  disabled = false,
+  value,
+  defaultValue,
+  onChange,
+  id,
+  name,
+  required,
+  placeholder,
+  menuMinWidth,
+  menuPlacement = 'bottom-start',
+  menuAnchorRef,
+  'aria-label': ariaLabel,
+  'aria-labelledby': ariaLabelledBy,
+  'data-testid': dataTestId,
   ref,
-) {
+  ...props
+}: SelectProps) {
   const generatedId = useId()
   const triggerId = id ?? `select-${generatedId}`
   const menuId = `${triggerId}-menu`
@@ -318,7 +317,7 @@ export const Select = forwardRef<HTMLSelectElement, SelectProps>(function Select
       )}
     </div>
   )
-})
+}
 
 function assignRef<T>(ref: Ref<T> | undefined, value: T | null) {
   if (!ref) return

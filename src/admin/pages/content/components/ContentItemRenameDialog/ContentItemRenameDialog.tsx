@@ -1,4 +1,4 @@
-import { memo, useEffect, useRef, useState, type FormEvent } from 'react'
+import { memo, useEffect, useId, useRef, useState, type FormEvent } from 'react'
 import { Button } from '@ui/components/Button'
 import { Dialog } from '@ui/components/Dialog'
 import { Input } from '@ui/components/Input'
@@ -37,6 +37,8 @@ export const ContentItemRenameDialog = memo(function ContentItemRenameDialog({
   const [slug, setSlug] = useState(initialSlug)
   const [submitError, setSubmitError] = useState<string | null>(null)
   const inputRef = useRef<HTMLInputElement>(null)
+  const titleInputId = useId()
+  const slugInputId = useId()
   const trimmedValue = value.trim()
   const normalizedSlug = slugFromTitle(slug || trimmedValue)
 
@@ -80,9 +82,10 @@ export const ContentItemRenameDialog = memo(function ContentItemRenameDialog({
       }
     >
       <form id={FORM_ID} className={dialogStyles.form} onSubmit={handleSubmit}>
-        <label className={dialogStyles.field}>
-          <span className={dialogStyles.label}>{titleLabel}</span>
+        <div className={dialogStyles.field}>
+          <label htmlFor={titleInputId} className={dialogStyles.label}>{titleLabel}</label>
           <Input
+            id={titleInputId}
             ref={inputRef}
             fieldSize="sm"
             value={value}
@@ -93,11 +96,12 @@ export const ContentItemRenameDialog = memo(function ContentItemRenameDialog({
             autoComplete="off"
             spellCheck={false}
           />
-        </label>
+        </div>
 
-        <label className={dialogStyles.field}>
-          <span className={dialogStyles.label}>Slug</span>
+        <div className={dialogStyles.field}>
+          <label htmlFor={slugInputId} className={dialogStyles.label}>Slug</label>
           <Input
+            id={slugInputId}
             fieldSize="sm"
             value={slug}
             onChange={(event) => {
@@ -107,7 +111,7 @@ export const ContentItemRenameDialog = memo(function ContentItemRenameDialog({
             autoComplete="off"
             spellCheck={false}
           />
-        </label>
+        </div>
 
         {submitError && (
           <p role="alert" className={dialogStyles.errorText}>

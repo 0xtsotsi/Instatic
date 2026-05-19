@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, type FormEvent, type KeyboardEvent, type MouseEvent } from 'react'
+import { useEffect, useId, useMemo, useState, type FormEvent, type KeyboardEvent, type MouseEvent } from 'react'
 import { selectSelectedNode, useEditorStore } from '@site/store/store'
 import { cssClassSelector } from '@core/page-tree/classNames'
 import { generatedClassKindLabel, isGeneratedClass, isGeneratedClassLocked } from '@core/page-tree/classUtils'
@@ -443,6 +443,7 @@ function SelectorNameDialog({
   const [name, setName] = useState(selectorInputValue(initialValue))
   const [error, setError] = useState<string | null>(null)
   const trimmedName = normalizeClassNameInput(name)
+  const nameInputId = useId()
 
   function handleSubmit(event: FormEvent) {
     event.preventDefault()
@@ -478,9 +479,10 @@ function SelectorNameDialog({
       }
     >
       <form id={SELECTOR_NAME_FORM_ID} className={dialogStyles.form} onSubmit={handleSubmit}>
-        <label className={dialogStyles.field}>
-          <span className={dialogStyles.label}>Class name</span>
+        <div className={dialogStyles.field}>
+          <label htmlFor={nameInputId} className={dialogStyles.label}>Class name</label>
           <Input
+            id={nameInputId}
             fieldSize="sm"
             value={name}
             onChange={(event) => {
@@ -491,7 +493,7 @@ function SelectorNameDialog({
             autoComplete="off"
             spellCheck={false}
           />
-        </label>
+        </div>
         {error && <p role="alert" className={dialogStyles.errorText}>{error}</p>}
       </form>
     </Dialog>

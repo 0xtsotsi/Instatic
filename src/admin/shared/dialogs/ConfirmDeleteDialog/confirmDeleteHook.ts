@@ -6,7 +6,7 @@
  * `frameworkChangeConfirmHook.ts`.
  */
 
-import { createContext, useContext } from 'react'
+import { createContext, use } from 'react'
 
 export interface ConfirmDeleteRequest {
   /** Short title shown in the dialog header. e.g. "Delete header layer?" */
@@ -47,6 +47,6 @@ export const ConfirmDeleteContext = createContext<ConfirmDeleteContextValue | nu
  * wrap them.
  */
 export function useConfirmDelete(): ConfirmDeleteContextValue['confirmDelete'] {
-  const ctx = useContext(ConfirmDeleteContext)
+  const ctx = use(ConfirmDeleteContext)
   return ctx?.confirmDelete ?? ((request) => request.commit())
 }

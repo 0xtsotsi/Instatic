@@ -14,7 +14,7 @@
  * Submits go through the parent's `onSubmit` (which wraps the action in
  * `runStepUp` so server-side step-up auth has a chance to re-prompt).
  */
-import type { FormEvent } from 'react'
+import { useId, type FormEvent } from 'react'
 import { Button } from '@ui/components/Button'
 import { Dialog } from '@ui/components/Dialog'
 import { Input } from '@ui/components/Input'
@@ -52,6 +52,11 @@ export function UserDialog({
 }: UserDialogProps) {
   const title = mode === 'create' ? 'Create User' : mode === 'edit' ? 'Edit User' : 'Reset Password'
   const submitLabel = mode === 'create' ? 'Create User' : mode === 'edit' ? 'Save User' : 'Reset Password'
+  const emailId = useId()
+  const displayNameId = useId()
+  const passwordId = useId()
+  const roleId = useId()
+  const statusId = useId()
   return (
     <Dialog
       open
@@ -73,9 +78,10 @@ export function UserDialog({
       <form id={USER_FORM_ID} className={dialogStyles.form} autoComplete="off" onSubmit={(event) => void onSubmit(event)}>
         {mode !== 'reset' && (
           <>
-            <label className={dialogStyles.field}>
-              <span className={dialogStyles.label}>Email</span>
+            <div className={dialogStyles.field}>
+              <label htmlFor={emailId} className={dialogStyles.label}>Email</label>
               <Input
+                id={emailId}
                 value={form.email}
                 type="email"
                 name={mode === 'create' ? 'new-user-email-address' : 'edited-user-email-address'}
@@ -85,21 +91,23 @@ export function UserDialog({
                 required
                 onChange={(event) => onChange({ ...form, email: event.currentTarget.value })}
               />
-            </label>
-            <label className={dialogStyles.field}>
-              <span className={dialogStyles.label}>Display name</span>
+            </div>
+            <div className={dialogStyles.field}>
+              <label htmlFor={displayNameId} className={dialogStyles.label}>Display name</label>
               <Input
+                id={displayNameId}
                 value={form.displayName}
                 name={mode === 'create' ? 'new-user-display-name' : 'edited-user-display-name'}
                 autoComplete="off"
                 onChange={(event) => onChange({ ...form, displayName: event.currentTarget.value })}
               />
-            </label>
+            </div>
           </>
         )}
-        <label className={dialogStyles.field}>
-          <span className={dialogStyles.label}>{mode === 'create' ? 'Initial password' : 'New password'}</span>
+        <div className={dialogStyles.field}>
+          <label htmlFor={passwordId} className={dialogStyles.label}>{mode === 'create' ? 'Initial password' : 'New password'}</label>
           <Input
+            id={passwordId}
             value={form.password}
             type="password"
             name={mode === 'create' ? 'new-user-initial-password' : 'edited-user-new-password'}
@@ -111,28 +119,30 @@ export function UserDialog({
             required={mode !== 'edit'}
             onChange={(event) => onChange({ ...form, password: event.currentTarget.value })}
           />
-        </label>
+        </div>
         {mode !== 'reset' && (
           <>
-            <label className={dialogStyles.field}>
-              <span className={dialogStyles.label}>Role</span>
+            <div className={dialogStyles.field}>
+              <label htmlFor={roleId} className={dialogStyles.label}>Role</label>
               <Select
+                id={roleId}
                 value={form.roleId}
                 name={mode === 'create' ? 'new-user-role' : 'edited-user-role'}
                 options={roleOptions}
                 onChange={(event) => onChange({ ...form, roleId: event.currentTarget.value })}
               />
-            </label>
+            </div>
             {mode === 'edit' && (
-              <label className={dialogStyles.field}>
-                <span className={dialogStyles.label}>Status</span>
+              <div className={dialogStyles.field}>
+                <label htmlFor={statusId} className={dialogStyles.label}>Status</label>
                 <Select
+                  id={statusId}
                   value={form.status}
                   name="edited-user-status"
                   options={statusOptions}
                   onChange={(event) => onChange({ ...form, status: event.currentTarget.value as CmsCurrentUser['status'] })}
                 />
-              </label>
+              </div>
             )}
           </>
         )}

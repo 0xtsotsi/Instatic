@@ -12,7 +12,7 @@
  *
  * Deletion goes through `useConfirmDelete` instead of bespoke inline confirm.
  */
-import { memo, useState } from 'react'
+import { memo, useId, useState } from 'react'
 import type { ReactElement, DragEvent } from 'react'
 import { Button } from '@ui/components/Button'
 import { Input, Textarea } from '@ui/components/Input'
@@ -321,6 +321,14 @@ function FieldEditForm({
   onCancel,
 }: FieldEditFormProps): ReactElement {
   const tableOptions = tables.map((t) => ({ value: t.id, label: t.name }))
+  const labelInputId = useId()
+  const descriptionId = useId()
+  const textMaxLengthId = useId()
+  const textPlaceholderId = useId()
+  const numberMinId = useId()
+  const numberMaxId = useId()
+  const numberStepId = useId()
+  const numberCurrencyId = useId()
 
   return (
     <div className={styles.fieldEditForm}>
@@ -332,21 +340,22 @@ function FieldEditForm({
       </div>
 
       {/* Label */}
-      <label className={styles.formGroup}>
-        <span className={styles.label}>
+      <div className={styles.formGroup}>
+        <label htmlFor={labelInputId} className={styles.label}>
           Label
           {labelLocked && (
             <span className={styles.optional}> (locked)</span>
           )}
-        </span>
+        </label>
         <Input
+          id={labelInputId}
           fieldSize="sm"
           value={state.label}
           disabled={labelLocked}
           onChange={(e) => onChange('label', e.target.value)}
           autoComplete="off"
         />
-      </label>
+      </div>
 
       {/* Required */}
       <div className={styles.switchRow}>
@@ -358,28 +367,30 @@ function FieldEditForm({
       </div>
 
       {/* Description */}
-      <label className={styles.formGroup}>
-        <span className={styles.label}>
+      <div className={styles.formGroup}>
+        <label htmlFor={descriptionId} className={styles.label}>
           Description <span className={styles.optional}>(optional)</span>
-        </span>
+        </label>
         <Textarea
+          id={descriptionId}
           fieldSize="sm"
           value={state.description}
           onChange={(e) => onChange('description', e.target.value)}
           placeholder="Shown next to the field in the editor"
           rows={2}
         />
-      </label>
+      </div>
 
       {/* ── Type-specific (hidden for locked built-ins) ── */}
 
       {!labelLocked && field.type === 'text' && (
         <>
-          <label className={styles.formGroup}>
-            <span className={styles.label}>
+          <div className={styles.formGroup}>
+            <label htmlFor={textMaxLengthId} className={styles.label}>
               Max length <span className={styles.optional}>(optional)</span>
-            </span>
+            </label>
             <Input
+              id={textMaxLengthId}
               fieldSize="sm"
               type="number"
               value={state.textMaxLength}
@@ -387,18 +398,19 @@ function FieldEditForm({
               placeholder="255"
               min={1}
             />
-          </label>
-          <label className={styles.formGroup}>
-            <span className={styles.label}>
+          </div>
+          <div className={styles.formGroup}>
+            <label htmlFor={textPlaceholderId} className={styles.label}>
               Placeholder <span className={styles.optional}>(optional)</span>
-            </span>
+            </label>
             <Input
+              id={textPlaceholderId}
               fieldSize="sm"
               value={state.textPlaceholder}
               onChange={(e) => onChange('textPlaceholder', e.target.value)}
               placeholder="Enter a value…"
             />
-          </label>
+          </div>
         </>
       )}
 
@@ -417,33 +429,36 @@ function FieldEditForm({
       {!labelLocked && field.type === 'number' && (
         <>
           <div className={styles.fieldRow3Col}>
-            <label className={styles.formGroup}>
-              <span className={styles.label}>Min</span>
+            <div className={styles.formGroup}>
+              <label htmlFor={numberMinId} className={styles.label}>Min</label>
               <Input
+                id={numberMinId}
                 fieldSize="sm"
                 type="number"
                 value={state.numberMin}
                 onChange={(e) => onChange('numberMin', e.target.value)}
               />
-            </label>
-            <label className={styles.formGroup}>
-              <span className={styles.label}>Max</span>
+            </div>
+            <div className={styles.formGroup}>
+              <label htmlFor={numberMaxId} className={styles.label}>Max</label>
               <Input
+                id={numberMaxId}
                 fieldSize="sm"
                 type="number"
                 value={state.numberMax}
                 onChange={(e) => onChange('numberMax', e.target.value)}
               />
-            </label>
-            <label className={styles.formGroup}>
-              <span className={styles.label}>Step</span>
+            </div>
+            <div className={styles.formGroup}>
+              <label htmlFor={numberStepId} className={styles.label}>Step</label>
               <Input
+                id={numberStepId}
                 fieldSize="sm"
                 type="number"
                 value={state.numberStep}
                 onChange={(e) => onChange('numberStep', e.target.value)}
               />
-            </label>
+            </div>
           </div>
           <div className={styles.switchRow}>
             <span className={styles.switchLabel}>Integer only</span>
@@ -464,18 +479,19 @@ function FieldEditForm({
             />
           </div>
           {state.numberFormat === 'currency' && (
-            <label className={styles.formGroup}>
-              <span className={styles.label}>
+            <div className={styles.formGroup}>
+              <label htmlFor={numberCurrencyId} className={styles.label}>
                 Currency code <span className={styles.optional}>(e.g. USD)</span>
-              </span>
+              </label>
               <Input
+                id={numberCurrencyId}
                 fieldSize="sm"
                 value={state.numberCurrency}
                 onChange={(e) => onChange('numberCurrency', e.target.value)}
                 placeholder="USD"
                 maxLength={10}
               />
-            </label>
+            </div>
           )}
         </>
       )}

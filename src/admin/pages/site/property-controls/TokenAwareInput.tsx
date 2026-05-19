@@ -20,7 +20,6 @@
  */
 
 import {
-  forwardRef,
   useCallback,
   useEffect,
   useImperativeHandle,
@@ -28,6 +27,7 @@ import {
   useRef,
   useState,
   type CSSProperties,
+  type Ref,
 } from 'react'
 import { createPortal } from 'react-dom'
 import { Input } from '@ui/components/Input'
@@ -83,34 +83,33 @@ interface TokenAwareInputProps {
   autoComplete?: string
   disabled?: boolean
   'data-testid'?: string
+  /** React 19: ref is a regular prop on function components. */
+  ref?: Ref<TokenAwareInputHandle>
 }
 
 // ---------------------------------------------------------------------------
 // TokenAwareInput
 // ---------------------------------------------------------------------------
 
-export const TokenAwareInput = forwardRef<TokenAwareInputHandle, TokenAwareInputProps>(
-  function TokenAwareInput(
-    {
-      value,
-      placeholder,
-      tokens,
-      onCommit,
-      onPreview,
-      onClearPreview,
-      fieldSize = 'sm',
-      'aria-label': ariaLabel,
-      className,
-      inputClassName,
-      style,
-      menuAriaLabel,
-      spellCheck = false,
-      autoComplete = 'off',
-      disabled,
-      'data-testid': dataTestId,
-    },
-    ref,
-  ) {
+export function TokenAwareInput({
+  value,
+  placeholder,
+  tokens,
+  onCommit,
+  onPreview,
+  onClearPreview,
+  fieldSize = 'sm',
+  'aria-label': ariaLabel,
+  className,
+  inputClassName,
+  style,
+  menuAriaLabel,
+  spellCheck = false,
+  autoComplete = 'off',
+  disabled,
+  'data-testid': dataTestId,
+  ref,
+}: TokenAwareInputProps) {
     const display = displayTokenValue(value, tokens)
     const placeholderDisplay = displayTokenValue(placeholder, tokens)
 
@@ -314,6 +313,5 @@ export const TokenAwareInput = forwardRef<TokenAwareInputHandle, TokenAwareInput
           )}
       </div>
     )
-  },
-)
+}
 

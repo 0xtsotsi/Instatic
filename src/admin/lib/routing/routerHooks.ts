@@ -16,7 +16,7 @@
  *   import { useLocation, useNavigate, Link, Router } from '@admin/lib/routing'
  */
 
-import { createContext, useContext } from 'react'
+import { createContext, use } from 'react'
 
 // ---------------------------------------------------------------------------
 // Types — exported for both this file's hooks and router.tsx's components.
@@ -110,7 +110,7 @@ export function matchPath(
 // ---------------------------------------------------------------------------
 
 function useRouterContextOrThrow(): RouterContextValue {
-  const ctx = useContext(RouterContext)
+  const ctx = use(RouterContext)
   if (!ctx) {
     throw new Error('Router hooks must be used inside <Router> or <MemoryRouter>')
   }
@@ -118,7 +118,7 @@ function useRouterContextOrThrow(): RouterContextValue {
 }
 
 export function useInRouterContext(): boolean {
-  return useContext(RouterContext) !== null
+  return use(RouterContext) !== null
 }
 
 export function useLocation(): Location {
@@ -130,5 +130,5 @@ export function useNavigate(): NavigateFn {
 }
 
 export function useParams<T extends Record<string, string> = Record<string, string>>(): T {
-  return useContext(RouteContext).params as T
+  return use(RouteContext).params as T
 }

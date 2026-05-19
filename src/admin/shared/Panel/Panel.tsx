@@ -25,7 +25,7 @@
  * @see Guideline #192 — `data-panel` event-propagation guard
  * @see Guideline #357 — Compact UI density (36px header)
  */
-import { forwardRef, type CSSProperties, type ReactNode, type Ref } from 'react'
+import type { CSSProperties, ReactNode, Ref } from 'react'
 import { PanelHeader } from '@admin/shared/PanelHeader'
 import { cn } from '@ui/cn'
 import styles from './Panel.module.css'
@@ -64,6 +64,8 @@ interface PanelProps {
   className?: string
   /** Children render inside the body wrapper. */
   children?: ReactNode
+  /** React 19: ref is a regular prop on function components. */
+  ref?: Ref<HTMLElement>
 }
 
 /**
@@ -73,24 +75,22 @@ interface PanelProps {
  * Forwards a ref to the outer `<aside>` so callers can focus it or
  * measure it (e.g. SiteExplorerPanel's autofocus on open).
  */
-export const Panel = forwardRef<HTMLElement, PanelProps>(function Panel(
-  {
-    panelId,
-    title,
-    titleContent,
-    ariaLabel,
-    testId,
-    onClose,
-    headerActions,
-    body = 'padded',
-    bodyClassName,
-    bodyRef,
-    bodyStyle,
-    className,
-    children,
-  },
+export function Panel({
+  panelId,
+  title,
+  titleContent,
+  ariaLabel,
+  testId,
+  onClose,
+  headerActions,
+  body = 'padded',
+  bodyClassName,
+  bodyRef,
+  bodyStyle,
+  className,
+  children,
   ref,
-) {
+}: PanelProps) {
   return (
     <aside
       ref={ref}
@@ -123,4 +123,4 @@ export const Panel = forwardRef<HTMLElement, PanelProps>(function Panel(
       </div>
     </aside>
   )
-})
+}
