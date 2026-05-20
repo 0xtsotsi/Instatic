@@ -55,6 +55,13 @@
     justify-content: flex-end;
 }
 
+.identityRow {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-width: 0;
+}
+
 .identity {
     display: grid;
     gap: 5px;

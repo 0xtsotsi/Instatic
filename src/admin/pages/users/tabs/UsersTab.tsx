@@ -33,6 +33,7 @@ import {
   type CmsCurrentUser,
 } from '@core/persistence'
 import { StepUpCancelledMessage, useStepUp } from '@admin/shared/StepUp'
+import { UserAvatar } from '@admin/shared/UserAvatar'
 import { Badge } from '../components/Badge'
 import { RowActionMenu } from '../components/RowActionMenu'
 import { UserDialog } from '../components/UserDialog'
@@ -248,9 +249,12 @@ export function UsersTab({ data, canManageUsers }: UsersTabProps) {
               return (
                 <DataTableRow key={user.id} aria-label={`User ${user.email}`}>
                   <DataTableCell>
-                    <div className={styles.identity}>
-                      <strong>{label}</strong>
-                      <span>{user.email}</span>
+                    <div className={styles.identityRow}>
+                      <UserAvatar user={user} size={32} alt={null} />
+                      <div className={styles.identity}>
+                        <strong>{label}</strong>
+                        <span>{user.email}</span>
+                      </div>
                     </div>
                   </DataTableCell>
                   <DataTableCell>
