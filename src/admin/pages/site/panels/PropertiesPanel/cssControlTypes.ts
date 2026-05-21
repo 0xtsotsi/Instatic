@@ -19,6 +19,7 @@ import { PaintBucketSolidIcon } from 'pixel-art-icons/icons/paint-bucket-solid'
 import { BoxSolidIcon } from 'pixel-art-icons/icons/box-solid'
 import { SparklesSolidIcon } from 'pixel-art-icons/icons/sparkles-solid'
 import { PointerSolidIcon } from 'pixel-art-icons/icons/pointer-solid'
+import { hasStyleValue } from './styleValueUtils'
 
 // ---------------------------------------------------------------------------
 // Public types
@@ -470,9 +471,4 @@ export function getClassStyleSectionSetCounts(
  */
 export function getActiveStyleTab(activeBreakpointId: string | undefined): string {
   return activeBreakpointId && activeBreakpointId !== 'desktop' ? activeBreakpointId : 'base'
-}
-
-// Private helper (also used in getClassStyleSectionSetCounts above)
-function hasStyleValue(value: unknown): value is string | number {
-  return value !== undefined && value !== null && value !== ''
 }

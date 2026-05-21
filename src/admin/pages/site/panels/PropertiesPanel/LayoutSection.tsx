@@ -25,10 +25,9 @@
  *     flex (or grid via the dropdown), the dependent rows fade in.
  */
 
-import { useMemo, useRef, useState, type ReactNode } from 'react'
+import { useRef, useState, type ReactNode } from 'react'
 import type { CSSPropertyBag } from '@core/page-tree'
 import { Button } from '@ui/components/Button'
-import { ContextMenu, ContextMenuItem } from '@ui/components/ContextMenu'
 import { Input } from '@ui/components/Input'
 import { SegmentedControl } from '@ui/components/SegmentedControl'
 import { ChevronDownIcon } from 'pixel-art-icons/icons/chevron-down'
@@ -54,9 +53,11 @@ import { AlignVerticalSpaceBetweenSolidIcon } from 'pixel-art-icons/icons/align-
 import { AlignVerticalSpaceAroundSolidIcon } from 'pixel-art-icons/icons/align-vertical-space-around-solid'
 import { UnderlineIcon } from 'pixel-art-icons/icons/underline'
 import { ClassPropertyRow } from './ClassPropertyRow'
+import { DropdownSwitcher } from './DropdownSwitcher'
 import { TokenAwareInput } from '@site/property-controls/TokenAwareInput'
 import { useSpacingTokens } from '@site/property-controls/tokenUtils'
 import { getEnumOptions, getCSSPropertyDefaultValue } from './cssControlTypes'
+import { hasStyleValue, readString } from './styleValueUtils'
 import styles from './LayoutSection.module.css'
 
 // ---------------------------------------------------------------------------
@@ -147,8 +148,11 @@ export function LayoutSection({
   return (
     <div className={styles.layoutSection}>
       {/* Display switcher — unlabeled, full width */}
-      <DisplaySwitcher
+      <DropdownSwitcher
+        property="display"
         value={display}
+        primarySegments={DISPLAY_PRIMARY_SEGMENTS}
+        allOptions={DISPLAY_OPTIONS}
         onChange={(v) => onChange('display', v)}
         onClear={() => onClearProperty('display')}
       />
@@ -277,157 +281,27 @@ export function LayoutSection({
 }
 
 // ---------------------------------------------------------------------------
-// DisplaySwitcher — Flex | Grid | ▼ all values
+// Display switcher config — Flex | Grid + dropdown of every other value
 // ---------------------------------------------------------------------------
 
-interface DisplaySwitcherProps {
-  value: string | undefined
-  onChange: (value: string) => void
-  onClear: () => void
-}
+const DISPLAY_OPTIONS = getEnumOptions('display') ?? ['block']
 
-/**
- * Three visual states keyed off the current `display` value:
- *
- *   1. unset — `[ Flex | Grid | ▼ ]` segmented row, no segment pressed.
- *   2. flex / grid — same row, the matching segment pressed. Hovering the
- *      pressed segment reveals a close-icon overlay; clicking it clears
- *      the property (`onClear()`).
- *   3. other value (block, inline-block, none, …) — the segmented row is
- *      replaced by a full-width chip showing the current value alongside
- *      a square close button that clears it. Clicking the chip itself
- *      reopens the dropdown so users can pick a different value.
- *
- * The chevron-down trailing button always opens a ContextMenu listing every
- * `display` value from cssControlTypes.ts so power users can reach values
- * not promoted to the primary segments.
- */
-function DisplaySwitcher({ value, onChange, onClear }: DisplaySwitcherProps) {
-  const [menuOpen, setMenuOpen] = useState(false)
-  const triggerRef = useRef<HTMLButtonElement>(null)
-
-  const allOptions = useMemo(() => getEnumOptions('display') ?? ['block'], [])
-  const isOtherValue = value != null && value !== '' && value !== 'flex' && value !== 'grid'
-
-  const menu = menuOpen ? (
-    <ContextMenu
-      anchorRef={triggerRef}
-      triggerRef={triggerRef}
-      align="end"
-      side="bottom"
-      offset={6}
-      ariaLabel="Display values"
-      onClose={() => setMenuOpen(false)}
-    >
-      {allOptions.map((opt) => (
-        <ContextMenuItem
-          key={opt}
-          role="menuitemradio"
-          aria-checked={value === opt}
-          active={value === opt}
-          onClick={() => {
-            onChange(opt)
-            setMenuOpen(false)
-          }}
-        >
-          {opt}
-        </ContextMenuItem>
-      ))}
-    </ContextMenu>
-  ) : null
-
-  // ── Other-value state — full-width chip + close button ───────────────────
-  if (isOtherValue) {
-    return (
-      <div
-        className={styles.displayRow}
-        data-testid="css-display-switcher"
-        data-display-value={value ?? ''}
-      >
-        <div className={styles.displayChipGroup}>
-          <Button
-            ref={triggerRef}
-            variant="secondary"
-            size="sm"
-            fullWidth
-            align="start"
-            aria-haspopup="menu"
-            aria-expanded={menuOpen}
-            aria-label={`Display: ${value}`}
-            tooltip="Change display value"
-            className={styles.displayChip}
-            onClick={() => setMenuOpen((o) => !o)}
-          >
-            <span className={styles.displayChipKicker}>display</span>
-            <span className={styles.displayChipValue}>{value}</span>
-          </Button>
-          <Button
-            variant="secondary"
-            size="sm"
-            iconOnly
-            aria-label={`Clear display (${value})`}
-            tooltip="Clear display"
-            className={styles.displayChipClear}
-            onClick={onClear}
-          >
-            <CloseIcon size={14} color="currentColor" />
-          </Button>
-        </div>
-        {menu}
-      </div>
-    )
-  }
-
-  // ── Unset / flex / grid state — segmented control ────────────────────────
-  return (
-    <div
-      className={styles.displayRow}
-      data-testid="css-display-switcher"
-      data-display-value={value ?? ''}
-    >
-      <SegmentedControl
-        fullWidth
-        aria-label="Display"
-        value={value === 'flex' || value === 'grid' ? value : undefined}
-        onChange={onChange}
-        onClear={onClear}
-        options={[
-          {
-            value: 'flex',
-            label: 'Flex',
-            icon: <LayoutSolidIcon size={14} />,
-            ariaLabel: 'Flex layout',
-            tooltip: 'display: flex',
-          },
-          {
-            value: 'grid',
-            label: 'Grid',
-            icon: <Grid2x22SolidIcon size={14} />,
-            ariaLabel: 'Grid layout',
-            tooltip: 'display: grid',
-          },
-        ]}
-        trailing={({ trailingClassName }) => (
-          <Button
-            ref={triggerRef}
-            variant="secondary"
-            size="sm"
-            iconOnly
-            aria-haspopup="menu"
-            aria-expanded={menuOpen}
-            aria-label="More display values"
-            tooltip="More display values"
-            className={trailingClassName}
-            onClick={() => setMenuOpen((o) => !o)}
-          >
-            <ChevronDownIcon size={14} color="currentColor" />
-          </Button>
-        )}
-      />
-      {menu}
-    </div>
-  )
-}
+const DISPLAY_PRIMARY_SEGMENTS = [
+  {
+    value: 'flex',
+    label: 'Flex',
+    icon: <LayoutSolidIcon size={14} />,
+    ariaLabel: 'Flex layout',
+    tooltip: 'display: flex',
+  },
+  {
+    value: 'grid',
+    label: 'Grid',
+    icon: <Grid2x22SolidIcon size={14} />,
+    ariaLabel: 'Grid layout',
+    tooltip: 'display: grid',
+  },
+] as const
 
 // ---------------------------------------------------------------------------
 // FlexDirectionControl
@@ -1010,16 +884,6 @@ function LabeledControl({ label, isSet, children }: LabeledControlProps) {
 // ---------------------------------------------------------------------------
 // Helpers
 // ---------------------------------------------------------------------------
-
-function readString(styles: Record<string, unknown>, key: string): string | undefined {
-  const v = styles[key]
-  if (typeof v === 'string' && v !== '') return v
-  return undefined
-}
-
-function hasStyleValue(value: unknown): value is string | number {
-  return value !== undefined && value !== null && value !== ''
-}
 
 /**
  * Parse a `repeat(N, 1fr)` template into its track count `N`. Returns null

@@ -21,6 +21,7 @@ import {
   getActiveStyleTab,
   type ClassStyleSectionDefinition,
 } from './cssControlTypes'
+import { hasStyleValue } from './styleValueUtils'
 import styles from './ClassComposer.module.css'
 import sectionStyles from '@ui/components/Section/Section.module.css'
 
@@ -281,8 +282,4 @@ function propertyMatchesQuery(prop: keyof CSSPropertyBag, query: string): boolea
   const raw = String(prop).toLowerCase()
   const label = cssPropertyLabel(String(prop)).toLowerCase()
   return raw.includes(query) || label.includes(query)
-}
-
-function hasStyleValue(value: unknown): value is string | number {
-  return value !== undefined && value !== null && value !== ''
 }

@@ -26,22 +26,20 @@
  * vocabulary stays in one place — `displayRow`, `displayChipGroup`, etc.
  */
 
-import { useRef, useState } from 'react'
 import type { IconComponent } from 'pixel-art-icons/types'
 import type { CSSPropertyBag } from '@core/page-tree'
 import { Button } from '@ui/components/Button'
-import { ContextMenu, ContextMenuItem } from '@ui/components/ContextMenu'
-import { SegmentedControl } from '@ui/components/SegmentedControl'
-import { ChevronDownIcon } from 'pixel-art-icons/icons/chevron-down'
 import { CloseIcon } from 'pixel-art-icons/icons/close'
 import { ArrowBarUpIcon } from 'pixel-art-icons/icons/arrow-bar-up'
 import { ArrowBarRightIcon } from 'pixel-art-icons/icons/arrow-bar-right'
 import { ArrowBarDownIcon } from 'pixel-art-icons/icons/arrow-bar-down'
 import { ArrowBarLeftIcon } from 'pixel-art-icons/icons/arrow-bar-left'
 import { ClassPropertyRow } from './ClassPropertyRow'
+import { DropdownSwitcher } from './DropdownSwitcher'
 import { TokenAwareInput } from '@site/property-controls/TokenAwareInput'
 import { useSpacingTokens, type Token } from '@site/property-controls/tokenUtils'
 import { getCSSPropertyDefaultValue } from './cssControlTypes'
+import { hasStyleValue, readString } from './styleValueUtils'
 import styles from './LayoutSection.module.css'
 
 // ---------------------------------------------------------------------------
@@ -93,8 +91,11 @@ export function PositionSection({
 
   return (
     <>
-      <PositionSwitcher
+      <DropdownSwitcher
+        property="position"
         value={position}
+        primarySegments={POSITION_PRIMARY_SEGMENTS}
+        allOptions={POSITION_OPTIONS}
         onChange={(v) => onChange('position', v)}
         onClear={() => onClearProperty('position')}
       />
@@ -160,151 +161,25 @@ export function PositionSection({
 }
 
 // ---------------------------------------------------------------------------
-// PositionSwitcher — Relative | Absolute | ▼ all values
+// Position switcher config — Relative | Absolute + dropdown of every value
 // ---------------------------------------------------------------------------
-
-interface PositionSwitcherProps {
-  value: string | undefined
-  onChange: (value: string) => void
-  onClear: () => void
-}
 
 const POSITION_OPTIONS = ['static', 'relative', 'absolute', 'fixed', 'sticky'] as const
 
-/**
- * Mirrors DisplaySwitcher's three-state shape:
- *
- *   1. unset — `[ Relative | Absolute | ▼ ]`, nothing pressed.
- *   2. relative / absolute — segmented row, matching segment pressed +
- *      hover-X clears the property.
- *   3. other value (fixed / sticky / static) — full-width chip showing
- *      the current value with a square close button. Clicking the chip
- *      body reopens the dropdown so users can switch values.
- */
-function PositionSwitcher({ value, onChange, onClear }: PositionSwitcherProps) {
-  const [menuOpen, setMenuOpen] = useState(false)
-  const triggerRef = useRef<HTMLButtonElement>(null)
-
-  const isPrimary = value === 'relative' || value === 'absolute'
-  const isOtherValue = value != null && value !== '' && !isPrimary
-
-  const menu = menuOpen ? (
-    <ContextMenu
-      anchorRef={triggerRef}
-      triggerRef={triggerRef}
-      align="end"
-      side="bottom"
-      offset={6}
-      ariaLabel="Position values"
-      onClose={() => setMenuOpen(false)}
-    >
-      {POSITION_OPTIONS.map((opt) => (
-        <ContextMenuItem
-          key={opt}
-          role="menuitemradio"
-          aria-checked={value === opt}
-          active={value === opt}
-          onClick={() => {
-            onChange(opt)
-            setMenuOpen(false)
-          }}
-        >
-          {opt}
-        </ContextMenuItem>
-      ))}
-    </ContextMenu>
-  ) : null
-
-  // ── Other-value state — chip + close ─────────────────────────────────────
-  if (isOtherValue) {
-    return (
-      <div
-        className={styles.displayRow}
-        data-testid="css-position-switcher"
-        data-position-value={value ?? ''}
-      >
-        <div className={styles.displayChipGroup}>
-          <Button
-            ref={triggerRef}
-            variant="secondary"
-            size="sm"
-            fullWidth
-            align="start"
-            aria-haspopup="menu"
-            aria-expanded={menuOpen}
-            aria-label={`Position: ${value}`}
-            tooltip="Change position value"
-            className={styles.displayChip}
-            onClick={() => setMenuOpen((o) => !o)}
-          >
-            <span className={styles.displayChipKicker}>position</span>
-            <span className={styles.displayChipValue}>{value}</span>
-          </Button>
-          <Button
-            variant="secondary"
-            size="sm"
-            iconOnly
-            aria-label={`Clear position (${value})`}
-            tooltip="Clear position"
-            className={styles.displayChipClear}
-            onClick={onClear}
-          >
-            <CloseIcon size={14} color="currentColor" />
-          </Button>
-        </div>
-        {menu}
-      </div>
-    )
-  }
-
-  // ── Unset / relative / absolute — segmented control ──────────────────────
-  return (
-    <div
-      className={styles.displayRow}
-      data-testid="css-position-switcher"
-      data-position-value={value ?? ''}
-    >
-      <SegmentedControl
-        fullWidth
-        aria-label="Position"
-        value={isPrimary ? value : undefined}
-        onChange={onChange}
-        onClear={onClear}
-        options={[
-          {
-            value: 'relative',
-            label: 'Relative',
-            ariaLabel: 'Position relative',
-            tooltip: 'position: relative',
-          },
-          {
-            value: 'absolute',
-            label: 'Absolute',
-            ariaLabel: 'Position absolute',
-            tooltip: 'position: absolute',
-          },
-        ]}
-        trailing={({ trailingClassName }) => (
-          <Button
-            ref={triggerRef}
-            variant="secondary"
-            size="sm"
-            iconOnly
-            aria-haspopup="menu"
-            aria-expanded={menuOpen}
-            aria-label="More position values"
-            tooltip="More position values"
-            className={trailingClassName}
-            onClick={() => setMenuOpen((o) => !o)}
-          >
-            <ChevronDownIcon size={14} color="currentColor" />
-          </Button>
-        )}
-      />
-      {menu}
-    </div>
-  )
-}
+const POSITION_PRIMARY_SEGMENTS = [
+  {
+    value: 'relative',
+    label: 'Relative',
+    ariaLabel: 'Position relative',
+    tooltip: 'position: relative',
+  },
+  {
+    value: 'absolute',
+    label: 'Absolute',
+    ariaLabel: 'Position absolute',
+    tooltip: 'position: absolute',
+  },
+] as const
 
 // ---------------------------------------------------------------------------
 // DirectionInput — icon-as-label numeric/text input for top/right/bottom/left
@@ -373,16 +248,3 @@ function DirectionInput({
   )
 }
 
-// ---------------------------------------------------------------------------
-// Helpers
-// ---------------------------------------------------------------------------
-
-function readString(styles: Record<string, unknown>, key: string): string | undefined {
-  const v = styles[key]
-  if (typeof v === 'string' && v !== '') return v
-  return undefined
-}
-
-function hasStyleValue(value: unknown): value is string | number {
-  return value !== undefined && value !== null && value !== ''
-}
