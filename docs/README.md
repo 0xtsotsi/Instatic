@@ -20,7 +20,10 @@ docs/
 ├── editor.md                   ← admin + visual editor deep dive
 │
 ├── features/                   ← "what X is and how it works" (per-feature)
-│   └── plugin-system.md
+│   ├── plugin-system.md
+│   ├── editor-preferences.md
+│   ├── media.md
+│   └── canvas-iframe-per-frame.md
 │
 ├── reference/                  ← short cookbook pages for primitives + patterns
 │   ├── page-tree.md
@@ -103,9 +106,12 @@ Plans (`docs/plans/`) describe in-flight work and are deleted when the work ship
 
 ### Features
 
-| Doc                                              | What it covers                                                       |
-|--------------------------------------------------|----------------------------------------------------------------------|
-| [features/plugin-system.md](features/plugin-system.md) | The plugin system end-to-end: package shape, lifecycle, sandbox, SDK, permissions, CLI |
+| Doc                                                              | What it covers                                                       |
+|------------------------------------------------------------------|----------------------------------------------------------------------|
+| [features/plugin-system.md](features/plugin-system.md)           | The plugin system end-to-end: package shape, lifecycle, sandbox, SDK, permissions, CLI |
+| [features/editor-preferences.md](features/editor-preferences.md) | Catalog-driven local UI preferences for the editor                   |
+| [features/media.md](features/media.md)                           | The Media workspace: folders, assets, upload pipeline, storage adapters |
+| [features/canvas-iframe-per-frame.md](features/canvas-iframe-per-frame.md) | Per-breakpoint iframe rendering in the visual editor canvas |
 
 ### Reference
 

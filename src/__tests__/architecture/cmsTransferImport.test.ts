@@ -12,7 +12,7 @@
  *
  * @see server/handlers/cms/import.ts
  * @see src/core/data/bundleSchema.ts
- * @see docs/superpowers/plans/2026-05-19-site-transfer-ux.md
+ * @see docs/plans/2026-05-19-site-transfer-ux.md
  */
 
 import { describe, test, expect, beforeAll } from 'bun:test'

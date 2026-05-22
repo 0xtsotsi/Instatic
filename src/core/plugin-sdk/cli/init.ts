@@ -82,7 +82,7 @@ export default definePlugin({
   permissions: [permissions.modulesRegister],
   modules: [hello],
   // Add settings, admin pages, hooks, frontend bundles, or a Visual Component
-  // pack here as your plugin grows. See docs/plugins/authoring.md for the
+  // pack here as your plugin grows. See docs/features/plugin-system.md for the
   // full SDK surface.
 })
 `
@@ -138,8 +138,8 @@ You'll need to install the plugin once via the admin UI (\`/admin/plugins\` →
 Upload Plugin) so the host registers it and approves permissions. After
 that, every \`pb-plugin dev\` rebuild flows in without another upload.
 
-See [docs/plugins/authoring.md](../page-builder/docs/plugins/authoring.md) for
-the full plugin SDK surface.
+See [docs/features/plugin-system.md](../page-builder/docs/features/plugin-system.md)
+for the full plugin SDK surface.
 `
 }
 

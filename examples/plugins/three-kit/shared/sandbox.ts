@@ -57,7 +57,7 @@ const STAGE_STYLES = `
 /**
  * Build the ESM source string the iframe runs. The host expects
  * `mount(root, context) => { update?, cleanup? }`. The shape below is the
- * standard pattern from the host's docs (`docs/plugins/sandbox.md`).
+ * standard pattern from the host's docs (`docs/features/plugin-system.md`).
  *
  * The string is template-built once at build time and shipped verbatim
  * into the iframe via `srcDoc`. No interpolation happens at runtime.

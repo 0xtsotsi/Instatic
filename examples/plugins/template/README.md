@@ -104,6 +104,5 @@ Remove permissions you don't need — users see the full permission list before 
 
 ## Further reading
 
-- [Plugin authoring guide](../../../docs/plugins/authoring.md)
-- [Permission reference](../../../docs/plugins/permissions.md)
+- [Plugin system docs](../../../docs/features/plugin-system.md)
 - [Full showcase plugin](../showcase/)

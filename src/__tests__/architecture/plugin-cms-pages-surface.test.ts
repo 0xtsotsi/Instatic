@@ -50,8 +50,8 @@ describe('cms.pages plugin API surface', () => {
     expect(source).toContain("cmsPagesPublish: 'cms.pages.publish'")
   })
 
-  it('docs/plugins/permissions.md documents cms.pages.read and cms.pages.publish', async () => {
-    const source = await read('docs/plugins/permissions.md')
+  it('docs/features/plugin-system.md documents cms.pages.read and cms.pages.publish', async () => {
+    const source = await read('docs/features/plugin-system.md')
     expect(source).toContain('cms.pages.read')
     expect(source).toContain('cms.pages.publish')
   })

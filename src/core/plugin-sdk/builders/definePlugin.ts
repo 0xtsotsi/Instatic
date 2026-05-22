@@ -73,7 +73,7 @@ export interface DefinePluginConfig {
    * Allowed outbound HTTP hosts. Required when `permissions` includes
    * `network.outbound`; ignored otherwise. Plain hostnames match exactly,
    * the leading `*.` wildcard matches one subdomain segment. See
-   * `docs/plugins/sandbox.md` for full semantics.
+   * `docs/features/plugin-system.md` for full semantics.
    */
   networkAllowedHosts?: string[]
 

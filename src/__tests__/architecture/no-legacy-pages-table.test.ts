@@ -23,7 +23,7 @@
  *
  * @see server/db/migrations-pg.ts      — Postgres baseline
  * @see server/db/migrations-sqlite.ts  — SQLite baseline
- * @see docs/superpowers/plans/2026-05-19-unified-content-storage.md
+ * @see docs/plans/2026-05-19-unified-content-storage.md
  */
 
 import { describe, test, expect } from 'bun:test'
