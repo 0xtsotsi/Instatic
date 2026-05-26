@@ -65,11 +65,6 @@ interface TemplateRenderDataContext {
 }
 ```
 
-There is no `viewer` frame — the product is admin-only and has no
-public-visitor identity concept (pre-v1 cleanup). A `viewer` binding
-source can be reintroduced later as a core feature (member auth) or
-exposed by a plugin via a future plugin-source registry.
-
 Builders:
 
 ```ts

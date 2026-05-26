@@ -51,13 +51,6 @@ import {
  * Frames are stable references across the whole render pass; the loop
  * interceptor only mutates `entryStack`. This keeps the resolver
  * branchless for the common case (frame lookup is a property read).
- *
- * Note on viewer / visitor identity: the product is admin-only today —
- * there is no public-visitor auth or session concept. A `viewer` binding
- * source was considered for `{viewer.displayName}`-style tokens but
- * removed pre-v1: dead surface on the public site, and trivial to add
- * later either as a core feature (member auth) or as a plugin-provided
- * binding-source registry. See the publishing-architecture plan doc.
  */
 export interface TemplateRenderDataContext {
   entryStack: LoopItem[]

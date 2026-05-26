@@ -61,11 +61,6 @@ import { containsTokens, parseTokenString } from '@core/templates/tokenInterpola
  *   - `site.*`            → publish-time
  *   - `route.path`        → publish-time (fixed per static route)
  *   - `route.slug`        → publish-time
- *
- * No public-visitor identity source is built in. Membership / visitor-auth
- * is a future feature (likely as a plugin); when it lands, the plugin
- * (or a future plugin-source registry) is the place to declare its own
- * request-dependent sources.
  */
 export function isBindingSourceRequestDependent(source: string, field: string): boolean {
   switch (source) {

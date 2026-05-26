@@ -17,9 +17,6 @@ import { useEditorStore } from '@site/store/store'
  *   - `entryStack` — populated only for template pages, with a single
  *     synthetic preview row from the table's schema. Loop iterations
  *     push/pop on top of this stack via `NodeRenderer`'s loop branch.
- *
- * There is no `viewer` frame: the product has no public-visitor identity
- * concept. Adding one is a future feature (likely plugin-driven).
  */
 export function useTemplatePreviewContext(page: Page | null): TemplateRenderDataContext | undefined {
   // Read site once; the page argument is already reactive via the caller.

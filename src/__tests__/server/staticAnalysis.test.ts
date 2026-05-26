@@ -122,11 +122,6 @@ describe('isBindingSourceRequestDependent', () => {
 
   it('returns false for unknown sources (conservative / static-default)', () => {
     expect(isBindingSourceRequestDependent('unknown', 'field')).toBe(false)
-    // Pre-v1, no public-visitor identity source exists. A `viewer` source
-    // would have been classified as request-dependent if it existed; the
-    // unknown-source default keeps the door open for a plugin-provided
-    // visitor frame later without forcing it to be request-dependent.
-    expect(isBindingSourceRequestDependent('viewer', 'displayName')).toBe(false)
   })
 })
 

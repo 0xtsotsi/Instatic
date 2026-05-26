@@ -131,13 +131,9 @@ export async function handleHoleRequest(
     async () => {
       // Render the node subtree with no dynamicNodeIds — inside the hole
       // endpoint we render fully (the node is already the dynamic boundary).
-      //
-      // The template context carries the entry stack only (loops mutate it
-      // around iterations). The product has no public-visitor identity
-      // concept yet — there's no `viewer` source on the binding side and no
-      // visitor-auth on the server side. Per-request bindings today come
-      // from `route.query.*` and from plugin-registered request-dependent
-      // loop sources or `dynamic: true` modules.
+      // Per-request bindings come from `route.query.*` and from plugin-
+      // registered request-dependent loop sources or `dynamic: true`
+      // modules.
       const renderCtx: RenderContext = {
         page: foundPage,
         site: snapshot.site,

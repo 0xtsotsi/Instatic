@@ -489,12 +489,7 @@ A node is **dynamic** if any of the following holds:
    - `route.query.*` → REQUEST (varies per visitor URL)
    - `site.*` / `page.*` → publish-time
    - Plugin-registered sources declare their own classification via
-     `requestDependent: boolean` on registration. (No public-visitor
-     identity source is built in. A `viewer.*` source was considered
-     for `{viewer.displayName}`-style tokens but removed before v1:
-     dead surface on the public site without a visitor-auth concept.
-     Plugins can add their own via a future plugin-source registry,
-     or a member-auth feature can reintroduce it as a core source.)
+     `requestDependent: boolean` on registration.
 3. **It's a `base.loop` whose source is request-dependent** (e.g. a
    plugin loop source that hits a live API and declares itself
    request-dependent). Most built-in loops (querying the CMS data
