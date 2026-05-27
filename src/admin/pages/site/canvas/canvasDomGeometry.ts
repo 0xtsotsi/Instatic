@@ -21,6 +21,49 @@ export function getViewportLocalPoint(
   }
 }
 
+/**
+ * Translate a pointer event's `clientX` / `clientY` into editor-document
+ * coordinates.
+ *
+ * The canvas renders each breakpoint frame inside its own iframe (see
+ * `IframeFrameSurface`). Pointer events that originate inside a frame carry
+ * coordinates relative to THAT iframe's viewport — not the editor's. Anything
+ * portaled into the editor's `document.body` with `position: fixed` (the
+ * right-click context menu, popovers anchored to the cursor, etc.) needs the
+ * editor's viewport coordinates instead.
+ *
+ * The translation:
+ *  1. Resolve the iframe element that hosts the event target (via
+ *     `target.ownerDocument.defaultView.frameElement`).
+ *  2. Multiply the iframe-internal point by the canvas zoom (recovered from
+ *     `iframeRect.width / iframe.offsetWidth` — the iframe element itself is
+ *     scaled by the canvas transform layer, but the iframe's internal
+ *     coordinate space is its own un-transformed viewport).
+ *  3. Add the iframe's outer client rect to get editor-document coordinates.
+ *
+ * When the event originates in the editor's own document (e.g. right-click in
+ * the DOM panel), `frameElement` is null and we return `clientX` / `clientY`
+ * unchanged.
+ */
+export function clientPointToEditorDoc(event: {
+  clientX: number
+  clientY: number
+  target: EventTarget | null
+}): { x: number; y: number } {
+  const target = event.target as { ownerDocument?: Document | null } | null
+  const ownerDoc = target?.ownerDocument ?? null
+  const frame = (ownerDoc?.defaultView?.frameElement ?? null) as HTMLIFrameElement | null
+  if (!frame) {
+    return { x: event.clientX, y: event.clientY }
+  }
+  const iframeRect = frame.getBoundingClientRect()
+  const iframeScale = frame.offsetWidth > 0 ? iframeRect.width / frame.offsetWidth : 1
+  return {
+    x: iframeRect.left + event.clientX * iframeScale,
+    y: iframeRect.top + event.clientY * iframeScale,
+  }
+}
+
 export function measureCanvasNodeClientUnionRect(
   viewport: HTMLElement,
   nodeIds: readonly string[],

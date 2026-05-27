@@ -48,6 +48,7 @@ import { useCanvasRenameDialog } from './useCanvasRenameDialog'
 import { CanvasLayerContextMenu } from './CanvasLayerContextMenu'
 import { useCanvasLayerContextMenu } from './useCanvasLayerContextMenu'
 import { useCanvasKeyboardShortcuts } from './useCanvasKeyboardShortcuts'
+import { clientPointToEditorDoc } from './canvasDomGeometry'
 import { useConfirmDelete } from '@admin/shared/dialogs/ConfirmDeleteDialog'
 import { useEditorPreference } from '@site/preferences/editorPreferences'
 import { useTemplatePreviewContext } from '@site/hooks/useTemplatePreviewContext'
@@ -225,7 +226,14 @@ export function CanvasRoot({ editable = true }: CanvasRootProps) {
         selectNode(nodeId)
       }
       setFocusedPanel('canvas')
-      contextMenu.open({ x: e.clientX, y: e.clientY, nodeId })
+      // The right-click event originates inside the per-breakpoint iframe, so
+      // `e.clientX` / `e.clientY` are relative to the iframe's own viewport.
+      // The context menu is portaled into the editor's `document.body` with
+      // `position: fixed` — it needs editor-document coordinates, which
+      // `clientPointToEditorDoc` produces by adding the iframe's outer rect
+      // (scaled by the canvas zoom).
+      const point = clientPointToEditorDoc(e.nativeEvent)
+      contextMenu.open({ x: point.x, y: point.y, nodeId })
     },
     [activeBreakpointId, contextMenu, editable, selectNode, setActiveBreakpoint, setFocusedPanel],
   )
