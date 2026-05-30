@@ -16,6 +16,7 @@
  */
 import {
   Fragment,
+  useDeferredValue,
   useEffect,
   useMemo,
   useState,
@@ -183,6 +184,11 @@ export function DataGrid({
 
   // ── Toolbar state ─────────────────────────────────────────────────────────
   const [query, setQuery] = useState('')
+  // The search input stays bound to `query` (instant feedback) while the
+  // expensive filter + sort over potentially thousands of rows reads the
+  // deferred value — typing stays responsive and the heavy recompute runs at
+  // lower priority.
+  const deferredQuery = useDeferredValue(query)
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('all')
   const [sort, setSort] = useState<SortState | null>(null)
   const [checkedIds, setCheckedIds] = useState<Set<string>>(() => new Set())
@@ -224,7 +230,7 @@ export function DataGrid({
       }
     }
 
-    const q = query.trim().toLowerCase()
+    const q = deferredQuery.trim().toLowerCase()
     if (q.length > 0) {
       r = r.filter((row) => {
         for (const field of table.fields) {
@@ -245,7 +251,7 @@ export function DataGrid({
     }
 
     return r
-  }, [rows, hasPublishWorkflow, statusFilter, query, sort, table.fields])
+  }, [rows, hasPublishWorkflow, statusFilter, deferredQuery, sort, table.fields])
 
   // ── Group rows by status (publish-workflow kinds, when scope is 'all'/'pages'/'templates') ─
   //

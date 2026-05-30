@@ -267,9 +267,12 @@ export function DashboardPage() {
   // legitimately contains ids the registry hasn't caught up to yet.
   // Removals from the persisted layout only happen when the user
   // explicitly drops a tile via the customize-mode kebab menu.
-  const visibleItems = useMemo(() => layout.items, [layout.items])
+  // `layout.items` IS the visible set — the layout legitimately keeps ids the
+  // registry hasn't caught up to yet (plugin widgets register after mount), and
+  // the grid renders a skeleton for those slots rather than pruning them. No
+  // memo needed: this is a plain alias, not a derived array.
+  const visibleItems = layout.items
 
-  const activeKeys = visibleItems.map((i) => i.id)
   const showOnboarding = !layout.onboardingDismissed && !facts.loading
 
   /**
@@ -282,9 +285,9 @@ export function DashboardPage() {
    * widget reappears in the library on the next render.
    */
   const availableWidgets = useMemo(() => {
-    const active = new Set(activeKeys)
+    const active = new Set(layout.items.map((i) => i.id))
     return widgets.filter((w) => !active.has(w.id))
-  }, [widgets, activeKeys])
+  }, [widgets, layout.items])
 
   function handleDragStart(event: DragStartEvent) {
     setActiveId(String(event.active.id))
@@ -476,7 +479,7 @@ export function DashboardPage() {
       // Defensive: `availableWidgets` already filters out everything on
       // the grid, so the library shouldn't expose dupes — but guard
       // anyway in case a plugin re-registers the same id mid-drag.
-      if (activeKeys.includes(widgetId)) return
+      if (layout.items.some((i) => i.id === widgetId)) return
       addWidget(widgetId, target.size, target.rows, target.col, target.row)
       return
     }
