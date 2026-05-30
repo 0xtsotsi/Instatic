@@ -372,15 +372,21 @@ describe('commitImportPlan — conflict: auto-rename', () => {
 // Atomicity — forced upload failure leaves no partial store state
 // ---------------------------------------------------------------------------
 
-describe('commitImportPlan — atomicity on upload failure', () => {
-  it('throws when upload fails and does NOT call adapter.commit', async () => {
+describe('commitImportPlan — per-asset upload failure recovery', () => {
+  it('continues past upload failures, records them as warnings, and still commits the store mutation', async () => {
     const plan = buildImportPlan({ fileMap: makeSampleFileMap(), currentSite: makeEmptySiteDocument() })
     const adapter = makeMockAdapter({ uploadFail: true })
 
-    await expect(commitImportPlan(plan, adapter)).rejects.toThrow('upload failure')
+    // Per-asset failures used to throw and abort the whole commit. The new
+    // contract: catch each failure, surface it as an `asset-upload-failed`
+    // warning, continue uploading the rest, and still run `adapter.commit`
+    // so the user's pages + style rules land regardless.
+    const result = await commitImportPlan(plan, adapter)
 
-    // No ops should have been recorded (commit was never called)
-    expect(adapter.ops).toHaveLength(0)
+    expect(adapter.ops.length).toBeGreaterThan(0) // commit DID run
+    expect(result.assets).toEqual([]) // all uploads failed → no successful assets
+    const uploadFailures = result.warnings.filter((w) => w.kind === 'asset-upload-failed')
+    expect(uploadFailures.length).toBe(plan.assets.length)
   })
 })
 

@@ -210,6 +210,7 @@ function contentTypeForAssetPath(pathname: string): string {
   if (pathname.endsWith('.woff2')) return 'font/woff2'
   if (pathname.endsWith('.woff')) return 'font/woff'
   if (pathname.endsWith('.ttf')) return 'font/ttf'
+  if (pathname.endsWith('.otf')) return 'font/otf'
   return 'application/octet-stream'
 }
 

@@ -99,6 +99,21 @@ export function buildAssetPlan(
     normalizedStyleRules.push(...normalized)
   }
 
+  // --- Sweep up unreferenced binary/media files ---
+  //
+  // Anything the user bundled that classifies as image / font / binary lands
+  // in the media library even when nothing in the imported HTML / CSS refers
+  // to it. The intent is "I dragged a folder in, I expect to see those files
+  // in my media library" — silently dropping the unreferenced ones makes the
+  // wizard feel lossy. Page-source files (html, css, js, meta) are still
+  // excluded; they're consumed by the page / rule pipelines.
+  for (const [filePath, entry] of Object.entries(fileMap.files)) {
+    if (assetMap.has(filePath)) continue
+    const mimeType = entry.mimeType ?? guessMimeType(filePath)
+    if (NON_ASSET_MIME_PREFIXES.some((prefix) => mimeType.toLowerCase().startsWith(prefix))) continue
+    assetMap.set(filePath, { sourcePath: filePath, mimeType, bytes: entry.bytes })
+  }
+
   const assets = Array.from(assetMap.values())
 
   return { normalizedPagePlans, normalizedStyleRules, assets, warnings }
@@ -195,7 +210,7 @@ function normalizeRules(
     bucket.push(ref)
   }
 
-  return rules.map((rule, ruleIdx) => {
+  const normalized = rules.map((rule, ruleIdx) => {
     const refs = refsByRule.get(ruleIdx)
     if (!refs || refs.length === 0) return rule
 
@@ -231,6 +246,21 @@ function normalizeRules(
       breakpointStyles: newBpStyles,
     }
   })
+
+  // Orphan asset refs — those whose `ruleIndex` doesn't bind to any rule we
+  // emitted. The CSS parser uses this for assets that live inside a dropped
+  // at-rule we can't model (notably `@font-face`'s `src: url(...)`). We still
+  // want the underlying file in `plan.assets` so the user gets the binary in
+  // their media library; the @font-face declaration itself is lost, but the
+  // file is recoverable.
+  for (const [ruleIdx, refs] of refsByRule) {
+    if (ruleIdx < normalized.length) continue
+    for (const ref of refs) {
+      resolveAndRecord(ref.rawUrl, cssFilePath, fileMap, assetMap)
+    }
+  }
+
+  return normalized
 }
 
 // ---------------------------------------------------------------------------

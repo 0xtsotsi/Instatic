@@ -171,7 +171,7 @@ async function handleUploadMedia(
     role: 'original',
     uploadedByUserId: user.id,
     oversizedMessage: 'File exceeds the 50 MB hard limit',
-    unsupportedMessage: 'Only JPEG, PNG, GIF, WebP, MP4, and WebM files can be uploaded',
+    unsupportedMessage: 'Only JPEG, PNG, GIF, WebP, SVG, MP4, WebM, and web font (WOFF, WOFF2, TTF, OTF) files can be uploaded',
   })
   if (result instanceof Response) return result
   return jsonResponse({ asset: result }, { status: 201 })
@@ -213,7 +213,7 @@ async function handleReplaceMedia(
     role: 'original',
     uploadedByUserId: user.id,
     oversizedMessage: 'File exceeds the 50 MB hard limit',
-    unsupportedMessage: 'Only JPEG, PNG, GIF, WebP, MP4, and WebM files can be uploaded',
+    unsupportedMessage: 'Only JPEG, PNG, GIF, WebP, SVG, MP4, WebM, and web font (WOFF, WOFF2, TTF, OTF) files can be uploaded',
   })
   if (result instanceof Response) return result
   return jsonResponse({ asset: result })

@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it } from 'bun:test'
-import { mkdtempSync, rmSync } from 'node:fs'
+import { mkdtempSync, rmSync, readFileSync } from 'node:fs'
 import { readFile, writeFile } from 'node:fs/promises'
 import { extname, join } from 'node:path'
 import { tmpdir } from 'node:os'
@@ -478,7 +478,11 @@ describe('CMS media handlers', () => {
     }
   })
 
-  it('rejects an SVG upload (XSS gadget — explicitly off the allowlist)', async () => {
+  it('accepts an SVG upload but sanitises the script gadget out of the stored bytes', async () => {
+    // SVG is now an accepted media type (fonts + SVG were added so static-site
+    // imports keep their iconography). The security boundary moved from
+    // "reject all SVG" to "sanitise via DOMPurify before persistence": the
+    // upload succeeds, but the stored bytes have the <script> stripped.
     const db = makeFakeDb()
     const cookie = await createCookie(db)
     const uploadsDir = mkdtempSync(join(tmpdir(), 'page-builder-uploads-'))
@@ -487,8 +491,8 @@ describe('CMS media handlers', () => {
     body.set(
       'file',
       new File(
-        ['<svg xmlns="http://www.w3.org/2000/svg"><script>alert(1)</script></svg>'],
-        'evil.svg',
+        ['<svg xmlns="http://www.w3.org/2000/svg"><script>alert(1)</script><rect width="10" height="10"/></svg>'],
+        'logo.svg',
         { type: 'image/svg+xml' },
       ),
     )
@@ -504,8 +508,17 @@ describe('CMS media handlers', () => {
         { uploadsDir },
       )
 
-      expect(res.status).toBe(400)
-      expect(db.media).toHaveLength(0)
+      expect(res.status).toBe(201)
+      expect(db.media).toHaveLength(1)
+      expect(extname(String(db.media[0].storage_path))).toBe('.svg')
+
+      // The stored file on disk must NOT contain the script gadget.
+      const storagePath = String(db.media[0].storage_path)
+      const onDisk = readFileSync(join(uploadsDir, storagePath), 'utf8')
+      expect(onDisk).not.toContain('<script')
+      expect(onDisk).not.toContain('alert(1)')
+      // The benign geometry survives.
+      expect(onDisk.toLowerCase()).toContain('rect')
     } finally {
       rmSync(uploadsDir, { recursive: true, force: true })
     }

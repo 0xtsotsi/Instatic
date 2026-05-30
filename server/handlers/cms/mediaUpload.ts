@@ -38,6 +38,7 @@ import {
   dispatchUpload,
   MediaStorageDispatchError,
 } from './mediaUploadDispatch'
+import { sanitizeSvgBytes } from './svgSanitize'
 
 /**
  * Whitelist of media MIMEs we accept — keys are the canonical MIME, values
@@ -45,17 +46,28 @@ import {
  * extension → Content-Type, so picking the extension here is what guarantees
  * the served Content-Type.
  *
- * Notably absent: `image/svg+xml` (SVG can carry `<script>`),
- * `application/pdf` (browsers may render PDFs inline with embedded JS),
- * anything HTML/CSS/JS adjacent.
+ * SVG is allowed but goes through DOMPurify (SVG profile) before storage so
+ * any `<script>`, foreignObject, or javascript:/data: URLs are stripped.
+ * Fonts are static binaries with reliable magic bytes and no script surface.
+ *
+ * Notably absent: `application/pdf` (browsers may render PDFs inline with
+ * embedded JS), anything HTML/CSS/JS adjacent.
  */
 export const EXTENSION_FOR_MIME = {
   'image/jpeg': '.jpg',
   'image/png': '.png',
   'image/gif': '.gif',
   'image/webp': '.webp',
+  'image/svg+xml': '.svg',
   'video/mp4': '.mp4',
   'video/webm': '.webm',
+  // Web fonts — referenced from @font-face inside imported stylesheets. All
+  // four formats are pure binary containers with no script surface; magic
+  // bytes are reliable per the OpenType / WOFF specs.
+  'font/woff': '.woff',
+  'font/woff2': '.woff2',
+  'font/ttf': '.ttf',
+  'font/otf': '.otf',
 } as const
 
 export type AcceptedMediaMime = keyof typeof EXTENSION_FOR_MIME
@@ -65,6 +77,19 @@ export const IMAGE_MIMES: ReadonlyArray<AcceptedMediaMime> = [
   'image/png',
   'image/gif',
   'image/webp',
+  'image/svg+xml',
+]
+
+/**
+ * Subset of font MIMEs — handy for callers that only want to accept font
+ * uploads (e.g. a future dedicated `@font-face` upload route). The Super
+ * Import wizard uses the full media-library set instead.
+ */
+export const FONT_MIMES: ReadonlyArray<AcceptedMediaMime> = [
+  'font/woff',
+  'font/woff2',
+  'font/ttf',
+  'font/otf',
 ]
 
 /**
@@ -96,7 +121,39 @@ const MEDIA_MAGIC_SIGNATURES: ReadonlyArray<{
   // the content-type we serve is video/webm regardless and browsers will
   // refuse to play non-webm Matroska, which is the desired outcome).
   { mime: 'video/webm', bytes: [[0, 0x1a], [1, 0x45], [2, 0xdf], [3, 0xa3]] },
+
+  // WOFF: 77 4F 46 46 ("wOFF") per W3C WOFF1 §3.
+  { mime: 'font/woff', bytes: [[0, 0x77], [1, 0x4f], [2, 0x46], [3, 0x46]] },
+  // WOFF2: 77 4F 46 32 ("wOF2") per W3C WOFF2 §3.
+  { mime: 'font/woff2', bytes: [[0, 0x77], [1, 0x4f], [2, 0x46], [3, 0x32]] },
+  // TTF / TrueType: 00 01 00 00 (sfnt scaler type) OR "true" / "ttcf" (rare).
+  { mime: 'font/ttf', bytes: [[0, 0x00], [1, 0x01], [2, 0x00], [3, 0x00]] },
+  { mime: 'font/ttf', bytes: [[0, 0x74], [1, 0x72], [2, 0x75], [3, 0x65]] }, // "true"
+  // OTF / OpenType with CFF outlines: 4F 54 54 4F ("OTTO") per OpenType §6.
+  { mime: 'font/otf', bytes: [[0, 0x4f], [1, 0x54], [2, 0x54], [3, 0x4f]] },
 ]
+
+/**
+ * SVG is text-based (XML), not a magic-byte format, so it can't be detected
+ * by the binary sniffer above. Decode the first ~512 bytes as UTF-8 and look
+ * for the XML prolog or a top-level `<svg` opening tag, allowing an optional
+ * BOM and leading whitespace. Returns `'image/svg+xml'` when matched.
+ *
+ * This is intentionally lenient — the **security** boundary is the
+ * subsequent DOMPurify pass (SVG profile) which strips `<script>`,
+ * `<foreignObject>`, `javascript:` / `data:` URLs, and on-* handlers
+ * regardless of how the file claims to be structured.
+ */
+function detectSvgMime(bytes: Uint8Array): AcceptedMediaMime | null {
+  // Decode the first 512 bytes; bigger files just look at the prefix.
+  const slice = bytes.subarray(0, Math.min(bytes.length, 512))
+  const decoder = new TextDecoder('utf-8', { fatal: false, ignoreBOM: true })
+  const head = decoder.decode(slice).trimStart()
+  if (head.startsWith('<?xml') || head.startsWith('<svg')) {
+    return 'image/svg+xml'
+  }
+  return null
+}
 
 function detectAcceptedMime(bytes: Uint8Array): AcceptedMediaMime | null {
   for (const sig of MEDIA_MAGIC_SIGNATURES) {
@@ -109,7 +166,11 @@ function detectAcceptedMime(bytes: Uint8Array): AcceptedMediaMime | null {
     }
     if (matches) return sig.mime
   }
-  return null
+  // Fallback to text-based detection for SVG — checked LAST so a corrupted
+  // binary file that happens to start with `<svg` can't be misidentified;
+  // the binary signatures above would have matched first if the bytes were
+  // actually a binary format.
+  return detectSvgMime(bytes)
 }
 
 /**
@@ -175,11 +236,27 @@ async function validateUploadedMedia(input: AcceptUploadInput): Promise<Response
   // Detect MIME from the actual bytes (NEVER from `file.type`, which is
   // attacker-controlled in any non-browser HTTP client). Reject anything
   // that doesn't match a known signature OR isn't in the caller's allow-list.
-  const bytes = new Uint8Array(await input.file.arrayBuffer())
+  let bytes = new Uint8Array(await input.file.arrayBuffer())
   const detectedMime = detectAcceptedMime(bytes)
   if (!detectedMime || !input.allowedMimes.includes(detectedMime)) {
     return badRequest(input.unsupportedMessage)
   }
+
+  // SVG passes the (lenient) text-based detector but still needs the script
+  // surface removed before persistence — see svgSanitize.ts for the threat
+  // model. Sanitize-then-store: the bytes that hit disk match the bytes the
+  // browser will receive, with no out-of-band cleaning step needed.
+  if (detectedMime === 'image/svg+xml') {
+    const sanitized = sanitizeSvgBytes(bytes)
+    if (sanitized.length === 0) {
+      return badRequest('SVG file is empty after sanitisation (likely contains only disallowed elements).')
+    }
+    // Copy into a fresh ArrayBuffer-backed view so the type matches the
+    // `Uint8Array<ArrayBuffer>` the rest of the pipeline expects (the
+    // TextEncoder output is typed against the looser ArrayBufferLike).
+    bytes = new Uint8Array(sanitized)
+  }
+
   return { bytes, detectedMime }
 }
 

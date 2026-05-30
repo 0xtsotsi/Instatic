@@ -52,6 +52,7 @@ const ALLOWLIST: ReadonlyMap<string, string> = new Map([
   // file-magic sniffing. Always called by an already-gated parent
   // handler (`/me/avatar`, `/media`).
   ['mediaUpload.ts', 'Multipart parse helper called by gated parent handlers.'],
+  ['svgSanitize.ts', 'Pure SVG sanitiser called by mediaUpload (itself gated parents); no handlers.'],
   ['mediaUploadDispatch.ts', 'Storage adapter dispatch called by gated parent handlers.'],
   ['mediaUploadExecutor.ts', 'Filesystem write helper called by gated parent handlers.'],
   ['mediaVariants.ts', 'Variant generation helper called by gated parent handlers.'],

@@ -150,13 +150,19 @@ export function buildImportPlan({ fileMap, currentSite, options }: BuildImportPl
  * Phase 3 Done step.
  *
  * Atomicity guarantee:
- *   - Step A (asset uploads): network, cannot be rolled back. Orphaned
- *     uploads that result from a partial failure are left in place; they are
- *     harmless and will be swept up by a future background job.
+ *   - Step A (asset uploads): network, cannot be rolled back. Per-asset
+ *     failures (e.g. an unsupported file type, oversized file, server-side
+ *     reject) are caught and recorded as `asset-upload-failed` warnings.
+ *     The remaining assets continue to upload — one bad file no longer
+ *     aborts the whole import. Orphaned uploads from a partial failure
+ *     are left in place; they are harmless and will be swept up by a
+ *     future background job.
  *   - Step C (store mutation): a single `adapter.commit` call — the adapter
  *     executes it as one Immer history snapshot; Cmd+Z reverts everything.
  *
- * @throws When any asset upload throws — the commit is aborted entirely.
+ * @throws When the store mutation itself fails (Step C). Per-asset failures
+ *         in Step A do NOT throw — they are reported in the result's
+ *         warnings list.
  */
 export async function commitImportPlan(
   plan: ImportPlan,
@@ -166,15 +172,33 @@ export async function commitImportPlan(
   //
   // Upload sequentially to avoid saturating the server. The spec does not
   // require parallelism here and sequential uploads give clearer progress.
+  //
+  // Per-asset try/catch: a single rejected file (unsupported MIME from the
+  // server's allowlist, oversized payload, network blip) used to abort the
+  // entire commit and stranded every following asset. We now record the
+  // failure as a warning and continue — pages and rules that referenced
+  // a failed asset keep their original `url('FileMap-key')` reference, so
+  // the publisher emits the unrewritten path. The user sees the warning in
+  // the Done step and can re-upload manually.
   const rewriteMap: Record<string, string> = {}
+  const uploadWarnings: import('./types').ImportWarning[] = []
 
   for (const asset of plan.assets) {
-    const newUrl = await adapter.uploadAsset({
-      path: asset.sourcePath,
-      bytes: asset.bytes,
-      mimeType: asset.mimeType,
-    })
-    rewriteMap[asset.sourcePath] = newUrl
+    try {
+      const newUrl = await adapter.uploadAsset({
+        path: asset.sourcePath,
+        bytes: asset.bytes,
+        mimeType: asset.mimeType,
+      })
+      rewriteMap[asset.sourcePath] = newUrl
+    } catch (err) {
+      const reason = err instanceof Error ? err.message : 'Unknown upload error'
+      uploadWarnings.push({
+        kind: 'asset-upload-failed',
+        message: `Failed to upload ${asset.sourcePath} (${asset.mimeType}): ${reason}`,
+        path: asset.sourcePath,
+      })
+    }
   }
 
   // ── Step B: Rewrite plan URLs ──────────────────────────────────────────────
@@ -241,18 +265,26 @@ export async function commitImportPlan(
     }
   })
 
-  // Build asset result
-  const resultAssets: ImportResult['assets'] = plan.assets.map((a) => ({
-    sourcePath: a.sourcePath,
-    mediaUrl: rewriteMap[a.sourcePath] ?? a.sourcePath,
-  }))
+  // Build asset result — only include the ones that actually uploaded.
+  // The user-facing "K assets imported" count needs to match reality; if
+  // we listed failed uploads here they'd inflate the count and confuse the
+  // Done step.
+  const resultAssets: ImportResult['assets'] = plan.assets
+    .filter((a) => rewriteMap[a.sourcePath] !== undefined)
+    .map((a) => ({
+      sourcePath: a.sourcePath,
+      mediaUrl: rewriteMap[a.sourcePath]!,
+    }))
 
   return {
     pages: resultPages,
     styleRules: resultRules,
     assets: resultAssets,
     conflicts: plan.conflicts,
-    warnings: plan.warnings,
+    // Carry forward the plan-level warnings (CSS parser / asset planner /
+    // missing stylesheet …) AND surface any per-asset upload failures from
+    // Step A above. The wizard's Done step renders this list verbatim.
+    warnings: [...plan.warnings, ...uploadWarnings],
   }
 }
 

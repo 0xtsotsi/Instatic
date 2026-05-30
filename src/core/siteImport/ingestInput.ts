@@ -204,6 +204,14 @@ async function ingestZip(
     const normalized = normalizeSlashes(relPath)
     assertSafePath(normalized)
     if (isHiddenPath(normalized)) continue
+    // Skip directory entries — fflate.unzipSync surfaces them as
+    // zero-byte records whose path ends with `/` (e.g. `styles/`,
+    // `fonts/`). They're metadata, not files; the directory tree
+    // already lives inside the actual file paths (`styles/site.css`).
+    // Letting them through would later get picked up by the
+    // unreferenced-asset sweep in assetPlan and uploaded as zero-byte
+    // "media files".
+    if (normalized.endsWith('/')) continue
 
     const bytes = entries[relPath]!
     uncompressedTotal += bytes.byteLength
