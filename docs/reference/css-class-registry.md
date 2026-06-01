@@ -287,7 +287,12 @@ The user never sees `__pb_scope_<nodeId>` — the panel shows it as "Custom styl
 
 ### Rename a class rule
 
-Rule **id** is stable; **name** is editable. The editor mutates `rule.name`. Nodes that reference the rule by id keep working — only the rendered CSS class name changes.
+Rule **id** is stable. Renaming is handled by `renameStyleRule` in `src/admin/pages/site/store/styleRuleRename.ts`, which the store wires up via `classSlice.renameClass`. Behavior differs by kind:
+
+- **class-kind**: `assertValidCssClassName` validates the new name, then `name` is updated and `selector` is rebuilt from it via `classKindSelector`. Uniqueness against other class-kind rules is enforced.
+- **ambient**: `isValidCssSelector` validates the new selector text, then both `name` and `selector` are updated to the trimmed selector string. Uniqueness is not required (multiple ambient rules can share a selector).
+
+Nodes that reference the rule by id keep working — only the rendered CSS output changes.
 
 ### Delete a rule
 
@@ -307,7 +312,7 @@ Rule **id** is stable; **name** is editable. The editor mutates `rule.name`. Nod
 | Looking up a rule by name                                           | Look up by id — names can be renamed                     |
 | Hand-emitting CSS in module `render`                                 | Add a rule to the registry — modules emit shared CSS, not per-instance overrides |
 | Forgetting to clone scoped rules on duplicate / paste              | `cloneScopedClassesForNodeMap` — called by mutations     |
-| Letting users name a class `__pb_scope_*`                            | The validator rejects names starting with `__pb_`        |
+| Naming a user class `__pb_scope_*`                                   | Internal scoped rules use this prefix; keep user-created names free of it (the class-kind validator does not reject the prefix — it's a convention, not a gate) |
 | Mixing user rules and framework rules in the same `classIds` array without intent | The order matters — later wins. Framework rules are usually last (override semantics). |
 | Reading `rule.styles` as `CSSPropertyBag` without narrowing         | The persistence boundary stores `Record<string, unknown>` — narrow via `bagToCSS` or `parseStylesBag` |
 | Hard-failing the editor on a corrupt rule entry                     | `parseStyleRuleRegistry` is tolerant — invalid entries drop silently |
@@ -331,7 +336,10 @@ Rule **id** is stable; **name** is editable. The editor mutates `rule.name`. Nod
   - `src/core/publisher/cssCollector.ts` — `collectClassCSS`
   - `src/admin/pages/site/panels/PropertiesPanel/selectorPickerModel.ts` — `deriveSelectorPickerModel`; the pure derivation layer for the unified selector picker
   - `src/core/page-tree/styleRule.ts` — `classifySelectorCreateInput`; the shared classifier for selector creation surfaces
+  - `src/admin/pages/site/store/styleRuleRename.ts` — `renameStyleRule`, `isValidCssSelector`; rename logic for both class-kind and ambient rules
   - `src/admin/pages/site/panels/PropertiesPanel/ClassPicker.tsx` — picker UI: pill strip, input, creation, context menus
+  - `src/admin/pages/site/panels/SelectorsPanel/SelectorDialogs.tsx` — `SelectorNameDialog`, `DeleteSelectorDialog`; shared dialog components for the Selectors panel
+  - `src/admin/pages/site/panels/SelectorsPanel/SelectorContextMenu.tsx` — right-click context menu for selector rows
 - Gate tests:
   - `src/__tests__/architecture/framework-typography-spacing.test.ts`
   - `src/__tests__/architecture/task427-preview-class-css.test.ts`

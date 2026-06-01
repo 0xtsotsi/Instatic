@@ -40,7 +40,7 @@ Every interactive control in `src/admin/` goes through one of these. Bare `<butt
 | `DateTimePicker`   | Date / time inputs                                                   | `value`, `onChange`, `mode: 'date' \| 'datetime'`          |
 | `FileUpload`       | Drop-zone + browse                                                   | `onSelect`, `accept`, `multiple`                           |
 | `SearchBar`        | Search input with magnifier icon + clear affordance                  | `value`, `onChange`, `placeholder`                         |
-| `FilterBar`        | Compound filter row (type + folder + date + query)                   | `filters`, `value`, `onChange`                             |
+| `FilterBar`        | Panel filter strip: filter chips + optional search bar + action slots | `items`, `value`, `onValueChange`, `search?`, `searchLeading?`, `searchTrailing?`, `inlineActions?`, `trailing?`, `groupLabel?` |
 
 ### Layout / structural
 
@@ -178,12 +178,17 @@ import { Select } from '@ui/components/Select'
   value={size}
   onChange={setSize}
   options={[
+    { value: '', label: 'Choose size', placeholder: true },
     { value: 'sm', label: 'Small' },
     { value: 'md', label: 'Medium' },
     { value: 'lg', label: 'Large' },
   ]}
 />
 ```
+
+Use `placeholder: true` for an empty/default option that should stay selectable but read
+as placeholder text in the open menu. When the `Select` itself has a non-empty
+`placeholder`, its empty-value option is treated this way automatically.
 
 For long lists or async options, use `SearchBar` + a custom dropdown built with `ContextMenu`. `Select` is for short fixed lists.
 
