@@ -29,6 +29,22 @@ describe('self-host docker config', () => {
     expect(dockerfile).not.toContain('vite build && bun run server/index.ts')
   })
 
+  it('keeps TypeScript path aliases available in the runtime image', () => {
+    const dockerfile = readFileSync('Dockerfile', 'utf8')
+
+    expect(dockerfile).toContain('COPY --chown=bun:bun tsconfig*.json ./')
+  })
+
+  it('installs the runtime script bundler in production dependencies', () => {
+    const pkg = JSON.parse(readFileSync('package.json', 'utf8')) as {
+      dependencies?: Record<string, string>
+      devDependencies?: Record<string, string>
+    }
+
+    expect(pkg.dependencies?.esbuild).toBeTruthy()
+    expect(pkg.devDependencies?.esbuild).toBeUndefined()
+  })
+
   it('allows PATCH in server CORS preflight for CMS media rename', () => {
     const serverIndex = readFileSync('server/index.ts', 'utf8')
 
