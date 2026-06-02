@@ -13,20 +13,18 @@ Install Docker Engine and Docker Compose on the VPS. Point your domain to the se
 Create an install directory:
 
 ```sh
-mkdir -p instatic-cms
-cd instatic-cms
+mkdir -p instatic
+cd instatic
 ```
 
 Download the production Compose and environment templates from the release source:
 
 ```sh
-curl -fsSLO https://raw.githubusercontent.com/GITHUB_OWNER/GITHUB_REPO/main/compose.prod.yml
-curl -fsSLO https://raw.githubusercontent.com/GITHUB_OWNER/GITHUB_REPO/main/.env.production.example
+curl -fsSLO https://raw.githubusercontent.com/corebunch/instatic/main/compose.prod.yml
+curl -fsSLO https://raw.githubusercontent.com/corebunch/instatic/main/.env.production.example
 ```
 
-`GITHUB_OWNER` and `GITHUB_REPO` are placeholders until the public repository is renamed and published.
-
-Before the project has a public GitHub repository/image, use the local repository files directly or build from source:
+Before the public image exists, use the local repository files directly or build from source:
 
 ```sh
 cp compose.prod.yml /path/on/server/compose.prod.yml
@@ -44,7 +42,7 @@ cp .env.production.example .env
 Edit `.env` and replace:
 
 ```txt
-INSTATIC_IMAGE=ghcr.io/GITHUB_OWNER/IMAGE_NAME:latest
+INSTATIC_IMAGE=ghcr.io/corebunch/instatic:latest
 POSTGRES_PASSWORD=replace-with-a-long-random-hex-password
 ```
 

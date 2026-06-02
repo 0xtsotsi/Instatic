@@ -68,7 +68,7 @@ export function PluginsPage() {
               <p className={styles.errorHint}>
                 This looks like a plugin sandbox issue. See the{' '}
                 <a
-                  href="https://github.com/davidbabinec/instatic/blob/main/docs/features/plugin-system.md"
+                  href="https://github.com/corebunch/instatic/blob/main/docs/features/plugin-system.md"
                   target="_blank"
                   rel="noopener noreferrer"
                 >

@@ -17,7 +17,7 @@ export default definePlugin({
   version: '0.1.0',
   description:
     'Email newsletter plugin powered by Resend. Subscriber management, double opt-in, list segmentation, broadcast composer, scheduled sends, and webhook-driven open/click tracking.',
-  author: { name: 'Instatic', email: 'plugins@instatic.dev' },
+  author: { name: 'Instatic', email: 'plugins@instatic.com' },
   license: 'MIT',
   keywords: ['newsletter', 'email', 'resend', 'subscribers', 'broadcasts'],
   icon: 'icon.svg',

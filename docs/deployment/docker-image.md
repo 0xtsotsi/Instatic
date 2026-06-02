@@ -5,7 +5,7 @@ The production image is the portable Instatic artifact. It contains the built ad
 ## Build Locally
 
 ```sh
-docker build -t instatic-cms:local .
+docker build -t instatic:local .
 ```
 
 The image does not run Vite or install dependencies at container startup. Those happen at image build time.
@@ -15,16 +15,14 @@ The image does not run Vite or install dependencies at container startup. Those 
 Once releases publish images, production servers should pull the image instead of building from source:
 
 ```sh
-docker pull ghcr.io/GITHUB_OWNER/IMAGE_NAME:latest
+docker pull ghcr.io/corebunch/instatic:latest
 ```
 
 Pin a version for predictable upgrades:
 
 ```sh
-docker pull ghcr.io/GITHUB_OWNER/IMAGE_NAME:1.0.0
+docker pull ghcr.io/corebunch/instatic:1.0.0
 ```
-
-`GITHUB_OWNER` and `IMAGE_NAME` are placeholders until the public repository/package name is finalized.
 
 ## Run With An External Postgres Database
 
@@ -32,14 +30,14 @@ Use this mode when you already operate Postgres separately (your own server, a m
 
 ```sh
 docker run -d \
-  --name instatic-cms \
+  --name instatic \
   -p 3001:3001 \
   -e DATABASE_URL="postgres://user:password@host:5432/instatic" \
   -e STATIC_DIR=/app/dist \
   -e UPLOADS_DIR=/app/uploads \
   -v instatic-uploads:/app/uploads \
   --restart unless-stopped \
-  ghcr.io/GITHUB_OWNER/IMAGE_NAME:latest
+  ghcr.io/corebunch/instatic:latest
 ```
 
 Then open:

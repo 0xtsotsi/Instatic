@@ -30,13 +30,13 @@ Archive uploads:
 
 ```sh
 docker run --rm \
-  -v instatic-cms-prod_uploads:/uploads:ro \
+  -v instatic-prod_uploads:/uploads:ro \
   -v "$PWD/backups:/backup" \
   alpine \
   tar czf "/backup/instatic-uploads-$(date +%F).tgz" -C /uploads .
 ```
 
-If your Compose project name is not `instatic-cms-prod`, find the actual uploads volume name with `docker volume ls | grep uploads`.
+If your Compose project name is not `instatic-prod`, find the actual uploads volume name with `docker volume ls | grep uploads`.
 
 ## Postgres mode — restore
 
@@ -61,7 +61,7 @@ Restore uploads:
 
 ```sh
 docker run --rm \
-  -v instatic-cms-prod_uploads:/uploads \
+  -v instatic-prod_uploads:/uploads \
   -v "$PWD/backups:/backup" \
   alpine \
   sh -lc "rm -rf /uploads/* && tar xzf /backup/instatic-uploads-YYYY-MM-DD.tgz -C /uploads"
@@ -132,7 +132,7 @@ With Litestream running, every write to `cms.db` is shipped to S3 within seconds
 
 ```sh
 docker run --rm \
-  -v instatic-cms-prod_data:/data \
+  -v instatic-prod_data:/data \
   -e LITESTREAM_ACCESS_KEY_ID -e LITESTREAM_SECRET_ACCESS_KEY \
   -v "$PWD/litestream.yml:/etc/litestream.yml:ro" \
   litestream/litestream:latest \

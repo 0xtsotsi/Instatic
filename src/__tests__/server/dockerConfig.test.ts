@@ -39,7 +39,7 @@ describe('self-host docker config', () => {
     const compose = readFileSync('compose.prod.yml', 'utf8')
     const buildOverride = readFileSync('compose.build.yml', 'utf8')
 
-    expect(compose).toContain('ghcr.io/GITHUB_OWNER/IMAGE_NAME:latest')
+    expect(compose).toContain('ghcr.io/corebunch/instatic:latest')
     expect(compose).not.toContain('build:')
     expect(compose).toContain('restart: unless-stopped')
     expect(compose).toContain('condition: service_healthy')
@@ -83,6 +83,6 @@ describe('self-host docker config', () => {
     expect(vpsDocs).toContain('compose.build.yml')
     expect(backupDocs).toContain('pg_dump')
     expect(releaseDocs).toContain('GitHub Actions builds the Docker image')
-    expect(releaseDocs).toContain('ghcr.io/GITHUB_OWNER/IMAGE_NAME')
+    expect(releaseDocs).toContain('ghcr.io/corebunch/instatic')
   })
 })

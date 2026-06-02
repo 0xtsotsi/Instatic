@@ -2,6 +2,17 @@
   "name": "instatic",
   "private": true,
   "version": "0.0.0",
+  "description": "Self-hosted CMS with an integrated visual editor.",
+  "author": "David Babinec",
+  "license": "MIT",
+  "homepage": "https://instatic.com",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/corebunch/instatic.git"
+  },
+  "bugs": {
+    "url": "https://github.com/corebunch/instatic/issues"
+  },
   "type": "module",
   "scripts": {
     "dev": "bun run scripts/dev.ts",
@@ -116,16 +127,5 @@
     "typescript": "~6.0.3",
     "typescript-eslint": "^8.59.1",
     "vite": "^8.0.10"
-  },
-  "description": "Self-hosted CMS with an integrated visual editor.",
-  "author": "David Babinec",
-  "license": "MIT",
-  "homepage": "https://instatic.com",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/corebunch/instatic.git"
-  },
-  "bugs": {
-    "url": "https://github.com/corebunch/instatic/issues"
   }
 }

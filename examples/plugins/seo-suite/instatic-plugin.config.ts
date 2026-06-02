@@ -18,7 +18,7 @@ export default definePlugin({
   version: '1.0.0',
   description:
     'Production-grade SEO tooling: sitemap, robots, per-page meta, JSON-LD, OG image generation.',
-  author: { name: 'Instatic', email: 'plugins@instatic.dev' },
+  author: { name: 'Instatic', email: 'plugins@instatic.com' },
   license: 'MIT',
   icon: 'icon.svg',
 

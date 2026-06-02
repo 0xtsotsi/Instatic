@@ -1,19 +1,10 @@
 # Release And Image Publishing Workflow
 
-The project is currently private and the final repository/package name is not locked. Production docs use placeholder names until the public GitHub repository is created.
-
-Replace these placeholders before the first public release:
-
-- `GITHUB_OWNER`: final GitHub user or organization.
-- `GITHUB_REPO`: final repository name.
-- `IMAGE_NAME`: final container package name.
-- `APP_NAME`: final product/install directory name.
-
-Recommended image naming:
+The public source repository is `github.com/corebunch/instatic`, and production images publish to GitHub Container Registry as:
 
 ```txt
-ghcr.io/GITHUB_OWNER/IMAGE_NAME:latest
-ghcr.io/GITHUB_OWNER/IMAGE_NAME:1.0.0
+ghcr.io/corebunch/instatic:latest
+ghcr.io/corebunch/instatic:1.0.0
 ```
 
 ## Release Flow
@@ -31,8 +22,8 @@ git push origin v1.0.0
 5. GitHub Actions pushes:
 
 ```txt
-ghcr.io/GITHUB_OWNER/IMAGE_NAME:1.0.0
-ghcr.io/GITHUB_OWNER/IMAGE_NAME:latest
+ghcr.io/corebunch/instatic:1.0.0
+ghcr.io/corebunch/instatic:latest
 ```
 
 6. GitHub release notes link to:
@@ -53,17 +44,17 @@ docker compose -f compose.prod.yml up -d
 Users should not clone the repository for normal VPS installs. They download the Compose and env templates from GitHub and pull the published image:
 
 ```sh
-mkdir -p APP_NAME
-cd APP_NAME
-curl -fsSLO https://raw.githubusercontent.com/GITHUB_OWNER/GITHUB_REPO/main/compose.prod.yml
-curl -fsSLO https://raw.githubusercontent.com/GITHUB_OWNER/GITHUB_REPO/main/.env.production.example
+mkdir -p instatic
+cd instatic
+curl -fsSLO https://raw.githubusercontent.com/corebunch/instatic/main/compose.prod.yml
+curl -fsSLO https://raw.githubusercontent.com/corebunch/instatic/main/.env.production.example
 cp .env.production.example .env
 ```
 
 Then they edit `.env`:
 
 ```txt
-INSTATIC_IMAGE=ghcr.io/GITHUB_OWNER/IMAGE_NAME:latest
+INSTATIC_IMAGE=ghcr.io/corebunch/instatic:latest
 POSTGRES_PASSWORD=<random hex password>
 ```
 
@@ -84,8 +75,8 @@ docker compose -f compose.prod.yml -f compose.build.yml up -d --build
 Or build and tag an image manually:
 
 ```sh
-docker build -t ghcr.io/GITHUB_OWNER/IMAGE_NAME:dev .
-INSTATIC_IMAGE=ghcr.io/GITHUB_OWNER/IMAGE_NAME:dev docker compose -f compose.prod.yml up -d
+docker build -t ghcr.io/corebunch/instatic:dev .
+INSTATIC_IMAGE=ghcr.io/corebunch/instatic:dev docker compose -f compose.prod.yml up -d
 ```
 
 ## GitHub Actions Shape
@@ -98,4 +89,4 @@ The release workflow should:
 - push a semver tag for `v*` tags.
 - push `latest` for releases from `main`.
 
-The exact workflow file should be added when the final repo owner/name is known, so package permissions and image visibility can be tested against the real GitHub organization.
+The exact workflow file should be added when package permissions and image visibility are ready to be tested against the `corebunch` GitHub organization.

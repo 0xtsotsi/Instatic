@@ -109,6 +109,5 @@ Same code, same migrations, same image — just no container around it. Docker i
 
 ## Image registry
 
-- `INSTATIC_IMAGE` defaults to `ghcr.io/GITHUB_OWNER/IMAGE_NAME:latest` (placeholder).
-- For a local build: `docker build -t instatic-cms:local .` and set `INSTATIC_IMAGE=instatic-cms:local` in `.env`.
-- Once the public release lands, the placeholders get replaced with the real image name everywhere.
+- `INSTATIC_IMAGE` defaults to `ghcr.io/corebunch/instatic:latest`.
+- For a local build: `docker build -t instatic:local .` and set `INSTATIC_IMAGE=instatic:local` in `.env`.

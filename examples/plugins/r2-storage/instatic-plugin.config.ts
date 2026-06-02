@@ -22,7 +22,7 @@ export default definePlugin({
   version: '1.0.0',
   description:
     'Stores uploaded media on Cloudflare R2 (S3-compatible object storage with zero egress fees). Pre-signed PUTs upload directly from the host; pre-signed GETs serve private buckets via a host redirect.',
-  author: { name: 'Instatic', email: 'plugins@instatic.dev' },
+  author: { name: 'Instatic', email: 'plugins@instatic.com' },
   license: 'MIT',
   keywords: ['storage', 'r2', 'cloudflare', 'media', 'adapter'],
   icon: 'icon.svg',

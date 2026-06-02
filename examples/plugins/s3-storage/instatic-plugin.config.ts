@@ -27,7 +27,7 @@ export default definePlugin({
   version: '1.0.0',
   description:
     'Stores uploaded media on Amazon S3 (or any S3-compatible backend: R2, B2, DO Spaces, MinIO). Pre-signed PUTs upload directly from the host; pre-signed GETs serve private buckets via a host redirect.',
-  author: { name: 'Instatic', email: 'plugins@instatic.dev' },
+  author: { name: 'Instatic', email: 'plugins@instatic.com' },
   license: 'MIT',
   keywords: ['storage', 's3', 'media', 'adapter'],
   icon: 'icon.svg',

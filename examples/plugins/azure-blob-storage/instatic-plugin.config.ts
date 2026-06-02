@@ -23,7 +23,7 @@ export default definePlugin({
   version: '1.0.0',
   description:
     'Stores uploaded media on Azure Blob Storage using Shared Access Signatures (SAS). Pre-signed PUTs upload directly from the host; pre-signed GETs serve private containers via a host redirect.',
-  author: { name: 'Instatic', email: 'plugins@instatic.dev' },
+  author: { name: 'Instatic', email: 'plugins@instatic.com' },
   license: 'MIT',
   keywords: ['storage', 'azure', 'blob', 'media', 'adapter'],
   icon: 'icon.svg',
