@@ -57,6 +57,13 @@ describe('admin CMS route wiring', () => {
     expect(authenticatedAdmin).toContain('<ContentPage />')
   })
 
+  it('does not block the first React mount on authenticated chunk preloads', () => {
+    const main = readFileSync(join(root, 'src/admin/main.tsx'), 'utf8')
+
+    expect(main).not.toContain('await Promise.all')
+    expect(main).toContain('root.render')
+  })
+
   it('uses a submit button for setup and login forms', () => {
     const preAuth = readFileSync(join(root, 'src/admin/preauth/AdminPreAuthForm.tsx'), 'utf8')
 
