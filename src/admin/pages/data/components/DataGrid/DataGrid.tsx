@@ -5,49 +5,50 @@
  * `CellDisplayRenderer`. Editing happens in the row inspector (opened when
  * the user clicks a row).
  *
- * Surface features:
- *   - Two-row toolbar — title + count + search + Add row (top); status
- *     filter chips with sort indicator (bottom).
- *   - Bulk-select gutter (sticky checkbox column).
- *   - Frozen primary column with optional /slug subtitle for post-types.
- *   - Status grouping with collapsible group headers (postType, "All" view).
- *   - Floating bulk action bar (Publish / Draft / Delete) at the bottom.
- *   - Click any column header to toggle asc / desc / unsorted.
+ * This file is the container: it owns interaction state (search, status
+ * filter, sort, selection, group collapse, column resize) and wires together
+ * the presentational pieces — toolbar, header row, rows, skeleton, empty
+ * state, bulk-action bar, and context menu. The filter → sort → group → count
+ * pipeline lives in `dataGridRows.ts`; bulk-select state in `useDataGridSelection`.
  */
 import {
   Fragment,
   useDeferredValue,
   useEffect,
+  useRef,
   useState,
   type CSSProperties,
   type MouseEvent as ReactMouseEvent,
   type ReactElement,
 } from 'react'
-import { cn } from '@ui/cn'
-import { Button } from '@ui/components/Button'
-import { Checkbox } from '@ui/components/Checkbox'
-import { EmptyState } from '@ui/components/EmptyState'
-import { FloatingActionBar } from '@ui/components/FloatingActionBar'
-import { SearchBar } from '@ui/components/SearchBar'
-import { Skeleton } from '@ui/components/Skeleton'
-import { ArrowDownIcon } from 'pixel-art-icons/icons/arrow-down'
-import { ChevronDownIcon } from 'pixel-art-icons/icons/chevron-down'
-import { PlusIcon } from 'pixel-art-icons/icons/plus'
-import { TrashSolidIcon } from 'pixel-art-icons/icons/trash-solid'
 import type {
-  DataField,
   DataRow,
   DataRowStatus,
   DataTable,
 } from '@core/data/schemas'
-import { DataGridHeaderCell } from './DataGridHeaderCell'
+import { DataGridBulkActionBar } from './DataGridBulkActionBar'
+import { DataGridEmptyState } from './DataGridEmptyState'
+import { DataGridGroupHeader } from './DataGridGroupHeader'
+import { DataGridHeaderRow } from './DataGridHeaderRow'
 import { DataGridRow } from './DataGridRow'
+import { DataGridSkeletonRows } from './DataGridSkeletonRows'
+import { DataGridToolbar } from './DataGridToolbar'
+import { DataRowContextMenu } from './DataRowContextMenu'
 import { usePrimaryColumnWidth } from './usePrimaryColumnWidth'
+import { useDataGridSelection } from './useDataGridSelection'
+import {
+  computeStatusCounts,
+  filterAndSortRows,
+  getColumnWidth,
+  getOrderedFields,
+  getSubtitleFieldId,
+  groupRowsByStatus,
+  STATUS_VIEW_ORDER_DEFAULT,
+  STATUS_VIEW_ORDER_PAGES,
+  type SortState,
+  type StatusFilter,
+} from './dataGridRows'
 import styles from './DataGrid.module.css'
-
-// ---------------------------------------------------------------------------
-// Props
-// ---------------------------------------------------------------------------
 
 export interface DataGridProps {
   table: DataTable
@@ -63,96 +64,25 @@ export interface DataGridProps {
   onAddRow: () => Promise<void> | void
   /** Delete a row by id. Omit to hide per-row + bulk delete. */
   onDeleteRow?: (rowId: string) => void
+  /** Duplicate a row. Omit to hide the duplicate action. */
+  onDuplicateRow?: (row: DataRow) => void | Promise<void>
   /** 'Edit in Content' — only meaningful for `kind='postType'` tables. */
   onEditInContent?: (row: DataRow) => void
   /** 'Open' — selects and opens the row inspector for `kind='data'` tables. */
   onOpenRow?: (rowId: string) => void
+  /** Open the visual Site editor for page/component rows. */
+  onOpenInSiteEditor?: (row: DataRow) => void
   /** Set a row's status. PostType only — enables bulk publish / unpublish. */
   onSetRowStatus?: (rowId: string, status: DataRowStatus) => Promise<DataRow>
   /** Called from the bulk-action bar's "Export" button. */
   onExportRows?: (rowIds: string[]) => void
 }
 
-// ---------------------------------------------------------------------------
-// Column width helper
-// ---------------------------------------------------------------------------
-
-function getColumnWidth(field: DataField, isPrimary: boolean, primaryWidth: number): string {
-  if (isPrimary) return `${primaryWidth}px`
-  switch (field.type) {
-    case 'number':
-    case 'boolean':
-    case 'date':
-    case 'dateTime':
-      return '140px'
-    case 'media':
-    case 'relation':
-      return '220px'
-    case 'select':
-      return '160px'
-    case 'multiSelect':
-      return '220px'
-    case 'longText':
-    case 'richText':
-      return '260px'
-    default:
-      return '200px'
-  }
+interface RowContextMenuState {
+  x: number
+  y: number
+  rowId: string
 }
-
-// ---------------------------------------------------------------------------
-// Sort + view state
-// ---------------------------------------------------------------------------
-
-interface SortState {
-  fieldId: string
-  dir: 'asc' | 'desc'
-}
-
-/**
- * The view-chip filter. For tables with a publish workflow this collapses
- * row visibility down to one chip.
- *
- *   - 'all'         — every row, grouped by status when no specific chip is active
- *   - 'pages'       — page rows where `templateEnabled !== true` (page table only)
- *   - 'templates'   — page rows where `templateEnabled === true` (page table only)
- *   - 'published'   — `status = 'published'`
- *   - 'draft'       — `status = 'draft'`
- *   - 'unpublished' — `status = 'unpublished'` (rendered as "Archived")
- */
-type StatusFilter = 'all' | 'pages' | 'templates' | DataRowStatus
-
-interface RowGroup {
-  key: string
-  label: string | null
-  status: DataRowStatus | null
-  rows: DataRow[]
-}
-
-const STATUS_VIEW_ORDER_DEFAULT: { key: StatusFilter; label: string }[] = [
-  { key: 'all',         label: 'All' },
-  { key: 'published',   label: 'Published' },
-  { key: 'scheduled',   label: 'Scheduled' },
-  { key: 'draft',       label: 'Drafts' },
-  { key: 'unpublished', label: 'Archived' },
-]
-
-/** Pages get extra chips for the template-flag filter, sequenced between
- *  the base 'All' chip and the status chips so the eye reads them as a
- *  scope refinement before drilling into status. */
-const STATUS_VIEW_ORDER_PAGES: { key: StatusFilter; label: string }[] = [
-  { key: 'all',         label: 'All' },
-  { key: 'pages',       label: 'Pages' },
-  { key: 'templates',   label: 'Templates' },
-  { key: 'published',   label: 'Published' },
-  { key: 'scheduled',   label: 'Scheduled' },
-  { key: 'draft',       label: 'Drafts' },
-  { key: 'unpublished', label: 'Archived' },
-]
-
-// ---------------------------------------------------------------------------
-// DataGrid
-// ---------------------------------------------------------------------------
 
 export function DataGrid({
   table,
@@ -165,8 +95,10 @@ export function DataGrid({
   onSelectRow,
   onAddRow,
   onDeleteRow,
+  onDuplicateRow,
   onEditInContent,
   onOpenRow,
+  onOpenInSiteEditor,
   onSetRowStatus,
   onExportRows,
 }: DataGridProps): ReactElement {
@@ -190,164 +122,30 @@ export function DataGrid({
   const deferredQuery = useDeferredValue(query)
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('all')
   const [sort, setSort] = useState<SortState | null>(null)
-  const [checkedIds, setCheckedIds] = useState<Set<string>>(() => new Set())
   const [collapsedGroups, setCollapsedGroups] = useState<Set<DataRowStatus>>(
     () => new Set(),
   )
+  const [rowContextMenu, setRowContextMenu] = useState<RowContextMenuState | null>(null)
+  const gridRef = useRef<HTMLDivElement | null>(null)
 
   // ── Field ordering ────────────────────────────────────────────────────────
-  // Primary field first; subtitle field (slug, when present and distinct from
-  // the primary) is collapsed into the primary cell as a subtitle.
-  const subtitleFieldId: string | null =
-    table.primaryFieldId === 'slug'
-      ? null
-      : table.fields.some((f) => f.id === 'slug')
-        ? 'slug'
-        : null
+  const subtitleFieldId = getSubtitleFieldId(table)
+  const orderedFields = getOrderedFields(table, subtitleFieldId)
 
-  const orderedFields: DataField[] = (() => {
-    const primary = table.fields.find((f) => f.id === table.primaryFieldId)
-    const rest = table.fields.filter(
-      (f) => f.id !== table.primaryFieldId && f.id !== subtitleFieldId,
-    )
-    return primary == null ? rest : [primary, ...rest]
-  })()
+  // ── Filtered + sorted rows, grouping, counts ──────────────────────────────
+  const visibleRows = filterAndSortRows({
+    rows,
+    table,
+    hasPublishWorkflow,
+    statusFilter,
+    query: deferredQuery,
+    sort,
+  })
+  const groups = groupRowsByStatus(visibleRows, hasPublishWorkflow, statusFilter)
+  const statusCounts = computeStatusCounts(rows)
 
-  // ── Filtered + sorted rows ────────────────────────────────────────────────
-  const visibleRows: DataRow[] = (() => {
-    let r = rows
-
-    if (hasPublishWorkflow && statusFilter !== 'all') {
-      // The 'pages' / 'templates' chips only filter the template flag —
-      // they cross-cut status, so within each scope we still show drafts
-      // alongside published rows (and they get grouped by status below).
-      if (statusFilter === 'pages') {
-        r = r.filter((row) => row.cells.templateEnabled !== true)
-      } else if (statusFilter === 'templates') {
-        r = r.filter((row) => row.cells.templateEnabled === true)
-      } else {
-        // 'draft' | 'published' | 'unpublished' — filter on row.status
-        r = r.filter((row) => row.status === statusFilter)
-      }
-    }
-
-    const q = deferredQuery.trim().toLowerCase()
-    if (q.length > 0) {
-      r = r.filter((row) => {
-        for (const field of table.fields) {
-          const v = row.cells[field.id]
-          if (typeof v === 'string' && v.toLowerCase().includes(q)) return true
-        }
-        return false
-      })
-    }
-
-    if (sort != null) {
-      r = [...r].sort((a, b) => {
-        const av = a.cells[sort.fieldId]
-        const bv = b.cells[sort.fieldId]
-        const cmp = compareCellValues(av, bv)
-        return sort.dir === 'asc' ? cmp : -cmp
-      })
-    }
-
-    return r
-  })()
-
-  // ── Group rows by status (publish-workflow kinds, when scope is 'all'/'pages'/'templates') ─
-  //
-  // The 'pages' and 'templates' chips are scope refinements that cross-cut
-  // status — within each scope we still want the Published / Drafts /
-  // Archived section headers. Specific status chips (draft / published /
-  // unpublished) flatten the list since by definition all rows share one
-  // status.
-  const groups: RowGroup[] = (() => {
-    const groupable = hasPublishWorkflow && (
-      statusFilter === 'all' || statusFilter === 'pages' || statusFilter === 'templates'
-    )
-    if (!groupable) {
-      return [{ key: 'all', label: null, status: null, rows: visibleRows }]
-    }
-    const buckets: Record<DataRowStatus, DataRow[]> = {
-      published: [],
-      draft: [],
-      unpublished: [],
-      scheduled: [],
-    }
-    for (const row of visibleRows) buckets[row.status].push(row)
-    const out: RowGroup[] = []
-    if (buckets.published.length > 0)
-      out.push({ key: 'published', label: 'Published', status: 'published', rows: buckets.published })
-    if (buckets.scheduled.length > 0)
-      out.push({ key: 'scheduled', label: 'Scheduled', status: 'scheduled', rows: buckets.scheduled })
-    if (buckets.draft.length > 0)
-      out.push({ key: 'draft', label: 'Drafts', status: 'draft', rows: buckets.draft })
-    if (buckets.unpublished.length > 0)
-      out.push({ key: 'unpublished', label: 'Archived', status: 'unpublished', rows: buckets.unpublished })
-    return out
-  })()
-
-  // ── Filter chip counts ────────────────────────────────────────────────────
-  //
-  // For pages, the 'Pages' and 'Templates' chips count by template-flag
-  // (cross-cut by status). For posts/components those chips don't appear,
-  // so their counts default to 0 and are never read.
-  const statusCounts = (() => {
-    const counts = {
-      all: rows.length,
-      published: 0,
-      draft: 0,
-      unpublished: 0,
-      scheduled: 0,
-      pages: 0,
-      templates: 0,
-    }
-    for (const r of rows) {
-      counts[r.status] += 1
-      if (r.cells.templateEnabled === true) counts.templates += 1
-      else counts.pages += 1
-    }
-    return counts
-  })()
-
-  // ── Selection helpers ─────────────────────────────────────────────────────
-  const visibleIdSet = new Set(visibleRows.map((r) => r.id))
-  const checkedVisibleCount = (() => {
-    let n = 0
-    for (const id of checkedIds) if (visibleIdSet.has(id)) n += 1
-    return n
-  })()
-  const allChecked = checkedVisibleCount > 0 && checkedVisibleCount === visibleRows.length
-  const someChecked = checkedVisibleCount > 0 && checkedVisibleCount < visibleRows.length
-  // The Checkbox primitive doesn't style `:indeterminate`, so we render the
-  // header checkbox as "checked" whenever ANY visible row is selected. Click
-  // semantics: if none-or-some are checked, select all visible; if all are
-  // checked, clear the selection. Matches Gmail / Linear behaviour.
-  const headerChecked = allChecked || someChecked
-
-  function toggleRow(rowId: string, next: boolean): void {
-    setCheckedIds((prev) => {
-      const out = new Set(prev)
-      if (next) out.add(rowId)
-      else out.delete(rowId)
-      return out
-    })
-  }
-
-  function toggleAll(next: boolean): void {
-    setCheckedIds((prev) => {
-      const out = new Set(prev)
-      for (const r of visibleRows) {
-        if (next) out.add(r.id)
-        else out.delete(r.id)
-      }
-      return out
-    })
-  }
-
-  function clearSelection(): void {
-    setCheckedIds(new Set())
-  }
+  // ── Selection ─────────────────────────────────────────────────────────────
+  const selection = useDataGridSelection(visibleRows)
 
   function toggleGroupCollapsed(status: DataRowStatus): void {
     setCollapsedGroups((prev) => {
@@ -374,15 +172,15 @@ export function DataGrid({
   // ── Bulk action handlers ──────────────────────────────────────────────────
   function handleBulkDelete(): void {
     if (onDeleteRow == null) return
-    for (const id of checkedIds) onDeleteRow(id)
-    clearSelection()
+    for (const id of selection.checkedIds) onDeleteRow(id)
+    selection.clearSelection()
   }
 
   async function handleBulkSetStatus(status: DataRowStatus): Promise<void> {
     if (onSetRowStatus == null) return
-    const ids = Array.from(checkedIds)
+    const ids = Array.from(selection.checkedIds)
     await Promise.all(ids.map((id) => onSetRowStatus(id, status)))
-    clearSelection()
+    selection.clearSelection()
   }
 
   // ── Per-row primary action ────────────────────────────────────────────────
@@ -391,6 +189,28 @@ export function DataGrid({
     if (!isPostType && onOpenRow != null) return () => onOpenRow(row.id)
     return undefined
   }
+
+  useEffect(() => {
+    const grid = gridRef.current
+    if (grid === null) return
+    const currentGrid = grid
+
+    function handleNativeContextMenu(event: MouseEvent): void {
+      if (!(event.target instanceof Element)) return
+      const rowElement = event.target.closest<HTMLElement>('[data-data-grid-row-id]')
+      if (rowElement === null || !currentGrid.contains(rowElement)) return
+      const rowId = rowElement.dataset.dataGridRowId
+      if (!rowId) return
+
+      event.preventDefault()
+      event.stopPropagation()
+      onSelectRow(rowId)
+      setRowContextMenu({ x: event.clientX, y: event.clientY, rowId })
+    }
+
+    currentGrid.addEventListener('contextmenu', handleNativeContextMenu, { capture: true })
+    return () => currentGrid.removeEventListener('contextmenu', handleNativeContextMenu, { capture: true })
+  }, [onSelectRow])
 
   // ── Primary column resize ─────────────────────────────────────────────────
   //
@@ -435,13 +255,7 @@ export function DataGrid({
     }
   }, [resizing, setPrimaryWidth])
 
-  // ── Grid template ─────────────────────────────────────────────────────────
   // [ checkbox 36px ] [ ...fields ] [ trailing actions minmax(min-content, 1fr) ]
-  //
-  // The trailing actions column flexes so the grid always fills at least
-  // 100% of the scroll container (see `.grid` rule in DataGrid.module.css).
-  // The actions cell itself is `justify-content: flex-end`, so the action
-  // buttons stay pinned to the right edge as the column expands.
   const columnWidths = [
     '36px',
     ...orderedFields.map((f) =>
@@ -457,61 +271,18 @@ export function DataGrid({
   const primaryStickyLeft: CSSProperties = { left: '36px' }
   const checkboxStickyLeft: CSSProperties = { left: '0' }
 
-  // ── Toolbar / subtitle text ───────────────────────────────────────────────
+  // ── Toolbar / subtitle helpers ────────────────────────────────────────────
   const rowCount = visibleRows.length
-  const totalCount = rows.length
-  const totalNoun = totalCount === 1 ? table.singularLabel : table.pluralLabel
-  const selectedCount = checkedIds.size
-
-  const subtitleParts: string[] = []
-  // While loading the visual skeleton rows below carry the "loading"
-  // signal — keep the toolbar subtitle empty so the user doesn't see
-  // two competing loading messages.
-  if (!loading) {
-    subtitleParts.push(`${totalCount} ${totalNoun.toLowerCase()}`)
-  }
-  if (hasPublishWorkflow && (statusFilter === 'all' || statusFilter === 'pages' || statusFilter === 'templates') && totalCount > 0) {
-    subtitleParts.push('grouped by status')
-  }
-  const subtitleText = subtitleParts.join(' · ')
+  const isFiltered = query.trim().length > 0 || statusFilter !== 'all'
 
   // Active sort indicator (right of toolbarBottom).
   const sortField = sort != null ? table.fields.find((f) => f.id === sort.fieldId) : null
   const sortLabel = sortField?.label ?? null
 
-  // ── Render helpers ────────────────────────────────────────────────────────
-  function renderGroupHeader(group: RowGroup): ReactElement | null {
-    if (group.status == null) return null
-    const collapsed = collapsedGroups.has(group.status)
-    return (
-      <button
-        key={`group-${group.key}`}
-        type="button"
-        className={styles.groupHeader}
-        data-collapsed={collapsed ? 'true' : undefined}
-        onClick={() => group.status != null && toggleGroupCollapsed(group.status)}
-      >
-        {/*
-          * Inner wrapper is `position: sticky; left: 14px;` so the label
-          * cluster stays visible while the user scrolls the table
-          * horizontally. The outer <button> keeps the full grid-spanning
-          * background; the inner span carries the visible content and
-          * pins to the left edge of the scroll container.
-          */}
-        <span className={styles.groupHeaderInner}>
-          <span className={styles.groupChev}>
-            <ChevronDownIcon size={10} aria-hidden="true" />
-          </span>
-          <span className={styles.groupTitle}>
-            <span className={styles.groupDot} data-status={group.status} aria-hidden="true" />
-            {group.label}
-            <span className={styles.groupCount}>{group.rows.length}</span>
-          </span>
-        </span>
-      </button>
-    )
-  }
+  // Non-primary field count drives the skeleton column ladder.
+  const skeletonFieldCount = orderedFields.filter((f) => f.id !== table.primaryFieldId).length
 
+  // ── Render helpers ────────────────────────────────────────────────────────
   function renderRow(row: DataRow): ReactElement {
     return (
       <DataGridRow
@@ -524,11 +295,11 @@ export function DataGrid({
         tables={tables}
         rows={rows}
         selected={row.id === selectedRowId}
-        checked={checkedIds.has(row.id)}
+        checked={selection.checkedIds.has(row.id)}
         readOnly={readOnly}
         showStatusDot={hasPublishWorkflow}
         onSelect={() => onSelectRow(row.id)}
-        onCheckedChange={(next) => toggleRow(row.id, next)}
+        onCheckedChange={(next) => selection.toggleRow(row.id, next)}
         onPrimaryAction={getPrimaryAction(row)}
         onDelete={onDeleteRow != null ? () => onDeleteRow(row.id) : undefined}
         primaryStickyLeft={primaryStickyLeft}
@@ -537,92 +308,30 @@ export function DataGrid({
     )
   }
 
+  const contextMenuRow = rowContextMenu === null
+    ? null
+    : rows.find((row) => row.id === rowContextMenu.rowId) ?? null
+
   // ── Render ────────────────────────────────────────────────────────────────
   return (
     <div className={styles.gridWrapper}>
-
-      {/* ── Toolbar ──────────────────────────────────────────────────────── */}
-      <div className={styles.toolbar}>
-        <div className={styles.toolbarTop}>
-          <div className={styles.titleBlock}>
-            <span className={styles.title}>{table.pluralLabel}</span>
-            <span className={styles.subtitle}>{subtitleText}</span>
-          </div>
-
-          <span className={styles.spacer} />
-
-          <div className={styles.searchWrap}>
-            <SearchBar
-              value={query}
-              onValueChange={setQuery}
-              placeholder={`Search ${table.pluralLabel.toLowerCase()}…`}
-              aria-label={`Search ${table.pluralLabel.toLowerCase()}`}
-            />
-          </div>
-
-          {!readOnly && (
-            <Button
-              variant="primary"
-              size="sm"
-              onClick={() => { void onAddRow() }}
-            >
-              <PlusIcon size={12} aria-hidden="true" />
-              Add row
-            </Button>
-          )}
-        </div>
-
-        {hasPublishWorkflow && (
-          <div className={styles.toolbarBottom}>
-            <div className={styles.viewChips}>
-              {statusViewOrder.map((view) => {
-                const active = statusFilter === view.key
-                // Status dots only make sense for true row.status values —
-                // the 'pages' / 'templates' chips on the pages table are
-                // template-flag refinements, not statuses.
-                const showDot =
-                  view.key === 'published' || view.key === 'draft' || view.key === 'unpublished'
-                return (
-                  <Button
-                    key={view.key}
-                    variant="ghost"
-                    size="sm"
-                    shape="pill"
-                    pressed={active}
-                    className={styles.pill}
-                    onClick={() => setStatusFilter(view.key)}
-                  >
-                    {showDot && (
-                      <span className={styles.pillDot} data-status={view.key} aria-hidden="true" />
-                    )}
-                    <span>{view.label}</span>
-                    <span className={styles.pillCount}>{statusCounts[view.key]}</span>
-                  </Button>
-                )
-              })}
-            </div>
-
-            <span className={styles.toolbarSpacer} />
-
-            {sort != null && sortLabel && (
-              <Button
-                variant="ghost"
-                size="sm"
-                shape="pill"
-                className={styles.sortIndicator}
-                onClick={clearSort}
-                aria-label={`Sorted by ${sortLabel} ${sort.dir === 'asc' ? 'ascending' : 'descending'} — click to clear`}
-                tooltip="Clear sort"
-              >
-                <span className={styles.sortArrow} data-dir={sort.dir} aria-hidden="true">
-                  <ArrowDownIcon size={10} />
-                </span>
-                <span>{sortLabel}</span>
-              </Button>
-            )}
-          </div>
-        )}
-      </div>
+      <DataGridToolbar
+        table={table}
+        totalCount={rows.length}
+        loading={loading}
+        readOnly={readOnly}
+        query={query}
+        onQueryChange={setQuery}
+        onAddRow={onAddRow}
+        hasPublishWorkflow={hasPublishWorkflow}
+        statusViewOrder={statusViewOrder}
+        statusFilter={statusFilter}
+        onStatusFilterChange={setStatusFilter}
+        statusCounts={statusCounts}
+        sort={sort}
+        sortLabel={sortLabel}
+        onClearSort={clearSort}
+      />
 
       {/* ── Error state (outside the grid — full width) ─────────────────── */}
       {error != null && (
@@ -636,6 +345,7 @@ export function DataGrid({
       {error == null && (
         <div className={styles.scrollContainer}>
           <div
+            ref={gridRef}
             role="grid"
             className={styles.grid}
             style={gridStyle}
@@ -643,142 +353,33 @@ export function DataGrid({
             aria-rowcount={rowCount}
             aria-busy={loading}
           >
-            {/* ── Header row ─────────────────────────────────────────────── */}
-            <div role="row" className={styles.headerRow}>
-              {/* Leading checkbox column header */}
-              <div
-                role="columnheader"
-                className={styles.headerCell}
-                data-sticky="checkbox"
-                style={checkboxStickyLeft}
-                aria-label="Select all rows"
-              >
-                <Checkbox
-                  boxSize="sm"
-                  checked={headerChecked}
-                  onCheckedChange={() => toggleAll(!allChecked)}
-                  aria-label={allChecked ? 'Deselect all rows' : 'Select all rows'}
-                />
-              </div>
+            <DataGridHeaderRow
+              fields={orderedFields}
+              primaryFieldId={table.primaryFieldId}
+              sort={sort}
+              headerChecked={selection.headerChecked}
+              allChecked={selection.allChecked}
+              onToggleAll={selection.toggleAll}
+              onSort={handleSort}
+              primaryStickyLeft={primaryStickyLeft}
+              checkboxStickyLeft={checkboxStickyLeft}
+              onPrimaryResizeStart={handlePrimaryResizeStart}
+            />
 
-              {orderedFields.map((field) => {
-                const isPrimary = field.id === table.primaryFieldId
-                const sortDir = sort?.fieldId === field.id ? sort.dir : null
-                return (
-                  <DataGridHeaderCell
-                    key={field.id}
-                    field={field}
-                    isPrimary={isPrimary}
-                    sortDir={sortDir}
-                    sticky={isPrimary ? 'primary' : undefined}
-                    stickyStyle={isPrimary ? primaryStickyLeft : undefined}
-                    onClickHeader={() => handleSort(field.id)}
-                    onResizeStart={isPrimary ? handlePrimaryResizeStart : undefined}
-                  />
-                )
-              })}
-
-              {/* Trailing actions column header — no visible label */}
-              <div
-                role="columnheader"
-                className={styles.headerCell}
-                aria-label="Actions"
+            {loading && (
+              <DataGridSkeletonRows
+                fieldCount={skeletonFieldCount}
+                primaryStickyLeft={primaryStickyLeft}
               />
-            </div>
+            )}
 
-            {/* ── Loading state ────────────────────────────────────────────
-                Skeleton mirrors the real cell-by-cell row layout —
-                each skeleton row is a `display: contents` wrapper that
-                emits one cell per column track (checkbox + primary +
-                fields + actions). Shimmer bars sit INSIDE each cell,
-                so the column ladder reads identically to a populated
-                grid and the loaded rows swap in with zero shift.
-
-                Sticky behaviour: the checkbox + primary cells use the
-                same `data-sticky="checkbox"` / `data-sticky="primary"`
-                attributes as the real cells so the existing `.cell[data-sticky=…]`
-                selectors apply automatically — no skeleton-specific
-                sticky CSS needed. */}
-            {loading && Array.from({ length: 8 }, (_, rowIndex) => (
-              <div
-                key={`skeleton-row-${rowIndex}`}
-                className={styles.skeletonRow}
-                role="status"
-                aria-hidden="true"
-              >
-                {/* Checkbox column — empty cell preserves the track. */}
-                <div
-                  className={cn(styles.cell, styles.skeletonCell)}
-                  data-sticky="checkbox"
-                />
-                {/* Primary field cell — wider shimmer, sticky-positioned
-                    via `data-sticky="primary"` so it lines up with the
-                    loaded primary column under horizontal scroll. */}
-                <div
-                  className={cn(styles.cell, styles.primaryCell, styles.skeletonCell)}
-                  data-sticky="primary"
-                  style={primaryStickyLeft}
-                >
-                  <Skeleton width={`${50 + (rowIndex % 4) * 10}%`} height={12} />
-                </div>
-                {/* One cell per remaining field. */}
-                {orderedFields
-                  .filter((f) => f.id !== table.primaryFieldId)
-                  .map((field) => (
-                    <div
-                      key={`skeleton-${rowIndex}-${field.id}`}
-                      className={cn(styles.cell, styles.skeletonCell)}
-                    >
-                      <Skeleton
-                        width={`${40 + ((rowIndex + field.id.length) % 5) * 12}%`}
-                        height={12}
-                      />
-                    </div>
-                  ))}
-                {/* Actions cell — empty trailing track. */}
-                <div className={cn(styles.cell, styles.skeletonCell)} />
-              </div>
-            ))}
-
-            {/* ── Empty state ──────────────────────────────────────────────
-              * Outer span fills the full grid row (`grid-column: 1 / -1`).
-              * The inner EmptyState uses `position: sticky; left: 14px` so
-              * the message cluster stays pinned to the left edge of the
-              * scroll viewport during horizontal scroll — matching the
-              * primary cell + group header label behaviour. `plain` drops
-              * the card background so the table surface shows through.
-              */}
             {!loading && rowCount === 0 && (
-              <div className={styles.emptyStateSpan}>
-                <EmptyState
-                  plain
-                  title={
-                    query.trim().length > 0 || statusFilter !== 'all'
-                      ? `No ${table.pluralLabel.toLowerCase()} match this view`
-                      : `No ${table.pluralLabel.toLowerCase()} yet`
-                  }
-                  description={
-                    readOnly
-                      ? undefined
-                      : query.trim().length > 0 || statusFilter !== 'all'
-                        ? 'Try clearing the search or switching views.'
-                        : 'Add the first row to get started.'
-                  }
-                  action={
-                    !readOnly && query.trim().length === 0 && statusFilter === 'all' ? (
-                      <Button
-                        variant="secondary"
-                        size="sm"
-                        onClick={() => { void onAddRow() }}
-                      >
-                        <PlusIcon size={12} aria-hidden="true" />
-                        Add row
-                      </Button>
-                    ) : undefined
-                  }
-                  className={styles.emptyStateInner}
-                />
-              </div>
+              <DataGridEmptyState
+                table={table}
+                filtered={isFiltered}
+                readOnly={readOnly}
+                onAddRow={onAddRow}
+              />
             )}
 
             {/* ── Groups + rows ──────────────────────────────────────────── */}
@@ -786,7 +387,11 @@ export function DataGrid({
               const collapsed = group.status != null && collapsedGroups.has(group.status)
               return (
                 <Fragment key={group.key}>
-                  {renderGroupHeader(group)}
+                  <DataGridGroupHeader
+                    group={group}
+                    collapsed={collapsed}
+                    onToggle={toggleGroupCollapsed}
+                  />
                   {!collapsed && group.rows.map((row) => renderRow(row))}
                 </Fragment>
               )
@@ -795,79 +400,32 @@ export function DataGrid({
         </div>
       )}
 
-      {/* ── Floating bulk action bar ─────────────────────────────────────── */}
-      <FloatingActionBar
-        open={selectedCount > 0}
-        ariaLabel="Bulk row actions"
-        label={<><strong>{selectedCount}</strong> selected</>}
-        onClose={clearSelection}
-        closeLabel="Clear selection"
-      >
-        {hasPublishWorkflow && onSetRowStatus != null && (
-          <>
-            <Button
-              variant="ghost"
-              size="sm"
-              shape="pill"
-              className={styles.bulkBarBtn}
-              onClick={() => { void handleBulkSetStatus('published') }}
-            >
-              Publish
-            </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              shape="pill"
-              className={styles.bulkBarBtn}
-              onClick={() => { void handleBulkSetStatus('draft') }}
-            >
-              Move to draft
-            </Button>
-          </>
-        )}
-        {onExportRows != null && (
-          <Button
-            variant="ghost"
-            size="sm"
-            shape="pill"
-            className={styles.bulkBarBtn}
-            onClick={() => onExportRows(Array.from(checkedIds))}
-          >
-            <ArrowDownIcon size={11} aria-hidden="true" />
-            Export
-          </Button>
-        )}
-        {onDeleteRow != null && (
-          <Button
-            variant="ghost"
-            size="sm"
-            shape="pill"
-            tone="danger"
-            dangerHover
-            className={styles.bulkBarBtn}
-            onClick={handleBulkDelete}
-          >
-            <TrashSolidIcon size={11} aria-hidden="true" />
-            Delete
-          </Button>
-        )}
-      </FloatingActionBar>
+      <DataGridBulkActionBar
+        selectedCount={selection.checkedIds.size}
+        hasPublishWorkflow={hasPublishWorkflow}
+        onClearSelection={selection.clearSelection}
+        onSetStatus={onSetRowStatus != null ? (status) => { void handleBulkSetStatus(status) } : undefined}
+        onExport={onExportRows != null ? () => onExportRows(Array.from(selection.checkedIds)) : undefined}
+        onDelete={onDeleteRow != null ? handleBulkDelete : undefined}
+      />
+
+      {rowContextMenu !== null && contextMenuRow !== null && (
+        <DataRowContextMenu
+          x={rowContextMenu.x}
+          y={rowContextMenu.y}
+          row={contextMenuRow}
+          table={table}
+          onClose={() => setRowContextMenu(null)}
+          onInspectRow={() => onSelectRow(contextMenuRow.id)}
+          onOpenRow={onOpenRow}
+          onDuplicateRow={onDuplicateRow}
+          onEditInContent={onEditInContent}
+          onOpenInSiteEditor={onOpenInSiteEditor}
+          onSetRowStatus={onSetRowStatus}
+          onExportRows={onExportRows}
+          onDeleteRow={onDeleteRow}
+        />
+      )}
     </div>
   )
-}
-
-// ---------------------------------------------------------------------------
-// Cell comparator — numeric > date > string fallback.
-// ---------------------------------------------------------------------------
-
-function compareCellValues(a: unknown, b: unknown): number {
-  if (a == null && b == null) return 0
-  if (a == null) return 1
-  if (b == null) return -1
-  if (typeof a === 'number' && typeof b === 'number') return a - b
-  if (typeof a === 'boolean' && typeof b === 'boolean') return Number(a) - Number(b)
-  const sa = String(a)
-  const sb = String(b)
-  // Use numeric collation so '10' sorts after '2', and respect locale for dates.
-  return sa.localeCompare(sb, undefined, { numeric: true, sensitivity: 'base' })
 }

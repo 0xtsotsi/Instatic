@@ -16,8 +16,8 @@
  * two is tiny.
  */
 import { type CSSProperties } from 'react'
-import { cn } from '@ui/cn'
 import { Skeleton } from '@ui/components/Skeleton'
+import { DataGridSkeletonRows } from './DataGridSkeletonRows'
 import styles from './DataGrid.module.css'
 
 const SKELETON_FIELD_COUNT = 6
@@ -118,45 +118,13 @@ export function DataGridSkeleton() {
             />
           </div>
 
-          {/* Skeleton rows — same `display: contents` + per-cell shimmer
-              shape as the real `DataGrid`'s loading state, so the
-              column ladder + sticky positioning is identical. */}
-          {Array.from({ length: SKELETON_ROW_COUNT }, (_, rowIndex) => (
-            <div
-              key={`skeleton-row-${rowIndex}`}
-              className={styles.skeletonRow}
-              role="status"
-              aria-hidden="true"
-            >
-              {/* Checkbox column. */}
-              <div
-                className={cn(styles.cell, styles.skeletonCell)}
-                data-sticky="checkbox"
-              />
-              {/* Primary field — sticky, wider shimmer. */}
-              <div
-                className={cn(styles.cell, styles.primaryCell, styles.skeletonCell)}
-                data-sticky="primary"
-                style={primaryStickyLeft}
-              >
-                <Skeleton width={`${50 + (rowIndex % 4) * 10}%`} height={12} />
-              </div>
-              {/* Field cells. */}
-              {Array.from({ length: SKELETON_FIELD_COUNT - 1 }, (_, fieldIndex) => (
-                <div
-                  key={`skeleton-${rowIndex}-${fieldIndex}`}
-                  className={cn(styles.cell, styles.skeletonCell)}
-                >
-                  <Skeleton
-                    width={`${40 + ((rowIndex + fieldIndex) % 5) * 12}%`}
-                    height={12}
-                  />
-                </div>
-              ))}
-              {/* Actions cell. */}
-              <div className={cn(styles.cell, styles.skeletonCell)} />
-            </div>
-          ))}
+          {/* Skeleton rows — shared with the live `DataGrid`'s loading state
+              so the column ladder + sticky positioning is identical. */}
+          <DataGridSkeletonRows
+            fieldCount={SKELETON_FIELD_COUNT - 1}
+            rowCount={SKELETON_ROW_COUNT}
+            primaryStickyLeft={primaryStickyLeft}
+          />
         </div>
       </div>
     </div>

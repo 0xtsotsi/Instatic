@@ -152,12 +152,12 @@ const ALLOWLIST = new Set([
   //   This is the same pattern class as §8.6 (custom ARIA role + custom
   //   structural layout).
   //
-  // • DataGrid status-group header is a grid-column-spanning (1 / -1)
-  //   sticky disclosure toggle (status dot + label + count, collapsible).
+  // • DataGridGroupHeader is a grid-column-spanning (1 / -1) sticky
+  //   disclosure toggle (status dot + label + count, collapsible).
   //   This is the exact §8.2 full-width-disclosure pattern, but inside a
   //   CSS-Grid row rather than a panel section.
   'admin/pages/data/components/DataGrid/DataGridHeaderCell.tsx',
-  'admin/pages/data/components/DataGrid/DataGrid.tsx',
+  'admin/pages/data/components/DataGrid/DataGridGroupHeader.tsx',
 
   // ── §8.11 BorderControl side / corner picker hit areas ──────────────────
   // The visual border editor's side picker renders four absolutely-positioned

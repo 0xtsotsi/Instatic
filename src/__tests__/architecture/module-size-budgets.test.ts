@@ -100,7 +100,6 @@ const GRANDFATHERED: Record<string, number> = {
   'server/handlers/cms/auth.ts': 913,
   'src/core/loops/sources/dataRows.ts': 903,
   'src/core/page-tree/mutations.ts': 882,
-  'src/admin/pages/data/components/DataGrid/DataGrid.tsx': 873,
   'server/plugins/host/handlers/content.ts': 848,
   'src/core/siteImport/cssToStyleRules.ts': 829,
   'src/admin/pages/site/panels/MediaExplorerPanel/MediaExplorerPanel.tsx': 825,
