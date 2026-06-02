@@ -82,12 +82,8 @@ export function AmbientSelectorPill({
       suffix={suffix}
       onClick={onToggle}
       onMainKeyDown={handleKeyDown}
-      removeDisabled
       mainAriaLabel={`${pill.active ? 'Deselect' : 'Edit'} selector ${selectorLabel}`}
-      removeAriaLabel={`Remove selector ${selectorLabel}`}
-      removeTooltip="Ambient selectors are not assigned to this element"
       mainTestId={`selector-chip-${pill.rule.id}`}
-      removeTestId={`selector-chip-remove-${pill.rule.id}`}
     />
   )
 }

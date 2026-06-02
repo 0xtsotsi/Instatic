@@ -36,7 +36,6 @@ export interface TagPillProps {
   onContextMenu?: MouseEventHandler<HTMLSpanElement>
   onMainKeyDown?: KeyboardEventHandler<HTMLButtonElement>
   onRemove?: MouseEventHandler<HTMLButtonElement>
-  removeDisabled?: boolean
   removeAriaLabel?: string
   removeTooltip?: ReactNode
   mainAriaLabel?: string
@@ -61,7 +60,6 @@ export function TagPill({
   onContextMenu,
   onMainKeyDown,
   onRemove,
-  removeDisabled = false,
   removeAriaLabel,
   removeTooltip,
   mainAriaLabel,
@@ -71,7 +69,7 @@ export function TagPill({
   'aria-hidden': ariaHidden,
 }: TagPillProps) {
   const resolvedAccent = accent ?? pillAccent(colorKey ?? label)
-  const removable = Boolean(onRemove || removeDisabled)
+  const removable = Boolean(onRemove)
   const style = {
     '--tag-pill-tint': `var(--tag-pill-tint-${resolvedAccent})`,
   } as CSSProperties
@@ -133,10 +131,9 @@ export function TagPill({
           variant="ghost"
           size="micro"
           iconOnly
-          disabled={removeDisabled}
           aria-label={removeAriaLabel ?? `Remove ${label}`}
           tooltip={removeTooltip}
-          dangerHover={!removeDisabled}
+          dangerHover
           className={styles.removeButton}
           onClick={handleRemove}
           data-testid={removeTestId}

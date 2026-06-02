@@ -39,6 +39,15 @@
     padding-right: 4px;
 }
 
+.pill[data-clickable="true"] {
+    padding: 0;
+    gap: 0;
+}
+
+.pill[data-clickable="true"][data-removable="true"] {
+    padding-right: 0;
+}
+
 .pill[data-monospace="true"] {
     font-family: var(--font-mono);
 }
@@ -83,12 +92,26 @@
 
 .mainButton.mainButton {
     flex: 1 1 auto;
-    height: 18px;
+    height: auto;
     justify-content: flex-start;
     padding: 0;
     background: transparent;
     font-size: inherit;
     font-weight: inherit;
+}
+
+.pill[data-size="xs"][data-clickable="true"] .mainButton.mainButton {
+    min-height: 18px;
+    padding: 1px 6px;
+}
+
+.pill[data-size="sm"][data-clickable="true"] .mainButton.mainButton {
+    min-height: 20px;
+    padding: 0 8px;
+}
+
+.pill[data-clickable="true"][data-removable="true"] .mainButton.mainButton {
+    padding-right: 4px;
 }
 
 .mainButton.mainButton:hover,
@@ -124,4 +147,16 @@
     height: 14px;
     border-radius: var(--editor-radius-sm);
     color: inherit;
+}
+
+.pill[data-size="xs"] .removeButton.removeButton {
+    flex-basis: 18px;
+    width: 18px;
+    height: 18px;
+}
+
+.pill[data-size="sm"] .removeButton.removeButton {
+    flex-basis: 20px;
+    width: 20px;
+    height: 20px;
 }

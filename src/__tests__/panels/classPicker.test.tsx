@@ -263,7 +263,7 @@ describe('ClassPicker — assigned pill', () => {
 // ---------------------------------------------------------------------------
 
 describe('ClassPicker — ambient selectors', () => {
-  it('renders a matching ambient selector as a non-removable pill that can be edited', async () => {
+  it('renders a matching ambient selector without a remove action and still lets it be edited', async () => {
     const user = userEvent.setup()
     const { nodeId } = loadSiteWithNode()
     addRenderedCanvasElement(`<section class="hero"><h1 data-node-id="${nodeId}" class="title"></h1></section>`)
@@ -273,8 +273,7 @@ describe('ClassPicker — ambient selectors', () => {
 
     const pill = screen.getByRole('button', { name: 'Edit selector .hero .title' })
     expect(pill).toBeTruthy()
-    const remove = screen.getByRole('button', { name: 'Remove selector .hero .title' })
-    expect(remove.getAttribute('aria-disabled')).toBe('true')
+    expect(screen.queryByRole('button', { name: 'Remove selector .hero .title' })).toBeNull()
 
     await user.click(pill)
     expect(useEditorStore.getState().activeClassId).toBe(ambient.id)

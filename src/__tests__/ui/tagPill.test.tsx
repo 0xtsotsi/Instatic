@@ -1,4 +1,5 @@
 import { afterEach, describe, expect, it } from 'bun:test'
+import { readFileSync } from 'fs'
 import { cleanup, fireEvent, render, screen } from '@testing-library/react'
 import { TagPill } from '@ui/components/TagPill'
 import { pillAccent } from '@ui/pillAccent'
@@ -43,5 +44,19 @@ describe('TagPill', () => {
 
     fireEvent.click(screen.getByRole('button', { name: 'Remove class .card' }))
     expect(removes).toBe(1)
+  })
+
+  it('assigns the visible clickable pill area to buttons, not inert wrapper padding', () => {
+    const css = readFileSync('src/ui/components/TagPill/TagPill.module.css', 'utf8')
+
+    expect(css).toMatch(
+      /\.pill\[data-clickable="true"\]\s*\{[^}]*padding:\s*0;[^}]*gap:\s*0;/s,
+    )
+    expect(css).toMatch(
+      /\.pill\[data-size="sm"\]\[data-clickable="true"\]\s+\.mainButton\.mainButton\s*\{[^}]*min-height:\s*20px;[^}]*padding:\s*0 8px;/s,
+    )
+    expect(css).toMatch(
+      /\.pill\[data-size="sm"\]\s+\.removeButton\.removeButton\s*\{[^}]*width:\s*20px;[^}]*height:\s*20px;/s,
+    )
   })
 })
