@@ -224,8 +224,10 @@ visitor request → server/router.ts → tryServePublicRoute
     │
     ▼ renderPublicResolution(db, url, uploadsDir?)
     │
-    ├─ Layer A: disk fast-path  (only if url.search === '')
+    ├─ Layer A: disk fast-path  (only if canonicalRenderQuery(url.searchParams) === '')
     │     readArtefact(uploadsDir, url.pathname)
+    │     junk params (UTM, etc.) collapse to '' and still hit disk;
+    │     loop-pagination params (loop_x_page=N) fall through to Layer B
     │     hit → stream HTML, 0.6–1.4 ms, no DB, no render
     │
     ├─ Layer B: in-memory LRU cache (live-render fallback)
