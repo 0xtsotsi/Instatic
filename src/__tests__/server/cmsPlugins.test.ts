@@ -6,7 +6,7 @@ import { strToU8, zipSync } from 'fflate'
 import { SESSION_COOKIE_NAME, hashSessionToken } from '../../../server/auth/tokens'
 import type { DbClient, DbResult } from '../../../server/db'
 import { handleCmsRequest } from '../../../server/handlers/cms'
-import { assertPluginPathWithin } from '../../../server/plugins/runtime'
+import { assertPathWithin } from '../../../server/util/pathWithin'
 import { hookBus } from '@core/plugins/hookBus'
 
 function makeFakeDb() {
@@ -726,19 +726,19 @@ describe('CMS plugin handlers', () => {
     })
   })
 
-  it('assertPluginPathWithin rejects paths that escape the uploads root', () => {
+  it('assertPathWithin rejects paths that escape the uploads root', () => {
     const root = '/srv/uploads'
     // Same root and a child below the root → ok.
-    expect(() => assertPluginPathWithin(root, '/srv/uploads/plugins/atk.evil/1.0.0/x.js'))
+    expect(() => assertPathWithin(root, '/srv/uploads/plugins/atk.evil/1.0.0/x.js'))
       .not.toThrow()
     // path.join already normalised these, but we still re-check the resolved value.
-    expect(() => assertPluginPathWithin(root, '/srv/etc'))
-      .toThrow('escapes uploads root')
-    expect(() => assertPluginPathWithin(root, '/srv/uploads/../etc'))
-      .toThrow('escapes uploads root')
+    expect(() => assertPathWithin(root, '/srv/etc'))
+      .toThrow('escapes root')
+    expect(() => assertPathWithin(root, '/srv/uploads/../etc'))
+      .toThrow('escapes root')
     // The root itself is rejected — there is no legitimate plugin file at exactly the uploads root.
-    expect(() => assertPluginPathWithin(root, '/srv/uploads'))
-      .toThrow('escapes uploads root')
+    expect(() => assertPathWithin(root, '/srv/uploads'))
+      .toThrow('escapes root')
   })
 
   it('stores lifecycle errors for admin diagnostics without losing the plugin row', async () => {
