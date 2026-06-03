@@ -18,6 +18,7 @@ const TREE_ROW_TSX = join(ROOT, 'src/admin/pages/site/ui/Tree/TreeRow.tsx')
 const TREE_ROW_CSS = join(ROOT, 'src/admin/pages/site/ui/Tree/TreeRow.module.css')
 const DOM_PANEL_TSX = join(ROOT, 'src/admin/pages/site/panels/DomPanel/DomPanel.tsx')
 const DOM_TREE_NODE_TSX = join(ROOT, 'src/admin/pages/site/panels/DomPanel/TreeNode.tsx')
+const DOM_LAYER_TREE_NODE_CONTENT_TSX = join(ROOT, 'src/admin/pages/site/panels/DomPanel/LayerTreeNodeContent.tsx')
 const PROJECT_EXPLORER_TSX = join(ROOT, 'src/admin/pages/site/panels/SiteExplorerPanel/SiteExplorerPanel.tsx')
 const SITE_EXPLORER_TREE_SECTION_TSX = join(ROOT, 'src/admin/pages/site/panels/SiteExplorerPanel/SiteExplorerTreeSection.tsx')
 const PROJECT_CREATE_DIALOG_TSX = join(ROOT, 'src/admin/shared/dialogs/SiteCreateDialog/SiteCreateDialog.tsx')
@@ -73,7 +74,11 @@ describe('DomPanel tree usage', () => {
   })
 
   it('uses the shared TreeRow visuals for DOM nodes', () => {
-    const source = src(DOM_TREE_NODE_TSX)
+    const treeNodeSource = src(DOM_TREE_NODE_TSX)
+    const rowContentSource = src(DOM_LAYER_TREE_NODE_CONTENT_TSX)
+    const source = `${treeNodeSource}\n${rowContentSource}`
+
+    expect(treeNodeSource.includes('LayerTreeNodeContent')).toBe(true)
     expect(source.includes('TreeRow')).toBe(true)
     expect(source.includes('TreeChevron')).toBe(true)
     expect(source.includes('TreeIconSlot')).toBe(true)

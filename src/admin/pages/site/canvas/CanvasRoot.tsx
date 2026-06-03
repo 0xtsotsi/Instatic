@@ -186,7 +186,7 @@ export function CanvasRoot({ editable = true }: CanvasRootProps) {
     try {
       prefillHtml = await navigator.clipboard.readText()
     } catch (_err) {
-      // Clipboard permission denied or API unavailable — open with empty textarea.
+      // Clipboard permission denied or API unavailable — open with an empty editor.
     }
     openImportHtmlModal({ parentId: nodeId, prefillHtml })
   }

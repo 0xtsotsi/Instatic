@@ -20,101 +20,170 @@
  * The live preview debounces at 200 ms so typing feels instant.
  */
 
-import { useEffect, useRef, useState } from 'react'
+import { lazy, Suspense, useEffect, useRef, useState } from 'react'
 import { Dialog } from '@ui/components/Dialog'
 import { Button } from '@ui/components/Button'
-import { Select } from '@ui/components/Select'
 import { pushToast } from '@ui/components/Toast'
 import { importHtml, type ImportFragment, type ImportResult } from '@core/htmlImport'
 import { cssToStyleRules } from '@core/siteImport'
 import { useEditorStore, selectActiveCanvasPage } from '@site/store/store'
 import { registry } from '@core/module-engine'
-import { getNodeDisplayName } from '@core/page-tree'
+import { getNodeDisplayName, getNodeHtmlTag } from '@core/page-tree'
 import type { PageNode } from '@core/page-tree'
+import { TreeContainer, TreeRow } from '@site/ui/Tree'
+import { useEditorPreference } from '@site/preferences/editorPreferences'
+import { LayerTreeNodeContent } from '@site/panels/DomPanel'
 import styles from './ImportHtmlModal.module.css'
 
+const CodeMirrorEditor = lazy(() => import('@site/code-editor/CodeMirrorEditor'))
+
 // ---------------------------------------------------------------------------
-// Fragment preview — small recursive presentational tree summary
+// Fragment preview — recursive read-only Layers-style tree
 // ---------------------------------------------------------------------------
 
 interface PreviewNodeRowProps {
   nodeId: string
   nodes: Record<string, PageNode>
   depth: number
+  showIcon: boolean
+  showTag: boolean
+  showClasses: boolean
 }
 
-function PreviewNodeRow({ nodeId, nodes, depth }: PreviewNodeRowProps) {
+function PreviewNodeRow({
+  nodeId,
+  nodes,
+  depth,
+  showIcon,
+  showTag,
+  showClasses,
+}: PreviewNodeRowProps) {
   const node = nodes[nodeId]
+  const [expanded, setExpanded] = useState(true)
   if (!node) return null
 
-  const indent = '│  '.repeat(depth)
-  const connector = depth === 0 ? '' : '├─ '
-  const moduleShort = node.moduleId.replace(/^base\./, '')
+  const definition = registry.get(node.moduleId)
+  const displayName = getNodeDisplayName(node, definition, undefined)
+  const htmlTag = getNodeHtmlTag(node, definition)
+  const hasChildren = node.children.length > 0
+  const classSelectorChip = node.classIds.length > 0 ? `.${node.classIds.join('.')}` : null
 
-  // Derive a representative prop snippet for the row label.
-  const propSnippet = (() => {
-    const p = node.props as Record<string, unknown>
-    if (typeof p.text === 'string' && p.text.length > 0) {
-      return `"${p.text.slice(0, 32)}${p.text.length > 32 ? '…' : ''}"`
-    }
-    if (typeof p.tag === 'string' && p.tag.length > 0 && p.tag !== 'div') {
-      return `<${p.tag}>`
-    }
-    if (typeof p.src === 'string' && p.src.length > 0) {
-      return p.src.split('/').pop() ?? p.src
-    }
-    return null
-  })()
+  function toggleExpanded() {
+    if (hasChildren) setExpanded((current) => !current)
+  }
 
   return (
-    <>
-      <div className={styles.previewNode}>
-        {depth > 0 && (
-          <span className={styles.previewNodeIndent} aria-hidden="true">
-            {indent}{connector}
-          </span>
-        )}
-        <span className={styles.previewNodeModule}>{moduleShort}</span>
-        {propSnippet && (
-          <span className={styles.previewNodeProp}>{propSnippet}</span>
-        )}
-      </div>
-      {node.children.map((childId) => (
-        <PreviewNodeRow
-          key={childId}
-          nodeId={childId}
-          nodes={nodes}
-          depth={depth + 1}
+    <div data-node-id={nodeId}>
+      <TreeRow
+        depth={depth}
+        role="treeitem"
+        aria-selected={false}
+        aria-expanded={hasChildren ? expanded : undefined}
+        aria-label={displayName}
+        tabIndex={0}
+        onClick={toggleExpanded}
+        onKeyDown={(event) => {
+          if (!hasChildren) return
+          if (event.key === 'Enter' || event.key === ' ') {
+            event.preventDefault()
+            toggleExpanded()
+          }
+          if (event.key === 'ArrowRight' && !expanded) {
+            event.preventDefault()
+            setExpanded(true)
+          }
+          if (event.key === 'ArrowLeft' && expanded) {
+            event.preventDefault()
+            setExpanded(false)
+          }
+        }}
+      >
+        <LayerTreeNodeContent
+          moduleId={node.moduleId}
+          displayName={displayName}
+          htmlTag={htmlTag}
+          classSelectorChip={classSelectorChip}
+          hasChildren={hasChildren}
+          expanded={expanded}
+          showIcon={showIcon}
+          showTag={showTag}
+          showClasses={showClasses}
+          locked={node.locked}
+          hidden={node.hidden}
+          onToggle={(event) => {
+            event.stopPropagation()
+            toggleExpanded()
+          }}
         />
-      ))}
-    </>
+      </TreeRow>
+      {hasChildren && expanded && (
+        <div role="group">
+          {node.children.map((childId) => (
+            <PreviewNodeRow
+              key={childId}
+              nodeId={childId}
+              nodes={nodes}
+              depth={depth + 1}
+              showIcon={showIcon}
+              showTag={showTag}
+              showClasses={showClasses}
+            />
+          ))}
+        </div>
+      )}
+    </div>
   )
+}
+
+function parseImportPreview(source: string): ImportResult | null {
+  if (!source.trim()) return null
+  try {
+    return importHtml(source)
+  } catch (_err) {
+    // Invalid preview HTML should not block typing; Insert reparses and reports errors.
+    return null
+  }
 }
 
 interface FragmentPreviewProps {
   result: ImportResult | null
+  showIcon: boolean
+  showTag: boolean
+  showClasses: boolean
 }
 
-function FragmentPreview({ result }: FragmentPreviewProps) {
+function FragmentPreview({ result, showIcon, showTag, showClasses }: FragmentPreviewProps) {
   if (!result || result.rootIds.length === 0) {
     return (
-      <div className={styles.previewTree}>
-        <p className={styles.previewEmpty}>No nodes — paste some HTML above.</p>
-      </div>
+      <p className={styles.previewEmpty}>
+        No imported nodes
+      </p>
     )
   }
 
   const total = Object.keys(result.nodes).length
   return (
     <>
-      <p className={styles.previewHeader}>
-        Preview ({total} {total === 1 ? 'node' : 'nodes'})
-      </p>
-      <div className={styles.previewTree} aria-label="Import preview">
-        {result.rootIds.map((id) => (
-          <PreviewNodeRow key={id} nodeId={id} nodes={result.nodes} depth={0} />
-        ))}
+      <div className={styles.previewSummary}>
+        {total} {total === 1 ? 'node' : 'nodes'}
       </div>
+      <TreeContainer
+        ariaLabel="Imported node preview"
+        testId="import-html-preview-tree"
+        className={styles.previewTree}
+      >
+        {result.rootIds.map((id) => (
+          <PreviewNodeRow
+            key={id}
+            nodeId={id}
+            nodes={result.nodes}
+            depth={0}
+            showIcon={showIcon}
+            showTag={showTag}
+            showClasses={showClasses}
+          />
+        ))}
+      </TreeContainer>
     </>
   )
 }
@@ -138,61 +207,36 @@ export function ImportHtmlModal() {
   const insertImportedNodes = useEditorStore((s) => s.insertImportedNodes)
   const breakpoints = useEditorStore((s) => s.site?.breakpoints)
   const canvasPage = useEditorStore(selectActiveCanvasPage)
+  const showIcon = useEditorPreference('layersShowIcon')
+  const showTag = useEditorPreference('layersShowTag')
+  const showClasses = useEditorPreference('layersShowClasses')
 
   // Initialize from store values — fresh on every mount.
   const rootId = canvasPage?.rootNodeId ?? ''
   const [html, setHtml] = useState(storePrefill)
-  const [selectedParentId, setSelectedParentId] = useState(storeParentId ?? rootId)
-  const [result, setResult] = useState<ImportResult | null>(null)
+  const [result, setResult] = useState<ImportResult | null>(() => parseImportPreview(storePrefill))
   const [errorMsg, setErrorMsg] = useState<string | null>(null)
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const targetParentId = storeParentId ?? rootId
 
   // Live preview — debounced 200 ms. All setState calls inside the timer
   // callback (not synchronously in the effect body).
   useEffect(() => {
     if (debounceRef.current) clearTimeout(debounceRef.current)
     debounceRef.current = setTimeout(() => {
-      if (!html.trim()) {
-        setResult(null)
-        return
-      }
-      try {
-        setResult(importHtml(html))
-      } catch (_err) {
-        setResult(null)
-      }
+      setResult(parseImportPreview(html))
     }, 200)
     return () => {
       if (debounceRef.current) clearTimeout(debounceRef.current)
     }
   }, [html])
 
-  // Parent picker options: page root + all container nodes.
-  const parentOptions = (() => {
-    if (!canvasPage) return []
-    const options: Array<{ value: string; label: string; textValue: string }> = []
-    for (const node of Object.values(canvasPage.nodes)) {
-      const isRoot = node.id === canvasPage.rootNodeId
-      const def = registry.get(node.moduleId)
-      const acceptsChildren = isRoot || def?.canHaveChildren === true
-      if (!acceptsChildren) continue
-      const displayName = getNodeDisplayName(node, def, undefined)
-      options.push({
-        value: node.id,
-        label: isRoot ? `${displayName} (root)` : displayName,
-        textValue: displayName,
-      })
-    }
-    return options
-  })()
-
   const nodeCount = result ? Object.keys(result.nodes).length : 0
   const canInsert = nodeCount > 0
 
   const handleInsert = () => {
     if (!canInsert || !result) return
-    const parentId = selectedParentId || canvasPage?.rootNodeId
-    if (!parentId) return
+    if (!targetParentId) return
 
     try {
       // Parse any <style> CSS into registry rules using the site's breakpoints
@@ -203,7 +247,7 @@ export function ImportHtmlModal() {
         : { rules: [], conditions: [] }
 
       const fragment: ImportFragment = { nodes: result.nodes, rootIds: result.rootIds }
-      const inserted = insertImportedNodes(parentId, fragment, {
+      const inserted = insertImportedNodes(targetParentId, fragment, {
         styleRules: rules,
         conditions,
       })
@@ -240,6 +284,8 @@ export function ImportHtmlModal() {
       title="Import HTML"
       eyebrow="Instatic"
       size="lg"
+      className={styles.dialog}
+      bodyClassName={styles.dialogBody}
       footer={
         <>
           <Button variant="secondary" type="button" onClick={closeModal}>
@@ -256,50 +302,48 @@ export function ImportHtmlModal() {
         </>
       }
     >
-      <div className={styles.body}>
-        {/* HTML input */}
-        <div className={styles.field}>
-          <label className={styles.label} htmlFor="import-html-textarea">
-            HTML
-          </label>
-          <textarea
-            id="import-html-textarea"
-            className={styles.textarea}
-            value={html}
-            onChange={(e) => { setHtml(e.target.value); setErrorMsg(null) }}
-            placeholder={'<section>\n  <h1>Hello world</h1>\n</section>'}
-            spellCheck={false}
-            autoComplete="off"
-          />
-        </div>
-
-        {/* Parent picker */}
-        {parentOptions.length > 0 && (
-          <div className={styles.field}>
-            <label className={styles.label} htmlFor="import-html-parent">
-              Insert inside
-            </label>
-            <Select
-              id="import-html-parent"
-              value={selectedParentId}
-              onChange={(e) => setSelectedParentId(e.target.value)}
-              options={parentOptions}
-              aria-label="Choose a parent node for the imported content"
+      <div className={styles.columns}>
+        <section className={styles.previewColumn} aria-label="Tree preview">
+          <div className={styles.columnHeader}>
+            <h3 className={styles.columnTitle}>Tree preview</h3>
+            {errorMsg && (
+              <div className={styles.errorAlert} role="alert">
+                {errorMsg}
+              </div>
+            )}
+          </div>
+          <div className={styles.previewScroll}>
+            <FragmentPreview
+              result={result}
+              showIcon={showIcon}
+              showTag={showTag}
+              showClasses={showClasses}
             />
           </div>
-        )}
+        </section>
 
-        {/* Error alert */}
-        {errorMsg && (
-          <div className={styles.errorAlert} role="alert">
-            {errorMsg}
+        <section className={styles.editorColumn} aria-label="HTML source">
+          <div className={styles.columnHeader}>
+            <h3 className={styles.columnTitle}>HTML</h3>
           </div>
-        )}
-
-        {/* Live preview */}
-        <div className={styles.field}>
-          <FragmentPreview result={result} />
-        </div>
+          <div
+            className={styles.codeEditor}
+            data-testid="import-html-code-editor"
+          >
+            <Suspense fallback={<div className={styles.editorLoading}>Loading editor</div>}>
+              <CodeMirrorEditor
+                docKey="import-html"
+                value={html}
+                language="html"
+                changeDelayMs={0}
+                onChange={(nextHtml) => {
+                  setHtml(nextHtml)
+                  setErrorMsg(null)
+                }}
+              />
+            </Suspense>
+          </div>
+        </section>
       </div>
     </Dialog>
   )

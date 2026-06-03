@@ -46,7 +46,14 @@ function highlightedColorFor(view: EditorView, tag: typeof tags.labelName) {
 
 describe('CodeMirrorEditor theme', () => {
   it('uses GitHub Dark-style syntax colors for CSS tokens', async () => {
-    render(<CodeMirrorEditor file={cssFile} updateFileContent={() => {}} />)
+    render(
+      <CodeMirrorEditor
+        docKey={cssFile.id}
+        value={cssFile.content}
+        language="css"
+        onChange={() => {}}
+      />,
+    )
     await waitForCodeMirrorMount()
 
     const editor = document.querySelector<HTMLElement>('.cm-editor')

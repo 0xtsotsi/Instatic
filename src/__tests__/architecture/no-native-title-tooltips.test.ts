@@ -56,7 +56,7 @@ export const ALLOWED_NATIVE_TITLES: Array<{
       'Not a button — no onClick, no role="button".',
   },
   {
-    file: 'admin/pages/site/panels/DomPanel/TreeNode.tsx',
+    file: 'admin/pages/site/panels/DomPanel/LayerTreeNodeContent.tsx',
     reason:
       'aria-hidden="true" emoji lock/visibility indicators: <span title="Locked"> and ' +
       '<span title="Hidden">. Adding aria-label to an aria-hidden element is ignored by AT; ' +

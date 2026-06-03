@@ -275,9 +275,20 @@ interface CodeMirrorEditorProps {
   language: CodeLanguage
   /** Debounced (250 ms) on every edit, and flushed immediately on docKey switch. */
   onChange: (content: string) => void
+  /**
+   * Change propagation delay. File editors keep the 250 ms default; modal
+   * command surfaces can pass 0 so their primary action never reads stale text.
+   */
+  changeDelayMs?: number
 }
 
-export default function CodeMirrorEditor({ docKey, value, language, onChange }: CodeMirrorEditorProps) {
+export default function CodeMirrorEditor({
+  docKey,
+  value,
+  language,
+  onChange,
+  changeDelayMs = 250,
+}: CodeMirrorEditorProps) {
   const containerRef = useRef<HTMLDivElement | null>(null)
 
   // Refs to hold pending debounce state. Using refs (not state) so that reads
@@ -325,6 +336,15 @@ export default function CodeMirrorEditor({ docKey, value, language, onChange }: 
           EditorView.updateListener.of((update) => {
             if (!update.docChanged) return
             const content = update.state.doc.toString()
+            if (changeDelayMs <= 0) {
+              if (timerRef.current) {
+                clearTimeout(timerRef.current)
+                timerRef.current = null
+              }
+              pendingContentRef.current = null
+              onChangeRef.current(content)
+              return
+            }
             pendingContentRef.current = content
             if (timerRef.current) clearTimeout(timerRef.current)
             timerRef.current = setTimeout(() => {
@@ -333,7 +353,7 @@ export default function CodeMirrorEditor({ docKey, value, language, onChange }: 
                 pendingContentRef.current = null
               }
               timerRef.current = null
-            }, 250)
+            }, changeDelayMs)
           }),
           EditorView.lineWrapping,
         ],

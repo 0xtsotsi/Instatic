@@ -36,17 +36,12 @@ import { LayerNodeContextMenu } from './LayerNodeContextMenu'
 import { Input } from '@ui/components/Input'
 import { cn } from '@ui/cn'
 import {
-  TreeChevron,
-  TreeIconSlot,
-  TreeLabel,
-  TreeLabelGroup,
   TreeRow,
   treeDropStyles,
 } from '@site/ui/Tree'
-import { ModuleIcon } from '@site/ui/ModuleIcon'
-import { TagPill } from '@ui/components/TagPill'
 import { useEditorPreference } from '@site/preferences/editorPreferences'
 import { useConfirmDelete } from '@admin/shared/dialogs/ConfirmDeleteDialog'
+import { LayerTreeNodeContent } from './LayerTreeNodeContent'
 import styles from './TreeNode.module.css'
 
 // Stable empty fallback for the children selector (keeps referential equality).
@@ -311,97 +306,40 @@ export const TreeNode = memo(function TreeNode({ nodeId, depth, editable = true 
         onFocus={() => setIsFocused(true)}
         onBlur={() => setIsFocused(false)}
       >
-        {/* Expand/collapse chevron — hidden on the page root, which is always
-            expanded (no toggle affordance). */}
-        <TreeChevron
-          onClick={(e) => { e.stopPropagation(); if (!isRoot) store.toggle(nodeId) }}
+        <LayerTreeNodeContent
+          moduleId={node.moduleId}
+          displayName={displayName}
+          htmlTag={htmlTag}
+          classSelectorChip={classSelectorChip}
+          hasChildren={hasChildren}
           expanded={expanded}
-          visible={hasChildren && !isRoot}
-        />
-
-        {/* Module icon — resolved from the module declaration via ModuleIcon.
-            Hidden when the user turns off the `layersShowIcon` preference. */}
-        {showIcon && (
-          <TreeIconSlot iconSize={11} iconColor="var(--editor-text-subtle)">
-            <ModuleIcon
-              module={definition}
-              size={11}
-              color="var(--editor-text-subtle)"
+          showIcon={showIcon}
+          showTag={showTag}
+          showClasses={showClasses}
+          isRoot={isRoot}
+          locked={node.locked}
+          hidden={node.hidden}
+          onToggle={(e) => { e.stopPropagation(); if (!isRoot) store.toggle(nodeId) }}
+          labelSlot={isRenaming ? (
+            <Input
+              ref={renameInputRef}
+              fieldSize="xs"
+              // autoFocus ensures the input receives keyboard focus as soon as it
+              // mounts — more reliable than the requestAnimationFrame fallback.
+              autoFocus
+              value={renameValue}
+              onChange={(e) => setRenameValue(e.target.value)}
+              onKeyDown={handleRenameKeyDown}
+              onBlur={commitRename}
+              // Stop pointer events from bubbling to the row's dnd-kit listeners.
+              // Without this, a click inside the input triggers the PointerSensor
+              // on the row div, which can steal focus away from the input.
+              onPointerDown={(e) => e.stopPropagation()}
+              aria-label={`Rename ${displayName}`}
+              className={styles.renameInput}
             />
-          </TreeIconSlot>
-        )}
-
-        {/* Node label — inline editable when renaming */}
-        {isRenaming ? (
-          <Input
-            ref={renameInputRef}
-            fieldSize="xs"
-            // autoFocus ensures the input receives keyboard focus as soon as it
-            // mounts — more reliable than the requestAnimationFrame fallback.
-            autoFocus
-            value={renameValue}
-            onChange={(e) => setRenameValue(e.target.value)}
-            onKeyDown={handleRenameKeyDown}
-            onBlur={commitRename}
-            // Stop pointer events from bubbling to the row's dnd-kit listeners.
-            // Without this, a click inside the input triggers the PointerSensor
-            // on the row div, which can steal focus away from the input.
-            onPointerDown={(e) => e.stopPropagation()}
-            aria-label={`Rename ${displayName}`}
-            className={styles.renameInput}
-          />
-        ) : (
-          <TreeLabelGroup>
-            {/* HTML tag pill — gradient-tinted chip placed BEFORE the label,
-                using the same accent palette as the ClassPicker (mint / lilac
-                / sky / peach) so a tag named "header" renders in the same
-                tint as a class named "header". Surfaced from the module's
-                `htmlTag` hint; hidden when the module declines to declare a
-                tag (visual-component-ref, slot, loop, etc.) or when the user
-                turns off the `layersShowTag` preference. */}
-            {showTag && htmlTag && (
-              <TagPill
-                label={htmlTag}
-                size="xs"
-                monospace
-                aria-hidden="true"
-                className={styles.tagPill}
-              />
-            )}
-            <TreeLabel>
-              {displayName}
-            </TreeLabel>
-            {/* Class selector chip — chained-dot CSS selector style after the
-                label (".header.padding-m"). Truncates with an ellipsis when
-                space runs out so the row's primary info (tag + name) stays
-                readable on narrow panels. Hidden when `layersShowClasses` is
-                turned off. */}
-            {showClasses && classSelectorChip && (
-              <TagPill
-                label={classSelectorChip}
-                size="xs"
-                monospace
-                aria-hidden="true"
-                className={styles.classChip}
-              />
-            )}
-          </TreeLabelGroup>
-        )}
-
-        {/* Indicators: locked, hidden
-            These emoji spans are aria-hidden="true" (decorative — AT reads state via
-            the row's aria-label above). title gives sighted mouse users a tooltip.
-            No aria-label here — it would be ignored by AT due to aria-hidden="true". */}
-        {node.locked && (
-          <span title="Locked" aria-hidden="true" className={styles.indicator}>
-            🔒
-          </span>
-        )}
-        {node.hidden && (
-          <span title="Hidden" aria-hidden="true" className={styles.indicator}>
-            👁
-          </span>
-        )}
+          ) : undefined}
+        />
       </TreeRow>
 
       {/* Children — role="group" as required by WAI-ARIA tree pattern */}
@@ -443,7 +381,7 @@ export const TreeNode = memo(function TreeNode({ nodeId, depth, editable = true 
             try {
               prefillHtml = await navigator.clipboard.readText()
             } catch (_err) {
-              // Clipboard permission denied or API unavailable — open with empty textarea.
+              // Clipboard permission denied or API unavailable — open with an empty editor.
             }
             openImportHtmlModal({ parentId: targetNodeId, prefillHtml })
           }}
