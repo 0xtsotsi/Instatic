@@ -16,7 +16,7 @@ Schemas are the **source of truth**. Domain types come from `Static<typeof Schem
 - **Schemas are source of truth.** `type Foo = Static<typeof FooSchema>` — never a hand-rolled interface beside the schema.
 - **Soft fallbacks** for corrupted local storage / optional config use `withFallback(schema, default)` + `parseJsonWithFallback`.
 - **Hard fallbacks** for required documents throw and bubble to an error boundary.
-- **`zod` is banned outside `server/handlers/agent/tools.ts`.** That single exemption exists because `@anthropic-ai/claude-agent-sdk`'s `tool()` API requires `AnyZodRawShape`.
+- **`zod` is banned outside `server/ai/drivers/`.** The Anthropic driver (`typeboxToZod.ts`, `anthropic.ts`) translates TypeBox schemas to Zod for the SDK's `tool()` API. Gated by `ai-driver-isolation.test.ts`.
 
 ---
 
@@ -273,7 +273,8 @@ Common boundaries already wrapped — extend the same pattern when you add a new
 | `JSON.parse` of disk JSON                  | `safeParseJson(raw, Schema)`                        | `src/core/utils/jsonValidate.ts`        |
 | Plugin manifest                            | `parsePluginManifest(raw)`                          | `src/core/plugins/manifest.ts`          |
 | Site shell loaded from storage             | `validateSite(raw)`                                 | `src/core/persistence/validate.ts`      |
-| Page roster loaded from storage            | `validatePages(shell, rawPages, vcs)`               | `src/core/persistence/validate.ts`      |
+| Page roster on load (fault-tolerant)       | `validatePages(shell, rawPages, vcs, { tolerant: true, storedVcIds })` | `src/core/persistence/validate.ts` |
+| Page roster on write (fail-closed)         | `validatePages(shell, rawPages, vcs)` (default: `tolerant: false`)     | `src/core/persistence/validate.ts` |
 | VC roster loaded from storage (read path)  | `validateVisualComponents(rawVCs)`                  | `src/core/persistence/validate.ts`      |
 | VC roster on write (fail-closed)           | `validateVisualComponentsForWrite(rawVCs)`          | `src/core/persistence/validate.ts`      |
 | Page-tree payload from plugin RPC / disk   | `parsePageNodeTree(raw)`                            | `src/core/page-tree/operationSchema.ts` |
@@ -289,7 +290,7 @@ Common boundaries already wrapped — extend the same pattern when you add a new
 | `await res.json() as Foo`                                     | `apiRequest(path, { schema })` (client) or `readEnvelope(res, FooSchema, msg)` (held `Response`) — `parseJsonResponse` only for `@core/http` internals / XHR / server-side |
 | `JSON.parse(raw) as Foo`                                      | `safeParseJson(raw, FooSchema)` / `parseJsonWithFallback`       |
 | Hand-rolled `interface Foo` next to a `FooSchema`             | `type Foo = Static<typeof FooSchema>`                            |
-| Importing `zod` in app code                                   | TypeBox — the only legitimate `zod` use is `server/handlers/agent/tools.ts` |
+| Importing `zod` in app code                                   | TypeBox — the only legitimate `zod` use is inside `server/ai/drivers/` (TypeBox→Zod adapter for the Anthropic SDK) |
 | `try { JSON.parse(raw) } catch (err) { /* swallow */ }`       | `parseJsonWithFallback` for soft, `safeParseJson` for hard       |
 | `if (typeof body.email !== 'string') return badRequest(...)` (ad-hoc shape check) | TypeBox schema + `parseValue`                       |
 | Re-wrapping `Error` in a way that loses the original cause    | `new Error(message, { cause: err })`                             |
@@ -307,7 +308,7 @@ Common boundaries already wrapped — extend the same pattern when you add a new
   - `src/core/utils/jsonValidate.ts` — JSON boundary helpers
   - `src/core/http/apiClient.ts` — `apiRequest`, `ApiError`, `isAbortError`, `readEnvelope`, `assertOk`, `responseErrorMessage`, `ErrorEnvelopeSchema`
   - `src/core/persistence/responseSchemas.ts` — shared CMS HTTP response schemas
-  - `src/core/persistence/validate.ts` — `validateSite`, `SiteValidationError`
+  - `src/core/persistence/validate.ts` — `validateSite`, `validatePages`, `ValidatePagesOptions`, `SiteValidationError`
   - `src/core/plugins/manifest.ts` — `parsePluginManifest`
   - `server/http.ts` — `readJsonObject`, `jsonResponse`, `badRequest`
   - `server/ai/drivers/typeboxToZod.ts`, `server/ai/drivers/anthropic.ts` — the only legitimate `zod` exemption (Anthropic driver translates TypeBox schemas to Zod for the SDK)

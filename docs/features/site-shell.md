@@ -261,18 +261,20 @@ type SiteRuntimeConfig = {
 ## Loading the site
 
 ```text
-GET /admin/api/cms/site
+GET /admin/api/cms/site + /admin/api/cms/pages + /admin/api/cms/components  (parallel)
     │
     ▼
-server/handlers/cms/site.ts
+Client: CmsAdapter.loadSite()  ← src/core/persistence/cms.ts
     │
-    ├─→ loadDraftSite(db)              ← server/repositories/site.ts
-    │       (reads the site row, validates settings_json via parseSiteDocument)
-    ├─→ listDataRows(db, 'pages')      ← page rows
-    ├─→ listDataRows(db, 'components') ← VC rows
+    ├─→ validateSite(shellBody.site)                      shell validation
+    ├─→ validateVisualComponents(rawVCs)                  VC parse + dedup + cycle check
+    └─→ validatePages(shell, rawPages, vcs, {             page validation (fault-tolerant)
+            tolerant: true,
+            storedVcIds: new Set(rawVCs.map(vc => vc.id))
+        })
     │
     ▼
-Client: assembleSiteDocument(shell, pages, vcs) → SiteDocument
+SiteDocument assembled inline  →  reconcileSiteExplorerOrganization
     │
     ▼
 Editor store: siteSlice initial state
@@ -294,6 +296,8 @@ The shell's `parseSiteDocument(raw)` is **tolerant in the right places**:
 | `runtime`     | Fall back to empty lock + scripts                |
 
 Hard fallbacks let the editor render a partially-corrupt site instead of hard-failing; identity-field throws prevent the editor from rendering against the wrong site.
+
+Pages and VCs follow the same principle: `validateVisualComponents` silently drops malformed VC rows; `validatePages` with `tolerant: true` logs and skips unparseable or tree-incoherent page rows rather than aborting the whole load. The `storedVcIds` option threads the raw VC id set through so refs to "loader-repaired" VCs (deduped or cycle-dropped) are not stripped from pages — only refs to VCs genuinely absent from storage are removed. The write path (`validatePages` without options, `tolerant: false`) remains fail-closed.
 
 ---
 
