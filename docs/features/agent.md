@@ -172,7 +172,7 @@ The handler (`server/ai/handlers/chat.ts`):
 3. Decrypts the credential and resolves the driver.
 4. Calls `selectToolsForScope('site', capabilities)` — write tools excluded without `ai.tools.write`.
 5. Builds the system prompt via `buildSiteSystemPrompt(snapshot)`.
-6. Creates a bridge (`createBridge(emit)`), emits `bridgeReady`.
+6. Creates a bridge (`createBridge(emit, req.signal)`), emits `bridgeReady`.
 7. Calls `runChat(...)`, pipes all stream events to the HTTP response.
 8. Emits a terminal `ai.chat.completed` / `ai.chat.failed` audit event.
 
@@ -368,7 +368,11 @@ Conversations and their message history are persisted server-side in `ai_convers
 
 ## Abort + crash recovery
 
-- **Abort.** "Stop" calls `agentSlice.abortAgent()` → `AbortController.abort()` → the fetch stream closes → the server's `destroy()` hook fires → pending tool waiters reject → the driver loop terminates.
+- **Abort.** "Stop" calls `agentSlice.abortAgent()` → `AbortController.abort()` → the fetch stream closes. Two things happen in parallel on the server:
+  - The request `AbortSignal` is forwarded to the Anthropic SDK via `options.abortController` (set in `buildQueryOptions` in `server/ai/drivers/anthropic.ts`). The driver's model loop terminates immediately — no further tokens are generated or billed.
+  - Any `callBrowser` promise still waiting for a browser tool-result rejects immediately. The `onAbort` listener registered per pending call fires, removes the pending entry, and clears its timeout.
+  - The stream's `destroy()` hook fires, rejects any remaining pending entries, and removes the bridge from the registry.
+- **Browser tool timeout.** If the browser never POSTs a tool-result, `callBrowser` rejects after 90 seconds (`BROWSER_TOOL_TIMEOUT_MS` in `server/ai/runtime/transport.ts`). The driver sees a rejection, emits an error, and the stream closes. This prevents a closed or unresponsive tab from hanging the SDK loop indefinitely.
 - **Crash on server.** If `runChat` throws, the stream emits `{ type: 'error', message }`. The browser surfaces the message verbatim in the Agent Panel (admin-only surface, so info-disclosure is not a concern).
 - **Tool failure.** Browser executors wrap every call in try/catch. Failures return `{ ok: false, error }`. The model reads the error message in the next turn and retries with corrected input.
 - **Bridge-result POST after abort.** If the browser POSTs a tool-result after the stream has closed, the server returns 404 and drops the result silently.
