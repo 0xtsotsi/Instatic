@@ -72,6 +72,7 @@ import {
 } from './publicRenderer'
 import { readArtefact } from './staticArtefact'
 import { getOrRender } from './renderCache'
+import { canonicalRenderQuery } from './loopPrefetch'
 
 // ---------------------------------------------------------------------------
 // Path helpers
@@ -206,11 +207,16 @@ export async function renderPublicResolution(
   url: URL,
   uploadsDir?: string,
 ): Promise<Response | null> {
+  // Canonicalise the query to the loop-pagination params the renderer actually
+  // consumes. Junk params collapse to '' (so they never mint cache slots), and
+  // real pagination keeps a bounded, canonical key (ISS-032).
+  const canonicalQuery = canonicalRenderQuery(url.searchParams)
+
   // ── Layer A: disk artefact fast-path ─────────────────────────────────────
-  // Only for requests without a query string. URLs with `?` always fall
-  // through to Layer B so paginated loops (e.g. `?page=2`) are never served
-  // the canonical URL's baked HTML.
-  if (uploadsDir && url.search === '') {
+  // Only for requests whose canonical query is empty. Real loop pagination
+  // (e.g. `?loop_x_page=2`) falls through to Layer B so it is never served the
+  // canonical URL's baked HTML; junk query strings still hit the disk artefact.
+  if (uploadsDir && canonicalQuery === '') {
     const html = await readArtefact(uploadsDir, url.pathname)
     if (html !== null) {
       return new Response(html, {
@@ -232,7 +238,7 @@ export async function renderPublicResolution(
 
   // ── Layer B: in-memory LRU cache for the expensive render path ───────────
   const cached = await getOrRender(
-    { urlPath: url.pathname, queryString: url.search },
+    { urlPath: url.pathname, queryString: canonicalQuery },
     async () => {
       const rendered = resolution.kind === 'page'
         ? await renderPublishedSnapshot(resolution.snapshot, { db, url })

@@ -168,6 +168,29 @@ function loopPageQueryKey(loopNodeId: string): string {
   return `loop_${loopNodeId}_page`
 }
 
+/** True for a `loop_<nodeId>_page` pagination param. */
+function isLoopPageQueryKey(key: string): boolean {
+  return /^loop_.+_page$/.test(key)
+}
+
+/**
+ * Canonical render-cache query: keep ONLY the loop pagination params the
+ * renderer consumes, sorted, and re-serialised (with a leading `?`, or `''`
+ * when none remain). Arbitrary junk params (`?utm=…`, `?x=1`) therefore
+ * collapse onto a single cache key, and a query that canonicalises to empty is
+ * eligible for the Layer A disk fast-path — eliminating the attacker-controlled
+ * key-space explosion against the shared LRU (ISS-032).
+ */
+export function canonicalRenderQuery(searchParams: URLSearchParams): string {
+  const kept: Array<[string, string]> = []
+  for (const [key, value] of searchParams) {
+    if (isLoopPageQueryKey(key)) kept.push([key, value])
+  }
+  if (kept.length === 0) return ''
+  kept.sort((a, b) => (a[0] === b[0] ? a[1].localeCompare(b[1]) : a[0].localeCompare(b[0])))
+  return `?${new URLSearchParams(kept).toString()}`
+}
+
 function readPageNumber(url: URL | undefined, loopNodeId: string): number {
   if (!url) return 1
   const raw = url.searchParams.get(loopPageQueryKey(loopNodeId))
