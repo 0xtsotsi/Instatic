@@ -47,6 +47,8 @@ server/ai/
 │   └── typeboxToZod.ts     — TypeBox→Zod conversion helper for the Anthropic driver
 └── runtime/
     ├── runner.ts           — runChat(): drives a driver, emits stream events
+    ├── persister.ts        — ConversationsPersister: messages + usage + session id to DB
+    ├── types.ts            — canonical AiStreamEvent / AiMessage / AiTool / ToolContext
     └── transport.ts        — createBridge() / resolveBridgeToolResult()
 
 src/admin/pages/site/agent/
@@ -93,7 +95,7 @@ agentSlice.sendAgentMessage(content)
 Server: chat.ts
     │
     ├─→ CSRF + requireCapability('ai.chat')
-    ├─→ load conversation row  (credentialId, modelId, message history)
+    ├─→ load conversation row  (credentialId, modelId, sessionId, message history)
     ├─→ decrypt credential; resolveDriver(credential.providerId)
     ├─→ selectToolsForScope('site', capabilities)
     │     — write tools excluded unless caller has ai.tools.write
@@ -101,6 +103,9 @@ Server: chat.ts
     ├─→ createBridge(emit)  →  { bridgeId, bridge, destroy }
     ├─→ emit { type: 'bridgeReady', bridgeId }
     └─→ runChat({ driver, request, persister, emit })  — streaming begins
+          │  request carries resumeSessionId: conversation.sessionId
+          │  (Anthropic driver sets options.resume = resumeSessionId so the SDK
+          │   replays prior history; null/undefined on first turn = fresh session)
           │
           ├─→ read tool (e.g. inspect_page)
           │     → resolved server-side from snapshot; result returned to model
@@ -112,6 +117,7 @@ Server: chat.ts
 
 NDJSON stream events (one JSON object + \n per line):
     { type: 'bridgeReady', bridgeId }
+    { type: 'session', sessionId }                         ← Anthropic only; runner persists to DB for next-turn resume
     { type: 'text', text: '…' }
     { type: 'toolCall', toolCallId, toolName, input, status: 'pending' }
     { type: 'toolRequest', requestId, toolName, input }    ← write tools only
@@ -123,6 +129,7 @@ NDJSON stream events (one JSON object + \n per line):
 Browser: processStreamEvent(event) in streamEvents.ts
     │
     ├─→ 'bridgeReady'   → store bridgeId in closure
+    ├─→ 'session'       → store agentSessionId in slice state (server already persisted it to DB)
     ├─→ 'toolRequest'   → executeAgentTool(toolName, input)  (executor.ts)
     │       – TypeBox-validates input
     │       – e.g. runInsertHtml → importHtml(html) → insertImportedNodes(parentId, …)
@@ -168,12 +175,12 @@ This snapshot travels with every prompt so server-side read tools resolve entire
 
 The handler (`server/ai/handlers/chat.ts`):
 1. CSRF-checks and requires `ai.chat`.
-2. Loads the conversation row (credentialId, modelId, persisted message history).
+2. Loads the conversation row (credentialId, modelId, `sessionId`, persisted message history).
 3. Decrypts the credential and resolves the driver.
 4. Calls `selectToolsForScope('site', capabilities)` — write tools excluded without `ai.tools.write`.
 5. Builds the system prompt via `buildSiteSystemPrompt(snapshot)`.
 6. Creates a bridge (`createBridge(emit, req.signal)`), emits `bridgeReady`.
-7. Calls `runChat(...)`, pipes all stream events to the HTTP response.
+7. Calls `runChat(...)` with `resumeSessionId: conversation.sessionId`. The Anthropic driver passes this as `options.resume` so the SDK replays the prior session; the runner persists the returned `session` event's id back to the DB via `createConversationsPersister`. Pipes all stream events to the HTTP response.
 8. Emits a terminal `ai.chat.completed` / `ai.chat.failed` audit event.
 
 ### `POST /admin/api/ai/tool-result`
@@ -409,6 +416,8 @@ Conversations and their message history are persisted server-side in `ai_convers
   - `server/ai/handlers/chat.ts` — `POST /admin/api/ai/chat/site` endpoint
   - `server/ai/handlers/toolResult.ts` — `POST /admin/api/ai/tool-result` endpoint
   - `server/ai/runtime/runner.ts` — `runChat()` driver loop
+  - `server/ai/runtime/persister.ts` — `ConversationsPersister` interface + `createConversationsPersister()`
+  - `server/ai/runtime/types.ts` — canonical `AiStreamEvent`, `AiMessage`, `AiTool`, `ToolContext` types
   - `server/ai/runtime/transport.ts` — `createBridge()` / `resolveBridgeToolResult()`
   - `src/admin/pages/site/agent/agentSlice.ts` — scope-agnostic slice factory (`createAgentSlice`)
   - `src/admin/pages/site/agent/agentSliceConfig.site.ts` — site-editor scope config
