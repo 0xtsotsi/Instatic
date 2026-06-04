@@ -1,9 +1,10 @@
 /**
- * ConflictRow — a single slug or class-name conflict with its resolution picker.
+ * ConflictRow — a single slug, class-name, or design-token conflict with its
+ * resolution picker.
  *
- * Shows the source path (or class name) and a segmented control for the resolution
- * action. When "Custom…" is selected, an `<Input>` appears inline for the
- * user to type the custom slug or name.
+ * Shows the source path (or class / token name) and a segmented control for the
+ * resolution action. When "Custom…" is selected, an `<Input>` appears inline
+ * for the user to type the custom slug / class / token variable.
  */
 import { SegmentedControl } from '@ui/components/SegmentedControl'
 import { Input } from '@ui/components/Input'
@@ -11,6 +12,8 @@ import type { ConflictResolution } from '@core/siteImport'
 import styles from './ConflictRow.module.css'
 
 type ResolutionAction = ConflictResolution['action']
+
+export type ConflictRowKind = 'page' | 'rule' | 'token'
 
 const ACTION_OPTIONS = [
   { value: 'auto-rename', label: 'Rename', tooltip: 'Rename with a numeric suffix' },
@@ -23,8 +26,34 @@ const ACTION_OPTIONS = [
 // overwrite (an intra-batch collision between two imported items).
 const ACTION_OPTIONS_NO_OVERWRITE = ACTION_OPTIONS.filter((o) => o.value !== 'overwrite')
 
+/** Read the resolved value for the active kind out of a resolution. */
+function resolvedValue(kind: ConflictRowKind, res: ConflictResolution): string | undefined {
+  if (kind === 'page') return res.resolvedSlug
+  if (kind === 'rule') return res.resolvedName
+  return res.resolvedVariable
+}
+
+/** Build a custom-rename resolution carrying the value on the right field. */
+function customResolution(kind: ConflictRowKind, value: string): ConflictResolution {
+  if (kind === 'page') return { action: 'custom-rename', resolvedSlug: value }
+  if (kind === 'rule') return { action: 'custom-rename', resolvedName: value }
+  return { action: 'custom-rename', resolvedVariable: value }
+}
+
+const CUSTOM_PLACEHOLDER: Record<ConflictRowKind, string> = {
+  page: 'custom-slug',
+  rule: 'custom-class',
+  token: 'custom-token',
+}
+
+const CUSTOM_LABEL: Record<ConflictRowKind, string> = {
+  page: 'Custom slug',
+  rule: 'Custom class name',
+  token: 'Custom token variable',
+}
+
 export interface ConflictRowProps {
-  kind: 'page' | 'rule'
+  kind: ConflictRowKind
   source: string
   desired: string
   current: ConflictResolution
@@ -41,26 +70,11 @@ export interface ConflictRowProps {
 export function ConflictRow({ kind, source, desired, current, canOverwrite = true, onChange }: ConflictRowProps) {
   const isCustom = current.action === 'custom-rename'
   const resolutionLabel = kind === 'page' ? (source || desired) : desired
-  const customValue =
-    kind === 'page'
-      ? (current.resolvedSlug ?? desired)
-      : (current.resolvedName ?? desired)
+  const customValue = resolvedValue(kind, current) ?? desired
 
   function handleActionChange(action: ResolutionAction) {
-    if (action === 'auto-rename') {
-      onChange({ action })
-    } else if (action === 'overwrite') {
-      onChange({ action })
-    } else if (action === 'skip') {
-      onChange({ action })
-    } else {
-      // custom-rename — pre-fill with the desired value
-      onChange(
-        kind === 'page'
-          ? { action, resolvedSlug: desired }
-          : { action, resolvedName: desired },
-      )
-    }
+    // custom-rename pre-fills with the desired value; the rest carry no payload.
+    onChange(action === 'custom-rename' ? customResolution(kind, desired) : { action })
   }
 
   return (
@@ -81,15 +95,9 @@ export function ConflictRow({ kind, source, desired, current, canOverwrite = tru
           <Input
             fieldSize="sm"
             value={customValue}
-            onChange={(e) => {
-              onChange(
-                kind === 'page'
-                  ? { action: 'custom-rename', resolvedSlug: e.target.value }
-                  : { action: 'custom-rename', resolvedName: e.target.value },
-              )
-            }}
-            placeholder={kind === 'page' ? 'custom-slug' : 'custom-class'}
-            aria-label={kind === 'page' ? 'Custom slug' : 'Custom class name'}
+            onChange={(e) => onChange(customResolution(kind, e.target.value))}
+            placeholder={CUSTOM_PLACEHOLDER[kind]}
+            aria-label={CUSTOM_LABEL[kind]}
           />
         )}
       </div>

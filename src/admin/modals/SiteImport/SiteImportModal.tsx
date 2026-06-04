@@ -30,22 +30,11 @@ import {
   ingestInput,
   buildImportPlan,
   commitImportPlan,
-  applyConflictResolutions,
   type FileMap,
   type ImportPlan,
   type ImportResult,
   type ConflictResolution,
-  type PageConflict,
-  type RuleConflict,
-  EmptyImportError,
-  OversizeImportError,
-  ZipBombError,
-  TooManyFilesError,
-  PathTraversalError,
 } from '@core/siteImport'
-import type { SiteDocument } from '@core/page-tree'
-import { cmsAdapter } from '@core/persistence/cms'
-import { CMS_SITE_RELOAD_EVENT } from '@admin/state/adminEvents'
 import { useAdminUi } from '@admin/state/adminUi'
 import { useEditorStore } from '@site/store/store'
 import { DropStep } from './steps/DropStep'
@@ -56,6 +45,16 @@ import { CmsBundleReviewStep } from './steps/CmsBundleReviewStep'
 import { makeInitialRunProgress, type RunProgress } from './shared/importProgress'
 import { createSiteImportAdapter } from './shared/createSiteImportAdapter'
 import { describeCmsBundleLoadError, useCmsBundleImport } from './shared/useCmsBundleImport'
+import {
+  type ImportSelection,
+  tokenConflictKey,
+  makeDefaultSelection,
+  filterPlanBySelection,
+  buildResolvedPlan,
+  describeIngestError,
+  ensureCurrentSiteForStaticImport,
+  saveImportedDraftSite,
+} from './shared/importPlanning'
 import styles from './SiteImportModal.module.css'
 
 // ---------------------------------------------------------------------------
@@ -64,114 +63,10 @@ import styles from './SiteImportModal.module.css'
 
 export type Step = 'drop' | 'analyze' | 'conflicts' | 'run' | 'cms-review'
 
-export interface ImportSelection {
-  pagesIncluded: Set<string>       // by source path
-  styleRulesIncluded: Set<number>  // by index in plan.styleRules
-  assetsIncluded: Set<string>      // by sourcePath
-  fontsIncluded: Set<string>       // by font family
-  scriptsIncluded: Set<string>     // by script path
-}
+export type { ImportSelection }
 
 interface SiteImportModalProps {
   onCmsBundleImportComplete?: () => void
-}
-
-// ---------------------------------------------------------------------------
-// Default selection
-// ---------------------------------------------------------------------------
-
-function makeDefaultSelection(plan: ImportPlan): ImportSelection {
-  return {
-    pagesIncluded: new Set(plan.pages.map((p) => p.source)),
-    styleRulesIncluded: new Set(plan.styleRules.map((_, i) => i)),
-    assetsIncluded: new Set(plan.assets.map((a) => a.sourcePath)),
-    fontsIncluded: new Set(plan.fonts.map((f) => f.family)),
-    scriptsIncluded: new Set(plan.scripts.map((s) => s.path)),
-  }
-}
-
-// ---------------------------------------------------------------------------
-// Ingest error → human-readable message
-// ---------------------------------------------------------------------------
-
-function formatByteLimit(bytes: number): string {
-  const mb = Math.round(bytes / (1024 * 1024))
-  if (mb >= 1024 && mb % 1024 === 0) return `${mb / 1024} GB`
-  return `${mb} MB`
-}
-
-function describeIngestError(err: unknown): string {
-  if (err instanceof EmptyImportError) return 'No importable files found. Drop at least one HTML or CSS file.'
-  if (err instanceof OversizeImportError) return `Import is too large (${Math.round(err.sizeBytes / 1024 / 1024)} MB). Maximum is ${formatByteLimit(err.limitBytes)}.`
-  if (err instanceof ZipBombError) return 'ZIP archive is too large when uncompressed. Maximum uncompressed size is 5 GB.'
-  if (err instanceof TooManyFilesError) return `Too many files (${err.count}). Maximum is ${err.limit}.`
-  if (err instanceof PathTraversalError) return `Unsafe path detected: "${err.path}".`
-  return err instanceof Error ? err.message : 'Unknown import error'
-}
-
-async function ensureCurrentSiteForStaticImport(): Promise<SiteDocument> {
-  const existingSite = useEditorStore.getState().site
-  if (existingSite) return existingSite
-
-  const loadedSite = await cmsAdapter.loadSite('default')
-  if (loadedSite) {
-    useEditorStore.getState().loadSite(loadedSite)
-    return loadedSite
-  }
-
-  return useEditorStore.getState().createSite('My Site')
-}
-
-async function saveImportedDraftSite(): Promise<void> {
-  const site = useEditorStore.getState().site
-  if (!site) throw new Error('Import completed, but no draft site is loaded.')
-  await cmsAdapter.saveSite(site)
-  useEditorStore.getState().setHasUnsavedChanges(false)
-  if (typeof window !== 'undefined') {
-    window.dispatchEvent(new Event(CMS_SITE_RELOAD_EVENT))
-  }
-}
-
-// ---------------------------------------------------------------------------
-// Plan filtering by selection
-// ---------------------------------------------------------------------------
-
-function filterPlanBySelection(plan: ImportPlan, selection: ImportSelection): ImportPlan {
-  return {
-    ...plan,
-    pages: plan.pages.filter((p) => selection.pagesIncluded.has(p.source)),
-    styleRules: plan.styleRules.filter((_, i) => selection.styleRulesIncluded.has(i)),
-    // Keep styleRuleSources index-aligned with the filtered styleRules.
-    styleRuleSources: plan.styleRuleSources.filter((_, i) => selection.styleRulesIncluded.has(i)),
-    assets: plan.assets.filter((a) => selection.assetsIncluded.has(a.sourcePath)),
-    fonts: plan.fonts.filter((f) => selection.fontsIncluded.has(f.family)),
-    fontTokens: plan.fontTokens.filter((t) => !t.family || selection.fontsIncluded.has(t.family)),
-    scripts: plan.scripts.filter((s) => selection.scriptsIncluded.has(s.path)),
-  }
-}
-
-// ---------------------------------------------------------------------------
-// Resolution merging
-// ---------------------------------------------------------------------------
-
-function buildResolvedPlan(
-  plan: ImportPlan,
-  pageResMap: Map<string, ConflictResolution>,
-  ruleResMap: Map<string, ConflictResolution>,
-): ImportPlan {
-  const updatedPageConflicts: PageConflict[] = plan.conflicts.pages.map((c) => ({
-    ...c,
-    defaultResolution: pageResMap.get(c.source) ?? c.defaultResolution,
-  }))
-  const updatedRuleConflicts: RuleConflict[] = plan.conflicts.rules.map((c) => ({
-    ...c,
-    defaultResolution: ruleResMap.get(c.desiredName) ?? c.defaultResolution,
-  }))
-  return applyConflictResolutions(
-    { ...plan, conflicts: { pages: updatedPageConflicts, rules: updatedRuleConflicts } },
-    updatedPageConflicts,
-    updatedRuleConflicts,
-  )
 }
 
 // ---------------------------------------------------------------------------
@@ -205,6 +100,7 @@ export function SiteImportModal({ onCmsBundleImportComplete }: SiteImportModalPr
   const [selection, setSelection] = useState<ImportSelection | null>(null)
   const [pageResolutions, setPageResolutions] = useState<Map<string, ConflictResolution>>(new Map())
   const [ruleResolutions, setRuleResolutions] = useState<Map<string, ConflictResolution>>(new Map())
+  const [tokenResolutions, setTokenResolutions] = useState<Map<string, ConflictResolution>>(new Map())
   const [pageSlugOverrides, setPageSlugOverrides] = useState<Map<string, string>>(new Map())
   const [runProgress, setRunProgress] = useState<RunProgress>(makeInitialRunProgress)
   const [result, setResult] = useState<ImportResult | null>(null)
@@ -291,6 +187,9 @@ export function SiteImportModal({ onCmsBundleImportComplete }: SiteImportModalPr
     setRuleResolutions(
       new Map(importPlan.conflicts.rules.map((c) => [c.desiredName, c.defaultResolution])),
     )
+    setTokenResolutions(
+      new Map(importPlan.conflicts.tokens.map((c) => [tokenConflictKey(c), c.defaultResolution])),
+    )
     setPageSlugOverrides(new Map())
     setBusy(false)
     setStep('analyze')
@@ -313,20 +212,21 @@ export function SiteImportModal({ onCmsBundleImportComplete }: SiteImportModalPr
     const filtered = filterPlanBySelection(planWithSlugs, selection)
     const hasConflicts =
       filtered.conflicts.pages.length > 0 ||
-      filtered.conflicts.rules.length > 0
+      filtered.conflicts.rules.length > 0 ||
+      filtered.conflicts.tokens.length > 0
 
     if (hasConflicts) {
       setPlan(filtered)
       setStep('conflicts')
     } else {
       setPlan(filtered)
-      void kickOffRun(filtered, pageResolutions, ruleResolutions)
+      void kickOffRun(filtered, pageResolutions, ruleResolutions, tokenResolutions)
     }
   }
 
   function handleConflictsImport() {
     if (!plan) return
-    void kickOffRun(plan, pageResolutions, ruleResolutions)
+    void kickOffRun(plan, pageResolutions, ruleResolutions, tokenResolutions)
   }
 
   function handleCmsChooseDifferentFile() {
@@ -348,8 +248,9 @@ export function SiteImportModal({ onCmsBundleImportComplete }: SiteImportModalPr
     planToRun: ImportPlan,
     pageResMap: Map<string, ConflictResolution>,
     ruleResMap: Map<string, ConflictResolution>,
+    tokenResMap: Map<string, ConflictResolution>,
   ) {
-    const resolvedPlan = buildResolvedPlan(planToRun, pageResMap, ruleResMap)
+    const resolvedPlan = buildResolvedPlan(planToRun, pageResMap, ruleResMap, tokenResMap)
 
     // Totals come from the plan being committed. Media is the only genuinely
     // incremental phase (per-asset uploads); everything else lands in one atomic
@@ -646,6 +547,7 @@ export function SiteImportModal({ onCmsBundleImportComplete }: SiteImportModalPr
             plan={plan}
             pageResolutions={pageResolutions}
             ruleResolutions={ruleResolutions}
+            tokenResolutions={tokenResolutions}
             onPageResolutionChange={(source, resolution) => {
               setPageResolutions((prev) => {
                 const next = new Map(prev)
@@ -657,6 +559,13 @@ export function SiteImportModal({ onCmsBundleImportComplete }: SiteImportModalPr
               setRuleResolutions((prev) => {
                 const next = new Map(prev)
                 next.set(desiredName, resolution)
+                return next
+              })
+            }}
+            onTokenResolutionChange={(key, resolution) => {
+              setTokenResolutions((prev) => {
+                const next = new Map(prev)
+                next.set(key, resolution)
                 return next
               })
             }}

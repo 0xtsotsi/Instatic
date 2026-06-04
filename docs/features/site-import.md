@@ -12,7 +12,7 @@ The static-site pipeline has two parts: a pure analysis function (`buildImportPl
 - `buildImportPlan({ fileMap, currentSite })` — pure, synchronous — produces an `ImportPlan` with pages, style rules, media, color tokens, fonts, font tokens, and scripts.
 - `commitImportPlan(plan, adapter)` — uploads assets, then wraps all store writes in a single `adapter.commit` call → one Cmd+Z reverts the whole import.
 - Static imports load the current CMS draft into the editor store on demand when launched outside `/admin/site`; if no draft exists, the modal creates an empty site before analysis.
-- Conflict resolution: rename with a numeric suffix (default), overwrite, skip, or custom-rename — per page slug and per class name, with category-level bulk actions for rename / skip / overwrite.
+- Conflict resolution: rename with a numeric suffix (default), overwrite, skip, or custom-rename — per page slug, per class name, and per design token (colour / font CSS variable), with category-level bulk actions for rename / skip / overwrite. Token renames rewrite `var(--x)` references so imports stay faithful.
 - What imports: pages, `kind:'class'` and `kind:'ambient'` style rules, images/fonts/binaries, root CSS color tokens, root CSS font tokens, `@font-face` families, JS files as site-wide scripts.
 - CMS bundle import preserves exported tables, rows, optional site shell, and embedded media using the same merge strategies as site transfer (`replace`, `merge-add`, `merge-overwrite`).
 - HTML forms import through the shared HTML importer as first-class form primitives (`base.form`, controls, labels, submit buttons), not as custom containers.
@@ -37,7 +37,7 @@ src/core/siteImport/
 ├── assetPlan.ts         — normalise URL props in node fragments + CSS url(); resolve @font-face; collect assets
 ├── applyAssetRewrites.ts — patch fragment props + CSS url() with new media URLs (post-upload)
 ├── linkRewrite.ts       — rewrite intra-site <a href> to cms:page:<id> refs
-├── conflicts.ts         — detect page-slug + class-name collisions; produce ConflictPlan
+├── conflicts.ts         — detect page-slug + class-name + design-token collisions; apply resolutions (incl. var(--x) rewrites)
 ├── adapter.ts           — SiteImportAdapter + SiteImportTransaction interfaces
 └── applyImport.ts       — top-level orchestrator: buildImportPlan + commitImportPlan
 
@@ -49,12 +49,12 @@ src/admin/modals/SiteImport/
 │   ├── DropStep.tsx             — full-modal drop zone (files, folder, .zip)
 │   ├── AnalyzeStep.tsx          — category navigator (left) + detail pane (right)
 │   ├── CmsBundleReviewStep.tsx  — CMS bundle diff + merge strategy review
-│   ├── ConflictsStep.tsx        — page-slug + class-name conflict resolution rows
+│   ├── ConflictsStep.tsx        — page-slug + class-name + design-token conflict resolution rows
 │   └── ImportStep.tsx           — determinate progress surface + complete/failed states
 └── shared/
     ├── createSiteImportAdapter.ts  — wires adapter to editor store + media API
     ├── useCmsBundleImport.ts       — CMS bundle parse/preview/import flow
-    ├── ConflictRow.tsx             — single slug/class-name conflict row with resolution picker
+    ├── ConflictRow.tsx             — single slug / class-name / token-variable conflict row with resolution picker
     ├── ImportStepper.tsx           — shared four-stage progress rail (Review + Import)
     └── importProgress.ts           — RunProgress model used by ImportStep
 ```
@@ -99,7 +99,7 @@ User drops files / folder / .zip / CMS bundle JSON
             │  resolves @font-face → ImportFontFamily[]
             │  collects deduplicated asset list
             ▼
-    detectConflicts(currentSite, pagePlans, styleRules)
+    detectConflicts(currentSite, pagePlans, styleRules, colorTokens, fontTokens)
             │
             ▼
     ImportPlan ──► wizard preview (AnalyzeStep → ConflictsStep)
@@ -109,8 +109,9 @@ User drops files / folder / .zip / CMS bundle JSON
       Step A: upload assets via adapter.uploadAsset (per-asset try/catch)
       Step B: applyAssetRewrites(plan, rewriteMap) — swap FileMap keys → media URLs
       Step C: adapter.commit(tx) — single atomic store mutation:
-                tx.addConditions / tx.addColorTokens / tx.addScripts
-                tx.addFonts / tx.addStyleRule / tx.overwriteStyleRule
+                tx.addConditions / tx.addColorTokens / tx.overwriteColorTokens / tx.addScripts
+                tx.addFonts / tx.addFontTokens / tx.overwriteFontTokens
+                tx.addStyleRule / tx.overwriteStyleRule
                 tx.addPage / tx.overwritePage
             │
             ▼
@@ -132,7 +133,7 @@ interface ImportPlan {
   assets:          { sourcePath: string; mimeType: string; bytes: Uint8Array }[]
   colors:          ImportColorToken[]
   scripts:         ImportScript[]
-  conflicts:       { pages: PageConflict[]; rules: RuleConflict[] }
+  conflicts:       { pages: PageConflict[]; rules: RuleConflict[]; tokens: TokenConflict[] }
   warnings:        ImportWarning[]
   droppedAtRules:  string[]     // source text of un-modelable @-rules
   unusedCss:       string[]     // CSS files present but not linked by any page
@@ -150,9 +151,9 @@ All URL-shaped values inside `pages[].nodeFragment` and style rule `styles`/`con
 | **Pages** | One `PagePlan` per `.html` file | `makeHtmlPagePlan` parses the body via `@core/htmlImport`; slug derived from filename |
 | **Style rules** | All rules from linked CSS files | `cssToStyleRules` maps each declaration block to a `NewStyleRule` (class or ambient kind) |
 | **Media** | Images, fonts, binaries — and any unreferenced files in the bundle | `buildAssetPlan` collects them; unreferenced files are swept up even if nothing in the HTML/CSS references them |
-| **Color tokens** | CSS custom properties on `:root` / `html` / `body` that look like colours | `extractRootColorTokens` pulls them into `ImportColorToken[]`; they become framework palette tokens |
+| **Color tokens** | CSS custom properties on `:root` / `html` / `body` that look like colours | `extractRootColorTokens` pulls them into `ImportColorToken[]`; they become framework palette tokens. A `--<slug>` that collides with an existing colour token surfaces as a `TokenConflict` (rename / skip / overwrite) |
 | **Fonts** | Self-hosted `@font-face` families with at least one bundled file | `buildFontFamilies` in `assetPlan.ts` picks the best format (woff2 → woff → ttf → otf); committed via `tx.addFonts` |
-| **Font tokens** | Root `--font-*` variables with font-family stacks | `extractRootFontTokens` pulls them into `ImportFontToken[]`; committed via `tx.addFontTokens` after fonts so matching imported families can be assigned |
+| **Font tokens** | Root `--font-*` variables with font-family stacks | `extractRootFontTokens` pulls them into `ImportFontToken[]`; committed via `tx.addFontTokens` after fonts so matching imported families can be assigned. A `--font-*` that collides with an existing font token surfaces as a `TokenConflict` (rename / skip / overwrite) |
 | **Scripts** | Every `.js` / `.mjs` / `.cjs` file | Decoded as UTF-8; committed via `tx.addScripts` as all-pages body-end scripts |
 
 ---
@@ -188,20 +189,27 @@ Pure element / attribute selectors (`body`, `h1`, `a:hover`) carry no class toke
 
 ## Conflict resolution
 
-`detectConflicts` produces two lists:
+`detectConflicts(currentSite, pagePlans, styleRules, colorTokens, fontTokens)` produces three lists:
 
 - **`PageConflict`** — a desired slug collides with an existing page slug or with another slug in the same import batch.
 - **`RuleConflict`** — a `kind:'class'` rule's name collides with an existing class name. Ambient rules never conflict.
+- **`TokenConflict`** — a design-token CSS custom property collides with an existing token. One type covers both colour tokens (keyed by `--<slug>`, against `framework.colors.tokens`) and font tokens (keyed by `--font-*`, against `fonts.tokens`), since both are just a `--var` contract referenced by `var(--x)` in the imported CSS. Imported tokens are deduped per kind upstream, so only site-vs-import collisions occur.
 
 Each conflict has a `defaultResolution`:
 - `auto-rename` — append `-2` (or `-3`, `-4`, …) until unique. This is the default.
-- `overwrite` — replace the existing page / rule.
+- `overwrite` — replace the existing page / rule / token value.
 - `skip` — do not import this item.
-- `custom-rename` — the user typed a new slug or class name.
+- `custom-rename` — the user typed a new slug / class / token variable.
 
-`applyConflictResolutions` applies the resolutions to the plan (renames page slugs, renames rule selectors, remaps `classIds` on nodes). `commitImportPlan` applies skip/overwrite actions from `defaultResolution` at commit time.
+`applyConflictResolutions(plan, pageResolutions, ruleResolutions, tokenResolutions)` applies the resolutions to the plan:
+- Page renames update the slug; rule renames update the `name` + `selector` and remap `classIds` on nodes.
+- **Token renames** rename the imported token in `plan.colors` / `plan.fontTokens` AND rewrite every `var(--old)` → `var(--new)` reference across the imported style rules (`styles` + `contextStyles`) and node `inlineStyles`, so the imported design keeps resolving to its own token instead of silently binding to the pre-existing same-named one (fallbacks like `var(--x, serif)` are preserved).
+- **Token skip** drops the imported token (references keep the old name and bind to the existing token).
+- **Token overwrite** keeps the imported token in place; `commitImportPlan` replaces the existing token's value by id via `tx.overwriteColorTokens` / `tx.overwriteFontTokens` (the variable name is unchanged, so both sides keep resolving).
 
-The conflict wizard renders bulk controls in each conflict category. Page slug conflicts and class name conflicts can each be set to rename with a numeric suffix, skip, or overwrite in one action; the page overwrite bulk action is hidden when any listed page conflict is only an intra-import collision and has no existing page to replace. Individual rows use segmented controls for the same actions and still allow custom renames after a bulk action.
+`commitImportPlan` applies page/rule skip/overwrite actions from `defaultResolution` at commit time, and partitions tokens into add vs. overwrite (skip and rename were already materialised into the plan by `applyConflictResolutions`).
+
+The conflict wizard renders bulk controls in each of the three conflict categories — pages, class names, and design tokens — each settable to rename with a numeric suffix, skip, or overwrite in one action; the page overwrite bulk action is hidden when any listed page conflict is only an intra-import collision and has no existing page to replace. Individual rows use segmented controls for the same actions and still allow custom renames after a bulk action.
 
 ---
 

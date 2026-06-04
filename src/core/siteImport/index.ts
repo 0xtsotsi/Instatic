@@ -84,6 +84,7 @@ export type {
   ConflictResolution,
   PageConflict,
   RuleConflict,
+  TokenConflict,
   ImportPlan,
   ImportResult,
   // @font-face import

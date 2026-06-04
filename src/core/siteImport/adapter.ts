@@ -148,6 +148,19 @@ export interface SiteImportTransaction {
   addFontTokens(tokens: ImportFontToken[]): { id: string; name: string; variable: string }[]
 
   /**
+   * Overwrite existing font tokens in place (conflict: overwrite resolution).
+   * The existing token's id, name, and variable are retained; its family
+   * binding and fallback stack are replaced from the imported token, so every
+   * `var(--<variable>)` reference (on both the existing and imported sides)
+   * keeps resolving to the new value.
+   *
+   * @returns The `{ id, name, variable }` for each overwritten token.
+   */
+  overwriteFontTokens(
+    items: { existingTokenId: string; token: ImportFontToken }[],
+  ): { id: string; name: string; variable: string }[]
+
+  /**
    * Add colour tokens (extracted from root-scope `--*` colour custom properties)
    * to the CMS colours system (`site.settings.framework.colors`). Each becomes a
    * plain base token that re-emits `--<slug>`, so imported `var(--<slug>)`
@@ -157,6 +170,17 @@ export interface SiteImportTransaction {
    * @returns The committed `{ slug, value }` for each newly-added token.
    */
   addColorTokens(colors: ImportColorToken[]): { slug: string; value: string }[]
+
+  /**
+   * Overwrite existing colour tokens in place (conflict: overwrite resolution).
+   * The existing token's id and slug are retained; only its colour value is
+   * replaced, so `var(--<slug>)` references on both sides keep resolving.
+   *
+   * @returns The `{ slug, value }` for each overwritten token.
+   */
+  overwriteColorTokens(
+    items: { existingTokenId: string; value: string }[],
+  ): { slug: string; value: string }[]
 
   /**
    * Add imported JavaScript files as site scripts: one `SiteFile`

@@ -44,6 +44,7 @@ import type {
   ImportScript,
   PageConflict,
   RuleConflict,
+  TokenConflict,
 } from './types'
 import type { SiteImportAdapter } from './adapter'
 
@@ -195,8 +196,15 @@ export function buildImportPlan({ fileMap, currentSite, options }: BuildImportPl
     buildAssetPlan(scoped.pagePlans, scoped.cssFileResults, fileMap)
   warnings.push(...assetWarnings)
 
-  // 6. Detect conflicts against the current site
-  const conflicts = detectConflicts(currentSite, normalizedPagePlans, normalizedStyleRules)
+  // 6. Detect conflicts against the current site — pages, class rules, and
+  //    design tokens (colour + font) all flow through one resolution model.
+  const conflicts = detectConflicts(
+    currentSite,
+    normalizedPagePlans,
+    normalizedStyleRules,
+    [...colorsBySlug.values()],
+    [...fontTokensByVariable.values()],
+  )
 
   return {
     pages: normalizedPagePlans,
@@ -298,6 +306,13 @@ export async function commitImportPlan(
   const ruleConflictsByName = new Map<string, RuleConflict>(
     rewrittenPlan.conflicts.rules.map((c) => [c.desiredName, c]),
   )
+  // Token conflicts keyed by `${kind}:${variable}`. Only `overwrite` is handled
+  // here — `skip` and rename were already applied to plan.colors/fontTokens by
+  // applyConflictResolutions (skip drops the token; rename gives it a unique
+  // name and rewrites its `var(--x)` references).
+  const tokenConflictByKey = new Map<string, TokenConflict>(
+    rewrittenPlan.conflicts.tokens.map((c) => [`${c.kind}:${c.desiredVariable}`, c]),
+  )
 
   // Pre-mint a stable page id for every page we're about to commit, keyed by
   // its source FileMap path. Overwritten pages reuse the existing id; added
@@ -328,9 +343,22 @@ export async function commitImportPlan(
     }
 
     // Colour tokens: register before style rules so any framework `--<slug>`
-    // they emit is available to everything that follows.
+    // they emit is available to everything that follows. Partition by conflict
+    // resolution — `overwrite` replaces the existing token's value by id; the
+    // rest are added (renamed tokens already carry their unique slug).
     if ((rewrittenPlan.colors ?? []).length > 0) {
-      resultColors.push(...tx.addColorTokens(rewrittenPlan.colors))
+      const colorAdds: ImportColorToken[] = []
+      const colorOverwrites: { existingTokenId: string; value: string }[] = []
+      for (const token of rewrittenPlan.colors) {
+        const conflict = tokenConflictByKey.get(`color:${token.slug}`)
+        if (conflict?.defaultResolution.action === 'overwrite') {
+          colorOverwrites.push({ existingTokenId: conflict.existingTokenId, value: token.value })
+        } else {
+          colorAdds.push(token)
+        }
+      }
+      if (colorAdds.length > 0) resultColors.push(...tx.addColorTokens(colorAdds))
+      if (colorOverwrites.length > 0) resultColors.push(...tx.overwriteColorTokens(colorOverwrites))
     }
 
     // Site scripts: commit imported JS as all-pages scripts.
@@ -352,9 +380,21 @@ export async function commitImportPlan(
     }
 
     // Font tokens: register after fonts so tokens can bind to a matching
-    // imported family id when the source stack names one.
+    // imported family id when the source stack names one. Same overwrite/add
+    // partition as colour tokens.
     if ((rewrittenPlan.fontTokens ?? []).length > 0) {
-      resultFontTokens.push(...tx.addFontTokens(rewrittenPlan.fontTokens))
+      const fontAdds: ImportFontToken[] = []
+      const fontOverwrites: { existingTokenId: string; token: ImportFontToken }[] = []
+      for (const token of rewrittenPlan.fontTokens) {
+        const conflict = tokenConflictByKey.get(`font:${token.variable}`)
+        if (conflict?.defaultResolution.action === 'overwrite') {
+          fontOverwrites.push({ existingTokenId: conflict.existingTokenId, token })
+        } else {
+          fontAdds.push(token)
+        }
+      }
+      if (fontAdds.length > 0) resultFontTokens.push(...tx.addFontTokens(fontAdds))
+      if (fontOverwrites.length > 0) resultFontTokens.push(...tx.overwriteFontTokens(fontOverwrites))
     }
 
     // Commit style rules first so pages that auto-create class links can

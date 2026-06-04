@@ -107,3 +107,42 @@ export function addImportedFontTokens(
 
   return committed
 }
+
+/**
+ * Overwrite existing font tokens in place (import conflict: overwrite). The
+ * existing token's id, name, variable, and order are retained; its family
+ * binding and fallback stack are replaced from the imported token so every
+ * `var(--<variable>)` reference keeps resolving to the new value.
+ *
+ * @returns The `{ id, name, variable }` for each overwritten token.
+ */
+export function overwriteImportedFontTokens(
+  site: Draft<SiteDocument>,
+  items: { existingTokenId: string; token: ImportFontToken }[],
+): { id: string; name: string; variable: string }[] {
+  if (items.length === 0) return []
+
+  const fontTokens = site.settings.fonts?.tokens
+  if (!fontTokens || fontTokens.length === 0) return []
+
+  const familyIdByName = new Map<string, string>()
+  for (const entry of site.settings.fonts?.items ?? []) {
+    familyIdByName.set(entry.family.toLowerCase(), entry.id)
+  }
+
+  const committed: { id: string; name: string; variable: string }[] = []
+  for (const { existingTokenId, token: input } of items) {
+    const existing = fontTokens.find((t) => t.id === existingTokenId)
+    if (!existing) continue
+    const familyId = input.family
+      ? familyIdByName.get(input.family.toLowerCase())
+      : undefined
+    existing.fallback = sanitizeFontFallbackStack(input.fallback)
+    if (familyId) existing.familyId = familyId
+    else delete existing.familyId
+    existing.updatedAt = Date.now()
+    committed.push({ id: existing.id, name: existing.name, variable: existing.variable })
+  }
+
+  return committed
+}

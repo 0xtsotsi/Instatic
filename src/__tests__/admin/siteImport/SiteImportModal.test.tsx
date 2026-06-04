@@ -96,7 +96,7 @@ function makeMinimalPlan(overrides: Partial<ImportPlan> = {}): ImportPlan {
     assets: overrides.assets ?? [],
     colors: overrides.colors ?? [],
     scripts: overrides.scripts ?? [],
-    conflicts: overrides.conflicts ?? { pages: [], rules: [] },
+    conflicts: overrides.conflicts ?? { pages: [], rules: [], tokens: [] },
     warnings: overrides.warnings ?? [],
     droppedAtRules: overrides.droppedAtRules ?? [],
     unusedCss: overrides.unusedCss ?? [],
@@ -112,7 +112,7 @@ function makeMinimalResult(overrides: Partial<ImportResult> = {}): ImportResult 
     assets: overrides.assets ?? [],
     colors: overrides.colors ?? [],
     scripts: overrides.scripts ?? [],
-    conflicts: overrides.conflicts ?? { pages: [], rules: [] },
+    conflicts: overrides.conflicts ?? { pages: [], rules: [], tokens: [] },
     warnings: overrides.warnings ?? [],
   }
 }
@@ -935,6 +935,7 @@ describe('ConflictsStep — conflict rendering', () => {
   it('shows "Page slug conflicts" section when page conflicts exist', () => {
     const plan = makeMinimalPlan({
       conflicts: {
+        tokens: [],
         pages: [
           {
             source: 'about.html',
@@ -961,6 +962,7 @@ describe('ConflictsStep — conflict rendering', () => {
   it('shows "Class name conflicts" section when rule conflicts exist', () => {
     const plan = makeMinimalPlan({
       conflicts: {
+        tokens: [],
         pages: [],
         rules: [
           {
@@ -987,6 +989,7 @@ describe('ConflictsStep — conflict rendering', () => {
   it('shows both sections when both conflict types exist', () => {
     const plan = makeMinimalPlan({
       conflicts: {
+        tokens: [],
         pages: [
           {
             source: 'about.html',
@@ -1021,6 +1024,7 @@ describe('ConflictsStep — conflict rendering', () => {
   it('hides the "Overwrite" option for intra-batch page conflicts (empty existingPageId)', () => {
     const plan = makeMinimalPlan({
       conflicts: {
+        tokens: [],
         pages: [
           {
             source: 'home.html',
@@ -1050,6 +1054,7 @@ describe('ConflictsStep — conflict rendering', () => {
   it('offers the "Overwrite" option when a real existing page id is present', () => {
     const plan = makeMinimalPlan({
       conflicts: {
+        tokens: [],
         pages: [
           {
             source: 'about.html',
@@ -1084,6 +1089,7 @@ describe('ConflictsStep — conflict rendering', () => {
     const changes: [string, ConflictResolution][] = []
     const plan = makeMinimalPlan({
       conflicts: {
+        tokens: [],
         pages: [
           {
             source: 'about.html',
@@ -1114,6 +1120,7 @@ describe('ConflictsStep — conflict rendering', () => {
   it('marks the current row resolution as pressed in the segmented control', () => {
     const plan = makeMinimalPlan({
       conflicts: {
+        tokens: [],
         pages: [],
         rules: [
           {
@@ -1147,6 +1154,7 @@ describe('ConflictsStep — conflict rendering', () => {
     const changes: [string, ConflictResolution][] = []
     const plan = makeMinimalPlan({
       conflicts: {
+        tokens: [],
         pages: [],
         rules: [
           {
@@ -1194,6 +1202,7 @@ describe('ConflictsStep — conflict rendering', () => {
     const changes: [string, ConflictResolution][] = []
     const plan = makeMinimalPlan({
       conflicts: {
+        tokens: [],
         pages: [
           {
             source: 'about.html',
@@ -1497,6 +1506,7 @@ describe('commitImportPlan — overwrite with no existing target falls back to a
         },
       ],
       conflicts: {
+        tokens: [],
         // Intra-batch collision → empty existingPageId, but user chose overwrite.
         pages: [
           {
@@ -1532,6 +1542,7 @@ describe('commitImportPlan — overwrite with no existing target falls back to a
         },
       ],
       conflicts: {
+        tokens: [],
         pages: [
           {
             source: 'home.html',

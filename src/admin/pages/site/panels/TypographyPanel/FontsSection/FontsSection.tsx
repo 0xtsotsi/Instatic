@@ -25,7 +25,6 @@ import {
   sortFontTokens,
 } from '@core/fonts/tokens'
 import { deleteCmsFontFamily } from '@core/persistence/cmsFonts'
-import { CopySolidIcon } from 'pixel-art-icons/icons/copy-solid'
 import { EditSolidIcon } from 'pixel-art-icons/icons/edit-solid'
 import { TrashSolidIcon } from 'pixel-art-icons/icons/trash-solid'
 import { AddGoogleFontDialog } from './AddGoogleFontDialog'
@@ -67,7 +66,6 @@ export function FontsSection() {
   const removeFont = useEditorStore((s) => s.removeFont)
   const createFontToken = useEditorStore((s) => s.createFontToken)
   const updateFontToken = useEditorStore((s) => s.updateFontToken)
-  const duplicateFontToken = useEditorStore((s) => s.duplicateFontToken)
   const deleteFontToken = useEditorStore((s) => s.deleteFontToken)
 
   const [dialogOpen, setDialogOpen] = useState(false)
@@ -218,7 +216,6 @@ export function FontsSection() {
                   token={token}
                   fonts={fonts}
                   onEdit={() => setEditToken(token)}
-                  onDuplicate={() => { duplicateFontToken(token.id) }}
                   onRemove={() => { deleteFontToken(token.id) }}
                 />
               ))}
@@ -327,7 +324,6 @@ interface FontTokenRowProps {
   token: FontToken
   fonts: FontEntry[]
   onEdit: () => void
-  onDuplicate: () => void
   onRemove: () => void
 }
 
@@ -335,7 +331,6 @@ function FontTokenRow({
   token,
   fonts,
   onEdit,
-  onDuplicate,
   onRemove,
 }: FontTokenRowProps) {
   const familyStack = resolveFontTokenStack(token, { items: fonts, tokens: [token] })
@@ -367,16 +362,6 @@ function FontTokenRow({
           onClick={onEdit}
         >
           <EditSolidIcon size={12} aria-hidden="true" />
-        </Button>
-        <Button
-          variant="ghost"
-          size="xs"
-          iconOnly
-          aria-label={`Duplicate ${token.name}`}
-          tooltip={`Duplicate ${token.name}`}
-          onClick={onDuplicate}
-        >
-          <CopySolidIcon size={12} aria-hidden="true" />
         </Button>
         <Button
           variant="ghost"

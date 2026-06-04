@@ -102,12 +102,31 @@ export interface SuperImportHelpers {
   addFontTokens(tokens: ImportFontToken[]): { id: string; name: string; variable: string }[]
 
   /**
+   * Overwrite existing font tokens in place (import conflict: overwrite). The
+   * existing token's id/name/variable are kept; family + fallback are replaced.
+   * @returns The `{ id, name, variable }` for each overwritten token.
+   */
+  overwriteFontTokens(
+    items: { existingTokenId: string; token: ImportFontToken }[],
+  ): { id: string; name: string; variable: string }[]
+
+  /**
    * Add colour tokens to the framework colours system as plain base tokens
    * (just `--<slug>`; no shades/tints/transparent or utility classes). A slug
    * already present is skipped. Reconciles framework classes afterwards.
    * @returns The committed `{ slug, value }` for each newly-added token.
    */
   addColorTokens(colors: ImportColorToken[]): { slug: string; value: string }[]
+
+  /**
+   * Overwrite existing framework colour tokens in place (import conflict:
+   * overwrite). The existing token's id/slug are kept; only `lightValue` is
+   * replaced. Reconciles framework classes afterwards.
+   * @returns The `{ slug, value }` for each overwritten token.
+   */
+  overwriteColorTokens(
+    items: { existingTokenId: string; value: string }[],
+  ): { slug: string; value: string }[]
 
   /**
    * Add imported JS files as `SiteFile`s (`type: 'script'`) plus an all-pages
@@ -373,7 +392,6 @@ export interface SiteSlice {
   removeFont: (fontId: string) => boolean
   createFontToken: (input: CreateFontTokenInput) => FontToken
   updateFontToken: (tokenId: string, patch: UpdateFontTokenPatch) => void
-  duplicateFontToken: (tokenId: string) => FontToken | null
   deleteFontToken: (tokenId: string) => boolean
 
   /**

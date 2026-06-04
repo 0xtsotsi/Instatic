@@ -42,8 +42,10 @@ interface MockTxOp {
     | 'overwriteStyleRule'
     | 'addFonts'
     | 'addFontTokens'
+    | 'overwriteFontTokens'
     | 'addConditions'
     | 'addColorTokens'
+    | 'overwriteColorTokens'
     | 'addScripts'
   args: unknown
   id: string
@@ -94,12 +96,24 @@ function makeMockAdapter(opts?: {
           ops.push({ type: 'addFontTokens', args: { tokens }, id: '' })
           return tokens.map((t) => ({ id: nextId(), name: t.name, variable: t.variable }))
         },
+        overwriteFontTokens(items) {
+          ops.push({ type: 'overwriteFontTokens', args: { items }, id: '' })
+          return items.map((i) => ({
+            id: i.existingTokenId,
+            name: i.token.name,
+            variable: i.token.variable,
+          }))
+        },
         addConditions(conditions) {
           ops.push({ type: 'addConditions', args: { conditions }, id: '' })
         },
         addColorTokens(colors) {
           ops.push({ type: 'addColorTokens', args: { colors }, id: '' })
           return colors.map((c) => ({ slug: c.slug, value: c.value }))
+        },
+        overwriteColorTokens(items) {
+          ops.push({ type: 'overwriteColorTokens', args: { items }, id: '' })
+          return items.map((i) => ({ slug: i.existingTokenId, value: i.value }))
         },
         addScripts(scripts) {
           ops.push({ type: 'addScripts', args: { scripts }, id: '' })
@@ -524,5 +538,83 @@ describe('buildImportPlan — unused CSS', () => {
     expect(plan.unusedCss).toContain('styles/orphan.css')
     // orphan CSS rules should NOT appear in styleRules
     expect(plan.styleRules.find((r) => r.name === 'foo')).toBeUndefined()
+  })
+})
+
+// ---------------------------------------------------------------------------
+// Token conflicts at commit (overwrite routing)
+// ---------------------------------------------------------------------------
+
+describe('commitImportPlan — token conflict: overwrite', () => {
+  it('routes an overwrite colour token to overwriteColorTokens, not addColorTokens', async () => {
+    const plan = buildImportPlan({ fileMap: makeSampleFileMap(), currentSite: makeEmptySiteDocument() })
+    const planWithToken: ImportPlan = {
+      ...plan,
+      colors: [{ slug: 'bg', value: '#123456' }],
+      conflicts: {
+        ...plan.conflicts,
+        tokens: [
+          {
+            kind: 'color',
+            desiredVariable: 'bg',
+            existingTokenId: 'existing-color-id',
+            defaultResolution: { action: 'overwrite' },
+          },
+        ],
+      },
+    }
+    const adapter = makeMockAdapter()
+    await commitImportPlan(planWithToken, adapter)
+
+    const overwrite = adapter.ops.find((o) => o.type === 'overwriteColorTokens')
+    expect(overwrite).toBeDefined()
+    expect((overwrite!.args as { items: unknown[] }).items).toEqual([
+      { existingTokenId: 'existing-color-id', value: '#123456' },
+    ])
+    // The bg token must NOT be double-added.
+    expect(adapter.ops.some((o) => o.type === 'addColorTokens')).toBe(false)
+  })
+
+  it('routes an overwrite font token to overwriteFontTokens, not addFontTokens', async () => {
+    const plan = buildImportPlan({ fileMap: makeSampleFileMap(), currentSite: makeEmptySiteDocument() })
+    const fontToken = { name: 'Primary', variable: 'font-primary', fallback: 'sans-serif' }
+    const planWithToken: ImportPlan = {
+      ...plan,
+      fontTokens: [fontToken],
+      conflicts: {
+        ...plan.conflicts,
+        tokens: [
+          {
+            kind: 'font',
+            desiredVariable: 'font-primary',
+            existingTokenId: 'existing-font-id',
+            defaultResolution: { action: 'overwrite' },
+          },
+        ],
+      },
+    }
+    const adapter = makeMockAdapter()
+    await commitImportPlan(planWithToken, adapter)
+
+    const overwrite = adapter.ops.find((o) => o.type === 'overwriteFontTokens')
+    expect(overwrite).toBeDefined()
+    expect((overwrite!.args as { items: { existingTokenId: string }[] }).items[0].existingTokenId).toBe(
+      'existing-font-id',
+    )
+    expect(adapter.ops.some((o) => o.type === 'addFontTokens')).toBe(false)
+  })
+
+  it('adds a non-conflicting colour token via addColorTokens', async () => {
+    const plan = buildImportPlan({ fileMap: makeSampleFileMap(), currentSite: makeEmptySiteDocument() })
+    const planWithToken: ImportPlan = {
+      ...plan,
+      colors: [{ slug: 'brand', value: '#abcdef' }],
+      conflicts: { ...plan.conflicts, tokens: [] },
+    }
+    const adapter = makeMockAdapter()
+    await commitImportPlan(planWithToken, adapter)
+
+    expect(adapter.ops.some((o) => o.type === 'addColorTokens')).toBe(true)
+    expect(adapter.ops.some((o) => o.type === 'overwriteColorTokens')).toBe(false)
   })
 })

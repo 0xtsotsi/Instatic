@@ -39,7 +39,7 @@ import type { EditorStore } from '@site/store/types'
 import { MAX_HISTORY } from './defaults'
 import { reconcileFrameworkClasses } from './framework/reconcile'
 import { indexStyleRulesByName, linkImportedClassNames } from './importLinking'
-import { addImportedFonts, addImportedFontTokens } from './importedFonts'
+import { addImportedFonts, addImportedFontTokens, overwriteImportedFontTokens } from './importedFonts'
 import type { HistoryEntry, SiteMutationResult, SiteSliceHelpers, SiteSliceRecipe, SuperImportHelpers } from './types'
 
 /**
@@ -473,8 +473,23 @@ export function buildSiteHelpers(
           return committed
         },
 
+        overwriteFontTokens(items): { id: string; name: string; variable: string }[] {
+          const committed = overwriteImportedFontTokens(site, items)
+          if (committed.length > 0) didMutate = true
+          return committed
+        },
+
         addColorTokens(colors): { slug: string; value: string }[] {
           const committed = addImportedColorTokens(site, colors)
+          if (committed.length > 0) {
+            reconcileFrameworkClasses(site)
+            didMutate = true
+          }
+          return committed
+        },
+
+        overwriteColorTokens(items): { slug: string; value: string }[] {
+          const committed = overwriteImportedColorTokens(site, items)
           if (committed.length > 0) {
             reconcileFrameworkClasses(site)
             didMutate = true
@@ -558,6 +573,35 @@ function addImportedColorTokens(
     }
     tokens.push(token)
     committed.push({ slug, value })
+  }
+
+  return committed
+}
+
+/**
+ * Overwrite existing framework colour tokens in place (import conflict:
+ * overwrite). The existing token's id, slug, and generation flags are retained;
+ * only its `lightValue` is replaced, so `var(--<slug>)` references on both the
+ * existing and imported sides keep resolving to the new colour.
+ *
+ * @returns The `{ slug, value }` for each overwritten token.
+ */
+function overwriteImportedColorTokens(
+  site: Draft<SiteDocument>,
+  items: { existingTokenId: string; value: string }[],
+): { slug: string; value: string }[] {
+  if (items.length === 0) return []
+
+  const tokens = site.settings.framework?.colors?.tokens
+  if (!tokens || tokens.length === 0) return []
+
+  const committed: { slug: string; value: string }[] = []
+  for (const { existingTokenId, value } of items) {
+    const existing = tokens.find((t) => t.id === existingTokenId)
+    if (!existing) continue
+    existing.lightValue = value
+    existing.updatedAt = Date.now()
+    committed.push({ slug: existing.slug, value })
   }
 
   return committed

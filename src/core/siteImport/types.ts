@@ -303,13 +303,18 @@ export interface PagePlan {
   nodeFragment: ImportFragment
 }
 
-/** How a slug or rule-name conflict is resolved for a single item. */
+/** How a slug, rule-name, or token-variable conflict is resolved for a single item. */
 export interface ConflictResolution {
   action: 'auto-rename' | 'overwrite' | 'skip' | 'custom-rename'
   /** Resolved slug (for page conflicts; defined when action !== 'skip'). */
   resolvedSlug?: string
   /** Resolved name (for rule conflicts; defined when action !== 'skip'). */
   resolvedName?: string
+  /**
+   * Resolved CSS custom-property name without leading `--` (for token conflicts;
+   * defined when action is `auto-rename` or `custom-rename`).
+   */
+  resolvedVariable?: string
 }
 
 /** A page slug that collides with an existing page. */
@@ -337,6 +342,34 @@ export interface RuleConflict {
   desiredName: string
   /** ID of the existing StyleRule that owns the name. */
   existingRuleId: string
+  /** Default resolution (auto-rename; may be overridden by the UI). */
+  defaultResolution: ConflictResolution
+}
+
+/**
+ * A design-token CSS custom property (`--bg`, `--font-primary`) extracted from
+ * the import that collides with an existing token in the site.
+ *
+ * Both colour tokens (keyed by `--<slug>`) and font tokens (keyed by
+ * `--font-*`) are modelled here: they are the same thing — a `--var` contract
+ * referenced by `var(--x)` in the imported CSS — and resolve through one UI.
+ *
+ * `auto-rename` / `custom-rename` rename the imported token AND rewrite every
+ * `var(--old)` reference in the imported style rules and node inline styles to
+ * the new name, so the imported design stays faithful. `skip` keeps the
+ * existing token (imported `var(--x)` binds to it). `overwrite` replaces the
+ * existing token's value, keeping its name so both sides keep resolving.
+ */
+export interface TokenConflict {
+  /** Which registry the token lives in. */
+  kind: 'color' | 'font'
+  /**
+   * The CSS custom-property name without the leading `--` the importer wanted
+   * (e.g. `bg` for `--bg`, `font-primary` for `--font-primary`).
+   */
+  desiredVariable: string
+  /** ID of the existing token (framework colour / font token) that owns the name. */
+  existingTokenId: string
   /** Default resolution (auto-rename; may be overridden by the UI). */
   defaultResolution: ConflictResolution
 }
@@ -392,7 +425,7 @@ export interface ImportPlan {
    * Replaces the old `droppedJs` — JS is now imported, not dropped.
    */
   scripts: ImportScript[]
-  conflicts: { pages: PageConflict[]; rules: RuleConflict[] }
+  conflicts: { pages: PageConflict[]; rules: RuleConflict[]; tokens: TokenConflict[] }
   warnings: ImportWarning[]
   /**
    * Source text snippets of @-rules that could not be modelled

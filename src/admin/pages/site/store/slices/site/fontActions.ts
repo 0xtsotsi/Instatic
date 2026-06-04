@@ -26,7 +26,6 @@ export type FontActions = Pick<
   | 'removeFont'
   | 'createFontToken'
   | 'updateFontToken'
-  | 'duplicateFontToken'
   | 'deleteFontToken'
 >
 
@@ -241,28 +240,6 @@ export function createFontActions({
         token.updatedAt = Date.now()
         return true
       })
-    },
-
-    duplicateFontToken: (tokenId) => {
-      let copy: FontToken | null = null
-      mutateSite((site) => {
-        const fonts = site.settings.fonts
-        const token = fonts?.tokens?.find((item) => item.id === tokenId)
-        if (!fonts || !token) return false
-        const now = Date.now()
-        copy = {
-          ...token,
-          id: nanoid(),
-          name: `${token.name} copy`,
-          variable: makeUniqueFontTokenVariable(token.variable, fonts.tokens ?? []),
-          order: nextTokenOrder(fonts.tokens ?? []),
-          createdAt: now,
-          updatedAt: now,
-        }
-        fonts.tokens?.push(copy)
-        return true
-      })
-      return copy
     },
 
     deleteFontToken: (tokenId) => {

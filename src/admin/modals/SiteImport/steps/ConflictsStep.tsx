@@ -14,23 +14,14 @@
 import type { ImportPlan, ConflictResolution } from '@core/siteImport'
 import { Button } from '@ui/components/Button'
 import { ConflictRow } from '../shared/ConflictRow'
+import { tokenConflictKey } from '../shared/importPlanning'
 import styles from './ConflictsStep.module.css'
 
 type BulkResolutionAction = Extract<ConflictResolution['action'], 'auto-rename' | 'overwrite' | 'skip'>
-type PageConflict = ImportPlan['conflicts']['pages'][number]
-type RuleConflict = ImportPlan['conflicts']['rules'][number]
 
-function pageResolutionForAction(
+function resolutionForAction(
   action: BulkResolutionAction,
-  conflict: PageConflict,
-): ConflictResolution {
-  if (action === 'auto-rename') return conflict.defaultResolution
-  return { action }
-}
-
-function ruleResolutionForAction(
-  action: BulkResolutionAction,
-  conflict: RuleConflict,
+  conflict: { defaultResolution: ConflictResolution },
 ): ConflictResolution {
   if (action === 'auto-rename') return conflict.defaultResolution
   return { action }
@@ -40,33 +31,43 @@ interface ConflictsStepProps {
   plan: ImportPlan
   pageResolutions: Map<string, ConflictResolution>
   ruleResolutions: Map<string, ConflictResolution>
+  tokenResolutions: Map<string, ConflictResolution>
   onPageResolutionChange: (source: string, resolution: ConflictResolution) => void
   onRuleResolutionChange: (desiredName: string, resolution: ConflictResolution) => void
+  onTokenResolutionChange: (key: string, resolution: ConflictResolution) => void
 }
 
 export function ConflictsStep({
   plan,
   pageResolutions,
   ruleResolutions,
+  tokenResolutions,
   onPageResolutionChange,
   onRuleResolutionChange,
+  onTokenResolutionChange,
 }: ConflictsStepProps) {
-  const { pages: pageConflicts, rules: ruleConflicts } = plan.conflicts
+  const { pages: pageConflicts, rules: ruleConflicts, tokens: tokenConflicts } = plan.conflicts
   const pageBulkOverwriteAvailable = pageConflicts.every((conflict) => conflict.existingPageId !== '')
 
-  if (pageConflicts.length === 0 && ruleConflicts.length === 0) {
+  if (pageConflicts.length === 0 && ruleConflicts.length === 0 && tokenConflicts.length === 0) {
     return null
   }
 
   function applyPageResolutionToAll(action: BulkResolutionAction) {
     for (const conflict of pageConflicts) {
-      onPageResolutionChange(conflict.source, pageResolutionForAction(action, conflict))
+      onPageResolutionChange(conflict.source, resolutionForAction(action, conflict))
     }
   }
 
   function applyRuleResolutionToAll(action: BulkResolutionAction) {
     for (const conflict of ruleConflicts) {
-      onRuleResolutionChange(conflict.desiredName, ruleResolutionForAction(action, conflict))
+      onRuleResolutionChange(conflict.desiredName, resolutionForAction(action, conflict))
+    }
+  }
+
+  function applyTokenResolutionToAll(action: BulkResolutionAction) {
+    for (const conflict of tokenConflicts) {
+      onTokenResolutionChange(tokenConflictKey(conflict), resolutionForAction(action, conflict))
     }
   }
 
@@ -183,6 +184,68 @@ export function ConflictsStep({
                 onChange={(next) => onRuleResolutionChange(conflict.desiredName, next)}
               />
             ))}
+          </div>
+        </section>
+      )}
+
+      {tokenConflicts.length > 0 && (
+        <section className={styles.section}>
+          <div className={styles.sectionHeader}>
+            <h3 className={styles.heading}>
+              Design token conflicts ({tokenConflicts.length})
+            </h3>
+            <fieldset className={styles.bulkActions}>
+              <legend className={styles.bulkLegend}>Bulk design token conflict actions</legend>
+              <Button
+                variant="secondary"
+                size="xs"
+                type="button"
+                aria-label="Rename all design token conflicts"
+                onClick={() => applyTokenResolutionToAll('auto-rename')}
+              >
+                Rename all
+              </Button>
+              <Button
+                variant="secondary"
+                size="xs"
+                type="button"
+                aria-label="Skip all design token conflicts"
+                onClick={() => applyTokenResolutionToAll('skip')}
+              >
+                Skip all
+              </Button>
+              <Button
+                variant="secondary"
+                size="xs"
+                type="button"
+                aria-label="Overwrite all design token conflicts"
+                onClick={() => applyTokenResolutionToAll('overwrite')}
+              >
+                Overwrite all
+              </Button>
+            </fieldset>
+          </div>
+          <p className={styles.hint}>
+            These colour / font variables already exist in this site. Rename keeps
+            the imported value on a new <code>--variable</code> (and rewrites the
+            imported CSS to match); skip keeps your current token; overwrite
+            replaces your token's value.
+          </p>
+          <div className={styles.rows}>
+            {tokenConflicts.map((conflict) => {
+              const key = tokenConflictKey(conflict)
+              const label = conflict.kind === 'color' ? 'Colour' : 'Font'
+              return (
+                <ConflictRow
+                  key={key}
+                  kind="token"
+                  source={`${label} · --${conflict.desiredVariable}`}
+                  desired={conflict.desiredVariable}
+                  current={tokenResolutions.get(key) ?? conflict.defaultResolution}
+                  onChange={(next) => onTokenResolutionChange(key, next)}
+                />
+              )
+            })}
           </div>
         </section>
       )}

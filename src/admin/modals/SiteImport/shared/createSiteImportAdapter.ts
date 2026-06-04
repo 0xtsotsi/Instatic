@@ -243,7 +243,9 @@ export function createSiteImportAdapter(opts: AdapterCallbacks): SiteImportAdapt
           addConditions: (conditions) => helpers.addConditions(conditions),
           addFonts: (fonts) => helpers.addFonts(fonts),
           addFontTokens: (tokens) => helpers.addFontTokens(tokens),
+          overwriteFontTokens: (items) => helpers.overwriteFontTokens(items),
           addColorTokens: (colors) => helpers.addColorTokens(colors),
+          overwriteColorTokens: (items) => helpers.overwriteColorTokens(items),
           addScripts: (scripts) => helpers.addScripts(scripts),
         }
         recipe(tx)
