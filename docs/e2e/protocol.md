@@ -166,6 +166,11 @@ Promote a scenario into scripted automation only when:
 - The value is regression detection, not product judgment.
 - The test can use durable user-visible selectors or accessible names.
 
+Promoted scenarios live in `tests/e2e/` as `*.e2e.ts` files and run with
+`bun run test:e2e`. Keep each spec focused on one durable user journey, with
+explicit saves, fresh/disposable data, and visitor-page checks when publishing
+behavior is in scope.
+
 Good candidates:
 
 - Fresh setup creates an owner and reaches the editor.

@@ -45,7 +45,8 @@ describe('development workflow', () => {
     // to `Path=/admin`) is sent on every request to the Bun backend.
     expect(viteConfig).toContain("'/admin/api'")
     expect(viteConfig).toContain("'/uploads'")
-    expect(viteConfig).toContain("target: 'http://localhost:3001'")
+    expect(viteConfig).toContain("const CMS_DEV_SERVER_ORIGIN = `http://localhost:${process.env.PORT ?? '3001'}`")
+    expect(viteConfig).toContain('target: CMS_DEV_SERVER_ORIGIN')
     expect(viteConfig).toContain('changeOrigin: true')
   })
 

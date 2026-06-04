@@ -31,7 +31,7 @@ import { isSqliteUrl } from '../server/db'
 import { ensurePortFree } from './lib/freePort'
 
 const CMS_PORT = Number(process.env.PORT ?? '3001')
-const VITE_PORT = 5173
+const VITE_PORT = Number(process.env.VITE_PORT ?? '5173')
 const POSTGRES_HOST = '127.0.0.1'
 const POSTGRES_PORT = 5433
 const DATABASE_URL = process.env.DATABASE_URL ?? 'sqlite:./.tmp/dev.db'
@@ -251,7 +251,7 @@ const processes: DevProcess[] = [
   },
   {
     name: 'vite',
-    command: 'vite --host 127.0.0.1',
+    command: `vite --host 127.0.0.1 --port ${VITE_PORT} --strictPort`,
   },
 ]
 
