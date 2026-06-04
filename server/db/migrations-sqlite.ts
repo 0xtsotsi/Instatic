@@ -694,8 +694,10 @@ export const sqliteMigrations: Migration[] = [
         created_at text not null default current_timestamp,
         updated_at text not null default current_timestamp,
         last_used_at text,
-        constraint ai_creds_provider_check
-          check (provider_id in ('anthropic', 'openai', 'ollama', 'openrouter')),
+        -- provider_id is validated at the application boundary by the TypeBox
+        -- ProviderId union (server/ai/handlers/credentials.ts). A DB enum that
+        -- duplicates that list would force a destructive migration on every new
+        -- provider, so it lives at the boundary, not here.
         constraint ai_creds_authmode_check
           check (auth_mode in ('apiKey', 'baseUrl')),
         constraint ai_creds_apikey_shape_check
@@ -812,6 +814,66 @@ export const sqliteMigrations: Migration[] = [
       alter table users
         add column step_up_window_minutes integer not null default 15
           check (step_up_window_minutes in (5, 15, 30, 60));
+    `,
+  },
+  {
+    id: '012_ai_drop_provider_check',
+    sql: `
+      -- ─── Drop the provider_id enum constraint — SQLite mirror of PG 012 ───
+      --
+      -- provider_id is validated at the application boundary by the TypeBox
+      -- ProviderId union (server/ai/handlers/credentials.ts). The original
+      -- DB-level enum check duplicated that list, so adding a provider
+      -- (e.g. OpenRouter) on an existing DB silently failed the insert with a
+      -- CHECK violation surfaced as a generic 500.
+      --
+      -- SQLite can't ALTER TABLE DROP CONSTRAINT, so we rebuild the table
+      -- without the provider check (same dance as migration 006): defer FK
+      -- enforcement so ai_defaults / ai_conversations references survive the
+      -- drop+recreate, copy rows across, swap, then re-create the index.
+      -- Safe on a fresh install too — migration 007 already builds the table
+      -- without the provider check, so this produces an identical table.
+
+      pragma defer_foreign_keys = on;
+
+      create table ai_provider_credentials__migr012 (
+        id text primary key,
+        user_id text not null references users(id) on delete cascade,
+        provider_id text not null,
+        auth_mode text not null,
+        display_label text not null,
+        ciphertext blob,
+        iv blob,
+        base_url text,
+        key_fingerprint text,
+        created_at text not null default current_timestamp,
+        updated_at text not null default current_timestamp,
+        last_used_at text,
+        constraint ai_creds_authmode_check
+          check (auth_mode in ('apiKey', 'baseUrl')),
+        constraint ai_creds_apikey_shape_check
+          check (
+            (auth_mode = 'apiKey'  and ciphertext is not null and iv is not null and base_url is null) or
+            (auth_mode = 'baseUrl' and base_url is not null)
+          )
+      );
+
+      insert into ai_provider_credentials__migr012 (
+        id, user_id, provider_id, auth_mode, display_label,
+        ciphertext, iv, base_url, key_fingerprint,
+        created_at, updated_at, last_used_at
+      )
+      select
+        id, user_id, provider_id, auth_mode, display_label,
+        ciphertext, iv, base_url, key_fingerprint,
+        created_at, updated_at, last_used_at
+      from ai_provider_credentials;
+
+      drop table ai_provider_credentials;
+      alter table ai_provider_credentials__migr012 rename to ai_provider_credentials;
+
+      create unique index if not exists ai_creds_user_label_idx
+        on ai_provider_credentials (user_id, provider_id, display_label);
     `,
   },
 ]

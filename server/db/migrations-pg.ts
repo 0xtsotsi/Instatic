@@ -702,8 +702,10 @@ export const pgMigrations: Migration[] = [
         created_at timestamptz not null default now(),
         updated_at timestamptz not null default now(),
         last_used_at timestamptz,
-        constraint ai_creds_provider_check
-          check (provider_id in ('anthropic', 'openai', 'ollama', 'openrouter')),
+        -- provider_id is validated at the application boundary by the TypeBox
+        -- ProviderId union (server/ai/handlers/credentials.ts). A DB enum that
+        -- duplicates that list would force a destructive migration on every new
+        -- provider, so it lives at the boundary, not here.
         constraint ai_creds_authmode_check
           check (auth_mode in ('apiKey', 'baseUrl')),
         constraint ai_creds_apikey_shape_check
@@ -844,6 +846,21 @@ export const pgMigrations: Migration[] = [
           check (step_up_auth_mode in ('required', 'disabled')),
         add constraint users_step_up_window_minutes_check
           check (step_up_window_minutes in (5, 15, 30, 60));
+    `,
+  },
+  {
+    id: '012_ai_drop_provider_check',
+    sql: `
+      -- ─── Drop the provider_id enum constraint ────────────────────────────
+      --
+      -- provider_id is validated at the application boundary by the TypeBox
+      -- ProviderId union (server/ai/handlers/credentials.ts). The original
+      -- DB-level enum check duplicated that list, so adding a provider
+      -- (e.g. OpenRouter) on an existing DB silently failed the insert with a
+      -- CHECK violation surfaced as a generic 500. Drop it — the boundary is
+      -- the single source of truth for valid providers.
+      alter table ai_provider_credentials
+        drop constraint if exists ai_creds_provider_check;
     `,
   },
 ]
