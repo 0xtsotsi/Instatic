@@ -9,7 +9,7 @@
  *
  * This gate also checks that the prompt was updated to the HTML-native
  * style: `insertHtml` must appear, and the phrase "Structure as HTML,
- * styling as classes" must be present.
+ * styling as CSS" must be present.
  */
 
 import { describe, it, expect } from 'bun:test'
@@ -40,7 +40,7 @@ describe('agent-system-prompt-no-module-enumeration gate', () => {
     expect(src).toContain('insertHtml')
   })
 
-  it('contains the "Structure as HTML, styling as classes" guideline', () => {
-    expect(src).toContain('Structure as HTML, styling as classes')
+  it('contains the "Structure as HTML, styling as CSS" guideline', () => {
+    expect(src).toContain('Structure as HTML, styling as CSS')
   })
 })

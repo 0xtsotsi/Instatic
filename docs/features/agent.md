@@ -1,6 +1,6 @@
 # AI Agent
 
-The AI Agent is a model-powered assistant integrated into the visual editor. The user types a request in the Agent Panel; the agent reads the current page snapshot, plans a sequence of edits, and executes them by calling tools. Structure is written as semantic HTML (`insertHtml` / `replaceNodeHtml`); styling is written as CSS classes (`createClass` / `updateClassStyles` / `assignClass`).
+The AI Agent is a model-powered assistant integrated into the visual editor. The user types a request in the Agent Panel; the agent reads the current page snapshot, plans a sequence of edits, and executes them by calling tools. Structure is written as semantic HTML (`insertHtml` / `replaceNodeHtml`); styling is written as CSS in the same call — a `<style>` block and/or `class=` attributes that the importer parses into Selectors-panel classes and ambient rules. `createClass` / `updateClassStyles` / `assignClass` remain for editing styles on existing nodes.
 
 The agent runs on a provider-agnostic AI runtime (`server/ai/`) that can drive any supported model (Anthropic Claude, OpenAI, OpenRouter, Ollama). Every driver talks directly to its provider's REST API over HTTP/SSE — no provider SDKs. All four share one multi-turn tool loop (`drivers/http/toolLoop.ts`); each supplies only a small `ProviderAdapter` of pure mapping functions. The plain `@anthropic-ai/sdk` (and any provider SDK) is banned repo-wide. Gated by `ai-driver-isolation.test.ts`.
 
@@ -9,7 +9,7 @@ The agent runs on a provider-agnostic AI runtime (`server/ai/`) that can drive a
 ## TL;DR
 
 - **Structure via HTML.** `insertHtml` and `replaceNodeHtml` accept semantic HTML strings; the browser executor calls `importHtml` (the same pipeline as the paste-HTML UI) to convert them into first-class, editable `PageNode`s.
-- **Styling via classes.** `createClass` / `updateClassStyles` / `assignClass` manage CSS classes. CSS classes are the recommended way to style imported HTML. `<style>` blocks inside imported HTML are converted to Selector-panel classes; `style=` attributes land on the node's inline styles. Use the `classes` parameter in `insertHtml`/`replaceNodeHtml` to declare and bind classes atomically.
+- **Styling via CSS.** The agent emits CSS the same way a human pastes it: a `<style>` block and/or `class=` attributes inside the `insertHtml`/`replaceNodeHtml` payload. The importer (`cssToStyleRules`) classifies every selector — a bare `.foo {}` rule becomes a reusable Selectors-panel class bound to `class="foo"`; any other selector (`.hero a`, `a:hover`, `nav > li`) becomes an ambient rule; `style=` attributes land on the node's inline styles. There is no structured `classes` parameter — the agent never hand-builds classes node-by-node at insert time. `createClass` / `updateClassStyles` / `assignClass` exist for editing styles on **existing** nodes after insertion.
 - **25 tools total.** 8 server-side read tools (resolved from the snapshot) + 17 browser-bridged write tools.
 - **Two-endpoint bridge.** `POST /admin/api/ai/chat/site` opens an NDJSON stream. When the model calls a write tool, the server emits `toolRequest`; the browser executor applies it to the editor store and POSTs the `AiToolOutput` result to `POST /admin/api/ai/tool-result`.
 - **Provider-agnostic.** The runtime selects a driver (Anthropic, OpenAI, OpenRouter, Ollama) from the conversation's configured credential.
@@ -229,20 +229,17 @@ All 17 tools carry `execution: 'browser'` in their `AiTool` definition. The serv
 
 | Tool              | Input                                  | Success `data`        | What it does                                           |
 |-------------------|----------------------------------------|-----------------------|--------------------------------------------------------|
-| `insertHtml`      | `{ parentId, index?, html, classes? }` | `{ nodeIds }`         | Parse HTML → import as `PageNode`s under `parentId` |
+| `insertHtml`      | `{ parentId, index?, html }`           | `{ nodeIds }`         | Parse HTML (+ any `<style>` CSS) → import as `PageNode`s under `parentId` |
 | `getNodeHtml`     | `{ nodeId }`                           | `{ html }`            | Render subtree to HTML via the publisher's `renderNode`|
-| `replaceNodeHtml` | `{ nodeId, html, classes? }`           | `{ nodeIds }`         | Delete existing children; re-import HTML under the same parent |
+| `replaceNodeHtml` | `{ nodeId, html }`                     | `{ nodeIds }`         | Delete existing children; re-import HTML under the same parent |
 
-The `classes` field in `insertHtml` / `replaceNodeHtml`:
-```ts
-Array<{
-  name: string                  // CSS identifier; resolved or created before insertion
-  styles?: Record<string, string | number>            // camelCase CSS properties
-  breakpointStyles?: Record<string, Record<string, string | number>>
-  //                            ↑ keyed by breakpoint id verbatim from the system prompt suffix
-}>
-```
-Declared classes are created (or resolved by name if they already exist) **with their styles** before the HTML is imported. Binding then happens when the fragment is spliced in: `insertImportedNodes` links every `class=` name on the imported nodes to a registry class id — reusing the just-declared class, or auto-creating a bare one for any name not in the `classes` array. So `class="hero-section"` renders and is styleable whether or not it appears in `classes`. See [html-import.md → Class linking](html-import.md#class-linking-name--id).
+Styling rides on the `html` payload — there is no separate `classes` parameter. The executor runs `importHtml(html)`, which harvests any `<style>` block's CSS, then hands it to `cssToStyleRules`. That classifier routes each selector:
+
+- a bare `.foo {}` rule → a reusable Selectors-panel **class**, bound to every `class="foo"` node in the fragment;
+- any other selector (`.hero a`, `a:hover`, `nav > li`, `@media …`) → an **ambient** rule (media queries fold into the matching breakpoint's `contextStyles`);
+- inline `style="…"` attributes → the node's inline styles.
+
+`insertImportedNodes` then links every `class=` token on the imported nodes to its registry class id in the same undo step, so `class="hero-section"` renders and is styleable whether its styles came from a `<style>` rule or an automatically-created bare class. See [html-import.md → Class linking](html-import.md#class-linking-name--id).
 
 **Node edits**
 
@@ -289,10 +286,10 @@ Declared classes are created (or resolved by name if they already exist) **with 
 Drivers that support prompt caching (Anthropic) apply `cache_control` to the static prefix automatically; drivers that don't concatenate the three strings. Content is intentionally static across providers — every observable behaviour comes from the tool definitions, not prompt knobs.
 
 **Static prefix** (full text in `server/ai/tools/site/systemPrompt.ts`):
-- Structure as HTML (`insertHtml` / `replaceNodeHtml`); style via CSS classes via `createClass` and `class=` attributes, or the `classes` parameter in the tool call.
-- `<style>` blocks inside imported HTML become Selectors-panel classes (`.foo {}` binds to `class="foo"`). `style=` attributes land on the node's inline styles. These are applied — not stripped. The `classes` parameter is preferred for reusable styles.
+- Structure as HTML (`insertHtml` / `replaceNodeHtml`); style with CSS in the same payload — a `<style>` block and/or `class=` attributes. The importer classifies selectors, so the agent never hand-builds classes at insert time.
+- `<style>` blocks inside imported HTML are parsed: a bare `.foo {}` rule becomes a Selectors-panel class bound to `class="foo"`; any other selector (`.hero a`, `a:hover`, `@media …`) becomes an ambient rule. `style=` attributes land on the node's inline styles. These are applied — not stripped.
 - One `insertHtml` call per logical section (nav, hero, pricing, footer = 4–6 calls); smaller chunks recover better if one fails.
-- Per-breakpoint variation: use `breakpointStyles` on classes, keyed by breakpoint ids **verbatim from the dynamic suffix** — never invent ids like `"mobile"` or `"desktop"`.
+- Per-breakpoint variation: `@media` queries in the `<style>` block (matched against the site breakpoints), or `breakpointStyles` on `createClass`, keyed by breakpoint ids **verbatim from the dynamic suffix** — never invent ids like `"mobile"` or `"desktop"`.
 - Page ids come from the dynamic suffix; never invent them.
 - Write-tool success data uses explicit keys: `classId` for `createClass`, `pageId` for `addPage`/`duplicatePage`, `nodeId`/`nodeIds` for `duplicateNode`, `nodeIds` for HTML inserts.
 - Reply rule: 1–2 narrating sentences only. No raw HTML/CSS/JSON in the reply.

@@ -32,12 +32,6 @@ const BreakpointStyles = Type.Record(
   StylePatch,
 )
 
-const ClassDefinition = Type.Object({
-  name: Type.String({ minLength: 1 }),
-  styles: Type.Optional(StylePatch),
-  breakpointStyles: Type.Optional(BreakpointStyles),
-})
-
 // ---------------------------------------------------------------------------
 // HTML-native write tools
 // ---------------------------------------------------------------------------
@@ -46,7 +40,6 @@ const InsertHtmlInput = Type.Object({
   parentId: Type.String({ minLength: 1 }),
   index: Type.Optional(Type.Integer({ minimum: 0 })),
   html: Type.String({ minLength: 1 }),
-  classes: Type.Optional(Type.Array(ClassDefinition)),
 })
 
 const insertHtmlTool: AiTool = {
@@ -54,7 +47,7 @@ const insertHtmlTool: AiTool = {
   scope: 'site',
   execution: 'browser',
   description:
-    'Insert semantic HTML as a subtree of editable nodes under an existing parent. Write structure as HTML (<section>, <h1>, <a>, <button>, <img>, <ul>, ...); style via classes referenced from class= attributes or declared in `classes`. <style> blocks and style= attributes are stripped on import.',
+    'Insert semantic HTML as a subtree of editable nodes under an existing parent. Write structure as HTML (<section>, <h1>, <a>, <button>, <img>, <ul>, ...) and style it with CSS: put a <style> block in the HTML and/or class= attributes. The importer parses every rule — a bare `.foo {}` selector becomes a reusable Selectors-panel class bound to class="foo"; any other selector (`.hero a`, `a:hover`, `nav > li`) becomes an ambient rule. Inline style= attributes land on the node\'s inline styles.',
   inputSchema: InsertHtmlInput,
 }
 
@@ -74,7 +67,6 @@ const getNodeHtmlTool: AiTool = {
 const ReplaceNodeHtmlInput = Type.Object({
   nodeId: Type.String({ minLength: 1 }),
   html: Type.String({ minLength: 1 }),
-  classes: Type.Optional(Type.Array(ClassDefinition)),
 })
 
 const replaceNodeHtmlTool: AiTool = {
@@ -82,7 +74,7 @@ const replaceNodeHtmlTool: AiTool = {
   scope: 'site',
   execution: 'browser',
   description:
-    "Replace a node subtree's children with new HTML. The target node is preserved as the parent; its existing children are rebuilt from the HTML.",
+    "Replace a node subtree's children with new HTML. The target node is preserved as the parent; its existing children are rebuilt from the HTML. Style with CSS exactly as in insertHtml: a <style> block and/or class= attributes; bare `.foo` selectors become reusable classes, other selectors become ambient rules.",
   inputSchema: ReplaceNodeHtmlInput,
 }
 

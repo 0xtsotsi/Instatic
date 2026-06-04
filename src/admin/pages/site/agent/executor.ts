@@ -72,17 +72,10 @@ const classBreakpointStylesSchema = Type.Record(
   classStylePatchSchema,
 )
 
-const classDefinitionSchema = Type.Object({
-  name: Type.String({ minLength: 1 }),
-  styles: Type.Optional(classStylePatchSchema),
-  breakpointStyles: Type.Optional(classBreakpointStylesSchema),
-})
-
 const insertHtmlSchema = Type.Object({
   parentId: Type.String({ minLength: 1 }),
   index: Type.Optional(Type.Integer({ minimum: 0 })),
   html: Type.String({ minLength: 1 }),
-  classes: Type.Optional(Type.Array(classDefinitionSchema)),
 })
 
 const getNodeHtmlSchema = Type.Object({
@@ -92,7 +85,6 @@ const getNodeHtmlSchema = Type.Object({
 const replaceNodeHtmlSchema = Type.Object({
   nodeId: Type.String({ minLength: 1 }),
   html: Type.String({ minLength: 1 }),
-  classes: Type.Optional(Type.Array(classDefinitionSchema)),
 })
 
 const deleteNodeSchema = Type.Object({
@@ -212,23 +204,6 @@ function resolveOrCreateClassId(
   }
 }
 
-function ensureClassIdWithStyles(
-  store: EditorStore,
-  classIdOrName: string,
-  styles: Record<string, string | number> = {},
-  breakpointStyles: Record<string, Record<string, string | number>> = {},
-): string | null {
-  const breakpointError = validateBreakpointStyles(store, breakpointStyles)
-  if (breakpointError) return null
-  const classId = resolveOrCreateClassId(store, classIdOrName, styles)
-  if (!classId) return null
-  if (Object.keys(styles).length > 0) {
-    store.updateClassStyles(classId, styles)
-  }
-  applyClassBreakpointStyles(store, classId, breakpointStyles)
-  return classId
-}
-
 function validateBreakpointId(
   store: EditorStore,
   breakpointId: string,
@@ -294,43 +269,23 @@ function findNodeAcrossSite(store: EditorStore, nodeId: string) {
  * Insert an HTML snippet as page nodes under `parentId`.
  *
  * Pipeline (identical to the paste-import modal path):
- *   1. Validate breakpoint keys in any class definitions.
- *   2. Create / resolve each class by name so CSS exists before insertion.
- *   3. importHtml(input.html) — parse → strip unsafe → walkAndMap → fragment
+ *   1. importHtml(input.html) — parse → strip unsafe → walkAndMap → fragment
  *      (+ inline `style="…"` on node.inlineStyles, + raw `<style>` CSS).
- *   4. parseImportedStyleCss — `<style>` CSS → registry rules + conditions.
- *   5. insertImportedNodes(parentId, fragment, { index, styleRules, conditions })
+ *   2. parseImportedStyleCss — `<style>` CSS → registry rules + conditions.
+ *      `cssToStyleRules` classifies each selector: a bare `.foo` becomes a
+ *      reusable class, anything else (`.hero a`, `a:hover`, …) an ambient rule.
+ *   3. insertImportedNodes(parentId, fragment, { index, styleRules, conditions })
  *      — nodes, <style> rules, and class-token binding in one undo step.
  */
 function runInsertHtml(input: Static<typeof insertHtmlSchema>): AiToolOutput {
-  // (1) Validate breakpoint keys before any mutation
-  for (const classDef of input.classes ?? []) {
-    const breakpointError = validateBreakpointStyles(
-      getStoreState(),
-      classDef.breakpointStyles ?? EMPTY_BREAKPOINT_STYLES,
-    )
-    if (breakpointError) return aiToolError(breakpointError)
-  }
-
-  // (2) Create / resolve each class by name so it exists before insertion
-  for (const classDef of input.classes ?? []) {
-    const classId = ensureClassIdWithStyles(
-      getStoreState(),
-      classDef.name,
-      classDef.styles ?? EMPTY_CLASS_STYLES,
-      classDef.breakpointStyles ?? EMPTY_BREAKPOINT_STYLES,
-    )
-    if (!classId) return aiToolError(`Class could not be created: ${classDef.name}`)
-  }
-
-  // (3) Parse and walk the HTML to produce a flat node fragment + any <style> CSS
+  // (1) Parse and walk the HTML to produce a flat node fragment + any <style> CSS
   const { nodes, rootIds, styleCss } = importHtml(input.html)
   if (rootIds.length === 0) {
     return aiToolError('HTML contained no importable elements.')
   }
   const { rules, conditions } = parseImportedStyleCss(styleCss)
 
-  // (4) Insert via the store action — same path as the paste import modal
+  // (2) Insert via the store action — same path as the paste import modal
   const insertedRootIds = getStoreState().insertImportedNodes(
     input.parentId,
     { nodes, rootIds },
@@ -397,26 +352,6 @@ function runReplaceNodeHtml(input: Static<typeof replaceNodeHtmlSchema>): AiTool
   const existingChildren = [...(targetNode.children ?? [])]
   if (existingChildren.length > 0) {
     getStoreState().deleteNodes(existingChildren)
-  }
-
-  // Validate breakpoint keys before any mutation
-  for (const classDef of input.classes ?? []) {
-    const breakpointError = validateBreakpointStyles(
-      getStoreState(),
-      classDef.breakpointStyles ?? EMPTY_BREAKPOINT_STYLES,
-    )
-    if (breakpointError) return aiToolError(breakpointError)
-  }
-
-  // Create / resolve each class by name
-  for (const classDef of input.classes ?? []) {
-    const classId = ensureClassIdWithStyles(
-      getStoreState(),
-      classDef.name,
-      classDef.styles ?? EMPTY_CLASS_STYLES,
-      classDef.breakpointStyles ?? EMPTY_BREAKPOINT_STYLES,
-    )
-    if (!classId) return aiToolError(`Class could not be created: ${classDef.name}`)
   }
 
   // Import and insert the new HTML under the target node

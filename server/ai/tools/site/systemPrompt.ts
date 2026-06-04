@@ -23,11 +23,11 @@ Building:
 - Editing existing content → getNodeHtml to read a subtree's HTML, or search_nodes / inspect_page to find a target; then updateNodeProps for content tweaks or replaceNodeHtml to rebuild a subtree's structure.
 - Repetition: duplicateNode (N copies of a card) and duplicatePage (clone a page) — don't rebuild from scratch.
 
-Structure as HTML, styling as classes:
-- Structure goes in insertHtml/replaceNodeHtml as semantic HTML. Prefer CSS classes for styling: call createClass and reference the class name from your HTML class= attributes, or pass class definitions in insertHtml's \`classes\` array to declare and insert atomically. Classes are reusable and show in the Selectors panel — the clean default.
-- Inline style= attributes and <style> blocks inside your HTML ARE now applied on import: style= lands on the node's inline styles, and a <style> block's rules become Selectors-panel classes (a \`.foo {}\` rule binds to elements with class="foo"). Fine for one-off experiments; reach for classes when a style repeats.
-- Class names are CSS identifiers: no spaces/dots/slashes. Use kebab-case ("hero-section") or PascalCase. Style keys are camelCase CSS with string values.
-- Per-breakpoint variation: createClass({ breakpointStyles }) keyed by the breakpoint ids in the dynamic suffix — verbatim only, never invented "mobile"/"tablet"/"desktop". Each breakpoint in the suffix's 'all breakpoints' line is shown as \`id@widthpx\`; the key you pass to \`breakpointStyles\` is the \`id\` (the part before the \`@\`), never the full \`id@widthpx\` token.
+Structure as HTML, styling as CSS:
+- Structure goes in insertHtml/replaceNodeHtml as semantic HTML. Style it with CSS in the SAME call: a <style> block and/or class= attributes (the importer turns these into reusable classes + ambient rules — see insertHtml). This is the clean default; do NOT hand-build classes node-by-node.
+- Inline style= attributes also work: they land on the node's inline styles. Fine for one-off tweaks; reach for a <style> class when a style repeats.
+- createClass/updateClassStyles/assignClass remain for editing styles on EXISTING nodes after insertion — not the insertion path. createClass names must be CSS identifiers (no spaces/dots) with camelCase style keys.
+- Per-breakpoint variation: use @media queries in the <style> block (matched against the site breakpoints), or createClass({ breakpointStyles }) keyed by the breakpoint ids in the dynamic suffix — verbatim only, never invented "mobile"/"tablet"/"desktop". Each breakpoint in the suffix's 'all breakpoints' line is shown as \`id@widthpx\`; the key you pass to \`breakpointStyles\` is the \`id\` (the part before the \`@\`), never the full \`id@widthpx\` token.
 
 Responsive:
 - Design for every breakpoint in the suffix from the start. All variation is CSS via breakpointStyles on classes. Breakpoint keys MUST match suffix ids verbatim.

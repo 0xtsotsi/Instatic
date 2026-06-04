@@ -111,26 +111,22 @@ describe('executeAgentTool — insertHtml', () => {
     expect(sectionNode.children).toHaveLength(2)
   })
 
-  it('class declared in the classes array is created in the store with its styles', async () => {
+  it('a <style> block class is created in the store with its styles and bound to the node', async () => {
     const { rootId } = freshStore()
     const result = await executeAgentTool('insertHtml', {
       parentId: rootId,
-      html: '<section class="hero-section"><h1>Title</h1></section>',
-      classes: [
-        {
-          name: 'hero-section',
-          styles: { padding: '80px', backgroundColor: '#111827' },
-        },
-      ],
+      html:
+        '<style>.hero-section { padding-top: 80px; background-color: tomato; }</style>' +
+        '<section class="hero-section"><h1>Title</h1></section>',
     })
     const nodeIds = expectNodeIds(result)
 
-    // The class must be created in the store
+    // The class must be created in the store from the <style> rule
     const classes = Object.values(useEditorStore.getState().site!.styleRules)
     const heroClass = classes.find((c) => c.name === 'hero-section')
     expect(heroClass).toBeDefined()
-    expect(heroClass!.styles.padding).toBe('80px')
-    expect(heroClass!.styles.backgroundColor).toBe('#111827')
+    expect(heroClass!.styles.paddingTop).toBe('80px')
+    expect(heroClass!.styles.backgroundColor).toBe('tomato')
 
     // ...AND the imported node must reference the class by its registry id, so
     // the declared styles actually resolve at render time (regression guard:
@@ -143,7 +139,27 @@ describe('executeAgentTool — insertHtml', () => {
     expect(classNamesForClassIds(site.styleRules, sectionNode.classIds)).toContain('hero-section')
   })
 
-  it('bare class= attribute (no classes declaration) auto-creates a registry class and links it', async () => {
+  it('a descendant selector in a <style> block becomes an ambient rule (not a malformed class)', async () => {
+    const { rootId } = freshStore()
+    const result = await executeAgentTool('insertHtml', {
+      parentId: rootId,
+      html:
+        '<style>.hero-nav a { color: tomato; }</style>' +
+        '<nav class="hero-nav"><a href="/">Home</a></nav>',
+    })
+    expectNodeIds(result)
+
+    const site = useEditorStore.getState().site!
+    // The whitespace selector must NOT have been forced through createClass
+    // (which rejects whitespace) — it round-trips as an ambient rule instead.
+    const ambient = Object.values(site.styleRules).find(
+      (c) => c.kind === 'ambient' && c.selector === '.hero-nav a',
+    )
+    expect(ambient).toBeDefined()
+    expect(ambient!.styles.color).toBe('tomato')
+  })
+
+  it('bare class= attribute (no <style> declaration) auto-creates a registry class and links it', async () => {
     const { rootId } = freshStore()
     const result = await executeAgentTool('insertHtml', {
       parentId: rootId,
@@ -181,20 +197,18 @@ describe('executeAgentTool — insertHtml', () => {
     }
   })
 
-  it('class with breakpoint styles is created correctly', async () => {
+  it('a <style> @media block folds into the class contextStyles for the matching breakpoint', async () => {
     const { rootId } = freshStore()
+    // The default site's `mobile` breakpoint is `(max-width: 375px)`, so a
+    // matching @media query folds into contextStyles.mobile.
     const result = await executeAgentTool('insertHtml', {
       parentId: rootId,
-      html: '<h1 class="hero-title">Hello</h1>',
-      classes: [
-        {
-          name: 'hero-title',
-          styles: { fontSize: '56px' },
-          breakpointStyles: {
-            mobile: { fontSize: '32px' },
-          },
-        },
-      ],
+      html:
+        '<style>' +
+        '.hero-title { font-size: 56px; }' +
+        '@media (max-width: 375px) { .hero-title { font-size: 32px; } }' +
+        '</style>' +
+        '<h1 class="hero-title">Hello</h1>',
     })
     expectNodeIds(result)
     const cls = Object.values(useEditorStore.getState().site!.styleRules).find(

@@ -147,7 +147,7 @@ See [docs/features/plugin-system.md](../features/plugin-system.md).
 | Test                                          | What it enforces                                                                 |
 |-----------------------------------------------|----------------------------------------------------------------------------------|
 | `agent-no-raw-html-in-reply-rule.test.ts`     | The agent system prompt contains the narrate-only rule (1–2 sentence replies, no raw HTML/CSS/JSON in the reply body). Prevents accidental removal during prompt refactors. |
-| `agent-system-prompt-no-module-enumeration.test.ts` | The system prompt does not enumerate module ids — they're discovered via `list_modules`/`inspect_node` at runtime. Also asserts the HTML-native style markers (`insertHtml`, "Structure as HTML, styling as classes"). |
+| `agent-system-prompt-no-module-enumeration.test.ts` | The system prompt does not enumerate module ids — they're discovered via `list_modules`/`inspect_node` at runtime. Also asserts the HTML-native style markers (`insertHtml`, "Structure as HTML, styling as CSS"). |
 | `agent-tool-surface.test.ts`                  | Legacy node-construction tools (`insertNode`, `insertTree`) are absent from the site write-tool list; HTML-native replacements (`insertHtml`, `getNodeHtml`, `replaceNodeHtml`) are present. |
 
 ### AI infrastructure
