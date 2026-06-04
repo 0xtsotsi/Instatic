@@ -371,7 +371,7 @@ Architectural rules live as tests in `src/__tests__/architecture/*.test.ts` and 
 | Icons come from `pixel-art-icons`                                                                     | `no-third-party-icons.test.ts`, `direct-icon-imports.test.ts`   |
 | Vendored icon set is fresh                                                                            | `vendor-icons-fresh.test.ts`                                    |
 | Plugin sandbox invariants (no `node:`, `bun:`, `require`, etc.)                                       | `plugin-sandbox-invariants.test.ts`                             |
-| Provider SDKs only inside `server/ai/drivers/`; `@anthropic-ai/sdk` banned everywhere                 | `ai-driver-isolation.test.ts`                                   |
+| All provider SDKs banned repo-wide (no exceptions); drivers talk directly to each provider's REST API  | `ai-driver-isolation.test.ts`                                   |
 | UI primitives live in `src/ui/components/`                                                            | `ui-primitives-location.test.ts`                                |
 
 See [docs/reference/architecture-tests.md](reference/architecture-tests.md) for the complete catalog (81 gate files).

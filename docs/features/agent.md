@@ -395,9 +395,8 @@ Conversations and their message history are persisted server-side in `ai_convers
 
 | Pattern | Use instead |
 |---|---|
-| Importing `@anthropic-ai/sdk` (plain SDK) | Banned repo-wide. Gated by `ai-driver-isolation.test.ts`. |
-| Importing any provider SDK outside `server/ai/drivers/` | Drivers only. Same gate. |
-| Importing `zod` in `server/ai/tools/**` | TypeBox only. Gated by `ai-tools-typebox-only.test.ts`. |
+| Importing any provider SDK (`@anthropic-ai/sdk`, `@anthropic-ai/claude-agent-sdk`, `@openai/agents`, `@openrouter/agent`, `@modelcontextprotocol/sdk`) | Banned repo-wide — no exceptions, including inside `server/ai/drivers/`. Drivers talk directly to the REST API. Gated by `ai-driver-isolation.test.ts`. |
+| Importing `zod` anywhere | Banned repo-wide — TypeBox schemas pass directly as JSON Schema to every provider. Gated by `ai-driver-isolation.test.ts`. |
 | Routing a write tool as a server-side read (resolving from snapshot) | Write tools are `execution: 'browser'` — they must go through the bridge. The editor store is the write authority. |
 | Using invented breakpoint ids in `breakpointStyles` (`"mobile"`, `"desktop"`, etc.) | Use verbatim ids from the dynamic suffix. Invalid ids are rejected by the executor. |
 | Editing nodes outside the active page | Agent mutations target the active page tree. Cross-page edits require the user to switch pages first. |
