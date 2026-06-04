@@ -7,7 +7,7 @@
 import {
   normalizeFontTokenVariable,
   sanitizeFontFallbackStack,
-} from '@core/fonts/tokens'
+} from '@core/fonts'
 import type { NewStyleRule, ImportFontToken } from './types'
 import { isRootScopeSelector } from './rootScope'
 

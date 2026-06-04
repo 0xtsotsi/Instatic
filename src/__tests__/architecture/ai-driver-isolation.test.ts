@@ -1,24 +1,26 @@
 /**
  * Architecture gate — AI driver SDK isolation.
  *
- * Drivers are the ONLY place provider SDKs (and Zod) may be imported.
- * Every other file in the repo — runtime, handlers, tools, repositories,
- * UI — talks to the `AiProvider` interface and never reaches into an
- * SDK directly.
+ * The drivers talk DIRECTLY to each provider's REST API over HTTP/SSE — there
+ * are no provider SDKs left in the tree. This gate is therefore inverted from
+ * its original form: it asserts that NO provider SDK and NO `zod` is imported
+ * ANYWHERE under `src/` or `server/` (a strictly stronger boundary than the
+ * old "only the driver file may import it" exemption).
  *
  * This replaces the legacy `no-anthropic-sdk.test.ts` gate, which only
  * scanned `src/` and predates the `server/ai/` module. The legacy gate
  * remains in place for the editor (the browser must never import any AI
- * SDK); this gate covers the server side.
+ * SDK); this gate covers the server side too.
  *
- * Permitted exceptions (case-by-case in the ALLOW_BY_PACKAGE map):
- *   - `@anthropic-ai/claude-agent-sdk` → driver + stream adapter
- *   - `@openai/agents`                  → openai driver
- *   - `zod`                              → driver + typebox→zod helper
- *
- * The PLAIN `@anthropic-ai/sdk` stays banned EVERYWHERE — the Agent SDK
- * covers all our needs, and the plain SDK has been documented as
- * dangerous in the legacy gate.
+ * Banned repo-wide (no allowed callers):
+ *   - `@anthropic-ai/claude-agent-sdk` — replaced by direct POST /v1/messages
+ *   - `@openai/agents`                  — replaced by direct POST /v1/responses
+ *   - `@openrouter/agent`               — replaced by direct POST /v1/responses
+ *   - `@modelcontextprotocol/sdk`       — only ever used to wrap tools for the
+ *                                         Agent SDK; gone with it
+ *   - `zod`                             — drivers pass TypeBox schemas through
+ *                                         as JSON Schema; no Zod bridge
+ *   - `@anthropic-ai/sdk`               — the plain SDK, always banned
  */
 
 import { describe, it, expect } from 'bun:test'
@@ -44,40 +46,38 @@ const RULES: PackageRule[] = [
   {
     label: '@anthropic-ai/claude-agent-sdk',
     importRe: /from\s+['"]@anthropic-ai\/claude-agent-sdk['"]|require\s*\(\s*['"]@anthropic-ai\/claude-agent-sdk['"]\s*\)/,
-    allowed: [
-      'server/ai/drivers/anthropic.ts',
-    ],
+    // No allowed callers — replaced by the direct /v1/messages HTTP driver.
+    allowed: [],
   },
   {
     label: '@openai/agents',
     importRe: /from\s+['"]@openai\/agents['"]|require\s*\(\s*['"]@openai\/agents['"]\s*\)/,
-    allowed: [
-      'server/ai/drivers/openai.ts',
-    ],
+    // No allowed callers — replaced by the direct /v1/responses HTTP driver.
+    allowed: [],
   },
   {
     label: '@openrouter/agent',
     importRe: /from\s+['"]@openrouter\/agent['"]|require\s*\(\s*['"]@openrouter\/agent['"]\s*\)/,
-    allowed: [
-      'server/ai/drivers/openrouter.ts',
-    ],
+    // No allowed callers — replaced by the direct /v1/responses HTTP driver.
+    allowed: [],
+  },
+  {
+    label: '@modelcontextprotocol/sdk',
+    importRe: /from\s+['"]@modelcontextprotocol\/sdk['"]|require\s*\(\s*['"]@modelcontextprotocol\/sdk['"]\s*\)|from\s+['"]@modelcontextprotocol\/sdk\/|require\s*\(\s*['"]@modelcontextprotocol\/sdk\//,
+    // No allowed callers — only ever wrapped tools for the Agent SDK.
+    allowed: [],
   },
   {
     label: 'zod',
     importRe: /from\s+['"]zod['"]|require\s*\(\s*['"]zod['"]\s*\)/,
-    allowed: [
-      'server/ai/drivers/anthropic.ts',
-      'server/ai/drivers/openrouter.ts',
-      'server/ai/drivers/typeboxToZod.ts',
-    ],
+    // No allowed callers — drivers pass TypeBox schemas through as JSON Schema.
+    allowed: [],
   },
   {
     label: '@anthropic-ai/sdk',
     importRe: /from\s+['"]@anthropic-ai\/sdk['"]|require\s*\(\s*['"]@anthropic-ai\/sdk['"]\s*\)/,
-    allowed: [
-      // No allowed callers — the plain Anthropic SDK is banned repo-wide.
-      // The Agent SDK covers ambient + apiKey paths via Options.env.
-    ],
+    // No allowed callers — the plain Anthropic SDK is banned repo-wide.
+    allowed: [],
   },
 ]
 

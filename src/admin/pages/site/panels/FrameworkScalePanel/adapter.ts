@@ -21,7 +21,7 @@ import type {
   FrameworkSpacingGroup,
   FrameworkTypographyClassGenerator,
   FrameworkTypographyGroup,
-} from '@core/framework/schemas'
+} from '@core/framework'
 
 export type GroupShape = FrameworkTypographyGroup | FrameworkSpacingGroup
 export type GeneratorShape =

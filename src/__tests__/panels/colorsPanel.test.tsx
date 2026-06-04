@@ -3,7 +3,7 @@ import React, { act } from 'react'
 import { cleanup, fireEvent, render, screen, within } from '@testing-library/react'
 import { ColorsPanel } from '@site/panels/ColorsPanel'
 import { useEditorStore } from '@site/store/store'
-import { frameworkColorClassId } from '@core/framework/colors'
+import { frameworkColorClassId } from '@core/framework'
 import { makeSite } from '../fixtures'
 
 function resetStore() {

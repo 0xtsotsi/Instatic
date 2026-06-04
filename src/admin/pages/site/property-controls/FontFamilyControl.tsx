@@ -6,14 +6,14 @@ import { ControlRow } from '@ui/components/ControlRow'
 import { ContextMenu, ContextMenuItem } from '@ui/components/ContextMenu'
 import { useEditorStore } from '@site/store/store'
 import { useEditorPreference } from '@site/preferences/editorPreferences'
-import { generateSiteFontsCss } from '@core/fonts/css'
+import { generateSiteFontsCss } from '@core/fonts'
 import {
   fontFamilyStackForEntry,
   fontTokenValueExpr,
   resolveFontTokenStack,
   sortFontTokens,
-} from '@core/fonts/tokens'
-import type { FontEntry, FontToken } from '@core/fonts/schemas'
+} from '@core/fonts'
+import type { FontEntry, FontToken } from '@core/fonts'
 import styles from './FontFamilyControl.module.css'
 
 const EMPTY_FONT_ENTRIES: FontEntry[] = []

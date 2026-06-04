@@ -28,9 +28,9 @@ import {
   installCmsGoogleFont,
   listCmsGoogleFonts,
 } from '@core/persistence/cmsFonts'
-import type { FontEntry } from '@core/fonts/schemas'
-import { compareVariants, parseVariant } from '@core/fonts/variants'
-import { loadFontPreview, loadFontPreviewWithVariants } from '@core/fonts/preview'
+import type { FontEntry } from '@core/fonts'
+import { compareVariants, parseVariant } from '@core/fonts'
+import { loadFontPreview, loadFontPreviewWithVariants } from '@core/fonts'
 import type { GoogleFontFamilyDto } from '@core/persistence/responseSchemas'
 import styles from './FontsSection.module.css'
 

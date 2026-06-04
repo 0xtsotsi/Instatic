@@ -25,7 +25,7 @@ import type {
   FrameworkSpacingSettings,
   FrameworkTypographyClassGenerator,
   FrameworkTypographySettings,
-} from '@core/framework/schemas'
+} from '@core/framework'
 import { reconcileFrameworkClasses } from './reconcile'
 import { nextOrderValue } from './shared'
 import type {

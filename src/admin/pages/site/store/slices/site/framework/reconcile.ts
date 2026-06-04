@@ -25,7 +25,7 @@
  */
 
 import type { StyleRule, SiteDocument } from '@core/page-tree'
-import { generateFrameworkUtilityClasses } from '@core/framework/generate'
+import { generateFrameworkUtilityClasses } from '@core/framework'
 
 const FRAMEWORK_ID_PREFIX = 'framework:'
 

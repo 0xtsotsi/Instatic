@@ -30,7 +30,7 @@
 
 import { describe, it, expect, beforeEach } from 'bun:test'
 import { useEditorStore, selectActiveCanvasPage, selectSelectedNode } from '@site/store/store'
-import { produce } from 'immer'
+import { create } from 'mutative'
 import type { PageNode } from '@core/page-tree'
 import { instantiateVCAtRef } from '@core/visualComponents'
 import type { VCNode } from '@core/visualComponents'
@@ -99,7 +99,7 @@ function injectNodesIntoPage(rootContainerId: string, extraNodes: PageNode[]): v
   const state = useEditorStore.getState()
   const pageId = state.activePageId!
   useEditorStore.setState(
-    produce(state, (draft) => {
+    create(state, (draft) => {
       const page = draft.site!.pages.find((p) => p.id === pageId)!
       const pageRoot = page.nodes[page.rootNodeId]
       if (!pageRoot.children.includes(rootContainerId)) {

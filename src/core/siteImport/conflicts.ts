@@ -30,8 +30,8 @@ import type {
 } from './types'
 import type { SiteDocument, PageNode } from '@core/page-tree'
 import type { ImportFragment } from '@core/htmlImport'
-import { normalizeFrameworkColorSlug } from '@core/framework/colors'
-import { normalizeFontTokenVariable } from '@core/fonts/tokens'
+import { normalizeFrameworkColorSlug } from '@core/framework'
+import { normalizeFontTokenVariable } from '@core/fonts'
 
 // ---------------------------------------------------------------------------
 // Detection

@@ -23,7 +23,7 @@
 
 import type { PageNode } from '@core/page-tree'
 import type { ImportFragment } from '@core/htmlImport'
-import type { FontFileFormat } from '@core/fonts/schemas'
+import type { FontFileFormat } from '@core/fonts'
 import type {
   FileMap,
   ImportWarning,

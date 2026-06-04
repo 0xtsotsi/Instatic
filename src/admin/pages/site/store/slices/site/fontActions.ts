@@ -10,14 +10,14 @@
 import { nanoid } from 'nanoid'
 import type { Draft } from 'mutative'
 import type { BaseNode, SiteDocument } from '@core/page-tree'
-import type { FontEntry, FontToken, SiteFontsSettings } from '@core/fonts/schemas'
+import type { FontEntry, FontToken, SiteFontsSettings } from '@core/fonts'
 import {
   defaultFontTokenFallback,
   isDuplicateFontTokenVariable,
   makeUniqueFontTokenVariable,
   normalizeFontTokenVariable,
   sanitizeFontFallbackStack,
-} from '@core/fonts/tokens'
+} from '@core/fonts'
 import type { SiteSlice, SiteSliceHelpers } from './types'
 
 export type FontActions = Pick<

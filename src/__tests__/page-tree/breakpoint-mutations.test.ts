@@ -7,7 +7,7 @@
  */
 
 import { describe, it, expect } from 'bun:test'
-import { produce } from 'immer'
+import { create } from 'mutative'
 import {
   setBreakpointOverride,
   clearBreakpointOverride,
@@ -72,7 +72,7 @@ describe('setBreakpointOverride', () => {
   it('is Immer-safe', () => {
     const { page, nodeId } = makeTestPage()
 
-    const nextPage = produce(page, (draft) => {
+    const nextPage = create(page, (draft) => {
       setBreakpointOverride(draft, nodeId, 'mobile', { fontSize: 16 })
     })
 
@@ -136,7 +136,7 @@ describe('clearBreakpointOverride', () => {
   it('is Immer-safe', () => {
     const { page, nodeId } = makeTestPageWithOverride()
 
-    const nextPage = produce(page, (draft) => {
+    const nextPage = create(page, (draft) => {
       clearBreakpointOverride(draft, nodeId, 'mobile')
     })
 

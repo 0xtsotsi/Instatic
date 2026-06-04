@@ -1,8 +1,8 @@
 import { Button } from '@ui/components/Button'
 import { MinusIcon } from 'pixel-art-icons/icons/minus'
 import { PlusIcon } from 'pixel-art-icons/icons/plus'
-import { declarationFromStep, type FluidScaleStep } from '@core/framework/scale'
-import type { resolveFrameworkPreferences } from '@core/framework/preferences'
+import { declarationFromStep, type FluidScaleStep } from '@core/framework'
+import type { resolveFrameworkPreferences } from '@core/framework'
 import type { GeneratorShape, GroupShape, ScaleAdapter } from './adapter'
 import styles from './StepList.module.css'
 

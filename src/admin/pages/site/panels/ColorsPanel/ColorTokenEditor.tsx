@@ -2,8 +2,8 @@ import { useId, useState } from 'react'
 import {
   generateFrameworkColorVariableSets,
   normalizeFrameworkColorSlug,
-} from '@core/framework/colors'
-import type { FrameworkColorToken } from '@core/framework/schemas'
+} from '@core/framework'
+import type { FrameworkColorToken } from '@core/framework'
 import type { UpdateFrameworkColorTokenPatch } from '@site/store/slices/site/types'
 import { Input } from '@ui/components/Input'
 import { CategoryComboBox } from './CategoryComboBox'

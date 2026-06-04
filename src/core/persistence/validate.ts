@@ -44,7 +44,7 @@ import { sanitizeRichtext, isRichtextPropKey } from '@core/sanitize'
 import { normalizeSitePackageJson } from '@core/site-dependencies/manifest'
 import { normalizeSiteRuntimeConfig } from '@core/site-runtime'
 import { pageSlugDuplicateError, pageSlugError } from '@core/page-tree'
-import { generateDefaultDarkColor, normalizeFrameworkColorSlug } from '@core/framework/colors'
+import { generateDefaultDarkColor, normalizeFrameworkColorSlug } from '@core/framework'
 import type { BaseNode } from '@core/page-tree'
 
 // ---------------------------------------------------------------------------

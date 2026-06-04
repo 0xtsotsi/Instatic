@@ -12,8 +12,8 @@ import { afterEach, beforeEach, describe, expect, it } from 'bun:test'
 import { useEffect, act } from 'react'
 import { cleanup, fireEvent, render, screen, within } from '@testing-library/react'
 import { useEditorStore } from '@site/store/store'
-import { frameworkColorClassId } from '@core/framework/colors'
-import type { FrameworkColorToken } from '@core/framework/schemas'
+import { frameworkColorClassId } from '@core/framework'
+import type { FrameworkColorToken } from '@core/framework'
 import { makeNode, makePage, makeSite } from '../fixtures'
 import {
   FrameworkChangeConfirmProvider,

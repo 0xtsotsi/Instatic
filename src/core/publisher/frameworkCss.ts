@@ -22,9 +22,9 @@ import type { StyleRule } from '@core/page-tree'
 import {
   generateFrameworkRootCss,
   generateFrameworkUtilityClasses,
-} from '@core/framework/generate'
-import { resolveFrameworkPreferences } from '@core/framework/preferences'
-import { generateFontsCss } from '@core/fonts/css'
+} from '@core/framework'
+import { resolveFrameworkPreferences } from '@core/framework'
+import { generateFontsCss } from '@core/fonts'
 import { generateClassCSS } from './classCss'
 
 export function buildSiteFrameworkCss(site: SiteDocument): string {

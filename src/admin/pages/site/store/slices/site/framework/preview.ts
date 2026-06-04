@@ -9,7 +9,7 @@
  * caller is free to commit silently.
  */
 
-import { previewFrameworkClassRemovals } from '@core/framework/changeImpact'
+import { previewFrameworkClassRemovals } from '@core/framework'
 import { reconcileFrameworkClasses } from './reconcile'
 import type { SiteSlice, SiteSliceHelpers } from '@site/store/slices/site/types'
 

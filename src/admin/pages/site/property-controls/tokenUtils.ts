@@ -21,8 +21,8 @@ import { useEditorStore } from '@site/store/store'
 import type {
   FrameworkSpacingGroup,
   FrameworkTypographyGroup,
-} from '@core/framework/schemas'
-import { getVariableName } from '@core/framework/scale'
+} from '@core/framework'
+import { getVariableName } from '@core/framework'
 
 // ---------------------------------------------------------------------------
 // Token shape — one suggestion entry shared across all scale-driven controls

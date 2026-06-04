@@ -7,7 +7,7 @@
 
 import type { StyleRule, ConditionDef } from '@core/page-tree'
 import type { ImportFragment } from '@core/htmlImport'
-import type { FontFileFormat } from '@core/fonts/schemas'
+import type { FontFileFormat } from '@core/fonts'
 
 // ---------------------------------------------------------------------------
 // NewStyleRule — a StyleRule ready to insert (sans identity fields)

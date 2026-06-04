@@ -1,6 +1,6 @@
 import { useState, type MouseEvent } from 'react'
 import { useEditorStore } from '@site/store/store'
-import type { FrameworkColorToken } from '@core/framework/schemas'
+import type { FrameworkColorToken } from '@core/framework'
 import type { UpdateFrameworkColorTokenPatch } from '@site/store/slices/site/types'
 import { Button } from '@ui/components/Button'
 import { EmptyState } from '@ui/components/EmptyState'

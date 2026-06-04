@@ -11,7 +11,7 @@ import type { ModuleDefinition } from '@core/module-engine'
 import {
   frameworkColorClassId,
   generateFrameworkColorUtilityClasses,
-} from '@core/framework/colors'
+} from '@core/framework'
 import { makeModule, makeRegistry, makePage, makeSite } from './helpers'
 
 // ---------------------------------------------------------------------------

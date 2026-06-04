@@ -14,7 +14,7 @@
  */
 
 import { describe, it, expect, beforeEach } from 'bun:test'
-import { produce } from 'immer'
+import { create } from 'mutative'
 import { useEditorStore } from '@site/store/store'
 import type { SiteDocument } from '@core/page-tree'
 import type { VisualComponent } from '@core/visualComponents'
@@ -81,7 +81,7 @@ function addRefNodeToPage(
 
   const state = useEditorStore.getState()
   useEditorStore.setState(
-    produce(state, (draft) => {
+    create(state, (draft) => {
       const page = draft.site!.pages.find((p) => p.id === pageId)!
       const rootNode = page.nodes[page.rootNodeId]
       rootNode.children.push(refNodeId)
@@ -113,7 +113,7 @@ function setVCNodeBindings(
 ) {
   const state = useEditorStore.getState()
   useEditorStore.setState(
-    produce(state, (draft) => {
+    create(state, (draft) => {
       const vc = draft.site!.visualComponents.find((v) => v.id === vcId)!
       const node = vc.tree.nodes[nodeId]
       if (node) {
@@ -233,7 +233,7 @@ describe('Gate RP-3 — slot content cleared for slot params', () => {
     const contentNodeId = 'content-node-1'
     const state = useEditorStore.getState()
     useEditorStore.setState(
-      produce(state, (draft) => {
+      create(state, (draft) => {
         const page = draft.site!.pages.find((p) => p.id === pageId)!
         // Add content node
         page.nodes[contentNodeId] = {
@@ -301,7 +301,7 @@ describe('Gate RP-4 — slot content NOT touched when param type is not slot', (
     const slotInstId = 'slot-inst-children-rp4'
     const stateBeforeInject = useEditorStore.getState()
     useEditorStore.setState(
-      produce(stateBeforeInject, (draft) => {
+      create(stateBeforeInject, (draft) => {
         const page = draft.site!.pages.find((p) => p.id === pageId)!
         page.nodes[slotInstId] = {
           id: slotInstId,

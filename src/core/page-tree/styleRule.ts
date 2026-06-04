@@ -30,7 +30,7 @@
 
 import { Type, type Static, withFallback } from '@core/utils/typeboxHelpers'
 import { compiledCheck } from '@core/utils/typeboxCompiler'
-import { GeneratedClassMetadataSchema } from '@core/framework/schemas'
+import { GeneratedClassMetadataSchema } from '@core/framework'
 import {
   asPlainObject,
   parseBreakpointStylesBag,

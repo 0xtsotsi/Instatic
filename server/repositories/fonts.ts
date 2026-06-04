@@ -18,10 +18,10 @@
 import { mkdir, rm, writeFile } from 'node:fs/promises'
 import { join } from 'node:path'
 import { nanoid } from 'nanoid'
-import type { FontEntry, FontFile, FontFileFormat } from '@core/fonts/schemas'
-import { familySlug } from '@core/fonts/css'
-import { compareVariants, parseVariant, variantsToCss2Axis } from '@core/fonts/variants'
-import { findGoogleFont } from '@core/fonts/googleDirectory'
+import type { FontEntry, FontFile, FontFileFormat } from '@core/fonts'
+import { familySlug } from '@core/fonts'
+import { compareVariants, parseVariant, variantsToCss2Axis } from '@core/fonts'
+import { findGoogleFont } from '@core/fonts'
 
 /**
  * UA spoof: Google's CSS2 endpoint inspects the User-Agent header to decide which

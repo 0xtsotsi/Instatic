@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'bun:test'
-import { produce } from 'immer'
+import { create } from 'mutative'
 import type { Page } from '@core/page-tree'
 import {
   createNode,
@@ -271,12 +271,12 @@ describe('toggleNodeHidden', () => {
 // ---------------------------------------------------------------------------
 
 describe('Immer immutability', () => {
-  it('produce() does not mutate the original when updating a node', () => {
+  it('create() does not mutate the original when updating a node', () => {
     const page = makePage()
     const id = addChildToPage(page, page.rootNodeId)
     const original = page.nodes[id].props
 
-    const nextPage = produce(page, (draft) => {
+    const nextPage = create(page, (draft) => {
       updateNodeProps(draft, id, { color: 'blue' })
     })
 

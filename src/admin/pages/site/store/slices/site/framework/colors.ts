@@ -11,7 +11,7 @@ import type {
 import {
   generateDefaultDarkColor,
   normalizeFrameworkColorSlug,
-} from '@core/framework/colors'
+} from '@core/framework'
 import { reconcileFrameworkClasses } from './reconcile'
 import { nextOrderValue } from './shared'
 import type {

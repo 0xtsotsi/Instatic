@@ -29,7 +29,6 @@ function freshAgentState() {
     isAgentStreaming: true,
     agentMessages: [],
     agentError: null,
-    agentSessionId: null,
     agentConversationId: null,
     agentActiveCredentialId: null,
     agentActiveModelId: null,

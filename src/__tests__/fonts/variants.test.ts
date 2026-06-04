@@ -4,7 +4,7 @@ import {
   formatVariant,
   parseVariant,
   variantsToCss2Axis,
-} from '@core/fonts/variants'
+} from '@core/fonts'
 
 describe('parseVariant', () => {
   it('parses upright weights', () => {

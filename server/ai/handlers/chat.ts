@@ -316,6 +316,7 @@ function emptySiteSnapshot(): SiteSnapshot {
     availableModules: [],
     selectedNodeId: null,
     classes: [],
+    tokens: { colors: [], typography: [], spacing: [], fonts: [] },
   }
 }
 

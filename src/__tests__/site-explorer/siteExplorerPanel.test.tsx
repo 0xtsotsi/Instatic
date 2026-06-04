@@ -195,8 +195,8 @@ describe('SiteExplorerPanel', () => {
       new URL('../../admin/pages/site/panels/SiteExplorerPanel/SiteExplorerDndScope.tsx', import.meta.url),
       'utf-8',
     )
-    const layoutSource = readFileSync(
-      new URL('../../admin/layouts/AdminCanvasLayout/AdminCanvasLayout.tsx', import.meta.url),
+    const editorBodySource = readFileSync(
+      new URL('../../admin/layouts/AdminCanvasLayout/AdminCanvasEditorBody.tsx', import.meta.url),
       'utf-8',
     )
     const treeDropCss = readFileSync(
@@ -213,7 +213,7 @@ describe('SiteExplorerPanel', () => {
     expect(treeSectionSource).toContain('data-drop-position')
     expect(treeSectionSource).toContain('RootDropGap')
     expect(dndScopeSource).toContain('DragOverlay')
-    expect(layoutSource).toContain('collisionDetection={pointerWithin}')
+    expect(editorBodySource).toContain('collisionDetection={pointerWithin}')
     expect(css).toContain('justify-content: flex-start')
     expect(css).toMatch(/\.treeRows\s*\{[^}]*gap:\s*0/s)
     expect(css).not.toContain('.dropBefore::before')
@@ -617,12 +617,12 @@ describe('SiteExplorerPanel', () => {
   })
 
   it('mounts editor previews as viewport overlays above sidebars', () => {
-    const editorLayoutSource = readFileSync(
-      new URL('../../admin/layouts/AdminCanvasLayout/AdminCanvasLayout.tsx', import.meta.url),
+    const editorBodySource = readFileSync(
+      new URL('../../admin/layouts/AdminCanvasLayout/AdminCanvasEditorBody.tsx', import.meta.url),
       'utf-8',
     )
-    const codeEditorMountIndex = editorLayoutSource.indexOf('<CodeEditorPanel />')
-    const rightSidebarMountIndex = editorLayoutSource.indexOf('<RightSidebar')
+    const codeEditorMountIndex = editorBodySource.indexOf('<CodeEditorPanel />')
+    const rightSidebarMountIndex = editorBodySource.indexOf('<RightSidebar')
     expect(codeEditorMountIndex).toBeGreaterThan(rightSidebarMountIndex)
 
     const editorPanelCss = readFileSync(

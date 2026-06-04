@@ -16,7 +16,7 @@
  */
 
 import { parseJsonResponse } from '@core/utils/jsonValidate'
-import type { FontEntry } from '@core/fonts/schemas'
+import type { FontEntry } from '@core/fonts'
 import { responseErrorMessage } from '@core/http'
 import {
   type CmsFontEstimateDto,

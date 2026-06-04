@@ -33,7 +33,7 @@ import type {
 } from '@core/siteImport'
 import type { SiteFile } from '@core/files/schemas'
 import { isSafePath, normalizePath } from '@core/files/pathValidation'
-import { normalizeFrameworkColorSlug } from '@core/framework/colors'
+import { normalizeFrameworkColorSlug } from '@core/framework'
 import { DEFAULT_SCRIPT_RUNTIME_CONFIG } from '@core/site-runtime'
 import type { EditorStore } from '@site/store/types'
 import { MAX_HISTORY } from './defaults'

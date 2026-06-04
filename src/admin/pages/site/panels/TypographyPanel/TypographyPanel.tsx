@@ -10,11 +10,11 @@
 
 import { type CSSProperties } from 'react'
 import { useEditorStore } from '@site/store/store'
-import { TYPE_RATIO_OPTIONS } from '@core/framework/scale'
+import { TYPE_RATIO_OPTIONS } from '@core/framework'
 import type {
   FrameworkTypographyClassGenerator,
   FrameworkTypographyGroup,
-} from '@core/framework/schemas'
+} from '@core/framework'
 import { TextStartTIcon } from 'pixel-art-icons/icons/text-start-t'
 import { TextColumsIcon } from 'pixel-art-icons/icons/text-colums'
 import {

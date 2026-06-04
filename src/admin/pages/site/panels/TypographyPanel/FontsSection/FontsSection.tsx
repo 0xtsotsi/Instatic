@@ -16,14 +16,14 @@ import type { CSSProperties } from 'react'
 import { Button } from '@ui/components/Button'
 import { EmptyState } from '@ui/components/EmptyState'
 import { useEditorStore } from '@site/store/store'
-import type { FontEntry, FontToken } from '@core/fonts/schemas'
-import { compareVariants } from '@core/fonts/variants'
-import { generateSiteFontsCss } from '@core/fonts/css'
+import type { FontEntry, FontToken } from '@core/fonts'
+import { compareVariants } from '@core/fonts'
+import { generateSiteFontsCss } from '@core/fonts'
 import {
   defaultFontTokenFallback,
   resolveFontTokenStack,
   sortFontTokens,
-} from '@core/fonts/tokens'
+} from '@core/fonts'
 import { deleteCmsFontFamily } from '@core/persistence/cmsFonts'
 import { EditSolidIcon } from 'pixel-art-icons/icons/edit-solid'
 import { TrashSolidIcon } from 'pixel-art-icons/icons/trash-solid'

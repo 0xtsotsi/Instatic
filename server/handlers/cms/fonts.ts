@@ -32,8 +32,8 @@ import {
   type ResolvedCustomFontFile,
 } from '../../repositories/fonts'
 import { getMediaAsset } from '../../repositories/media'
-import { listGoogleFonts } from '@core/fonts/googleDirectory'
-import { parseVariant } from '@core/fonts/variants'
+import { listGoogleFonts } from '@core/fonts'
+import { parseVariant } from '@core/fonts'
 import { badRequest, jsonResponse, methodNotAllowed, readValidatedBody } from '../../http'
 import { Type } from '@core/utils/typeboxHelpers'
 import type { CmsHandlerOptions } from './shared'

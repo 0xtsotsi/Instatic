@@ -3,12 +3,12 @@ import { Button } from '@ui/components/Button'
 import { Dialog } from '@ui/components/Dialog'
 import { Input } from '@ui/components/Input'
 import { Select } from '@ui/components/Select'
-import type { FontEntry, FontToken } from '@core/fonts/schemas'
+import type { FontEntry, FontToken } from '@core/fonts'
 import {
   defaultFontTokenFallback,
   resolveFontTokenStack,
   suggestFontTokenVariable,
-} from '@core/fonts/tokens'
+} from '@core/fonts'
 import { getErrorMessage } from '@core/utils/errorMessage'
 import styles from './FontsSection.module.css'
 

@@ -40,7 +40,7 @@
 import { isEmittableProperty } from '@core/publisher'
 import type { StyleRuleKind, Condition, ConditionDef } from '@core/page-tree'
 import { conditionId, makeConditionDef } from '@core/page-tree'
-import { formatVariant } from '@core/fonts/variants'
+import { formatVariant } from '@core/fonts'
 import { matchMediaQueryToViewport } from './mediaQueryMatch'
 import type {
   ImportWarning,

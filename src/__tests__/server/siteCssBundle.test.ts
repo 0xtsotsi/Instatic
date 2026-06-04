@@ -15,7 +15,7 @@ import { describe, it, expect } from 'bun:test'
 import {
   frameworkColorClassId,
   generateFrameworkColorUtilityClasses,
-} from '@core/framework/colors'
+} from '@core/framework'
 import { buildSiteCssBundle } from '../../../server/publish/siteCssBundle'
 import { makeModule, makeRegistry, makePage, makeSite } from '../publisher/helpers'
 

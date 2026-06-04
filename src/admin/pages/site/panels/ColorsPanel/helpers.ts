@@ -1,5 +1,5 @@
-import { generateFrameworkColorVariableSets } from '@core/framework/colors'
-import type { FrameworkColorToken, FrameworkColorUtilityType } from '@core/framework/schemas'
+import { generateFrameworkColorVariableSets } from '@core/framework'
+import type { FrameworkColorToken, FrameworkColorUtilityType } from '@core/framework'
 import type { UpdateFrameworkColorTokenPatch } from '@site/store/slices/site/types'
 
 export const MAX_VARIANT_COUNT = 12

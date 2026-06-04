@@ -26,8 +26,8 @@
 
 import { Type, type Static } from '@core/utils/typeboxHelpers'
 import { compiledCheck } from '@core/utils/typeboxCompiler'
-import { FrameworkSettingsSchema } from '@core/framework/schemas'
-import { SiteFontsSettingsSchema, parseSiteFontsSettings } from '@core/fonts/schemas'
+import { FrameworkSettingsSchema } from '@core/framework'
+import { SiteFontsSettingsSchema, parseSiteFontsSettings } from '@core/fonts'
 
 // ---------------------------------------------------------------------------
 // SiteSettingsSchema

@@ -20,7 +20,7 @@
 
 import { describe, it, expect, beforeEach } from 'bun:test'
 import { useEditorStore } from '@site/store/store'
-import { produce } from 'immer'
+import { create } from 'mutative'
 import type { SiteDocument, PageNode, StyleRule } from '@core/page-tree'
 import type { VisualComponent } from '@core/visualComponents'
 import { VisualComponentNameError } from '@site/store/slices/visualComponentsSlice'
@@ -120,7 +120,7 @@ function injectNodesIntoPage(
   const site = state.site!
 
   useEditorStore.setState(
-    produce(state, (draft) => {
+    create(state, (draft) => {
       const page = draft.site!.pages.find((p) => p.id === pageId)!
       // Add the root container as a child of the page root
       const pageRoot = page.nodes[page.rootNodeId]
@@ -267,7 +267,7 @@ describe('Gate CNC-4 — node-scoped classes hoisted and scope rewritten', () =>
     // Create the node-scoped CSS class directly in site.styleRules
     const state0 = useEditorStore.getState()
     useEditorStore.setState(
-      produce(state0, (draft) => {
+      create(state0, (draft) => {
         draft.site!.styleRules[classId] = {
           id: classId,
           name: '.module-ctr-4',
@@ -326,7 +326,7 @@ describe('Gate CNC-5 — generic classes stay shared, not duplicated', () => {
     // Create a generic class (no scope)
     const state0 = useEditorStore.getState()
     useEditorStore.setState(
-      produce(state0, (draft) => {
+      create(state0, (draft) => {
         draft.site!.styleRules[genericClassId] = {
           id: genericClassId,
           name: 'text-bold',

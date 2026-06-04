@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it } from 'bun:test'
 import { useEditorStore } from '@site/store/store'
 import { classKindSelector, type StyleRule } from '@core/page-tree'
-import type { FontEntry } from '@core/fonts/schemas'
+import type { FontEntry } from '@core/fonts'
 import { makeNode, makePage, makeSite, makeVC, makeVCNode } from '../fixtures'
 
 const inter: FontEntry = {

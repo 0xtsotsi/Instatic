@@ -4,7 +4,7 @@ import { cleanup, render, screen, within } from '@testing-library/react'
 import { SpacingPanel } from '@site/panels/SpacingPanel'
 import { TypographyPanel } from '@site/panels/TypographyPanel'
 import { useEditorStore } from '@site/store/store'
-import type { FontEntry } from '@core/fonts/schemas'
+import type { FontEntry } from '@core/fonts'
 import { makeSite } from '../fixtures'
 
 const INTER_FONT: FontEntry = {

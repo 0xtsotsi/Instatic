@@ -9,12 +9,12 @@
  */
 
 import type { SiteDocument } from '@core/page-tree'
-import type { FrameworkTypographyGroup } from '@core/framework/schemas'
+import type { FrameworkTypographyGroup } from '@core/framework'
 import {
   buildDefaultTypographyGroup,
   makeFreshTypographyGroup,
   nextTypographyTabValues,
-} from '@core/framework/defaults'
+} from '@core/framework'
 import { createScaleGroupActions } from './scaleGroups'
 import type { SiteSlice, SiteSliceHelpers } from '@site/store/slices/site/types'
 

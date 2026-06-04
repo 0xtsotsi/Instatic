@@ -2,11 +2,11 @@ import { describe, expect, it } from 'bun:test'
 import {
   frameworkColorClassId,
   generateFrameworkColorUtilityClasses,
-} from '@core/framework/colors'
-import { buildDefaultSpacingSettings, buildDefaultTypographySettings } from '@core/framework/defaults'
-import { generateFrameworkRootCss } from '@core/framework/generate'
+} from '@core/framework'
+import { buildDefaultSpacingSettings, buildDefaultTypographySettings } from '@core/framework'
+import { generateFrameworkRootCss } from '@core/framework'
 import { generateFrameworkCss } from '@core/publisher'
-import { resolveFrameworkPreferences } from '@core/framework/preferences'
+import { resolveFrameworkPreferences } from '@core/framework'
 import type { VisualComponent } from '@core/visualComponents'
 import { makePage, makeSite } from '../publisher/helpers'
 

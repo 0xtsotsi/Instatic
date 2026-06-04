@@ -9,12 +9,12 @@
  */
 
 import type { SiteDocument } from '@core/page-tree'
-import type { FrameworkSpacingGroup } from '@core/framework/schemas'
+import type { FrameworkSpacingGroup } from '@core/framework'
 import {
   buildDefaultSpacingGroup,
   makeFreshSpacingGroup,
   nextSpacingTabValues,
-} from '@core/framework/defaults'
+} from '@core/framework'
 import { createScaleGroupActions } from './scaleGroups'
 import type { SiteSlice, SiteSliceHelpers } from '@site/store/slices/site/types'
 

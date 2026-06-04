@@ -2,12 +2,12 @@ import { nanoid } from 'nanoid'
 import type { Draft } from 'mutative'
 import type { SiteDocument } from '@core/page-tree'
 import type { ImportFontFamily, ImportFontToken } from '@core/siteImport'
-import type { FontEntry, FontFile, FontToken } from '@core/fonts/schemas'
+import type { FontEntry, FontFile, FontToken } from '@core/fonts'
 import {
   makeUniqueFontTokenVariable,
   normalizeFontTokenVariable,
   sanitizeFontFallbackStack,
-} from '@core/fonts/tokens'
+} from '@core/fonts'
 
 /**
  * Merge imported @font-face families into `site.settings.fonts.items`.

@@ -4,8 +4,8 @@ import {
   effectiveScaleRatio,
   prependStep,
   type FluidScaleStep,
-} from '@core/framework/scale'
-import type { resolveFrameworkPreferences } from '@core/framework/preferences'
+} from '@core/framework'
+import type { resolveFrameworkPreferences } from '@core/framework'
 import { BaseSettings } from './BaseSettings'
 import { ChartHost } from './ChartHost'
 import { StepList } from './StepList'

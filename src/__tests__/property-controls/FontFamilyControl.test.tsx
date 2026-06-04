@@ -3,7 +3,7 @@ import { cleanup, fireEvent, render, screen } from '@testing-library/react'
 import { FontFamilyControl } from '@site/property-controls/FontFamilyControl'
 import { useEditorStore } from '@site/store/store'
 import { makeSite } from '../fixtures'
-import type { FontEntry } from '@core/fonts/schemas'
+import type { FontEntry } from '@core/fonts'
 
 const inter: FontEntry = {
   id: 'font-inter',

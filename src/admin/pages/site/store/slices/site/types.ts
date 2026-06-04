@@ -29,7 +29,7 @@ import type {
   ConditionDef,
   SiteExplorerSectionId,
 } from '@core/page-tree'
-import type { FontEntry, FontToken } from '@core/fonts/schemas'
+import type { FontEntry, FontToken } from '@core/fonts'
 import type { ImportFragment } from '@core/htmlImport'
 import type {
   NewStyleRule,
@@ -38,7 +38,7 @@ import type {
   ImportFontToken,
   ImportScript,
 } from '@core/siteImport'
-import type { FrameworkChangeImpact } from '@core/framework/changeImpact'
+import type { FrameworkChangeImpact } from '@core/framework'
 import type { EditorStore } from '@site/store/types'
 
 // ---------------------------------------------------------------------------

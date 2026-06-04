@@ -90,7 +90,7 @@ export {
 } from './pageRef'
 
 // Other re-exports unrelated to the schemas split
-export type { FontEntry } from '@core/fonts/schemas'
+export type { FontEntry } from '@core/fonts'
 
 export type { BaseNode } from './baseNode'
 
@@ -106,7 +106,7 @@ export type {
   FrameworkSpacingGroup,
   FrameworkTypographyClassGenerator,
   FrameworkTypographyGroup,
-} from '@core/framework/schemas'
+} from '@core/framework'
 
 export {
   createNode,

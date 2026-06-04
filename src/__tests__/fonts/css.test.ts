@@ -4,8 +4,8 @@ import {
   generateFontTokenVariablesCss,
   generateFontsCss,
   generateSiteFontsCss,
-} from '@core/fonts/css'
-import type { FontEntry, SiteFontsSettings } from '@core/fonts/schemas'
+} from '@core/fonts'
+import type { FontEntry, SiteFontsSettings } from '@core/fonts'
 
 const inter: FontEntry = {
   id: 'f1',

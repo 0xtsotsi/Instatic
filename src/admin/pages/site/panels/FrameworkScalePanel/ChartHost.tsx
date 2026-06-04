@@ -1,4 +1,4 @@
-import type { FluidScaleStep } from '@core/framework/scale'
+import type { FluidScaleStep } from '@core/framework'
 import type { GeneratorShape, GroupShape, ScaleAdapter } from './adapter'
 import styles from './ChartHost.module.css'
 

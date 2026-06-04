@@ -1,5 +1,5 @@
 import { useState, type CSSProperties, type ChangeEvent, type FocusEvent, type KeyboardEvent } from 'react'
-import { generateFrameworkColorVariableSets } from '@core/framework/colors'
+import { generateFrameworkColorVariableSets } from '@core/framework'
 import { useEditorStore } from '@site/store/store'
 import { ColorInput } from '@ui/components/ColorInput'
 import { Input } from '@ui/components/Input'

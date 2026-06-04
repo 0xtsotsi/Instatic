@@ -7,7 +7,7 @@
  */
 
 import { describe, it, expect } from 'bun:test'
-import { produce } from 'immer'
+import { create } from 'mutative'
 import type { SiteDocument } from '@core/page-tree'
 import {
   addPage,
@@ -77,11 +77,11 @@ describe('addPage', () => {
     expect(createUniquePageSlug('About', site.pages)).toBe('about-2')
   })
 
-  it('is Immer-safe — produce() works with addPage', () => {
+  it('is Immer-safe — create() works with addPage', () => {
     const site = makeSite({ pages: [makePage()] })
     const originalCount = site.pages.length
 
-    const nextSite = produce(site, (draft) => {
+    const nextSite = create(site, (draft) => {
       addPage(draft, 'Immer Test', 'immer-test')
     })
 
@@ -121,7 +121,7 @@ describe('deletePage', () => {
     const p2 = makePage({ id: 'p2', slug: 'p2' })
     const site = makeSite({ pages: [p1, p2] })
 
-    const nextSite = produce(site, (draft) => {
+    const nextSite = create(site, (draft) => {
       deletePage(draft, 'p1')
     })
 
@@ -160,7 +160,7 @@ describe('renamePage', () => {
     const page = makePage({ id: 'p1', title: 'Original' })
     const site = makeSite({ pages: [page] })
 
-    const nextSite = produce(site, (draft) => {
+    const nextSite = create(site, (draft) => {
       renamePage(draft, 'p1', 'Updated')
     })
 
@@ -206,7 +206,7 @@ describe('reorderPages', () => {
   it('is Immer-safe', () => {
     const site = makeSiteWithPages(['a', 'b', 'c'])
 
-    const nextSite = produce(site, (draft) => {
+    const nextSite = create(site, (draft) => {
       reorderPages(draft, 0, 2)
     })
 

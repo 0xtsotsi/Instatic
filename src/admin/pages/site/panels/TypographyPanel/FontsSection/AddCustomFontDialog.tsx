@@ -36,8 +36,8 @@ import {
   type CmsMediaAsset,
 } from '@core/persistence/cmsMedia'
 import { registerCustomFont } from '@core/persistence/cmsFonts'
-import type { FontEntry } from '@core/fonts/schemas'
-import { formatVariant, parseVariant } from '@core/fonts/variants'
+import type { FontEntry } from '@core/fonts'
+import { formatVariant, parseVariant } from '@core/fonts'
 import styles from './FontsSection.module.css'
 
 interface AddCustomFontDialogProps {

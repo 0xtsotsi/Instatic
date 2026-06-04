@@ -13,23 +13,23 @@ import {
   generateFrameworkTypographyRootCss,
   generateFrameworkTypographyUtilityClasses,
   generateFrameworkTypographyVariables,
-} from '@core/framework/typography'
+} from '@core/framework'
 import {
   generateFrameworkSpacingRootCss,
   generateFrameworkSpacingUtilityClasses,
   generateFrameworkSpacingVariables,
-} from '@core/framework/spacing'
+} from '@core/framework'
 import { generateClassCSS } from '@core/publisher'
-import { DEFAULT_FRAMEWORK_PREFERENCES } from '@core/framework/scale'
-import { resolveFrameworkPreferences } from '@core/framework/preferences'
+import { DEFAULT_FRAMEWORK_PREFERENCES } from '@core/framework'
+import { resolveFrameworkPreferences } from '@core/framework'
 import {
   buildDefaultSpacingSettings,
   buildDefaultTypographySettings,
-} from '@core/framework/defaults'
+} from '@core/framework'
 import type {
   FrameworkSpacingSettings,
   FrameworkTypographySettings,
-} from '@core/framework/schemas'
+} from '@core/framework'
 
 const NOW = 1_700_000_000_000
 

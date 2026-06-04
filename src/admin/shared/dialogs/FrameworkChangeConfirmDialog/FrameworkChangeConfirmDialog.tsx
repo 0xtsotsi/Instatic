@@ -19,7 +19,7 @@ import { Dialog } from '@ui/components/Dialog'
 import type {
   FrameworkChangeImpact,
   FrameworkClassUsageRef,
-} from '@core/framework/changeImpact'
+} from '@core/framework'
 import styles from './FrameworkChangeConfirmDialog.module.css'
 
 export interface FrameworkChangeConfirmDialogProps {
