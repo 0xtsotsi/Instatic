@@ -384,7 +384,7 @@ Selectors are pure reads. Mutations go through actions (`useEditorStore.getState
 `CanvasRoot` switches between two rendering surfaces based on `canvasView`:
 
 - **Design mode** (`canvasView === 'design'`): `CanvasRoot` → `CanvasTransformLayer` → `BreakpointFrame` → `IframeFrameSurface` → `NodeRenderer`. Each breakpoint gets its own iframe rendered side-by-side inside the pan/zoom transform layer. The author sees all breakpoints at once and can zoom in/out.
-- **Live mode** (`canvasView === 'live'`): `CanvasRoot` → `CanvasLiveSurface` → `IframeFrameSurface` → `NodeRenderer`. A single real-size frame at 100% width (optionally clamped to a selected breakpoint's width) scrolls normally. Resizable with side handles.
+- **Live mode** (`canvasView === 'live'`): `CanvasRoot` → `CanvasLiveSurface` → `IframeFrameSurface` → `NodeRenderer`. A single real-size frame at 100% width (optionally clamped to a selected breakpoint's width) scrolls normally. Resizable with side handles. Because the live frame is flush with the top of the canvas surface, both chrome controls — `CanvasNotch` (top-center) and `CanvasModeToggle` (top-left) — render in **peek** mode: they park above the top edge and roll down on hover/`:focus-within`, so they do not overlay the page's own header. In design mode they are always pinned.
 
 Both modes use the same `IframeFrameSurface` and the same `NodeRenderer` — they are fully editable (click-to-select, properties panel, structural edits all work). The only difference is the layout wrapper.
 
@@ -471,7 +471,8 @@ Canvas-internal values are not CSS tokens — they are raw integers intentionall
 | `CanvasTransformLayer.tsx`      | Zoom + pan transform (design view)                              |
 | `CanvasLiveSurface.tsx`         | "Live" view — single real-size editable frame, normal scroll    |
 | `RuntimeScriptInjector.tsx`     | Injects bundled runtime scripts into an editable iframe         |
-| `CanvasModeToggle.tsx`          | Design/Live view toggle + Run-scripts toggle + breakpoint switch |
+| `CanvasNotch.tsx`               | Top-center chrome: history controls + favorite insert shortcuts; peek mode in live view |
+| `CanvasModeToggle.tsx`          | Design/Live view toggle + Run-scripts toggle + breakpoint switch; peek mode in live view |
 | `CanvasContextSelector.tsx`     | Editing-context switcher: viewports + custom conditions (@media/@container/@supports) |
 | `CanvasLayerContextMenu.tsx`    | Right-click on a layer                                          |
 | `canvasDnd.ts`                  | Drag-and-drop (insert / move / wrap)                            |
@@ -577,7 +578,7 @@ Site-specific controls that were previously sections of this modal (Pages roster
 
 **State bridge**: settings modal open/close state is mirrored between two stores. `adminUi` (`src/admin/state/adminUi.ts`) is the source the modal reads — this lets `SettingsButton` work on non-editor admin pages without pulling in the editor store. `settingsSlice` in the editor store mirrors that state via `bindSettingsBridgeStoreApi` so editor-side consumers (spotlight commands, tests) can open/navigate settings without knowing about `adminUi`. A re-entrance guard (`bridgeReentrancyGuard`) prevents the two-way sync from looping.
 
-`CanvasNotch` (`src/admin/pages/site/canvas/CanvasNotch.tsx`) owns the canvas-local insertion chrome. Its quick insert buttons are resolved from each admin's server-side `module-inserter` user preference; the default favorites are Container, Text, and Image. The full module inserter is the management surface for those favorites, so any insertable module, layout preset, or Visual Component can be pinned into the notch without adding a separate settings panel. In Visual Component mode, `CanvasRoot` mounts `VisualComponentModeControl` below the notch so the current component name, rename action, and page-return action stay attached to the canvas rather than the global toolbar.
+`CanvasNotch` (`src/admin/pages/site/canvas/CanvasNotch.tsx`) owns the canvas-local insertion chrome. Its quick insert buttons are resolved from each admin's server-side `module-inserter` user preference; the default favorites are Container, Text, and Image. The full module inserter is the management surface for those favorites, so any insertable module, layout preset, or Visual Component can be pinned into the notch without adding a separate settings panel. In Visual Component mode, `CanvasRoot` mounts `VisualComponentModeControl` below the notch so the current component name, rename action, and page-return action stay attached to the canvas rather than the global toolbar. In live mode the notch accepts a `peek` prop — it parks above the top edge (clipped by `overflow:hidden`) and rolls down on hover/`:focus-within` so it does not overlay the page header; a slim `peekHandle` strip remains as the hover target.
 
 ### Module Inserter
 
