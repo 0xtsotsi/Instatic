@@ -12,7 +12,7 @@ Each viewport frame runs in its own `<iframe>` with its own `<html><body>`. The 
 - **Design mode** renders one `IframeFrameSurface` per framed viewport context inside `CanvasTransformLayer` (pan/zoom), but it progressive-loads frame contents: iframe shells and skeletons paint first, the active frame's node tree mounts first, and inactive frame node trees mount during idle tasks. **Live mode** renders a single real-size `IframeFrameSurface` inside `CanvasLiveSurface` (normal scroll).
 - Both modes are fully editable — click-to-select, properties panel, structural edits all work. Neither is a read-only preview.
 - CSS arrives in each iframe via three injectors: `EditorChromeInjector` (unlayered), `ClassStyleInjector` (`@layer user-authored`), `UserStylesheetInjector` (`@layer user-authored`).
-- Wheel events and pointer events are forwarded from inside the iframe to the parent's gesture / reorder-drag handlers.
+- Wheel, pointer, and keyboard events are forwarded from inside the iframe to the parent's gesture / reorder-drag / shortcut handlers. `Tab` is blocked to prevent tab-walking inside the design preview.
 - Plugin canvas modules use a separate, sandboxed `ModuleSandboxFrame` (not `IframeFrameSurface`).
 
 ---
