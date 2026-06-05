@@ -5,7 +5,8 @@
  *
  *   shared.ts  — shared mapper helpers (userRefAt, toIso, toIsoOrNull, types)
  *   tables.ts  — data_tables CRUD
- *   rows.ts    — data_rows CRUD (drafts, status, author, move, delete)
+ *   rows/      — data_rows repository, split by responsibility (read, search,
+ *                filter, mutations, bulk, schedule, import); see rows/index.ts
  *   publish.ts — data_row_versions + redirects + public-route lookups
  *
  * Domain types (`DataRow`, `DataTable`, `PublishedDataRow`, `DataRowRedirect`,
