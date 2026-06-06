@@ -72,12 +72,19 @@ export function useCanvasTreeLadderOverlay({
     !inspectSuppressed &&
     Boolean(inspectAnchorNodeId) &&
     treeLadderRows.length > 0
-  const effectiveTreeLadderHighlightedNodeId =
+  // The row the user has *explicitly* landed on (mouse-hover or arrow keys),
+  // distinct from the "current"-relation fallback below. Non-null only when a
+  // real highlight is active and still maps to a visible row — releasing Alt
+  // commits exactly this, so it must never fall back to a default.
+  const explicitHighlightNodeId =
     showTreeLadder && treeLadderRows.some((row) => row.nodeId === treeLadderHighlightedNodeId)
       ? treeLadderHighlightedNodeId
-      : showTreeLadder
-        ? treeLadderRows.find((row) => row.relation === 'current')?.nodeId ?? treeLadderRows[0]?.nodeId ?? null
-        : null
+      : null
+  const effectiveTreeLadderHighlightedNodeId =
+    explicitHighlightNodeId ??
+    (showTreeLadder
+      ? treeLadderRows.find((row) => row.relation === 'current')?.nodeId ?? treeLadderRows[0]?.nodeId ?? null
+      : null)
   const hoverNodeId = showTreeLadder
     ? effectiveTreeLadderHighlightedNodeId ?? inspectAnchorNodeId
     : null
@@ -202,7 +209,15 @@ export function useCanvasTreeLadderOverlay({
     }
 
     const handleKeyUp = (event: KeyboardEvent) => {
-      if (event.key === 'Alt') clearInspect()
+      if (event.key !== 'Alt') return
+      // Releasing Alt commits the row the user explicitly moved onto (mouse or
+      // arrow keys) and keeps it selected. Just holding Alt over an element
+      // without landing on a row tears the ladder down without selecting.
+      if (showTreeLadder && explicitHighlightNodeId) {
+        commitTreeLadderSelection(explicitHighlightNodeId)
+        return
+      }
+      clearInspect()
     }
 
     const cleanups: Array<() => void> = []
@@ -246,6 +261,7 @@ export function useCanvasTreeLadderOverlay({
     iframeElement,
     commitTreeLadderSelection,
     effectiveTreeLadderHighlightedNodeId,
+    explicitHighlightNodeId,
     hoveredBreakpointOrigin,
     hoveredNodeId,
     inspectAnchorNodeId,
