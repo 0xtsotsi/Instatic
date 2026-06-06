@@ -1,10 +1,10 @@
-/* ClassComposer — CSS property section content. */
+/* StyleRuleComposer — CSS property section content. */
 
 .styleSections {
     display: grid;
     align-content: start;
     min-width: 0;
-    gap: 4px;
+    gap: 1px;
     padding-bottom: 16px;
 }
 

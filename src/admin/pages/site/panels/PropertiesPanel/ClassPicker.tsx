@@ -13,11 +13,12 @@ import {
 } from 'react'
 import { useEditorStore, selectActiveCanvasPage } from '@site/store/store'
 import { useEditorPreference } from '@site/preferences/editorPreferences'
-import { classifySelectorCreateInput } from '@core/page-tree'
+import { classifySelectorCreateInput, styleRuleSelector } from '@core/page-tree'
 import { recordClassUsage } from '@site/preferences/classUsage'
 import { getErrorMessage } from '@core/utils/errorMessage'
 import {
   deriveSelectorPickerModel,
+  type SelectorPillItem,
   type SelectorSuggestionItem,
 } from './selectorPickerModel'
 import {
@@ -35,6 +36,27 @@ import styles from './ClassPicker.module.css'
 interface UnmatchedSelectorNoticeState {
   ruleId: string
   selector: string
+}
+
+/**
+ * The selector to auto-activate when a node is selected and nothing is active
+ * yet: the highest-specificity *direct* match, skipping the universal `*`
+ * (activating it on every element would be noise). Pills arrive sorted
+ * weakest→strongest, so the strongest direct match is the last one.
+ *
+ * This restores click-to-edit for elements styled purely by ambient/descendant
+ * selectors (e.g. `.hero-title em`) — they carry no own class, so the
+ * store-level selection logic (which only reads `node.classIds`) can't pick
+ * them up.
+ */
+function pickAutoActiveSelectorId(pills: SelectorPillItem[]): string | null {
+  for (let i = pills.length - 1; i >= 0; i--) {
+    const pill = pills[i]
+    if (pill.match.kind !== 'direct') continue
+    if (styleRuleSelector(pill.rule).trim() === '*') continue
+    return pill.rule.id
+  }
+  return null
 }
 
 function keyboardMenuPosition(element: HTMLElement) {
@@ -207,6 +229,27 @@ export function ClassPicker({ nodeId, trailingAction, ref }: ClassPickerProps) {
   const clearPreviewClass = (classId: string) => {
     clearPreviewNodeClass(nodeId, classId)
   }
+
+  // Auto-activate the most specific matching selector when a fresh node is
+  // selected and nothing is active yet. Keyed on `nodeId` (via the ref guard)
+  // so it fires once per selection — a manual deactivation on the same node
+  // stays deactivated rather than being immediately re-applied.
+  const autoActivatedNodeRef = useRef<string | null>(null)
+  useEffect(() => {
+    if (autoActivatedNodeRef.current === nodeId) return
+    // An assigned class (set by the store on selection) or inline-style editing
+    // already supplies the edit target — nothing to auto-activate.
+    if (activeClassId !== null || inlineStyleEditing) {
+      autoActivatedNodeRef.current = nodeId
+      return
+    }
+    // Wait until the live canvas element is resolved so ambient/descendant
+    // selector matching is real before we commit to "nothing matches".
+    if (!selectedElement) return
+    autoActivatedNodeRef.current = nodeId
+    const target = pickAutoActiveSelectorId(selectorModel.pills)
+    if (target) setActiveClass(target)
+  }, [nodeId, activeClassId, inlineStyleEditing, selectedElement, selectorModel, setActiveClass])
 
   useEffect(() => {
     if (!hoverPreviewEnabled) clearPreviewNodeClass(nodeId)

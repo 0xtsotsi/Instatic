@@ -53,10 +53,10 @@ interface PositionSectionProps {
   activeTab: string
   onChange: (property: keyof CSSPropertyBag, value: string | number | undefined) => void
   onRemove: (property: keyof CSSPropertyBag) => void
-  /** Fully clear a property — see ClassComposer.handleClearProperty. */
+  /** Fully clear a property — see StyleRuleComposer.handleClearProperty. */
   onClearProperty: (property: keyof CSSPropertyBag) => void
   /**
-   * Patch-shaped hover-preview channel (see ClassComposer.handlePreview).
+   * Patch-shaped hover-preview channel (see StyleRuleComposer.handlePreview).
    * Forwarded to the position dropdown, the offset token inputs, and the
    * z-index row so hovering a suggestion previews on the canvas.
    */

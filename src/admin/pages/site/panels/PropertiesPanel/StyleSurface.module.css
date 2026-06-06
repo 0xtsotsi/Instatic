@@ -19,7 +19,13 @@
 }
 
 /* ── Left content column ─────────────────────────────────────────────────── */
+/* Grid with the same 1px gap as `.styleSections` so the Module section and the
+   CSS sections share one consistent vertical rhythm. (The sticky search bar is
+   absolutely positioned, so it's out of flow and adds no gap.) */
 .surfaceContent {
+    display: grid;
+    align-content: start;
+    gap: 1px;
     min-width: 0;
     padding-bottom: 32px;
 }

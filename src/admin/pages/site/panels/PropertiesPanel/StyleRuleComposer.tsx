@@ -1,9 +1,9 @@
 /**
- * ClassComposer — CSS section content renderer for a single class.
+ * StyleRuleComposer — CSS section content renderer for a single style rule.
  *
- * Renders the style property sections for the given class filtered by
- * activeStyleSectionId and styleQuery. The rail, search bar, and section
- * navigation are owned by the parent (StyleSurface).
+ * Renders the style property sections for the given style rule (any selector,
+ * not just a class) filtered by activeStyleSectionId and styleQuery. The rail,
+ * search bar, and section navigation are owned by the parent (StyleSurface).
  */
 
 import { useEditorStore } from '@site/store/store'
@@ -15,7 +15,7 @@ import { getActiveStyleTab } from './cssControlTypes'
 // Props
 // ---------------------------------------------------------------------------
 
-interface ClassComposerProps {
+interface StyleRuleComposerProps {
   classId: string
   cls: StyleRule
   /** Search query — filters visible properties across all categories. */
@@ -24,15 +24,15 @@ interface ClassComposerProps {
 }
 
 // ---------------------------------------------------------------------------
-// ClassComposer
+// StyleRuleComposer
 // ---------------------------------------------------------------------------
 
-export function ClassComposer({
+export function StyleRuleComposer({
   classId,
   cls,
   styleQuery,
   mode: _mode = 'contextual',
-}: ClassComposerProps) {
+}: StyleRuleComposerProps) {
   const activeBreakpointId = useEditorStore((s) => s.activeBreakpointId)
   // The editing context is owned by the canvas toolbar's context switcher:
   // either the active viewport (base / breakpoint) or a custom condition. The

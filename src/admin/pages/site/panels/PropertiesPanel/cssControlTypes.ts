@@ -512,9 +512,9 @@ export const CLASS_STYLE_SECTIONS: ReadonlyArray<ClassStyleSectionDefinition> = 
 // ---------------------------------------------------------------------------
 // Style tab utilities
 //
-// Shared by ClassComposer, StyleSurface, and PropertiesPanel. Kept here (not
-// in ClassComposer) so ClassComposer stays a components-only file — satisfying
-// the react-refresh/only-export-components lint rule.
+// Shared by StyleRuleComposer, StyleSurface, and PropertiesPanel. Kept here (not
+// in StyleRuleComposer) so StyleRuleComposer stays a components-only file —
+// satisfying the react-refresh/only-export-components lint rule.
 // ---------------------------------------------------------------------------
 
 /**

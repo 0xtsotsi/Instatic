@@ -75,7 +75,7 @@ interface BorderControlProps {
    */
   onClearProperty: (property: keyof CSSPropertyBag) => void
   /**
-   * Patch-shaped hover-preview channel (see ClassComposer.handlePreview).
+   * Patch-shaped hover-preview channel (see StyleRuleComposer.handlePreview).
    * Forwarded to the border-style select and border-colour field so hovering
    * a suggestion previews on the canvas; honours the current link state so a
    * linked border previews all four sides at once.

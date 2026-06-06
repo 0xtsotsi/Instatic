@@ -6,7 +6,7 @@
  *
  * All sections render together in one scroll:
  *   1. Module settings — wrapped in a Section accordion, always first.
- *   2. CSS area — ClassComposer (all CSS sections) or locked preview.
+ *   2. CSS area — StyleRuleComposer (all CSS sections) or locked preview.
  *
  * The search bar is bound to the active editable class and filters across
  * module settings (by prop key/label) and the class's CSS properties
@@ -29,7 +29,7 @@ import { isGeneratedClassLocked, styleRuleSelector } from '@core/page-tree'
 import { Button } from '@ui/components/Button'
 import { SearchBar } from '@ui/components/SearchBar'
 import { Section } from '@ui/components/Section'
-import { ClassComposer } from './ClassComposer'
+import { StyleRuleComposer } from './StyleRuleComposer'
 import { InlineStyleComposer } from './InlineStyleComposer'
 import { ClassPropertyRow } from './ClassPropertyRow'
 import { StyleCategoryRail, MODULE_CATEGORY_ID } from './StyleCategoryRail'
@@ -150,6 +150,11 @@ export function StyleSurface({
   // very next click without re-binding the callback.
   const propertiesSmoothScroll = useEditorPreference('propertiesSmoothScroll')
 
+  // Default open/closed state for every property section (Module + CSS), driven
+  // by the `propertiesSectionsExpanded` preference. Read once here; the CSS
+  // sections receive it through StyleRuleComposer → StyleSectionsEditor.
+  const sectionsExpanded = useEditorPreference('propertiesSectionsExpanded')
+
   // Scroll to the section corresponding to the clicked rail button.
   function handleSectionClick(sectionId: string) {
     const container = scrollRef.current
@@ -224,7 +229,7 @@ export function StyleSurface({
   // CSS area content. Branches in priority order:
   //  - caller lacks `site.style.edit`           → role-locked notice
   //  - inline-style editing target              → InlineStyleComposer
-  //  - active class is set and editable         → ClassComposer
+  //  - active class is set and editable         → StyleRuleComposer
   //  - active class is a locked generated utility → utility notice
   //  - no active class                          → teaser + "Add class"/"Style inline"
   let cssContent: ReactNode
@@ -256,7 +261,7 @@ export function StyleSurface({
       )
     } else {
       cssContent = (
-        <ClassComposer
+        <StyleRuleComposer
           key={`${activeClassId}-${activeTab}`}
           classId={activeClassId!}
           cls={activeClass}
@@ -308,7 +313,8 @@ export function StyleSurface({
             <Section
               title={definition!.name}
               icon={ModuleIcon}
-              defaultOpen
+              defaultOpen={sectionsExpanded}
+              flush
             >
               {/* sectionBody gives the same display:grid + gap as CSS sections.
                   key={nodeId} remounts on node change (replaces the old div wrapper). */}
@@ -319,7 +325,7 @@ export function StyleSurface({
           </div>
         )}
 
-        {/* CSS area — ClassComposer sections, locked preview, or generated lock */}
+        {/* CSS area — StyleRuleComposer sections, locked preview, or generated lock */}
         {cssContent}
       </div>
 

@@ -4,6 +4,13 @@
     padding: 2px 4px;
 }
 
+/* Flush variant — no vertical padding; the parent grid gap is the only spacing
+   between sections (1px-gap card pattern in the Properties panel). */
+.sectionFlush {
+    padding-top: 0;
+    padding-bottom: 0;
+}
+
 .sectionOpen {
     background: rgba(255, 255, 255, 0.012);
 }

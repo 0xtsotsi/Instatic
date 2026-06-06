@@ -1,7 +1,7 @@
 /**
  * StyleSectionsEditor — the target-agnostic CSS section renderer.
  *
- * This is the shared rendering core behind both `ClassComposer` (edits a
+ * This is the shared rendering core behind both `StyleRuleComposer` (edits a
  * StyleRule's `styles` / `contextStyles`) and `InlineStyleComposer` (edits a
  * node's `inlineStyles`). It knows nothing about WHERE the styles live: it
  * takes the resolved style bags plus a set of handlers and renders the curated
@@ -27,7 +27,8 @@ import {
   type ClassStyleSectionDefinition,
 } from './cssControlTypes'
 import { hasStyleValue } from './styleValueUtils'
-import styles from './ClassComposer.module.css'
+import { useEditorPreference } from '@site/preferences/editorPreferences'
+import styles from './StyleRuleComposer.module.css'
 import sectionStyles from '@ui/components/Section/Section.module.css'
 
 const SPACING_SECTION_ID = 'spacing'
@@ -75,6 +76,9 @@ export function StyleSectionsEditor({
 }: StyleSectionsEditorProps) {
   const visibleStyleSections = getVisibleStyleSections(styleQuery)
 
+  // Default open/closed state for every section, from the user preference.
+  const sectionsExpanded = useEditorPreference('propertiesSectionsExpanded')
+
   return (
     <div className={styles.styleSections}>
       {visibleStyleSections.map((section) => (
@@ -84,6 +88,7 @@ export function StyleSectionsEditor({
             currentStyles={currentStyles}
             storedStyles={storedStyles}
             activeTab={sectionKey}
+            defaultOpen={sectionsExpanded}
             onChange={onChange}
             onRemove={onRemove}
             onClearProperty={onClearProperty}
@@ -100,6 +105,7 @@ export function StyleSectionsEditor({
           <CustomPropertiesSection
             key={sectionKey}
             storedStyles={storedStyles}
+            defaultOpen={sectionsExpanded}
             onChange={onChange}
             onRemove={onRemove}
           />
@@ -121,6 +127,8 @@ interface StyleSectionGroupProps {
   currentStyles: Record<string, unknown>
   storedStyles: Record<string, unknown>
   activeTab: string
+  /** Initial open/closed state, from the `propertiesSectionsExpanded` preference. */
+  defaultOpen: boolean
   onChange: (property: keyof CSSPropertyBag, value: string | number | undefined) => void
   onRemove: (property: keyof CSSPropertyBag) => void
   onClearProperty: (property: keyof CSSPropertyBag) => void
@@ -134,6 +142,7 @@ function StyleSectionGroup({
   currentStyles,
   storedStyles,
   activeTab,
+  defaultOpen,
   onChange,
   onRemove,
   onClearProperty,
@@ -153,7 +162,8 @@ function StyleSectionGroup({
     <Section
       title={section.title}
       icon={section.icon}
-      defaultOpen
+      defaultOpen={defaultOpen}
+      flush
       indicator={setCount > 0}
       indicatorTestId={`class-style-section-dot-${section.id}`}
       meta={setCount > 0 ? `${setCount} set` : undefined}

@@ -1,7 +1,7 @@
 /**
  * InlineStyleComposer — CSS section editor bound to a node's inline styles.
  *
- * The sibling of `ClassComposer`: same `StyleSectionsEditor` rendering core,
+ * The sibling of `StyleRuleComposer`: same `StyleSectionsEditor` rendering core,
  * but reads from / writes to `node.inlineStyles` (the per-node `style=""`
  * layer the publisher emits) instead of a StyleRule.
  *

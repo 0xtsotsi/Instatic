@@ -2,8 +2,8 @@
  * SelectorInspector — Properties panel body when a class is selected via the
  * global Selectors panel (no node context, just the rule + style sections).
  *
- * Renders the StyleCategoryRail for category nav and a ClassComposer body
- * that lists / edits the class's CSS properties. A search input above filters
+ * Renders the StyleCategoryRail for category nav and a StyleRuleComposer body
+ * that lists / edits the rule's CSS properties. A search input above filters
  * by property name.
  *
  * Generated utility classes (those gated by `isGeneratedClassLocked`) render
@@ -14,7 +14,7 @@ import { SearchBar } from '@ui/components/SearchBar'
 import { useEditorPreference } from '@site/preferences/editorPreferences'
 import { isGeneratedClassLocked, styleRuleSelector } from '@core/page-tree'
 import type { StyleRule } from '@core/page-tree'
-import { ClassComposer } from './ClassComposer'
+import { StyleRuleComposer } from './StyleRuleComposer'
 import { StyleCategoryRail } from './StyleCategoryRail'
 import { GeneratedUtilityLockedState } from './StyleSurface'
 import {
@@ -110,7 +110,7 @@ export function SelectorInspector({ cls, activeBreakpointId }: SelectorInspector
       </div>
       <div className={styles.selectorSurfaceLayout}>
         <div ref={scrollRef} className={styles.selectorScrollContainer}>
-          <ClassComposer
+          <StyleRuleComposer
             key={cls.id}
             classId={cls.id}
             cls={cls}

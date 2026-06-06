@@ -254,6 +254,14 @@ export const PREFERENCE_CATALOG = [
     description: 'Animate the properties panel when switching between Style / Module / Component tabs.',
     default: true,
   },
+  {
+    id: 'propertiesSectionsExpanded',
+    type: 'boolean',
+    category: 'properties',
+    label: 'Expand style sections by default',
+    description: 'Open every property section (Module, Layout, Typography, …) when an element is selected. Turn off to start with all sections collapsed.',
+    default: true,
+  },
 
   // ── Command palette (spotlight) ──────────────────────────────────────────
   {

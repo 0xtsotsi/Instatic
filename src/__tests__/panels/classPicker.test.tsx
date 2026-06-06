@@ -317,7 +317,7 @@ describe('ClassPicker — assigned pill', () => {
 // ---------------------------------------------------------------------------
 
 describe('ClassPicker — ambient selectors', () => {
-  it('renders a matching ambient selector without a remove action and still lets it be edited', async () => {
+  it('auto-activates a matching ambient selector on selection, renders it without a remove action, and lets it be toggled', async () => {
     const user = userEvent.setup()
     const { nodeId } = loadSiteWithNode()
     addRenderedCanvasElement(`<section class="hero"><h1 data-node-id="${nodeId}" class="title"></h1></section>`)
@@ -325,12 +325,19 @@ describe('ClassPicker — ambient selectors', () => {
 
     render(<ClassPicker nodeId={nodeId} />)
 
-    const pill = screen.getByRole('button', { name: 'Edit selector .hero .title' })
+    // The most specific matching selector auto-activates on selection, so an
+    // element styled purely by a descendant selector opens straight into edit.
+    expect(useEditorStore.getState().activeClassId).toBe(ambient.id)
+
+    // The pill is present (now showing its active "Deselect" affordance) and
+    // carries no remove action — an ambient rule isn't a class "on" the node.
+    const pill = screen.getByRole('button', { name: 'Deselect selector .hero .title' })
     expect(pill).toBeTruthy()
     expect(screen.queryByRole('button', { name: 'Remove selector .hero .title' })).toBeNull()
 
+    // Clicking the active pill toggles editing back off.
     await user.click(pill)
-    expect(useEditorStore.getState().activeClassId).toBe(ambient.id)
+    expect(useEditorStore.getState().activeClassId).toBeNull()
   })
 
   it('shows non-matching ambient selectors as disabled dropdown rows', async () => {

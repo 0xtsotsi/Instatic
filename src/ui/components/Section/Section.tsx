@@ -24,6 +24,13 @@ interface SectionProps {
   icon?: IconComponent;
   meta?: React.ReactNode;
   forceOpen?: boolean;
+  /**
+   * Drop the section's own vertical padding so spacing comes entirely from the
+   * parent container's grid gap (the borderless-tile / 1px-gap card pattern).
+   * Used by the Properties panel; panels that rely on the section's own padding
+   * for inter-section spacing (Data inspector) leave this off.
+   */
+  flush?: boolean;
 }
 
 export function Section({
@@ -35,12 +42,13 @@ export function Section({
   icon: SectionIcon,
   meta,
   forceOpen = false,
+  flush = false,
 }: SectionProps) {
   const [open, setOpen] = useState(defaultOpen);
   const expanded = forceOpen || open;
 
   return (
-    <div className={cn(styles.section, expanded && styles.sectionOpen)}>
+    <div className={cn(styles.section, flush && styles.sectionFlush, expanded && styles.sectionOpen)}>
       <button
         onClick={() => {
           if (!forceOpen) setOpen((o) => !o);

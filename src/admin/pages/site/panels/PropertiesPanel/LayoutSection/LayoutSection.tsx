@@ -72,7 +72,7 @@ interface LayoutSectionProps {
    */
   onClearProperties: (properties: ReadonlyArray<keyof CSSPropertyBag>) => void
   /**
-   * Patch-shaped hover-preview channel (see ClassComposer.handlePreview).
+   * Patch-shaped hover-preview channel (see StyleRuleComposer.handlePreview).
    * Forwarded to the display dropdown, the gap token input, and the generic
    * fallback rows so hovering a suggestion previews on the canvas.
    */

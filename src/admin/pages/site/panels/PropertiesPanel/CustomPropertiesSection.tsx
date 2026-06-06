@@ -32,6 +32,8 @@ import styles from './CustomPropertiesSection.module.css'
 interface CustomPropertiesSectionProps {
   /** Active-tab stored styles (no inherited base merge). */
   storedStyles: Record<string, unknown>
+  /** Initial open/closed state, from the `propertiesSectionsExpanded` preference. */
+  defaultOpen: boolean
   onChange: (property: keyof CSSPropertyBag, value: string | number | undefined) => void
   onRemove: (property: keyof CSSPropertyBag) => void
 }
@@ -62,6 +64,7 @@ const PROPERTY_NAME_RE = /^-{0,2}[a-zA-Z][a-zA-Z0-9-]*$/
 
 export function CustomPropertiesSection({
   storedStyles,
+  defaultOpen,
   onChange,
   onRemove,
 }: CustomPropertiesSectionProps) {
@@ -103,6 +106,8 @@ export function CustomPropertiesSection({
     <Section
       title="Custom properties"
       icon={SlidersHorizontalIcon}
+      defaultOpen={defaultOpen}
+      flush
       indicator={setCount > 0}
       meta={setCount > 0 ? `${setCount} set` : undefined}
     >
