@@ -9,7 +9,7 @@
  */
 import type { DbClient } from '../../../db/client'
 import type { DataRow } from '@core/data/schemas'
-import type { CreateDataRowInput, SaveDataRowDraftInput } from './mapper'
+import type { InsertDataRowInput, UpdateDataRowDraftInput } from './mapper'
 import { createDataRow, saveDataRowDraft, softDeleteDataRow } from './mutations'
 
 /**
@@ -20,7 +20,7 @@ import { createDataRow, saveDataRowDraft, softDeleteDataRow } from './mutations'
  */
 export async function createDataRowMany(
   db: DbClient,
-  inputs: ReadonlyArray<CreateDataRowInput>,
+  inputs: ReadonlyArray<InsertDataRowInput>,
   actorUserId: string | null = null,
   pluginActorId: string | null = null,
 ): Promise<DataRow[]> {
@@ -40,7 +40,7 @@ export async function createDataRowMany(
  */
 export async function saveDataRowDraftMany(
   db: DbClient,
-  updates: ReadonlyArray<{ id: string; input: SaveDataRowDraftInput }>,
+  updates: ReadonlyArray<{ id: string; input: UpdateDataRowDraftInput }>,
   actorUserId: string | null = null,
   pluginActorId: string | null = null,
 ): Promise<DataRow[]> {
