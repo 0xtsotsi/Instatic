@@ -21,6 +21,7 @@ import { mkdir, writeFile } from 'node:fs/promises'
 import { dirname } from 'node:path'
 import type { MediaStorageUploadPlan } from '@core/plugin-sdk'
 import { LOCAL_DISK_STEP_METHOD } from '@core/plugins/mediaStorageRegistry'
+import { toArrayBuffer } from '../../binary'
 
 export interface StepReceipt {
   etag?: string
@@ -68,9 +69,8 @@ async function executeStep(
   }
   // Materialise a fresh ArrayBuffer (not SharedArrayBuffer; not a Uint8Array
   // view past byteLength) so the body slot accepts the value without TS
-  // narrowing complaints. Copy is cheap relative to a network upload.
-  const body = new ArrayBuffer(bytes.byteLength)
-  new Uint8Array(body).set(bytes)
+  // narrowing complaints.
+  const body = toArrayBuffer(bytes)
   const response = await fetch(step.url, {
     method: step.method,
     headers,

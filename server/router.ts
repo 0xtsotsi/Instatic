@@ -12,6 +12,7 @@ import { handlePublicFormRequest } from './forms/handler'
 import { FORM_RUNTIME_PATH, serveFormRuntimeAsset } from './forms/formRuntime'
 import { isRuntimePackagePath, tryServeRuntimePackage } from './publish/runtime/packageServer'
 import { jsonResponse } from './http'
+import { binaryResponse, toArrayBuffer } from './binary'
 import { hardenUploadResponse, serveAdminApp, serveStaticFile } from './static'
 import { registry } from '@core/module-engine'
 import type { CssBundleFile, SiteCssBundleId } from '@core/publisher'
@@ -186,9 +187,7 @@ async function tryServeRuntimeAsset(req: Request, runtime: ServerRuntime, _url: 
   if (runtime.uploadsDir) {
     const bytes = await readStaticAsset(runtime.uploadsDir, pathname)
     if (bytes) {
-      const body = new ArrayBuffer(bytes.byteLength)
-      new Uint8Array(body).set(bytes)
-      return new Response(body, {
+      return binaryResponse(bytes, {
         headers: {
           'content-type': contentTypeForAssetPath(pathname),
           'cache-control': 'public, max-age=31536000, immutable',
@@ -201,9 +200,7 @@ async function tryServeRuntimeAsset(req: Request, runtime: ServerRuntime, _url: 
   // failed). The live renderer keeps working off these.
   const runtimeAsset = await getPublishedRuntimeAsset(runtime.db, pathname)
   if (!runtimeAsset) return null
-  const body = new ArrayBuffer(runtimeAsset.bytes.byteLength)
-  new Uint8Array(body).set(runtimeAsset.bytes)
-  return new Response(body, {
+  return binaryResponse(runtimeAsset.bytes, {
     headers: {
       'content-type': runtimeAsset.contentType,
       'cache-control': 'public, max-age=31536000, immutable',
@@ -504,9 +501,7 @@ async function serveSiteCss(db: DbClient, pathname: string, uploadsDir?: string)
   if (uploadsDir) {
     const bytes = await readStaticAsset(uploadsDir, pathname)
     if (bytes) {
-      const buffer = new ArrayBuffer(bytes.byteLength)
-      new Uint8Array(buffer).set(bytes)
-      return cssResponse(buffer, requestedHash)
+      return cssResponse(toArrayBuffer(bytes), requestedHash)
     }
   }
 

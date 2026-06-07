@@ -18,6 +18,7 @@
 import sharp from 'sharp'
 import { encode as encodeBlurHash } from 'blurhash'
 import type { ImageVariantJobRequest, ImageVariantJobResponse, ImageVariantPayload } from './imageVariantProtocol'
+import { toArrayBuffer } from '../../binary'
 
 function send(msg: ImageVariantJobResponse, transfer: ArrayBuffer[] = []): void {
   ;(self as unknown as { postMessage: (m: unknown, transfer?: ArrayBuffer[]) => void }).postMessage(msg, transfer)
@@ -78,15 +79,10 @@ async function handleJob(req: ImageVariantJobRequest): Promise<void> {
           .webp({ quality: req.webpQuality })
           .toBuffer({ resolveWithObject: true })
         // Detach the encoded WebP bytes into a fresh ArrayBuffer so the
-        // host owns them after transfer. `v.data` is a Node `Buffer`
-        // sharing its underlying pool with sharp's internals — we can't
-        // safely transfer that pool. Allocating a clean ArrayBuffer and
-        // copying gives us bytes we can hand off. (We use `new ArrayBuffer`
-        // + `set` rather than `.buffer.slice(...)` because the latter
-        // widens to `ArrayBuffer | SharedArrayBuffer` under modern
-        // lib.dom types.)
-        const ab = new ArrayBuffer(v.data.byteLength)
-        new Uint8Array(ab).set(v.data)
+        // host owns them after transfer. `v.data` is a Node `Buffer` sharing
+        // its underlying pool with sharp's internals — we can't safely
+        // transfer that pool, so copy into clean bytes we can hand off.
+        const ab = toArrayBuffer(v.data)
         variants.push({ width: v.info.width, height: v.info.height, bytes: ab })
         transfer.push(ab)
       }

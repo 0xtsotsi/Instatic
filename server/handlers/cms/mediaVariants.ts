@@ -30,6 +30,7 @@ import type { DbClient } from '../../db/client'
 import { dispatchDelete, dispatchUpload } from './mediaUploadDispatch'
 import { getElectedVariantDelegate, type ElectedVariantDelegate } from '../../repositories/mediaStorageAdapters'
 import { runImageVariantJob, isImageVariantOk } from './imageVariantWorkerHost'
+import { toArrayBuffer } from '../../binary'
 
 /**
  * Target widths for the responsive variant ladder. Chosen to cover the
@@ -122,12 +123,8 @@ export async function processImageVariants(
     const delegate = await getElectedVariantDelegate(db)
 
     // Copy the source bytes into a fresh ArrayBuffer the worker can take
-    // ownership of via transfer. Allocating + copying (rather than
-    // `bytes.buffer.slice(...)`) keeps the caller's `Uint8Array` view
-    // intact AND gives us a definite `ArrayBuffer` (not the wider
-    // `ArrayBuffer | SharedArrayBuffer` that `.buffer` resolves to).
-    const sourceBuffer = new ArrayBuffer(bytes.byteLength)
-    new Uint8Array(sourceBuffer).set(bytes)
+    // ownership of via transfer — keeps the caller's `Uint8Array` view intact.
+    const sourceBuffer = toArrayBuffer(bytes)
 
     const response = await runImageVariantJob({
       bytes: sourceBuffer,
