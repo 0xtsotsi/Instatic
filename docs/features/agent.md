@@ -100,6 +100,16 @@ src/admin/pages/site/panels/AgentPanel/
 ├── ContextMeter.module.css
 ├── AgentPanel.module.css
 └── index.ts                — barrel export
+
+src/admin/pages/ai/
+├── AiPage.tsx              — /admin/ai workspace; three tabs gated by ai.providers.manage + ai.audit.read
+├── AiPage.module.css
+└── tabs/
+    ├── ProvidersTab.tsx    — CRUD for ai_credentials rows (encrypted API keys)
+    ├── DefaultsTab.tsx     — per-scope model defaults editor
+    ├── AuditTab.tsx        — usage audit view: totals strip, by-model/user/scope tables, daily bar chart
+    ├── UsageTablePanel.tsx — shared table scaffolding (title + hint header, numeric-aligned columns, empty row)
+    └── usageFormat.ts      — formatNumber / formatCost helpers (plain .ts leaf; importable by tests and components alike)
 ```
 
 The Agent Panel owns the credential list load for its header, lock-state empty states, and model picker. The header always contains a `ConversationHistory` popover (browse and restore past threads), a "New chat" button (`startNewAgentConversation`), a conditional "Clear conversation" button (visible when `agentMessages.length > 0`), a streaming badge, and an "AI settings" shortcut that routes to `/admin/ai`. The AI settings button is always visible in the header, independent of credential state.
@@ -249,7 +259,7 @@ tz?:    string   // IANA timezone (e.g. "Europe/Bratislava"); defaults to UTC
 
 `byDay` is the time-series chart data — each `day` field is `YYYY-MM-DD` in the viewer's local timezone (not UTC). The daily rollup pulls raw message rows and bins them in JS via `localDayKeyFactory(timeZone)` (`server/time.ts`) rather than SQL date-truncation, because the day boundary depends on the viewer's timezone which the database doesn't know. The client (see `AuditTab.tsx` → `listAiAudit`) reads `Intl.DateTimeFormat().resolvedOptions().timeZone` and passes it as `?tz=`.
 
-The Audit tab (`src/admin/pages/ai/tabs/AuditTab.tsx`) consumes this endpoint. The daily rollup there also aligns its "Today" range window to local midnight (`setHours(0, 0, 0, 0)`) so the day boundary is consistent both in the filter and in the bar chart.
+The Audit tab (`src/admin/pages/ai/tabs/AuditTab.tsx`) consumes this endpoint. The daily rollup there also aligns its "Today" range window to local midnight (`setHours(0, 0, 0, 0)`) so the day boundary is consistent both in the filter and in the bar chart. The by-model, by-user, and by-scope rollups all render through `UsageTablePanel` (`tabs/UsageTablePanel.tsx`) — a shared table component that takes a `columns` config and handles the empty-state row. Number and cost formatting (`formatNumber`, `formatCost`) live in `tabs/usageFormat.ts`, a plain `.ts` leaf that both the tab components and their tests can import without triggering React Fast Refresh's components-only export rule on the component file.
 
 ### `POST /admin/api/ai/tool-result`
 
@@ -585,6 +595,10 @@ When `POST /admin/api/ai/credentials` creates a new credential, `seedEmptyDefaul
   - `server/ai/audit/store.ts` — `getUsageTotals`, `getUsageByUser`, `getUsageByScope`, `getUsageByModel`, `getUsageByDay` (usage rollup queries)
   - `server/ai/handlers/audit.ts` — `GET /admin/api/ai/audit` handler
   - `server/time.ts` — `resolveTimeZone` + `localDayKeyFactory` (shared timezone day-bucketing utilities)
+  - `src/admin/pages/ai/AiPage.tsx` — `/admin/ai` workspace (Providers / Defaults / Audit tabs)
+  - `src/admin/pages/ai/tabs/AuditTab.tsx` — usage audit view (totals strip, tables, daily bar chart)
+  - `src/admin/pages/ai/tabs/UsageTablePanel.tsx` — shared table scaffolding for audit rollups
+  - `src/admin/pages/ai/tabs/usageFormat.ts` — `formatNumber` / `formatCost` formatting helpers
   - `src/admin/pages/site/agent/agentSlice.ts` — scope-agnostic slice factory (`createAgentSlice`)
   - `src/admin/pages/site/agent/agentSliceConfig.site.ts` — site-editor scope config
   - `src/admin/pages/site/agent/agentApi.ts` — tool-result POST, conversation bootstrap, message rehydration
