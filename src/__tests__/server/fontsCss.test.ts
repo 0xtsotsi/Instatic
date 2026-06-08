@@ -10,9 +10,8 @@
 import { describe, expect, it } from 'bun:test'
 import {
   computePrimarySubset,
-  mapWithConcurrency,
   parseCss2Faces,
-} from '../../../server/repositories/fonts'
+} from '../../../server/fonts/googleFontsInstaller'
 
 const ROBOTO_CSS = `
 /* cyrillic */
@@ -261,45 +260,5 @@ describe('computePrimarySubset', () => {
       @font-face { font-weight: 400; font-style: normal; src: url(https://fonts.gstatic.com/s/x/0.woff2); }
     `
     expect(computePrimarySubset(['cyrillic', 'latin'], css)).toBe('cyrillic')
-  })
-})
-
-describe('mapWithConcurrency — bounded parallelism for install downloads', () => {
-  it('processes every item exactly once and preserves order', async () => {
-    const items = [10, 20, 30, 40, 50]
-    const results = await mapWithConcurrency(items, 2, async (n) => n * 2)
-    expect(results).toEqual([20, 40, 60, 80, 100])
-  })
-
-  it('never exceeds the concurrency cap', async () => {
-    let inFlight = 0
-    let peak = 0
-    const items = Array.from({ length: 20 }, (_, i) => i)
-    await mapWithConcurrency(items, 4, async () => {
-      inFlight += 1
-      peak = Math.max(peak, inFlight)
-      // Yield once so the runner can pick up another task.
-      await Promise.resolve()
-      await Promise.resolve()
-      inFlight -= 1
-    })
-    expect(peak).toBeLessThanOrEqual(4)
-    expect(peak).toBeGreaterThan(1)
-  })
-
-  it('handles an empty list without spawning workers', async () => {
-    const results = await mapWithConcurrency([] as number[], 4, async (n) => n + 1)
-    expect(results).toEqual([])
-  })
-
-  it('rejects on the first worker error', async () => {
-    const items = [1, 2, 3, 4]
-    const error = new Error('boom')
-    await expect(
-      mapWithConcurrency(items, 2, async (n) => {
-        if (n === 3) throw error
-        return n
-      }),
-    ).rejects.toBe(error)
   })
 })

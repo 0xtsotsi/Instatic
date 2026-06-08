@@ -30,7 +30,7 @@ import {
   installGoogleFont,
   uninstallFontFamily,
   type ResolvedCustomFontFile,
-} from '../../repositories/fonts'
+} from '../../fonts/googleFontsInstaller'
 import { getMediaAsset } from '../../repositories/media'
 import { listGoogleFonts } from '@core/fonts'
 import { parseVariant } from '@core/fonts'

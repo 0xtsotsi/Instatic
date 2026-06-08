@@ -1,5 +1,5 @@
 /**
- * fontsRepository — server-side installer for Google Fonts.
+ * googleFontsInstaller — server-side installer for Google Fonts.
  *
  * Workflow:
  *   1. The editor sends `{ family, variants[], subsets[] }` to the install endpoint.
@@ -13,6 +13,9 @@
  * keyless one — it doesn't require an API key, only a UA hint that supports
  * woff2 (we send a modern Chrome UA). The font binaries live at
  * `https://fonts.gstatic.com/s/...` and are CC/OFL licensed for redistribution.
+ *
+ * This module does network + file IO only — it never touches the database, so
+ * it lives under `server/fonts/`, not in the `server/repositories/` data layer.
  */
 
 import { mkdir, rm, writeFile } from 'node:fs/promises'
@@ -22,6 +25,7 @@ import type { FontEntry, FontFile, FontFileFormat } from '@core/fonts'
 import { familySlug } from '@core/fonts'
 import { compareVariants, parseVariant, variantsToCss2Axis } from '@core/fonts'
 import { findGoogleFont } from '@core/fonts'
+import { mapWithConcurrency } from '../util/mapWithConcurrency'
 
 /**
  * UA spoof: Google's CSS2 endpoint inspects the User-Agent header to decide which
@@ -143,7 +147,7 @@ async function fetchFamilyCss(family: string, axisSpec: string): Promise<string>
   return promise
 }
 
-/** @internal exported only for unit tests in `server/cms/__tests__/fontsCss.test.ts`. */
+/** @internal exported only for unit tests in `src/__tests__/server/fontsCss.test.ts`. */
 export interface ParsedFace {
   weight: number
   italic: boolean
@@ -398,32 +402,6 @@ function fontSliceFilename(variant: string, subset: string, sliceIndex: number):
  * tripping gstatic's per-host limits.
  */
 const INSTALL_CONCURRENCY = 8
-
-/**
- * Run `worker(item)` over `items` with at most `limit` tasks in flight at any
- * time. Resolves once every item has been processed; rejects on the first
- * worker error (other in-flight tasks resolve / reject as they finish but
- * their values are not collected). Order of `results` matches `items`.
- *
- * @internal exported for unit tests in `src/__tests__/server/fontsCss.test.ts`.
- */
-export async function mapWithConcurrency<T, R>(
-  items: readonly T[],
-  limit: number,
-  worker: (item: T, index: number) => Promise<R>,
-): Promise<R[]> {
-  const results = new Array<R>(items.length)
-  let cursor = 0
-  async function pump(): Promise<void> {
-    while (cursor < items.length) {
-      const i = cursor++
-      results[i] = await worker(items[i], i)
-    }
-  }
-  const workers = Array.from({ length: Math.min(limit, items.length) }, () => pump())
-  await Promise.all(workers)
-  return results
-}
 
 export async function installGoogleFont(
   input: InstallGoogleFontInput,
