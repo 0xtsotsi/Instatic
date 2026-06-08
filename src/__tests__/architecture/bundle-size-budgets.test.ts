@@ -54,6 +54,7 @@ import { join } from 'path'
 
 const REPO_ROOT = join(import.meta.dir, '../../../')
 const DIST_ASSETS = join(REPO_ROOT, 'dist/assets')
+const VENDORED_ICON_DIST = join(REPO_ROOT, 'vendor/pixel-art-icons/dist/icons')
 
 interface ChunkBudget {
   /** Stable prefix of the chunk filename (Vite appends `-<hash>.js`). */
@@ -101,6 +102,14 @@ const BUDGETS: ChunkBudget[] = [
     prefix: 'state-vendor-',
     maxBytes: 46_000,
     rationale: 'dompurify + mutative + zustand-mutative (current ~42 KB raw / 15 KB gzipped)',
+  },
+  {
+    prefix: 'pixel-art-icons-',
+    maxBytes: 90_000,
+    rationale:
+      'single tree-shaken chunk for imported vendored pixel-art-icons ' +
+      '(current ~50 KB raw / ~9 KB gzipped). Must not regress into ' +
+      'one emitted chunk per icon.',
   },
 
   {
@@ -211,6 +220,23 @@ function findChunk(prefix: string): { path: string; size: number } | null {
   return { path, size: statSync(path).size }
 }
 
+function findChunks(prefix: string): string[] {
+  if (!existsSync(DIST_ASSETS)) return []
+  return readdirSync(DIST_ASSETS).filter(
+    (f) => f.startsWith(prefix) && f.endsWith('.js'),
+  )
+}
+
+function regexEscape(value: string): string {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+}
+
+function vendoredIconNames(): string[] {
+  return readdirSync(VENDORED_ICON_DIST)
+    .filter((file) => file.endsWith('.js'))
+    .map((file) => file.slice(0, -'.js'.length))
+}
+
 function formatKB(bytes: number): string {
   return `${(bytes / 1024).toFixed(1)} kB`
 }
@@ -267,5 +293,19 @@ describe('Bundle size budgets', () => {
     }
     const source = readFileSync(reactVendor.path, 'utf8')
     expect(source).not.toContain('dnd-vendor-')
+  })
+
+  it('emits vendored pixel-art-icons as one chunk instead of per-icon chunks', () => {
+    const iconVendorChunks = findChunks('pixel-art-icons-')
+    expect(iconVendorChunks).toHaveLength(1)
+
+    const iconChunkPatterns = vendoredIconNames().map(
+      (iconName) => new RegExp(`^${regexEscape(iconName)}-[A-Za-z0-9_-]+\\.js$`),
+    )
+    const individualIconChunks = readdirSync(DIST_ASSETS).filter((asset) =>
+      iconChunkPatterns.some((pattern) => pattern.test(asset)),
+    )
+
+    expect(individualIconChunks).toEqual([])
   })
 })

@@ -406,12 +406,12 @@ import { cn } from '@ui/cn'
 
 ## Icons
 
-Icons are TSX components from the vendored `pixel-art-icons` package. Each icon is its own file; deep-import to keep the bundle small:
+Icons are TSX components from the vendored `pixel-art-icons` package. Each icon is its own file; deep-import so only used icons enter the module graph:
 
 ```tsx
-import { ChevronRight } from 'pixel-art-icons/icons/ChevronRight'
+import { ChevronRightIcon } from 'pixel-art-icons/icons/chevron-right'
 
-<ChevronRight />
+<ChevronRightIcon />
 ```
 
 Rules:
@@ -423,6 +423,10 @@ Rules:
 - Adding a new icon: import it normally, then run `bun run icons:sync`. The vendored set is gated for freshness by `vendor-icons-fresh.test.ts`.
 
 The full set (~4,053 icons) lives in the sibling repo `../pixel-art-icons`; the CMS vendors only the icons it actually imports.
+
+Production builds fold those imported icon modules into one `pixel-art-icons-*`
+chunk. That keeps source imports tree-shakeable while avoiding dozens of
+sub-1 KB emitted icon chunks.
 
 ---
 
@@ -518,7 +522,7 @@ The HTML `title` attribute is banned for hover hints — gated by `no-native-tit
 | `className="text-zinc-400"` (Tailwind utility)           | CSS Module class                                         |
 | `className="bg-blue-500"`, `min-h-[44px]`, etc.          | CSS Module class with a token                            |
 | `import { cn } from 'clsx'`                              | `import { cn } from '@ui/cn'`                            |
-| `import { X } from 'lucide-react'`                       | `import { X } from 'pixel-art-icons/icons/X'`            |
+| `import { X } from 'lucide-react'`                       | `import { XIcon } from 'pixel-art-icons/icons/<name>'`   |
 | `style={{ color: 'white' }}`                             | CSS Module class — `style` is only for CSS custom properties |
 | `!important` in a component CSS module                   | Restructure selectors                                    |
 | `alert('Saved!')`                                        | Toast or `role="status"` element                         |

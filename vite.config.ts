@@ -108,9 +108,16 @@ function publicSiteDevProxyPlugin(): Plugin {
 // Notes:
 //   - We deliberately do NOT chunk @codemirror / @lezer / codemirror — they
 //     are already isolated via React.lazy() in CodeMirrorEditor.tsx.
-//   - We deliberately do NOT chunk pixel-art-icons — it tree-shakes through
-//     deep imports, and forcing a vendor chunk would pull every icon in.
+//   - pixel-art-icons stays tree-shaken through deep imports at the source
+//     level, then the imported icon modules are folded into one async vendor
+//     chunk. That avoids dozens of sub-1 KB icon chunk requests without
+//     bundling the full upstream catalog.
+function isPixelArtIconModule(moduleId: string): boolean {
+  return moduleId.replace(/\\/g, '/').includes('/pixel-art-icons/dist/icons/')
+}
+
 function vendorChunkName(moduleId: string): string | null {
+  if (isPixelArtIconModule(moduleId)) return 'pixel-art-icons'
   if (!moduleId.includes('node_modules')) return null
   if (moduleId.includes('node_modules/react-dom') || /node_modules\/react(\/|\\)/.test(moduleId)) {
     return 'react-vendor'
