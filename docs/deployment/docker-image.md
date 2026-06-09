@@ -35,19 +35,19 @@ GHCR is the canonical image registry:
 
 ```sh
 docker pull ghcr.io/corebunch/instatic:latest
-docker pull ghcr.io/corebunch/instatic:0.0.1
+docker pull ghcr.io/corebunch/instatic:0.0.2
 ```
 
 Docker Hub is a discoverability mirror:
 
 ```sh
 docker pull corebunch/instatic:latest
-docker pull corebunch/instatic:0.0.1
+docker pull corebunch/instatic:0.0.2
 ```
 
 When both registries are available, prefer GHCR in Compose files because it is produced directly by the release workflow.
 
-The v0.0.1 published image is built for `linux/amd64`. Use it on Railway and x86_64 VPS/container hosts. ARM64 hosts should build from source for now, or wait for the native arm64 release job before pulling GHCR images directly.
+The v0.0.2 published image is built for `linux/amd64`. Use it on Railway and x86_64 VPS/container hosts. ARM64 hosts should build from source for now, or wait for the native arm64 release job before pulling GHCR images directly.
 
 ## Run With SQLite
 
@@ -100,7 +100,7 @@ Replace `instatic:local` with `ghcr.io/corebunch/instatic:<tag>` when deploying 
 Create an app service from Docker image source:
 
 ```txt
-ghcr.io/corebunch/instatic:0.0.1
+ghcr.io/corebunch/instatic:0.0.2
 ```
 
 Attach a Railway volume at `/app/storage`, set the health check path to `/health`, and set app variables:
@@ -113,7 +113,7 @@ STATIC_DIR=/app/dist
 INSTATIC_SECRET_KEY=<output of bun run scripts/generate-secret-key.ts>
 ```
 
-Enable Railway Image Auto Updates when you want Railway to move the service forward automatically during a maintenance window. Use `:latest` for "always follow the newest image", or a semver tag such as `:0.0.1` if you want Railway's semver update controls.
+Enable Railway Image Auto Updates when you want Railway to move the service forward automatically during a maintenance window. Use `:latest` for "always follow the newest image", or a semver tag such as `:0.0.2` if you want Railway's semver update controls.
 
 ## Run On Render From The Image
 

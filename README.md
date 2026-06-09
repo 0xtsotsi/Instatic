@@ -144,7 +144,7 @@ INSTATIC_IMAGE=ghcr.io/corebunch/instatic:latest docker compose -f compose.prod.
 Pin a version for predictable upgrades:
 
 ```sh
-INSTATIC_IMAGE=ghcr.io/corebunch/instatic:0.0.1 docker compose -f compose.prod.yml -f compose.sqlite.yml up -d
+INSTATIC_IMAGE=ghcr.io/corebunch/instatic:0.0.2 docker compose -f compose.prod.yml -f compose.sqlite.yml up -d
 ```
 
 Use **Postgres** when you have a multi-author editorial team, need horizontal app scale-out, or already operate Postgres:

@@ -16,7 +16,7 @@ Railway is the simplest managed target for Instatic because it can run the publi
 Both templates use:
 
 ```txt
-Image=ghcr.io/corebunch/instatic:0.0.1
+Image=ghcr.io/corebunch/instatic:0.0.2
 PORT=8080
 UPLOADS_DIR=/app/storage/uploads
 STATIC_DIR=/app/dist
@@ -30,7 +30,7 @@ Configure the app service health check path as `/health`. If Railway asks which 
 Use a Docker image source for production installs:
 
 ```txt
-ghcr.io/corebunch/instatic:0.0.1
+ghcr.io/corebunch/instatic:0.0.2
 ```
 
 The image already runs:
@@ -46,7 +46,7 @@ Recommended service settings:
 | Setting | Value |
 |---|---|
 | Source | Docker image |
-| Image | `ghcr.io/corebunch/instatic:0.0.1` |
+| Image | `ghcr.io/corebunch/instatic:0.0.2` |
 | Public networking | HTTP enabled |
 | Target port | `8080` |
 | Healthcheck path | `/health` |
@@ -121,7 +121,7 @@ Railway volume backups apply to mounted volumes. For Postgres, use Railway's dat
 Enable Railway Image Auto Updates on the app service:
 
 - Use `ghcr.io/corebunch/instatic:latest` when you want the service to redeploy whenever the `latest` tag moves.
-- Use a semver tag like `ghcr.io/corebunch/instatic:0.0.1` when you want Railway to stage matching patch or minor updates according to the service's auto-update preference.
+- Use a semver tag like `ghcr.io/corebunch/instatic:0.0.2` when you want Railway to stage matching patch or minor updates according to the service's auto-update preference.
 
 Set a maintenance window before enabling automatic updates on sites with attached volumes.
 
