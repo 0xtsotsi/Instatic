@@ -78,7 +78,7 @@ The serializer produces stable, idempotent output. Existing entries load with no
 |---------|-----|
 | Bubble menu | Appears on text selection — bold / italic / code / strike / link |
 | Slash menu (`/`) | Contextual command menu at the caret — headings, lists, quote, code block, divider, table, media, data token |
-| Canvas notch | Top-center quick-action buttons — Heading, Text, Media, Insert data token |
+| Canvas notch | Top-center quick-action buttons — Heading, Text, Media, Insert data token. It does not show the Site editor's module picker. |
 | Input rules | `# ` → H1 (normalised), `## ` → H2, `**x**` → bold, `- ` → bullet, `` ``` `` → code block, etc. |
 
 ### Imperative handle

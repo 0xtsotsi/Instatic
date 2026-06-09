@@ -123,7 +123,11 @@ export const ContentDocumentCanvas = forwardRef<TiptapBodyEditorHandle, ContentD
         {/* The insertion notch is meaningful only in Write mode — Live
             mode has its own block affordances inside the iframe. */}
         {showInsertNotch && contentMode === 'write' && (
-          <CanvasNotch actions={notchActions} showHistoryControls={false} />
+          <CanvasNotch
+            actions={notchActions}
+            addControl={null}
+            showHistoryControls={false}
+          />
         )}
 
         <div className={styles.documentScroll}>

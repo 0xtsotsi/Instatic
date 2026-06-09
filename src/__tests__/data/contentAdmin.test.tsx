@@ -539,6 +539,23 @@ describe('ContentPage', () => {
     expect(screen.getByText('Content Shell Site')).toBeDefined()
   })
 
+  it('keeps the site module picker out of the content insert notch', async () => {
+    render(
+      <AdminTestProviders>
+        <ContentPage />
+      </AdminTestProviders>,
+    )
+
+    const notch = await screen.findByTestId('canvas-notch')
+
+    expect(within(notch).getByRole('button', { name: 'Add Heading' })).toBeDefined()
+    expect(within(notch).getByRole('button', { name: 'Add Text' })).toBeDefined()
+    expect(within(notch).getByRole('button', { name: 'Add Media' })).toBeDefined()
+    expect(within(notch).getByRole('button', { name: 'Add Insert data token' })).toBeDefined()
+    expect(within(notch).queryByRole('button', { name: 'Add to canvas' })).toBeNull()
+    expect(screen.queryByTestId('canvas-notch-add-btn')).toBeNull()
+  })
+
   it('hides the right settings panel until an entry is selected, then shows it', async () => {
     render(
       <AdminTestProviders>

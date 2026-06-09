@@ -55,6 +55,10 @@ export type CanvasNotchAction = {
 
 interface CanvasNotchProps {
   actions?: CanvasNotchAction[];
+  /**
+   * Replaces the default Site-editor module picker. Leave undefined to show
+   * it; pass null when reusing the notch for a non-site canvas.
+   */
   addControl?: ReactNode;
   floatingControl?: ReactNode;
   /**
@@ -102,12 +106,12 @@ export function CanvasNotch({
             ? actions.map((action) => renderActionButton(action))
             : <FavoriteNotchActions />}
 
-          {addControl ?? (
+          {addControl === undefined ? (
             <ModulePickerDropdown
               triggerClassName={styles.addButton}
               triggerTestId={ADD_TRIGGER_TEST_ID}
             />
-          )}
+          ) : addControl}
         </div>
         {floatingControl && (
           <div className={styles.floatingControl}>
