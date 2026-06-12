@@ -1,4 +1,6 @@
-/* Extracted from ToggleControl and Settings PreferencesSection switch styles. */
+/* Extracted from ToggleControl and Settings PreferencesSection switch styles.
+ * High-contrast achromatic states: on = white track + dark thumb, off =
+ * raised gray track + light thumb — readable on every editor surface. */
 
 .switch {
     display: inline-flex;
@@ -11,13 +13,9 @@
     cursor: pointer;
 }
 
-.switch[data-hit-area="true"] {
-    min-width: 44px;
-    min-height: 44px;
-}
-
 .switch:disabled {
     cursor: not-allowed;
+    opacity: 0.55;
 }
 
 .track {
@@ -32,29 +30,13 @@
 }
 
 .trackOn {
-    background: var(--editor-surface-3);
-    border-color: var(--editor-surface-3);
+    background: var(--editor-accent);
+    border-color: var(--editor-accent);
 }
 
 .trackOff {
-    background: transparent;
-}
-
-.switch[data-hit-area="true"] .track {
-    width: 32px;
-    height: 16px;
-    padding: 2px;
-    box-sizing: content-box;
-    border: 0;
-    border-radius: 10px;
-}
-
-.switch[data-hit-area="true"] .trackOn {
-    background: var(--editor-accent);
-}
-
-.switch[data-hit-area="true"] .trackOff {
-    background: var(--editor-border-med);
+    background: var(--editor-surface-4);
+    border-color: var(--editor-surface-4);
 }
 
 .thumb {
@@ -68,7 +50,7 @@
 
 .thumbOn {
     left: 18px;
-    background: var(--editor-text);
+    background: var(--editor-surface);
 }
 
 .thumbOff {
@@ -93,8 +75,4 @@
 
 .switch[data-size="sm"] .thumbOff {
     left: 3px;
-}
-
-.switch[data-hit-area="true"] .thumbOff {
-    left: 2px;
 }

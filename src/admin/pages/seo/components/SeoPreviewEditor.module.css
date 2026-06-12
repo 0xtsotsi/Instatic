@@ -16,7 +16,7 @@
 .form {
     display: flex;
     flex-direction: column;
-    gap: 16px;
+    gap: 18px;
     background: var(--editor-surface-2);
     border-radius: 16px;
     padding: 20px;
@@ -138,9 +138,10 @@
 
 .fieldHint {
     margin: 0;
-    font-size: 11px;
-    color: var(--editor-text-muted);
-    line-height: 1.4;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--editor-text-secondary);
+    line-height: 1.5;
 }
 
 .customizeRow {

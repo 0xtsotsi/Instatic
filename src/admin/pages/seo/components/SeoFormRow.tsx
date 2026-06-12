@@ -71,7 +71,6 @@ export function SeoSwitchRow({
           disabled={disabled}
           onCheckedChange={onCheckedChange}
           aria-label={label}
-          switchSize="sm"
           data-testid={testId}
         />
       </div>
