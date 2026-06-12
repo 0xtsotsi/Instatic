@@ -42,7 +42,8 @@ import { SeoPreviewRail } from './SeoPreviewRail'
 import { SeoScoreChip } from './SeoScoreChip'
 import { MetaLengthMeter } from './MetaLengthMeter'
 import { SeoImageField } from './SeoImageField'
-import { AiSuggestionSparkle } from './AiSuggestionBubbles'
+import { useAiSuggestions } from '../hooks/useAiSuggestions'
+import { AiSuggestionSparkle, AiSuggestionResults } from './AiSuggestionBubbles'
 import styles from './SeoPreviewEditor.module.css'
 
 interface SeoPreviewEditorProps {
@@ -161,52 +162,23 @@ export function SeoPreviewEditor({ target, workspace, canManage, bridge }: SeoPr
     invalid?: boolean
     sparkle?: boolean
   }) {
-    const id = `${fieldIdBase}-${field}`
-    const value = draft.draft[field] ?? ''
-    const placeholder = resolvedPlaceholder(field)
-    const common = {
-      id,
-      value,
-      placeholder,
-      disabled: !canManage,
-      'aria-invalid': opts?.invalid || undefined,
-    }
     return (
-      <div className={styles.field}>
-        <div className={styles.fieldLabelRow}>
-          <label htmlFor={id} className={styles.fieldLabel}>{label}</label>
-          {opts?.sparkle && (
-            <AiSuggestionSparkle
-              target={target}
-              field={field}
-              canManage={canManage}
-              onPick={(suggestion) => draft.setField(field, suggestion)}
-            />
-          )}
-        </div>
-        {opts?.textarea ? (
-          <Textarea
-            {...common}
-            rows={3}
-            onChange={(e) => draft.setField(field, e.target.value)}
-          />
-        ) : (
-          <Input
-            {...common}
-            type="text"
-            onChange={(e) => draft.setField(field, e.target.value)}
-          />
-        )}
-        {opts?.meterBudget && (
-          /* Inherited values meter against the RESOLVED text, never the
-             input's hint placeholder ("No description — add one…"). */
-          <MetaLengthMeter
-            text={value !== '' ? value : opts.meterBudget === 'title' ? resolved.title : resolved.description ?? ''}
-            budget={opts.meterBudget}
-            explicit={value !== ''}
-          />
-        )}
-      </div>
+      <MetaField
+        field={field}
+        label={label}
+        id={`${fieldIdBase}-${field}`}
+        value={draft.draft[field] ?? ''}
+        placeholder={resolvedPlaceholder(field)}
+        disabled={!canManage}
+        target={target}
+        canManage={canManage}
+        textarea={opts?.textarea}
+        invalid={opts?.invalid}
+        sparkle={opts?.sparkle}
+        meterBudget={opts?.meterBudget}
+        meterText={opts?.meterBudget === 'title' ? resolved.title : resolved.description ?? ''}
+        onChange={(value) => draft.setField(field, value)}
+      />
     )
   }
 
@@ -382,6 +354,78 @@ export function SeoPreviewEditor({ target, workspace, canManage, bridge }: SeoPr
           </>
         )}
       </section>
+    </div>
+  )
+}
+
+interface MetaFieldProps {
+  field: SeoDraftField
+  label: string
+  id: string
+  value: string
+  placeholder: string
+  disabled: boolean
+  target: SeoTarget
+  canManage: boolean
+  textarea?: boolean
+  invalid?: boolean
+  sparkle?: boolean
+  meterBudget?: 'title' | 'description'
+  /** Resolved text the meter measures when the value is inherited. */
+  meterText?: string
+  onChange: (value: string) => void
+}
+
+/**
+ * One metadata field row in the two-column grid: label (+ AI sparkle
+ * trigger) in the label cell; input, length meter, and the sparkle's
+ * error/suggestion bubbles stacked in the control column.
+ */
+function MetaField({
+  field,
+  label,
+  id,
+  value,
+  placeholder,
+  disabled,
+  target,
+  canManage,
+  textarea,
+  invalid,
+  sparkle,
+  meterBudget,
+  meterText,
+  onChange,
+}: MetaFieldProps) {
+  const ai = useAiSuggestions(target, field, onChange)
+  const common = {
+    id,
+    value,
+    placeholder,
+    disabled,
+    'aria-invalid': invalid || undefined,
+  }
+  return (
+    <div className={styles.field}>
+      <div className={styles.fieldLabelRow}>
+        <label htmlFor={id} className={styles.fieldLabel}>{label}</label>
+        {sparkle && <AiSuggestionSparkle ai={ai} canManage={canManage} />}
+      </div>
+      {textarea ? (
+        <Textarea {...common} rows={3} onChange={(e) => onChange(e.target.value)} />
+      ) : (
+        <Input {...common} type="text" onChange={(e) => onChange(e.target.value)} />
+      )}
+      {meterBudget && (
+        /* Inherited values meter against the RESOLVED text, never the
+           input's hint placeholder ("No description — add one…"). */
+        <MetaLengthMeter
+          text={value !== '' ? value : meterText ?? ''}
+          budget={meterBudget}
+          explicit={value !== ''}
+        />
+      )}
+      <AiSuggestionResults ai={ai} />
     </div>
   )
 }
