@@ -126,13 +126,13 @@
 .selected,
 .selected:hover {
     background: var(--editor-surface-4);
-    box-shadow: inset 2px 0 0 var(--editor-accent);
 }
 
+/* Title + route/descriptor inline on one baseline. */
 .rowText {
     display: flex;
-    flex-direction: column;
-    gap: 1px;
+    align-items: baseline;
+    gap: 6px;
     min-width: 0;
 }
 
@@ -144,8 +144,10 @@
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    min-width: 0;
 }
 
+/* Route/descriptor gives way before the title when space runs out. */
 .rowRoute {
     font-size: 10.5px;
     line-height: 15px;
@@ -154,6 +156,8 @@
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    min-width: 0;
+    flex-shrink: 4;
 }
 
 .rowDescriptor {
@@ -163,6 +167,8 @@
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    min-width: 0;
+    flex-shrink: 4;
 }
 
 /* Tiered score pill — tinted background + matching text, mono digits. */
