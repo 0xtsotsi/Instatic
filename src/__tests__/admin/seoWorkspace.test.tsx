@@ -1,0 +1,297 @@
+/**
+ * SEO workspace UI tests — /admin/tools/seo.
+ *
+ * Renders the Meta/Robots/Sitemap tabs against a mocked fetch:
+ *   - tab switching through the Tabs primitive
+ *   - target search / filter / selection driving the preview editor
+ *   - snippet edits writing the STRUCTURED seo object on save
+ *   - inherited values rendering as placeholders (X falls back to OG/search)
+ *   - the Customize X gate
+ *   - robots toggles updating the generated preview
+ *   - the Tools nav dropdown exposing the SEO link
+ */
+import { afterEach, describe, expect, it } from 'bun:test'
+import { cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react'
+import { MemoryRouter } from '@admin/lib/routing'
+import { AdminSessionProvider } from '@admin/session'
+import { AdminSectionNavigation } from '@admin/shared/AdminSectionNavigation'
+import { MetaTab } from '@admin/pages/seo/tabs/MetaTab'
+import { RobotsTab } from '@admin/pages/seo/tabs/RobotsTab'
+import { useSeoWorkspace } from '@admin/pages/seo/hooks/useSeoWorkspace'
+import type { CmsCurrentUser } from '@core/persistence'
+
+const originalFetch = globalThis.fetch
+const now = '2026-06-12T10:00:00.000Z'
+
+function currentUser(capabilities: string[]): CmsCurrentUser {
+  return {
+    id: 'user_1',
+    email: 'seo@example.com',
+    displayName: 'SEO Editor',
+    status: 'active',
+    role: {
+      id: 'test-role',
+      slug: 'test-role',
+      name: 'Test Role',
+      description: '',
+      isSystem: false,
+      capabilities,
+    },
+    capabilities,
+    lastLoginAt: null,
+    failedLoginCount: 0,
+    lockedUntil: null,
+    passwordUpdatedAt: null,
+    mfaEnabled: false,
+    mfaEnabledAt: null,
+    mfaRecoveryCodesRemaining: 0,
+    stepUpAuthMode: 'required',
+    stepUpWindowMinutes: 15,
+    avatarMediaId: null,
+    avatarUrl: null,
+    gravatarHash: '',
+    createdAt: now,
+    updatedAt: now,
+  }
+}
+
+function json(body: unknown, status = 200) {
+  return new Response(JSON.stringify(body), {
+    status,
+    headers: { 'content-type': 'application/json' },
+  })
+}
+
+interface FetchCall {
+  input: RequestInfo | URL
+  init?: RequestInit
+}
+
+const TARGETS_PAYLOAD = {
+  siteName: 'Acme',
+  language: 'en',
+  publicOrigin: 'https://acme.com',
+  siteSeo: {
+    titlePattern: '{page.title} — {site.name}',
+    description: 'Site default description',
+  },
+  targets: [
+    {
+      kind: 'page',
+      id: 'page_home',
+      title: 'Home',
+      route: '/',
+      seo: null,
+      status: 'published',
+      updatedAt: now,
+      publishedAt: now,
+    },
+    {
+      kind: 'page',
+      id: 'page_about',
+      title: 'About',
+      route: '/about',
+      seo: { title: 'About Acme', description: 'Who we are.' },
+      status: 'published',
+      updatedAt: now,
+      publishedAt: now,
+    },
+    {
+      kind: 'template',
+      id: 'page_tpl',
+      title: 'Post template',
+      route: null,
+      templateTableSlugs: ['posts'],
+      seo: { title: '{currentEntry.title} — {site.name}' },
+      status: 'published',
+      updatedAt: now,
+      publishedAt: null,
+    },
+    {
+      kind: 'post',
+      id: 'row_hello',
+      title: 'Hello world',
+      route: '/posts/hello-world',
+      tableSlug: 'posts',
+      tableLabel: 'Posts',
+      seo: null,
+      status: 'published',
+      updatedAt: now,
+      publishedAt: now,
+    },
+  ],
+}
+
+function mockSeoFetch(): FetchCall[] {
+  const calls: FetchCall[] = []
+  globalThis.fetch = (async (input: RequestInfo | URL, init?: RequestInit) => {
+    calls.push({ input, init })
+    const url = String(input)
+    if (url === '/admin/api/cms/seo/targets') return json(TARGETS_PAYLOAD)
+    if (url.startsWith('/admin/api/cms/seo/targets/') && init?.method === 'PUT') {
+      const body = JSON.parse(String(init.body)) as { seo: Record<string, unknown> }
+      const id = url.split('/').at(-1)
+      const stored = TARGETS_PAYLOAD.targets.find((t) => t.id === id)!
+      return json({ target: { ...stored, seo: body.seo } })
+    }
+    if (url === '/admin/api/cms/seo/site' && init?.method === 'PUT') {
+      const body = JSON.parse(String(init.body)) as { seo: Record<string, unknown> }
+      return json({ seo: body.seo })
+    }
+    return json({ error: `Unhandled ${url}` }, 404)
+  }) as typeof fetch
+  return calls
+}
+
+function MetaHarness({ canManage = true }: { canManage?: boolean }) {
+  const workspace = useSeoWorkspace()
+  if (workspace.loading) return <p>Loading…</p>
+  return <MetaTab workspace={workspace} canManage={canManage} />
+}
+
+function RobotsHarness() {
+  const workspace = useSeoWorkspace()
+  if (workspace.loading) return <p>Loading…</p>
+  return <RobotsTab workspace={workspace} canManage />
+}
+
+function renderWithSession(node: React.ReactElement, capabilities: string[] = ['seo.read', 'seo.manage', 'ai.chat']) {
+  return render(
+    <MemoryRouter initialEntries={['/admin/tools/seo']}>
+      <AdminSessionProvider user={currentUser(capabilities)}>
+        {node}
+      </AdminSessionProvider>
+    </MemoryRouter>,
+  )
+}
+
+afterEach(() => {
+  cleanup()
+  globalThis.fetch = originalFetch
+})
+
+describe('SEO Meta tab', () => {
+  it('lists targets, filters by search, and selects into the editor', async () => {
+    mockSeoFetch()
+    renderWithSession(<MetaHarness />)
+
+    const aboutRow = await screen.findByTestId('seo-target-page_about')
+    expect(screen.getByTestId('seo-target-site-defaults')).toBeDefined()
+    expect(screen.getByTestId('seo-target-row_hello')).toBeDefined()
+
+    // Search narrows the list.
+    fireEvent.change(screen.getByTestId('seo-target-search'), { target: { value: 'about' } })
+    expect(screen.queryByTestId('seo-target-row_hello')).toBeNull()
+
+    // Selecting a row activates the preview editor for that target.
+    fireEvent.click(aboutRow)
+    const editor = await screen.findByRole('region', { name: 'SEO for About' })
+    expect(within(editor).getByDisplayValue('About Acme')).toBeDefined()
+  })
+
+  it('shows inherited values as placeholders and saves the structured object', async () => {
+    const calls = mockSeoFetch()
+    renderWithSession(<MetaHarness />)
+
+    fireEvent.click(await screen.findByTestId('seo-target-page_home'))
+    const editor = await screen.findByRole('region', { name: 'SEO for Home' })
+
+    // No explicit title — the placeholder shows the interpolated site pattern.
+    const titleInput = within(editor).getByLabelText('Title') as HTMLInputElement
+    expect(titleInput.value).toBe('')
+    expect(titleInput.placeholder).toBe('Home — Acme')
+
+    fireEvent.change(titleInput, { target: { value: 'Welcome to Acme' } })
+    fireEvent.change(within(editor).getByLabelText('Description'), {
+      target: { value: 'The Acme homepage.' },
+    })
+    fireEvent.click(screen.getByTestId('seo-save'))
+
+    await waitFor(() => {
+      const put = calls.find(
+        (call) =>
+          String(call.input) === '/admin/api/cms/seo/targets/page/page_home' &&
+          call.init?.method === 'PUT',
+      )
+      expect(put).toBeDefined()
+      expect(JSON.parse(String(put!.init!.body))).toEqual({
+        seo: { title: 'Welcome to Acme', description: 'The Acme homepage.' },
+      })
+    })
+  })
+
+  it('keeps X fields behind the customize gate until they differ', async () => {
+    mockSeoFetch()
+    renderWithSession(<MetaHarness />)
+
+    fireEvent.click(await screen.findByTestId('seo-target-page_about'))
+    const editor = await screen.findByRole('region', { name: 'SEO for About' })
+
+    // Switch to the X platform view.
+    fireEvent.click(within(editor).getByRole('button', { name: 'X' }))
+    expect(within(editor).queryByLabelText('X title')).toBeNull()
+
+    fireEvent.click(screen.getByTestId('seo-customize-x'))
+    const xTitle = within(editor).getByLabelText('X title') as HTMLInputElement
+    // Inherits the search title through the OG fallback chain.
+    expect(xTitle.placeholder).toBe('About Acme')
+  })
+
+  it('guards target switching while the editor is dirty', async () => {
+    mockSeoFetch()
+    renderWithSession(<MetaHarness />)
+
+    fireEvent.click(await screen.findByTestId('seo-target-page_home'))
+    const editor = await screen.findByRole('region', { name: 'SEO for Home' })
+    fireEvent.change(within(editor).getByLabelText('Title'), { target: { value: 'Dirty' } })
+
+    // Switching opens the in-app confirm dialog instead of discarding.
+    fireEvent.click(screen.getByTestId('seo-target-page_about'))
+    expect(await screen.findByText('Discard unsaved changes?')).toBeDefined()
+
+    fireEvent.click(screen.getByTestId('seo-discard-switch'))
+    expect(await screen.findByRole('region', { name: 'SEO for About' })).toBeDefined()
+  })
+})
+
+describe('SEO Robots tab', () => {
+  it('updates the generated preview as AI-crawler toggles flip', async () => {
+    mockSeoFetch()
+    renderWithSession(<RobotsHarness />)
+
+    const preview = await screen.findByTestId('seo-robots-preview')
+    expect(preview.textContent).toContain('User-agent: *\nAllow: /')
+    expect(preview.textContent).not.toContain('GPTBot')
+
+    fireEvent.click(screen.getByTestId('seo-robots-ai-training'))
+    expect(screen.getByTestId('seo-robots-preview').textContent).toContain('User-agent: GPTBot\nDisallow: /')
+  })
+})
+
+describe('Tools navigation', () => {
+  it('exposes the SEO link inside the Tools dropdown', async () => {
+    mockSeoFetch()
+    render(
+      <MemoryRouter initialEntries={['/admin/dashboard']}>
+        <AdminSessionProvider user={currentUser(['dashboard.read', 'seo.read'])}>
+          <AdminSectionNavigation section="dashboard" />
+        </AdminSessionProvider>
+      </MemoryRouter>,
+    )
+
+    fireEvent.click(await screen.findByTestId('tools-nav-trigger'))
+    expect(await screen.findByTestId('tools-nav-seo')).toBeDefined()
+  })
+
+  it('hides the Tools dropdown without seo.read or plugin pages', () => {
+    mockSeoFetch()
+    render(
+      <MemoryRouter initialEntries={['/admin/dashboard']}>
+        <AdminSessionProvider user={currentUser(['dashboard.read'])}>
+          <AdminSectionNavigation section="dashboard" />
+        </AdminSessionProvider>
+      </MemoryRouter>,
+    )
+    expect(screen.queryByTestId('tools-nav-trigger')).toBeNull()
+  })
+})

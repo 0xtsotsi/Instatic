@@ -182,6 +182,17 @@ export const CAPABILITY_META: Record<CoreCapability, CapabilityMeta> = {
     label: 'Read AI audit log',
     description: 'View site-wide AI usage, cost, and error events across all users.',
   },
+  // ---------------------------------------------------------------------
+  // SEO workspace
+  // ---------------------------------------------------------------------
+  'seo.read': {
+    label: 'View SEO',
+    description: 'Open the SEO workspace and read metadata, robots, and sitemap settings.',
+  },
+  'seo.manage': {
+    label: 'Manage SEO',
+    description: 'Edit page/post metadata, site SEO defaults, robots.txt, and sitemap settings.',
+  },
 }
 
 /**
@@ -242,6 +253,7 @@ export const CAPABILITY_GROUPS: CapabilityGroup[] = [
     title: 'AI',
     capabilities: ['ai.chat', 'ai.tools.write', 'ai.providers.manage', 'ai.audit.read'],
   },
+  { title: 'SEO', capabilities: ['seo.read', 'seo.manage'] },
   { title: 'Users & Roles', capabilities: ['users.manage', 'roles.manage'] },
   { title: 'Audit', capabilities: ['audit.read'] },
 ]

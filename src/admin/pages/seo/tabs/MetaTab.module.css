@@ -1,0 +1,26 @@
+.columns {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 360px;
+  gap: 16px;
+  align-items: start;
+}
+
+.editorColumn {
+  position: sticky;
+  top: 16px;
+  min-width: 0;
+}
+
+.indexColumn {
+  min-width: 0;
+}
+
+@media (max-width: 960px) {
+  .columns {
+    grid-template-columns: 1fr;
+  }
+
+  .editorColumn {
+    position: static;
+  }
+}

@@ -1,0 +1,126 @@
+.index {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.summaryRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.summaryChip {
+  font-size: 11px;
+  padding: 2px 8px;
+  border-radius: var(--editor-radius-sm);
+  background: var(--editor-surface-3);
+  color: var(--editor-warning-text);
+}
+
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  background: var(--editor-surface);
+  border-radius: 16px;
+  overflow: hidden;
+  outline: none;
+}
+
+.list:focus-visible {
+  box-shadow: 0 0 0 2px var(--editor-focus-ring);
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  width: 100%;
+  padding: 8px 12px;
+  border-radius: 0;
+  background: var(--editor-surface-2);
+  text-align: left;
+}
+
+.row:hover {
+  background: var(--editor-surface-3);
+}
+
+.rowSelected,
+.rowSelected:hover {
+  background: var(--editor-surface-4);
+}
+
+.rowPinned {
+  background: var(--editor-surface-3);
+}
+
+.rowMain {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+}
+
+.rowTitle {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--editor-text-bright);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.rowSub {
+  font-size: 11px;
+  color: var(--editor-text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.rowMeta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.rowKind {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--editor-text-muted);
+}
+
+.dots {
+  display: inline-flex;
+  gap: 3px;
+}
+
+.dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+}
+
+.dot_ok {
+  background: var(--editor-success-green);
+}
+
+.dot_warn {
+  background: var(--editor-warning);
+}
+
+.dot_bad {
+  background: var(--editor-danger);
+}
+
+.empty {
+  padding: 16px;
+  font-size: 12px;
+  color: var(--editor-text-muted);
+  background: var(--editor-surface-2);
+}

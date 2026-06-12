@@ -1,0 +1,37 @@
+.wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  align-items: flex-end;
+}
+
+.loadingText {
+  font-size: 11px;
+  color: var(--editor-text-muted);
+}
+
+.error {
+  margin: 0;
+  font-size: 11px;
+  color: var(--editor-danger-text);
+  text-align: right;
+}
+
+.bubbles {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  justify-content: flex-end;
+}
+
+.bubble {
+  max-width: 100%;
+  white-space: normal;
+  text-align: left;
+  border-radius: var(--input-radius);
+}
+
+.bubbleAction {
+  border-radius: var(--input-radius);
+  color: var(--editor-text-muted);
+}

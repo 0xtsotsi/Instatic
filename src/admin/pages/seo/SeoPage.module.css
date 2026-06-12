@@ -1,0 +1,16 @@
+.tabsRow {
+  display: flex;
+  gap: 6px;
+}
+
+.body {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.loadError {
+  margin: 24px 0;
+  color: var(--editor-danger-text);
+  font-size: 13px;
+}

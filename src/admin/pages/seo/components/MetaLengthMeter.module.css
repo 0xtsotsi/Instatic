@@ -1,0 +1,56 @@
+.meter {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.meterInherited {
+  opacity: 0.55;
+}
+
+.track {
+  position: relative;
+  flex: 1;
+  height: 3px;
+  border-radius: 2px;
+  background: var(--editor-surface-4);
+  overflow: hidden;
+}
+
+.fill {
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: var(--seo-meter-fill);
+  border-radius: 2px;
+}
+
+.fill_ok {
+  background: var(--editor-success-green);
+}
+
+.fill_amber {
+  background: var(--editor-warning);
+}
+
+.fill_over {
+  background: var(--editor-danger);
+}
+
+.count {
+  font-size: 10px;
+  font-variant-numeric: tabular-nums;
+  color: var(--editor-text-muted);
+}
+
+.count_amber {
+  color: var(--editor-warning-text);
+}
+
+.count_over {
+  color: var(--editor-danger-text);
+}
+
+/* Track reads the fill width from the custom property set inline. */
+.track {
+  --seo-meter-fill: 0%;
+}
