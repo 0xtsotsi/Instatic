@@ -279,9 +279,11 @@ export function SaveControls({
   canManage: boolean
   onSave: () => void
 }) {
+  // "Saved" alone reads as "live" — it isn't. SEO follows the publish
+  // lifecycle (static pages are baked at publish time), so say so.
   const statusText =
     state === 'saving' ? 'Saving…'
-    : state === 'saved' && !dirty ? 'Saved'
+    : state === 'saved' && !dirty ? 'Saved — goes live on publish'
     : dirty ? 'Unsaved changes' : ''
   return (
     <div className={styles.saveControls}>
