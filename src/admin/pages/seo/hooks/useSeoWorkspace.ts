@@ -24,6 +24,8 @@ export interface SeoWorkspace {
   siteName: string
   language: string | null
   publicOrigin: string | null
+  /** Site favicon — rendered in the Google snippet preview's icon circle. */
+  faviconUrl: string | null
   siteSeo: SiteSeoSettings | null
   targets: SeoTarget[]
   /** Context bundle for `resolveTargetSeo` / health computation. */
@@ -40,6 +42,7 @@ export function useSeoWorkspace(): SeoWorkspace {
   const [siteName, setSiteName] = useState('')
   const [language, setLanguage] = useState<string | null>(null)
   const [publicOrigin, setPublicOrigin] = useState<string | null>(null)
+  const [faviconUrl, setFaviconUrl] = useState<string | null>(null)
   const [siteSeo, setSiteSeo] = useState<SiteSeoSettings | null>(null)
   const [targets, setTargets] = useState<SeoTarget[]>([])
 
@@ -52,6 +55,7 @@ export function useSeoWorkspace(): SeoWorkspace {
         setSiteName(payload.siteName)
         setLanguage(payload.language)
         setPublicOrigin(payload.publicOrigin)
+        setFaviconUrl(payload.faviconUrl)
         setSiteSeo(payload.siteSeo)
         setTargets(payload.targets)
         setError(null)
@@ -83,6 +87,7 @@ export function useSeoWorkspace(): SeoWorkspace {
     siteName,
     language,
     publicOrigin,
+    faviconUrl,
     siteSeo,
     targets,
     resolveContext: { siteName, language, publicOrigin, siteSeo, targets },

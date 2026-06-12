@@ -135,6 +135,7 @@ async function handleGetTargets(req: Request, db: DbClient): Promise<Response> {
     siteName: site?.name ?? '',
     language: site?.settings.language ?? null,
     publicOrigin: canonicalPublicOrigin(),
+    faviconUrl: site?.settings.faviconUrl ?? null,
     siteSeo: site?.settings.seo ?? null,
     targets: [...pageRows.map(pageRowToTarget), ...postTargets],
   })

@@ -100,6 +100,14 @@ const ALLOWLIST = new Set([
   // mode toggle's segmented pill pattern and shares the same constraints.
   'admin/pages/content/components/ContentModeToggle/ContentModeToggle.tsx',
 
+  // ── §8.8 SEO target index rows ──────────────────────────────────────────
+  // role="option" rows inside the SEO workspace's role="listbox" target
+  // index: full-width two-line rows (title + route, health dots right) and
+  // the pinned Site defaults card. Button's fixed per-size heights and
+  // white-space: nowrap crush the two-line layout — same rationale as the
+  // §8.1 nav rows and §8.7 listbox options.
+  'admin/pages/seo/components/SeoTargetIndex.tsx',
+
   // ── §8.7 Full-width row disclosure / listbox option custom layouts ──────
   // ColorTokenCard row toggle is a full-width structured row (title + meta,
   // expand caret pattern) — same pattern as §8.2 disclosures but on a

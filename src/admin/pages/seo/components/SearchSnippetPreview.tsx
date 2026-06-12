@@ -16,15 +16,21 @@ interface SearchSnippetPreviewProps {
   siteName: string
   origin: string | null
   routePath: string
+  /** Site favicon — shown in the icon circle like the real SERP. */
+  faviconUrl: string | null
 }
 
-export function SearchSnippetPreview({ resolved, siteName, origin, routePath }: SearchSnippetPreviewProps) {
+export function SearchSnippetPreview({ resolved, siteName, origin, routePath, faviconUrl }: SearchSnippetPreviewProps) {
   const siteLabel = serpSiteLabel(siteName, origin)
   return (
     <figure className={styles.serp} aria-label="Google search result preview">
       <div className={styles.head}>
         <span className={styles.favicon} aria-hidden="true">
-          {siteLabel.slice(0, 1).toUpperCase()}
+          {faviconUrl ? (
+            <img className={styles.faviconImage} src={faviconUrl} alt="" />
+          ) : (
+            siteLabel.slice(0, 1).toUpperCase()
+          )}
         </span>
         <span className={styles.headText}>
           <span className={styles.site}>{siteLabel}</span>

@@ -71,6 +71,7 @@ const TARGETS_PAYLOAD = {
   siteName: 'Acme',
   language: 'en',
   publicOrigin: 'https://acme.com',
+  faviconUrl: null,
   siteSeo: {
     titlePattern: '{page.title} — {site.name}',
     description: 'Site default description',

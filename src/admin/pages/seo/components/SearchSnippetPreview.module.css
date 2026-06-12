@@ -33,6 +33,12 @@
     flex-shrink: 0;
 }
 
+.faviconImage {
+    width: 18px;
+    height: 18px;
+    object-fit: contain;
+}
+
 .headText {
     display: flex;
     flex-direction: column;

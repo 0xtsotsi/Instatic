@@ -4,7 +4,7 @@
     display: flex;
     flex-direction: column;
     margin: 0;
-    border-radius: var(--editor-radius);
+    border-radius: var(--panel-radius);
     overflow: hidden;
     background: var(--seo-og-bg);
     font-family: Helvetica, arial, sans-serif;

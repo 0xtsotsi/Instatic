@@ -1,9 +1,13 @@
 /**
  * MetaLengthMeter — live character + approximate pixel-width meter for SEO
  * title/description fields, against Google's desktop truncation budgets
- * (~580px title / ~990px description). Zones: ok (≤85%), amber, over.
- * Inherited (placeholder) values render the meter muted — informative but
- * clearly not the user's own text.
+ * (~580px title / ~990px description).
+ *
+ * The fill carries a green → amber → red gradient that is sized to the FULL
+ * track and clipped by the fill width, so the colour genuinely progresses
+ * as the text grows instead of flipping between flat colours. Over budget,
+ * the whole fill turns danger-red. Inherited (placeholder) values render
+ * muted — informative but clearly not the user's own text.
  */
 import { cn } from '@ui/cn'
 import {
@@ -30,6 +34,9 @@ export function MetaLengthMeter({ text, budget, explicit }: MetaLengthMeterProps
   const width = approxPixelWidth(text)
   const zone = meterZone(width, pixelBudget)
   const fillPct = Math.min(100, Math.round((width / pixelBudget) * 100))
+  // The gradient spans the full track: a fill at X% shows the first X% of
+  // it, so colour position always matches budget position.
+  const gradientSpan = fillPct > 0 ? `${Math.round(10000 / fillPct)}% 100%` : '100% 100%'
 
   return (
     <div
@@ -37,11 +44,12 @@ export function MetaLengthMeter({ text, budget, explicit }: MetaLengthMeterProps
       role="status"
       aria-label={`${budget === 'title' ? 'Title' : 'Description'} length: ${text.length} characters, ${zone === 'over' ? 'over' : 'within'} the display budget`}
     >
-      <span
-        className={cn(styles.track)}
-        style={{ '--seo-meter-fill': `${fillPct}%` } as CSSProperties}
-      >
-        <span className={cn(styles.fill, styles[`fill_${zone}`])} />
+      <span className={styles.track}>
+        <span
+          className={cn(styles.fill, zone === 'over' && styles.fillOver)}
+          style={{ '--seo-meter-fill': `${fillPct}%`, '--seo-meter-gradient-span': gradientSpan } as CSSProperties}
+        />
+        <span className={styles.budgetTick} aria-hidden="true" />
       </span>
       <span className={cn(styles.count, styles[`count_${zone}`])}>
         {text.length}/{charGuide}

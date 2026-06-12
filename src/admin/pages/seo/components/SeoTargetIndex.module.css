@@ -5,16 +5,23 @@
     min-width: 0;
 }
 
-.summary {
-    margin: 0;
-    font-size: 11px;
+.issuesLine {
+    align-self: flex-start;
+    gap: 6px;
     color: var(--editor-warning-text);
+}
+
+.issuesDot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--editor-warning);
 }
 
 .scroller {
     display: flex;
     flex-direction: column;
-    gap: 14px;
+    gap: 16px;
     outline: none;
 }
 
@@ -23,23 +30,51 @@
     box-shadow: 0 0 0 2px var(--editor-focus-ring);
 }
 
-/* Pinned site-defaults card — its own rounded tile above the groups. */
-.siteRow {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 10px;
+/* ── Shared row reset — §8.8 bare buttons ────────────────────────────────── */
+.row,
+.siteCard {
+    appearance: none;
+    border: 0;
+    margin: 0;
+    font: inherit;
+    cursor: pointer;
     width: 100%;
+    text-align: left;
+    color: var(--editor-text);
+}
+
+/* ── Pinned Site defaults card ───────────────────────────────────────────── */
+.siteCard {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 10px;
     padding: 12px 14px;
     border-radius: var(--panel-radius);
     background: var(--editor-surface-2);
-    text-align: left;
+    transition: background 120ms ease;
 }
 
-.siteRow:hover {
+.siteCard:hover {
     background: var(--editor-surface-3);
 }
 
+.siteCardIcon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    border-radius: var(--editor-radius);
+    background: var(--editor-surface-4);
+    color: var(--editor-text);
+}
+
+.siteCardChevron {
+    color: var(--editor-text-subtle);
+}
+
+/* ── Groups ──────────────────────────────────────────────────────────────── */
 .group {
     display: flex;
     flex-direction: column;
@@ -47,6 +82,9 @@
 }
 
 .groupLabel {
+    display: flex;
+    align-items: center;
+    gap: 6px;
     margin: 0;
     padding: 0 2px;
     font-size: 10px;
@@ -54,6 +92,11 @@
     letter-spacing: 0.08em;
     text-transform: uppercase;
     color: var(--editor-text-secondary);
+}
+
+.groupCount {
+    font-weight: 500;
+    color: var(--editor-text-subtle);
 }
 
 .groupList {
@@ -65,48 +108,58 @@
     overflow: hidden;
 }
 
+/* ── Target rows ─────────────────────────────────────────────────────────── */
 .row {
-    display: flex;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
     align-items: center;
-    justify-content: space-between;
     gap: 10px;
-    width: 100%;
-    padding: 10px 14px;
-    border-radius: 0;
+    padding: 9px 13px;
     background: var(--editor-surface-2);
-    text-align: left;
+    transition: background 120ms ease;
 }
 
 .row:hover {
     background: var(--editor-surface-3);
 }
 
-.rowSelected,
-.rowSelected:hover {
+.selected,
+.selected:hover {
     background: var(--editor-surface-4);
     box-shadow: inset 2px 0 0 var(--editor-accent);
 }
 
-.rowMain {
+.rowText {
     display: flex;
     flex-direction: column;
-    gap: 2px;
+    gap: 1px;
     min-width: 0;
 }
 
 .rowTitle {
-    font-size: 12px;
+    font-size: 12.5px;
     font-weight: 600;
+    line-height: 17px;
     color: var(--editor-text-bright);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
 }
 
-.rowSub {
-    font-size: 11px;
+.rowRoute {
+    font-size: 10.5px;
+    line-height: 15px;
     font-family: var(--font-mono);
-    color: var(--editor-text-muted);
+    color: var(--editor-text-subtle);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.rowDescriptor {
+    font-size: 11px;
+    line-height: 15px;
+    color: var(--editor-text-subtle);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -114,13 +167,13 @@
 
 .dots {
     display: inline-flex;
-    gap: 3px;
+    gap: 4px;
     flex-shrink: 0;
 }
 
 .dot {
-    width: 6px;
-    height: 6px;
+    width: 5px;
+    height: 5px;
     border-radius: 50%;
 }
 

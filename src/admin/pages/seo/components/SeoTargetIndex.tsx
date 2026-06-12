@@ -1,15 +1,20 @@
 /**
  * SeoTargetIndex — the Meta tab's right column: navigation + audit context.
  *
- * Search, kind filters, an issues summary chip, the pinned Site defaults
- * card, then the targets grouped under Pages / Templates / Posts section
- * headers — each row shows title, mono route, and per-field health dots.
- * Keyboard: ↑/↓ move the selection, `/` focuses search.
+ * Search, kind filters, a clickable issues line, the pinned Site defaults
+ * card (globe icon), then targets grouped under "Pages · N" style section
+ * headers. Rows are bare <button> list rows (§8.8 in
+ * `button-primitive-usage.test.ts`) — two lines (title + route/descriptor)
+ * with per-field health dots on the right; the Button primitive's fixed
+ * heights and nowrap cannot host this layout. Keyboard: ↑/↓ move the
+ * selection, `/` focuses search.
  */
 import { useRef, useState, type KeyboardEvent } from 'react'
 import { SearchBar } from '@ui/components/SearchBar'
 import { SegmentedControl } from '@ui/components/SegmentedControl'
 import { Button } from '@ui/components/Button'
+import { GlobeSolidIcon } from 'pixel-art-icons/icons/globe-solid'
+import { ChevronRightIcon } from 'pixel-art-icons/icons/chevron-right'
 import { computeSeoHealth, type SeoHealth } from '@core/seo'
 import { cn } from '@ui/cn'
 import type { SeoTarget } from '../lib/seoApi'
@@ -119,10 +124,18 @@ export function SeoTargetIndex({ workspace, selectedId, siteDefaultsId, onSelect
         data-testid="seo-target-filter"
       />
 
-      {issueCount > 0 && (
-        <p className={styles.summary} role="status">
-          {issueCount} {issueCount === 1 ? 'target needs' : 'targets need'} attention
-        </p>
+      {issueCount > 0 && filter !== 'issues' && (
+        <Button
+          type="button"
+          variant="ghost"
+          size="xs"
+          className={styles.issuesLine}
+          onClick={() => setFilter('issues')}
+          data-testid="seo-issues-line"
+        >
+          <span className={styles.issuesDot} aria-hidden="true" />
+          <span>{issueCount} {issueCount === 1 ? 'target needs' : 'targets need'} attention</span>
+        </Button>
       )}
 
       <div
@@ -132,24 +145,31 @@ export function SeoTargetIndex({ workspace, selectedId, siteDefaultsId, onSelect
         tabIndex={0}
         onKeyDown={handleListKeyDown}
       >
-        <Button
+        {/* §8.8 — pinned card + rows are bare <button> list rows. */}
+        <button
           type="button"
-          variant="ghost"
-          className={cn(styles.siteRow, selectedId === siteDefaultsId && styles.rowSelected)}
+          className={cn(styles.siteCard, selectedId === siteDefaultsId && styles.selected)}
           role="option"
           aria-selected={selectedId === siteDefaultsId}
           onClick={() => onSelect(siteDefaultsId)}
           data-testid="seo-target-site-defaults"
         >
-          <span className={styles.rowMain}>
-            <span className={styles.rowTitle}>Site defaults</span>
-            <span className={styles.rowSub}>Fallbacks for every target</span>
+          <span className={styles.siteCardIcon} aria-hidden="true">
+            <GlobeSolidIcon size={14} />
           </span>
-        </Button>
+          <span className={styles.rowText}>
+            <span className={styles.rowTitle}>Site defaults</span>
+            <span className={styles.rowDescriptor}>Fallbacks for every target</span>
+          </span>
+          <ChevronRightIcon size={11} aria-hidden="true" className={styles.siteCardChevron} />
+        </button>
 
         {groups.map((group) => (
           <div key={group.label} className={styles.group}>
-            <h3 className={styles.groupLabel}>{group.label}</h3>
+            <h3 className={styles.groupLabel}>
+              {group.label}
+              <span className={styles.groupCount}>{group.items.length}</span>
+            </h3>
             <div className={styles.groupList}>
               {group.items.map(({ target, health }) => (
                 <TargetRow
@@ -183,23 +203,26 @@ function TargetRow({
   onSelect: () => void
 }) {
   return (
-    <Button
+    <button
       type="button"
-      variant="ghost"
-      className={cn(styles.row, selected && styles.rowSelected)}
+      className={cn(styles.row, selected && styles.selected)}
       role="option"
       aria-selected={selected}
       onClick={onSelect}
       data-testid={`seo-target-${target.id}`}
     >
-      <span className={styles.rowMain}>
+      <span className={styles.rowText}>
         <span className={styles.rowTitle}>{target.title}</span>
-        <span className={styles.rowSub}>
-          {target.route ?? (target.kind === 'template' ? `Entry template${target.tableSlug ? ` · ${target.tableSlug}` : ''}` : '—')}
-        </span>
+        {target.route !== null ? (
+          <span className={styles.rowRoute}>{target.route}</span>
+        ) : (
+          <span className={styles.rowDescriptor}>
+            Entry template{target.tableSlug ? ` · ${target.tableSlug}` : ''}
+          </span>
+        )}
       </span>
       <HealthDots health={health} />
-    </Button>
+    </button>
   )
 }
 

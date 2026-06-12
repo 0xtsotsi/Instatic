@@ -39,6 +39,7 @@ export const SeoTargetsResponseSchema = Type.Object({
   siteName: Type.String(),
   language: Type.Union([Type.String(), Type.Null()]),
   publicOrigin: Type.Union([Type.String(), Type.Null()]),
+  faviconUrl: Type.Union([Type.String(), Type.Null()]),
   siteSeo: Type.Union([SiteSeoSettingsSchema, Type.Null()]),
   targets: Type.Array(SeoTargetSchema),
 })

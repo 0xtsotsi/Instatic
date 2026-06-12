@@ -41,6 +41,7 @@ export function SeoPreviewRail({ resolved, workspace, routePath, schemaTarget }:
           siteName={workspace.siteName}
           origin={workspace.publicOrigin}
           routePath={routePath}
+          faviconUrl={workspace.faviconUrl}
         />
       </section>
 
