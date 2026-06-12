@@ -309,7 +309,7 @@ describe('SEO Meta tab', () => {
     expect(publish).toBeDefined()
   })
 
-  it('renders the scoreboard and jumps the index to the issues filter', async () => {
+  it('renders the sidebar score summary and jumps the index to the issues filter', async () => {
     mockSeoFetch()
     renderWithSession(<MetaHarness />)
 
@@ -317,9 +317,9 @@ describe('SEO Meta tab', () => {
     await screen.findByLabelText(/Site SEO score: \d+ out of 100/)
     expect(screen.getByTestId('seo-score-chip')).toBeDefined()
 
-    // Every seeded target has at least one open check, so the review action
+    // Every seeded target has at least one open check, so the issues line
     // is present; clicking it narrows the index to issue targets only.
-    fireEvent.click(screen.getByTestId('seo-scoreboard-review-issues'))
+    fireEvent.click(screen.getByTestId('seo-issues-line'))
     expect(screen.queryByTestId('seo-issues-line')).toBeNull()
     expect(screen.getByTestId('seo-target-page_home')).toBeDefined()
   })

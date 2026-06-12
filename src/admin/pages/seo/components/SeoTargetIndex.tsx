@@ -1,9 +1,8 @@
 /**
  * SeoTargetIndex — the Meta tab's right column: navigation + audit context.
  *
- * Search, kind filters (lifted to MetaTab so the scoreboard can jump to the
- * issues view), a clickable issues line, the pinned Site defaults card
- * (globe icon), then targets grouped under "Pages · N" style section
+ * Search, kind filters, a clickable issues line, the pinned Site defaults
+ * card (globe icon), then targets grouped under "Pages · N" style section
  * headers. Rows are bare <button> list rows (§8.8 in
  * `button-primitive-usage.test.ts`) — two lines (title + route/descriptor)
  * with a tiered score pill on the right; the Button primitive's fixed
@@ -22,7 +21,7 @@ import type { SeoTarget } from '../lib/seoApi'
 import type { IndexedSeoTarget } from '../lib/indexTargets'
 import styles from './SeoTargetIndex.module.css'
 
-export type SeoTargetFilter = 'all' | 'pages' | 'posts' | 'templates' | 'issues'
+type SeoTargetFilter = 'all' | 'pages' | 'posts' | 'templates' | 'issues'
 
 const FILTER_OPTIONS: { value: SeoTargetFilter; label: string }[] = [
   { value: 'all', label: 'All' },
@@ -39,8 +38,6 @@ interface TargetGroup {
 
 interface SeoTargetIndexProps {
   indexed: IndexedSeoTarget[]
-  filter: SeoTargetFilter
-  onFilterChange: (filter: SeoTargetFilter) => void
   selectedId: string
   siteDefaultsId: string
   onSelect: (id: string) => void
@@ -48,13 +45,12 @@ interface SeoTargetIndexProps {
 
 export function SeoTargetIndex({
   indexed,
-  filter,
-  onFilterChange,
   selectedId,
   siteDefaultsId,
   onSelect,
 }: SeoTargetIndexProps) {
   const [query, setQuery] = useState('')
+  const [filter, setFilter] = useState<SeoTargetFilter>('all')
   const searchRef = useRef<HTMLInputElement>(null)
 
   const issueCount = indexed.filter((item) => item.report.issueCount > 0).length
@@ -112,7 +108,7 @@ export function SeoTargetIndex({
       <SegmentedControl
         value={filter}
         options={FILTER_OPTIONS}
-        onChange={onFilterChange}
+        onChange={setFilter}
         size="xs"
         fullWidth
         aria-label="Filter targets"
@@ -125,7 +121,7 @@ export function SeoTargetIndex({
           variant="ghost"
           size="xs"
           className={styles.issuesLine}
-          onClick={() => onFilterChange('issues')}
+          onClick={() => setFilter('issues')}
           data-testid="seo-issues-line"
         >
           <span className={styles.issuesDot} aria-hidden="true" />

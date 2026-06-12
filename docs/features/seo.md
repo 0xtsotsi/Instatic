@@ -109,12 +109,12 @@ button, Save draft + Open live URL menu). Posts publish through the
 incremental row endpoint; everything else runs the step-up-gated full site
 publish — the same machinery as the Site toolbar, not a parallel path.
 
-- **Meta tab** — top: scoreboard — site-wide SEO score in a
-  `LiquidProgressRing` (tier-toned liquid) plus coverage tiles (search
-  snippets / social cards / indexable / needs-work with a jump to the issues
-  filter), computed from one shared `indexSeoTargets` pass. Right: target
-  index (search, All/Pages/Posts/Templates/Issues filters, tiered score
-  pills per row, ↑/↓/Enter + `/` keyboard nav, pinned Site defaults row).
+- **Meta tab** — right sidebar: site-wide SEO score in a
+  `LiquidProgressRing` (tier-toned liquid, computed from one shared
+  `indexSeoTargets` pass) over the target index (search,
+  All/Pages/Posts/Templates/Issues filters, clickable issues line, tiered
+  score pills per row, ↑/↓/Enter + `/` keyboard nav, pinned Site defaults
+  row).
   Left: sticky preview editor with Search / Open Graph / X / Schema platform
   views, a live score chip, and a clickable improvements list (each row
   focuses the field it describes). Controlled `Input`/`Textarea` primitives
