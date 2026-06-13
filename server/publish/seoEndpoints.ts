@@ -24,7 +24,7 @@ import {
   absoluteUrl,
   type SiteSeoSettings,
 } from '@core/seo'
-import { canonicalPublicOrigin } from '../auth/security'
+import { canonicalPublicOrigin, requestHostIsCanonical } from '../auth/security'
 import { listPublishedRowsForSitemap } from '../repositories/data/publish'
 import { getLatestSnapshotForVersion } from './publishedSnapshotCache'
 import { getPublishVersion } from './publishState'
@@ -74,7 +74,17 @@ async function publishedSeoSettings(db: DbClient): Promise<SiteSeoSettings | und
 // robots.txt
 // ---------------------------------------------------------------------------
 
-export async function serveRobotsTxt(db: DbClient, url: URL): Promise<Response> {
+export async function serveRobotsTxt(db: DbClient, url: URL, req: Request): Promise<Response> {
+  // Non-canonical host (preview/staging) → blanket Disallow, uncached: the
+  // body doesn't depend on settings and must never be confused with the
+  // production body (the cache keys on the resolved canonical origin, which
+  // is identical for every host).
+  if (requestHostIsCanonical(req) === false) {
+    return new Response(generateRobotsTxt({ sitemapEnabled: false, blockAll: true }), {
+      headers: { 'content-type': 'text/plain; charset=utf-8', 'x-robots-tag': 'noindex' },
+    })
+  }
+
   const version = getPublishVersion()
   const origin = resolveOrigin(url)
 

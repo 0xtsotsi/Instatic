@@ -78,6 +78,22 @@ export const SeoOrganizationSchema = Type.Object({
 
 export type SeoOrganization = Static<typeof SeoOrganizationSchema>
 
+/**
+ * One custom robots.txt group: a user-agent plus its allow/disallow paths.
+ * Rendered as a `User-agent:` block; groups targeting the same agent as a
+ * built-in block (the `*` group, or an AI-crawler toggle) merge into it.
+ */
+export const SeoRobotsRuleSchema = Type.Object({
+  /** Target user-agent token, e.g. `*` or `Googlebot`. */
+  userAgent: Type.String(),
+  /** Path prefixes to Allow (each rendered as `Allow: <path>`). */
+  allow: Type.Optional(Type.Array(Type.String())),
+  /** Path prefixes to Disallow (each rendered as `Disallow: <path>`). */
+  disallow: Type.Optional(Type.Array(Type.String())),
+})
+
+export type SeoRobotsRule = Static<typeof SeoRobotsRuleSchema>
+
 export const SeoRobotsSettingsSchema = Type.Object({
   /** false ⇒ `Disallow: /` for every user agent. Defaults to true. */
   indexingEnabled: Type.Optional(Type.Boolean()),
@@ -85,6 +101,19 @@ export const SeoRobotsSettingsSchema = Type.Object({
   allowAiTrainingCrawlers: Type.Optional(Type.Boolean()),
   /** false ⇒ Disallow blocks for AI_ANSWER_CRAWLERS. Defaults to true. */
   allowAiAnswerCrawlers: Type.Optional(Type.Boolean()),
+  /**
+   * false ⇒ skip the default `Disallow:` lines for non-content system routes
+   * (`/admin`, `/_instatic/`) under `User-agent: *`. Defaults to true.
+   */
+  disallowSystemPaths: Type.Optional(Type.Boolean()),
+  /** Custom per-user-agent allow/disallow groups. */
+  rules: Type.Optional(Type.Array(SeoRobotsRuleSchema)),
+  /**
+   * Raw directives appended verbatim to the generated file — the escape
+   * hatch for one-offs (Clean-param, Host, a brand-new crawler). Linted in
+   * the admin tab but never silently dropped.
+   */
+  extraDirectives: Type.Optional(Type.String()),
 })
 
 export type SeoRobotsSettings = Static<typeof SeoRobotsSettingsSchema>

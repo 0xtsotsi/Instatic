@@ -14,6 +14,7 @@ import {
   resetSeoEndpointCachesForTests,
 } from '../../../server/publish/seoEndpoints'
 import { bumpPublishVersion } from '../../../server/publish/publishState'
+import { configurePublicOrigins, resetPublicOrigins } from '../../../server/auth/security'
 import type { SiteSeoSettings } from '@core/seo'
 
 function makeSiteJson(seo: SiteSeoSettings | undefined) {
@@ -102,6 +103,9 @@ function makeFakeDb(seo: SiteSeoSettings | undefined, sitemapRows: FakeRow[]): D
 }
 
 const URL_NO_ORIGIN = new URL('http://localhost:3001/robots.txt')
+// No public origin configured in these tests ⇒ requestHostIsCanonical → null
+// ⇒ env protection is inert, so this request never changes the output.
+const REQ = new Request('http://localhost:3001/robots.txt')
 
 beforeEach(() => {
   resetSeoEndpointCachesForTests()
@@ -113,7 +117,7 @@ beforeEach(() => {
 
 describe('GET /robots.txt', () => {
   it('serves text/plain with default allow + sitemap line', async () => {
-    const res = await serveRobotsTxt(makeFakeDb(undefined, []), URL_NO_ORIGIN)
+    const res = await serveRobotsTxt(makeFakeDb(undefined, []), URL_NO_ORIGIN, REQ)
     expect(res.headers.get('content-type')).toBe('text/plain; charset=utf-8')
     const body = await res.text()
     expect(body).toContain('User-agent: *\nAllow: /')
@@ -126,28 +130,50 @@ describe('GET /robots.txt', () => {
       { robots: { allowAiTrainingCrawlers: false, allowAiAnswerCrawlers: false } },
       [],
     )
-    const body = await (await serveRobotsTxt(db, URL_NO_ORIGIN)).text()
+    const body = await (await serveRobotsTxt(db, URL_NO_ORIGIN, REQ)).text()
     expect(body).toContain('User-agent: GPTBot\nDisallow: /')
     expect(body).toContain('User-agent: PerplexityBot\nDisallow: /')
   })
 
   it('disables indexing wholesale when indexingEnabled is false', async () => {
     const db = makeFakeDb({ robots: { indexingEnabled: false } }, [])
-    const body = await (await serveRobotsTxt(db, URL_NO_ORIGIN)).text()
+    const body = await (await serveRobotsTxt(db, URL_NO_ORIGIN, REQ)).text()
     expect(body).toContain('User-agent: *\nDisallow: /')
   })
 
   it('caches per publish version', async () => {
     const db = makeFakeDb(undefined, [])
-    const first = await (await serveRobotsTxt(db, URL_NO_ORIGIN)).text()
+    const first = await (await serveRobotsTxt(db, URL_NO_ORIGIN, REQ)).text()
     // Same version: served from cache even if settings change underneath.
     const dbChanged = makeFakeDb({ robots: { indexingEnabled: false } }, [])
-    const second = await (await serveRobotsTxt(dbChanged, URL_NO_ORIGIN)).text()
+    const second = await (await serveRobotsTxt(dbChanged, URL_NO_ORIGIN, REQ)).text()
     expect(second).toBe(first)
     // New publish version: regenerated.
     bumpPublishVersion()
-    const third = await (await serveRobotsTxt(dbChanged, URL_NO_ORIGIN)).text()
+    const third = await (await serveRobotsTxt(dbChanged, URL_NO_ORIGIN, REQ)).text()
     expect(third).toContain('Disallow: /')
+  })
+
+  it('serves a blanket Disallow on a non-canonical host (preview protection)', async () => {
+    configurePublicOrigins(['https://acme.com'])
+    try {
+      const db = makeFakeDb(undefined, [])
+      // Request arriving on a preview host that is NOT the configured origin.
+      const previewReq = new Request('https://preview-abc.vercel.app/robots.txt', {
+        headers: { host: 'preview-abc.vercel.app' },
+      })
+      const res = await serveRobotsTxt(db, new URL('https://preview-abc.vercel.app/robots.txt'), previewReq)
+      const body = await res.text()
+      expect(body).toBe('User-agent: *\nDisallow: /\n')
+      expect(res.headers.get('x-robots-tag')).toBe('noindex')
+
+      // The canonical host still serves the normal allow body.
+      const canonReq = new Request('https://acme.com/robots.txt', { headers: { host: 'acme.com' } })
+      const canon = await (await serveRobotsTxt(db, new URL('https://acme.com/robots.txt'), canonReq)).text()
+      expect(canon).toContain('User-agent: *\nAllow: /')
+    } finally {
+      resetPublicOrigins()
+    }
   })
 })
 

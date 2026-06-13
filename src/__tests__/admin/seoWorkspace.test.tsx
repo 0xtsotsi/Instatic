@@ -371,6 +371,44 @@ describe('SEO Robots tab', () => {
     fireEvent.click(screen.getByTestId('seo-robots-ai-training'))
     expect(screen.getByTestId('seo-robots-preview').getAttribute('data-code')).toContain('User-agent: GPTBot')
   })
+
+  it('disallows system paths by default and lets you opt out', async () => {
+    mockSeoFetch()
+    renderWithSession(<RobotsHarness />)
+
+    const preview = await screen.findByTestId('seo-robots-preview')
+    expect(preview.getAttribute('data-code')).toContain('Disallow: /admin')
+
+    fireEvent.click(screen.getByTestId('seo-robots-system-paths'))
+    expect(screen.getByTestId('seo-robots-preview').getAttribute('data-code')).not.toContain('Disallow: /admin')
+  })
+
+  it('adds a custom rule and reflects it in the preview', async () => {
+    mockSeoFetch()
+    renderWithSession(<RobotsHarness />)
+    await screen.findByTestId('seo-robots-preview')
+
+    fireEvent.click(screen.getByTestId('seo-robots-add-rule'))
+    fireEvent.change(screen.getByTestId('seo-robots-rule-ua-0'), { target: { value: 'Bingbot' } })
+    fireEvent.change(screen.getByLabelText('Rule 1 disallow paths'), { target: { value: '/no-bing' } })
+
+    const code = screen.getByTestId('seo-robots-preview').getAttribute('data-code') ?? ''
+    expect(code).toContain('User-agent: Bingbot')
+    expect(code).toContain('Disallow: /no-bing')
+  })
+
+  it('URL tester reports a blocked system path and an allowed content path', async () => {
+    mockSeoFetch()
+    renderWithSession(<RobotsHarness />)
+    await screen.findByTestId('seo-robots-preview')
+
+    fireEvent.change(screen.getByTestId('seo-robots-test-ua'), { target: { value: 'Googlebot' } })
+    fireEvent.change(screen.getByTestId('seo-robots-test-path'), { target: { value: '/admin/users' } })
+    expect(screen.getByTestId('seo-robots-test-result').textContent).toContain('Blocked')
+
+    fireEvent.change(screen.getByTestId('seo-robots-test-path'), { target: { value: '/about' } })
+    expect(screen.getByTestId('seo-robots-test-result').textContent).toContain('Allowed')
+  })
 })
 
 describe('Tools navigation', () => {

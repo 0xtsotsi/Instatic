@@ -13,6 +13,7 @@ export {
   SiteSeoSettingsSchema,
   SeoOrganizationSchema,
   SeoRobotsSettingsSchema,
+  SeoRobotsRuleSchema,
   SeoSitemapSettingsSchema,
   OgTypeSchema,
   XCardTypeSchema,
@@ -22,6 +23,7 @@ export {
   type SiteSeoSettings,
   type SeoOrganization,
   type SeoRobotsSettings,
+  type SeoRobotsRule,
   type SeoSitemapSettings,
   type OgType,
   type XCardType,
@@ -44,7 +46,15 @@ export {
 
 export { AI_TRAINING_CRAWLERS, AI_ANSWER_CRAWLERS } from './aiCrawlers'
 
-export { generateRobotsTxt, type GenerateRobotsTxtInput } from './robots'
+export { generateRobotsTxt, SYSTEM_DISALLOW_PATHS, type GenerateRobotsTxtInput } from './robots'
+
+export {
+  lintRobotsTxt,
+  matchRobots,
+  type RobotsLintFinding,
+  type RobotsLintLevel,
+  type RobotsMatch,
+} from './robotsAnalysis'
 
 export {
   computeSeoReport,
