@@ -21,7 +21,7 @@ One engine module owns everything: **`src/core/seo/`** (barrel-gated).
 | `jsonLd.ts` | `buildJsonLdEntities` (`WebSite`, `Organization`, `Article`, `BreadcrumbList`) + `serializeJsonLd` (escapes `</script`, `<!--`) |
 | `robots.ts` | `generateRobotsTxt` — serves the stored body verbatim (`SeoRobotsSettings.content`), falling back to `DEFAULT_ROBOTS_TEMPLATE` when empty and appending the origin-resolved `Sitemap:` line unless the body already has one. `SYSTEM_DISALLOW_PATHS` seeds the default template + the tab's "block system paths" shortcut. `blockAll` serves a bare `Disallow: /` for preview hosts. |
 | `robotsAnalysis.ts` | `lintRobotsTxt` (flags unknown directives, rules before any `User-agent`, malformed values) + `matchRobots` (is a path crawlable for a UA — Google longest-match, `Allow` tie-break, `*`/`$` support). Powers the Robots tab's issue list and URL tester, plus the contextual recommendations. |
-| `aiCrawlers.ts` | The AI-crawler user-agent lists behind the Robots tab's two toggles |
+| `aiCrawlers.ts` | The AI-crawler user-agent lists the Robots tab's "block AI crawlers" shortcuts insert (training + answer groups) |
 | `health.ts` | `computeSeoReport` — per-target weighted checks + 0–100 score (`aggregateSeoScore`, `seoScoreTier` for the site-wide rollup and good/fair/poor tiers) |
 | `lengthMeter.ts` | Approximate pixel-width metering with an ideal band (~580px title / ~990px description budgets; "ok" only between the too-short minimum and the budget) |
 
