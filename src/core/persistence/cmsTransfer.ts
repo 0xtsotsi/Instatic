@@ -9,10 +9,10 @@
  * return standard JSON envelopes validated with TypeBox via `readEnvelope`.
  */
 
-import type { SiteBundle, BundlePreview, ImportResult, ImportStrategy, ExportRequest } from '@core/data/bundleSchema'
-import { SiteBundleSchema, BundlePreviewSchema, ImportResultSchema } from '@core/data/bundleSchema'
+import type { SiteBundle, BundlePreview, ImportResult, ImportStrategy, ExportRequest, ExportEstimate } from '@core/data/bundleSchema'
+import { SiteBundleSchema, BundlePreviewSchema, ImportResultSchema, ExportEstimateSchema } from '@core/data/bundleSchema'
 import { parseValue, formatValueErrors, compiled } from '@core/utils/typeboxHelpers'
-import { readEnvelope, assertOk } from '@core/http'
+import { apiRequest, readEnvelope, assertOk } from '@core/http'
 
 // ---------------------------------------------------------------------------
 // SiteBundleParseError
@@ -59,6 +59,32 @@ export async function exportSiteBundle(opts: ExportRequest): Promise<Blob> {
   })
   await assertOk(res, 'Failed to export site')
   return res.blob()
+}
+
+// ---------------------------------------------------------------------------
+// estimateSiteBundle
+// ---------------------------------------------------------------------------
+
+/**
+ * POST /admin/api/cms/export/estimate
+ *
+ * Returns the exact byte size the bundle WOULD have for the given request,
+ * computed server-side from the same selection logic as the real export (it
+ * never reads media files off disk). Used to drive the "Estimated size" line
+ * live as the operator toggles options. Pass an `AbortSignal` so superseded
+ * requests cancel cleanly; detect cancellation with `isAbortError`.
+ */
+export async function estimateSiteBundle(
+  opts: ExportRequest,
+  signal?: AbortSignal,
+): Promise<ExportEstimate> {
+  return apiRequest('/admin/api/cms/export/estimate', {
+    method: 'POST',
+    body: opts,
+    schema: ExportEstimateSchema,
+    signal,
+    fallbackMessage: 'Failed to estimate export size',
+  })
 }
 
 // ---------------------------------------------------------------------------

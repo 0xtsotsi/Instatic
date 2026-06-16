@@ -14,12 +14,16 @@
  */
 
 import { describe, test, expect, beforeAll } from 'bun:test'
+import { mkdtemp, writeFile, rm } from 'node:fs/promises'
+import { tmpdir } from 'node:os'
+import { join } from 'node:path'
 import { createSqliteClient } from '../../../server/db/sqlite'
 import { runMigrations } from '../../../server/db/runMigrations'
 import { sqliteMigrations } from '../../../server/db/migrations-sqlite'
 import { saveDraftSite } from '../../../server/repositories/site'
 import { createUser } from '../../../server/repositories/users'
 import { createSession } from '../../../server/auth/sessions'
+import { createMediaAsset } from '../../../server/repositories/media'
 import {
   createSessionToken,
   hashSessionToken,
@@ -388,5 +392,97 @@ describe('handleExportRoute — auth', () => {
     const req = new Request('http://localhost/admin/api/cms/export', { method: 'GET' })
     const res = await handleExportRoute(req, db)
     expect(res!.status).toBe(401)
+  })
+})
+
+// ---------------------------------------------------------------------------
+// Estimate endpoint — must equal the real download size exactly, because both
+// run the same selection logic. The estimate just skips reading media bytes
+// and sizes them analytically (Base64 length) instead.
+// ---------------------------------------------------------------------------
+
+async function estimateBytes(path: string, body: unknown, cookieStr: string, opts?: { uploadsDir?: string }): Promise<number> {
+  const res = await handleExportRoute(makePostRequest(path, cookieStr, body), db, opts)
+  expect(res!.status).toBe(200)
+  const parsed = JSON.parse(await res!.text()) as { bytes: number }
+  return parsed.bytes
+}
+
+describe('handleExportRoute — POST /export/estimate', () => {
+  test('estimate equals the real download byte length exactly (no media)', async () => {
+    const dl = await handleExportRoute(makePostRequest('/admin/api/cms/export', cookie, {}), db)
+    const realBytes = Buffer.byteLength(await dl!.text(), 'utf8')
+
+    const bytes = await estimateBytes('/admin/api/cms/export/estimate', {}, cookie)
+    expect(bytes).toBe(realBytes)
+  })
+
+  test('estimate drops the shell cost when includeSite is false, still matching the real download', async () => {
+    const withSite = await estimateBytes('/admin/api/cms/export/estimate', { includeSite: true }, cookie)
+    const withoutSite = await estimateBytes('/admin/api/cms/export/estimate', { includeSite: false }, cookie)
+    expect(withoutSite).toBeLessThan(withSite)
+
+    const realNoSite = await handleExportRoute(
+      makePostRequest('/admin/api/cms/export', cookie, { includeSite: false }),
+      db,
+    )
+    expect(withoutSite).toBe(Buffer.byteLength(await realNoSite!.text(), 'utf8'))
+  })
+
+  test('requires a session (401 without a cookie)', async () => {
+    const req = new Request('http://localhost/admin/api/cms/export/estimate', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: '{}',
+    })
+    const res = await handleExportRoute(req, db)
+    expect(res!.status).toBe(401)
+  })
+})
+
+describe('handleExportRoute — POST /export/estimate with embedded media', () => {
+  test('estimate equals the real download byte length exactly, including Base64 media bytes', async () => {
+    const mediaDb = createSqliteClient(':memory:')
+    await runMigrations(mediaDb, sqliteMigrations)
+    const mediaCookie = await seedAuth(mediaDb)
+
+    const uploadsDir = await mkdtemp(join(tmpdir(), 'instatic-export-estimate-'))
+    try {
+      // Seed one media asset whose bytes live on disk. 5000 raw bytes → a
+      // Base64 payload that isn't a clean multiple of 3 (exercises padding).
+      const fileBytes = Buffer.alloc(5000, 7)
+      await writeFile(join(uploadsDir, 'seed.bin'), fileBytes)
+      await createMediaAsset(mediaDb, {
+        id: 'asset-1',
+        filename: 'seed.bin',
+        mimeType: 'application/octet-stream',
+        sizeBytes: fileBytes.length,
+        storagePath: 'seed.bin',
+        publicPath: '/uploads/seed.bin',
+        uploadedByUserId: null,
+        storageAdapterId: '',
+        externallyHosted: false,
+      })
+
+      const dl = await handleExportRoute(
+        makePostRequest('/admin/api/cms/export', mediaCookie, { includeMedia: true }),
+        mediaDb,
+        { uploadsDir },
+      )
+      const realBytes = Buffer.byteLength(await dl!.text(), 'utf8')
+
+      const estRes = await handleExportRoute(
+        makePostRequest('/admin/api/cms/export/estimate', mediaCookie, { includeMedia: true }),
+        mediaDb,
+        { uploadsDir },
+      )
+      const { bytes } = JSON.parse(await estRes!.text()) as { bytes: number }
+
+      expect(bytes).toBe(realBytes)
+      // Sanity: media actually dominated (the asset's bytes are present).
+      expect(bytes).toBeGreaterThan(5000)
+    } finally {
+      await rm(uploadsDir, { recursive: true, force: true })
+    }
   })
 })

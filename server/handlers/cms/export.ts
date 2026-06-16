@@ -3,12 +3,19 @@
  *
  *   GET  /admin/api/cms/export
  *   POST /admin/api/cms/export
+ *   POST /admin/api/cms/export/estimate   → { bytes } (size only, no download)
  *
  * Returns a `SiteBundle` JSON that captures a full or partial site state:
  *   - optionally the lean site shell (breakpoints, settings, classes, files, runtime)
  *   - selected (or all) data tables
  *   - selected (or all) non-deleted data rows
  *   - optionally: non-deleted media assets with bytes embedded as base64
+ *
+ * The `/export/estimate` path runs the IDENTICAL selection logic but reports
+ * only the bundle's byte size — without reading media files off disk or
+ * base64-encoding them. The estimate is therefore exact (it serializes the
+ * real selection and adds each asset's Base64 length analytically), so the
+ * "Estimated size" line in the dialog can never drift from the real download.
  *
  * Filter options (GET → query string, POST → JSON body via ExportRequestSchema):
  *   tables       — comma-separated table ids (GET) or string[] (POST); default all
@@ -39,13 +46,61 @@ import { CMS_API_PREFIX, type CmsHandlerOptions } from './shared'
 import { ExportRequestSchema, type SiteBundle } from '@core/data/bundleSchema'
 import { canSeeAllDataRows } from './data/access'
 
+const EXPORT_PATH = `${CMS_API_PREFIX}/export`
+const EXPORT_ESTIMATE_PATH = `${CMS_API_PREFIX}/export/estimate`
+
+/** A media asset row enriched with its storage path, as loaded for export. */
+type ExportableAsset = Awaited<ReturnType<typeof listMediaAssetsForExport>>[number]
+
+/** Bundle media entry without the heavy `bytesBase64` payload. */
+type MediaEntryMetadata = Omit<NonNullable<SiteBundle['media']>[number], 'bytesBase64'>
+
+/**
+ * The metadata fields of a bundle media entry — everything except the Base64
+ * payload. Shared by the real export (which appends the encoded bytes) and the
+ * estimate (which appends an empty string and sizes the bytes analytically).
+ */
+function mediaEntryMetadata(asset: ExportableAsset): MediaEntryMetadata {
+  return {
+    id: asset.id,
+    filename: asset.filename,
+    mimeType: asset.mimeType,
+    sizeBytes: asset.sizeBytes,
+    altText: asset.altText,
+    caption: asset.caption,
+    title: asset.title,
+    tags: asset.tags,
+    width: asset.width,
+    height: asset.height,
+    durationMs: asset.durationMs,
+    dominantColor: asset.dominantColor,
+    blurHash: asset.blurHash,
+    storagePath: asset.storagePath,
+    posterPath: asset.posterPath,
+  }
+}
+
+/** Exact length of the Base64 encoding (with padding) of `n` raw bytes. */
+function base64Length(n: number): number {
+  return Math.ceil(n / 3) * 4
+}
+
+interface ExportSelection {
+  shell: NonNullable<Awaited<ReturnType<typeof getDraftSite>>>
+  tables: Awaited<ReturnType<typeof listDataTables>>
+  rows: Awaited<ReturnType<typeof listDataRows>>
+  includeMedia: boolean
+  includeSite: boolean
+}
+
 export async function handleExportRoute(
   req: Request,
   db: DbClient,
   options: CmsHandlerOptions = {},
 ): Promise<Response | null> {
   const url = new URL(req.url)
-  if (url.pathname !== `${CMS_API_PREFIX}/export`) return null
+  const isEstimate = url.pathname === EXPORT_ESTIMATE_PATH
+  if (url.pathname !== EXPORT_PATH && !isEstimate) return null
   if (req.method !== 'GET' && req.method !== 'POST') {
     return jsonResponse({ error: 'Method not allowed' }, { status: 405 })
   }
@@ -111,32 +166,58 @@ export async function handleExportRoute(
     tables = tables.filter((t) => referencedTableIds.has(t.id))
   }
 
-  // Optionally embed media bytes
+  const selection: ExportSelection = { shell, tables, rows, includeMedia, includeSite }
+
+  // Media is embedded only when requested AND an uploads dir is configured —
+  // both the estimate and the real export gate on this so they stay in sync.
+  const wantMedia = includeMedia && Boolean(options.uploadsDir)
+  const assets = wantMedia ? await listMediaAssetsForExport(db) : []
+
+  if (isEstimate) {
+    return estimateResponse(selection, wantMedia, assets)
+  }
+
+  return downloadResponse(selection, wantMedia, assets, options.uploadsDir)
+}
+
+/**
+ * Compute the exact bundle byte size without reading media files. Serializes
+ * the real selection with empty `bytesBase64` strings, then adds each asset's
+ * Base64-encoded length — which is precisely what would fill those strings.
+ * (Base64 is ASCII, so its JSON-string length equals its byte length.)
+ */
+function estimateResponse(
+  selection: ExportSelection,
+  wantMedia: boolean,
+  assets: ExportableAsset[],
+): Response {
+  const mediaSkeleton: SiteBundle['media'] = wantMedia
+    ? assets.map((asset) => ({ ...mediaEntryMetadata(asset), bytesBase64: '' }))
+    : undefined
+
+  const skeleton = buildBundle(selection, mediaSkeleton)
+  const structuralBytes = Buffer.byteLength(JSON.stringify(skeleton), 'utf8')
+  const mediaBytes = wantMedia
+    ? assets.reduce((sum, asset) => sum + base64Length(asset.sizeBytes), 0)
+    : 0
+
+  return jsonResponse({ bytes: structuralBytes + mediaBytes })
+}
+
+/** Build the full bundle (reading + base64-encoding media bytes) and stream it as a download. */
+async function downloadResponse(
+  selection: ExportSelection,
+  wantMedia: boolean,
+  assets: ExportableAsset[],
+  uploadsDir: string | undefined,
+): Promise<Response> {
   let media: SiteBundle['media']
-  if (includeMedia && options.uploadsDir) {
-    const assets = await listMediaAssetsForExport(db)
+  if (wantMedia && uploadsDir) {
     const mediaItems = await Promise.all(
       assets.map(async (asset) => {
         try {
-          const bytes = await readFile(join(options.uploadsDir!, asset.storagePath))
-          return {
-            id: asset.id,
-            filename: asset.filename,
-            mimeType: asset.mimeType,
-            sizeBytes: asset.sizeBytes,
-            altText: asset.altText,
-            caption: asset.caption,
-            title: asset.title,
-            tags: asset.tags,
-            width: asset.width,
-            height: asset.height,
-            durationMs: asset.durationMs,
-            dominantColor: asset.dominantColor,
-            blurHash: asset.blurHash,
-            storagePath: asset.storagePath,
-            posterPath: asset.posterPath,
-            bytesBase64: bytes.toString('base64'),
-          }
+          const bytes = await readFile(join(uploadsDir, asset.storagePath))
+          return { ...mediaEntryMetadata(asset), bytesBase64: bytes.toString('base64') }
         } catch {
           // If a file is missing from disk, skip the asset rather than aborting
           // the entire export. The import will recreate metadata rows but without
@@ -148,16 +229,7 @@ export async function handleExportRoute(
     media = mediaItems.filter((item): item is NonNullable<typeof item> => item !== null)
   }
 
-  const bundle: SiteBundle = {
-    schemaVersion: 1,
-    exportedAt: new Date().toISOString(),
-    sourceSiteName: shell.name,
-    ...(includeSite ? { site: shell } : {}),
-    tables,
-    rows,
-    ...(media !== undefined ? { media } : {}),
-  }
-
+  const bundle = buildBundle(selection, media)
   const json = JSON.stringify(bundle)
   const timestamp = new Date().toISOString().slice(0, 19).replace(/[:.]/g, '-')
   return new Response(json, {
@@ -166,4 +238,17 @@ export async function handleExportRoute(
       'content-disposition': `attachment; filename="site-bundle-${timestamp}.json"`,
     },
   })
+}
+
+/** Assemble the `SiteBundle` from a selection plus an already-resolved media array. */
+function buildBundle(selection: ExportSelection, media: SiteBundle['media']): SiteBundle {
+  return {
+    schemaVersion: 1,
+    exportedAt: new Date().toISOString(),
+    sourceSiteName: selection.shell.name,
+    ...(selection.includeSite ? { site: selection.shell } : {}),
+    tables: selection.tables,
+    rows: selection.rows,
+    ...(media !== undefined ? { media } : {}),
+  }
 }

@@ -20,6 +20,7 @@ import { Switch } from '@ui/components/Switch'
 import { pushToast } from '@ui/components/Toast'
 import { exportSiteBundle } from '@core/persistence/cmsTransfer'
 import type { DataTableKind, DataTableListItem } from '@core/data/schemas'
+import type { ExportRequest } from '@core/data/bundleSchema'
 import { useExportEstimate } from './useExportEstimate'
 import styles from './ExportDialog.module.css'
 import { getErrorMessage } from '@core/utils/errorMessage'
@@ -190,20 +191,20 @@ export function ExportDialog({
 
   // ── Estimate ──────────────────────────────────────────────────────────────
 
-  // Derive rowCounts from the tables array (each table carries its live count
-  // from the server list endpoint). Computed inline — no memo needed because
-  // the tables array only changes when the workspace refreshes.
-  const rowCountsByTableId = Object.fromEntries(tables.map((t) => [t.id, t.rowCount]))
+  // Mirror the exact ExportRequest the Download button will send, so the
+  // server sizes the same selection. `null` while the dialog is closed pauses
+  // estimating. Built inline — the React Compiler memoizes; the request only
+  // changes when a toggle/table/scope flips.
+  const estimateRequest: ExportRequest | null = open
+    ? {
+        tables: Array.from(effectiveTableIds),
+        rowIds: scope === 'selected' ? selectedRowIds : undefined,
+        includeMedia,
+        includeSite: siteShell,
+      }
+    : null
 
-  const estimate = useExportEstimate({
-    rowCounts: rowCountsByTableId,
-    selectedTableIds: effectiveTableIds,
-    scope,
-    selectedRowIdCount: selectedRowIds.length,
-    includeSite: siteShell,
-    includeMedia,
-    mediaAssetCount: 0, // caller doesn't provide a cheap count yet
-  })
+  const estimate = useExportEstimate(estimateRequest)
 
   // ── Ids for accessibility ─────────────────────────────────────────────────
 
@@ -354,7 +355,7 @@ export function ExportDialog({
 
         {/* ── Estimated size ───────────────────────────────────────── */}
         <p className={styles.estimate}>
-          Estimated size: {estimate.formatted}
+          Estimated size: {estimate.error ? 'unavailable' : estimate.formatted}
         </p>
 
         {/* ── Inline error ─────────────────────────────────────────── */}

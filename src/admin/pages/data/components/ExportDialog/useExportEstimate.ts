@@ -1,61 +1,32 @@
 /**
- * useExportEstimate — client-side bundle size estimator.
+ * useExportEstimate — live, server-accurate bundle size estimate.
  *
- * Uses simple per-row and per-asset constants to produce a rough estimate of
- * the final bundle size. The result is a display string suitable for the
- * "Estimated size: ~127 KB" line in ExportDialog.
+ * Instead of guessing from per-row/per-asset constants (which ignored media
+ * entirely and ran ~10× low on content), this hook asks the server for the
+ * exact size the bundle WOULD have for the current `ExportRequest`. The server
+ * runs the same selection logic as the real export but skips reading media
+ * bytes off disk, so the number can never drift from the actual download.
  *
- * Constants (deliberately conservative):
- *   - Site shell: 8 KB flat
- *   - Per row:    1.5 KB
- *   - Per media asset: 100 KB (default; configurable via `mediaPerAssetBytes`)
+ * Fetches are debounced (options change as the operator clicks toggles) and
+ * cancellable (a superseded request aborts). The previous value is kept on
+ * screen while a new estimate is in flight to avoid flicker.
  */
 
-// ---------------------------------------------------------------------------
-// Types
-// ---------------------------------------------------------------------------
+import { useEffect, useState } from 'react'
+import { estimateSiteBundle } from '@core/persistence/cmsTransfer'
+import { isAbortError } from '@core/http'
+import type { ExportRequest } from '@core/data/bundleSchema'
 
-interface UseExportEstimateOpts {
-  /** rowCounts[tableId] = number of rows in that table. */
-  rowCounts: Record<string, number>
-  /** The subset of table ids currently checked in the dialog. */
-  selectedTableIds: Set<string>
-  /** Export scope. When 'selected', only `selectedRowIdCount` rows are costed. */
-  scope: 'all' | 'selected'
-  /** Number of individually selected row ids (only meaningful when scope='selected'). */
-  selectedRowIdCount: number
-  /** Whether to include the site shell in the estimate. */
-  includeSite: boolean
-  /** Whether to include media bytes in the estimate. */
-  includeMedia: boolean
-  /**
-   * Rough per-asset byte estimate used when `includeMedia` is true.
-   * Defaults to 100_000 (100 KB).
-   */
-  mediaPerAssetBytes?: number
-  /**
-   * Number of media assets in the workspace. Used when `includeMedia` is true.
-   * When not supplied (or 0), media cost is 0.
-   */
-  mediaAssetCount?: number
-}
+const DEBOUNCE_MS = 250
 
 interface UseExportEstimateResult {
-  bytes: number
+  /** Display string, e.g. "~92.3 MB". `'…'` while the first estimate loads. */
   formatted: string
+  /** True while a request is in flight. */
+  loading: boolean
+  /** True when the last request failed (non-abort). */
+  error: boolean
 }
-
-// ---------------------------------------------------------------------------
-// Constants
-// ---------------------------------------------------------------------------
-
-const SITE_SHELL_BYTES = 8 * 1024          // 8 KB
-const BYTES_PER_ROW   = 1.5 * 1024        // 1.5 KB
-const DEFAULT_MEDIA_BYTES_PER_ASSET = 100_000 // 100 KB
-
-// ---------------------------------------------------------------------------
-// Formatter
-// ---------------------------------------------------------------------------
 
 function formatBytes(bytes: number): string {
   if (bytes < 1024) return '< 1 KB'
@@ -63,43 +34,52 @@ function formatBytes(bytes: number): string {
   return `~${(bytes / 1_048_576).toFixed(1)} MB`
 }
 
-// ---------------------------------------------------------------------------
-// Hook
-// ---------------------------------------------------------------------------
+/**
+ * @param request The export request to size, or `null` to pause estimating
+ *                (e.g. while the dialog is closed).
+ */
+export function useExportEstimate(request: ExportRequest | null): UseExportEstimateResult {
+  const [bytes, setBytes] = useState<number | null>(null)
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState(false)
 
-export function useExportEstimate({
-  rowCounts,
-  selectedTableIds,
-  scope,
-  selectedRowIdCount,
-  includeSite,
-  includeMedia,
-  mediaPerAssetBytes = DEFAULT_MEDIA_BYTES_PER_ASSET,
-  mediaAssetCount = 0,
-}: UseExportEstimateOpts): UseExportEstimateResult {
-  let bytes = 0
+  // Serialize the request to a stable primitive so the effect re-runs only when
+  // the actual selection changes — not on every render's fresh object identity.
+  const requestKey = request ? JSON.stringify(request) : null
 
-  // Site shell
-  if (includeSite) {
-    bytes += SITE_SHELL_BYTES
-  }
+  useEffect(() => {
+    if (requestKey === null) return
 
-  // Row cost
-  if (scope === 'selected') {
-    bytes += selectedRowIdCount * BYTES_PER_ROW
-  } else {
-    // Sum row counts for all selected tables
-    let totalRows = 0
-    for (const tableId of selectedTableIds) {
-      totalRows += rowCounts[tableId] ?? 0
+    const parsed = JSON.parse(requestKey) as ExportRequest
+    const controller = new AbortController()
+
+    // All state updates happen inside deferred callbacks (the debounce timer
+    // and the promise handlers), never synchronously in the effect body —
+    // synchronous setState-in-effect cascades an extra render and is linted out.
+    const timer = setTimeout(() => {
+      setLoading(true)
+      setError(false)
+      estimateSiteBundle(parsed, controller.signal)
+        .then((result) => {
+          setBytes(result.bytes)
+          setLoading(false)
+        })
+        .catch((err) => {
+          if (isAbortError(err)) return // superseded — a newer request is running
+          setError(true)
+          setLoading(false)
+        })
+    }, DEBOUNCE_MS)
+
+    return () => {
+      clearTimeout(timer)
+      controller.abort()
     }
-    bytes += totalRows * BYTES_PER_ROW
-  }
+  }, [requestKey])
 
-  // Media cost
-  if (includeMedia && mediaAssetCount > 0) {
-    bytes += mediaAssetCount * mediaPerAssetBytes
+  return {
+    formatted: bytes === null ? '…' : formatBytes(bytes),
+    loading,
+    error,
   }
-
-  return { bytes, formatted: formatBytes(bytes) }
 }

@@ -351,6 +351,38 @@ describe('ExportDialog', () => {
     }
   })
 
+  it('estimate is fetched from the server and grows when media is toggled on', async () => {
+    // The estimate endpoint reports a size that depends on includeMedia, so we
+    // can assert the dialog re-requests and re-renders when the toggle flips.
+    globalThis.fetch = async (input: RequestInfo | URL, init?: RequestInit) => {
+      const url = typeof input === 'string' ? input : input.toString()
+      if (url === '/admin/api/cms/export/estimate') {
+        const body = JSON.parse((init?.body as string) ?? '{}') as { includeMedia?: boolean }
+        return jsonResponse({ bytes: body.includeMedia ? 5_000_000 : 12_000 })
+      }
+      return jsonResponse({ error: `Unexpected request: ${url}` }, 500)
+    }
+
+    render(
+      <ExportDialog
+        open={true}
+        onClose={() => {}}
+        tables={[POSTS_TABLE]}
+      />,
+    )
+
+    // Initial (media off) estimate resolves to ~12 KB.
+    await waitFor(() => {
+      expect(screen.getByText(/estimated size: ~12 KB/i)).toBeTruthy()
+    })
+
+    // Flip media on → the dialog re-requests and the estimate jumps to MB.
+    fireEvent.click(screen.getByRole('switch', { name: /include media files/i }))
+    await waitFor(() => {
+      expect(screen.getByText(/estimated size: ~4\.8 MB/i)).toBeTruthy()
+    })
+  })
+
   it('Cancel button calls onClose', () => {
     let onCloseCalled = false
     render(

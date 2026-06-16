@@ -117,6 +117,23 @@ export const ExportRequestSchema = Type.Object({
 export type ExportRequest = Static<typeof ExportRequestSchema>
 
 // ---------------------------------------------------------------------------
+// ExportEstimate
+// ---------------------------------------------------------------------------
+
+/**
+ * Response of `POST /admin/api/cms/export/estimate`. Reports the byte size the
+ * export bundle WOULD have for the given `ExportRequest`, computed from the
+ * exact same selection logic the real export uses — without reading media
+ * files off disk or base64-encoding them. `bytes` is the serialized bundle
+ * length plus the Base64-encoded length of every included media asset.
+ */
+export const ExportEstimateSchema = Type.Object({
+  bytes: Type.Number(),
+})
+
+export type ExportEstimate = Static<typeof ExportEstimateSchema>
+
+// ---------------------------------------------------------------------------
 // BundlePreview
 // ---------------------------------------------------------------------------
 
