@@ -67,8 +67,10 @@ const adminCapabilities: CoreCapability[] = [
   'users.manage',
   // `roles.manage` is owner-only by design — admin cannot grant capabilities.
   'audit.read',
-  'data.tables.read',
-  'data.tables.manage',
+  'data.custom.tables.read',
+  'data.custom.tables.manage',
+  'data.system.tables.read',
+  'data.system.tables.manage',
   'data.rows.move',
   'data.export',
   'data.import',
@@ -86,9 +88,9 @@ const clientCapabilities: CoreCapability[] = [
   // nodes (`site.content.edit` already lets them change image src; this
   // makes the picker actually usable).
   'media.read',
-  // Data workspace = read-only schema/row browsing. Client can see the
-  // shape of the site's data but cannot mutate schema or row authors.
-  'data.tables.read',
+  // Data workspace = read-only browsing of CUSTOM tables only. The client
+  // never sees the internal system tables (posts/pages/components/layouts).
+  'data.custom.tables.read',
 ]
 
 export const SYSTEM_ROLES: SystemRoleDefinition[] = [

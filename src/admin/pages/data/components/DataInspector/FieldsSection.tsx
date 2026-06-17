@@ -26,8 +26,8 @@ import { FieldRow } from './FieldRow'
 import {
   deleteTooltip,
   isFieldDeletable,
+  isFieldFullyLocked,
   isLabelLocked,
-  isMandatoryField,
   isOptionalBuiltIn,
 } from './fieldGuards'
 import {
@@ -117,11 +117,12 @@ export function FieldsSection({
   const [newFieldDialogOpen, setNewFieldDialogOpen] = useState(false)
   const [updateError, setUpdateError] = useState<string | null>(null)
 
-  // Dragging is allowed for all tables; mandatory postType fields are excluded
-  // from drag-and-drop because they're rendered as locked rows.
+  // Dragging is allowed for all tables; fully-locked fields (postType mandatory
+  // fields and built-ins on system tables) are excluded — they render as locked
+  // rows.
   const canDragField = (field: DataField): boolean => {
     if (!canEdit) return false
-    if (table.kind === 'postType' && isMandatoryField(field.id)) return false
+    if (isFieldFullyLocked(field, table)) return false
     return true
   }
 
@@ -278,7 +279,9 @@ export function FieldsSection({
 
       <div className={styles.fieldList}>
         {table.fields.map((field) => {
-          const mandatory = table.kind === 'postType' && isMandatoryField(field.id)
+          // Fully-locked rows (postType mandatory + system-table built-ins)
+          // render with no edit/delete/drag affordances.
+          const locked = isFieldFullyLocked(field, table)
           const isEditing = editingFieldId === field.id
 
           return (
@@ -289,8 +292,8 @@ export function FieldsSection({
                 canEdit={canEdit}
                 deletable={isFieldDeletable(field, table)}
                 deleteTooltip={deleteTooltip(field, table)}
-                mandatory={mandatory}
-                optionalBuiltIn={isOptionalBuiltIn(field)}
+                mandatory={locked}
+                optionalBuiltIn={isOptionalBuiltIn(field) && !locked}
                 isEditing={isEditing}
                 isDragOver={dragOverId === field.id}
                 isDragging={draggingId === field.id}

@@ -143,13 +143,21 @@ export const CAPABILITY_META: Record<CoreCapability, CapabilityMeta> = {
   // ---------------------------------------------------------------------
   // Data workspace — split from `content.manage`
   // ---------------------------------------------------------------------
-  'data.tables.read': {
-    label: 'Browse data schema',
-    description: 'Open the Data workspace; browse tables and field schemas (read-only).',
+  'data.custom.tables.read': {
+    label: 'Browse custom tables',
+    description: 'Open the Data workspace; browse user-created (custom) tables and their field schemas. Does not reveal the internal system tables.',
   },
-  'data.tables.manage': {
-    label: 'Manage data schema',
-    description: 'Create, rename, and delete tables; add/edit/remove fields and route bases. Step-up gated — changes public URL surface.',
+  'data.custom.tables.manage': {
+    label: 'Manage custom tables',
+    description: 'Create, rename, and delete custom tables; add/edit/remove their fields and route bases.',
+  },
+  'data.system.tables.read': {
+    label: 'Browse system tables',
+    description: 'See and open the four built-in system tables (Posts, Pages, Components, Layouts) in the Data workspace.',
+  },
+  'data.system.tables.manage': {
+    label: 'Manage system-table custom fields',
+    description: 'On system tables: add/edit/remove custom fields and choose the primary field. Built-in fields and the table identity (name, slug, route) stay locked.',
   },
   'data.rows.move': {
     label: 'Move rows between tables',
@@ -219,8 +227,10 @@ export const CAPABILITY_GROUPS: CapabilityGroup[] = [
   {
     title: 'Data',
     capabilities: [
-      'data.tables.read',
-      'data.tables.manage',
+      'data.custom.tables.read',
+      'data.custom.tables.manage',
+      'data.system.tables.read',
+      'data.system.tables.manage',
       'data.rows.move',
       'data.export',
       'data.import',

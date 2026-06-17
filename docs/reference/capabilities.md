@@ -57,12 +57,14 @@ The `own / any` split is the standard CMS workflow: a contributor can edit/publi
 
 ### Data workspace (schema + raw rows + bundles)
 
-The Data workspace is split from the Content workspace: Content owns row-level editorial via `content.*`; Data owns schema design, cross-collection row moves, and bundle export/import.
+The Data workspace is split from the Content workspace: Content owns row-level editorial via `content.*`; Data owns schema design, cross-collection row moves, and bundle export/import. Table read/manage is further split **system vs custom**, so a persona (e.g. Client) can browse and manage custom tables without ever seeing the four internal system tables (`posts`, `pages`, `components`, `layouts`).
 
-| Capability             | Grants                                                              | Roles         |
-|------------------------|---------------------------------------------------------------------|---------------|
-| `data.tables.read`     | Open the Data workspace; browse tables and field schemas (read-only) | Owner, Admin, Client |
-| `data.tables.manage`   | Create, rename, delete tables; add/rename/delete fields; change primary field, route base. **Step-up gated** — changes public URL surface. | Owner, Admin |
+| Capability                    | Grants                                                              | Roles         |
+|-------------------------------|---------------------------------------------------------------------|---------------|
+| `data.custom.tables.read`     | Open the Data workspace; see + browse **custom** tables and their field schemas | Owner, Admin, Client |
+| `data.custom.tables.manage`   | Create, rename, delete **custom** tables; add/rename/delete fields; change primary field, route base. **Step-up gated** — changes public URL surface. | Owner, Admin |
+| `data.system.tables.read`     | See + open the four **system** tables (`posts`/`pages`/`components`/`layouts`). | Owner, Admin |
+| `data.system.tables.manage`   | On a system table: add/edit/remove **custom** fields and set the primary field. The table's identity (name, slug, route base, labels, kind) and its **built-in fields** are frozen for everyone — `assertSystemTableUpdateAllowed` rejects those edits server-side. Built-in field *values* on the structural system tables (pages/components/layouts) are read-only in the grid; `posts` built-ins stay editable. | Owner, Admin |
 | `data.rows.move`       | `PATCH /data/rows/:id/table` — move a row to a different table (changes its public URL because route base differs per table). | Owner, Admin |
 | `data.export`          | `GET /export` and `POST /import/preview` (read-only bundle ops). Row visibility is filtered against `canSeeAllDataRows`. | Owner, Admin |
 | `data.import`          | `POST /import` (write). **`replace` strategy ALSO requires `content.manage` AND step-up.** Bundles carrying a site shell ALSO require `site.structure.edit`. | Owner, Admin |
@@ -133,7 +135,7 @@ Four built-in `SYSTEM_ROLES`:
 |----------|-----------|------------------------------------------------------------------------------|----------------|
 | Owner    | `owner`   | All 36 (`CORE_CAPABILITIES`)                                                 | Force-resynced on every boot. Owner-only `roles.manage`. |
 | Admin    | `admin`   | All 36 except `roles.manage`                                                 | **Force-resynced on every boot** (changed from previous "seeded once"). Hand-edits restored at boot. |
-| Client   | `client`  | `dashboard.read`, `site.read`, `site.content.edit`, `media.read`, `data.tables.read` | Seeded once; freely editable. |
+| Client   | `client`  | `dashboard.read`, `site.read`, `site.content.edit`, `media.read`, `data.custom.tables.read` | Seeded once; freely editable. Sees custom tables only — never the system tables. |
 | Member   | `member`  | (none)                                                                       | Seeded once; freely editable. |
 
 A new capability added to the codebase appears on Owner AND Admin on the next boot (force-sync). Client and Member don't auto-update — users grant the new capability via the Roles admin page if they want it. Existing **custom** roles also don't auto-update — same reason.

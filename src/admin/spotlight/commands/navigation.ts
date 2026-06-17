@@ -27,10 +27,12 @@ const USERS_ACCESS_CAPABILITIES = [
   'audit.read',
 ] as const
 
-/** Mirrors `canAccessDataWorkspace` in access.ts (any `data.*` read or `content.*`). */
+/** Mirrors `canAccessDataWorkspace` in access.ts (any `data.*` table read/manage or `content.*`). */
 const DATA_WORKSPACE_CAPABILITIES = [
-  'data.tables.read',
-  'data.tables.manage',
+  'data.custom.tables.read',
+  'data.custom.tables.manage',
+  'data.system.tables.read',
+  'data.system.tables.manage',
   ...CONTENT_ACCESS_CAPABILITIES,
 ] as const
 

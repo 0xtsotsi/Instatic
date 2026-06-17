@@ -17,6 +17,7 @@ import {
   canCreateContent,
   canEditAnyContent,
   canManageDataTables,
+  canManageTable,
 } from '@admin/access'
 import type { DataRow, DataRowCells, DataRowStatus } from '@core/data/schemas'
 import { useDataWorkspace } from './hooks/useDataWorkspace'
@@ -189,6 +190,12 @@ export function DataPage() {
   // Right panel (inspector)
   // ---------------------------------------------------------------------------
 
+  // Schema management is kind-aware: custom tables need `data.custom.tables.manage`,
+  // system tables need `data.system.tables.manage`. Deletion is never allowed on
+  // a system table (the server blocks it; the UI hides the affordance).
+  const canManageSchema = selectedTable ? canManageTable(permissionUser, selectedTable) : canManage
+  const canDeleteTable = Boolean(selectedTable) && canManageSchema && !selectedTable?.system
+
   const rightPanel = selectedTable ? (
     <DataInspector
       table={selectedTable}
@@ -207,7 +214,8 @@ export function DataPage() {
       onPublishRow={async (rowId) => workspace.publishRow(rowId)}
       onSetRowStatus={async (rowId, status) => workspace.setRowStatus(rowId, status)}
       canEdit={canEdit}
-      canDelete={canDelete}
+      canManageSchema={canManageSchema}
+      canDelete={canDeleteTable}
     />
   ) : undefined
 

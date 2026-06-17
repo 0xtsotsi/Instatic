@@ -422,7 +422,7 @@ describe('capability route matrix', () => {
       const tableReader = await harness.createRoleUser({
         name: 'Table Reader',
         slug: 'table-reader',
-        capabilities: ['data.tables.read'],
+        capabilities: ['data.custom.tables.read'],
       })
       const exporter = await harness.createRoleUser({
         name: 'Data Exporter',

@@ -44,8 +44,14 @@ const DOCUMENT_READ_CAPS: readonly CoreCapability[] = [
   'content.manage',
 ]
 
-// Schema-level read — mirrors `requireDataTablesRead`.
-const SCHEMA_READ_CAPS: readonly CoreCapability[] = ['data.tables.read', 'data.tables.manage']
+// Schema-level read — mirrors `requireDataTablesRead`. Covers both table
+// families since these tools read custom-data and component (system) schemas.
+const SCHEMA_READ_CAPS: readonly CoreCapability[] = [
+  'data.custom.tables.read',
+  'data.custom.tables.manage',
+  'data.system.tables.read',
+  'data.system.tables.manage',
+]
 
 // ---------------------------------------------------------------------------
 // Shared projections

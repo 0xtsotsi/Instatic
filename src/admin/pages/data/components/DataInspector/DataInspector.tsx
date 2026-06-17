@@ -30,7 +30,10 @@ interface DataInspectorProps {
   onOpenInSiteEditor?: (row: DataRow) => void
   onPublishRow?: (rowId: string) => Promise<DataRow>
   onSetRowStatus?: (rowId: string, status: 'draft' | 'unpublished') => Promise<DataRow>
+  /** Row-level content editing (RowDetail cell editors). */
   canEdit: boolean
+  /** Schema editing in Table settings — kind-aware (custom vs system manage). */
+  canManageSchema: boolean
   canDelete: boolean
 }
 
@@ -51,6 +54,7 @@ export function DataInspector({
   onPublishRow,
   onSetRowStatus,
   canEdit,
+  canManageSchema,
   canDelete,
 }: DataInspectorProps): ReactElement {
   const setPropertiesPanel = useEditorStore((s) => s.setPropertiesPanel)
@@ -104,7 +108,7 @@ export function DataInspector({
             rows={rows}
             onUpdateTable={onUpdateTable}
             onDeleteTable={onDeleteTable}
-            canEdit={canEdit}
+            canEdit={canManageSchema}
             canDelete={canDelete}
           />
         )}

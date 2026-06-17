@@ -15,9 +15,11 @@ import {
   canImportData,
   canManageContentCollections,
   canManageDataTables,
+  canManageTable,
   canMoveDataRow,
   canPublishContentEntry,
   canReadDataTables,
+  canReadTable,
   canReadMedia,
   canReplaceMedia,
   canSaveDraftSite,
@@ -93,7 +95,7 @@ describe('admin capability access helpers', () => {
       'site.read',
       'site.content.edit',
       'content.create',
-      'data.tables.read',
+      'data.custom.tables.read',
       'media.read',
     ])
     expect(canAccessWorkspace(operator, 'dashboard')).toBe(true)
@@ -178,7 +180,7 @@ describe('admin capability access helpers', () => {
     expect(canPublishContentEntry(contentManager, otherRow)).toBe(false)
 
     const dataManager = user('data-manager', [
-      'data.tables.manage',
+      'data.custom.tables.manage',
       'data.rows.move',
       'data.export',
       'data.import',
@@ -190,6 +192,19 @@ describe('admin capability access helpers', () => {
     expect(canExportData(dataManager)).toBe(true)
     expect(canImportData(dataManager)).toBe(true)
     expect(canReadMedia(dataManager)).toBe(false)
+
+    // System tables are a separate family: custom-manage does not grant system
+    // visibility, and a system-read persona never sees custom tables.
+    expect(canReadTable(dataManager, { system: false })).toBe(true)
+    expect(canReadTable(dataManager, { system: true })).toBe(false)
+    expect(canManageTable(dataManager, { system: false })).toBe(true)
+    expect(canManageTable(dataManager, { system: true })).toBe(false)
+
+    const systemViewer = user('system-viewer', ['data.system.tables.read'])
+    expect(canReadDataTables(systemViewer)).toBe(true)
+    expect(canReadTable(systemViewer, { system: true })).toBe(true)
+    expect(canReadTable(systemViewer, { system: false })).toBe(false)
+    expect(canManageTable(systemViewer, { system: true })).toBe(false)
 
     const mediaOperator = user('media-operator', [
       'media.read',

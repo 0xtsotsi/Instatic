@@ -6,6 +6,7 @@ import { CellEditorRenderer } from '@admin/pages/data/components/DataGrid/cells/
 import { RelationPickerDialog } from '@admin/pages/data/components/RelationPickerDialog/RelationPickerDialog'
 import { useDataRowDraft } from '@admin/pages/data/hooks/useDataRowDraft'
 import { emptyCellValue } from '@admin/pages/data/utils/fieldDefaults'
+import { isBuiltInValueLocked } from '@core/data/systemTableGuard'
 import type { DataTable, DataRow, DataRowCells } from '@core/data/schemas'
 import type { DataField } from '@core/data/schemas'
 import styles from './DataInspector.module.css'
@@ -213,7 +214,7 @@ function DataRowForm({
               onChange={(next) => draft.setCell(field.id, next)}
               onCommit={() => void draft.flush()}
               context="detail"
-              readOnly={!canEdit}
+              readOnly={!canEdit || isBuiltInValueLocked(table, field)}
               rowId={row.id}
               resolveRelationTarget={resolveRow}
               onOpenPicker={

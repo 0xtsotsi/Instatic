@@ -19,8 +19,11 @@
  *                so a "data architect" persona can design tables without
  *                being able to read/write row content.
  *
- *     data.tables.read     — open Data workspace, browse tables + fields
- *     data.tables.manage   — create/rename/delete tables, edit fields
+ *     data.custom.tables.read    — see + browse custom tables
+ *     data.custom.tables.manage  — create/rename/delete custom tables, edit fields
+ *     data.system.tables.read    — see + open the 4 system tables
+ *     data.system.tables.manage  — add custom fields + set primary field on a
+ *                                  system table (identity + built-ins frozen)
  *     data.rows.move       — cross-collection row move
  *     data.export          — bundle export + import preview (read-only)
  *     data.import          — bundle import (replace mode also needs
@@ -36,6 +39,7 @@ import {
 import type { DbClient } from '../../../db/client'
 import { jsonResponse } from '../../../http'
 import type { AuthUser } from '../../../repositories/users'
+import type { DataTable } from '@core/data/schemas'
 
 const DATA_ACCESS_CAPABILITIES = [
   'content.create',
@@ -86,22 +90,59 @@ export async function requireDataAccess(req: Request, db: DbClient): Promise<Aut
   return requireAnyCapability(req, db, DATA_ACCESS_CAPABILITIES)
 }
 
+// Any data-table read/manage cap is enough to OPEN the Data workspace; the
+// list endpoint then filters tables per-family via `canReadTable`.
+const TABLE_READ_CAPABILITIES = [
+  'data.custom.tables.read',
+  'data.custom.tables.manage',
+  'data.system.tables.read',
+  'data.system.tables.manage',
+] satisfies CoreCapability[]
+
 /**
- * Schema-level read — open the Data workspace, browse tables + their
- * field schemas. Granted independently from row content access so a
- * read-only stakeholder persona is expressible.
+ * Schema-level read floor — open the Data workspace. Holding ANY table
+ * read/manage cap (custom or system) is sufficient to enter; per-table
+ * visibility is decided by `canReadTable`.
  */
 export async function requireDataTablesRead(req: Request, db: DbClient): Promise<AuthUser | Response> {
-  return requireAnyCapability(req, db, ['data.tables.read', 'data.tables.manage'])
+  return requireAnyCapability(req, db, TABLE_READ_CAPABILITIES)
 }
 
 /**
- * Schema-level mutation — create/rename/delete tables, edit fields.
- * Was `content.manage`; split so the table-design power is separable
- * from row-content power.
+ * Create a CUSTOM table. System tables are seeded, never created, so creation
+ * always gates on the custom-manage cap.
  */
-export async function requireDataTablesManager(req: Request, db: DbClient): Promise<AuthUser | Response> {
-  return requireCapability(req, db, 'data.tables.manage')
+export async function requireCustomTablesManager(req: Request, db: DbClient): Promise<AuthUser | Response> {
+  return requireCapability(req, db, 'data.custom.tables.manage')
+}
+
+/**
+ * Whether the user may SEE a specific table. System tables need a system read
+ * cap; custom tables need a custom read cap. Used to filter the table list and
+ * gate single-table reads at the boundary.
+ */
+export function canReadTable(user: AuthUser, table: Pick<DataTable, 'system'>): boolean {
+  return table.system
+    ? userHasAnyCapability(user, ['data.system.tables.read', 'data.system.tables.manage'])
+    : userHasAnyCapability(user, ['data.custom.tables.read', 'data.custom.tables.manage'])
+}
+
+/**
+ * Whether the user may MANAGE a specific table's schema. For system tables this
+ * only governs custom fields + primary-field selection — identity and built-in
+ * fields are immutable for everyone (`assertSystemTableUpdateAllowed`).
+ */
+export function canManageTable(user: AuthUser, table: Pick<DataTable, 'system'>): boolean {
+  return userHasCapability(user, table.system ? 'data.system.tables.manage' : 'data.custom.tables.manage')
+}
+
+/**
+ * Content-row access (the loop / template pickers in the site editor). Such a
+ * caller sees the full table list even without data-table read caps, because
+ * picking a loop source needs to know what tables exist.
+ */
+export function hasContentRowAccess(user: AuthUser): boolean {
+  return userHasAnyCapability(user, DATA_ACCESS_CAPABILITIES)
 }
 
 /**

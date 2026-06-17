@@ -86,24 +86,39 @@
     color: var(--editor-text-muted);
 }
 
-.footer {
-    padding: 6px 8px 8px;
-    flex-shrink: 0;
+.sectionHeader {
     display: flex;
-    flex-direction: column;
-    gap: 4px;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 6px 4px;
 }
 
-.footerButton {
-    /* explicit margin for the create button above the transfer actions */
+.sectionHeader:not(:first-child) {
+    margin-top: 6px;
 }
 
-.transferActions {
+.sectionTitle {
+    flex: 1 1 auto;
+    min-width: 0;
+    margin: 0;
+    overflow: hidden;
+    color: var(--editor-text-muted);
+    font-size: 11px;
+    font-weight: 700;
+    line-height: 1.2;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.sectionCount {
+    color: var(--editor-text-muted);
+    font-size: 11px;
+    line-height: 1;
+}
+
+.headerActions {
     display: flex;
-    flex-direction: column;
-    gap: 1px;
-    border-top: 1px solid var(--editor-border);
-    padding-top: 4px;
-    margin-top: 2px;
+    align-items: center;
+    gap: 2px;
 }
 

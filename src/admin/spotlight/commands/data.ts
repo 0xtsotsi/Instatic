@@ -16,10 +16,9 @@ export function getDataCommands(): Command[] {
       iconName: 'database-solid',
       keywords: ['data', 'table', 'database', 'schema', 'new', 'create', 'add'],
       workspaces: ['any'],
-      // Creating a data table is gated by `data.tables.manage` (split
-      // out of the old `content.manage` mega-cap so schema editing is
-      // separable from row-content editing).
-      capability: 'data.tables.manage',
+      // Creating a data table always creates a CUSTOM table, gated by
+      // `data.custom.tables.manage` (system tables are seeded, never created).
+      capability: 'data.custom.tables.manage',
       run: (ctx) => {
         queuePendingAction('data.newTable')
         ctx.navigate('/admin/data')

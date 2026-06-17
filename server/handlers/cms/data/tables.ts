@@ -50,12 +50,17 @@ import {
   type TablePatchBody,
 } from './schemas'
 import {
+  canManageTable,
+  canReadTable,
   canSeeAllDataRows,
+  forbidden,
+  hasContentRowAccess,
+  requireCustomTablesManager,
   requireDataAccess,
   requireDataCreator,
-  requireDataTablesManager,
   requireDataTablesRead,
 } from './access'
+import { assertSystemTableUpdateAllowed, lockedBuiltInCellKey } from '@core/data/systemTableGuard'
 import { requireStepUp } from '../../../auth/authz'
 
 // ---------------------------------------------------------------------------
@@ -129,13 +134,17 @@ async function recordTableAuditEvent(
 
 /**
  * The tables list endpoint is read by two distinct audiences:
- *   - Data workspace UI — gated by `data.tables.read` (schema browser).
+ *   - Data workspace UI — gated by any data-table read cap (schema browser),
+ *     then filtered per family via `canReadTable`.
  *   - Loop / template pickers in the site editor — gated by any `content.*`
  *     access cap because the picker only needs to know what tables exist
  *     to choose a loop source.
  *
- * Either cap family is sufficient — the response is the same list of
- * tables + counts. Mutations stay strict (`data.tables.manage`).
+ * Either cap family is sufficient to ENTER — the per-table rows are then
+ * filtered by `canReadTable` (so a custom-only persona never sees the system
+ * tables), while content-row callers (loop picker) keep seeing the full list.
+ * Mutations stay strict (`data.custom.tables.manage` — creation is always a
+ * custom table).
  */
 async function requireAnyRead(req: Request, db: DbClient): Promise<AuthUser | Response> {
   const tablesRead = await requireDataTablesRead(req, db)
@@ -144,14 +153,13 @@ async function requireAnyRead(req: Request, db: DbClient): Promise<AuthUser | Re
 }
 
 async function handleTablesCollection(req: Request, db: DbClient): Promise<Response> {
-  // GET = schema-level read (`data.tables.read` — Data workspace floor;
-  // `content.*` callers also accepted because the loop picker calls this
-  // and they need to know what tables exist).
-  // POST = schema mutation (`data.tables.manage` + step-up — creating a
-  // table changes the public route surface of the site).
+  // GET = schema-level read (Data workspace floor; `content.*` callers also
+  // accepted because the loop picker calls this and needs to know what tables
+  // exist). POST = create a CUSTOM table (`data.custom.tables.manage` + step-up
+  // — creating a table changes the public route surface of the site).
   const user = req.method === 'GET'
     ? await requireAnyRead(req, db)
-    : await requireDataTablesManager(req, db)
+    : await requireCustomTablesManager(req, db)
   if (user instanceof Response) return user
 
   if (req.method === 'POST') {
@@ -166,6 +174,13 @@ async function handleTablesCollection(req: Request, db: DbClient): Promise<Respo
     const limit = limitParam ? Math.min(Math.max(parseInt(limitParam, 10) || 25, 1), 100) : null
 
     let tables = await listDataTablesWithCounts(db)
+
+    // Per-family visibility: a custom-only persona (e.g. "client") never sees
+    // the system tables. Content-row callers (loop/template pickers) keep the
+    // full list so they can choose any table as a loop source.
+    if (!hasContentRowAccess(user)) {
+      tables = tables.filter((t) => canReadTable(user, t))
+    }
 
     if (query) {
       tables = tables.filter(
@@ -227,13 +242,22 @@ async function handleTableItem(
     if (user instanceof Response) return user
     const table = await getDataTable(db, tableId)
     if (!table) return jsonResponse({ error: 'Table not found' }, { status: 404 })
+    // A custom-only persona must not read a system table by id. Content-row
+    // callers (loop pickers) may still resolve any table.
+    if (!canReadTable(user, table) && !hasContentRowAccess(user)) {
+      return jsonResponse({ error: 'Table not found' }, { status: 404 })
+    }
     return jsonResponse({ table })
   }
 
-  // PATCH/DELETE = schema mutation. Step-up gated — renaming or deleting a
-  // table changes / breaks every public URL under its route base.
-  const user = await requireDataTablesManager(req, db)
+  // PATCH/DELETE = schema mutation. Resolve the table first so the manage gate
+  // is kind-aware (system vs custom). Step-up gated — schema/route changes
+  // affect the public URL surface.
+  const user = await requireDataTablesRead(req, db)
   if (user instanceof Response) return user
+  const table = await getDataTable(db, tableId)
+  if (!table) return jsonResponse({ error: 'Table not found' }, { status: 404 })
+  if (!canManageTable(user, table)) return forbidden()
   const stepUp = await requireStepUp(req, db, user)
   if (stepUp) return stepUp
 
@@ -244,17 +268,21 @@ async function handleTableItem(
     const update = buildTablePatch(body, user.id)
     if ('error' in update) return badRequest(update.error)
 
-    const table = await updateDataTable(db, tableId, update)
-    if (!table) return jsonResponse({ error: 'Table not found' }, { status: 404 })
-    await recordTableAuditEvent(db, user, req, 'data.table.update', table)
-    return jsonResponse({ table })
+    // System tables: identity + built-in fields are frozen for everyone.
+    const frozenError = assertSystemTableUpdateAllowed(table, update)
+    if (frozenError) return badRequest(frozenError)
+
+    const updated = await updateDataTable(db, tableId, update)
+    if (!updated) return jsonResponse({ error: 'Table not found' }, { status: 404 })
+    await recordTableAuditEvent(db, user, req, 'data.table.update', updated)
+    return jsonResponse({ table: updated })
   }
 
   if (req.method === 'DELETE') {
-    const table = await softDeleteDataTable(db, tableId, user.id)
-    if (!table) return jsonResponse({ error: 'Table cannot be deleted' }, { status: 409 })
-    await recordTableAuditEvent(db, user, req, 'data.table.delete', table)
-    return jsonResponse({ table })
+    const deleted = await softDeleteDataTable(db, tableId, user.id)
+    if (!deleted) return jsonResponse({ error: 'Table cannot be deleted' }, { status: 409 })
+    await recordTableAuditEvent(db, user, req, 'data.table.delete', deleted)
+    return jsonResponse({ table: deleted })
   }
 
   return methodNotAllowed()
@@ -281,6 +309,14 @@ async function handleTableRows(
   if (req.method === 'POST') {
     const body = await readValidatedBody(req, RowUpsertBodySchema)
     if (!body) return badRequest('Invalid row payload')
+
+    // Editor-managed built-in values can't be set through the Data grid.
+    if (body.cells) {
+      const locked = lockedBuiltInCellKey(table, body.cells)
+      if (locked) {
+        return badRequest(`The "${locked}" field is managed by the editor and can't be set here.`)
+      }
+    }
 
     // Run the `content.entry.cells` filter pipeline before persistence so
     // plugins can validate / normalize / auto-fill cells — the same shared

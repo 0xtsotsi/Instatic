@@ -43,8 +43,8 @@ describe('toolAllowedForCapabilities', () => {
   })
 
   it('allows when the caller has ANY of the requiredCapabilities', () => {
-    const t = tool({ requiredCapabilities: ['data.tables.read', 'data.tables.manage'] })
-    expect(toolAllowedForCapabilities(t, ['data.tables.manage'])).toBe(true)
+    const t = tool({ requiredCapabilities: ['data.custom.tables.read', 'data.custom.tables.manage'] })
+    expect(toolAllowedForCapabilities(t, ['data.custom.tables.manage'])).toBe(true)
   })
 
   it('blocks a mutating tool when the caller lacks ai.tools.write', () => {
@@ -74,12 +74,12 @@ describe('selectToolsForScope capability filtering', () => {
     expect(names).toContain('list_users')
   })
 
-  it('drops document read tools for a caller with only data.tables.read', () => {
-    const names = selectToolsForScope('content', ['ai.chat', 'data.tables.read']).map((t) => t.name)
+  it('drops document read tools for a caller with only data.custom.tables.read', () => {
+    const names = selectToolsForScope('content', ['ai.chat', 'data.custom.tables.read']).map((t) => t.name)
     expect(names).not.toContain('get_document')
     expect(names).not.toContain('list_documents')
     expect(names).not.toContain('search_documents')
-    // schema tools stay — they only need data.tables.read
+    // schema tools stay — they only need a data-table read cap
     expect(names).toContain('list_collections')
   })
 

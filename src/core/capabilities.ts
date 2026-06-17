@@ -53,9 +53,16 @@ export const CORE_CAPABILITIES = [
   'users.manage',
   'roles.manage',
   'audit.read',
-  // Data workspace — split from `content.manage`.
-  'data.tables.read',
-  'data.tables.manage',
+  // Data workspace — split from `content.manage`, and further split
+  // system-vs-custom so a persona (e.g. "client") can see/manage custom tables
+  // without ever seeing the internal system tables (posts/pages/components/
+  // layouts). System-table identity + built-in fields are immutable for
+  // everyone; `data.system.tables.manage` only governs custom fields +
+  // primary-field selection on a system table.
+  'data.custom.tables.read',
+  'data.custom.tables.manage',
+  'data.system.tables.read',
+  'data.system.tables.manage',
   'data.rows.move',
   'data.export',
   'data.import',

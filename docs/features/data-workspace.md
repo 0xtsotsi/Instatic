@@ -71,7 +71,9 @@ DataPage.tsx
 
 ## TableSettings and field management
 
-`TableSettings.tsx` renders four collapsible sections (General, Routing, Display, Fields, Kind, Danger zone). The **Fields** section delegates to `FieldsSection`.
+`TableSettings.tsx` renders collapsible sections (General, Routing, Display, Fields, Kind, Danger zone). The **Fields** section delegates to `FieldsSection`.
+
+**System tables** (`posts`/`pages`/`components`/`layouts`) render a **reduced** panel: only **Display** (primary field) and **Fields** are shown, gated by `data.system.tables.manage`. General / Routing / Kind / Danger zone are hidden because a system table's identity is frozen (the server's `assertSystemTableUpdateAllowed` rejects identity + built-in-field changes for everyone). Managers can still add/manage **custom** fields and change the primary field.
 
 ### FieldsSection
 
@@ -84,21 +86,26 @@ DataPage.tsx
 
 ### Field classification — `fieldGuards.ts`
 
-Three tiers for postType tables, enforced by the guard functions:
+Tiers enforced by the guard functions:
 
 | Tier | Field IDs | Edit affordance | Delete affordance |
 |------|-----------|-----------------|-------------------|
-| Mandatory built-in | `title`, `slug` | None — locked row, no edit/delete buttons | Blocked |
-| Optional built-in | `body`, `featuredMedia`, `seoTitle`, `seoDescription` | Description + required only; label locked | Allowed |
+| Mandatory built-in (postType) | `title`, `slug` | None — locked row, no edit/delete buttons | Blocked |
+| Optional built-in (postType) | `body`, `featuredMedia`, `seoTitle`, `seoDescription` | Description + required only; label locked | Allowed |
+| Built-in on a **system table** | every `builtIn` field | None — fully locked row | Blocked |
 | Custom | all others | Fully editable | Allowed if not the primary field |
 
 ```ts
 isMandatoryField(fieldId)           // title or slug on a postType
 isOptionalBuiltIn(field)            // builtIn: true but not mandatory
-isFieldDeletable(field, table)      // false for primaryField or mandatory built-in
-isLabelLocked(field, table)         // true for any built-in postType field
+isSystemBuiltInField(field, table)  // builtIn on a system table — frozen
+isFieldFullyLocked(field, table)    // postType mandatory OR system built-in → no edit/delete/reorder
+isFieldDeletable(field, table)      // false for primaryField or any fully-locked field
+isLabelLocked(field, table)         // true for built-in postType fields and system built-ins
 deleteTooltip(field, table)         // disabled-button tooltip text, or undefined
 ```
+
+Built-in field **values** (row cells) are additionally read-only on the *structural* system tables (pages/components/layouts) via `isBuiltInValueLocked` (`@core/data/systemTableGuard`); `posts` built-in values stay editable. The same predicate backs the server's row-write rejection (`lockedBuiltInCellKey`).
 
 `FIELD_TYPE_LABELS` maps every `DataFieldType` to a human-readable string and is shared by `FieldRow` and `FieldEditForm`.
 

@@ -105,6 +105,41 @@ export function DataSidebar({
     setContextMenu({ x, y, tableId: table.id })
   }
 
+  // Built-in system tables (posts/pages/components/layouts) are grouped apart
+  // from user-created custom tables. `listDataTablesWithCounts` already sorts
+  // system tables first, so partitioning preserves order within each group.
+  const systemTables = tables.filter((table) => table.system)
+  const customTables = tables.filter((table) => !table.system)
+
+  function renderTableButton(table: DataTableListItem) {
+    const selected = table.id === selectedTableId
+    return (
+      <Button
+        key={table.id}
+        variant="ghost"
+        size="sm"
+        fullWidth
+        align="start"
+        pressed={selected}
+        role="option"
+        aria-selected={selected}
+        data-data-table-id={table.id}
+        onClick={() => onSelectTable(table.id)}
+        onContextMenuCapture={(event) => openTableContextMenu(table, event)}
+        className={styles.tableButton}
+      >
+        <DatabaseSolidIcon size={13} aria-hidden="true" />
+        <span className={styles.tableLabel}>{table.pluralLabel}</span>
+        <span className={styles.kindBadge}>
+          {table.kind === 'postType' ? 'post-type'
+            : table.kind === 'page' ? 'page'
+            : table.kind === 'component' ? 'component'
+            : 'data'}
+        </span>
+      </Button>
+    )
+  }
+
   function openTableContextMenu(table: DataTableListItem, event: MouseEvent<HTMLButtonElement>): void {
     event.preventDefault()
     event.stopPropagation()
@@ -188,6 +223,30 @@ export function DataSidebar({
             title="Data tables"
             body="bare"
             onClose={() => setDataSidebarCollapsed(true)}
+            headerActions={
+              <>
+                <Button
+                  variant="ghost"
+                  size="xs"
+                  iconOnly
+                  aria-label="Export site"
+                  tooltip="Export site"
+                  onClick={onOpenExport}
+                >
+                  <ArrowDownIcon size={13} aria-hidden="true" />
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="xs"
+                  iconOnly
+                  aria-label="Import site"
+                  tooltip="Import site"
+                  onClick={onOpenImport}
+                >
+                  <UploadIcon size={13} aria-hidden="true" />
+                </Button>
+              </>
+            }
           >
             <div
               ref={tableListRef}
@@ -222,66 +281,45 @@ export function DataSidebar({
                 </p>
               )}
 
-              {!loading && !error && tables.length === 0 && (
-                <p className={styles.emptyText}>No tables yet.</p>
+              {/* System tables (built-in) first, then the user's custom tables.
+                  The System group only renders when the user can see system
+                  tables; the Custom group always renders so its "New table"
+                  action has a home even with zero custom tables. */}
+              {!loading && !error && systemTables.length > 0 && (
+                <>
+                  <div className={styles.sectionHeader}>
+                    <h3 className={styles.sectionTitle}>System</h3>
+                    <span className={styles.sectionCount}>{systemTables.length}</span>
+                  </div>
+                  {systemTables.map(renderTableButton)}
+                </>
               )}
 
-              {tables.map((table) => {
-                const selected = table.id === selectedTableId
-                return (
-                  <Button
-                    key={table.id}
-                    variant="ghost"
-                    size="sm"
-                    fullWidth
-                    align="start"
-                    pressed={selected}
-                    role="option"
-                    aria-selected={selected}
-                    data-data-table-id={table.id}
-                    onClick={() => onSelectTable(table.id)}
-                    onContextMenuCapture={(event) => openTableContextMenu(table, event)}
-                    className={styles.tableButton}
-                  >
-                    <DatabaseSolidIcon size={13} aria-hidden="true" />
-                    <span className={styles.tableLabel}>{table.pluralLabel}</span>
-                    <span className={styles.kindBadge}>
-                      {table.kind === 'postType' ? 'post-type'
-                        : table.kind === 'page' ? 'page'
-                        : table.kind === 'component' ? 'component'
-                        : 'data'}
-                    </span>
-                  </Button>
-                )
-              })}
-            </div>
-
-            {/* Action footer — create table + export/import */}
-            <div className={styles.footer}>
-              {canCreate && (
-                <Button
-                  variant="primary"
-                  size="sm"
-                  fullWidth
-                  onClick={onCreateTable}
-                  className={styles.footerButton}
-                >
-                  <PlusIcon size={12} aria-hidden="true" />
-                  <span>New table</span>
-                </Button>
+              {!loading && !error && (
+                <>
+                  <div className={styles.sectionHeader}>
+                    <h3 className={styles.sectionTitle}>Custom tables</h3>
+                    <span className={styles.sectionCount}>{customTables.length}</span>
+                    {canCreate && (
+                      <span className={styles.headerActions}>
+                        <Button
+                          variant="ghost"
+                          size="xs"
+                          iconOnly
+                          aria-label="New table"
+                          tooltip="New table"
+                          onClick={onCreateTable}
+                        >
+                          <PlusIcon size={13} aria-hidden="true" />
+                        </Button>
+                      </span>
+                    )}
+                  </div>
+                  {customTables.length > 0
+                    ? customTables.map(renderTableButton)
+                    : <p className={styles.emptyText}>None yet</p>}
+                </>
               )}
-
-              <div className={styles.transferActions}>
-                <Button variant="ghost" size="sm" fullWidth onClick={onOpenExport}>
-                  <ArrowDownIcon size={12} aria-hidden="true" />
-                  <span>Export site</span>
-                </Button>
-
-                <Button variant="ghost" size="sm" fullWidth onClick={onOpenImport}>
-                  <UploadIcon size={12} aria-hidden="true" />
-                  <span>Import site</span>
-                </Button>
-              </div>
             </div>
           </Panel>
 
