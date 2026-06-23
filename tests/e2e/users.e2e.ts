@@ -34,6 +34,105 @@ test.describe('users and roles', () => {
     await expect(page.getByText(email)).toBeVisible()
   })
 
+  test('owner edits, suspends, resets, activates, and deletes a non-owner user (USERS-001)', async ({
+    page,
+    browser,
+  }) => {
+    await login(page)
+    const suffix = Date.now().toString(36)
+    const email = `user-lifecycle-${suffix}@example.com`
+    const editedEmail = `user-lifecycle-edited-${suffix}@example.com`
+    const initialDisplayName = `User Lifecycle ${suffix}`
+    const editedDisplayName = `User Lifecycle Edited ${suffix}`
+    const initialPassword = 'user-lifecycle-pass-12345'
+    const resetPassword = 'user-lifecycle-reset-12345'
+
+    await page.goto('/admin/users')
+    await createUser(page, {
+      email,
+      displayName: initialDisplayName,
+      password: initialPassword,
+      role: 'Admin',
+    })
+
+    let row = userRow(page, email)
+    await expect(row).toBeVisible()
+    await expect(row.getByText(initialDisplayName)).toBeVisible()
+    await expect(row.getByText('Active')).toBeVisible()
+    await expect(row.getByText('Admin')).toBeVisible()
+
+    await test.step('edit identity fields', async () => {
+      await openUserAction(page, initialDisplayName, 'Edit')
+      const dialog = page.getByRole('dialog', { name: 'Edit User' })
+      await expect(dialog).toBeVisible()
+      await dialog.locator('input[name="edited-user-email-address"]').fill(editedEmail)
+      await dialog.locator('input[name="edited-user-display-name"]').fill(editedDisplayName)
+      await page.locator('button[form="users-page-user-form"]').click()
+      await completeStepUp(page)
+      await expect(dialog).toBeHidden({ timeout: 20_000 })
+
+      row = userRow(page, editedEmail)
+      await expect(row).toBeVisible()
+      await expect(row.getByText(editedDisplayName)).toBeVisible()
+      await expect(page.getByText(email)).toHaveCount(0)
+    })
+
+    await test.step('suspend blocks login', async () => {
+      await openUserAction(page, editedDisplayName, 'Suspend')
+      await completeStepUp(page)
+      row = userRow(page, editedEmail)
+      await expect(row.getByText('Suspended')).toBeVisible()
+
+      const context = await browser.newContext()
+      const suspendedLogin = await context.newPage()
+      try {
+        await expectLoginRejected(suspendedLogin, editedEmail, initialPassword)
+      } finally {
+        await context.close()
+      }
+    })
+
+    await test.step('activate and reset password restores login', async () => {
+      await openUserAction(page, editedDisplayName, 'Activate')
+      await completeStepUp(page)
+      row = userRow(page, editedEmail)
+      await expect(row.getByText('Active')).toBeVisible()
+
+      await openUserAction(page, editedDisplayName, 'Reset password')
+      const dialog = page.getByRole('dialog', { name: 'Reset Password' })
+      await expect(dialog).toBeVisible()
+      await dialog.locator('input[name="edited-user-new-password"]').fill(resetPassword)
+      await page.locator('button[form="users-page-user-form"]').click()
+      await completeStepUp(page)
+      await expect(dialog).toBeHidden({ timeout: 20_000 })
+    })
+
+    const activeContext = await browser.newContext()
+    const activeAdmin = await activeContext.newPage()
+    try {
+      await loginAs(activeAdmin, editedEmail, resetPassword)
+
+      await test.step('delete removes the user and invalidates fresh access', async () => {
+        await openUserAction(page, editedDisplayName, 'Delete')
+        await completeStepUp(page)
+        await expect(userRow(page, editedEmail)).toHaveCount(0)
+
+        await activeAdmin.goto('/admin/dashboard')
+        await expect(activeAdmin.getByRole('heading', { name: 'Admin Login' })).toBeVisible()
+      })
+
+      const deletedContext = await browser.newContext()
+      const deletedLogin = await deletedContext.newPage()
+      try {
+        await expectLoginRejected(deletedLogin, editedEmail, resetPassword)
+      } finally {
+        await deletedContext.close()
+      }
+    } finally {
+      await activeContext.close()
+    }
+  })
+
   test('user creation requires successful step-up before mutating (CAP-003)', async ({
     page,
   }) => {
@@ -434,6 +533,36 @@ async function openRoleAction(page: Page, roleName: string, action: string): Pro
     .getByRole('menu', { name: `Role actions for ${roleName}` })
     .getByRole('menuitem', { name: action })
     .click()
+}
+
+function userRow(page: Page, email: string): Locator {
+  return page.getByRole('row', { name: new RegExp(`User ${escapeRegExp(email)}`) })
+}
+
+async function openUserAction(page: Page, displayName: string, action: string): Promise<void> {
+  await page.getByRole('button', { name: `Actions for ${displayName}` }).click()
+  await page
+    .getByRole('menu', { name: `User actions for ${displayName}` })
+    .getByRole('menuitem', { name: action })
+    .click()
+}
+
+async function expectLoginRejected(
+  page: Page,
+  email: string,
+  password: string,
+): Promise<void> {
+  await page.goto('/admin')
+  await expect(page.getByRole('heading', { name: 'Admin Login' })).toBeVisible()
+  await page.getByLabel('Email').fill(email)
+  await page.getByLabel('Password').fill(password)
+  await page.getByRole('button', { name: 'Sign In' }).click()
+  await expect(page.getByRole('alert')).toHaveText('Invalid email or password')
+  await expect(page.getByRole('heading', { name: 'Admin Login' })).toBeVisible()
+}
+
+function escapeRegExp(value: string): string {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
 }
 
 async function expectDataTableMobileScroller(table: Locator): Promise<void> {
