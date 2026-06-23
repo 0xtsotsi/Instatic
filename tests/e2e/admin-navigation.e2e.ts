@@ -1,5 +1,7 @@
-import { expect, test, type Page } from '@playwright/test'
+import { expect, test, type Locator, type Page } from '@playwright/test'
 import { expectEditorReady } from './helpers'
+
+const EDITOR_PREFS_KEY = 'instatic-editor-prefs'
 
 /**
  * ADMIN-001 — move between the primary admin workspaces and confirm the active
@@ -33,6 +35,154 @@ test.describe('admin navigation', () => {
   })
 })
 
+/**
+ * ADMIN-004 — global Settings modal and local editor preferences.
+ *
+ * Settings is mounted by every top-level admin layout. This regression opens it
+ * from the lightweight Dashboard route, verifies each section renders, mutates
+ * representative local preferences through the real controls, confirms reload
+ * persistence, confirms corrupted local preference storage falls back cleanly,
+ * and checks the modal remains usable at 390px.
+ */
+test.describe('admin settings', () => {
+  test('opens global settings, persists preferences, and stays contained at mobile width (ADMIN-004)', async ({
+    page,
+  }) => {
+    await page.goto('/admin/dashboard')
+    await expect(page.getByRole('heading', { name: 'Overview' })).toBeVisible()
+
+    const previousPrefs = await page.evaluate((key) => localStorage.getItem(key), EDITOR_PREFS_KEY)
+
+    try {
+      await page.evaluate((key) => localStorage.removeItem(key), EDITOR_PREFS_KEY)
+      await page.reload()
+      await expect(page.getByRole('heading', { name: 'Overview' })).toBeVisible()
+
+      await test.step('all Settings sections render from a non-editor route', async () => {
+        const dialog = await openSettings(page)
+
+        const general = dialog.getByRole('region', { name: 'General' })
+        await expect(general.getByLabel('Site Name')).toBeVisible({ timeout: 20_000 })
+        await expect(general.getByLabel('Meta Title')).toBeVisible()
+        await expect(general.getByLabel('Language')).toBeVisible()
+
+        await switchSettingsSection(dialog, 'Shortcuts')
+        const shortcuts = dialog.getByRole('region', { name: 'Shortcuts' })
+        await expect(shortcuts.getByText('Global', { exact: true })).toBeVisible()
+        await expect(shortcuts.getByText('Editor', { exact: true })).toBeVisible()
+
+        await switchSettingsSection(dialog, 'Publishing')
+        const publishing = dialog.getByRole('region', { name: 'Publishing' })
+        await expect(publishing.getByText('Runtime', { exact: true })).toBeVisible()
+        await expect(publishing.getByText('/admin', { exact: true })).toBeVisible()
+        await expect(
+          publishing.getByRole('switch', {
+            name: 'Tree-shake generated framework utilities',
+          }),
+        ).toBeVisible()
+
+        await page.keyboard.press('Escape')
+        await expect(dialog).toBeHidden()
+      })
+
+      await test.step('preference controls write and reload from local storage', async () => {
+        const dialog = await openSettings(page, 'Preferences')
+        const autoSave = dialog.getByRole('switch', { name: 'Auto-save' })
+        const delay = dialog.getByRole('combobox', { name: 'Auto-save delay' })
+        const density = dialog.getByRole('combobox', { name: 'UI density' })
+
+        await expect(autoSave).toHaveAttribute('aria-checked', 'true')
+        await expect(delay).toHaveValue('30 seconds')
+        await expect(density).toHaveValue('Compact')
+
+        await autoSave.click()
+        await expect(autoSave).toHaveAttribute('aria-checked', 'false')
+        await chooseComboboxOption(page, delay, '15 seconds')
+        await chooseComboboxOption(page, density, 'Comfortable')
+
+        const savedPrefs = await page.evaluate((key) => {
+          const raw = localStorage.getItem(key)
+          return raw ? JSON.parse(raw) as Record<string, unknown> : {}
+        }, EDITOR_PREFS_KEY)
+        expect(savedPrefs.autoSave).toBe(false)
+        expect(savedPrefs.autoSaveDelay).toBe('15')
+        expect(savedPrefs.density).toBe('comfortable')
+
+        await page.keyboard.press('Escape')
+        await expect(dialog).toBeHidden()
+
+        await page.reload()
+        await expect(page.getByRole('heading', { name: 'Overview' })).toBeVisible()
+        const reloadedDialog = await openSettings(page, 'Preferences')
+        await expect(reloadedDialog.getByRole('switch', { name: 'Auto-save' })).toHaveAttribute(
+          'aria-checked',
+          'false',
+        )
+        await expect(
+          reloadedDialog.getByRole('combobox', { name: 'Auto-save delay' }),
+        ).toHaveValue('15 seconds')
+        await expect(reloadedDialog.getByRole('combobox', { name: 'UI density' })).toHaveValue(
+          'Comfortable',
+        )
+        await page.keyboard.press('Escape')
+        await expect(reloadedDialog).toBeHidden()
+      })
+
+      await test.step('corrupted local preference storage falls back to defaults', async () => {
+        await page.evaluate((key) => localStorage.setItem(key, '{bad json'), EDITOR_PREFS_KEY)
+        await page.reload()
+        await expect(page.getByRole('heading', { name: 'Overview' })).toBeVisible()
+
+        const dialog = await openSettings(page, 'Preferences')
+        await expect(dialog.getByRole('switch', { name: 'Auto-save' })).toHaveAttribute(
+          'aria-checked',
+          'true',
+        )
+        await expect(dialog.getByRole('combobox', { name: 'Auto-save delay' })).toHaveValue(
+          '30 seconds',
+        )
+        await page.keyboard.press('Escape')
+        await expect(dialog).toBeHidden()
+      })
+
+      await test.step('settings modal remains usable at phone width', async () => {
+        await page.setViewportSize({ width: 390, height: 844 })
+        await page.reload()
+        await expect(page.getByRole('heading', { name: 'Overview' })).toBeVisible()
+
+        const dialog = await openSettings(page, 'Preferences')
+        const preferences = dialog.getByRole('region', { name: 'Preferences' })
+        await expect(preferences.getByRole('switch', { name: 'Auto-save' })).toBeVisible()
+        await expect(preferences.getByRole('combobox', { name: 'UI density' })).toBeVisible()
+        await expectPageContained(page)
+        await expectLocatorContained(
+          page,
+          dialog.getByRole('button', { name: 'Preferences' }),
+          'mobile settings Preferences tab',
+        )
+        await expectLocatorContained(
+          page,
+          preferences.getByRole('switch', { name: 'Auto-save' }),
+          'mobile settings Auto-save switch',
+        )
+        await expectLocatorContained(
+          page,
+          preferences.getByRole('combobox', { name: 'UI density' }),
+          'mobile settings density combobox',
+        )
+      })
+    } finally {
+      await page.evaluate(
+        ({ key, value }) => {
+          if (value === null) localStorage.removeItem(key)
+          else localStorage.setItem(key, value)
+        },
+        { key: EDITOR_PREFS_KEY, value: previousPrefs },
+      ).catch(() => {})
+    }
+  })
+})
+
 /** Click a section link in the toolbar and confirm the workspace took over. */
 async function navigateSection(
   page: Page,
@@ -51,4 +201,56 @@ async function expectActiveSection(page: Page, name: string): Promise<void> {
   const toolbar = page.getByTestId('toolbar')
   await expect(toolbar.getByRole('link', { name })).toHaveCount(0)
   await expect(toolbar.getByText(name, { exact: true })).toBeVisible()
+}
+
+async function openSettings(page: Page, section?: string): Promise<Locator> {
+  await page.getByTestId('toolbar-settings-btn').click()
+  const dialog = page.getByRole('dialog', { name: 'Settings' })
+  await expect(dialog).toBeVisible({ timeout: 20_000 })
+  if (section) {
+    await switchSettingsSection(dialog, section)
+  }
+  return dialog
+}
+
+async function switchSettingsSection(dialog: Locator, section: string): Promise<void> {
+  await dialog.getByRole('button', { name: section }).click()
+  await expect(dialog.getByRole('region', { name: section })).toBeVisible()
+}
+
+async function chooseComboboxOption(
+  page: Page,
+  combobox: Locator,
+  optionName: string,
+): Promise<void> {
+  await combobox.click()
+  await page.getByRole('option', { name: optionName }).click()
+  await expect(combobox).toHaveValue(optionName)
+  await expect(combobox).toBeFocused()
+}
+
+async function expectPageContained(page: Page): Promise<void> {
+  const metrics = await page.evaluate(() => {
+    const doc = document.documentElement
+    return {
+      viewportWidth: doc.clientWidth,
+      viewportHeight: window.innerHeight,
+      pageOverflow: doc.scrollWidth - doc.clientWidth,
+    }
+  })
+  expect(metrics.viewportWidth).toBe(390)
+  expect(metrics.viewportHeight).toBe(844)
+  expect(metrics.pageOverflow).toBeLessThanOrEqual(1)
+}
+
+async function expectLocatorContained(
+  page: Page,
+  locator: Locator,
+  description: string,
+): Promise<void> {
+  const box = await locator.boundingBox()
+  if (!box) throw new Error(`${description} was visible but had no bounding box`)
+  const viewportWidth = await page.evaluate(() => document.documentElement.clientWidth)
+  expect(box.x).toBeGreaterThanOrEqual(-1)
+  expect(box.x + box.width).toBeLessThanOrEqual(viewportWidth + 1)
 }
