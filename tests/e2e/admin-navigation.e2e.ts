@@ -2,6 +2,7 @@ import { expect, test, type Locator, type Page } from '@playwright/test'
 import { expectEditorReady } from './helpers'
 
 const EDITOR_PREFS_KEY = 'instatic-editor-prefs'
+const EDITOR_LAYOUT_STORAGE_KEY = 'instatic-editor-layout-v2'
 
 /**
  * ADMIN-001 — move between the primary admin workspaces and confirm the active
@@ -113,6 +114,109 @@ test.describe('admin navigation', () => {
         'mobile toolbar account menu trigger',
       )
     })
+  })
+
+  test('recovers workspace panels after resize, close, reload, and mobile viewport changes (ADMIN-005)', async ({
+    page,
+  }) => {
+    const suffix = Date.now().toString(36)
+    const title = `ADMIN-005 Panel ${suffix}`
+    const slug = `admin-005-panel-${suffix}`
+    let previousLayout: string | null = null
+
+    try {
+      await page.goto('/admin/content')
+      previousLayout = await page.evaluate((key) => localStorage.getItem(key), EDITOR_LAYOUT_STORAGE_KEY)
+      await page.evaluate((key) => localStorage.removeItem(key), EDITOR_LAYOUT_STORAGE_KEY)
+      await page.reload()
+      await expect(page.getByTestId('content-explorer-panel')).toBeVisible({ timeout: 20_000 })
+
+      await page.getByRole('button', { name: 'New post', exact: true }).click()
+      await page.getByRole('textbox', { name: 'Title', exact: true }).fill(title)
+      await page.getByRole('textbox', { name: 'Slug' }).fill(slug)
+      await expect(page.getByTestId('content-settings-panel')).toBeVisible()
+
+      const leftSidebar = page.getByTestId('left-sidebar')
+      const rightSidebar = page.getByTestId('right-sidebar')
+      await expect(leftSidebar).toHaveAttribute('data-expanded', 'true')
+      await expect(rightSidebar).toHaveAttribute('data-expanded', 'true')
+
+      await test.step('keyboard resize updates both panel widths and persists them', async () => {
+        const leftResize = page.getByRole('separator', { name: 'Resize content sidebar' })
+        await leftResize.focus()
+        await page.keyboard.press('End')
+        await expect(leftResize).toHaveAttribute('aria-valuenow', '520')
+
+        const rightResize = page.getByRole('separator', { name: 'Resize right sidebar' })
+        await rightResize.focus()
+        await page.keyboard.press('Home')
+        await expect(rightResize).toHaveAttribute('aria-valuenow', '300')
+
+        await expectStoredWorkspaceLayout(page, {
+          leftWidth: 520,
+          rightWidth: 300,
+          rightOpen: true,
+          activeLeftPanel: 'content',
+        })
+      })
+
+      await test.step('closed panels expose stable reopen affordances', async () => {
+        await page.getByTestId('panel-close-content-settings').click()
+        await expect(rightSidebar).toHaveAttribute('data-expanded', 'false')
+        const settingsNotch = page.getByTestId('content-settings-notch')
+        await expect(settingsNotch).toBeVisible()
+        await settingsNotch.getByRole('button', { name: 'Open settings panel' }).click()
+        await expect(rightSidebar).toHaveAttribute('data-expanded', 'true')
+        await expect(page.getByTestId('content-settings-panel')).toBeVisible()
+
+        await page.getByTestId('panel-close-content-explorer').click()
+        await expect(leftSidebar).toHaveAttribute('data-expanded', 'false')
+        await page.getByTestId('panel-rail-content').click()
+        await expect(leftSidebar).toHaveAttribute('data-expanded', 'true')
+        await expect(page.getByTestId('content-explorer-panel')).toBeVisible()
+      })
+
+      await test.step('layout state survives reload without panel overlap', async () => {
+        await page.reload()
+        await expect(page.getByTestId('content-explorer-panel')).toBeVisible({ timeout: 20_000 })
+        await expect(leftSidebar).toHaveAttribute('data-expanded', 'true')
+        await expect(rightSidebar).toHaveAttribute('data-expanded', 'true')
+        await expect(page.getByRole('separator', { name: 'Resize content sidebar' })).toHaveAttribute(
+          'aria-valuenow',
+          '520',
+        )
+        await expect(page.getByRole('separator', { name: 'Resize right sidebar' })).toHaveAttribute(
+          'aria-valuenow',
+          '300',
+        )
+        await expectPageContained(page, { width: 1280, height: 720 })
+      })
+
+      await test.step('mobile viewport stays contained with persisted oversized desktop widths', async () => {
+        await page.setViewportSize({ width: 390, height: 844 })
+        await page.reload()
+        await expect(page.getByTestId('content-explorer-panel')).toBeVisible({ timeout: 20_000 })
+        await expectPageContained(page, { width: 390, height: 844 })
+        await expectLocatorContained(
+          page,
+          page.getByTestId('panel-rail-content'),
+          'mobile content rail button',
+        )
+        await expectLocatorContained(
+          page,
+          page.getByTestId('panel-close-content-explorer'),
+          'mobile content panel close button',
+        )
+      })
+    } finally {
+      await page.evaluate(
+        ({ key, value }) => {
+          if (value === null) localStorage.removeItem(key)
+          else localStorage.setItem(key, value)
+        },
+        { key: EDITOR_LAYOUT_STORAGE_KEY, value: previousLayout },
+      ).catch(() => {})
+    }
   })
 })
 
@@ -334,7 +438,10 @@ async function chooseComboboxOption(
   await expect(combobox).toBeFocused()
 }
 
-async function expectPageContained(page: Page): Promise<void> {
+async function expectPageContained(
+  page: Page,
+  viewport: { width: number, height: number } = { width: 390, height: 844 },
+): Promise<void> {
   const metrics = await page.evaluate(() => {
     const doc = document.documentElement
     return {
@@ -343,8 +450,8 @@ async function expectPageContained(page: Page): Promise<void> {
       pageOverflow: doc.scrollWidth - doc.clientWidth,
     }
   })
-  expect(metrics.viewportWidth).toBe(390)
-  expect(metrics.viewportHeight).toBe(844)
+  expect(metrics.viewportWidth).toBe(viewport.width)
+  expect(metrics.viewportHeight).toBe(viewport.height)
   expect(metrics.pageOverflow).toBeLessThanOrEqual(1)
 }
 
@@ -358,4 +465,32 @@ async function expectLocatorContained(
   const viewportWidth = await page.evaluate(() => document.documentElement.clientWidth)
   expect(box.x).toBeGreaterThanOrEqual(-1)
   expect(box.x + box.width).toBeLessThanOrEqual(viewportWidth + 1)
+}
+
+async function expectStoredWorkspaceLayout(
+  page: Page,
+  expected: {
+    leftWidth: number
+    rightWidth: number
+    rightOpen: boolean
+    activeLeftPanel: string
+  },
+): Promise<void> {
+  await expect.poll(async () => {
+    return page.evaluate((key) => {
+      const raw = localStorage.getItem(key)
+      if (!raw) return null
+      const parsed = JSON.parse(raw) as {
+        workspaces?: {
+          content?: {
+            leftWidth?: number
+            rightWidth?: number
+            rightOpen?: boolean
+            activeLeftPanel?: string | null
+          }
+        }
+      }
+      return parsed.workspaces?.content ?? null
+    }, EDITOR_LAYOUT_STORAGE_KEY)
+  }).toMatchObject(expected)
 }
