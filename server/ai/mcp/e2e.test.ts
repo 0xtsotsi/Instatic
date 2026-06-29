@@ -80,11 +80,11 @@ describe('MCP end-to-end (stateless multi-request, real handler)', () => {
 
     const list = await rpc('tools/list', {})
     const names = (list.json.result?.tools ?? []).map((t) => t.name)
-    expect(names).toContain('list_collections') // headless content read
-    expect(names).toContain('read_styles') // headless design-system read
-    expect(names).toContain('insertHtml') // browser editing tool, relayed to the editor
+    expect(names).toContain('content_list_collections') // headless content read
+    expect(names).toContain('site_read_styles') // headless design-system read
+    expect(names).toContain('site_insert_html') // browser editing tool, relayed to the editor
 
-    const read = await rpc('tools/call', { name: 'list_collections', arguments: {} })
+    const read = await rpc('tools/call', { name: 'content_list_collections', arguments: {} })
     expect(read.json.result?.isError).toBeFalsy()
     expect(JSON.stringify(read.json.result?.content)).toContain('pages')
   })
@@ -111,9 +111,9 @@ describe('MCP end-to-end (stateless multi-request, real handler)', () => {
     const body: RpcResponse = JSON.parse(await listRes!.text())
     const tools = body.result?.tools ?? []
     const names = tools.map((t) => t.name)
-    expect(names).toContain('list_collections')
-    expect(names).toContain('read_styles')
-    expect(names).not.toContain('insertHtml') // write tool gated out (no ai.tools.write)
+    expect(names).toContain('content_list_collections')
+    expect(names).toContain('site_read_styles')
+    expect(names).not.toContain('site_insert_html') // write tool gated out (no ai.tools.write)
     expect(names).not.toContain('mutate_page_tree') // removed entirely
   })
 })

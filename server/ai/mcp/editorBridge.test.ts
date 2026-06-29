@@ -53,10 +53,10 @@ describe('editor bridge', () => {
     const bridgeId = ready.bridgeId as string
 
     const bridge = getEditorBridgeForUser(userId)!
-    const callPromise = bridge.callBrowser('insertHtml', { html: '<p>hi</p>' })
+    const callPromise = bridge.callBrowser('site_insert_html', { html: '<p>hi</p>' })
 
     const toolRequest = await readUntil(reader, (e) => e.type === 'toolRequest')
-    expect(toolRequest.toolName).toBe('insertHtml')
+    expect(toolRequest.toolName).toBe('site_insert_html')
     const requestId = toolRequest.requestId as string
 
     // Simulate the editor POSTing its result back.

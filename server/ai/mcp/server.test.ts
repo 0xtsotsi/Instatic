@@ -35,18 +35,18 @@ describe('mcp server', () => {
     const client = await connectClient(db, ['ai.chat', 'content.manage', 'site.read', 'data.system.tables.read'])
     const { tools } = await client.listTools()
     const names = tools.map((t) => t.name)
-    expect(names).toContain('list_collections') // headless read
-    expect(names).toContain('read_styles') // headless design-system read
+    expect(names).toContain('content_list_collections') // headless read
+    expect(names).toContain('site_read_styles') // headless design-system read
     // Write tools are gated out (MCP Tool exposes no `mutates` flag, so assert by name).
-    expect(names).not.toContain('insertHtml')
-    expect(names).not.toContain('deleteNode')
-    expect(names).not.toContain('applyCss')
+    expect(names).not.toContain('site_insert_html')
+    expect(names).not.toContain('site_delete_node')
+    expect(names).not.toContain('site_apply_css')
     await client.close()
   })
 
   it('runs a headless content read tool', async () => {
     const client = await connectClient(db, ['ai.chat', 'site.read', 'data.system.tables.read'])
-    const result = await client.callTool({ name: 'list_collections', arguments: {} })
+    const result = await client.callTool({ name: 'content_list_collections', arguments: {} })
     expect(result.isError).toBeFalsy()
     const text = (result.content as Array<{ type: string; text: string }>)[0].text
     expect(text).toContain('pages') // the seeded system table
@@ -56,10 +56,10 @@ describe('mcp server', () => {
   it('lists browser editing tools but errors with an open-editor hint when no editor is connected', async () => {
     const client = await connectClient(db, ['ai.chat', 'ai.tools.write', 'site.structure.edit', 'content.manage'])
     const { tools } = await client.listTools()
-    expect(tools.some((t) => t.name === 'insertHtml')).toBe(true) // browser tool is listed
-    expect(tools.some((t) => t.name === 'deleteNode')).toBe(true)
+    expect(tools.some((t) => t.name === 'site_insert_html')).toBe(true) // browser tool is listed
+    expect(tools.some((t) => t.name === 'site_delete_node')).toBe(true)
 
-    const result = await client.callTool({ name: 'insertHtml', arguments: { html: '<p>hi</p>' } })
+    const result = await client.callTool({ name: 'site_insert_html', arguments: { html: '<p>hi</p>' } })
     expect(result.isError).toBe(true)
     const text = (result.content as Array<{ type: string; text: string }>)[0].text
     expect(text).toContain('Instatic editor')

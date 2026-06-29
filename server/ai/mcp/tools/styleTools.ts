@@ -2,15 +2,15 @@
  * Headless site-read tools for MCP (design system + breakpoints).
  *
  * The agent reads (and writes) the site as HTML + CSS — pages come back as HTML
- * (`read_document`), and `read_styles` returns the design system as a CSS
+ * (`site_read_document`), and `site_read_styles` returns the design system as a CSS
  * stylesheet: design tokens (CSS custom properties) plus every class and
- * ambient rule. It is the exact CSS you write back with `applyCss`, so Instatic
- * just parses it back and forth. `list_breakpoints` returns the configured
- * viewport ids so `render_snapshot` can target one deliberately.
+ * ambient rule. It is the exact CSS you write back with `site_apply_css`, so Instatic
+ * just parses it back and forth. `site_list_breakpoints` returns the configured
+ * viewport ids so `site_render_snapshot` can target one deliberately.
  *
  * Server-resolved + headless: reads the draft site shell straight from the DB
  * (`getDraftSite`) and reuses the publisher's CSS emitters. No editor, no
- * browser snapshot — fixing the old `list_tokens` / `list_breakpoints` (which
+ * browser snapshot — fixing the old `site_list_tokens` / `site_list_breakpoints` (which
  * silently needed the editor's posted snapshot and returned nothing over MCP).
  */
 import { Type } from '@core/utils/typeboxHelpers'
@@ -52,9 +52,9 @@ const ReadStylesInput = Type.Object(
 
 export const styleMcpTools: AiTool[] = [
   {
-    name: 'read_styles',
+    name: 'site_read_styles',
     description:
-      "Read the site's design system as a CSS stylesheet — design tokens (CSS custom properties for colors, type scale, spacing) plus every class and ambient rule. This is the SAME CSS you write back with applyCss, so read it first to learn the available classes (e.g. .ist-btn) and token variables (e.g. var(--ist-accent)) before authoring HTML/CSS. Works headless — no open editor needed. Pass className to read one rule; omit for the whole sheet.",
+      "Read the site's design system as a CSS stylesheet — design tokens (CSS custom properties for colors, type scale, spacing) plus every class and ambient rule. This is the SAME CSS you write back with site_apply_css, so read it first to learn the available classes (e.g. .ist-btn) and token variables (e.g. var(--ist-accent)) before authoring HTML/CSS. Works headless — no open editor needed. Pass className to read one rule; omit for the whole sheet.",
     scope: 'site',
     execution: 'server',
     inputSchema: ReadStylesInput,
@@ -110,9 +110,9 @@ export const styleMcpTools: AiTool[] = [
     },
   },
   {
-    name: 'list_breakpoints',
+    name: 'site_list_breakpoints',
     description:
-      'List the configured viewport breakpoints (id, label, width), in order (the first is the base/widest context). Pass a breakpoint id to render_snapshot to capture a specific viewport. Headless — no editor needed.',
+      'List the configured viewport breakpoints (id, label, width), in order (the first is the base/widest context). Pass a breakpoint id to site_render_snapshot to capture a specific viewport. Headless — no editor needed.',
     scope: 'site',
     execution: 'server',
     inputSchema: Type.Object({}, { additionalProperties: false }),

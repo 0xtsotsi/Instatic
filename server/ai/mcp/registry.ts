@@ -3,7 +3,7 @@
  * filtered to the connector's granted capabilities.
  *
  * Two execution classes are exposed:
- *   - server-resolved tools (content reads + `read_styles`) run in-process and
+ *   - server-resolved tools (content reads + `site_read_styles`) run in-process and
  *     work with NO editor open;
  *   - browser tools (structure edits, HTML/CSS authoring, design tokens, page
  *     lifecycle, content CRUD, code assets, live-DOM reads) are relayed to the
@@ -32,10 +32,10 @@ import { contextMcpTools } from './tools/contextTool'
 
 // Server-resolved site read tools whose handlers read the browser-posted
 // `ctx.snapshot`, which is null over MCP — they'd silently return nothing.
-// `read_styles` (headless) replaces `list_tokens`. The snapshot-based
-// `list_breakpoints` is excluded too; a headless `list_breakpoints` is provided
+// `site_read_styles` (headless) replaces `site_list_tokens`. The snapshot-based
+// `site_list_breakpoints` is excluded too; a headless `site_list_breakpoints` is provided
 // by `styleMcpTools` (which is ordered first, so it wins the de-dup).
-const MCP_EXCLUDED_TOOLS = new Set<string>(['list_tokens'])
+const MCP_EXCLUDED_TOOLS = new Set<string>(['site_list_tokens'])
 
 function allMcpTools(): AiTool[] {
   // De-dup by tool name. Order matters: the headless style + content tools win

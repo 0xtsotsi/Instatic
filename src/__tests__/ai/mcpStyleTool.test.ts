@@ -34,8 +34,8 @@ function ctxFor(harness: CapabilityTestHarness): ToolContext {
   }
 }
 
-const readStyles = styleMcpTools.find((t) => t.name === 'read_styles')!
-const listBreakpoints = styleMcpTools.find((t) => t.name === 'list_breakpoints')!
+const readStyles = styleMcpTools.find((t) => t.name === 'site_read_styles')!
+const listBreakpoints = styleMcpTools.find((t) => t.name === 'site_list_breakpoints')!
 
 describe('read_styles (headless design-system read)', () => {
   let harness: CapabilityTestHarness

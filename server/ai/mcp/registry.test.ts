@@ -22,13 +22,13 @@ describe('mcp registry', () => {
     const tools = mcpToolsForCapabilities(FULL)
     const names = tools.map((t) => t.name)
     // headless (server-resolved) reads
-    expect(names).toContain('read_styles') // headless design-system read
-    expect(names).toContain('list_collections')
+    expect(names).toContain('site_read_styles') // headless design-system read
+    expect(names).toContain('content_list_collections')
     // browser-execution editing (relayed via the editor bridge)
-    expect(names).toContain('insertHtml')
-    expect(names).toContain('deleteNode')
-    expect(names).toContain('applyCss')
-    expect(names).toContain('set_color_tokens')
+    expect(names).toContain('site_insert_html')
+    expect(names).toContain('site_delete_node')
+    expect(names).toContain('site_apply_css')
+    expect(names).toContain('site_set_color_tokens')
     expect(tools.some((t) => t.execution === 'browser')).toBe(true)
   })
 
@@ -43,16 +43,19 @@ describe('mcp registry', () => {
     const tools = mcpToolsForCapabilities(FULL)
     const names = tools.map((t) => t.name)
     // list_tokens reads ctx.snapshot (null over MCP) → excluded; read_styles replaces it.
-    expect(names).not.toContain('list_tokens')
+    expect(names).not.toContain('site_list_tokens')
     // list_breakpoints is exposed, but as the HEADLESS (server-resolved) version.
-    const bp = tools.find((t) => t.name === 'list_breakpoints')
+    const bp = tools.find((t) => t.name === 'site_list_breakpoints')
     expect(bp).toBeTruthy()
     expect(bp!.execution).toBe('server')
   })
 
-  it('de-dupes shared tool names (e.g. list_documents appears once)', () => {
+  it('prefixes resolve the old site/content list_documents collision into distinct names', () => {
     const names = mcpToolsForCapabilities(FULL).map((t) => t.name)
-    expect(names.filter((n) => n === 'list_documents')).toHaveLength(1)
+    expect(names).toContain('site_list_documents')
+    expect(names).toContain('content_list_documents')
+    // No tool name appears twice.
+    expect(new Set(names).size).toBe(names.length)
   })
 
   it('filters out mutating tools when ai.tools.write is absent', () => {
@@ -61,6 +64,6 @@ describe('mcp registry', () => {
     expect(tools.length).toBeGreaterThan(0)
     expect(tools.some((t) => t.mutates)).toBe(false)
     expect(tools.some((t) => t.name === 'mutate_page_tree')).toBe(false)
-    expect(tools.some((t) => t.name === 'insertHtml')).toBe(false)
+    expect(tools.some((t) => t.name === 'site_insert_html')).toBe(false)
   })
 })

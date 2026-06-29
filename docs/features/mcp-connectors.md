@@ -12,7 +12,7 @@ The server is implemented with the official `@modelcontextprotocol/sdk`. That pa
 
 - **Instatic is an MCP server.** One Streamable-HTTP endpoint at `/_instatic/mcp` serves both local and remote clients (local is just `localhost`).
 - **Thin adapter over the existing tool engine.** No tool logic is duplicated. MCP is a new *caller* alongside the built-in agent and the plugin host; tool dispatch reuses `executeAiTool`.
-- **Tool surface = the full catalog.** Server-resolved tools (content reads + `read_styles`) run headless — no editor needed. Every browser-execution tool the agent panel has (structure edits, insert HTML, apply CSS, assign classes, set design tokens, manage pages, content CRUD, code assets, live-DOM reads) is exposed too, **relayed to an open editor via the live editor bridge** — the single source of truth for page editing. If the connector owner has no editor open, those tools return a clear "open the editor" error; the headless reads still work.
+- **Tool surface = the full catalog.** Server-resolved tools (content reads + `site_read_styles`) run headless — no editor needed. Every browser-execution tool the agent panel has (structure edits, insert HTML, apply CSS, assign classes, set design tokens, manage pages, content CRUD, code assets, live-DOM reads) is exposed too, **relayed to an open editor via the live editor bridge** — the single source of truth for page editing. If the connector owner has no editor open, those tools return a clear "open the editor" error; the headless reads still work.
 - **Bearer-token auth, one secret per connector.** The token is shown once on creation and stored only as a SHA-256 hash. Revocable.
 - **Capability-gated.** A connector carries a granted capability subset; the same gate the built-in agent uses (`toolAllowedForCapabilities`) filters the toolset. An MCP caller can never invoke a tool the granting capabilities couldn't authorize over HTTP.
 - **Privilege floor.** An admin can only grant capabilities they themselves hold.
@@ -49,7 +49,7 @@ repositories (data_rows, media) + applyTreeOperation + saveDataRowDraft
 | `auth.ts` | Bearer resolution → `{ connectorId, userId, capabilities }`; spec-correct 401 with an RFC 9728 `resource_metadata` pointer. |
 | `server.ts` | Builds a capability-scoped low-level `Server` (`ListTools` / `CallTool` handlers). Uses the low-level `Server`, not `McpServer.registerTool`, because the latter needs Zod (banned) — this lets the TypeBox `inputSchema` pass through verbatim. |
 | `registry.ts` | The exposable toolset = full catalog (content + site + page-tree), deduped by name, filtered by `toolAllowedForCapabilities`. |
-| `tools/styleTools.ts` | `read_styles` — the design system as a CSS stylesheet, headless from the DB. |
+| `tools/styleTools.ts` | `site_read_styles` — the design system as a CSS stylesheet, headless from the DB. |
 | `editorBridge.ts` | Per-user live editor bridge registry + `createEditorBridgeStream`; `getEditorBridgeForUser` routes browser tools to the owner's open editor. |
 | `handlers/editorBridge.ts` | `GET /admin/api/ai/editor-bridge` — the NDJSON stream the editor holds open. |
 | `connectors/` | `types.ts` (server-only record), `token.ts` (generate + SHA-256 hash), `store.ts` (CRUD + `toConnectorView`). |
@@ -68,13 +68,13 @@ MCP exposes the **full tool catalog** (deduped by name), capability-filtered. To
 **Headless (server-resolved) — work with no editor open:**
 - Content reads — list/read collections, entries, data rows, media.
 - `get_context({ entryId? })` — orientation in one call: is a live editor connected (browser tools need it), which "everywhere"/post-type templates wrap pages, site name. Call it first if a browser tool returns "open the editor."
-- `read_styles({ format?, className?, includeTokens? })` — the design system as a **CSS stylesheet**: design tokens (CSS custom properties) + every class/ambient rule, read straight from the DB via the publisher's emitters. `format:"summary"` returns a compact class catalog (selector + referenced token vars, no declarations) to scan first. Symmetric with reading pages as HTML / writing CSS via `applyCss`. Replaces the old snapshot-dependent `list_tokens`.
-- `list_breakpoints` — configured viewport ids/labels/widths (the first is the base), so `render_snapshot` can target one deliberately. Headless version replaces the snapshot-dependent one.
+- `site_read_styles({ format?, className?, includeTokens? })` — the design system as a **CSS stylesheet**: design tokens (CSS custom properties) + every class/ambient rule, read straight from the DB via the publisher's emitters. `format:"summary"` returns a compact class catalog (selector + referenced token vars, no declarations) to scan first. Symmetric with reading pages as HTML / writing CSS via `site_apply_css`. Replaces the old snapshot-dependent `list_tokens`.
+- `site_list_breakpoints` — configured viewport ids/labels/widths (the first is the base), so `site_render_snapshot` can target one deliberately. Headless version replaces the snapshot-dependent one.
 
 **Browser-relayed (via the live editor bridge) — require an open editor:**
-- Structure editing — `insertHtml`, `replaceNodeHtml`, `deleteNode`, `moveNode`, `duplicateNode`, `renameNode`, `updateNodeProps`.
-- HTML/CSS authoring (`applyCss`, `assignClass`, `removeClass`), page lifecycle (`addPage`, …), design tokens (`set_color_tokens`, …), content CRUD (`create_document`, `set_document_field`, …), code assets, structure reads (`read_document`), and live-DOM reads (`render_snapshot`, `getNodeHtml`).
-- These have no server implementation — their logic runs in the editor app against the live store. The MCP server relays the call to the connector owner's open editor and awaits the result (see "Live editor bridge"); image attachments (e.g. `render_snapshot`'s PNG) come back as MCP image content blocks. No editor connected → a clear error asking the operator to open it.
+- Structure editing — `site_insert_html`, `site_replace_node_html`, `site_delete_node`, `site_move_node`, `site_duplicate_node`, `site_rename_node`, `site_update_node_props`.
+- HTML/CSS authoring (`site_apply_css`, `site_assign_class`, `site_remove_class`), page lifecycle (`site_add_page`, …), design tokens (`site_set_color_tokens`, …), content CRUD (`content_create_document`, `content_set_document_field`, …), code assets, structure reads (`site_read_document`), and live-DOM reads (`site_render_snapshot`, `site_get_node_html`).
+- These have no server implementation — their logic runs in the editor app against the live store. The MCP server relays the call to the connector owner's open editor and awaits the result (see "Live editor bridge"); image attachments (e.g. `site_render_snapshot`'s PNG) come back as MCP image content blocks. No editor connected → a clear error asking the operator to open it.
 
 ## Live editor bridge
 
@@ -90,7 +90,7 @@ buildMcpServer → getEditorBridgeForUser(userId)
    ◀───────────── POST /admin/api/ai/tool-result ◀── postToolResult ◀───────┘
 ```
 
-- Editor side: `useEditorMcpBridge` (mounted in `SitePage`) opens `GET /admin/api/ai/editor-bridge` (NDJSON, admin-session auth), runs each `toolRequest` through the SAME `executeAgentTool` the agent panel uses, and POSTs the result back. Reconnects with backoff. After a tool that leaves unsaved changes, it **flushes the draft save** (`flushEditorSave`) so a follow-up headless read (`read_styles` / content reads) sees the change immediately instead of waiting for the 30 s autosave.
+- Editor side: `useEditorMcpBridge` (mounted in `SitePage`) opens `GET /admin/api/ai/editor-bridge` (NDJSON, admin-session auth), runs each `toolRequest` through the SAME `executeAgentTool` the agent panel uses, and POSTs the result back. Reconnects with backoff. After a tool that leaves unsaved changes, it **flushes the draft save** (`flushEditorSave`) so a follow-up headless read (`site_read_styles` / content reads) sees the change immediately instead of waiting for the 30 s autosave.
 - Server side: reuses the chat bridge machinery wholesale — `createBridge` issues the `AiBrowserBridge`, `resolveBridgeToolResult` settles it from the existing `/admin/api/ai/tool-result` endpoint.
 
 This is why an open editor (yours, or one the agent opens) unlocks the full editing surface without reimplementing any tool.

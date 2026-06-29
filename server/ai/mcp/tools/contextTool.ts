@@ -49,7 +49,7 @@ export const contextMcpTools: AiTool[] = [
   {
     name: 'get_context',
     description:
-      'Orient yourself before editing: reports whether a live Instatic editor is connected (browser tools like insertHtml / render_snapshot require it), and which templates wrap pages — an "everywhere" template applies a nav/footer/etc. to every page, so anything you author is in addition to it. Pass entryId to also learn whether a template wraps that specific page. Headless — no editor needed. Call this first if a browser tool returns an "open the editor" error.',
+      'Orient yourself before editing: reports whether a live Instatic editor is connected (browser tools like site_insert_html / site_render_snapshot require it), and which templates wrap pages — an "everywhere" template applies a nav/footer/etc. to every page, so anything you author is in addition to it. Pass entryId to also learn whether a template wraps that specific page. Headless — no editor needed. Call this first if a browser tool returns an "open the editor" error.',
     scope: 'site',
     execution: 'server',
     inputSchema: GetContextInput,

@@ -67,10 +67,10 @@ describe('MCP image forwarding', () => {
 
     // Fire the tool call and, concurrently, play the editor: read the relayed
     // request and post back a result carrying an image.
-    const callPromise = client.callTool({ name: 'render_snapshot', arguments: { breakpointId: 'desktop' } })
+    const callPromise = client.callTool({ name: 'site_render_snapshot', arguments: { breakpointId: 'desktop' } })
 
     const toolRequest = await readUntil(reader, (e) => e.type === 'toolRequest')
-    expect(toolRequest.toolName).toBe('render_snapshot')
+    expect(toolRequest.toolName).toBe('site_render_snapshot')
     resolveBridgeToolResult(bridgeId, toolRequest.requestId as string, {
       ok: true,
       data: { screenshot: { status: 'ok', width: 1, height: 1 } },
