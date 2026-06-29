@@ -31,9 +31,10 @@ import { styleMcpTools } from './tools/styleTools'
 
 // Server-resolved site read tools whose handlers read the browser-posted
 // `ctx.snapshot`, which is null over MCP — they'd silently return nothing.
-// `read_styles` (headless, reads the DB) replaces what `list_tokens` offered;
-// breakpoints surface in the media queries `read_styles` emits.
-const MCP_EXCLUDED_TOOLS = new Set<string>(['list_tokens', 'list_breakpoints'])
+// `read_styles` (headless) replaces `list_tokens`. The snapshot-based
+// `list_breakpoints` is excluded too; a headless `list_breakpoints` is provided
+// by `styleMcpTools` (which is ordered first, so it wins the de-dup).
+const MCP_EXCLUDED_TOOLS = new Set<string>(['list_tokens'])
 
 function allMcpTools(): AiTool[] {
   // De-dup by tool name. Order matters: the headless style + content tools win

@@ -39,11 +39,15 @@ describe('mcp registry', () => {
     expect(names).not.toContain('mutate_page_tree')
   })
 
-  it('excludes the snapshot-dependent site read tools that break headless', () => {
-    const names = mcpToolsForCapabilities(FULL).map((t) => t.name)
-    // list_tokens / list_breakpoints read ctx.snapshot (null over MCP) — excluded.
+  it('excludes the snapshot-dependent list_tokens but exposes a headless list_breakpoints', () => {
+    const tools = mcpToolsForCapabilities(FULL)
+    const names = tools.map((t) => t.name)
+    // list_tokens reads ctx.snapshot (null over MCP) → excluded; read_styles replaces it.
     expect(names).not.toContain('list_tokens')
-    expect(names).not.toContain('list_breakpoints')
+    // list_breakpoints is exposed, but as the HEADLESS (server-resolved) version.
+    const bp = tools.find((t) => t.name === 'list_breakpoints')
+    expect(bp).toBeTruthy()
+    expect(bp!.execution).toBe('server')
   })
 
   it('de-dupes shared tool names (e.g. list_documents appears once)', () => {

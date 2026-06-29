@@ -1,19 +1,20 @@
 /**
- * Headless design-system read tool for MCP.
+ * Headless site-read tools for MCP (design system + breakpoints).
  *
  * The agent reads (and writes) the site as HTML + CSS — pages come back as HTML
- * (`read_document` / `getNodeHtml`), and this returns the design system as a CSS
- * stylesheet: the design tokens (CSS custom properties for colors, type scale,
- * spacing) plus every class and ambient rule. It is the exact CSS you write
- * back with `applyCss`, so Instatic just parses it back and forth.
+ * (`read_document`), and `read_styles` returns the design system as a CSS
+ * stylesheet: design tokens (CSS custom properties) plus every class and
+ * ambient rule. It is the exact CSS you write back with `applyCss`, so Instatic
+ * just parses it back and forth. `list_breakpoints` returns the configured
+ * viewport ids so `render_snapshot` can target one deliberately.
  *
  * Server-resolved + headless: reads the draft site shell straight from the DB
  * (`getDraftSite`) and reuses the publisher's CSS emitters. No editor, no
- * browser snapshot — fixing the old `list_tokens` (which silently needed the
- * editor's posted snapshot and returned nothing over MCP).
+ * browser snapshot — fixing the old `list_tokens` / `list_breakpoints` (which
+ * silently needed the editor's posted snapshot and returned nothing over MCP).
  */
 import { Type } from '@core/utils/typeboxHelpers'
-import { isGeneratedClass, type SiteDocument, type StyleRule } from '@core/page-tree'
+import { isGeneratedClass, styleRuleSelector, type SiteDocument, type StyleRule } from '@core/page-tree'
 import { generateClassCSS, generateFrameworkCss } from '@core/publisher'
 import type { CoreCapability } from '@core/capabilities'
 import type { AiTool, ToolContext } from '../../runtime/types'
@@ -29,6 +30,12 @@ const SITE_READ_CAPS: readonly CoreCapability[] = [
 
 const ReadStylesInput = Type.Object(
   {
+    format: Type.Optional(
+      Type.Union([Type.Literal('full'), Type.Literal('summary')], {
+        description:
+          'full (default) = the complete CSS stylesheet. summary = a compact catalog of class names + the token variables each references, no declarations — scan this first to learn what exists, then read full for the ones you will edit.',
+      }),
+    ),
     className: Type.Optional(
       Type.String({
         description: 'Limit output to one class by name (without the leading dot). Omit for the full stylesheet.',
@@ -53,7 +60,11 @@ export const styleMcpTools: AiTool[] = [
     inputSchema: ReadStylesInput,
     requiredCapabilities: SITE_READ_CAPS,
     handler: async (input, ctx: ToolContext) => {
-      const { className, includeTokens = true } = input as { className?: string; includeTokens?: boolean }
+      const { format = 'full', className, includeTokens = true } = input as {
+        format?: 'full' | 'summary'
+        className?: string
+        includeTokens?: boolean
+      }
       const site = await getDraftSite(ctx.db)
       if (!site) return { ok: false, error: 'No site found.' }
 
@@ -64,6 +75,19 @@ export const styleMcpTools: AiTool[] = [
         if (isGeneratedClass(rule)) continue
         if (className && !(rule.kind === 'class' && rule.name === className)) continue
         rules[id] = rule
+      }
+
+      // Compact catalog: selector + the token variables each rule references,
+      // no declarations. Scan this first; read `full` only for rules you edit.
+      if (format === 'summary' && !className) {
+        const classes = Object.values(rules)
+          .sort((a, b) => a.order - b.order)
+          .map((rule) => ({
+            selector: styleRuleSelector(rule),
+            kind: rule.kind,
+            tokens: collectTokenRefs(rule),
+          }))
+        return { classes, classCount: classes.length }
       }
 
       const parts: string[] = []
@@ -85,4 +109,39 @@ export const styleMcpTools: AiTool[] = [
       return { css: parts.join('\n\n'), classCount: Object.keys(rules).length }
     },
   },
+  {
+    name: 'list_breakpoints',
+    description:
+      'List the configured viewport breakpoints (id, label, width), in order (the first is the base/widest context). Pass a breakpoint id to render_snapshot to capture a specific viewport. Headless — no editor needed.',
+    scope: 'site',
+    execution: 'server',
+    inputSchema: Type.Object({}, { additionalProperties: false }),
+    requiredCapabilities: SITE_READ_CAPS,
+    handler: async (_input, ctx: ToolContext) => {
+      const site = await getDraftSite(ctx.db)
+      if (!site) return { ok: false, error: 'No site found.' }
+      return {
+        breakpoints: site.breakpoints.map((b, i) => ({
+          id: b.id,
+          label: b.label,
+          width: b.width,
+          isBase: i === 0,
+        })),
+      }
+    },
+  },
 ]
+
+/** Unique `--token` variables referenced by a style rule's declarations. */
+function collectTokenRefs(rule: StyleRule): string[] {
+  const found = new Set<string>()
+  const scan = (bag: Record<string, unknown> | undefined): void => {
+    for (const value of Object.values(bag ?? {})) {
+      if (typeof value !== 'string') continue
+      for (const match of value.matchAll(/var\(\s*(--[A-Za-z0-9_-]+)/g)) found.add(match[1]!)
+    }
+  }
+  scan(rule.styles as Record<string, unknown>)
+  for (const ctx of Object.values(rule.contextStyles ?? {})) scan(ctx as Record<string, unknown>)
+  return [...found].sort()
+}

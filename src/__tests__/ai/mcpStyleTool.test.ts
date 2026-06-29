@@ -35,6 +35,7 @@ function ctxFor(harness: CapabilityTestHarness): ToolContext {
 }
 
 const readStyles = styleMcpTools.find((t) => t.name === 'read_styles')!
+const listBreakpoints = styleMcpTools.find((t) => t.name === 'list_breakpoints')!
 
 describe('read_styles (headless design-system read)', () => {
   let harness: CapabilityTestHarness
@@ -61,6 +62,35 @@ describe('read_styles (headless design-system read)', () => {
     await seedClass(harness)
     const out = (await readStyles.handler!({ className: 'test-card' }, ctxFor(harness))) as { css: string }
     expect(out.css).toContain('.test-card')
+  })
+
+  it('summary mode returns a compact catalog (selector + token refs, no declarations)', async () => {
+    const site = await getDraftSite(harness.db)
+    const now = Date.now()
+    site!.styleRules['r_tok'] = {
+      id: 'r_tok', name: 'tok-card', kind: 'class', selector: '.tok-card', order: 0,
+      styles: { color: 'var(--ist-accent)', padding: '8px' }, contextStyles: {}, createdAt: now, updatedAt: now,
+    }
+    await saveDraftSite(harness.db, site!)
+    const out = (await readStyles.handler!({ format: 'summary' }, ctxFor(harness))) as {
+      classes: Array<{ selector: string; tokens: string[] }>
+    }
+    const card = out.classes.find((c) => c.selector === '.tok-card')!
+    expect(card).toBeTruthy()
+    expect(card.tokens).toContain('--ist-accent')
+    // summary carries no declarations
+    expect(JSON.stringify(out)).not.toContain('padding')
+  })
+
+  it('list_breakpoints returns the configured viewports headlessly', async () => {
+    const out = (await listBreakpoints.handler!({}, ctxFor(harness))) as {
+      breakpoints: Array<{ id: string; label: string; width: number; isBase: boolean }>
+    }
+    expect(Array.isArray(out.breakpoints)).toBe(true)
+    expect(out.breakpoints.length).toBeGreaterThan(0)
+    expect(out.breakpoints[0]).toHaveProperty('id')
+    expect(out.breakpoints[0].isBase).toBe(true)
+    expect(listBreakpoints.execution).toBe('server')
   })
 
   it('errors clearly for an unknown class name', async () => {

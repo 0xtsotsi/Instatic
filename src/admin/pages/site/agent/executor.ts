@@ -274,7 +274,8 @@ function runInsertHtml(input: InsertHtmlInput): AiToolOutput {
   }
 
   // (2) Insert via the store action — same path as the paste import modal
-  const insertedRootIds = getStoreState().insertImportedNodes(
+  const store = getStoreState()
+  const insertedRootIds = store.insertImportedNodes(
     input.parentId,
     { nodes, rootIds },
     { index: input.index, styleRules: rules, conditions },
@@ -283,7 +284,25 @@ function runInsertHtml(input: InsertHtmlInput): AiToolOutput {
     return aiToolError(`Parent node not found or does not accept children: ${input.parentId}`)
   }
 
-  return aiToolOk({ nodeIds: insertedRootIds })
+  // Return the full created subtree (id + module + class names) so the caller
+  // can target nested nodes (e.g. the `.ist-shell` wrapper) without a separate
+  // tree dump. `nodeIds` stays as the top-level roots for back-compat.
+  const nodeMap = activeDocumentNodes(store) ?? {}
+  const styleRules = store.site?.styleRules ?? {}
+  const created: Array<{ id: string; moduleId: string; classes: string[] }> = []
+  const visit = (id: string): void => {
+    const node = nodeMap[id]
+    if (!node) return
+    created.push({
+      id,
+      moduleId: node.moduleId,
+      classes: (node.classIds ?? []).map((cid) => styleRules[cid]?.name ?? cid),
+    })
+    for (const childId of node.children) visit(childId)
+  }
+  for (const rootId of insertedRootIds) visit(rootId)
+
+  return aiToolOk({ nodeIds: insertedRootIds, created })
 }
 
 /**
