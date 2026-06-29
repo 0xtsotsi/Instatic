@@ -46,8 +46,18 @@ beforeEach(async () => {
   })
 })
 
+interface RpcResponse {
+  result?: {
+    serverInfo?: { name: string }
+    tools?: Array<{ name: string }>
+    isError?: boolean
+    content?: unknown
+  }
+  error?: { message: string }
+}
+
 let nextId = 1
-async function rpc(method: string, params: unknown): Promise<{ status: number; json: any }> {
+async function rpc(method: string, params: unknown): Promise<{ status: number; json: RpcResponse }> {
   const req = new Request('http://localhost/_instatic/mcp', {
     method: 'POST',
     headers: {
@@ -62,7 +72,8 @@ async function rpc(method: string, params: unknown): Promise<{ status: number; j
   const text = await res.text()
   // `enableJsonResponse` returns a plain JSON body; tolerate an SSE `data:` prefix.
   const payload = text.startsWith('data:') ? text.slice(text.indexOf('{')) : text
-  return { status: res.status, json: JSON.parse(payload) }
+  const json: RpcResponse = JSON.parse(payload)
+  return { status: res.status, json }
 }
 
 const INIT_PARAMS = {
@@ -75,16 +86,16 @@ describe('MCP end-to-end (stateless multi-request, real handler)', () => {
   it('initializes, lists tools, reads, and mutates — the Claude Code flow', async () => {
     const init = await rpc('initialize', INIT_PARAMS)
     expect(init.status).toBe(200)
-    expect(init.json.result.serverInfo.name).toBe('instatic')
+    expect(init.json.result?.serverInfo?.name).toBe('instatic')
 
     const list = await rpc('tools/list', {})
-    const names = list.json.result.tools.map((t: { name: string }) => t.name)
+    const names = (list.json.result?.tools ?? []).map((t) => t.name)
     expect(names).toContain('read_page_tree')
     expect(names).toContain('mutate_page_tree')
 
     const read = await rpc('tools/call', { name: 'read_page_tree', arguments: { entryId: 'page1' } })
-    expect(read.json.result.isError).toBeFalsy()
-    expect(JSON.stringify(read.json.result.content)).toContain('rootNodeId')
+    expect(read.json.result?.isError).toBeFalsy()
+    expect(JSON.stringify(read.json.result?.content)).toContain('rootNodeId')
 
     const mutate = await rpc('tools/call', {
       name: 'mutate_page_tree',
@@ -96,7 +107,7 @@ describe('MCP end-to-end (stateless multi-request, real handler)', () => {
         ],
       },
     })
-    expect(mutate.json.result.isError).toBeFalsy()
+    expect(mutate.json.result?.isError).toBeFalsy()
 
     const { rows } = await db<{ cells_json: { body: unknown } }>`select cells_json from data_rows where id='page1'`
     expect(JSON.stringify(rows[0].cells_json)).toContain('n_e2e')
@@ -122,8 +133,8 @@ describe('MCP end-to-end (stateless multi-request, real handler)', () => {
       })
     await handleMcpHttp(req('initialize', INIT_PARAMS), db)
     const listRes = await handleMcpHttp(req('tools/list', {}), db)
-    const body = JSON.parse(await listRes!.text())
-    const names = body.result.tools.map((t: { name: string }) => t.name)
+    const body: RpcResponse = JSON.parse(await listRes!.text())
+    const names = (body.result?.tools ?? []).map((t) => t.name)
     expect(names).toContain('read_page_tree')
     expect(names).not.toContain('mutate_page_tree')
   })
