@@ -12,7 +12,7 @@
 
 import { describe, expect, it } from 'bun:test'
 import { CORE_CAPABILITIES } from '@core/capabilities'
-import { ALL_PICKER_CAPABILITIES, CAPABILITY_GROUPS } from '@admin/pages/users/utils/capabilities'
+import { ALL_PICKER_CAPABILITIES } from '@admin/pages/users/utils/capabilities'
 import { CAPABILITY_META } from '@admin/shared/CapabilityPicker'
 
 describe('capability picker coverage', () => {

@@ -40,7 +40,6 @@ describe('get_context', () => {
   })
 
   it('surfaces an everywhere template as wrapping a page', async () => {
-    const now = Date.now()
     const cells = JSON.stringify({
       title: 'Shell', slug: 'shell',
       body: { rootNodeId: 'r', nodes: { r: { id: 'r', moduleId: 'base.body', props: {}, breakpointOverrides: {}, classIds: [], children: [] } } },
