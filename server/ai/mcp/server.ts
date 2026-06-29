@@ -48,8 +48,11 @@ export function buildMcpServer(ctx: McpServerContext): Server {
     tools: tools.map((t) => ({
       name: t.name,
       description: t.description,
-      // Our TypeBox object schema IS a valid JSON-Schema tool definition.
-      inputSchema: t.inputSchema as { type: 'object' } & Record<string, unknown>,
+      // Our TypeBox object schema IS a valid JSON-Schema tool definition. The
+      // `AiTool.inputSchema` field is the general `TSchema`, so we adapt it to
+      // the SDK's object-schema shape (a type-level adaptation, not a runtime
+      // data boundary — every MCP tool's schema is a `Type.Object`).
+      inputSchema: t.inputSchema as unknown as { type: 'object'; properties?: Record<string, unknown> },
     })),
   }))
 

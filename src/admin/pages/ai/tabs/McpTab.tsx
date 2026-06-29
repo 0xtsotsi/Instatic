@@ -159,7 +159,6 @@ export function McpTab() {
                     size="sm"
                     onClick={() => void handleRevoke(connector.id)}
                     disabled={isBusy || connector.revoked}
-                    title={connector.revoked ? 'Already revoked' : undefined}
                   >
                     <TrashSolidIcon size={14} aria-hidden="true" />
                     <span>{connector.revoked ? 'Revoked' : 'Revoke'}</span>
