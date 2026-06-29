@@ -675,8 +675,13 @@ export async function executeAgentTool(
         return runSetTypeScale(rawInput)
       case 'site_set_spacing_scale':
         return runSetSpacingScale(rawInput)
-      case 'site_render_snapshot':
-        return await runRenderSnapshot(parseValue(renderSnapshotSchema, rawInput))
+      case 'site_render_snapshot': {
+        const parsed = parseValue(renderSnapshotSchema, rawInput)
+        // Default to the breakpoint the user is actually viewing, not the first
+        // frame in the DOM (which is mobile in a mobile-first canvas layout).
+        const breakpointId = parsed.breakpointId ?? getStoreState().activeBreakpointId
+        return await runRenderSnapshot({ ...parsed, breakpointId })
+      }
       default:
         return aiToolError(`Unknown instatic tool: ${toolName}`)
     }
