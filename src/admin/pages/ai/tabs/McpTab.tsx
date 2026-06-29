@@ -6,6 +6,9 @@
  * AI panel does. The bearer token is shown ONCE on creation; only its hash is
  * stored server-side. Capabilities offered are filtered to those the current
  * admin holds — you cannot mint a connector more powerful than yourself.
+ *
+ * The capability picker reuses the Role dialog's styles + `CAPABILITY_META`
+ * (`users/utils/capabilities`) so the two stay visually consistent.
  */
 import { useId, useState } from 'react'
 import type { FormEvent } from 'react'
@@ -23,38 +26,37 @@ import { ApiError } from '@core/http'
 import { getErrorMessage } from '@core/utils/errorMessage'
 import type { CoreCapability } from '@core/capabilities'
 import type { McpConnectorView, McpConnectorType, CreateMcpConnectorResult } from '@core/ai'
+import { CAPABILITY_META, capabilityLabel } from '../../users/utils/capabilities'
 import {
   listMcpConnectors,
   createMcpConnector,
   revokeMcpConnector,
 } from '../../../ai/api'
+import dialogStyles from '../../../shared/dialogs/SiteCreateDialog/SiteCreateDialog.module.css'
+import pickerStyles from '../../users/UsersPage.module.css'
 import styles from '../AiPage.module.css'
 import mcpStyles from './McpTab.module.css'
 
-// MCP-relevant capabilities, grouped read vs. write. Each connector is gated
-// against these through the same engine the built-in agent uses, so the list
-// mirrors what the tools actually check.
-interface CapabilityOption {
-  cap: CoreCapability
-  label: string
-  write: boolean
+// MCP-relevant capabilities, grouped read vs. write — the surface an external
+// client can actually exercise. Labels/descriptions come from CAPABILITY_META
+// (the same source the Role dialog uses) so wording stays consistent.
+interface McpCapabilityGroup {
+  title: string
+  capabilities: readonly CoreCapability[]
 }
 
-const CAPABILITY_OPTIONS: readonly CapabilityOption[] = [
-  { cap: 'site.read', label: 'Read site structure & pages', write: false },
-  { cap: 'content.manage', label: 'Read content (pages, posts, data, media)', write: false },
-  { cap: 'data.custom.tables.read', label: 'Read custom data tables', write: false },
-  { cap: 'media.read', label: 'Read media library', write: false },
-  { cap: 'ai.tools.write', label: 'Allow write operations (required to edit anything)', write: true },
-  { cap: 'site.structure.edit', label: 'Edit page structure (add / move / delete nodes)', write: true },
-  { cap: 'site.content.edit', label: 'Edit node content & properties', write: true },
-  { cap: 'site.style.edit', label: 'Edit node styles', write: true },
-  { cap: 'content.create', label: 'Create content entries', write: true },
-  { cap: 'content.edit.any', label: 'Edit any content entry', write: true },
-  { cap: 'media.write', label: 'Upload media', write: true },
+const MCP_CAPABILITY_GROUPS: readonly McpCapabilityGroup[] = [
+  {
+    title: 'Read access',
+    capabilities: ['site.read', 'content.manage', 'data.custom.tables.read', 'data.system.tables.read', 'media.read'],
+  },
+  {
+    title: 'Write access',
+    capabilities: ['ai.tools.write', 'site.structure.edit', 'site.content.edit', 'site.style.edit', 'content.create', 'content.edit.any', 'media.write'],
+  },
 ]
 
-const READ_ONLY_CAPS = CAPABILITY_OPTIONS.filter((o) => !o.write).map((o) => o.cap)
+const READ_GROUP_CAPS = MCP_CAPABILITY_GROUPS[0].capabilities
 
 const TYPE_OPTIONS: Array<{ value: McpConnectorType; label: string }> = [
   { value: 'local', label: 'Local (Claude Code, Codex, Cursor)' },
@@ -183,6 +185,8 @@ export function McpTab() {
   )
 }
 
+const CONNECTOR_FORM_ID = 'mcp-connector-form'
+
 function AddConnectorDialog({
   onClose,
   onCreated,
@@ -192,22 +196,30 @@ function AddConnectorDialog({
 }) {
   const labelInputId = useId()
   const typeInputId = useId()
-  const formId = useId()
   const currentUser = useCurrentAdminUser()
-  // Offer only capabilities the current admin actually holds (or all, for the
-  // unrestricted dev/owner session where currentUser is null).
-  const grantable = CAPABILITY_OPTIONS.filter(
-    (o) => !currentUser || hasCapability(currentUser, o.cap),
-  )
+
+  // Groups filtered to the capabilities the current admin can actually grant
+  // (the unrestricted dev/owner session — currentUser null — sees everything).
+  const groups = MCP_CAPABILITY_GROUPS
+    .map((group) => ({
+      title: group.title,
+      capabilities: group.capabilities.filter((cap) => !currentUser || hasCapability(currentUser, cap)),
+    }))
+    .filter((group) => group.capabilities.length > 0)
+  const allCaps = groups.flatMap((g) => g.capabilities)
+  const totalCount = allCaps.length
 
   const [label, setLabel] = useState('')
   const [type, setType] = useState<McpConnectorType>('local')
   const [selected, setSelected] = useState<Set<CoreCapability>>(
-    () => new Set(grantable.filter((o) => READ_ONLY_CAPS.includes(o.cap)).map((o) => o.cap)),
+    () => new Set(allCaps.filter((cap) => READ_GROUP_CAPS.includes(cap))),
   )
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [created, setCreated] = useState<CreateMcpConnectorResult | null>(null)
+
+  const selectedCount = allCaps.reduce((n, cap) => (selected.has(cap) ? n + 1 : n), 0)
+  const allSelected = selectedCount === totalCount && totalCount > 0
 
   function toggle(cap: CoreCapability) {
     setSelected((prev) => {
@@ -218,8 +230,19 @@ function AddConnectorDialog({
     })
   }
 
-  function selectPreset(caps: readonly CoreCapability[]) {
-    setSelected(new Set(grantable.filter((o) => caps.includes(o.cap)).map((o) => o.cap)))
+  function setGroup(caps: readonly CoreCapability[], checked: boolean) {
+    setSelected((prev) => {
+      const next = new Set(prev)
+      for (const cap of caps) {
+        if (checked) next.add(cap)
+        else next.delete(cap)
+      }
+      return next
+    })
+  }
+
+  function setAll(checked: boolean) {
+    setSelected(checked ? new Set(allCaps) : new Set())
   }
 
   async function handleSubmit(e: FormEvent) {
@@ -244,9 +267,7 @@ function AddConnectorDialog({
   }
 
   if (created) {
-    return (
-      <TokenResultDialog result={created} onClose={onClose} />
-    )
+    return <TokenResultDialog result={created} onClose={onClose} />
   }
 
   return (
@@ -254,76 +275,116 @@ function AddConnectorDialog({
       open
       onClose={onClose}
       title="Add MCP connector"
-      size="md"
+      size="xl"
       footer={
         <>
           <Button type="button" variant="secondary" size="sm" onClick={onClose} disabled={busy}>
             <span>Cancel</span>
           </Button>
-          <Button type="submit" form={formId} variant="primary" size="sm" disabled={busy || selected.size === 0}>
+          <Button type="submit" form={CONNECTOR_FORM_ID} variant="primary" size="sm" disabled={busy || selected.size === 0}>
             <PlusIcon size={14} aria-hidden="true" />
             <span>Create connector</span>
           </Button>
         </>
       }
     >
-      <form id={formId} className={styles.dialogForm} onSubmit={(e) => void handleSubmit(e)}>
-        <div className={styles.dialogField}>
-          <label htmlFor={labelInputId} className={styles.dialogFieldLabel}>Label</label>
-          <Input
-            id={labelInputId}
-            value={label}
-            onChange={(e) => setLabel(e.currentTarget.value)}
-            placeholder="e.g. My laptop (Claude Code)"
-            required
-          />
-        </div>
-
-        <div className={styles.dialogField}>
-          <label htmlFor={typeInputId} className={styles.dialogFieldLabel}>Type</label>
-          <Select
-            id={typeInputId}
-            value={type}
-            onChange={(e) => setType(e.currentTarget.value as McpConnectorType)}
-            options={TYPE_OPTIONS}
-          />
-        </div>
-
-        <div className={styles.dialogField}>
-          <div className={mcpStyles.capabilityHeader}>
-            <span className={styles.dialogFieldLabel}>Capabilities</span>
-            <div className={mcpStyles.presetButtons}>
-              <Button type="button" variant="ghost" size="sm" onClick={() => selectPreset(READ_ONLY_CAPS)}>
-                <span>Read-only</span>
-              </Button>
-              <Button
-                type="button"
-                variant="ghost"
-                size="sm"
-                onClick={() => selectPreset(grantable.map((o) => o.cap))}
-              >
-                <span>Select all</span>
-              </Button>
-            </div>
+      <form id={CONNECTOR_FORM_ID} className={dialogStyles.form} onSubmit={(e) => void handleSubmit(e)}>
+        <div className={pickerStyles.roleIdentityGrid}>
+          <div className={dialogStyles.field}>
+            <label htmlFor={labelInputId} className={dialogStyles.label}>Label</label>
+            <Input
+              id={labelInputId}
+              value={label}
+              onChange={(e) => setLabel(e.currentTarget.value)}
+              placeholder="e.g. My laptop (Claude Code)"
+              required
+            />
           </div>
-          <ul className={mcpStyles.capabilityList}>
-            {grantable.map((option) => (
-              <li key={option.cap} className={mcpStyles.capabilityItem}>
-                <label className={mcpStyles.capabilityLabel}>
-                  <Checkbox
-                    checked={selected.has(option.cap)}
-                    onCheckedChange={() => toggle(option.cap)}
-                    boxSize="sm"
-                  />
-                  <span>{option.label}</span>
-                  {option.write && <span className={mcpStyles.writeBadge}>write</span>}
-                </label>
-              </li>
-            ))}
-          </ul>
+          <div className={dialogStyles.field}>
+            <label htmlFor={typeInputId} className={dialogStyles.label}>Type</label>
+            <Select
+              id={typeInputId}
+              value={type}
+              onChange={(e) => setType(e.currentTarget.value as McpConnectorType)}
+              options={TYPE_OPTIONS}
+            />
+          </div>
         </div>
 
-        {error && <p role="alert" className={styles.dialogError}>{error}</p>}
+        <section className={pickerStyles.capabilityPicker} aria-label="Capabilities">
+          <header className={pickerStyles.capabilityPickerHeader}>
+            <div className={pickerStyles.capabilityPickerSummary}>
+              <h3 className={pickerStyles.capabilityPickerTitle}>Capabilities</h3>
+              <p className={pickerStyles.capabilityPickerCount}>
+                <strong>{selectedCount}</strong> of {totalCount} selected
+              </p>
+            </div>
+            <Button
+              type="button"
+              variant="ghost"
+              size="xs"
+              aria-label={allSelected ? 'Clear all capabilities' : 'Select all capabilities'}
+              onClick={() => setAll(!allSelected)}
+            >
+              <span>{allSelected ? 'Clear all' : 'Select all'}</span>
+            </Button>
+          </header>
+
+          <div className={pickerStyles.capabilityGroups}>
+            {groups.map((group) => {
+              const groupSelected = group.capabilities.filter((cap) => selected.has(cap)).length
+              const groupTotal = group.capabilities.length
+              const groupAllSelected = groupSelected === groupTotal
+              return (
+                <section key={group.title} className={pickerStyles.capabilityGroup}>
+                  <header className={pickerStyles.capabilityGroupHeader}>
+                    <div className={pickerStyles.capabilityGroupHeading}>
+                      <h4>{group.title}</h4>
+                      <span
+                        className={pickerStyles.capabilityGroupCount}
+                        data-state={groupAllSelected ? 'full' : groupSelected > 0 ? 'partial' : 'empty'}
+                      >
+                        {groupSelected}/{groupTotal}
+                      </span>
+                    </div>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="xs"
+                      aria-label={groupAllSelected ? `Clear ${group.title}` : `Select all ${group.title}`}
+                      onClick={() => setGroup(group.capabilities, !groupAllSelected)}
+                    >
+                      <span>{groupAllSelected ? 'Clear' : 'Select all'}</span>
+                    </Button>
+                  </header>
+                  <ul className={pickerStyles.capabilityList}>
+                    {group.capabilities.map((capability) => {
+                      const meta = CAPABILITY_META[capability]
+                      const checked = selected.has(capability)
+                      return (
+                        <li key={capability} className={pickerStyles.capabilityItem} data-checked={checked}>
+                          <label className={pickerStyles.capabilityRow}>
+                            <Checkbox checked={checked} onCheckedChange={() => toggle(capability)} />
+                            <span className={pickerStyles.capabilityRowText}>
+                              <span className={pickerStyles.capabilityRowLabel}>
+                                {meta?.label ?? capabilityLabel(capability)}
+                              </span>
+                              {meta && (
+                                <span className={pickerStyles.capabilityRowDescription}>{meta.description}</span>
+                              )}
+                            </span>
+                          </label>
+                        </li>
+                      )
+                    })}
+                  </ul>
+                </section>
+              )
+            })}
+          </div>
+        </section>
+
+        {error && <p role="alert" className={dialogStyles.errorText}>{error}</p>}
       </form>
     </Dialog>
   )
@@ -355,7 +416,7 @@ function TokenResultDialog({
       open
       onClose={onClose}
       title="Connector created"
-      size="md"
+      size="lg"
       footer={
         <Button type="button" variant="primary" size="sm" onClick={onClose}>
           <span>Done</span>
@@ -367,8 +428,8 @@ function TokenResultDialog({
           Copy this token now. It will not be shown again.
         </p>
 
-        <div className={styles.dialogField}>
-          <span className={styles.dialogFieldLabel}>Token</span>
+        <div className={dialogStyles.field}>
+          <span className={dialogStyles.label}>Token</span>
           <div className={mcpStyles.copyRow}>
             <code className={mcpStyles.codeBlock}>{result.token}</code>
             <Button type="button" variant="secondary" size="sm" onClick={() => void copy(result.token, 'token')}>
@@ -378,8 +439,8 @@ function TokenResultDialog({
         </div>
 
         {result.connector.type === 'local' ? (
-          <div className={styles.dialogField}>
-            <span className={styles.dialogFieldLabel}>Add to Claude Code / Codex</span>
+          <div className={dialogStyles.field}>
+            <span className={dialogStyles.label}>Add to Claude Code / Codex</span>
             <div className={mcpStyles.copyRow}>
               <code className={mcpStyles.codeBlock}>{claudeCommand}</code>
               <Button type="button" variant="secondary" size="sm" onClick={() => void copy(claudeCommand, 'cmd')}>
@@ -388,8 +449,8 @@ function TokenResultDialog({
             </div>
           </div>
         ) : (
-          <div className={styles.dialogField}>
-            <span className={styles.dialogFieldLabel}>Endpoint</span>
+          <div className={dialogStyles.field}>
+            <span className={dialogStyles.label}>Endpoint</span>
             <div className={mcpStyles.copyRow}>
               <code className={mcpStyles.codeBlock}>{endpoint}</code>
               <Button type="button" variant="secondary" size="sm" onClick={() => void copy(endpoint, 'url')}>
