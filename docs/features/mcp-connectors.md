@@ -67,7 +67,9 @@ MCP exposes the **full tool catalog** (deduped by name), capability-filtered. To
 
 **Headless (server-resolved) — work with no editor open:**
 - Content reads — list/read collections, entries, data rows, media.
-- `read_styles({ className?, includeTokens? })` — the design system as a **CSS stylesheet**: design tokens (CSS custom properties) + every class/ambient rule, read straight from the DB via the publisher's emitters. Symmetric with reading pages as HTML / writing CSS via `applyCss`. Replaces the old snapshot-dependent `list_tokens` (which returned nothing over MCP).
+- `get_context({ entryId? })` — orientation in one call: is a live editor connected (browser tools need it), which "everywhere"/post-type templates wrap pages, site name. Call it first if a browser tool returns "open the editor."
+- `read_styles({ format?, className?, includeTokens? })` — the design system as a **CSS stylesheet**: design tokens (CSS custom properties) + every class/ambient rule, read straight from the DB via the publisher's emitters. `format:"summary"` returns a compact class catalog (selector + referenced token vars, no declarations) to scan first. Symmetric with reading pages as HTML / writing CSS via `applyCss`. Replaces the old snapshot-dependent `list_tokens`.
+- `list_breakpoints` — configured viewport ids/labels/widths (the first is the base), so `render_snapshot` can target one deliberately. Headless version replaces the snapshot-dependent one.
 
 **Browser-relayed (via the live editor bridge) — require an open editor:**
 - Structure editing — `insertHtml`, `replaceNodeHtml`, `deleteNode`, `moveNode`, `duplicateNode`, `renameNode`, `updateNodeProps`.

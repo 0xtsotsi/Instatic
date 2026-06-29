@@ -28,6 +28,7 @@ import { toolAllowedForCapabilities } from '../tools/capabilityGate'
 import { contentTools } from '../tools/content'
 import { siteTools } from '../tools/site'
 import { styleMcpTools } from './tools/styleTools'
+import { contextMcpTools } from './tools/contextTool'
 
 // Server-resolved site read tools whose handlers read the browser-posted
 // `ctx.snapshot`, which is null over MCP — they'd silently return nothing.
@@ -40,7 +41,7 @@ function allMcpTools(): AiTool[] {
   // De-dup by tool name. Order matters: the headless style + content tools win
   // over the site toolset for any shared name (e.g. `list_documents`), so the
   // version that works without an open editor is the one exposed.
-  const ordered = [...styleMcpTools, ...contentTools, ...siteTools]
+  const ordered = [...contextMcpTools, ...styleMcpTools, ...contentTools, ...siteTools]
   const byName = new Map<string, AiTool>()
   for (const tool of ordered) {
     if (MCP_EXCLUDED_TOOLS.has(tool.name)) continue
