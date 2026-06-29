@@ -38,14 +38,33 @@ import mcpStyles from './McpTab.module.css'
 // MCP-relevant capabilities, grouped read vs. write — the surface an external
 // client can actually exercise. Labels/descriptions come from CAPABILITY_META
 // (the same source the Role dialog uses) so wording stays consistent.
+// Capabilities that map to an exposed MCP tool (headless reads + the
+// browser-relayed write tools). Grouped for the picker; every entry here gates
+// at least one tool the connector can actually call.
 const MCP_CAPABILITY_GROUPS: readonly CapabilityPickerGroup[] = [
   {
-    title: 'Read access',
+    title: 'Read',
     capabilities: ['site.read', 'content.manage', 'data.custom.tables.read', 'data.system.tables.read', 'media.read'],
   },
   {
-    title: 'Write access',
-    capabilities: ['ai.tools.write', 'site.structure.edit', 'site.content.edit', 'site.style.edit', 'content.create', 'content.edit.any', 'media.write'],
+    title: 'Allow writes',
+    capabilities: ['ai.tools.write'],
+  },
+  {
+    title: 'Site editing',
+    capabilities: ['site.structure.edit', 'site.content.edit', 'site.style.edit'],
+  },
+  {
+    title: 'Pages',
+    capabilities: ['pages.edit', 'pages.publish'],
+  },
+  {
+    title: 'Content',
+    capabilities: ['content.create', 'content.edit.own', 'content.edit.any', 'content.publish.own', 'content.publish.any'],
+  },
+  {
+    title: 'Media',
+    capabilities: ['media.write', 'media.replace', 'media.delete'],
   },
 ]
 

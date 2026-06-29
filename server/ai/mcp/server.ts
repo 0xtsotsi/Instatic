@@ -19,6 +19,7 @@ import type { CoreCapability } from '@core/capabilities'
 import type { AiBrowserBridge, AiTool } from '../runtime/types'
 import { executeAiTool } from '../drivers/http/execTool'
 import { mcpToolsForCapabilities } from './registry'
+import { getEditorBridgeForUser } from './editorBridge'
 
 export interface McpServerContext {
   db: DbClient
@@ -27,13 +28,15 @@ export interface McpServerContext {
   capabilities: readonly CoreCapability[]
 }
 
-// MCP only ever registers `execution: 'server'` tools, so the bridge is never
-// invoked. It exists solely to satisfy the `executeAiTool` signature.
+// Used for server-resolved tools, which never call the bridge.
 const NOOP_BRIDGE: AiBrowserBridge = {
   callBrowser: async () => {
-    throw new Error('[ai:mcp] browser-execution tools are not available over MCP')
+    throw new Error('[ai:mcp] this tool has no server handler and no live editor bridge')
   },
 }
+
+const NO_EDITOR_MESSAGE =
+  'This tool runs in the Instatic editor. Open the site editor in a browser (signed in as the connector owner) and try again.'
 
 export function buildMcpServer(ctx: McpServerContext): Server {
   const server = new Server(
@@ -63,12 +66,23 @@ export function buildMcpServer(ctx: McpServerContext): Server {
       return { isError: true, content: [{ type: 'text', text: `Unknown tool: ${name}` }] }
     }
 
+    // Server-resolved tools run in-process; browser tools are relayed to the
+    // connector owner's open editor. No editor → a clear, actionable error.
+    let bridge = NOOP_BRIDGE
+    if (tool.execution === 'browser') {
+      const live = getEditorBridgeForUser(ctx.userId)
+      if (!live) {
+        return { isError: true, content: [{ type: 'text', text: NO_EDITOR_MESSAGE }] }
+      }
+      bridge = live
+    }
+
     const controller = new AbortController()
-    const output = await executeAiTool(tool, args ?? {}, NOOP_BRIDGE, controller.signal, {
+    const output = await executeAiTool(tool, args ?? {}, bridge, controller.signal, {
       db: ctx.db,
       userId: ctx.userId,
       capabilities: ctx.capabilities,
-      scope: 'content',
+      scope: tool.scope === 'shared' ? 'content' : tool.scope,
       conversationId: `mcp:${ctx.connectorId}`,
       snapshot: null,
     })

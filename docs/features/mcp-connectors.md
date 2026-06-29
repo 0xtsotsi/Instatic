@@ -11,8 +11,8 @@ The server is implemented with the official `@modelcontextprotocol/sdk`. That pa
 ## TL;DR
 
 - **Instatic is an MCP server.** One Streamable-HTTP endpoint at `/_instatic/mcp` serves both local and remote clients (local is just `localhost`).
-- **Thin adapter over the existing tool engine.** No tool logic is duplicated. MCP is a new *caller* alongside the built-in agent and the plugin host; tool dispatch reuses `executeAiTool`, and visual editing reuses the headless page-tree service.
-- **Tool surface:** the server-resolved content tools (pages, posts, data, media — read/write) plus `read_page_tree` / `mutate_page_tree` for headless visual/structure editing.
+- **Thin adapter over the existing tool engine.** No tool logic is duplicated. MCP is a new *caller* alongside the built-in agent and the plugin host; tool dispatch reuses `executeAiTool`.
+- **Tool surface = the full catalog.** Server-resolved tools (content reads, `read_page_tree`, `mutate_page_tree`) run headless — no editor needed. Every browser-execution tool the agent panel has (insert HTML, apply CSS, assign classes, set design tokens, manage pages, content CRUD, code assets, live-DOM reads) is exposed too, **relayed to an open editor via the live editor bridge**. If the connector owner has no editor open, those tools return a clear "open the editor" error; the headless tools still work.
 - **Bearer-token auth, one secret per connector.** The token is shown once on creation and stored only as a SHA-256 hash. Revocable.
 - **Capability-gated.** A connector carries a granted capability subset; the same gate the built-in agent uses (`toolAllowedForCapabilities`) filters the toolset. An MCP caller can never invoke a tool the granting capabilities couldn't authorize over HTTP.
 - **Privilege floor.** An admin can only grant capabilities they themselves hold.
@@ -48,8 +48,10 @@ repositories (data_rows, media) + applyTreeOperation + saveDataRowDraft
 | `transports/http.ts` | Mounts the SDK's Web-standard Streamable-HTTP transport; stateless per request (`enableJsonResponse`). |
 | `auth.ts` | Bearer resolution → `{ connectorId, userId, capabilities }`; spec-correct 401 with an RFC 9728 `resource_metadata` pointer. |
 | `server.ts` | Builds a capability-scoped low-level `Server` (`ListTools` / `CallTool` handlers). Uses the low-level `Server`, not `McpServer.registerTool`, because the latter needs Zod (banned) — this lets the TypeBox `inputSchema` pass through verbatim. |
-| `registry.ts` | The exposable toolset = every `execution: 'server'` tool, filtered by `toolAllowedForCapabilities`. |
+| `registry.ts` | The exposable toolset = full catalog (content + site + page-tree), deduped by name, filtered by `toolAllowedForCapabilities`. |
 | `tools/pageTreeTools.ts` | `read_page_tree` / `mutate_page_tree`, backed by the shared `treeService`. |
+| `editorBridge.ts` | Per-user live editor bridge registry + `createEditorBridgeStream`; `getEditorBridgeForUser` routes browser tools to the owner's open editor. |
+| `handlers/editorBridge.ts` | `GET /admin/api/ai/editor-bridge` — the NDJSON stream the editor holds open. |
 | `connectors/` | `types.ts` (server-only record), `token.ts` (generate + SHA-256 hash), `store.ts` (CRUD + `toConnectorView`). |
 | `handlers/connectors.ts` | `/admin/api/ai/mcp/connectors` CRUD, gated by `ai.providers.manage`. |
 
@@ -59,14 +61,35 @@ The headless page-tree path (load → `applyTreeOperation` → persist) lives in
 
 ## Tool surface
 
-MCP exposes only **server-resolved** tools (`execution: 'server'`). Browser-bridged site tools need the live editor canvas and are excluded by construction; the registry auto-includes any tool the moment it becomes headless.
+MCP exposes the **full tool catalog** (deduped by name), capability-filtered. Tools fall in two execution classes:
 
-- **Content (server-resolved):** the `content`-scope tools — list/read collections, entries, data rows, and media; create/update where capabilities allow.
-- **Visual / structure editing:**
-  - `read_page_tree({ entryId, fieldId? })` — returns the full `NodeTree`.
-  - `mutate_page_tree({ entryId, fieldId?, operations[] })` — applies the 11 canonical tree operations (insert / delete / move / duplicate / wrap / rename / updateProps / setBreakpointOverride / clearBreakpointOverride / toggleNodeLocked / toggleNodeHidden) through `applyTreeOperation`, then persists a draft.
+**Headless (server-resolved) — work with no editor open:**
+- Content reads — list/read collections, entries, data rows, media.
+- `read_page_tree({ entryId, fieldId? })` — the full `NodeTree`.
+- `mutate_page_tree({ entryId, fieldId?, operations[] })` — the 11 canonical tree operations (insert / delete / move / duplicate / wrap / rename / updateProps / setBreakpointOverride / clearBreakpointOverride / toggleNodeLocked / toggleNodeHidden) via `applyTreeOperation`, persisted as a draft. `fieldId` defaults to `body`.
 
-`fieldId` defaults to `body`. Pages and posts are `data_rows` whose `body` field holds the tree.
+**Browser-relayed (via the live editor bridge) — require an open editor:**
+- HTML/CSS authoring (`insertHtml`, `replaceNodeHtml`, `applyCss`, `assignClass`, `removeClass`), node ops, page lifecycle (`addPage`, …), design tokens (`set_color_tokens`, …), content CRUD (`create_document`, `set_document_field`, …), code assets, and live-DOM reads (`render_snapshot`, `getNodeHtml`).
+- These have no server implementation — their logic runs in the editor app. The MCP server relays the call to the connector owner's open editor and awaits the result (see "Live editor bridge"). No editor connected → a clear error asking the operator to open it.
+
+## Live editor bridge
+
+`server/ai/mcp/editorBridge.ts` keeps one bridge per user (newest open editor wins), keyed by `userId` so a connector can only reach **its own owner's** editor.
+
+```
+MCP browser-tool call            Editor (open in a browser)
+   │ executeAiTool(browser)         │ useEditorMcpBridge() holds the stream open
+   ▼                                ▼
+buildMcpServer → getEditorBridgeForUser(userId)
+   │ bridge.callBrowser(tool, input) → emits toolRequest ─────────────▶ executeAgentTool(tool, input)
+   │                                                                        │ (live store)
+   ◀───────────── POST /admin/api/ai/tool-result ◀── postToolResult ◀───────┘
+```
+
+- Editor side: `useEditorMcpBridge` (mounted in `SitePage`) opens `GET /admin/api/ai/editor-bridge` (NDJSON, admin-session auth), runs each `toolRequest` through the SAME `executeAgentTool` the agent panel uses, and POSTs the result back. Reconnects with backoff.
+- Server side: reuses the chat bridge machinery wholesale — `createBridge` issues the `AiBrowserBridge`, `resolveBridgeToolResult` settles it from the existing `/admin/api/ai/tool-result` endpoint.
+
+This is why an open editor (yours, or one the agent opens) unlocks the full editing surface without reimplementing any tool.
 
 ---
 

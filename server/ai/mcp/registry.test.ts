@@ -4,21 +4,37 @@ import { mcpToolsForCapabilities } from './registry'
 const FULL: Parameters<typeof mcpToolsForCapabilities>[0] = [
   'ai.chat',
   'ai.tools.write',
-  'content.manage',
   'site.read',
   'site.structure.edit',
+  'site.content.edit',
+  'site.style.edit',
+  'content.manage',
+  'content.create',
+  'content.edit.any',
   'data.custom.tables.read',
   'data.system.tables.read',
   'media.read',
+  'media.write',
 ]
 
 describe('mcp registry', () => {
-  it('only includes server-resolved tools (no browser-bridged)', () => {
+  it('exposes the full catalog: headless server tools + browser tools', () => {
     const tools = mcpToolsForCapabilities(FULL)
-    expect(tools.length).toBeGreaterThan(0)
-    expect(tools.every((t) => t.execution === 'server')).toBe(true)
-    expect(tools.some((t) => t.name === 'mutate_page_tree')).toBe(true)
-    expect(tools.some((t) => t.name === 'read_page_tree')).toBe(true)
+    const names = tools.map((t) => t.name)
+    // headless (server-resolved)
+    expect(names).toContain('read_page_tree')
+    expect(names).toContain('mutate_page_tree')
+    expect(names).toContain('list_collections')
+    // browser-execution (relayed via the editor bridge)
+    expect(names).toContain('insertHtml')
+    expect(names).toContain('applyCss')
+    expect(names).toContain('set_color_tokens')
+    expect(tools.some((t) => t.execution === 'browser')).toBe(true)
+  })
+
+  it('de-dupes shared tool names (e.g. list_documents appears once)', () => {
+    const names = mcpToolsForCapabilities(FULL).map((t) => t.name)
+    expect(names.filter((n) => n === 'list_documents')).toHaveLength(1)
   })
 
   it('filters out mutating tools when ai.tools.write is absent', () => {
@@ -27,10 +43,6 @@ describe('mcp registry', () => {
     expect(tools.length).toBeGreaterThan(0)
     expect(tools.some((t) => t.mutates)).toBe(false)
     expect(tools.some((t) => t.name === 'mutate_page_tree')).toBe(false)
-  })
-
-  it('returns nothing a bare ai.chat connector can mutate', () => {
-    const tools = mcpToolsForCapabilities(['ai.chat'])
-    expect(tools.every((t) => !t.mutates)).toBe(true)
+    expect(tools.some((t) => t.name === 'insertHtml')).toBe(false)
   })
 })

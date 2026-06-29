@@ -18,6 +18,7 @@ import { tryHandleAiConversations } from './conversations'
 import { tryHandleAiDefaults } from './defaults'
 import { tryHandleAiModels } from './models'
 import { tryHandleAiMcpConnectors } from '../mcp/handlers/connectors'
+import { tryHandleAiEditorBridge } from '../mcp/handlers/editorBridge'
 
 export function tryHandleAi(
   req: Request,
@@ -39,6 +40,7 @@ export function tryHandleAi(
   // handler so the order is handled there.
   return (
     tryHandleAiMcpConnectors(req, db, pathname) ??
+    tryHandleAiEditorBridge(req, db, pathname) ??
     tryHandleAiAudit(req, db, url, pathname) ??
     tryHandleAiChat(req, db, pathname) ??
     tryHandleAiToolResult(req, db, pathname) ??

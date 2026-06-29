@@ -82,4 +82,16 @@ describe('mcp server', () => {
     expect(result.isError).toBe(true)
     await client.close()
   })
+
+  it('lists browser tools but errors with an open-editor hint when no editor is connected', async () => {
+    const client = await connectClient(db, ['ai.chat', 'ai.tools.write', 'site.structure.edit', 'content.manage'])
+    const { tools } = await client.listTools()
+    expect(tools.some((t) => t.name === 'insertHtml')).toBe(true) // browser tool is listed
+
+    const result = await client.callTool({ name: 'insertHtml', arguments: { html: '<p>hi</p>' } })
+    expect(result.isError).toBe(true)
+    const text = (result.content as Array<{ type: string; text: string }>)[0].text
+    expect(text).toContain('Instatic editor')
+    await client.close()
+  })
 })
