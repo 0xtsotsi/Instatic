@@ -129,133 +129,135 @@
   flex: 0 1 auto;
 }
 
-/* ── MessageBubble ───────────────────────────────────────────────────────── */
-.messageBubble {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
+/* ── Message entries ─────────────────────────────────────────────────────── */
+.messageEntry {
+  display: grid;
+  align-items: stretch;
+  gap: 8px;
+  width: 100%;
 }
 
-.messageBubbleUser {
-  align-items: flex-end;
-}
-
-.messageBubbleAssistant {
-  align-items: flex-start;
+.messageEntryUser,
+.messageEntryAssistant {
+  justify-items: stretch;
 }
 
 .roleLabel {
-  font-size: 9px;
   color: var(--editor-text-subtle);
+  font-size: 12px;
+  font-weight: 650;
+  line-height: 1.2;
   letter-spacing: 0.05em;
 }
 
-.contentBubble {
-  max-width: 90%;
-  padding: 7px 10px;
+.textBlock {
+  width: 100%;
+  max-width: none;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
   color: var(--editor-text);
   font-size: 12px;
-  line-height: 1.6;
+  font-weight: 500;
+  line-height: 1.55;
   white-space: pre-wrap;
   word-break: break-word;
-  border: 1px solid var(--panel-border);
 }
 
-.contentBubbleUser {
-  border-radius: 10px 10px 2px 10px;
-  background: var(--editor-overlay-white-08);
+.textBlockUser {
+  color: var(--editor-text-secondary);
 }
 
-.contentBubbleAssistant {
-  border-radius: 2px 10px 10px 10px;
-  background: var(--editor-overlay-white-04);
+.textBlockAssistant {
+  color: var(--editor-text);
 }
 
-/* ── Markdown bubble typography ─────────────────────────────────────────────
- * Applied alongside .contentBubble when the text is parsed as markdown.
+/* ── Markdown text typography ───────────────────────────────────────────────
+ * Applied alongside .textBlock when the text is parsed as markdown.
  * Resets `white-space: pre-wrap` (marked emits proper block elements with
  * their own whitespace handling — we only want pre-wrap inside <pre>) and
  * adds the typography rules for the small subset of HTML we accept. */
-.markdownBubble {
+.markdownText {
   white-space: normal;
 }
 
-.markdownBubble > :first-child {
+.markdownText > :first-child {
   margin-top: 0;
 }
 
-.markdownBubble > :last-child {
+.markdownText > :last-child {
   margin-bottom: 0;
 }
 
-.markdownBubble p {
+.markdownText p {
   margin: 0 0 8px;
 }
 
-.markdownBubble h1,
-.markdownBubble h2,
-.markdownBubble h3,
-.markdownBubble h4,
-.markdownBubble h5,
-.markdownBubble h6 {
+.markdownText h1,
+.markdownText h2,
+.markdownText h3,
+.markdownText h4,
+.markdownText h5,
+.markdownText h6 {
   margin: 12px 0 6px;
   color: var(--editor-text-bright);
   font-weight: 600;
   line-height: 1.3;
 }
 
-.markdownBubble h1 { font-size: 16px; }
-.markdownBubble h2 { font-size: 15px; }
-.markdownBubble h3 { font-size: 14px; }
-.markdownBubble h4,
-.markdownBubble h5,
-.markdownBubble h6 { font-size: 13px; }
+.markdownText h1 { font-size: 16px; }
+.markdownText h2 { font-size: 15px; }
+.markdownText h3 { font-size: 14px; }
+.markdownText h4,
+.markdownText h5,
+.markdownText h6 { font-size: 13px; }
 
-.markdownBubble strong,
-.markdownBubble b {
+.markdownText strong,
+.markdownText b {
   font-weight: 600;
   color: var(--editor-text-bright);
 }
 
-.markdownBubble em,
-.markdownBubble i {
+.markdownText em,
+.markdownText i {
   font-style: italic;
 }
 
-.markdownBubble ul,
-.markdownBubble ol {
+.markdownText ul,
+.markdownText ol {
   margin: 0 0 8px;
   padding-left: 18px;
 }
 
-.markdownBubble li {
+.markdownText li {
   margin-bottom: 2px;
 }
 
-.markdownBubble li > p {
+.markdownText li > p {
   margin: 0;
 }
 
-.markdownBubble a {
+.markdownText a {
   color: var(--editor-text-bright);
   text-decoration: underline;
   text-underline-offset: 2px;
 }
 
-.markdownBubble a:hover {
+.markdownText a:hover {
   color: var(--editor-accent);
 }
 
-.markdownBubble code {
+.markdownText code {
   padding: 1px 5px;
   border-radius: var(--editor-radius-sm);
   background: var(--editor-surface-3);
   color: var(--editor-text-bright);
   font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-  font-size: 11px;
+  font-size: 12px;
 }
 
-.markdownBubble pre {
+.markdownText pre {
   margin: 0 0 8px;
   padding: 8px 10px;
   border-radius: var(--editor-radius-sm);
@@ -264,13 +266,13 @@
   white-space: pre;
 }
 
-.markdownBubble pre code {
+.markdownText pre code {
   padding: 0;
   background: transparent;
-  font-size: 11px;
+  font-size: 12px;
 }
 
-.markdownBubble blockquote {
+.markdownText blockquote {
   margin: 0 0 8px;
   padding: 2px 0 2px 10px;
   border-left: 2px solid var(--panel-border);
@@ -280,47 +282,126 @@
 .toolCallsContainer {
   display: flex;
   flex-direction: column;
-  gap: 3px;
-  width: 90%;
+  gap: 2px;
+  width: 100%;
+  padding: 4px 0;
 }
 
-/* ── ToolCallBadge ───────────────────────────────────────────────────────── */
-.toolCallBadge {
-  display: inline-flex;
+/* ── ToolCallRow ─────────────────────────────────────────────────────────── */
+.toolCallRow {
+  display: grid;
+  grid-template-columns: 22px minmax(0, 1fr) auto;
   align-items: center;
-  gap: 5px;
-  padding: 3px 8px;
-  border-radius: 20px;
-  background: var(--editor-overlay-white-04);
-  border: 1px solid var(--editor-overlay-white-08);
-  font-size: 10px;
+  column-gap: 10px;
+  width: 100%;
+  padding: 4px 8px 4px 4px;
+  border-radius: var(--editor-radius);
+  background: var(--editor-surface);
+  border: 0;
+  color: var(--editor-text);
+}
+
+.toolCallRowPending {
+  background: var(--editor-surface);
+}
+
+.toolCallRowFailed {
+  background: var(--editor-danger-bg);
+}
+
+.toolCallIcon {
+  display: inline-grid;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  background: transparent;
   color: var(--editor-text-secondary);
 }
 
-.toolCallIconPending {
-  color: var(--editor-text-subtle);
-}
-
-.toolCallIconSuccess {
-  color: var(--editor-success-bright);
-}
-
-.toolCallIconFailed {
+.toolCallIconDanger {
   color: var(--editor-danger-light);
 }
 
-.toolCallType {
-  font-family: var(--font-mono);
-  font-size: 9px;
-  opacity: 0.70;
+.toolCallIconNeutral {
+  color: var(--editor-text-secondary);
 }
 
-/* Inline error message rendered under a failed tool badge. Lets the user
+.toolCallIconRead {
+  color: var(--rail-tint-sky);
+}
+
+.toolCallIconStyle {
+  color: var(--rail-tint-gold);
+}
+
+.toolCallIconWrite {
+  color: var(--rail-tint-mint);
+}
+
+.toolCallCopy {
+  display: flex;
+  align-items: baseline;
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.toolCallTitle {
+  flex: 0 0 auto;
+  color: var(--editor-text);
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1.25;
+}
+
+.toolCallDetail {
+  flex: 0 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  color: var(--editor-text-muted);
+  font-size: 12px;
+  line-height: 1.25;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Middle-dot separator only renders when a detail value is present (the
+   span is conditionally rendered), keeping title + value on one row. */
+.toolCallDetail::before {
+  content: '·';
+  margin: 0 6px;
+  color: var(--editor-text-muted);
+}
+
+.toolCallStatus {
+  display: inline-flex;
+  align-items: center;
+  justify-self: end;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  color: var(--editor-text-muted);
+  line-height: 1;
+}
+
+.toolCallStatusPending {
+  color: var(--editor-text-secondary);
+}
+
+.toolCallStatusSuccess {
+  color: var(--editor-success-bright);
+}
+
+.toolCallStatusFailed {
+  color: var(--editor-danger-light);
+}
+
+/* Inline error message rendered under a failed tool row. Lets the user
    see WHY the tool failed without expanding anything — same width as the
-   badge container, danger-toned text, one-line ellipsis when long. */
+   row container, danger-toned text, one-line ellipsis when long. */
 .toolCallError {
   margin: 2px 0 0 12px;
-  font-size: 11px;
+  font-size: 12px;
   line-height: 1.4;
   color: var(--editor-danger-light);
   word-break: break-word;

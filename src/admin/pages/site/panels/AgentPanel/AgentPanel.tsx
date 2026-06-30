@@ -15,24 +15,21 @@
  * - role="complementary" + aria-label="AI Assistant" on the panel landmark
  * - role="log" + aria-live="polite" on the message thread
  * - role="alert" for error messages
- * - role="status" for tool call status badges
+ * - role="status" for tool call status rows
  * - keyboard: Escape closes the panel
  *
  * @see Guideline #410 — 3 Self-Contained Independent Panels
  */
 
-import { useRef, useEffect, memo } from 'react'
+import { useRef, useEffect } from 'react'
 import { useAgentStore } from '@admin/ai/useAgentStore'
 import { useAsyncResource } from '@admin/lib/useAsyncResource'
 import { useAdminNavigate } from '@admin/lib/useAdminNavigate'
 import { listCredentials, listModels } from '@admin/ai/api'
-import { renderMarkdownToHtml, type AgentMessage, type AgentToolCall } from '@site/agent'
+import type { AgentMessage } from '@site/agent'
 import { TrashSolidIcon } from 'pixel-art-icons/icons/trash-solid'
 import { SquareSolidIcon } from 'pixel-art-icons/icons/square-solid'
 import { SendSolidIcon } from 'pixel-art-icons/icons/send-solid'
-import { LoaderIcon } from 'pixel-art-icons/icons/loader'
-import { CheckIcon } from 'pixel-art-icons/icons/check'
-import { CircleAlertSolidIcon } from 'pixel-art-icons/icons/circle-alert-solid'
 import { AiBoxSolidIcon } from 'pixel-art-icons/icons/ai-box-solid'
 import { AiSettingsSolidIcon } from 'pixel-art-icons/icons/ai-settings-solid'
 import { EditSolidIcon } from 'pixel-art-icons/icons/edit-solid'
@@ -46,6 +43,7 @@ import { cn } from '@ui/cn'
 import { ModelPicker } from './ModelPicker'
 import { ConversationHistory } from './ConversationHistory'
 import { ContextMeter } from './ContextMeter'
+import { MessageGroups } from './MessageGroup'
 import styles from './AgentPanel.module.css'
 
 const PANEL_WIDTH = 320
@@ -262,34 +260,14 @@ export function AgentPanel({ variant = 'floating' }: { variant?: PanelVariant })
         />
       </PanelHeader>
 
-      {/* ── Message thread ──────────────────────────────────────────────────── */}
-      <div
-        ref={threadRef}
-        role="log"
-        aria-live="polite"
-        aria-atomic="false"
-        aria-relevant="additions text"
-        aria-label="Conversation"
-        aria-busy={isStreaming}
-        className={styles.thread}
-      >
-        {messages.length === 0 ? (
-          <AgentEmptyState mode={lockReason ?? 'prompt'} />
-        ) : (
-          <>
-            {lockReason && <AgentCredentialAlert mode={lockReason} />}
-            {messages.map((msg) => <MessageBubble key={msg.id} msg={msg} />)}
-          </>
-        )}
-
-        {/* Generic error banner — only show when it's NOT the dedicated
-            no-credential message (which renders via the setup empty state). */}
-        {agentError && !noProviderError && (
-          <div role="alert" className={styles.errorBanner}>
-            {agentError}
-          </div>
-        )}
-      </div>
+      <AgentThread
+        threadRef={threadRef}
+        messages={messages}
+        lockReason={lockReason}
+        agentError={agentError}
+        noProviderError={noProviderError}
+        isStreaming={isStreaming}
+      />
 
       {/* ── Input bar ───────────────────────────────────────────────────────── */}
       <div className={styles.inputBar}>
@@ -365,178 +343,50 @@ export function AgentPanel({ variant = 'floating' }: { variant?: PanelVariant })
   )
 }
 
-// ---------------------------------------------------------------------------
-// MessageBubble
-// ---------------------------------------------------------------------------
-
-interface MessageBubbleProps {
-  msg: AgentMessage
+interface AgentThreadProps {
+  threadRef: React.RefObject<HTMLDivElement | null>
+  messages: AgentMessage[]
+  lockReason: ComposerLockReason | null
+  agentError: string | null
+  noProviderError: boolean
+  isStreaming: boolean
 }
 
-// Exception #2: React.memo re-render bailout on a hot, list-rendered component
-// (one per message in messages.map).
-const MessageBubble = memo(function MessageBubble({ msg }: MessageBubbleProps) {
-  const isUser = msg.role === 'user'
-
+function AgentThread({
+  threadRef,
+  messages,
+  lockReason,
+  agentError,
+  noProviderError,
+  isStreaming,
+}: AgentThreadProps) {
   return (
-    <div className={cn(styles.messageBubble, isUser ? styles.messageBubbleUser : styles.messageBubbleAssistant)}>
-      {/* Role label */}
-      <div className={styles.roleLabel}>
-        {isUser ? 'You' : 'Assistant'}
-      </div>
+    <div
+      ref={threadRef}
+      role="log"
+      aria-live="polite"
+      aria-atomic="false"
+      aria-relevant="additions text"
+      aria-label="Conversation"
+      aria-busy={isStreaming}
+      className={styles.thread}
+    >
+      {messages.length === 0 ? (
+        <AgentEmptyState mode={lockReason ?? 'prompt'} />
+      ) : (
+        <>
+          {lockReason && <AgentCredentialAlert mode={lockReason} />}
+          <MessageGroups messages={messages} />
+        </>
+      )}
 
-      {/* Chronological blocks — text and tool calls render in the order
-          Claude actually emitted them, so a "text → tool → text" sequence
-          shows two separate text bubbles around the tool badges. Text is
-          rendered as markdown (bold, lists, inline code, links, …) via a
-          DOMPurify-sanitised HTML pipeline. */}
-      {msg.blocks.map((block, index) =>
-        block.kind === 'text' ? (
-          <MarkdownTextBubble
-            // Stable key per text block: text deltas append in place, so each
-            // run of text gets its position-based key.
-            key={`text-${index}`}
-            text={block.text}
-            isUser={isUser}
-          />
-        ) : (
-          <div key={block.toolCall.id} className={styles.toolCallsContainer}>
-            <ToolCallBadge toolCall={block.toolCall} />
-          </div>
-        ),
+      {agentError && !noProviderError && (
+        <div role="alert" className={styles.errorBanner}>
+          {agentError}
+        </div>
       )}
     </div>
   )
-})
-
-// ---------------------------------------------------------------------------
-// MarkdownTextBubble — parses + sanitises the block text and injects it via
-// dangerouslySetInnerHTML. Memoised render so streaming deltas don't re-parse
-// markdown for unchanged blocks.
-// ---------------------------------------------------------------------------
-
-interface MarkdownTextBubbleProps {
-  text: string
-  isUser: boolean
-}
-
-// Exception #2: React.memo re-render bailout on a hot, list-rendered component
-// (one per text block, re-rendered on every streaming delta).
-const MarkdownTextBubble = memo(function MarkdownTextBubble({
-  text,
-  isUser,
-}: MarkdownTextBubbleProps) {
-  const html = renderMarkdownToHtml(text)
-  // Empty/whitespace-only blocks don't render at all (avoids stray bubbles
-  // around stripped-out tool blocks during streaming).
-  if (!html) return null
-  return (
-    <div
-      className={cn(
-        styles.contentBubble,
-        isUser ? styles.contentBubbleUser : styles.contentBubbleAssistant,
-        styles.markdownBubble,
-      )}
-      // Safe: sanitised by DOMPurify (via sanitizeRichtext) before reaching here.
-      dangerouslySetInnerHTML={{ __html: html }}
-    />
-  )
-})
-
-// ---------------------------------------------------------------------------
-// ToolCallBadge
-// ---------------------------------------------------------------------------
-
-function ToolCallBadge({ toolCall }: { toolCall: AgentToolCall }) {
-  const isPending = toolCall.status === 'pending'
-  const isSuccess = toolCall.status === 'success'
-  const isError = toolCall.status === 'error'
-
-  const iconClass = isPending
-    ? styles.toolCallIconPending
-    : isSuccess
-    ? styles.toolCallIconSuccess
-    : styles.toolCallIconFailed
-  const displayType = formatToolCallType(toolCall.actionType)
-  const label = formatActionLabel(toolCall.actionType, toolCall.params)
-  const statusLabel = isPending
-    ? `Running ${displayType}${label ? ` — ${label}` : ''}`
-    : isSuccess
-    ? `Completed ${displayType}${label ? ` — ${label}` : ''}`
-    : `Failed ${displayType}${label ? ` — ${label}` : ''}`
-
-  // Surface the tool's error message directly in the badge stream so the
-  // user sees WHY a tool failed without having to dig through devtools. The
-  // toolResult handler in agentSlice.ts already populates `result.error`.
-  const errorMessage = isError ? toolCall.result?.error ?? 'Tool call failed.' : null
-
-  return (
-    <>
-      <div
-        role="status"
-        aria-label={statusLabel}
-        className={styles.toolCallBadge}
-      >
-        <span className={iconClass} aria-hidden="true">
-          {isPending ? (
-            <LoaderIcon size={10} />
-          ) : isSuccess ? (
-            <CheckIcon size={10} />
-          ) : (
-            <CircleAlertSolidIcon size={10} />
-          )}
-        </span>
-        <span className={styles.toolCallType} aria-hidden="true">
-          {displayType}
-        </span>
-        <span aria-hidden="true">{label}</span>
-      </div>
-      {errorMessage && (
-        <p
-          role="alert"
-          // Tone-aligned with `.errorBanner` (red text on muted background)
-          // but inline + compact so a string of failed tool calls stays
-          // readable.
-          className={styles.toolCallError}
-        >
-          {errorMessage}
-        </p>
-      )}
-    </>
-  )
-}
-
-function formatToolCallType(actionType: string): string {
-  return actionType.replace(/^mcp__instatic__/, '')
-}
-
-/** Compact one-line summary of an applyCss payload: the selectors it touches. */
-function summarizeCss(css: string): string {
-  const selectors = css
-    .match(/[^{}]+(?=\{)/g)
-    ?.map((s) => s.trim().replace(/\s+/g, ' '))
-    .filter(Boolean) ?? []
-  if (selectors.length === 0) return 'css'
-  const head = selectors.slice(0, 2).join(', ')
-  return selectors.length > 2 ? `${head} +${selectors.length - 2}` : head
-}
-
-function formatActionLabel(actionType: string, params: unknown): string {
-  const p = params as Record<string, unknown>
-  switch (actionType) {
-    case 'insertHtml': return `→ ${String(p.parentId ?? '').slice(0, 8)}`
-    case 'getNodeHtml': return `node ${String(p.nodeId ?? '').slice(0, 6)}…`
-    case 'replaceNodeHtml': return `node ${String(p.nodeId ?? '').slice(0, 6)}…`
-    case 'deleteNode': return `node ${String(p.nodeId ?? '').slice(0, 6)}…`
-    case 'updateNodeProps': return `node ${String(p.nodeId ?? '').slice(0, 6)}…`
-    case 'moveNode': return `→ ${String(p.newParentId ?? '').slice(0, 6)}…`
-    case 'renameNode': return `"${String(p.label ?? '')}"`
-    case 'applyCss': return summarizeCss(String(p.css ?? ''))
-    case 'assignClass': return `${String(p.classId ?? '').slice(0, 6)}… → node`
-    case 'removeClass': return `${String(p.classId ?? '').slice(0, 6)}… from node`
-    case 'addPage': return `"${String(p.title ?? '')}"`
-    default: return ''
-  }
 }
 
 // ---------------------------------------------------------------------------

@@ -3,7 +3,7 @@ import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/re
 import { createStore } from 'zustand/vanilla'
 import { AgentStoreProvider } from '@admin/ai/AgentStoreContext'
 import { MemoryRouter, useLocation } from '@admin/lib/routing'
-import type { AgentSlice } from '@site/agent'
+import type { AgentMessage, AgentSlice } from '@site/agent'
 import { AgentPanel } from '@site/panels/AgentPanel'
 
 const originalFetch = globalThis.fetch
@@ -230,5 +230,112 @@ describe('AgentPanel', () => {
     expect(screen.queryByText('Connect an AI provider')).toBeNull()
     const textarea = screen.getByLabelText('Message to AI assistant') as HTMLTextAreaElement
     expect(textarea.disabled).toBe(false)
+  })
+
+  it('renders tool calls as human-readable action rows', async () => {
+    globalThis.fetch = mock(async (input: RequestInfo | URL) => {
+      const url = typeof input === 'string' ? input : input.toString()
+      if (url.endsWith('/admin/api/ai/credentials')) {
+        return jsonResponse({
+          credentials: [{
+            id: 'cred_1',
+            providerId: 'openai',
+            authMode: 'apiKey',
+            displayLabel: 'OpenAI',
+            baseUrl: null,
+            keyFingerprintCurrent: true,
+            createdAt: '2026-06-01T10:00:00.000Z',
+            lastUsedAt: null,
+          }],
+        })
+      }
+      if (url.includes('/admin/api/ai/providers/')) {
+        return jsonResponse({ models: [] })
+      }
+      throw new Error(`Unexpected fetch: ${url}`)
+    }) as typeof fetch
+
+    const assistantMessage: AgentMessage = {
+      id: 'assistant-1',
+      role: 'assistant',
+      timestamp: Date.now(),
+      blocks: [{
+        kind: 'toolCall',
+        toolCall: {
+          id: 'tool-1',
+          externalId: 'toolu_1',
+          actionType: 'applyCss',
+          params: { css: '.hero { color: red; } .cta:hover { color: blue; }' },
+          result: null,
+          status: 'pending',
+        },
+      }],
+    }
+
+    renderAgentPanel({
+      agentActiveCredentialId: 'cred_1',
+      agentActiveModelId: 'gpt-4o',
+      agentMessages: [assistantMessage],
+    })
+
+    await waitFor(() => {
+      expect(screen.getByText('Updating CSS')).toBeTruthy()
+    })
+
+    expect(screen.getByText('.hero, .cta:hover')).toBeTruthy()
+    expect(screen.queryByText('applyCss')).toBeNull()
+    expect(screen.getByRole('status', { name: 'Running Updating CSS - .hero, .cta:hover' })).toBeTruthy()
+  })
+
+  it('stacks consecutive same-role messages under one role marker', async () => {
+    globalThis.fetch = mock(async (input: RequestInfo | URL) => {
+      const url = typeof input === 'string' ? input : input.toString()
+      if (url.endsWith('/admin/api/ai/credentials')) {
+        return jsonResponse({
+          credentials: [{
+            id: 'cred_1',
+            providerId: 'openai',
+            authMode: 'apiKey',
+            displayLabel: 'OpenAI',
+            baseUrl: null,
+            keyFingerprintCurrent: true,
+            createdAt: '2026-06-01T10:00:00.000Z',
+            lastUsedAt: null,
+          }],
+        })
+      }
+      if (url.includes('/admin/api/ai/providers/')) {
+        return jsonResponse({ models: [] })
+      }
+      throw new Error(`Unexpected fetch: ${url}`)
+    }) as typeof fetch
+
+    const assistantMessages: AgentMessage[] = [
+      {
+        id: 'assistant-1',
+        role: 'assistant',
+        timestamp: Date.now(),
+        blocks: [{ kind: 'text', text: 'First assistant note.' }],
+      },
+      {
+        id: 'assistant-2',
+        role: 'assistant',
+        timestamp: Date.now() + 1,
+        blocks: [{ kind: 'text', text: 'Second assistant note.' }],
+      },
+    ]
+
+    renderAgentPanel({
+      agentActiveCredentialId: 'cred_1',
+      agentActiveModelId: 'gpt-4o',
+      agentMessages: assistantMessages,
+    })
+
+    await waitFor(() => {
+      expect(screen.getByText('First assistant note.')).toBeTruthy()
+    })
+
+    expect(screen.getByText('Second assistant note.')).toBeTruthy()
+    expect(screen.getAllByText('Assistant')).toHaveLength(1)
   })
 })

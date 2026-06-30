@@ -95,6 +95,8 @@ src/admin/pages/content/agent/
 
 src/admin/pages/site/panels/AgentPanel/
 ├── AgentPanel.tsx          — main panel; resolves active model's contextWindow from the models endpoint
+├── ToolCallRow.tsx         — tool-call row UI: icon rendering, status text, failed-call error copy
+├── toolCallDisplay.ts      — raw tool name + params → human-readable action row copy, icon key, and tone
 ├── ModelPicker.tsx         — credential + model selector used in the input bar
 ├── ConversationHistory.tsx — history popover (browse, restore, delete past threads)
 ├── ContextMeter.tsx        — "context used / window" progress indicator (display only)
@@ -114,6 +116,8 @@ src/admin/pages/ai/
 ```
 
 The Agent Panel owns the credential list load for its header, lock-state empty states, and model picker. The header always contains a `ConversationHistory` popover (browse and restore past threads), a "New chat" button (`startNewAgentConversation`), a conditional "Clear conversation" button (visible when `agentMessages.length > 0`), a streaming badge, and an "AI settings" shortcut that routes to `/admin/ai`. The AI settings button is always visible in the header, independent of credential state.
+
+Tool-call blocks render as action rows instead of raw tool names. `toolCallDisplay.ts` maps each streamed `toolName` plus its params to human copy, detail text, icon key, and semantic tone; `ToolCallRow.tsx` owns the pixel-art icon rendering and status/error states. The same renderer is shared by the site and content AI panels because both mount the same `AgentPanel` component.
 
 The composer has two distinct lock states, expressed as `lockReason: 'setup' | 'chooseModel' | null`:
 
@@ -548,7 +552,7 @@ Conversations and their message history are persisted server-side in `ai_convers
 
 **Content blocks are one schema.** Every message body is an `AiContentBlock[]` — a discriminated union of `text` / `image` / `toolCall` / `toolResult` kinds defined once as a TypeBox schema in `@core/ai` (`src/core/ai/contentBlock.ts`). The server runtime type (`AiContentBlock`), the read boundary (`ContentBlocksSchema` in `conversations/store.ts`, which validates every block out of `content_json`), and the client wire schema (`MessageViewSchema` in `src/admin/ai/api.ts`) all derive from it. Add a kind there and every reader/writer sees it.
 
-**Tool outcomes are first-class.** A `role:'tool'` row records its result as a `{ kind: 'toolResult', ok, error? }` block — `ok` is an explicit boolean, never inferred from the emptiness of a text block. The persister writes it (`appendToolResult`), `buildMessageHistory` reads `ok`/`error` straight off the block to reconstruct the replay `AiToolOutput`, and the client folds it back into the matching tool-call badge (`rehydrateMessages`). The heavy successful `data` an `AiToolOutput` may carry is intentionally **not** persisted: the model already consumed it in the round that produced the result, so replay only needs `{ ok, error }` — re-feeding large tool payloads every turn would bloat the context for no benefit.
+**Tool outcomes are first-class.** A `role:'tool'` row records its result as a `{ kind: 'toolResult', ok, error? }` block — `ok` is an explicit boolean, never inferred from the emptiness of a text block. The persister writes it (`appendToolResult`), `buildMessageHistory` reads `ok`/`error` straight off the block to reconstruct the replay `AiToolOutput`, and the client folds it back into the matching tool-call row (`rehydrateMessages`). The heavy successful `data` an `AiToolOutput` may carry is intentionally **not** persisted: the model already consumed it in the round that produced the result, so replay only needs `{ ok, error }` — re-feeding large tool payloads every turn would bloat the context for no benefit.
 
 ---
 
