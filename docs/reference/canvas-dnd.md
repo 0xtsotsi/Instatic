@@ -197,7 +197,7 @@ The `id` prefix tells `onDragEnd` it's a new-module insert.
 
 ### Drop an existing node
 
-The canvas's `NodeRenderer` registers each node as `useDraggable({ id: `node:${nodeId}` })`. The drag is initiated by clicking the node's drag handle (or by middle-click drag in some flows). The same drop-zone resolution applies.
+The canvas's `NodeRenderer` registers each node as `useDraggable({ id: `node:${nodeId}` })`. The drag is initiated by clicking the node's drag handle. The same drop-zone resolution applies.
 
 ### Drop INTO a container
 
