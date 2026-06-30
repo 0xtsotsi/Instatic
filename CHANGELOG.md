@@ -6,6 +6,26 @@ This project is pre-1.0. Breaking changes may appear in minor or patch releases 
 
 ## Unreleased
 
+## 0.0.8 - 2026-07-01
+
+### Editor and framework
+
+- Unified Core Framework management into one tabbed panel with a declarative Full / Variables / None manager.
+- Consolidated Layers, Site, Code, and Media into one Explorer panel, including a dedicated Code tab and refreshed media browsing.
+- Added canvas support for dragging media assets directly from the Media workspace.
+- Fixed onboarding framework import defaults and retained pending site reloads so imported framework changes appear in the editor without a hard refresh.
+- Kept the highlighted Spotlight result scrolled into view during keyboard navigation.
+
+### AI and integrations
+
+- Made AI token tools more tolerant of model-authored argument aliases for framework typography and spacing updates.
+
+### Security
+
+- Added central security response headers for admin and upload routes.
+- Revalidated and sanitized imported archive media, including SVG payloads, before writing them to disk.
+- Added expiry timestamps for MCP connector tokens, with existing tokens backfilled to a 90-day grace period.
+
 ## 0.0.7 - 2026-06-29
 
 ### AI & integrations
