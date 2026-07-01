@@ -82,6 +82,11 @@ import { useCanvasFormControlSuppression } from './useCanvasFormControlSuppressi
 import { CANVAS_VIEWPORT_HEIGHT, type CanvasViewport } from './resolveViewportUnits'
 import { useIframeFrameAutoHeight } from './useIframeFrameAutoHeight'
 import { applyIframeBodyReset, type IframeInteraction } from './iframeBodyReset'
+import {
+  isCanvasSpacePanActive,
+  setCanvasSpacePanActive,
+  shouldStartCanvasPointerPan,
+} from './canvasPanInput'
 import { useEditorStore } from '@site/store/store'
 import { closestReadonlyRegion, isElementLike } from './readonlyRegion'
 import styles from './IframeFrameSurface.module.css'
@@ -372,14 +377,12 @@ export const IframeFrameSurface = forwardRef<IframeFrameSurfaceHandle, IframeFra
     // ── Forward pointer events for canvas pan gestures + parent-doc canvas drags ────
     // The canvas pan gesture (useCanvas via @use-gesture) and the canvas
     // parent-doc canvas drag handlers both live in the parent document
-    // and rely on `window` pointer events. Three scenarios need to cross
+    // and rely on `window` pointer events. Two scenarios need to cross
     // the iframe boundary from inside the iframe back to the parent:
     //
-    //   1. Middle-click drag (`e.button === 1`) — always a pan, regardless
-    //      of where the cursor is.
-    //   2. Space + left-click drag (Figma convention) — pan when the user
+    //   1. Space + left-click drag (Figma convention) — pan when the user
     //      is holding space, even with the cursor over a frame.
-    //   3. An active canvas drag started outside the iframe (selection
+    //   2. An active canvas drag started outside the iframe (selection
     //      toolbar handle, media panel asset, etc.). The
     //      pointer down fires in the parent, then as the cursor enters an
     //      iframe its pointermove/up events go to the iframe instead of
@@ -459,7 +462,10 @@ export const IframeFrameSurface = forwardRef<IframeFrameSurfaceHandle, IframeFra
         // coalesced session) while the DOM keeps the text — store/DOM diverge.
         // The element's own React onKeyDown still owns Escape/Enter.
         if (useEditorStore.getState().activeInlineEdit) return
-        if (e.code === 'Space' && !e.repeat) spaceHeld = true
+        if (e.code === 'Space' && !e.repeat) {
+          spaceHeld = true
+          setCanvasSpacePanActive(parentDocument, 'iframe', true)
+        }
         // Block Tab navigation inside the canvas iframe. The author is
         // designing, not using, the page — letting Tab walk through
         // link / button controls inside the iframe surface the browser's
@@ -474,7 +480,10 @@ export const IframeFrameSurface = forwardRef<IframeFrameSurfaceHandle, IframeFra
         forwardKeyboard(e)
       }
       const onKeyUp = (e: KeyboardEvent) => {
-        if (e.code === 'Space') spaceHeld = false
+        if (e.code === 'Space') {
+          spaceHeld = false
+          setCanvasSpacePanActive(parentDocument, 'iframe', false)
+        }
       }
       iframeDoc.addEventListener('keydown', onKeyDown)
       iframeDoc.addEventListener('keyup', onKeyUp)
@@ -510,25 +519,22 @@ export const IframeFrameSurface = forwardRef<IframeFrameSurfaceHandle, IframeFra
         return Number.isFinite(id) ? { pointerId: id } : { pointerId: 0 }
       }
       // True while a pan gesture started inside this iframe is still in
-      // flight (middle-click hold OR space+left-click hold). We start a
-      // pan on pointerdown when the conditions match and keep forwarding
-      // every subsequent pointermove / pointerup for the same pointerId
-      // until the button comes back up. This is the only way to know that
-      // a stray pointermove is "part of an active pan" — `e.buttons` is 0
-      // on the final pointerup, and using `e.button === 0` to detect "left
-      // is down during move" matches every casual mouse motion (because
-      // pointermove always reports `button` as 0). Tracking explicitly is
-      // the only correct option.
+      // flight (space+left-click hold). We start a pan on pointerdown when
+      // the conditions match and keep forwarding every subsequent pointermove
+      // / pointerup for the same pointerId until the button comes back up.
+      // This is the only way to know that a stray pointermove is "part of an
+      // active pan" — `e.buttons` is 0 on the final pointerup, and using
+      // `e.button === 0` to detect "left is down during move" matches every
+      // casual mouse motion (because pointermove always reports `button` as 0).
+      // Tracking explicitly is the only correct option.
       let panPointerId: number | null = null
       const isPanStartPointer = (e: PointerEvent): boolean => {
-        // Middle button down — middle-click pan.
-        if (e.button === 1) return true
-        // Space + left button down — Figma-style pan.
-        if (spaceHeld && e.button === 0) return true
-        return false
+        return shouldStartCanvasPointerPan(e, {
+          spaceHeld: spaceHeld || isCanvasSpacePanActive(parentDocument),
+        })
       }
       const maybeForward = (e: PointerEvent) => {
-        // (3) An external canvas drag is in progress — forward move/up/
+        // (2) An external canvas drag is in progress — forward move/up/
         // cancel so the parent's `window` listeners keep ticking.
         // pointerdown is excluded: the iframe never originates the drag,
         // and forwarding the first iframe-internal pointerdown would
@@ -546,13 +552,10 @@ export const IframeFrameSurface = forwardRef<IframeFrameSurfaceHandle, IframeFra
 
         if (e.type === 'pointerdown' && isPanStartPointer(e)) {
           panPointerId = e.pointerId
-          // Space + left-click: swallow the original so the click doesn't
-          // also trigger module selection. Middle-click never selects
-          // anything so it doesn't need swallowing.
-          if (spaceHeld && e.button === 0) {
-            e.preventDefault()
-            e.stopPropagation()
-          }
+          // Swallow the original so the click doesn't also trigger module
+          // selection while the user is intentionally panning.
+          e.preventDefault()
+          e.stopPropagation()
           forwardPointer(e)
           return
         }
@@ -578,6 +581,7 @@ export const IframeFrameSurface = forwardRef<IframeFrameSurfaceHandle, IframeFra
       iframeDoc.addEventListener('pointerup', maybeForward)
       iframeDoc.addEventListener('pointercancel', maybeForward)
       return () => {
+        setCanvasSpacePanActive(parentDocument, 'iframe', false)
         iframeDoc.removeEventListener('keydown', onKeyDown)
         iframeDoc.removeEventListener('keyup', onKeyUp)
         iframeDoc.removeEventListener('pointerdown', maybeForward)
