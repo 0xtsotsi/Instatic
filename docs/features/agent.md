@@ -374,11 +374,25 @@ Scripts and user stylesheets live in `site.files[]`; runtime targeting and loadi
 |------------------------|--------------------------------------------|-----------------------------------------|-------------------------------------------------------|
 | `list_code_assets`     | `{ type?: 'script' \| 'style' }`           | `{ assets }`                            | List runtime code assets with file ids, paths, full-content hashes, sizes, timestamps, and runtime config |
 | `read_code_asset`      | `{ fileId? \| path?, part?, maxChars? }`   | `{ fileId, path, type, content, hash, runtime, pageInfo }` | Read an exact script/stylesheet content slice. The `hash` is for the full file; page through with `pageInfo.nextPart` |
-| `write_code_asset`     | `{ path, type, content, runtime? }`        | asset summary + `{ action }`            | Create or replace a runtime script/stylesheet and normalize its runtime config. Existing paths are updated, new paths are created |
+| `write_code_asset`     | `{ path, type, content, runtime?, dependencies? }` | asset summary + `{ action, dependencies }` | Create or replace a runtime script/stylesheet and normalize its runtime config. Existing paths are updated, new paths are created. For module scripts, `dependencies` is a package-name → version/range map added to `site.packageJson.dependencies` |
 | `patch_code_asset`     | `{ fileId? \| path?, expectedHash, replacements }` | asset summary + `{ replacements }` | Apply exact text replacements only when `expectedHash` matches the latest content. Ambiguous matches require a wider `oldText` or explicit `replaceAll:true` |
 | `inspect_code_runtime` | `{ document?: { type, id } }`              | `{ pageId, document, scripts, styles }` | Report which runtime scripts/stylesheets apply to the current page/template or supplied page/template document ref |
 
 `insertHtml` / `replaceNodeHtml` intentionally strip `<script>` elements and inline event handlers (`onclick`, `onload`, etc.). When a request needs behavior, the agent should use `write_code_asset({ type: "script", ... })` and then `inspect_code_runtime`, not raw `<script>` tags or event attributes in HTML.
+
+Module scripts that need npm packages should import bare package specifiers and declare those packages in the same `write_code_asset` call:
+
+```ts
+write_code_asset({
+  path: 'src/scripts/motion.js',
+  type: 'script',
+  content: `import { Motion } from '@motion.page/sdk';`,
+  runtime: { format: 'module' },
+  dependencies: { '@motion.page/sdk': '1.2.4' },
+})
+```
+
+Agents should not use npm CDN URLs such as `esm.sh`, `unpkg`, or jsDelivr for packages that can live in the site dependency manifest.
 
 **Pages**
 

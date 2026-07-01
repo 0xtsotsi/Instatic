@@ -245,7 +245,7 @@ const writeCodeAssetTool: AiTool = {
   execution: 'browser',
   requiredCapabilities: SITE_STRUCTURE_CAPS,
   description:
-    'Create or replace a runtime script/style file in site.files and attach normalized site.runtime config. Use `type:"script"` for behavior such as theme toggles, menus, tabs, analytics hooks, and DOM-ready interactions; use `type:"style"` for global user stylesheets that should load as files. `path` is a safe site-relative path such as src/scripts/theme-toggle.js or src/styles/theme.css. `runtime` is optional and merges with existing/default config.',
+    'Create or replace a runtime script/style file in site.files and attach normalized site.runtime config. Use `type:"script"` for behavior such as theme toggles, menus, tabs, analytics hooks, and DOM-ready interactions; use `type:"style"` for global user stylesheets that should load as files. `path` is a safe site-relative path such as src/scripts/theme-toggle.js or src/styles/theme.css. `runtime` is optional and merges with existing/default config. For module scripts that import npm packages, use bare package imports in `content` and declare them in `dependencies` (package name → semver/range) so they are added to the site dependency manifest; do not use npm CDN URLs for npm packages.',
   inputSchema: WriteCodeAssetInputSchema,
 }
 

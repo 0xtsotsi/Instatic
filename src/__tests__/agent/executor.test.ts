@@ -430,6 +430,22 @@ describe('executeAgentTool — code assets', () => {
     expect(read.pageInfo.nextPart).toBeNull()
   })
 
+  it('write_code_asset adds declared runtime dependencies for module scripts', async () => {
+    freshStore()
+
+    const result = await executeAgentTool('site_write_code_asset', {
+      path: 'src/scripts/motion.js',
+      type: 'script',
+      content: `import { Motion } from '@motion.page/sdk';\nwindow.Motion = Motion;`,
+      runtime: { format: 'module' },
+      dependencies: { '@motion.page/sdk': '1.2.4' },
+    })
+
+    expectToolOk(result)
+    expect(useEditorStore.getState().packageJson.dependencies['@motion.page/sdk']).toBe('1.2.4')
+    expect(useEditorStore.getState().site?.packageJson.dependencies['@motion.page/sdk']).toBe('1.2.4')
+  })
+
   it('write_code_asset creates a runtime stylesheet and inspect_code_runtime shows page applicability', async () => {
     const { rootId } = freshStore()
     await executeAgentTool('site_insert_html', { parentId: rootId, html: '<main><h1>Home</h1></main>' })
