@@ -243,10 +243,26 @@ export async function listMessagesForConversation(
 // Writes
 // ---------------------------------------------------------------------------
 
+/** Placeholder title for a freshly-created conversation, before the first
+ * prompt lands and gives it a real name. */
+export const DEFAULT_CONVERSATION_TITLE = 'New conversation'
+
 /**
- * Create a new conversation row. `title` defaults to "New conversation" —
- * the runner can rename it after the first user message lands (or the UI
- * can offer "Rename this chat").
+ * Derive a short conversation title from the first user prompt: collapse
+ * whitespace to a single line, trim, and cap the length. Returns '' for an
+ * empty prompt (caller keeps the placeholder in that case).
+ */
+export function deriveConversationTitle(prompt: string): string {
+  const oneLine = prompt.replace(/\s+/g, ' ').trim()
+  if (!oneLine) return ''
+  const MAX = 60
+  return oneLine.length > MAX ? `${oneLine.slice(0, MAX).trimEnd()}…` : oneLine
+}
+
+/**
+ * Create a new conversation row. `title` defaults to
+ * `DEFAULT_CONVERSATION_TITLE`; the chat handler renames it from the first
+ * user prompt (see `deriveConversationTitle`).
  */
 export async function createConversationForUser(
   db: DbClient,
@@ -254,7 +270,7 @@ export async function createConversationForUser(
   input: CreateConversationInput,
 ): Promise<ConversationRecord> {
   const id = nanoid()
-  const title = (input.title ?? '').trim() || 'New conversation'
+  const title = (input.title ?? '').trim() || DEFAULT_CONVERSATION_TITLE
   const { rows } = await db<ConversationRow>`
     insert into ai_conversations (
       id, user_id, scope, title, credential_id, model_id
