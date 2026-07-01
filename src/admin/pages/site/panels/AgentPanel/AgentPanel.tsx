@@ -58,6 +58,7 @@ import { PanelHeader } from '@admin/shared/PanelHeader'
 import { Button } from '@ui/components/Button'
 import { EmptyState } from '@ui/components/EmptyState'
 import { Textarea } from '@ui/components/Input'
+import { Tooltip } from '@ui/components/Tooltip'
 import { useDraggablePanel } from '@site/hooks/useDraggablePanel'
 import { cn } from '@ui/cn'
 import { ModelPicker } from './ModelPicker'
@@ -554,12 +555,12 @@ function ToolCallRow({ toolCall }: { toolCall: AgentToolCall }) {
       {swatches.length > 0 && (
         <div className={styles.toolCallSwatches} aria-hidden="true">
           {swatches.map((swatch) => (
-            <span
-              key={swatch.slug}
-              className={styles.toolCallSwatch}
-              title={`${swatch.slug} · ${swatch.value}`}
-              style={{ '--swatch': swatch.value } as CSSProperties}
-            />
+            <Tooltip key={swatch.slug} content={`${swatch.slug} · ${swatch.value}`}>
+              <span
+                className={styles.toolCallSwatch}
+                style={{ '--swatch': swatch.value } as CSSProperties}
+              />
+            </Tooltip>
           ))}
         </div>
       )}
