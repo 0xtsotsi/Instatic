@@ -21,7 +21,7 @@
  * @see Guideline #410 — 3 Self-Contained Independent Panels
  */
 
-import { useRef, useEffect, memo } from 'react'
+import { useRef, useEffect, memo, type CSSProperties } from 'react'
 import { useAgentStore } from '@admin/ai/useAgentStore'
 import { useAsyncResource } from '@admin/lib/useAsyncResource'
 import { useAdminNavigate } from '@admin/lib/useAdminNavigate'
@@ -63,7 +63,7 @@ import { cn } from '@ui/cn'
 import { ModelPicker } from './ModelPicker'
 import { ConversationHistory } from './ConversationHistory'
 import { ContextMeter } from './ContextMeter'
-import { getToolCallDisplay, type ToolCallIcon, type ToolCallTone } from './toolCallDisplay'
+import { getToolCallDisplay, extractColorSwatches, type ToolCallIcon, type ToolCallTone } from './toolCallDisplay'
 import styles from './AgentPanel.module.css'
 
 const PANEL_WIDTH = 320
@@ -517,6 +517,7 @@ function ToolCallRow({ toolCall }: { toolCall: AgentToolCall }) {
   const isError = toolCall.status === 'error'
 
   const display = getToolCallDisplay(toolCall.actionType, toolCall.params)
+  const swatches = extractColorSwatches(toolCall.actionType, toolCall.params)
   const accessibleStatus = isPending ? 'Running' : isSuccess ? 'Completed' : 'Failed'
   const statusLabel = `${accessibleStatus} ${display.title}${display.detail ? ` — ${display.detail}` : ''}`
   const statusClass = isPending
@@ -550,6 +551,18 @@ function ToolCallRow({ toolCall }: { toolCall: AgentToolCall }) {
           )}
         </span>
       </div>
+      {swatches.length > 0 && (
+        <div className={styles.toolCallSwatches} aria-hidden="true">
+          {swatches.map((swatch) => (
+            <span
+              key={swatch.slug}
+              className={styles.toolCallSwatch}
+              title={`${swatch.slug} · ${swatch.value}`}
+              style={{ '--swatch': swatch.value } as CSSProperties}
+            />
+          ))}
+        </div>
+      )}
       {errorMessage && (
         <p role="alert" className={styles.toolCallError}>
           {errorMessage}

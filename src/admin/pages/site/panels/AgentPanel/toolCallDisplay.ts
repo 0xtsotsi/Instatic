@@ -158,6 +158,30 @@ function display(title: string, detail: string, icon: ToolCallIcon, tone: ToolCa
   return { title, detail, icon, tone }
 }
 
+export interface ColorSwatch {
+  slug: string
+  value: string
+}
+
+/**
+ * Colour swatches to preview under a `set_color_tokens` row — the light value
+ * of each token the agent created/updated. Empty for any other tool. Params
+ * are read defensively (they arrive as `unknown` from the tool-call stream).
+ */
+export function extractColorSwatches(actionType: string, params: unknown): ColorSwatch[] {
+  if (normalizeToolName(actionType) !== 'set_color_tokens') return []
+  const tokens = asRecord(params).tokens
+  if (!Array.isArray(tokens)) return []
+  const swatches: ColorSwatch[] = []
+  for (const entry of tokens) {
+    const token = asRecord(entry)
+    const slug = optionalString(token.slug)
+    const value = optionalString(token.lightValue)
+    if (slug && value) swatches.push({ slug, value })
+  }
+  return swatches
+}
+
 // Canonicalise a provider tool name to a stable snake_case key: drop the MCP
 // namespace and the `site_`/`content_` domain prefixes, then fold any camelCase
 // (historical names like `insertHtml`) down to snake_case.
