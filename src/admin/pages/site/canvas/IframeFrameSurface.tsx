@@ -417,16 +417,9 @@ export const IframeFrameSurface = forwardRef<IframeFrameSurfaceHandle, IframeFra
       // and every `window`-level listener during capture/bubble.
       //
       // We deliberately dispatch on `document`, NOT on the iframe element. The
-      // canvas's own shortcut handler (delete / duplicate / clipboard / Escape)
-      // is a React `onKeyDown` on the canvas root, and React already delivers
-      // iframe-originated key events to it through the React fiber tree (see
-      // docs/features/canvas-iframe-per-frame.md). Dispatching the clone on the
-      // iframe element would bubble it through React's root container too and
-      // fire those handlers a SECOND time (duplicate twice, delete twice).
-      // `document` is above React's root container in the DOM, so the clone is
-      // seen only by the native window/document listeners — never re-entering
-      // React. The clone also lands in the parent document, so this
-      // iframe-document listener never sees it again (no loop).
+      // global shortcut dispatcher and canvas-level native bridge both listen
+      // in the parent document; dispatching here keeps the clone out of the
+      // iframe document so this listener never sees it again (no loop).
       const parentDocument = iframe.ownerDocument
       const forwardKeyboard = (e: KeyboardEvent) => {
         const forwarded = new KeyboardEvent('keydown', {
