@@ -139,9 +139,32 @@
 }
 
 .roleLabel {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2xs);
   font-size: var(--text-3xs);
-  color: var(--text-disabled);
   letter-spacing: 0.05em;
+}
+
+.roleName {
+  color: var(--text-subtle);
+}
+
+.roleTime {
+  color: var(--text-disabled);
+}
+
+/* Agent avatar — the robot glyph in a circle, mirroring the user's Gravatar. */
+.roleAvatarAi {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--overlay-10);
+  color: var(--text-muted);
 }
 
 /* Plain full-width text — no card, no border. Both roles align left; the

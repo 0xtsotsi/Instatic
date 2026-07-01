@@ -25,6 +25,7 @@ import { useRef, useEffect, memo, type CSSProperties } from 'react'
 import { useAgentStore } from '@admin/ai/useAgentStore'
 import { useAsyncResource } from '@admin/lib/useAsyncResource'
 import { useAdminNavigate } from '@admin/lib/useAdminNavigate'
+import { useAuthenticatedAdminUser } from '@admin/sessionContext'
 import { listCredentials, listModels } from '@admin/ai/api'
 import { renderMarkdownToHtml, type AgentMessage, type AgentToolCall } from '@site/agent'
 import { TrashSolidIcon } from 'pixel-art-icons/icons/trash-solid'
@@ -55,6 +56,7 @@ import { LayoutSolidIcon } from 'pixel-art-icons/icons/layout-solid'
 import { UsersSolidIcon } from 'pixel-art-icons/icons/users-solid'
 import { ZapSolidIcon } from 'pixel-art-icons/icons/zap-solid'
 import { PanelHeader } from '@admin/shared/PanelHeader'
+import { UserAvatar } from '@admin/shared/UserAvatar'
 import { Button } from '@ui/components/Button'
 import { EmptyState } from '@ui/components/EmptyState'
 import { Textarea } from '@ui/components/Input'
@@ -65,6 +67,7 @@ import { ModelPicker } from './ModelPicker'
 import { ConversationHistory } from './ConversationHistory'
 import { ContextMeter } from './ContextMeter'
 import { getToolCallDisplay, extractColorSwatches, type ToolCallIcon, type ToolCallTone } from './toolCallDisplay'
+import { formatRelativeTime } from './relativeTime'
 import styles from './AgentPanel.module.css'
 
 const PANEL_WIDTH = 320
@@ -384,12 +387,24 @@ interface ConversationGroup {
 
 function MessageBubble({ group }: { group: ConversationGroup }) {
   const isUser = group.role === 'user'
+  const user = useAuthenticatedAdminUser()
+  const startedAt = group.messages[0]?.timestamp
+  const relativeTime = startedAt ? formatRelativeTime(startedAt) : ''
 
   return (
     <div className={styles.messageTurn}>
-      {/* Role label — once per turn, not once per message */}
+      {/* Role marker — avatar + name + relative time, once per turn. The user
+          reuses their Gravatar; the agent gets the robot glyph. */}
       <div className={styles.roleLabel}>
-        {isUser ? 'You' : 'Assistant'}
+        {isUser ? (
+          <UserAvatar user={user} size={16} alt={null} />
+        ) : (
+          <span className={styles.roleAvatarAi} aria-hidden="true">
+            <AiBoxSolidIcon size={11} />
+          </span>
+        )}
+        <span className={styles.roleName}>{isUser ? 'You' : 'Assistant'}</span>
+        {relativeTime && <span className={styles.roleTime}>· {relativeTime}</span>}
       </div>
 
       {/* Chronological blocks — text and tool calls render in the order
