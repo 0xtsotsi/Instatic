@@ -76,3 +76,34 @@ export function useCmsMediaAssetByPath(publicPath: string | null | undefined): C
 
   return publicPath ? cache.get(publicPath) ?? null : null
 }
+
+export function useCmsMediaAssetsByPath(publicPaths: readonly string[]): ReadonlyMap<string, CmsMediaAsset> {
+  const [, setTick] = useState(0)
+  const hasPaths = publicPaths.length > 0
+
+  useEffect(() => {
+    if (!hasPaths) return
+    if (publicPaths.every((path) => cache.has(path))) return
+    let canceled = false
+    void ensureList()
+      .then(() => { if (!canceled) setTick((n) => n + 1) })
+      .catch(() => { /* swallow — editor still renders raw urls */ })
+    return () => { canceled = true }
+  }, [hasPaths, publicPaths])
+
+  // Subscribe to cache invalidation only when this consumer actually depends on
+  // media rows; most canvas nodes have no background image.
+  useEffect(() => {
+    if (!hasPaths) return
+    const sub = () => setTick((n) => n + 1)
+    subscribers.add(sub)
+    return () => { subscribers.delete(sub) }
+  }, [hasPaths])
+
+  const assets = new Map<string, CmsMediaAsset>()
+  for (const path of publicPaths) {
+    const asset = cache.get(path)
+    if (asset) assets.set(path, asset)
+  }
+  return assets
+}
