@@ -7,12 +7,6 @@
     gap: var(--space-6xl);
 }
 
-.tabsRow {
-    display: flex;
-    flex-wrap: wrap;
-    gap: var(--space-s);
-}
-
 .section {
     display: grid;
     gap: var(--space-2xl);
