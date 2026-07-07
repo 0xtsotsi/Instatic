@@ -15,6 +15,17 @@ export const OWNER = {
   siteName: 'Automated E2E Site',
 } as const
 
+/**
+ * Admin origin — the single source of truth for any spec that opens an EXTRA
+ * browser context (a second device, an attacker session) and must navigate it to
+ * the admin app by absolute URL. Playwright's project `baseURL` only applies to
+ * the default context, so manually-created contexts need this. Resolved by
+ * `playwright.config.ts` (the Vite host in dev, the single Bun origin in prod)
+ * and written into the environment there — never hardcode a port in a spec.
+ */
+export const ADMIN_BASE_URL =
+  process.env.E2E_ADMIN_BASE_URL ?? 'http://127.0.0.1:5174'
+
 /** Public (visitor-facing) origin. Different port → always a fresh context. */
 export const PUBLIC_BASE_URL =
   process.env.E2E_PUBLIC_BASE_URL ?? 'http://127.0.0.1:3002'
