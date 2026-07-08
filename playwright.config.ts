@@ -56,17 +56,27 @@ export default defineConfig({
     video: 'retain-on-failure',
   },
   // The disposable DB is set up once per run, so first-run setup runs in its own
-  // `setup` project. Every spec depends on it and reuses the owner's auth state;
-  // specs that need a clean/anonymous session opt out with `test.use({ storageState })`.
+  // `setup` project. `personas` then creates dedicated tester accounts (each a
+  // member of the "team of testers"): specs that must run account-GLOBAL
+  // destructive flows — sign out everywhere, change password, toggle MFA — do so
+  // against a persona instead of the shared owner, so they can't invalidate the
+  // owner session every later spec reuses. Every spec depends on both; specs that
+  // need a clean/anonymous session opt out with `test.use({ storageState })`.
   projects: [
     {
       name: 'setup',
       testMatch: /auth\.setup\.ts$/,
     },
     {
+      name: 'personas',
+      testMatch: /\.setup\.ts$/,
+      testIgnore: /auth\.setup\.ts$/,
+      dependencies: ['setup'],
+    },
+    {
       name: 'e2e',
       testMatch: '**/*.e2e.ts',
-      dependencies: ['setup'],
+      dependencies: ['setup', 'personas'],
       use: { storageState: OWNER_STATE_FILE },
     },
   ],

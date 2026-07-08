@@ -44,3 +44,22 @@ export const OWNER_STATE_FILE = '.tmp/e2e-owner-state.json'
  * owner state.
  */
 export const ANONYMOUS_STATE = { cookies: [], origins: [] }
+
+/**
+ * A dedicated "account tester" persona — one member of the team of testers. It
+ * exists so that `account.e2e`'s account-GLOBAL destructive flows (sign out
+ * everywhere, change password, enable/disable MFA) operate on THIS account
+ * instead of the shared owner. Those actions invalidate every session for the
+ * account they target; run against the owner they would nuke `OWNER_STATE_FILE`
+ * and log out every later spec. Created once by `account-persona.setup.ts`.
+ *
+ * Given the `Admin` role because account self-management (profile, MFA,
+ * password, sessions) is available to any authenticated user — no owner-only
+ * privilege is required, so the shared owner stays pristine.
+ */
+export const ACCOUNT_PERSONA = {
+  email: 'account.persona.e2e@example.com',
+  password: 'account-persona-pass-12345',
+  displayName: 'Account Persona',
+  role: 'Admin',
+} as const

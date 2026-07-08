@@ -1,15 +1,28 @@
 import { createHmac } from 'node:crypto'
 import { expect, test, type Locator, type Page } from '@playwright/test'
 import {
+  ACCOUNT_PERSONA,
   ADMIN_BASE_URL,
   ANONYMOUS_STATE,
   OWNER,
   completeStepUp,
   expectLoggedIn,
-  login,
+  login as loginOwner,
   loginAs,
   logout,
 } from './helpers'
+
+/**
+ * In this spec `login` means "log in as the dedicated account persona." Account
+ * self-management flows here (sessions, MFA, password) are account-GLOBAL and
+ * destructive — sign out everywhere, change password, toggle MFA — so running
+ * them against the persona keeps the shared owner session (`OWNER_STATE_FILE`,
+ * reused by every other spec) intact. The one flow that must be the owner (the
+ * lockout test creates a user, an owner-only action) calls `loginOwner`.
+ */
+async function login(page: Page): Promise<void> {
+  await loginAs(page, ACCOUNT_PERSONA.email, ACCOUNT_PERSONA.password)
+}
 
 /** A minimal but valid 1×1 PNG for the avatar upload. */
 const PNG_1X1 = Buffer.from(
@@ -53,7 +66,7 @@ function totpCode(secret: string, now = Date.now()): string {
 async function completeStepUpWithMfa(page: Page, secret: string): Promise<void> {
   const dialog = page.getByTestId('step-up-dialog')
   await expect(dialog).toBeVisible({ timeout: 20_000 })
-  await page.getByTestId('step-up-password').fill(OWNER.password)
+  await page.getByTestId('step-up-password').fill(ACCOUNT_PERSONA.password)
   await page.getByTestId('step-up-mfa-code').fill(totpCode(secret))
   await page.getByTestId('step-up-confirm').click()
   await expect(dialog).toBeHidden({ timeout: 20_000 })
@@ -65,7 +78,7 @@ async function completeStepUpWithMfaIfOpened(page: Page, secret: string): Promis
     .waitFor({ state: 'visible', timeout: 1_000 })
     .then(() => true, () => false)
   if (!opened) return
-  await page.getByTestId('step-up-password').fill(OWNER.password)
+  await page.getByTestId('step-up-password').fill(ACCOUNT_PERSONA.password)
   await page.getByTestId('step-up-mfa-code').fill(totpCode(secret))
   await page.getByTestId('step-up-confirm').click()
   await expect(dialog).toBeHidden({ timeout: 20_000 })
@@ -89,7 +102,7 @@ async function enableMfaFromSecurityTab(
   page: Page,
 ): Promise<{ secret: string; recoveryCodes: string[] }> {
   await page.getByTestId('security-mfa-enable').click()
-  await completeStepUp(page)
+  await completeStepUp(page, ACCOUNT_PERSONA.password)
 
   const setupDialog = page.getByRole('dialog', {
     name: 'Enable two-factor authentication',
@@ -127,7 +140,7 @@ async function createAccountActivityUser(
   await page.locator('input[name="new-user-initial-password"]').fill(user.password)
   await page.locator('select[name="new-user-role"]').selectOption({ label: user.role })
   await page.locator('button[form="users-page-user-form"]').click()
-  await completeStepUp(page)
+  await completeStepUp(page, OWNER.password)
   await expect(page.getByText(user.email)).toBeVisible()
 }
 
@@ -167,7 +180,7 @@ test.describe('account', () => {
 
       await page.getByTestId('profile-display-name').fill(displayName)
       await page.getByTestId('profile-save').click()
-      await completeStepUp(page)
+      await completeStepUp(page, ACCOUNT_PERSONA.password)
       await expect(page.getByTestId('profile-status')).toHaveText(/profile saved/i, {
         timeout: 20_000,
       })
@@ -338,7 +351,7 @@ test.describe('account', () => {
       await expect(mfaCard).toContainText('Off')
 
       await page.getByTestId('security-mfa-enable').click()
-      await completeStepUp(page)
+      await completeStepUp(page, ACCOUNT_PERSONA.password)
 
       const setupDialog = page.getByRole('dialog', {
         name: 'Enable two-factor authentication',
@@ -375,7 +388,7 @@ test.describe('account', () => {
 
       await page.getByTestId('security-step-up-window').click()
       await page.getByRole('option', { name: '30 minutes' }).click()
-      await completeStepUp(page)
+      await completeStepUp(page, ACCOUNT_PERSONA.password)
       await expect(page.getByText('Step-up authentication updated to 30 minutes.')).toBeVisible()
       await expect(stepUpCard).toContainText('On - sensitive actions ask again after 30 minutes.')
       await expect(page.getByTestId('security-step-up-window')).toHaveValue('30 minutes')
@@ -389,7 +402,7 @@ test.describe('account', () => {
 
       await page.getByTestId('security-step-up-window').click()
       await page.getByRole('option', { name: '15 minutes' }).click()
-      await completeStepUp(page)
+      await completeStepUp(page, ACCOUNT_PERSONA.password)
       await expect(page.getByText('Step-up authentication updated to 15 minutes.')).toBeVisible()
       await expect(page.getByTestId('security-step-up-window')).toHaveValue('15 minutes')
     })
@@ -431,12 +444,12 @@ test.describe('account', () => {
       await page.goto('/admin')
       await expect(page.getByRole('heading', { name: 'Admin Login' })).toBeVisible()
 
-      await page.getByLabel('Email').fill(OWNER.email)
-      await page.getByLabel('Password').fill(`${OWNER.password}-wrong`)
+      await page.getByLabel('Email').fill(ACCOUNT_PERSONA.email)
+      await page.getByLabel('Password').fill(`${ACCOUNT_PERSONA.password}-wrong`)
       await page.getByRole('button', { name: 'Sign In' }).click()
       await expect(page.getByRole('alert')).toHaveText(/invalid email or password/i)
 
-      await page.getByLabel('Password').fill(OWNER.password)
+      await page.getByLabel('Password').fill(ACCOUNT_PERSONA.password)
       await page.getByRole('button', { name: 'Sign In' }).click()
       await expectLoggedIn(page)
 
@@ -463,7 +476,7 @@ test.describe('account', () => {
       page,
       browser,
     }) => {
-      await login(page)
+      await loginOwner(page)
       const suffix = Date.now().toString(36)
       const accountUser = {
         email: `activity-lockout-${suffix}@example.com`,
@@ -535,12 +548,12 @@ test.describe('account', () => {
       page,
       browser,
     }) => {
-      await login(page)
+      await loginAs(page, ACCOUNT_PERSONA.email, ACCOUNT_PERSONA.password)
 
       const otherContext = await browser.newContext({ baseURL: ADMIN_BASE_URL })
       try {
         const otherPage = await otherContext.newPage()
-        await login(otherPage)
+        await loginAs(otherPage, ACCOUNT_PERSONA.email, ACCOUNT_PERSONA.password)
 
         await page.goto('/admin/account')
         await page.getByTestId('account-tab-sessions').click()
@@ -555,7 +568,7 @@ test.describe('account', () => {
         const signOutOthers = page.getByTestId('account-sessions-sign-out-others')
         await expect(signOutOthers).toBeEnabled()
         await signOutOthers.click()
-        await completeStepUp(page)
+        await completeStepUp(page, ACCOUNT_PERSONA.password)
 
         await expect(page.getByText(/Signed out \d+ other devices?\./)).toBeVisible()
         await expect(signOutOthers).toBeDisabled()
@@ -573,12 +586,12 @@ test.describe('account', () => {
       browser,
     }) => {
       await page.setViewportSize({ width: 390, height: 844 })
-      await login(page)
+      await loginAs(page, ACCOUNT_PERSONA.email, ACCOUNT_PERSONA.password)
 
       const otherContext = await browser.newContext({ baseURL: ADMIN_BASE_URL })
       try {
         const otherPage = await otherContext.newPage()
-        await login(otherPage)
+        await loginAs(otherPage, ACCOUNT_PERSONA.email, ACCOUNT_PERSONA.password)
 
         await page.goto('/admin/account')
         await page.getByTestId('account-tab-sessions').click()
@@ -610,7 +623,7 @@ test.describe('account', () => {
       await expect(mfaCard).toContainText('Off')
 
       await page.getByTestId('security-mfa-enable').click()
-      await completeStepUp(page)
+      await completeStepUp(page, ACCOUNT_PERSONA.password)
 
       const setupDialog = page.getByRole('dialog', {
         name: 'Enable two-factor authentication',
@@ -647,7 +660,7 @@ test.describe('account', () => {
       await expect(mfaCard).toContainText('Off')
 
       await page.getByTestId('security-mfa-enable').click()
-      await completeStepUp(page)
+      await completeStepUp(page, ACCOUNT_PERSONA.password)
 
       const setupDialog = page.getByRole('dialog', {
         name: 'Enable two-factor authentication',
@@ -695,8 +708,8 @@ test.describe('account', () => {
       await expect(page.getByTestId('security-recovery-regenerate')).toBeEnabled()
 
       await logout(page)
-      await page.getByLabel('Email').fill(OWNER.email)
-      await page.getByLabel('Password').fill(OWNER.password)
+      await page.getByLabel('Email').fill(ACCOUNT_PERSONA.email)
+      await page.getByLabel('Password').fill(ACCOUNT_PERSONA.password)
       await page.getByRole('button', { name: 'Sign In' }).click()
       await expect(
         page.getByRole('heading', { name: 'Two-Factor Authentication' }),
@@ -757,8 +770,8 @@ test.describe('account', () => {
       await expect(page.getByTestId('security-mfa-card')).toContainText('On')
 
       await logout(page)
-      await page.getByLabel('Email').fill(OWNER.email)
-      await page.getByLabel('Password').fill(OWNER.password)
+      await page.getByLabel('Email').fill(ACCOUNT_PERSONA.email)
+      await page.getByLabel('Password').fill(ACCOUNT_PERSONA.password)
       await page.getByRole('button', { name: 'Sign In' }).click()
       await expect(
         page.getByRole('heading', { name: 'Two-Factor Authentication' }),
@@ -783,7 +796,7 @@ test.describe('account', () => {
       await expect(stepUpDialog.getByTestId('step-up-confirm')).toBeDisabled()
 
       const wrongStepUpCode = totpCode(secret) === '000000' ? '000001' : '000000'
-      await page.getByTestId('step-up-password').fill(OWNER.password)
+      await page.getByTestId('step-up-password').fill(ACCOUNT_PERSONA.password)
       await page.getByTestId('step-up-mfa-code').fill(wrongStepUpCode)
       await page.getByTestId('step-up-confirm').click()
       await expect(stepUpDialog.getByRole('alert')).toHaveText('Invalid authentication code')
@@ -813,8 +826,8 @@ test.describe('account', () => {
 
       await logout(page)
       await page.setViewportSize({ width: 390, height: 844 })
-      await page.getByLabel('Email').fill(OWNER.email)
-      await page.getByLabel('Password').fill(OWNER.password)
+      await page.getByLabel('Email').fill(ACCOUNT_PERSONA.email)
+      await page.getByLabel('Password').fill(ACCOUNT_PERSONA.password)
       await page.getByRole('button', { name: 'Sign In' }).click()
 
       await expect(
@@ -854,8 +867,8 @@ test.describe('account', () => {
       if (!recoveryCode) throw new Error('MFA setup did not render a recovery code')
 
       await logout(page)
-      await page.getByLabel('Email').fill(OWNER.email)
-      await page.getByLabel('Password').fill(OWNER.password)
+      await page.getByLabel('Email').fill(ACCOUNT_PERSONA.email)
+      await page.getByLabel('Password').fill(ACCOUNT_PERSONA.password)
       await page.getByRole('button', { name: 'Sign In' }).click()
       await expect(
         page.getByRole('heading', { name: 'Two-Factor Authentication' }),
@@ -872,8 +885,8 @@ test.describe('account', () => {
       )
 
       await logout(page)
-      await page.getByLabel('Email').fill(OWNER.email)
-      await page.getByLabel('Password').fill(OWNER.password)
+      await page.getByLabel('Email').fill(ACCOUNT_PERSONA.email)
+      await page.getByLabel('Password').fill(ACCOUNT_PERSONA.password)
       await page.getByRole('button', { name: 'Sign In' }).click()
       await expect(
         page.getByRole('heading', { name: 'Two-Factor Authentication' }),
@@ -956,13 +969,13 @@ test.describe('account', () => {
 
       await page.getByTestId('security-password-confirm').fill(temporaryPassword)
       await page.getByTestId('security-password-submit').click()
-      await completeStepUp(page)
+      await completeStepUp(page, ACCOUNT_PERSONA.password)
       await expect(dialog).toBeHidden({ timeout: 20_000 })
       await expect(page.getByText('Password updated. Other devices were signed out.')).toBeVisible()
 
       await logout(page)
-      await page.getByLabel('Email').fill(OWNER.email)
-      await page.getByLabel('Password').fill(OWNER.password)
+      await page.getByLabel('Email').fill(ACCOUNT_PERSONA.email)
+      await page.getByLabel('Password').fill(ACCOUNT_PERSONA.password)
       await page.getByRole('button', { name: 'Sign In' }).click()
       await expect(page.getByRole('alert')).toHaveText(/invalid email or password/i)
 
@@ -974,8 +987,8 @@ test.describe('account', () => {
       await page.getByTestId('account-tab-security').click()
       await page.getByTestId('security-change-password').click()
       await expect(dialog).toBeVisible()
-      await page.getByTestId('security-password-new').fill(OWNER.password)
-      await page.getByTestId('security-password-confirm').fill(OWNER.password)
+      await page.getByTestId('security-password-new').fill(ACCOUNT_PERSONA.password)
+      await page.getByTestId('security-password-confirm').fill(ACCOUNT_PERSONA.password)
       await page.getByTestId('security-password-submit').click()
       await completeStepUp(page, temporaryPassword)
       await expect(dialog).toBeHidden({ timeout: 20_000 })
