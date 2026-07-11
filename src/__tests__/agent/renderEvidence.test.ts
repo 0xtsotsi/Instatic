@@ -333,6 +333,10 @@ describe('captureAgentRenderSnapshot — on-demand browser bridge', () => {
     wrapper.dataset.nodeId = 'title'
     wrapper.dataset.moduleId = 'base.text'
     wrapper.textContent = 'Overflowing headline'
+    wrapper.style.backgroundImage = 'linear-gradient(red, blue)'
+    wrapper.style.backgroundClip = 'text'
+    wrapper.style.setProperty('-webkit-background-clip', 'text')
+    wrapper.style.setProperty('-webkit-text-fill-color', 'transparent')
     setRect(wrapper, { x: 8, y: 16, width: 420, height: 64 })
     body.appendChild(wrapper)
 
@@ -345,6 +349,12 @@ describe('captureAgentRenderSnapshot — on-demand browser bridge', () => {
     expect(snapshot!.breakpointId).toBe('mobile')
     expect(snapshot!.layout.viewport.scrollWidth).toBe(420)
     expect(snapshot!.layout.nodes[0].nodeId).toBe('title')
+    expect(snapshot!.layout.nodes[0].computed).toMatchObject({
+      backgroundImage: 'linear-gradient(red, blue)',
+      backgroundClip: 'text',
+      webkitBackgroundClip: 'text',
+      webkitTextFillColor: 'transparent',
+    })
     expect(snapshot!.layout.warnings.some((warning) =>
       warning.type === 'horizontal-overflow' && warning.nodeId === 'title',
     )).toBe(true)
@@ -385,6 +395,24 @@ describe('captureAgentRenderSnapshot — on-demand browser bridge', () => {
     expect(brokenWarnings).toHaveLength(1)
     expect(brokenWarnings[0]?.nodeId).toBe('broken-image')
     expect(snapshot!.layout.images.find((image) => image.nodeId === 'deferred-image')?.complete).toBe(false)
+  })
+
+  it('bounds computed background images before returning them as model-visible evidence', async () => {
+    const doc = mountFrame('desktop')
+    const node = doc.createElement('div')
+    node.dataset.nodeId = 'large-background'
+    node.style.backgroundImage = `url("data:image/png;base64,${'A'.repeat(1_000)}")`
+    setRect(node, { width: 100, height: 100 })
+    doc.body.appendChild(node)
+
+    const snapshot = await captureAgentRenderSnapshot({
+      breakpointId: 'desktop',
+      captureScreenshot: false,
+    })
+
+    const backgroundImage = snapshot!.layout.nodes[0].computed.backgroundImage
+    expect(backgroundImage).toHaveLength(500)
+    expect(backgroundImage.endsWith('...[truncated]')).toBe(true)
   })
 
   it('scopes the capture to a node subtree when nodeId is given', async () => {

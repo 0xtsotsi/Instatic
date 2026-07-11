@@ -10,6 +10,8 @@ import type {
 import { getErrorMessage } from '@core/utils/errorMessage'
 
 const MAX_TEXT_LENGTH = 300
+const MAX_COMPUTED_BACKGROUND_IMAGE_LENGTH = 500
+const COMPUTED_STYLE_TRUNCATION_SUFFIX = '...[truncated]'
 const OVERFLOW_TOLERANCE_PX = 2
 const FRAME_WAIT_TIMEOUT_MS = 5_000
 const FRAME_WAIT_POLL_MS = 16
@@ -315,6 +317,10 @@ function collectNodeLayout(
       overflow: computed.overflow,
       color: computed.color,
       backgroundColor: computed.backgroundColor,
+      backgroundImage: boundComputedBackgroundImage(computed.backgroundImage),
+      backgroundClip: computed.backgroundClip,
+      webkitBackgroundClip: computed.getPropertyValue('-webkit-background-clip'),
+      webkitTextFillColor: computed.getPropertyValue('-webkit-text-fill-color'),
       fontSize: computed.fontSize,
       lineHeight: computed.lineHeight,
     },
@@ -542,6 +548,14 @@ function trimText(text: string): string {
   return normalized.length > MAX_TEXT_LENGTH
     ? `${normalized.slice(0, MAX_TEXT_LENGTH - 1)}...`
     : normalized
+}
+
+function boundComputedBackgroundImage(value: string): string {
+  if (value.length <= MAX_COMPUTED_BACKGROUND_IMAGE_LENGTH) return value
+  return `${value.slice(
+    0,
+    MAX_COMPUTED_BACKGROUND_IMAGE_LENGTH - COMPUTED_STYLE_TRUNCATION_SUFFIX.length,
+  )}${COMPUTED_STYLE_TRUNCATION_SUFFIX}`
 }
 
 function round(value: number): number {

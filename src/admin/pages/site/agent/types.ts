@@ -209,6 +209,10 @@ export interface AgentLayoutNodeContext {
     overflow: string
     color: string
     backgroundColor: string
+    backgroundImage: string
+    backgroundClip: string
+    webkitBackgroundClip: string
+    webkitTextFillColor: string
     fontSize: string
     lineHeight: string
   }

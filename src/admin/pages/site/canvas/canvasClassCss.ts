@@ -148,7 +148,10 @@ export function generatePreviewClassCSS(
   preview: { breakpointId?: string | null; styles: Record<string, unknown> },
   responsiveOptions: ResponsiveCssOptions = {},
 ): string {
-  const decls = bagToCSS(preview.styles, responsiveOptions)
+  const priorities = preview.breakpointId
+    ? cls.contextStylePriorities?.[preview.breakpointId]
+    : cls.stylePriorities
+  const decls = bagToCSS(preview.styles, responsiveOptions, priorities)
   if (!decls) return ''
   const selector = styleRuleSelector(cls)
   const doubled = `${selector}${selector}`
@@ -209,7 +212,12 @@ export function generateForcedStateCSS(
   }
 
   const emitRule = createStyleRuleCssEmitter(breakpoints, conditions, responsiveOptions)
-  return emitRule(selector, baseStyles, contextStyles).join('\n\n')
+  return emitRule(selector, {
+    styles: baseStyles,
+    stylePriorities: rule.stylePriorities,
+    contextStyles,
+    contextStylePriorities: rule.contextStylePriorities,
+  }).join('\n\n')
 }
 
 function escapeCssAttribute(value: string): string {

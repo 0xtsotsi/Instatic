@@ -112,6 +112,14 @@ describe('generateCanvasClassCSS', () => {
     expect(css).not.toContain('/uploads/hero.png')
   })
 
+  it('uses the same declaration priorities as published CSS', () => {
+    const rule = makeClass('notice', { color: 'red' })
+    rule.stylePriorities = { color: 'important' }
+    expect(generateCanvasClassCSS({ notice: rule }, [])).toContain(
+      'color: red !important;',
+    )
+  })
+
   it('emits sanitized raw @keyframes rules, matching the published output', () => {
     // Regression: the canvas used to skip `rawCss` rules entirely, so
     // imported keyframe animations published fine but never played in the
@@ -282,6 +290,19 @@ describe('generateForcedStateCSS', () => {
     expect(css).toContain('[data-node-id="node-1"][data-node-id="node-1"]')
     expect(css).toContain('color: red')
     expect(css).toContain('font-weight: 700')
+  })
+
+  it('keeps important declarations in forced-state previews', () => {
+    const rule = hoverRule({ color: 'red' }, { mobile: { color: 'blue' } })
+    rule.stylePriorities = { color: 'important' }
+    rule.contextStylePriorities = { mobile: { color: 'important' } }
+    const css = generateForcedStateCSS(
+      'node-1',
+      rule,
+      [{ id: 'mobile', width: 375 }],
+    )
+    expect(css).toContain('color: red !important;')
+    expect(css).toContain('color: blue !important;')
   })
 
   it('emits per-breakpoint overrides under the breakpoint media query, node-scoped', () => {

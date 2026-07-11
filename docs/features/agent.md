@@ -13,12 +13,12 @@ The agent runs on a provider-agnostic AI runtime (`server/ai/`) that can drive a
 ## TL;DR
 
 - **Structure via HTML.** `site_insert_html` and `site_replace_node_html` accept semantic HTML strings; the browser executor calls `importHtml` (the same pipeline as the paste-HTML UI) to convert them into first-class, editable `PageNode`s.
-- **Styling via CSS.** The agent emits CSS the same way a human pastes it: a `<style>` block and/or `class=` attributes inside the `site_insert_html`/`site_replace_node_html` payload, or the standalone `site_apply_css` tool. The importer (`cssToStyleRules`) classifies every selector — a bare `.foo {}` rule becomes a reusable Selectors-panel class bound to `class="foo"`; any other selector (`.hero a`, `a:hover`, `nav > li`) becomes an ambient rule; `style=` attributes land on the node's inline styles. There is no structured `classes` parameter — the agent never hand-builds classes node-by-node at insert time. `site_apply_css` is the single tool for authoring/editing CSS on its own; it **upserts**, so re-applying a selector edits the existing rule (the way descendant/pseudo rules get restyled).
+- **Styling via CSS.** The agent emits CSS the same way a human pastes it: a `<style>` block and/or `class=` attributes inside the `site_insert_html`/`site_replace_node_html` payload, or the standalone `site_apply_css` tool. The importer (`cssToStyleRules`) classifies every selector — a bare `.foo {}` rule becomes a reusable Selectors-panel class bound to `class="foo"`; any other selector (`.hero a`, `a:hover`, `nav > li`) becomes an ambient rule; `style=` attributes land on the node's inline styles. There is no structured `classes` parameter — the agent never hand-builds classes node-by-node at insert time. `site_apply_css` is the single tool for CSS on its own, with explicit merge, replace, rule-delete, and property-removal operations; exact selector identity and `!important` priority survive the round trip.
 - **Site scope: 35 tools total.** 6 server-side catalog read tools (resolved server-side from the posted snapshot / DB) + 29 browser-bridged tools.
 - **Content scope: 15 tools total.** 7 server-side content/catalog/media/user read tools + 8 browser-bridged document mutation/navigation tools.
 - **Two-endpoint bridge.** `POST /admin/api/ai/chat/:scope` opens an NDJSON stream. When the model calls a browser-bridged tool, the server emits `toolRequest`; the browser executor reads or mutates the live workspace and POSTs the `AiToolOutput` result to `POST /admin/api/ai/tool-result`.
 - **Provider-agnostic.** The runtime selects a driver (Anthropic, OpenAI, OpenRouter, Ollama, Custom Provider) from the conversation's configured credential.
-- **Site tool input schemas are a single source of truth** in `@core/ai` (`src/core/ai/toolSchemas.ts`). The server tool registry (`server/ai/tools/site/writeTools.ts`) and the browser executor (`executor.ts` + `tokenRunners.ts`) import the exact same schema objects — a constraint added once is enforced on both sides at build time. Gated by `ai-tool-schema-ssot.test.ts` and `ai-tools-typebox-only.test.ts`.
+- **Site tool input schemas are a single source of truth** in `@core/ai` (`src/core/ai/toolSchemas.ts`). The server registry and browser executor import from that shared leaf. Most tools reuse the exact same schema object; `site_apply_css` deliberately advertises a flat provider object because Anthropic rejects root-level schema composition, then the executor validates the payload against the leaf's exact operation union. Gated by `ai-tool-input-object.test.ts`, `ai-tool-schema-ssot.test.ts`, and `ai-tools-typebox-only.test.ts`.
 - **Capabilities.** `ai.chat` required to stream; `ai.tools.write` required for write tools. Gated by `ai-handlers-capability-gated.test.ts`.
 
 ---
@@ -28,7 +28,7 @@ The agent runs on a provider-agnostic AI runtime (`server/ai/`) that can drive a
 ```text
 src/core/ai/
 ├── toolOutput.ts           — AiToolOutput type + AiToolOutputSchema + aiToolOk / aiToolError
-├── toolSchemas.ts          — all site write-tool input schemas (single source of truth for both server and browser)
+├── toolSchemas.ts          — all site write-tool schemas; provider/execution layers for site_apply_css share field definitions here
 └── index.ts                — barrel re-export (canonical @core/ai import path)
 
 server/ai/
@@ -95,6 +95,7 @@ src/admin/pages/site/agent/
 ├── siteAgentSnapshot.ts    — `SiteAgentSnapshotSchema` (TypeBox) + derived `SiteAgentSnapshot` type + `buildSiteAgentSnapshot` serializer
 ├── pageContext.ts          — editor adapter: reads active page + store scalars, calls `buildSiteAgentSnapshot`
 ├── executor.ts             — browser-side dispatcher: validates + runs write tools; auto-navigates canvas to node's owning document before each write
+├── cssTools.ts             — site_apply_css parser + exact-selector merge/replace/delete runners
 ├── documentTools.ts        — list/read/open document helpers for pages, templates, and visual components
 ├── tokenRunners.ts         — site_set_color_tokens / site_set_font_tokens / site_set_type_scale / site_set_spacing_scale runners (split from executor.ts)
 ├── renderEvidence.ts       — captureAgentRenderSnapshot (site_render_snapshot tool)
@@ -402,9 +403,14 @@ Styling rides on the `html` payload — there is no separate `classes` parameter
 
 `insertImportedNodes` then links every `class=` token on the imported nodes to its registry class id in the same undo step, so `class="hero-section"` renders and is styleable whether its styles came from a `<style>` rule or an automatically-created bare class. See [html-import.md → Class linking](html-import.md#class-linking-name--id).
 
-**Authoring CSS with `site_apply_css`.** `site_apply_css({ css })` is the single tool for CSS that isn't attached to inserted structure. The agent passes real CSS text (e.g. `".hero a:hover { color: var(--primary) }"`); it runs through the same `cssToStyleRules` classifier and is **upserted** into the registry by `upsertCssRules`: a bare `.foo {}` selector creates or edits a reusable class, any other selector (`.hero a`, `a:hover`, `nav > li`, `::before`, `h1`) creates or edits an ambient rule, `@media` folds into per-breakpoint/condition overrides, and supported `@keyframes` become ambient raw CSS rules. Re-applying a selector **merges** onto the existing rule — so the same tool both creates new styles and restyles existing descendant/pseudo rules (the case the retired `updateClassStyles` could not express). Returns `{ cssRulesCreated, cssRulesUpdated }`. Framework-generated token/utility classes are never overwritten. `site_insert_html`/`site_replace_node_html` also accept a `<style>`-only payload and route it through the same upsert as a forgiving fallback, but `site_apply_css` is the canonical path.
+**Authoring CSS with `site_apply_css`.** The required `operation` discriminator makes destructive intent explicit:
 
-Note the deliberate split: `site_apply_css` and `<style>`-only payloads **upsert** (the agent's intent is to author/edit CSS), whereas a `<style>` block that accompanies *elements* in an insert is **additive** (`mergeImportedStyleRules` — it never clobbers a shared class as a side effect of dropping in structure).
+- `{ operation: "merge", css }` creates missing selectors and patches only the supplied declarations/contexts. Touched declarations move to the end of the stored rule in authored order, so longhand/shorthand cascade order stays truthful.
+- `{ operation: "replace", css }` makes every supplied selector's complete CSS payload authoritative: omitted base declarations and contexts are removed, while stable rule id, cascade order, metadata, and class assignments survive. An empty `.foo {}` therefore clears its CSS without detaching the class.
+- `{ operation: "remove-properties", selectors, properties }` removes CSS-native property names from base plus every viewport/custom-condition bag without rebuilding unrelated CSS. Vendor names and custom properties are accepted; emitted `padding`/`margin` shorthands also clear their stored side longhands.
+- `{ operation: "delete", selectors }` removes every exact matching rule; class-kind rules are detached from page and Visual Component nodes in the same undo step.
+
+Selectors are matched by their exact emitted text across rule kinds. `.grad`, `.hero .grad`, and `.grad, .hero .grad` are separate rules—there is no unsafe attempt at semantic selector equivalence. Destructive batches preflight missing/locked targets and fail without partial mutation. Merge/replace accept real CSS through `cssToStyleRules`, including conditions, vendor/custom properties, raw keyframes, and structurally preserved `!important`. Framework-generated locked utilities are never changed. `<style>`-only `site_insert_html`/`site_replace_node_html` payloads keep merge behavior as a forgiving fallback; a `<style>` block accompanying inserted elements remains additive (`mergeImportedStyleRules`) so dropping in structure cannot clobber a shared rule.
 
 **Loops through HTML.** A repeated list is authored with the custom importer marker:
 
@@ -435,7 +441,7 @@ The agent calls `site_list_loop_sources` first to get the valid source id, data 
 
 | Tool          | Input                 | Success `data`                          | What it does                                          |
 |---------------|-----------------------|-----------------------------------------|-------------------------------------------------------|
-| `site_apply_css`    | `{ css }`             | `{ cssRulesCreated, cssRulesUpdated }`  | Parse CSS text and upsert every rule — classes (bare `.foo`) and ambient rules (any other selector); re-applying a selector edits it |
+| `site_apply_css`    | `{ operation:'merge'\|'replace', css }` or `{ operation:'delete', selectors }` or `{ operation:'remove-properties', selectors, properties }` | `{ cssRulesCreated?, cssRulesUpdated?, cssRulesDeleted?, cssPropertiesRemoved? }` | Merge/replace authored CSS, delete exact rules, or remove selected properties across all contexts |
 | `site_assign_class` | `{ nodeId, classId }` | none                                    | Attach an existing class to a node; `classId` accepts id or name|
 | `site_remove_class` | `{ nodeId, classId }` | none                                    | Detach a class from a node (the class itself remains) |
 
@@ -500,7 +506,7 @@ The agent works **design-system-first**: it establishes or reuses tokens, then r
 
 | Tool              | Input                 | Success `data` | What it does                                                     |
 |-------------------|-----------------------|----------------|------------------------------------------------------------------|
-| `site_render_snapshot` | `{ breakpointId?, nodeId? }`   | `{ breakpointId, nodeId?, label, width, capturedAt, layout, screenshot }` + optional `images[]` | Inspect the rendered canvas: always returns a layout report (viewport, per-node bounding boxes, overflow / broken-image / invisible warnings); when the active provider supports native image-bearing tool results, a PNG is attached via the tool-output **image channel**. `breakpointId` picks any configured viewport at its exact configured width (defaults to active). Evidence always renders through a deterministic one-shot frame, so Live mode, collapsed frames, and `previewFrame:false` do not change the result or the user's visible canvas state. `nodeId` crops the rendered document to a smaller, sharper model image while preserving HTML/body/ancestor paint; the report covers the same section with coordinates relative to its box. Unknown breakpoint/node ids return `aiToolError` |
+| `site_render_snapshot` | `{ breakpointId?, nodeId? }`   | `{ breakpointId, nodeId?, label, width, capturedAt, layout, screenshot }` + optional `images[]` | Inspect the rendered canvas: always returns geometry, warnings, and per-node computed styles including background image/clip and WebKit text-mask values; capable providers also receive a PNG. `breakpointId` renders any configured viewport through a deterministic one-shot frame at its exact width, independent of Live mode or collapsed/disabled frames. `nodeId` crops to one subtree while preserving ancestor paint. Unknown ids error. Pair computed evidence with `site_read_document` source CSS when debugging the cascade |
 
 ### Auto-navigation
 
@@ -573,11 +579,12 @@ Drivers that support explicit prompt-cache controls (Anthropic) apply `cache_con
 - **Design system first.** Establish or reuse tokens before/while building (`site_set_color_tokens`, `site_set_type_scale`, `site_set_spacing_scale`, `site_set_font_tokens`), then reference them in CSS (`var(--<slug>)`, `var(--text-l)`, `var(--space-m)`, `var(--<font-var>)`) instead of raw hex/px/font-family. The dynamic suffix's `Tokens —` line shows what already exists; `(none …)` means no design system yet.
 - Structure as HTML (`site_insert_html` / `site_replace_node_html`); style with CSS in the same payload — a `<style>` block and/or `class=` attributes referencing the design tokens. The importer classifies selectors, so the agent never hand-builds classes at insert time.
 - `<style>` blocks inside imported HTML are parsed: a bare `.foo {}` rule becomes a Selectors-panel class bound to `class="foo"`; any other selector (`.hero a`, `a:hover`, `@media …`) becomes an ambient rule, and supported `@keyframes` publish as raw keyframes CSS. `style=` attributes land on the node's inline styles. These are applied — not stripped.
+- CSS-only edits use an explicit `site_apply_css` operation: merge for additive patches, remove-properties for stale declarations, replace only with the selector's complete desired CSS, and delete for whole exact rules. Read the document first before destructive operations; grouped and ungrouped selectors are different identities.
 - One `site_insert_html` call per logical section (nav, hero, pricing, footer = 4–6 calls); smaller chunks recover better if one fails.
 - Per-breakpoint variation: `@media` queries — in the `<style>` block of an insert or inside `site_apply_css` — with min/max-width queries that line up with the breakpoint widths in the dynamic suffix. Never invent ids like `"mobile"` or `"desktop"`.
 - Document refs come from the dynamic suffix or `site_list_documents`; never invent them. Shared chrome/layout/theme/navigation/footer requests should inspect template documents first.
 - Page ids for page operations come from the dynamic suffix; never invent them.
-- Write-tool success data uses explicit keys: `cssRulesCreated`/`cssRulesUpdated` for `site_apply_css`, `pageId` for `site_add_page`/`site_duplicate_page`, `nodeId`/`nodeIds` for `site_duplicate_node`, `nodeIds` for HTML inserts.
+- Write-tool success data uses explicit keys: `cssRulesCreated`/`cssRulesUpdated`/`cssRulesDeleted`/`cssPropertiesRemoved` for `site_apply_css`, `pageId` for `site_add_page`/`site_duplicate_page`, `nodeId`/`nodeIds` for `site_duplicate_node`, `nodeIds` for HTML inserts.
 - Editing existing content: call `site_read_document` first — it returns annotated document HTML where every element carries `uid="<nodeId>"` plus `pageInfo`; follow `pageInfo.nextPart` when more of the document is needed. Pass `uid` verbatim to write tools (`site_update_node_props`, `site_replace_node_html`, etc.). For a single subtree, `site_get_node_html` is sufficient.
 - Reply rule: 1–2 narrating sentences only. No raw HTML/CSS/JSON in the reply.
 
@@ -799,7 +806,7 @@ unblocks deletion of the credential that had been protected by the default FK.
   - `src/core/ai/chatRequest.ts` — canonical browser-to-server chat envelope and computed multi-image request ceiling
   - `src/core/ai/contentBlock.ts` — persisted/provider content blocks plus the lazy-URL conversation-detail view schema
   - `src/core/ai/userImage.ts` — accepted source formats, normalised JPEG schema, byte/dimension limits, and eight-image per-message bound
-  - `src/core/ai/toolSchemas.ts` — all site browser-tool input schemas (single source of truth; imported by both the server registry and the browser executor)
+  - `src/core/ai/toolSchemas.ts` — all site browser-tool input schemas (single source of truth); includes the flat provider schema and exact execution union required for `site_apply_css`
   - `src/core/ai/documentRefs.ts` — document refs/descriptors for pages, templates, and visual components
   - `src/core/ai/readSurface.ts` — runtime-agnostic `renderAgentDocument` annotated HTML + compact CSS renderer
   - `src/core/ai/index.ts` — barrel re-exporting the above
@@ -863,6 +870,7 @@ unblocks deletion of the credential that had been protected by the default FK.
   - `src/admin/pages/site/panels/AgentPanel/ContextMeter.tsx` — five-segment context status and rich usage tooltip
   - `src/admin/pages/site/panels/AgentPanel/contextMeterMetrics.ts` — exact five-band fill/tone calculation
 - Gate tests:
+  - `src/__tests__/architecture/ai-tool-input-object.test.ts`
   - `src/__tests__/architecture/ai-tool-schema-ssot.test.ts`
   - `src/__tests__/architecture/ai-driver-isolation.test.ts`
   - `src/__tests__/architecture/ai-tools-typebox-only.test.ts`
