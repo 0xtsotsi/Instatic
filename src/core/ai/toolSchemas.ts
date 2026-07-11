@@ -119,9 +119,43 @@ export type DuplicateNodeInput = Static<typeof DuplicateNodeInputSchema>
 // CSS + class-assignment write tools
 // ---------------------------------------------------------------------------
 
-export const ApplyCssInputSchema = Type.Object({
-  css: Type.String({ minLength: 1 }),
+const CssTextInputSchema = Type.String({ minLength: 1 })
+const CssSelectorListInputSchema = Type.Array(
+  Type.String({ minLength: 1 }),
+  { minItems: 1, maxItems: 100, uniqueItems: true },
+)
+const CssPropertyNameInputSchema = Type.String({
+  minLength: 1,
+  pattern: '^-{0,2}[a-zA-Z][a-zA-Z0-9-]*$',
 })
+
+/**
+ * One explicit CSS-registry mutation. The discriminator keeps destructive
+ * replacement/deletion impossible to trigger accidentally by omitting an
+ * optional flag from a normal merge.
+ */
+export const ApplyCssInputSchema = Type.Union([
+  Type.Object({
+    operation: Type.Literal('merge'),
+    css: CssTextInputSchema,
+  }),
+  Type.Object({
+    operation: Type.Literal('replace'),
+    css: CssTextInputSchema,
+  }),
+  Type.Object({
+    operation: Type.Literal('delete'),
+    selectors: CssSelectorListInputSchema,
+  }),
+  Type.Object({
+    operation: Type.Literal('remove-properties'),
+    selectors: CssSelectorListInputSchema,
+    properties: Type.Array(
+      CssPropertyNameInputSchema,
+      { minItems: 1, maxItems: 100, uniqueItems: true },
+    ),
+  }),
+])
 export type ApplyCssInput = Static<typeof ApplyCssInputSchema>
 
 export const AssignClassInputSchema = Type.Object({

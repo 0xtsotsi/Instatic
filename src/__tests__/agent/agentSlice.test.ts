@@ -715,7 +715,7 @@ describe('sendAgentMessage — request lifecycle', () => {
           type: 'toolRequest',
           requestId: 'req-7',
           toolName: 'site_apply_css',
-          input: { css: '.pricing-card { padding: 24px; }' },
+          input: { operation: 'merge', css: '.pricing-card { padding: 24px; }' },
         },
         { type: 'done' },
       ]),
