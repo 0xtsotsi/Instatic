@@ -12,11 +12,12 @@
  * site_render_snapshot, site_get_node_html).
  *
  * The input schemas are the single source of truth in `@core/ai`
- * (`src/core/ai/toolSchemas.ts`). This module imports each `*InputSchema`
- * for its tool `inputSchema`; the browser executor at
- * `src/admin/pages/site/agent/executor.ts` imports the SAME schemas to
- * validate each call. Neither side redeclares them, so a constraint added
- * here is enforced in the browser too — at build time.
+ * (`src/core/ai/toolSchemas.ts`). This module imports each provider-facing
+ * `*InputSchema`; the browser executor imports the same schemas for validation.
+ * `site_apply_css` has one deliberate second layer: providers receive a flat
+ * object because Anthropic rejects root schema composition, then the executor
+ * validates the call against the exact `ApplyCssExecutionInputSchema` union.
+ * Both CSS layers reuse the same field schemas in the shared leaf.
  */
 
 import {

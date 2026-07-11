@@ -1000,6 +1000,23 @@ describe('executeAgentTool — applyCss', () => {
     expect(findRule((rule) => rule.selector === '.legacy-shape')).toBeUndefined()
   })
 
+  it('enforces required fields while tolerating optional siblings from the flat provider schema', async () => {
+    freshStore()
+    expectToolError(await executeAgentTool('site_apply_css', { operation: 'merge' }))
+    expectToolError(await executeAgentTool('site_apply_css', { operation: 'delete' }))
+    expectToolError(await executeAgentTool('site_apply_css', {
+      operation: 'remove-properties',
+      selectors: ['.card'],
+    }))
+    const result = await executeAgentTool('site_apply_css', {
+      operation: 'replace',
+      css: '.card { color: red; }',
+      selectors: ['.card'],
+    })
+    expectToolData(result)
+    expect(findRule((rule) => rule.selector === '.card')?.styles.color).toBe('red')
+  })
+
   it('creates a reusable class from a bare `.foo` selector', async () => {
     freshStore()
     const result = await executeAgentTool('site_apply_css', {

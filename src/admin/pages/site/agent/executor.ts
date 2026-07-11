@@ -32,6 +32,7 @@ import {
   RenameNodeInputSchema,
   DuplicateNodeInputSchema,
   ApplyCssInputSchema,
+  ApplyCssExecutionInputSchema,
   AssignClassInputSchema,
   RemoveClassInputSchema,
   ListCodeAssetsInputSchema,
@@ -105,16 +106,16 @@ const getStoreState = (): EditorStore => getAgentStoreApi<EditorStore>().getStat
 // ---------------------------------------------------------------------------
 // Tool input validation
 //
-// The per-tool input schemas are the single source of truth in `@core/ai`
-// (`src/core/ai/toolSchemas.ts`) — the SAME schemas the server advertises as
-// each tool's `inputSchema` in `server/ai/tools/site/writeTools.ts`. The
-// executor imports them and re-validates each `toolRequest` payload here with
-// `parseValue` — defence-in-depth at the store boundary (Constraint #272).
+// The provider-facing and execution input schemas have one source in `@core/ai`
+// (`src/core/ai/toolSchemas.ts`). The executor imports them and validates each
+// `toolRequest` payload here with `parseValue` — defence-in-depth at the store
+// boundary (Constraint #272). Most tools use one schema for both layers.
 //
-// `site_render_snapshot` is the one divergence: the model-facing schema carries only
-// `breakpointId`/`nodeId`, so we compose the server-set `captureScreenshot`
-// flag (chosen from the model's vision capability — non-vision models skip the
-// expensive html-to-image capture) on top of the shared shape here.
+// Two deliberate provider-boundary layers live here:
+// - `site_render_snapshot` composes the server-set `captureScreenshot` flag
+//   onto its model-facing schema.
+// - `site_apply_css` advertises a flat provider-compatible object, then uses
+//   `ApplyCssExecutionInputSchema` here for exact operation-specific fields.
 // ---------------------------------------------------------------------------
 
 const renderSnapshotSchema = Type.Composite([
@@ -607,8 +608,10 @@ export async function executeAgentTool(
         return runMoveNode(parseValue(MoveNodeInputSchema, rawInput))
       case 'site_rename_node':
         return runRenameNode(parseValue(RenameNodeInputSchema, rawInput))
-      case 'site_apply_css':
-        return runApplyCss(parseValue(ApplyCssInputSchema, rawInput))
+      case 'site_apply_css': {
+        const providerInput = parseValue(ApplyCssInputSchema, rawInput)
+        return runApplyCss(parseValue(ApplyCssExecutionInputSchema, providerInput))
+      }
       case 'site_list_code_assets':
         return await runListCodeAssets(parseValue(ListCodeAssetsInputSchema, rawInput))
       case 'site_read_code_asset':

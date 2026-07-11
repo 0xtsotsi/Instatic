@@ -18,7 +18,7 @@ The agent runs on a provider-agnostic AI runtime (`server/ai/`) that can drive a
 - **Content scope: 15 tools total.** 7 server-side content/catalog/media/user read tools + 8 browser-bridged document mutation/navigation tools.
 - **Two-endpoint bridge.** `POST /admin/api/ai/chat/:scope` opens an NDJSON stream. When the model calls a browser-bridged tool, the server emits `toolRequest`; the browser executor reads or mutates the live workspace and POSTs the `AiToolOutput` result to `POST /admin/api/ai/tool-result`.
 - **Provider-agnostic.** The runtime selects a driver (Anthropic, OpenAI, OpenRouter, Ollama, Custom Provider) from the conversation's configured credential.
-- **Site tool input schemas are a single source of truth** in `@core/ai` (`src/core/ai/toolSchemas.ts`). The server tool registry (`server/ai/tools/site/writeTools.ts`) and the browser executor (`executor.ts` + `tokenRunners.ts`) import the exact same schema objects — a constraint added once is enforced on both sides at build time. Gated by `ai-tool-schema-ssot.test.ts` and `ai-tools-typebox-only.test.ts`.
+- **Site tool input schemas are a single source of truth** in `@core/ai` (`src/core/ai/toolSchemas.ts`). The server registry and browser executor import from that shared leaf. Most tools reuse the exact same schema object; `site_apply_css` deliberately advertises a flat provider object because Anthropic rejects root-level schema composition, then the executor validates the payload against the leaf's exact operation union. Gated by `ai-tool-input-object.test.ts`, `ai-tool-schema-ssot.test.ts`, and `ai-tools-typebox-only.test.ts`.
 - **Capabilities.** `ai.chat` required to stream; `ai.tools.write` required for write tools. Gated by `ai-handlers-capability-gated.test.ts`.
 
 ---
@@ -28,7 +28,7 @@ The agent runs on a provider-agnostic AI runtime (`server/ai/`) that can drive a
 ```text
 src/core/ai/
 ├── toolOutput.ts           — AiToolOutput type + AiToolOutputSchema + aiToolOk / aiToolError
-├── toolSchemas.ts          — all site write-tool input schemas (single source of truth for both server and browser)
+├── toolSchemas.ts          — all site write-tool schemas; provider/execution layers for site_apply_css share field definitions here
 └── index.ts                — barrel re-export (canonical @core/ai import path)
 
 server/ai/
@@ -806,7 +806,7 @@ unblocks deletion of the credential that had been protected by the default FK.
   - `src/core/ai/chatRequest.ts` — canonical browser-to-server chat envelope and computed multi-image request ceiling
   - `src/core/ai/contentBlock.ts` — persisted/provider content blocks plus the lazy-URL conversation-detail view schema
   - `src/core/ai/userImage.ts` — accepted source formats, normalised JPEG schema, byte/dimension limits, and eight-image per-message bound
-  - `src/core/ai/toolSchemas.ts` — all site browser-tool input schemas (single source of truth; imported by both the server registry and the browser executor)
+  - `src/core/ai/toolSchemas.ts` — all site browser-tool input schemas (single source of truth); includes the flat provider schema and exact execution union required for `site_apply_css`
   - `src/core/ai/documentRefs.ts` — document refs/descriptors for pages, templates, and visual components
   - `src/core/ai/readSurface.ts` — runtime-agnostic `renderAgentDocument` annotated HTML + compact CSS renderer
   - `src/core/ai/index.ts` — barrel re-exporting the above
@@ -870,6 +870,7 @@ unblocks deletion of the credential that had been protected by the default FK.
   - `src/admin/pages/site/panels/AgentPanel/ContextMeter.tsx` — five-segment context status and rich usage tooltip
   - `src/admin/pages/site/panels/AgentPanel/contextMeterMetrics.ts` — exact five-band fill/tone calculation
 - Gate tests:
+  - `src/__tests__/architecture/ai-tool-input-object.test.ts`
   - `src/__tests__/architecture/ai-tool-schema-ssot.test.ts`
   - `src/__tests__/architecture/ai-driver-isolation.test.ts`
   - `src/__tests__/architecture/ai-tools-typebox-only.test.ts`

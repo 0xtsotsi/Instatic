@@ -2,7 +2,7 @@ import {
   aiToolError,
   aiToolOk,
   type AiToolOutput,
-  type ApplyCssInput,
+  type ApplyCssExecutionInput,
 } from '@core/ai'
 import type { ConditionDef } from '@core/page-tree'
 import { cssToStyleRules, type NewStyleRule } from '@core/siteImport'
@@ -36,7 +36,7 @@ export function parseImportedStyleCss(styleCss: string): {
 }
 
 /** Apply an exact-selector CSS mutation to the live site's style registry. */
-export function runApplyCss(input: ApplyCssInput): AiToolOutput {
+export function runApplyCss(input: ApplyCssExecutionInput): AiToolOutput {
   if (input.operation === 'delete') {
     const result = getStoreState().deleteCssRules(input.selectors)
     if (result.missingSelectors.length > 0) {
