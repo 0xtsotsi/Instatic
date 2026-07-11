@@ -23,7 +23,13 @@ export { buildCurrentPageContext } from './pageContext'
 
 // Browser-side tool dispatch + render evidence + markdown rendering.
 export { executeAgentTool } from './executor'
-export { captureAgentRenderSnapshot, SnapshotNodeNotFoundError } from './renderEvidence'
+export {
+  captureAgentRenderSnapshot,
+  findAgentRenderFrame,
+  waitForAgentRenderFrame,
+  SnapshotNodeNotFoundError,
+} from './renderEvidence'
+export type { AgentRenderFrameQuery } from './renderEvidence'
 export { renderMarkdownToHtml } from './markdown'
 
 // Store handle wiring.

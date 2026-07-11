@@ -88,7 +88,7 @@ import {
   runReadCodeAsset,
   runWriteCodeAsset,
 } from './codeAssetTools'
-import { runRenderSnapshot } from './renderSnapshotTool'
+import { runRenderSnapshotAtBreakpoint } from './renderSnapshotAtBreakpoint'
 import {
   activeDocumentNodes,
   activeRenderPage,
@@ -685,7 +685,7 @@ export async function executeAgentTool(
         // Default to the breakpoint the user is actually viewing, not the first
         // frame in the DOM (which is mobile in a mobile-first canvas layout).
         const breakpointId = parsed.breakpointId ?? getStoreState().activeBreakpointId
-        return await runRenderSnapshot({ ...parsed, breakpointId })
+        return await runRenderSnapshotAtBreakpoint({ ...parsed, breakpointId })
       }
       default:
         return aiToolError(`Unknown instatic tool: ${toolName}`)
