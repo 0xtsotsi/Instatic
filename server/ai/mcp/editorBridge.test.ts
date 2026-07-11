@@ -94,4 +94,41 @@ describe('editor bridge', () => {
     await contentReader.read().catch(() => {})
     expect(hasEditorBridge(userId, 'content')).toBe(false)
   })
+
+  it('clears a bridge when the stream consumer cancels without aborting the request', async () => {
+    const userId = `u_${Math.floor(performance.now())}_cancelled`
+    const ctrl = new AbortController()
+    const reader = createEditorBridgeStream(userId, 'site', ctrl.signal).getReader()
+
+    await readUntil(reader, (e) => e.type === 'bridgeReady')
+    expect(hasEditorBridge(userId, 'site')).toBe(true)
+
+    await reader.cancel()
+    expect(ctrl.signal.aborted).toBe(false)
+    expect(hasEditorBridge(userId, 'site')).toBe(false)
+  })
+
+  it('does not evict the newest bridge when a superseded consumer disconnects', async () => {
+    const userId = `u_${Math.floor(performance.now())}_superseded`
+    const firstReader = createEditorBridgeStream(
+      userId,
+      'site',
+      new AbortController().signal,
+    ).getReader()
+    await readUntil(firstReader, (e) => e.type === 'bridgeReady')
+
+    const secondReader = createEditorBridgeStream(
+      userId,
+      'site',
+      new AbortController().signal,
+    ).getReader()
+    await readUntil(secondReader, (e) => e.type === 'bridgeReady')
+    expect(hasEditorBridge(userId, 'site')).toBe(true)
+
+    await firstReader.cancel()
+    expect(hasEditorBridge(userId, 'site')).toBe(true)
+
+    await secondReader.cancel()
+    expect(hasEditorBridge(userId, 'site')).toBe(false)
+  })
 })

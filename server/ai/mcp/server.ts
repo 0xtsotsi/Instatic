@@ -91,11 +91,12 @@ export function buildMcpServer(ctx: McpServerContext): Server {
           content: [{ type: 'text', text: `Browser tool "${tool.name}" has unsupported scope "${tool.scope}".` }],
         }
       }
-      const live = getEditorBridgeForUser(ctx.userId, tool.scope)
+      const browserScope: EditorBridgeScope = tool.scope
+      const live = getEditorBridgeForUser(ctx.userId, browserScope)
       if (!live) {
-        return { isError: true, content: [{ type: 'text', text: NO_WORKSPACE_MESSAGE[tool.scope] }] }
+        return { isError: true, content: [{ type: 'text', text: NO_WORKSPACE_MESSAGE[browserScope] }] }
       }
-      bridge = tool.scope === 'content'
+      bridge = browserScope === 'content'
         ? {
             callBrowser: async (toolName, input) => {
               await authorizeMcpContentTool(
@@ -105,7 +106,9 @@ export function buildMcpServer(ctx: McpServerContext): Server {
                 toolName,
                 input,
               )
-              return live.callBrowser(toolName, input)
+              const current = getEditorBridgeForUser(ctx.userId, browserScope)
+              if (!current) throw new Error(NO_WORKSPACE_MESSAGE[browserScope])
+              return current.callBrowser(toolName, input)
             },
           }
         : live

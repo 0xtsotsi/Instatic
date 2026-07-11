@@ -53,48 +53,24 @@ export function createEditorBridgeStream(
   scope: EditorBridgeScope,
   signal: AbortSignal,
 ): ReadableStream<Uint8Array> {
+  let closeStream: (() => void) | null = null
+
   return new ReadableStream<Uint8Array>({
     start(controller) {
       let closed = false
       const encoder = new TextEncoder()
 
-      const emit = (event: AiStreamEvent): void => {
-        if (closed) return
-        try {
-          controller.enqueue(encodeStreamEvent(event))
-        } catch {
-          closed = true
-        }
-      }
-
-      const { bridgeId, bridge, destroy } = createBridge(emit, signal)
-
-      // Newest instance of this workspace wins. The user's other workspace
-      // remains connected, so Site and Content may serve MCP simultaneously.
-      const userBridges = byUser.get(userId) ?? new Map<EditorBridgeScope, EditorBridgeEntry>()
-      const previous = userBridges.get(scope)
-      if (previous) previous.destroy()
-      userBridges.set(scope, { bridgeId, bridge, destroy })
-      byUser.set(userId, userBridges)
-
-      emit({ type: 'bridgeReady', bridgeId })
-
-      // Heartbeat blank line keeps proxies from idling the connection;
-      // `readNdjsonStream` skips empty lines.
-      const heartbeat = setInterval(() => {
-        if (closed) return
-        try {
-          controller.enqueue(encoder.encode('\n'))
-        } catch {
-          closed = true
-        }
-      }, 25_000)
+      let bridgeId = ''
+      let destroyBridge = (): void => {}
+      let heartbeat: ReturnType<typeof setInterval> | null = null
 
       const cleanup = () => {
         if (closed) return
         closed = true
-        clearInterval(heartbeat)
-        destroy()
+        if (heartbeat) clearInterval(heartbeat)
+        signal.removeEventListener('abort', cleanup)
+        destroyBridge()
+
         // Only evict if we're still the current bridge for this scope. Keep
         // the user's other workspace registered until its own stream closes.
         const liveUserBridges = byUser.get(userId)
@@ -105,10 +81,54 @@ export function createEditorBridgeStream(
         try {
           controller.close()
         } catch {
-          /* already closed */
+          /* already closed or cancelled */
         }
       }
-      signal.addEventListener('abort', cleanup, { once: true })
+      closeStream = cleanup
+
+      const emit = (event: AiStreamEvent): void => {
+        if (closed) return
+        try {
+          controller.enqueue(encodeStreamEvent(event))
+        } catch {
+          cleanup()
+        }
+      }
+
+      const created = createBridge(emit, signal)
+      bridgeId = created.bridgeId
+      destroyBridge = created.destroy
+
+      // Newest instance of this workspace wins. The user's other workspace
+      // remains connected, so Site and Content may serve MCP simultaneously.
+      const userBridges = byUser.get(userId) ?? new Map<EditorBridgeScope, EditorBridgeEntry>()
+      const previous = userBridges.get(scope)
+      if (previous) previous.destroy()
+      userBridges.set(scope, { bridgeId, bridge: created.bridge, destroy: destroyBridge })
+      byUser.set(userId, userBridges)
+
+      emit({ type: 'bridgeReady', bridgeId })
+
+      // Heartbeat blank line keeps proxies from idling the connection;
+      // `readNdjsonStream` skips empty lines.
+      heartbeat = setInterval(() => {
+        if (closed) return
+        try {
+          controller.enqueue(encoder.encode('\n'))
+        } catch {
+          cleanup()
+        }
+      }, 25_000)
+
+      if (signal.aborted) cleanup()
+      else signal.addEventListener('abort', cleanup, { once: true })
+    },
+    cancel() {
+      // Bun cancels the response body when the browser tab/context closes, but
+      // that transport cancellation does not abort the server Request signal.
+      // Tear down the heartbeat + registry entry from either lifecycle signal.
+      closeStream?.()
+      closeStream = null
     },
   })
 }
