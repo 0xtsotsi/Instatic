@@ -73,7 +73,7 @@ function uniqueSelector(el: Element, root: Element): string {
   const parts: string[] = []
   let cur: Element | null = el
   while (cur && cur !== root.parentElement) {
-    const parent = cur.parentElement
+    const parent: Element | null = cur.parentElement
     if (!parent) break
     const tag = cur.tagName.toLowerCase()
     const sameTag: Element[] = []
@@ -103,7 +103,7 @@ function captureStyles(
     return out
   }
   for (const prop of props) {
-    let v = ''
+    let v: string
     try {
       v = cs.getPropertyValue(prop)
     } catch {
@@ -230,7 +230,6 @@ return runExtract(target, COMPUTED_PROPS_);
  * TypeScript walker used by tests (extractDom) never touches this.
  */
 export function makePageWalker(target: CaptureTarget, props: readonly string[]): ExtractedNode[] {
-  // eslint-disable-next-line no-new-func
   const fn = new Function('target', 'COMPUTED_PROPS_', PAGE_WALKER_SOURCE) as (
     target: CaptureTarget,
     props: readonly string[],

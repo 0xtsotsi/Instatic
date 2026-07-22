@@ -69,10 +69,14 @@ export async function createPlaywrightFetcher(
         const target: CaptureTarget = { selector: null, maxDepth: Infinity }
         // Run the page-side walker in the page's V8. `document` and
         // `window` are real globals there; makePageWalker bridges them.
+        // page.evaluate takes a function + one arg, so we close over the
+        // two-call args inside a wrapper that accepts a single arg.
         const nodes = await page.evaluate(
-          makePageWalker as unknown as () => ExtractedNode[],
-          target,
-          COMPUTED_PROPS,
+          ((targetAndProps: { target: CaptureTarget; props: readonly string[] }) =>
+            makePageWalker(targetAndProps.target, targetAndProps.props)) as unknown as (
+            arg: { target: CaptureTarget; props: readonly string[] },
+          ) => ExtractedNode[],
+          { target, props: COMPUTED_PROPS },
         )
         return {
           html,
