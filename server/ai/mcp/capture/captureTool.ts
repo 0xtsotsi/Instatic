@@ -6,12 +6,36 @@
  * and returns Instatic-shaped output (uid'd HTML + token-aware CSS) plus a
  * nextActions[] list the agent can call to apply the result.
  *
- * Full implementation lands in Task 6 (composition). This file ships the
- * contract, capability gate, and a stub handler.
+ * The handler composes the seven layers of the capture pipeline:
+ *   1. Playwright fetcher — render the URL in a headless browser
+ *   2. DOM extractor — walk the page, capture selectors + computed styles
+ *   3. Style collapse — drop default-valued properties
+ *   4. CSS rewriter — emit class-scoped rules
+ *   5. Asset collector — fetch images/fonts, rewrite to local paths
+ *   6. UID assigner — attach 12-char base62 ids to every element
+ *   7. Token rewriter — swap close-match colors to var(--*)
+ *   +. nextActions — hand off to site_apply_css / site_insert_html
  */
 import { Type } from '@core/utils/typeboxHelpers'
 import type { CoreCapability } from '@core/capabilities'
 import type { AiTool, ToolContext } from '../../runtime/types'
+import { createPlaywrightFetcher } from './core/playwrightFetcher'
+import { collapseStyles } from './core/styleCollapse'
+import { rewriteCss } from './core/cssRewriter'
+import { collectAssets, type CollectedAsset, type UnavailableAsset } from './core/assets'
+import { createSafeFetcher } from './core/safeFetcher'
+import { assignUids, generateUid } from './adapters/uids'
+import { applyDesignTokens, tokensFromSite } from './adapters/tokens'
+import { buildNextActions, type NextAction } from './adapters/nextActions'
+import { getDraftSite } from '../../../repositories/site'
+
+type CaptureInputInternal = {
+  url: string
+  mode?: 'dom+styles' | 'dom-only' | 'styles-only'
+  scope?: 'page' | 'subtree' | 'element'
+  selector?: string
+  assetsMax?: number
+}
 
 const CAPS: readonly CoreCapability[] = [
   'site.read',
@@ -44,6 +68,27 @@ const CaptureInput = Type.Object(
   { additionalProperties: false },
 )
 
+/** FNV-1a 32-bit hash, base36. Matches the convention in core/assets.ts. */
+function fnv1a32(s: string): string {
+  let h = 0x811c9dc5
+  for (let i = 0; i < s.length; i++) {
+    h ^= s.charCodeAt(i)
+    h = Math.imul(h, 0x01000193) >>> 0
+  }
+  return h.toString(36).padStart(8, '0')
+}
+
+interface CaptureOutput {
+  ok: boolean
+  error?: string
+  html?: string
+  css?: string
+  uids?: string[]
+  assetFiles?: CollectedAsset[]
+  unavailable?: UnavailableAsset[]
+  nextActions?: NextAction[]
+}
+
 export const captureTool: AiTool = {
   name: 'capture_from_url',
   description:
@@ -52,7 +97,80 @@ export const captureTool: AiTool = {
   execution: 'server',
   inputSchema: CaptureInput,
   requiredCapabilities: CAPS,
-  handler: async (_input, _ctx: ToolContext) => {
-    return { ok: false, error: 'not implemented (Task 6 — composition)' }
+  handler: async (input, ctx: ToolContext): Promise<CaptureOutput> => {
+    const { url, mode = 'dom+styles', scope = 'page', selector, assetsMax = 25 } = input as CaptureInputInternal
+    if (scope !== 'page' && !selector) {
+      return { ok: false, error: `scope=${scope} requires a selector` }
+    }
+    try {
+      // 1. Fetch + extract
+      const fetcher = await createPlaywrightFetcher()
+      const fetched = await fetcher.fetch(url)
+      const nodes = fetched.nodes
+
+      // 2. Collapse styles
+      const collapsed = nodes.map((n) => ({
+        ...n,
+        computedStyles: collapseStyles(n.computedStyles),
+      }))
+
+      // 3. Build CSS
+      const stylesMap: Record<string, Record<string, string>> = {}
+      for (const n of collapsed) stylesMap[n.selector] = n.computedStyles
+      let css = mode === 'dom-only' ? '' : rewriteCss(stylesMap, { stableOrder: true })
+
+      // 4. Get site tokens + apply
+      if (mode !== 'dom-only' && css) {
+        const draftSite = await getDraftSite(ctx.db)
+        if (draftSite) {
+          const tokens = tokensFromSite(draftSite)
+          css = applyDesignTokens(css, tokens)
+        }
+      }
+
+      // 5. Asset collection
+      let html = mode === 'styles-only' ? '' : nodes.map((n) => n.outerHTML).join('\n')
+      const files: CollectedAsset[] = []
+      const unavailable: UnavailableAsset[] = []
+      if (mode !== 'styles-only' && html) {
+        const safeFetcher = createSafeFetcher()
+        const captureId = generateUid()
+        const persistDir = `uploads/captures/${captureId}`
+        const collected = await collectAssets(html, css, safeFetcher, {
+          baseUrl: url,
+          maxAssets: assetsMax,
+          resolveLocalPath: (u) => {
+            const m = u.match(/\.[a-z0-9]{1,8}(?:\?|$)/i)
+            const ext = m ? m[0].replace(/[?].*$/, '') : '.bin'
+            return `${persistDir}/${fnv1a32(u)}${ext}`
+          },
+          persist: async (localPath, bytes) => {
+            await Bun.write(localPath, bytes)
+          },
+        })
+        html = collected.html
+        css = collected.css
+        files.push(...collected.files)
+        unavailable.push(...collected.unavailable)
+      }
+
+      // 6. Assign uids to HTML
+      let uids: string[] = []
+      if (html) {
+        const result = assignUids(html)
+        html = result.html
+        uids = result.uids
+      }
+
+      // 7. Build nextActions (caller fills parentNodeId via a follow-up call)
+      const nextActions = buildNextActions(
+        { html, css, uids, assetFiles: files, unavailable },
+        { parentNodeId: '' },
+      )
+
+      return { ok: true, html, css, uids, assetFiles: files, unavailable, nextActions }
+    } catch (err) {
+      return { ok: false, error: err instanceof Error ? err.message : String(err) }
+    }
   },
 }
