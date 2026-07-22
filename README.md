@@ -242,3 +242,4 @@ Instatic's interface uses [Pixelarticons](https://pixelarticons.com/) by Gerrit 
 ## License
 
 MIT. See [LICENSE](LICENSE). No tiers, no open-core asterisks, no "contact sales."
+<!-- bench: rerun-ci 2026-07-22T14:45:36Z -->
