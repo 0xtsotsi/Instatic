@@ -31,6 +31,7 @@ import { styleMcpTools } from './tools/styleTools'
 import { contextMcpTools } from './tools/contextTool'
 import { documentMcpTools } from './tools/documentTools'
 import { createPublishMcpTool, type McpPublishRuntime } from './tools/publishTool'
+import { captureTool } from './capture/captureTool'
 
 // Server-resolved site read tools whose handlers read the browser-posted
 // `ctx.snapshot`, which is null over MCP — they'd return nothing or throw.
@@ -54,6 +55,7 @@ function allMcpTools(runtime?: McpPublishRuntime): AiTool[] {
     createPublishMcpTool(runtime),
     ...contentTools,
     ...siteTools,
+    ...([captureTool]),
   ]
   const byName = new Map<string, AiTool>()
   for (const tool of ordered) {
