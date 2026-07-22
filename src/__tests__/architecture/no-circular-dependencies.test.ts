@@ -37,5 +37,9 @@ describe('Circular dependencies', () => {
     }
 
     expect(output).toContain('No circular dependency found')
-  }, 15000)
+    // 30s budget: madge over the full src+server graph (now 2488 files after the
+    // web-capture tool's core/ + adapters/ + captureTool.ts were added) routinely
+    // exceeds 15s on GitHub Actions' smaller runners. The graph itself is still
+    // cycle-free — bump the budget rather than skipping the gate.
+  }, 30000)
 })
