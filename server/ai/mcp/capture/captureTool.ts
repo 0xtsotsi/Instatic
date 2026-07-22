@@ -19,7 +19,7 @@
 import { Type } from '@core/utils/typeboxHelpers'
 import type { CoreCapability } from '@core/capabilities'
 import type { AiTool, ToolContext } from '../../runtime/types'
-import { createPlaywrightFetcher } from './core/playwrightFetcher'
+import { createPlaywrightFetcher, type FetchedPage, type PlaywrightFetcher } from './core/playwrightFetcher'
 import { collapseStyles } from './core/styleCollapse'
 import { rewriteCss } from './core/cssRewriter'
 import { collectAssets, type CollectedAsset, type UnavailableAsset } from './core/assets'
@@ -102,10 +102,12 @@ export const captureTool: AiTool = {
     if (scope !== 'page' && !selector) {
       return { ok: false, error: `scope=${scope} requires a selector` }
     }
+    let fetcher: PlaywrightFetcher | null = null
+    let fetched: FetchedPage | null = null
     try {
       // 1. Fetch + extract
-      const fetcher = await createPlaywrightFetcher()
-      const fetched = await fetcher.fetch(url)
+      fetcher = await createPlaywrightFetcher()
+      fetched = await fetcher.fetch(url)
       const nodes = fetched.nodes
 
       // 2. Collapse styles
@@ -171,6 +173,11 @@ export const captureTool: AiTool = {
       return { ok: true, html, css, uids, assetFiles: files, unavailable, nextActions }
     } catch (err) {
       return { ok: false, error: err instanceof Error ? err.message : String(err) }
+    } finally {
+      // Release per-page resources (page + context), then the browser
+      // process. Without this, every MCP call leaks one Chromium.
+      try { await fetched?.close() } catch { /* best effort */ }
+      try { await fetcher?.close() } catch { /* best effort */ }
     }
   },
 }

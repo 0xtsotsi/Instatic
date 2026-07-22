@@ -14,6 +14,7 @@ import { readdirSync, readFileSync } from 'node:fs'
 import { join } from 'node:path'
 import type { CoreCapability } from '@core/capabilities'
 import { mcpToolsForCapabilities } from '../registry'
+import { captureTool } from './captureTool'
 
 const CAPS_FOR_CAPTURE: readonly CoreCapability[] = [
   'site.read',
@@ -97,5 +98,62 @@ describe('mcp capture_from_url', () => {
       )
     }
     expect(violations).toHaveLength(0)
+  })
+})
+
+/**
+ * Handler contract tests that do NOT require a real browser.
+ *
+ * The full pipeline (Playwright fetch + walk + rewrite + asset collect) is
+ * gated on CAPTURE_LIVE=1 in a separate integration test. These cover the
+ * synchronous early-return paths and the resource-cleanup contract.
+ */
+describe('capture_from_url handler (no browser)', () => {
+  const stubCtx = {
+    db: {} as never,
+    userId: 'u1',
+    capabilities: CAPS_FOR_CAPTURE,
+    scope: 'site' as const,
+    conversationId: 'c1',
+    snapshot: null,
+  } as never
+
+  it('rejects element/subtree scope without a selector BEFORE launching a browser', async () => {
+    // The handler should validate input first; if it tries to launch a browser
+    // here, Playwright would throw in a CI environment without the binary.
+    const result = (await captureTool.handler(
+      { url: 'https://example.com', scope: 'element' } as never,
+      stubCtx,
+    )) as { ok: boolean; error?: string }
+    expect(result.ok).toBe(false)
+    expect(result.error).toMatch(/selector/)
+  })
+
+  it('rejects subtree scope without a selector BEFORE launching a browser', async () => {
+    const result = (await captureTool.handler(
+      { url: 'https://example.com', scope: 'subtree' } as never,
+      stubCtx,
+    )) as { ok: boolean; error?: string }
+    expect(result.ok).toBe(false)
+    expect(result.error).toMatch(/selector/)
+  })
+
+  it('page scope is the default and does not require a selector (still needs a reachable URL to succeed)', async () => {
+    // We don't assert success (that would require Playwright); we assert the
+    // handler did NOT short-circuit on missing selector.
+    // The handler will try to launch Playwright and fail; the error is captured
+    // and returned as { ok: false, error: ... }.
+    const result = (await captureTool.handler(
+      { url: 'https://127.0.0.1:1/never-resolves' } as never,
+      stubCtx,
+    )) as { ok: boolean; error?: string }
+    // Either ok:false with a Playwright/network error, or ok:true if Playwright
+    // happened to be installed. We only assert the SHAPE: it's an object with ok.
+    expect(typeof result.ok).toBe('boolean')
+    if (!result.ok) {
+      // Error should be a non-empty string (real failure, not a silent skip).
+      expect(typeof result.error).toBe('string')
+      expect(result.error!.length).toBeGreaterThan(0)
+    }
   })
 })

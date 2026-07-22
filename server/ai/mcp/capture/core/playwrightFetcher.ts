@@ -33,11 +33,15 @@ export interface FetchedPage {
   close(): Promise<void>
 }
 
+export interface PlaywrightFetcher {
+  fetch(url: string, signal?: AbortSignal): Promise<FetchedPage>
+  /** Close the browser. Idempotent. */
+  close(): Promise<void>
+}
+
 export async function createPlaywrightFetcher(
   opts: PlaywrightFetcherOptions = {},
-): Promise<{
-  fetch(url: string, signal?: AbortSignal): Promise<FetchedPage>
-}> {
+): Promise<PlaywrightFetcher> {
   // Dynamic import keeps playwright-core off the module-load path.
   const pw = (await import('playwright-core')) as typeof import('playwright-core')
   const engine =
@@ -45,6 +49,13 @@ export async function createPlaywrightFetcher(
     : opts.browser === 'webkit' ? pw.webkit
     : pw.chromium
   const browser = await engine.launch({ headless: true })
+  let browserClosed = false
+
+  const closeBrowser = async (): Promise<void> => {
+    if (browserClosed) return
+    browserClosed = true
+    await browser.close().catch(() => {})
+  }
 
   return {
     async fetch(url: string, signal?: AbortSignal): Promise<FetchedPage> {
@@ -94,5 +105,6 @@ export async function createPlaywrightFetcher(
         if (signal) signal.removeEventListener('abort', onAbort)
       }
     },
+    close: closeBrowser,
   }
 }
