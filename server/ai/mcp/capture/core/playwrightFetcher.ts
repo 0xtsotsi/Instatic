@@ -33,25 +33,21 @@ export interface FetchedPage {
   close(): Promise<void>
 }
 
-export interface FetchOptions {
-  /** Cancel an in-flight navigation. */
-  signal?: AbortSignal
-  /**
-   * What to extract from the rendered page. Defaults to
-   * `{ selector: null, maxDepth: Infinity }` (the whole body).
-   */
-  target?: CaptureTarget
-}
-
-export interface PlaywrightFetcher {
-  fetch(url: string, opts?: FetchOptions): Promise<FetchedPage>
-  /** Close the browser. Idempotent. */
+/**
+ * Fetcher abstraction used by the orchestration layer (`runCapture`). The
+ * shape is the minimal contract the pipeline needs: a `fetch` that takes a
+ * URL and an optional CaptureTarget, and a `close` that releases any long-
+ * lived resources. Production wires `createPlaywrightFetcher()` here;
+ * tests inject a stub.
+ */
+export interface CaptureFetcher {
+  fetch(url: string, target?: CaptureTarget): Promise<FetchedPage>
   close(): Promise<void>
 }
 
 export async function createPlaywrightFetcher(
   opts: PlaywrightFetcherOptions = {},
-): Promise<PlaywrightFetcher> {
+): Promise<CaptureFetcher> {
   // Dynamic import keeps playwright-core off the module-load path.
   const pw = (await import('playwright-core')) as typeof import('playwright-core')
   const engine =
@@ -68,29 +64,18 @@ export async function createPlaywrightFetcher(
   }
 
   return {
-    async fetch(url: string, fetchOpts: FetchOptions = {}): Promise<FetchedPage> {
-      const { signal, target: targetOpt } = fetchOpts
+    async fetch(url: string, target?: CaptureTarget): Promise<FetchedPage> {
       const context = await browser.newContext()
       const page = await context.newPage()
-      const onAbort = (): void => {
-        page.close().catch(() => {})
-      }
-      if (signal) {
-        if (signal.aborted) {
-          await context.close().catch(() => {})
-          throw new Error('aborted before navigation')
-        }
-        signal.addEventListener('abort', onAbort, { once: true })
-      }
       try {
         await page.goto(url, {
           waitUntil: 'networkidle',
           timeout: opts.navigationTimeoutMs ?? (opts.networkIdleMs ?? 5000) + 5000,
         })
         const html = await page.content()
-        // Default to the whole body. Callers pass a target via FetchOptions
-        // when they want a subtree or single-element capture.
-        const target: CaptureTarget = targetOpt ?? { selector: null, maxDepth: Infinity }
+        // Default to the whole body. Callers pass a target when they want
+        // a subtree or single-element capture.
+        const resolvedTarget: CaptureTarget = target ?? { selector: null, maxDepth: Infinity }
         // Run the page-side walker in the page's V8. `document` and
         // `window` are real globals there; makePageWalker bridges them.
         // page.evaluate takes a function + one arg, so we close over the
@@ -100,7 +85,7 @@ export async function createPlaywrightFetcher(
             makePageWalker(targetAndProps.target, targetAndProps.props)) as unknown as (
             arg: { target: CaptureTarget; props: readonly string[] },
           ) => ExtractedNode[],
-          { target, props: COMPUTED_PROPS },
+          { target: resolvedTarget, props: COMPUTED_PROPS },
         )
         return {
           html,
@@ -114,8 +99,6 @@ export async function createPlaywrightFetcher(
         await page.close().catch(() => {})
         await context.close().catch(() => {})
         throw err
-      } finally {
-        if (signal) signal.removeEventListener('abort', onAbort)
       }
     },
     close: closeBrowser,

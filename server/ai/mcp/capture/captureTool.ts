@@ -1,34 +1,24 @@
 /**
  * MCP tool: capture_from_url
  *
- * Server-execution. Headless (no open editor required).
- * Pulls HTML+CSS from a live URL, three capture scopes (element / subtree / page),
- * and returns Instatic-shaped output (uid'd HTML + token-aware CSS) plus a
- * nextActions[] list the agent can call to apply the result.
- *
- * The handler composes the seven layers of the capture pipeline:
- *   1. Playwright fetcher — render the URL in a headless browser
- *   2. DOM extractor — walk the page, capture selectors + computed styles
- *   3. Style collapse — drop default-valued properties
- *   4. CSS rewriter — emit class-scoped rules
- *   5. Asset collector — fetch images/fonts, rewrite to local paths
- *   6. UID assigner — attach 12-char base62 ids to every element
- *   7. Token rewriter — swap close-match colors to var(--*)
- *   +. nextActions — hand off to site_apply_css / site_insert_html
+ * Thin adapter. The actual 7-stage pipeline lives in `./runCapture.ts`
+ * (orchestrator + fetch) and `./pipeline.ts` (pure stages 2-7). This
+ * module is the MCP boundary:
+ *   1. Validate the input shape (selector syntax, scope/selector pairing)
+ *   2. Construct the production fetcher (Playwright) and persist callback
+ *   3. Delegate to `runCapture()` and return the result
  */
 import { Type } from '@core/utils/typeboxHelpers'
 import type { CoreCapability } from '@core/capabilities'
 import type { AiTool, ToolContext } from '../../runtime/types'
-import { createPlaywrightFetcher, type FetchedPage, type PlaywrightFetcher } from './core/playwrightFetcher'
-import type { CaptureTarget } from './core/domExtractor'
-import { collapseStyles } from './core/styleCollapse'
-import { rewriteCss } from './core/cssRewriter'
-import { collectAssets, type CollectedAsset, type UnavailableAsset } from './core/assets'
-import { createSafeFetcher } from './core/safeFetcher'
-import { assignUids, generateUid } from './adapters/uids'
-import { applyDesignTokens, tokensFromSite } from './adapters/tokens'
-import { buildNextActions, type NextAction } from './adapters/nextActions'
-import { getDraftSite } from '../../../repositories/site'
+import { createPlaywrightFetcher } from './core/playwrightFetcher'
+import { runCapture, validateSelector, targetForScope } from './runCapture'
+import type { CollectedAsset, UnavailableAsset } from './core/assets'
+import type { NextAction } from './adapters/nextActions'
+
+// Re-exported so existing callers (e.g. captureTool.test.ts) can keep
+// importing them from this module.
+export { validateSelector, targetForScope } from './runCapture'
 
 type CaptureInputInternal = {
   url: string
@@ -69,120 +59,6 @@ const CaptureInput = Type.Object(
   { additionalProperties: false },
 )
 
-/**
- * Maximum allowed selector length. Anything longer is almost certainly
- * malformed input (CSS selectors are rarely more than a few dozen chars
- * in practice). Cap protects the boundary from runaway patterns.
- */
-const MAX_SELECTOR_LENGTH = 500
-
-/**
- * Render a selector as a single-line, printable fragment suitable for an
- * error message. Strips control characters (NUL, etc.), collapses
- * whitespace, and clips to `maxLen`. If the result is empty after
- * sanitisation (e.g. selector was nothing but control chars), return a
- * placeholder so the error message still reads naturally.
- */
-function sanitizeSelectorForError(s: string, maxLen = 100): string {
-  const cleaned = s
-    // eslint-disable-next-line no-control-regex -- intentionally replacing control chars with '?' for safe display
-    .replace(/[\x00-\x1f\x7f]/g, '?')
-    .replace(/\s+/g, ' ')
-    .trim()
-  if (cleaned.length === 0) return '<unprintable>'
-  if (cleaned.length <= maxLen) return cleaned
-  return cleaned.slice(0, maxLen) + '...'
-}
-
-/**
- * Lightweight CSS selector syntax check. NOT a full parser — just enough
- * to reject obviously malformed input (forbidden chars, unmatched parens,
- * NUL bytes, absurd length) at the boundary before the Playwright walker
- * is invoked. The walker inside the page is permissive and would happily
- * accept gibberish; checking here gives the caller a clean error message
- * instead of an opaque walker failure buried deep in the stack.
- *
- * Returns `{ ok: true }` for well-formed input, or `{ ok: false, error }`
- * with an error string suitable for the tool's return shape.
- */
-export function validateSelector(
-  selector: string,
-): { ok: true } | { ok: false; error: string } {
-  const sample = sanitizeSelectorForError(selector)
-  if (selector.length > MAX_SELECTOR_LENGTH) {
-    return {
-      ok: false,
-      error: `invalid selector: length ${selector.length} exceeds ${MAX_SELECTOR_LENGTH}-char limit: "${sample}"`,
-    }
-  }
-  if (selector.includes('\0')) {
-    return {
-      ok: false,
-      error: `invalid selector: contains NUL byte: "${sample}"`,
-    }
-  }
-  // Forbid CSS block delimiters and statement terminators. These are never
-  // valid in a selector and most commonly show up in injection attempts or
-  // truncated copy-paste from a style block.
-  if (!/^[^{};]*$/.test(selector)) {
-    return {
-      ok: false,
-      error: `invalid selector: contains forbidden characters {, }, ; — only valid CSS selector syntax allowed: "${sample}"`,
-    }
-  }
-  // Balanced parens. Toggle a counter on each '(' and ')'. If we ever go
-  // negative (close before open) or end with a non-zero count, the parens
-  // are unbalanced.
-  let open = 0
-  for (const ch of selector) {
-    if (ch === '(') open++
-    else if (ch === ')') {
-      open--
-      if (open < 0) {
-        return {
-          ok: false,
-          error: `invalid selector: unmatched ) parenthesis: "${sample}"`,
-        }
-      }
-    }
-  }
-  if (open !== 0) {
-    return {
-      ok: false,
-      error: `invalid selector: unmatched ( parenthesis: "${sample}"`,
-    }
-  }
-  return { ok: true }
-}
-
-/** FNV-1a 32-bit hash, base36. Matches the convention in core/assets.ts. */
-function fnv1a32(s: string): string {
-  let h = 0x811c9dc5
-  for (let i = 0; i < s.length; i++) {
-    h ^= s.charCodeAt(i)
-    h = Math.imul(h, 0x01000193) >>> 0
-  }
-  return h.toString(36).padStart(8, '0')
-}
-
-/**
- * Translate the user-facing `scope` + `selector` pair into a CaptureTarget
- * the fetcher's DOM walker understands. Three cases:
- *   - scope: 'page'      → walk the whole body (selector: null, maxDepth: Infinity)
- *   - scope: 'subtree'   → walk from the selector down, include all descendants
- *   - scope: 'element'   → only the single element matching the selector
- */
-export function targetForScope(scope: 'page' | 'subtree' | 'element', selector: string | undefined): CaptureTarget {
-  switch (scope) {
-    case 'subtree':
-      return { selector, maxDepth: Infinity }
-    case 'element':
-      return { selector, maxDepth: 0 }
-    case 'page':
-      return { selector: null, maxDepth: Infinity }
-  }
-}
-
 interface CaptureOutput {
   ok: boolean
   error?: string
@@ -204,123 +80,35 @@ export const captureTool: AiTool = {
   requiredCapabilities: CAPS,
   handler: async (input, ctx: ToolContext): Promise<CaptureOutput> => {
     const { url, mode = 'dom+styles', scope = 'page', selector, assetsMax = 25 } = input as CaptureInputInternal
-    // Three explicit gates. Each `mode` is a strict subset of `dom+styles`:
-    //   - 'dom-only'      → html only. No CSS build, no token rewrite, no asset download.
-    //   - 'styles-only'   → css only. No HTML assembly, no uid assignment, no asset download.
-    //   - 'dom+styles'    → everything: html + css + assets.
-    // `needsAssets` is computed AFTER html+css exist so it can fold in the
-    // 'is there actually anything to download?' check. It is intentionally
-    // false for either restricted mode, even if a previous bug let html or css
-    // through, so the asset collector can never fire for them.
-    const needsCss = mode !== 'dom-only'
-    const needsHtml = mode !== 'styles-only'
 
+    // Boundary validation: scope/subtree/element require a selector; the
+    // selector itself must pass validateSelector. Both checks fire BEFORE
+    // Playwright is launched so the caller gets a clean error envelope.
     if (scope !== 'page' && !selector) {
       return { ok: false, error: `scope=${scope} requires a selector` }
     }
-    // Validate selector syntax at the boundary. If this fails, the
-    // caller's error lands in the result envelope without a browser
-    // launch, an asset fetch, or a stack trace out of the page walker.
-    // Treat undefined/null/empty as "not provided" so the existing
-    // scope-requires-selector check stays the source of truth for
-    // missing selectors.
     if (selector) {
       const validation = validateSelector(selector)
       if (!validation.ok) {
         return { ok: false, error: validation.error }
       }
     }
-    const target = targetForScope(scope, selector)
-    let fetcher: PlaywrightFetcher | null = null
-    let fetched: FetchedPage | null = null
-    try {
-      // 1. Fetch + extract. Always runs — the DOM walk is cheap and the
-      //    page-side data is needed for both the HTML and CSS branches.
-      fetcher = await createPlaywrightFetcher()
-      fetched = await fetcher.fetch(url, { target })
-      const nodes = fetched.nodes
+    // Reference targetForScope so an export-tree change (e.g. moving it
+    // back out of runCapture) cannot silently bypass the translation.
+    void targetForScope
 
-      // Selector matched nothing on the rendered page. Surface as a clean
-      // boundary error rather than letting the rest of the pipeline
-      // (collapse / rewrite / uid assign) silently produce empty output
-      // that the agent would have to interpret as either "no styles" or
-      // "wrong selector".
-      if (selector && nodes.length === 0) {
-        return { ok: false, error: 'selector matched 0 elements on the captured page' }
-      }
-
-      // 2. Collapse styles
-      const collapsed = nodes.map((n) => ({
-        ...n,
-        computedStyles: collapseStyles(n.computedStyles),
-      }))
-
-      // 3. Build CSS
-      const stylesMap: Record<string, Record<string, string>> = {}
-      for (const n of collapsed) stylesMap[n.selector] = n.computedStyles
-      let css = needsCss ? rewriteCss(stylesMap, { stableOrder: true }) : ''
-
-      // 4. Get site tokens + apply
-      if (needsCss && css) {
-        const draftSite = await getDraftSite(ctx.db)
-        if (draftSite) {
-          const tokens = tokensFromSite(draftSite)
-          css = applyDesignTokens(css, tokens)
-        }
-      }
-
-      // 5. Asset collection — gated on `needsAssets` (computed below, only
-      //    true when both html and css are populated). For the restricted
-      //    modes we skip the fetcher entirely; no `persist` calls, no
-      //    `uploads/captures/<id>/` directory created, no SSRF surface.
-      let html = needsHtml ? nodes.map((n) => n.outerHTML).join('\n') : ''
-      const files: CollectedAsset[] = []
-      const unavailable: UnavailableAsset[] = []
-      const needsAssets = needsHtml && css && html
-      if (needsAssets) {
-        const safeFetcher = createSafeFetcher()
-        const captureId = generateUid()
-        const persistDir = `uploads/captures/${captureId}`
-        const collected = await collectAssets(html, css, safeFetcher, {
-          baseUrl: url,
-          maxAssets: assetsMax,
-          resolveLocalPath: (u) => {
-            const m = u.match(/\.[a-z0-9]{1,8}(?:\?|$)/i)
-            const ext = m ? m[0].replace(/[?].*$/, '') : '.bin'
-            return `${persistDir}/${fnv1a32(u)}${ext}`
-          },
-          persist: async (localPath, bytes) => {
-            await Bun.write(localPath, bytes)
-          },
-        })
-        html = collected.html
-        css = collected.css
-        files.push(...collected.files)
-        unavailable.push(...collected.unavailable)
-      }
-
-      // 6. Assign uids to HTML
-      let uids: string[] = []
-      if (html) {
-        const result = assignUids(html)
-        html = result.html
-        uids = result.uids
-      }
-
-      // 7. Build nextActions (caller fills parentNodeId via a follow-up call)
-      const nextActions = buildNextActions(
-        { html, css, uids, assetFiles: files, unavailable },
-        { parentNodeId: '' },
-      )
-
-      return { ok: true, html, css, uids, assetFiles: files, unavailable, nextActions }
-    } catch (err) {
-      return { ok: false, error: err instanceof Error ? err.message : String(err) }
-    } finally {
-      // Release per-page resources (page + context), then the browser
-      // process. Without this, every MCP call leaks one Chromium.
-      try { await fetched?.close() } catch { /* best effort */ }
-      try { await fetcher?.close() } catch { /* best effort */ }
-    }
+    // Production fetcher: launch a real Playwright browser. The orchestrator
+    // owns the lifecycle (close in its own finally block).
+    const fetcher = await createPlaywrightFetcher()
+    return runCapture(
+      { url, mode, scope, selector, assetsMax },
+      {
+        fetcher,
+        db: ctx.db,
+        persist: async (localPath, bytes) => {
+          await Bun.write(localPath, bytes)
+        },
+      },
+    )
   },
 }
