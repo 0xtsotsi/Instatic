@@ -1,5 +1,4 @@
 {
-  "$schema": "https://railway.com/template-schemas/template.json",
   "name": "Instatic (Postgres)",
   "description": "Self-hosted Instatic CMS with managed Postgres. Builds the Docker image from the 0xtsotsi/Instatic fork at branch main.",
   "version": "1.0.0",
@@ -24,8 +23,8 @@
     {
       "name": "instatic",
       "source": {
-        "repo": "{{ INSTATIC_REPO }}",
-        "branch": "{{ INSTATIC_BRANCH }}"
+        "repo": "${{INSTATIC_REPO}}",
+        "branch": "${{INSTATIC_BRANCH}}"
       },
       "build": {
         "builder": "DOCKERFILE",
@@ -38,7 +37,7 @@
         },
         "DATABASE_URL": {
           "description": "Internal Postgres connection string. Resolved by Railway at deploy time.",
-          "reference": "{{ instatic-postgres.DATABASE_URL }}"
+          "reference": "${{instatic-postgres.DATABASE_URL}}"
         },
         "UPLOADS_DIR": {
           "description": "Persistent uploads directory (must live on the mounted volume).",
@@ -55,10 +54,6 @@
             "length": 43,
             "alphabet": "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789+/"
           }
-        },
-        "PUBLIC_ORIGIN": {
-          "description": "Public origin(s) trusted by the CSRF check. Default: the auto-assigned Railway domain. Override if you add a custom domain (comma-separated).",
-          "default": "https://{{ RAILWAY_PUBLIC_DOMAIN }}"
         },
         "RAILWAY_RUN_UID": {
           "description": "Required: Railway mounts volumes as root, but the Instatic image otherwise runs as non-root bun. Set to 0 so SQLite and media directory creation do not fail with EACCES under /app/storage.",
