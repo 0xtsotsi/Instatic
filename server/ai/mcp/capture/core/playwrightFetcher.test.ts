@@ -43,7 +43,12 @@ mock.module('playwright-core', () => ({
 
 const fetcherModule = await import('./playwrightFetcher')
 
-beforeEach(() => {
+beforeEach(async () => {
+  // Full shutdown + reset so each test starts from a clean singleton state.
+  // `__resetSharedBrowserLaunchCount` zeroes the counter; `shutdownSharedBrowser`
+  // nulls the cached browser pointer so the next getSharedBrowser() actually
+  // launches (rather than returning the cached instance from a prior test).
+  await fetcherModule.shutdownSharedBrowser()
   fetcherModule.__resetSharedBrowserLaunchCount()
 })
 

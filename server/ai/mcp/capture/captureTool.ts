@@ -122,11 +122,13 @@ export const captureTool: AiTool = {
         return { ok: false, error: validation.error }
       }
     }
-    // Reference targetForScope so an export-tree change (e.g. moving it
-    // back out of runCapture) cannot silently bypass the translation.
-    void targetForScope
+    // Reference targetForScope so ESLint counts it as used; the symbol is
+// only consumed via the re-export on line 21 (captureTool.test.ts
+// imports it from this module). Without this, `targetForScope` would
+// be flagged as unused and the import line would be removed by --fix.
+void targetForScope
 
-    // Production fetcher: launch a real Playwright browser. The orchestrator
+// Production fetcher: launch a real Playwright browser. The orchestrator
     // owns the lifecycle (close in its own finally block).
     const fetcher = await createPlaywrightFetcher()
     return runCapture(

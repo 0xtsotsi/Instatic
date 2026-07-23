@@ -117,6 +117,14 @@ const shared: SharedBrowserState = {
  * `shutdownSharedBrowser()` is called (typically from the host's signal
  * handlers). Idempotent — multiple concurrent first-calls await the same
  * launch promise rather than racing to launch twice.
+ *
+ * The `launchPromise` is the single-flight guard. We clear it ONLY when the
+ * launch throws; on success it stays set so concurrent callers see the
+ * in-flight promise and wait, instead of starting a second launch while
+ * the first is still resolving. (A `finally` clear looked cleaner but
+ * defeated the guard: once the first call's await returned, `launchPromise`
+ * was null again, so a second call arriving microseconds later would pass
+ * the `shared.browser == null` check and start its own launch.)
  */
 let launchPromise: Promise<import('playwright-core').Browser> | null = null
 
@@ -136,8 +144,11 @@ export async function getSharedBrowser(
   })()
   try {
     return await launchPromise
-  } finally {
+  } catch (err) {
+    // Only clear on failure. On success we keep `launchPromise` set so
+    // concurrent callers still see it as the in-flight launch.
     launchPromise = null
+    throw err
   }
 }
 
@@ -152,6 +163,11 @@ export async function shutdownSharedBrowser(): Promise<void> {
   const browser = shared.browser
   shared.browser = null
   shared.openContexts = 0
+  // Also clear any pending launch promise so a subsequent getSharedBrowser()
+  // starts a fresh launch rather than returning the (closed) cached browser
+  // from a completed-but-still-referenced IIFE. Without this, shutdown +
+  // relaunch sequence stays stuck on the original launch handle.
+  launchPromise = null
   if (browser) {
     await browser.close().catch(() => { /* best effort */ })
   }
