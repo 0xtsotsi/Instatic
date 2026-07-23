@@ -69,6 +69,92 @@ const CaptureInput = Type.Object(
   { additionalProperties: false },
 )
 
+/**
+ * Maximum allowed selector length. Anything longer is almost certainly
+ * malformed input (CSS selectors are rarely more than a few dozen chars
+ * in practice). Cap protects the boundary from runaway patterns.
+ */
+const MAX_SELECTOR_LENGTH = 500
+
+/**
+ * Render a selector as a single-line, printable fragment suitable for an
+ * error message. Strips control characters (NUL, etc.), collapses
+ * whitespace, and clips to `maxLen`. If the result is empty after
+ * sanitisation (e.g. selector was nothing but control chars), return a
+ * placeholder so the error message still reads naturally.
+ */
+function sanitizeSelectorForError(s: string, maxLen = 100): string {
+  const cleaned = s
+    // eslint-disable-next-line no-control-regex -- intentionally replacing control chars with '?' for safe display
+    .replace(/[\x00-\x1f\x7f]/g, '?')
+    .replace(/\s+/g, ' ')
+    .trim()
+  if (cleaned.length === 0) return '<unprintable>'
+  if (cleaned.length <= maxLen) return cleaned
+  return cleaned.slice(0, maxLen) + '...'
+}
+
+/**
+ * Lightweight CSS selector syntax check. NOT a full parser — just enough
+ * to reject obviously malformed input (forbidden chars, unmatched parens,
+ * NUL bytes, absurd length) at the boundary before the Playwright walker
+ * is invoked. The walker inside the page is permissive and would happily
+ * accept gibberish; checking here gives the caller a clean error message
+ * instead of an opaque walker failure buried deep in the stack.
+ *
+ * Returns `{ ok: true }` for well-formed input, or `{ ok: false, error }`
+ * with an error string suitable for the tool's return shape.
+ */
+export function validateSelector(
+  selector: string,
+): { ok: true } | { ok: false; error: string } {
+  const sample = sanitizeSelectorForError(selector)
+  if (selector.length > MAX_SELECTOR_LENGTH) {
+    return {
+      ok: false,
+      error: `invalid selector: length ${selector.length} exceeds ${MAX_SELECTOR_LENGTH}-char limit: "${sample}"`,
+    }
+  }
+  if (selector.includes('\0')) {
+    return {
+      ok: false,
+      error: `invalid selector: contains NUL byte: "${sample}"`,
+    }
+  }
+  // Forbid CSS block delimiters and statement terminators. These are never
+  // valid in a selector and most commonly show up in injection attempts or
+  // truncated copy-paste from a style block.
+  if (!/^[^{};]*$/.test(selector)) {
+    return {
+      ok: false,
+      error: `invalid selector: contains forbidden characters {, }, ; — only valid CSS selector syntax allowed: "${sample}"`,
+    }
+  }
+  // Balanced parens. Toggle a counter on each '(' and ')'. If we ever go
+  // negative (close before open) or end with a non-zero count, the parens
+  // are unbalanced.
+  let open = 0
+  for (const ch of selector) {
+    if (ch === '(') open++
+    else if (ch === ')') {
+      open--
+      if (open < 0) {
+        return {
+          ok: false,
+          error: `invalid selector: unmatched ) parenthesis: "${sample}"`,
+        }
+      }
+    }
+  }
+  if (open !== 0) {
+    return {
+      ok: false,
+      error: `invalid selector: unmatched ( parenthesis: "${sample}"`,
+    }
+  }
+  return { ok: true }
+}
+
 /** FNV-1a 32-bit hash, base36. Matches the convention in core/assets.ts. */
 function fnv1a32(s: string): string {
   let h = 0x811c9dc5
@@ -132,6 +218,18 @@ export const captureTool: AiTool = {
     if (scope !== 'page' && !selector) {
       return { ok: false, error: `scope=${scope} requires a selector` }
     }
+    // Validate selector syntax at the boundary. If this fails, the
+    // caller's error lands in the result envelope without a browser
+    // launch, an asset fetch, or a stack trace out of the page walker.
+    // Treat undefined/null/empty as "not provided" so the existing
+    // scope-requires-selector check stays the source of truth for
+    // missing selectors.
+    if (selector) {
+      const validation = validateSelector(selector)
+      if (!validation.ok) {
+        return { ok: false, error: validation.error }
+      }
+    }
     const target = targetForScope(scope, selector)
     let fetcher: PlaywrightFetcher | null = null
     let fetched: FetchedPage | null = null
@@ -141,6 +239,15 @@ export const captureTool: AiTool = {
       fetcher = await createPlaywrightFetcher()
       fetched = await fetcher.fetch(url, { target })
       const nodes = fetched.nodes
+
+      // Selector matched nothing on the rendered page. Surface as a clean
+      // boundary error rather than letting the rest of the pipeline
+      // (collapse / rewrite / uid assign) silently produce empty output
+      // that the agent would have to interpret as either "no styles" or
+      // "wrong selector".
+      if (selector && nodes.length === 0) {
+        return { ok: false, error: 'selector matched 0 elements on the captured page' }
+      }
 
       // 2. Collapse styles
       const collapsed = nodes.map((n) => ({

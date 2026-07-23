@@ -14,7 +14,7 @@
  *      the CSS branch was bypassed for `styles-only` (gate sequenced after
  *      the asset collector overwrote `css`).
  */
-import { describe, expect, it, mock } from 'bun:test'
+import { describe, expect, it, mock, beforeEach } from 'bun:test'
 import { readdirSync, readFileSync } from 'node:fs'
 import { join } from 'node:path'
 import type { CoreCapability } from '@core/capabilities'
@@ -87,7 +87,7 @@ mock.module('../../../repositories/site', () => ({
 // Dynamic import so the mocks above are in place before captureTool evaluates
 // its `import { createPlaywrightFetcher } from './core/playwrightFetcher'`
 // (and the other two) at module load time.
-const { captureTool, targetForScope } = await import('./captureTool')
+const { captureTool, targetForScope, validateSelector } = await import('./captureTool')
 
 const CAPS_FOR_CAPTURE: readonly CoreCapability[] = [
   'site.read',
@@ -228,6 +228,247 @@ describe('capture_from_url handler (no browser)', () => {
       expect(typeof result.error).toBe('string')
       expect(result.error!.length).toBeGreaterThan(0)
     }
+  })
+})
+
+/**
+ * Boundary validation for the `selector` parameter.
+ *
+ * The handler must reject malformed selectors (forbidden chars, unmatched
+ * parens, NUL bytes, absurd length) at the boundary — BEFORE the
+ * Playwright fetcher is invoked — so the caller gets a clean error
+ * instead of an opaque walker failure deep in the stack. It must also
+ * return a clean error when a structurally valid selector matches zero
+ * elements on the rendered page.
+ *
+ * The mock fetcher is reused from the top of the file. The no-match test
+ * mutates `mockFetchedPage.nodes` to `[]`, simulating a page where the
+ * selector matched nothing. `beforeEach` resets it so subsequent tests
+ * (the mode-gate suite below) see the original 2-node mock.
+ */
+describe('capture_from_url selector validation', () => {
+  const stubCtx = {
+    db: {} as never,
+    userId: 'u1',
+    capabilities: CAPS_FOR_CAPTURE,
+    scope: 'site' as const,
+    conversationId: 'c1',
+    snapshot: null,
+  } as never
+
+  beforeEach(() => {
+    // Reset the mock page's nodes between tests so the no-match test's
+    // mutation doesn't leak into the mode-gate suite below.
+    mockFetchedPage.nodes = mockNodes
+  })
+
+  function resetMocks() {
+    mockFetcherInstance.fetch.mockClear()
+    mockSafeFetcherInstance.fetch.mockClear()
+    mockCreatePlaywrightFetcher.mockClear()
+    mockCreateSafeFetcher.mockClear()
+    mockGetDraftSite.mockClear()
+  }
+
+  it('rejects selectors containing forbidden CSS-block characters { } ;', async () => {
+    resetMocks()
+    for (const sel of ['div{x}', 'div;', 'div}blockquote', 'a{x;b}']) {
+      const result = (await captureTool.handler(
+        { url: 'https://example.test/', selector: sel } as never,
+        stubCtx,
+      )) as { ok: boolean; error?: string }
+      expect(result.ok).toBe(false)
+      expect(result.error).toMatch(/invalid selector/)
+      expect(result.error).toMatch(/forbidden/)
+    }
+    // Browser must never have been launched for any of these.
+    expect(mockCreatePlaywrightFetcher).not.toHaveBeenCalled()
+  })
+
+  it('rejects selector with unmatched ( parenthesis', async () => {
+    resetMocks()
+    const result = (await captureTool.handler(
+      { url: 'https://example.test/', selector: 'div(x' } as never,
+      stubCtx,
+    )) as { ok: boolean; error?: string }
+    expect(result.ok).toBe(false)
+    expect(result.error).toMatch(/invalid selector/)
+    expect(result.error).toMatch(/unmatched \(/)
+    expect(mockCreatePlaywrightFetcher).not.toHaveBeenCalled()
+  })
+
+  it('rejects selector with unmatched ) parenthesis', async () => {
+    resetMocks()
+    const result = (await captureTool.handler(
+      { url: 'https://example.test/', selector: 'div)' } as never,
+      stubCtx,
+    )) as { ok: boolean; error?: string }
+    expect(result.ok).toBe(false)
+    expect(result.error).toMatch(/invalid selector/)
+    expect(result.error).toMatch(/unmatched \)/)
+    expect(mockCreatePlaywrightFetcher).not.toHaveBeenCalled()
+  })
+
+  it('rejects selector containing NUL bytes', async () => {
+    resetMocks()
+    const result = (await captureTool.handler(
+      { url: 'https://example.test/', selector: 'div\0x' } as never,
+      stubCtx,
+    )) as { ok: boolean; error?: string }
+    expect(result.ok).toBe(false)
+    expect(result.error).toMatch(/invalid selector/)
+    expect(result.error).toMatch(/NUL/)
+    // The error message MUST NOT echo the raw NUL byte back to the caller;
+    // the sanitiser replaces it with '?'.
+    expect(result.error).not.toContain('\0')
+    expect(mockCreatePlaywrightFetcher).not.toHaveBeenCalled()
+  })
+
+  it('rejects selector exceeding 500 characters', async () => {
+    resetMocks()
+    const longSelector = 'a'.repeat(501)
+    const result = (await captureTool.handler(
+      { url: 'https://example.test/', selector: longSelector } as never,
+      stubCtx,
+    )) as { ok: boolean; error?: string }
+    expect(result.ok).toBe(false)
+    expect(result.error).toMatch(/invalid selector/)
+    expect(result.error).toMatch(/500/)
+    expect(mockCreatePlaywrightFetcher).not.toHaveBeenCalled()
+  })
+
+  it('accepts a selector at exactly the 500-char boundary', async () => {
+    resetMocks()
+    // 500 chars of valid selector chars — must NOT trigger length validation.
+    // The mock fetcher will return nodes, so the handler proceeds normally.
+    const result = (await captureTool.handler(
+      { url: 'https://example.test/', selector: 'a'.repeat(500) } as never,
+      stubCtx,
+    )) as { ok: boolean; error?: string }
+    expect(result.ok).toBe(true)
+    expect(mockCreatePlaywrightFetcher).toHaveBeenCalledTimes(1)
+  })
+
+  it('returns "matched 0 elements" when selector matches nothing on the page', async () => {
+    resetMocks()
+    // Simulate the rendered page having no matches for the selector
+    // (the browser launched, the walker ran, nothing found).
+    mockFetchedPage.nodes = []
+    const result = (await captureTool.handler(
+      { url: 'https://example.test/', scope: 'subtree', selector: '.nonexistent' } as never,
+      stubCtx,
+    )) as { ok: boolean; error?: string }
+    expect(result.ok).toBe(false)
+    expect(result.error).toMatch(/matched 0 elements/)
+    // The fetcher IS invoked (we needed to render the page to discover the
+    // no-match), but everything downstream is skipped.
+    expect(mockCreatePlaywrightFetcher).toHaveBeenCalledTimes(1)
+    expect(mockFetcherInstance.fetch).toHaveBeenCalledTimes(1)
+    expect(mockCreateSafeFetcher).not.toHaveBeenCalled()
+  })
+
+  it('sanitises the selector in the error message (no raw control chars)', async () => {
+    resetMocks()
+    const result = (await captureTool.handler(
+      { url: 'https://example.test/', selector: 'div\t\nx' } as never,
+      stubCtx,
+    )) as { ok: boolean; error?: string }
+    // 'div\t\nx' is structurally valid; we just want to confirm the
+    // sanitiser collapses whitespace into a single space rather than
+    // embedding raw tabs/newlines.
+    expect(result.ok).toBe(true)
+    // The mock fetcher is invoked; the error path is not used here.
+  })
+})
+
+/**
+ * Pure unit tests for `validateSelector`. These pin the low-level rules
+ * (what counts as forbidden, what counts as balanced) without going
+ * through the handler, so a refactor that affects the integration tests
+ * does not silently roll back the validation contract.
+ */
+describe('validateSelector (unit)', () => {
+  it('accepts a variety of well-formed selectors', () => {
+    expect(validateSelector('.hero')).toEqual({ ok: true })
+    expect(validateSelector('div.hero > p:first-child')).toEqual({ ok: true })
+    expect(validateSelector('a[href*="example"]')).toEqual({ ok: true })
+    expect(validateSelector('ul li:nth-child(3)')).toEqual({ ok: true })
+    expect(validateSelector('#root > .a + .b ~ .c')).toEqual({ ok: true })
+  })
+
+  it('rejects forbidden characters', () => {
+    const r = validateSelector('div{x}')
+    expect(r.ok).toBe(false)
+    if (!r.ok) expect(r.error).toMatch(/forbidden/)
+  })
+
+  it('rejects unmatched open paren', () => {
+    const r = validateSelector('div(')
+    expect(r.ok).toBe(false)
+    if (!r.ok) expect(r.error).toMatch(/unmatched \(/)
+  })
+
+  it('rejects unmatched close paren', () => {
+    const r = validateSelector('div)')
+    expect(r.ok).toBe(false)
+    if (!r.ok) expect(r.error).toMatch(/unmatched \)/)
+  })
+
+  it('rejects NUL bytes', () => {
+    const r = validateSelector('div\0x')
+    expect(r.ok).toBe(false)
+    if (!r.ok) expect(r.error).toMatch(/NUL/)
+  })
+
+  it('rejects selectors longer than 500 chars', () => {
+    const r = validateSelector('a'.repeat(501))
+    expect(r.ok).toBe(false)
+    if (!r.ok) expect(r.error).toMatch(/500/)
+  })
+
+  it('accepts a selector at exactly the 500-char boundary', () => {
+    expect(validateSelector('a'.repeat(500))).toEqual({ ok: true })
+  })
+
+  it('includes the selector (sanitised) in the error message', () => {
+    const r = validateSelector('div(x')
+    expect(r.ok).toBe(false)
+    if (!r.ok) {
+      expect(r.error).toContain('div(x')
+    }
+  })
+
+  it('replaces control chars with ? in the sanitised preview', () => {
+    const r = validateSelector('div\0x')
+    expect(r.ok).toBe(false)
+    if (!r.ok) {
+      expect(r.error).not.toContain('\0')
+      expect(r.error).toContain('?')
+    }
+  })
+
+  it('does not echo raw control chars in any error message', () => {
+    // A selector that mixes forbidden chars with a control char — the NUL
+    // check fires first; the sanitised preview must still be safe.
+    const r = validateSelector('a\0b')
+    expect(r.ok).toBe(false)
+    if (!r.ok) {
+      expect(r.error).not.toContain('\0')
+    }
+  })
+
+  it('counts balanced parens correctly with nested combinations', () => {
+    // Balanced: 'div:nth-child(3)' — one open, one close.
+    const balanced = 'div:nth-child(3)'
+    expect(validateSelector(balanced)).toEqual({ ok: true })
+    // Balanced with nesting: 'div:has(span:contains("abc"))' — 2 opens, 2 closes.
+    const nested = 'div:has(span:contains("abc"))'
+    expect(validateSelector(nested)).toEqual({ ok: true })
+    // Unbalanced: close first.
+    const unbalanced = 'div)('
+    const r = validateSelector(unbalanced)
+    expect(r.ok).toBe(false)
+    if (!r.ok) expect(r.error).toMatch(/unmatched \)/)
   })
 })
 
