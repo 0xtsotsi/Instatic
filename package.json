@@ -42,7 +42,6 @@
     "icons:check": "bun run scripts/sync-icons.ts --check",
     "bootstrap:sync": "bun run scripts/sync-plugin-bootstrap.ts",
     "bootstrap:check": "bun run scripts/sync-plugin-bootstrap.ts --check",
-    "deploy:railway": "bun run scripts/deploy-railway.ts",
     "instatic-plugin": "bun run src/core/plugin-sdk/cli/index.ts",
     "bench": "bun run scripts/bench/index.ts",
     "bench:bundle": "bun run scripts/bench/index.ts --only=bundle",
