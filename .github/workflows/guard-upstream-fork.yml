@@ -1,0 +1,62 @@
+name: Upstream Fork Guard
+
+# Server-side branch protection helper.
+# This workflow fails (and can be configured to block merges) if a push to
+# `main` arrives from a repository that is not the configured fork.
+#
+# It also runs on PRs to `main` from non-fork PRs — useful as a pre-merge
+# signal when maintainers forget to re-route a branch they imported from
+# upstream by mistake.
+#
+# How to make this a hard block:
+#   In your GitHub repo Settings -> Rulesets (or classic Branch Protection):
+#     Required status checks: include "fork-identity-check"
+# This will block merges when the check fails.
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  fork-identity-check:
+    name: Fork identity check
+    runs-on: ubuntu-latest
+    steps:
+      - name: Block pushes not from the configured fork
+        env:
+          REPOSITORY: ${{ github.repository }}
+          EXPECTED_FORK: '0xtsotsi/instatic'
+          EXPECTED_UPSTREAM: 'corebunch/instatic'
+        run: |
+          set -euo pipefail
+
+          echo "Event: ${{ github.event_name }}"
+          echo "Source repository: $REPOSITORY"
+
+          case "$REPOSITORY" in
+            "$EXPECTED_FORK")
+              echo "OK: push is from the configured fork ($EXPECTED_FORK)"
+              exit 0
+              ;;
+            "$EXPECTED_UPSTREAM")
+              echo "FAIL: direct push to upstream release repo is not allowed."
+              echo "  Repository: $REPOSITORY"
+              echo "  Expected:   $EXPECTED_FORK"
+              echo "  Configure 'origin' to point at $EXPECTED_FORK and use 'git push' (no args)."
+              echo "  If this push was intentional, disable this workflow on the rule set."
+              exit 1
+              ;;
+            *)
+              # Anything else (e.g. a contributor fork) is allowed through — we
+              # only care about the upstream release repo itself.
+              echo "OK: push is from a third-party repository ($REPOSITORY), not the upstream release repo."
+              exit 0
+              ;;
+          esac
