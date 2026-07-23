@@ -123,3 +123,23 @@ Bun.serve({
 })
 
 console.log(`[server] Listening on http://localhost:${config.port}`)
+
+// Graceful shutdown: release the shared Playwright browser on SIGINT/SIGTERM
+// so the Chromium process doesn't outlive the server. The capture pipeline
+// owns a process-wide browser singleton (see playwrightFetcher.ts) — without
+// this hook every dev/restart leaks one Chromium process. Idempotent: the
+// singleton's shutdown is safe to call multiple times.
+const shutdown = async (signal: string): Promise<void> => {
+  console.log(`[server] Received ${signal}, shutting down…`)
+  try {
+    const { shutdownSharedBrowser } = await import('./ai/mcp/capture/core/playwrightFetcher')
+    await shutdownSharedBrowser()
+  } catch (err) {
+    console.error('[server] Error during shared-browser shutdown:', err)
+  }
+  // Let Bun exit cleanly. exit(0) avoids the noisy stack dump that a forced
+  // exitCode > 0 produces when listeners are attached.
+  process.exit(0)
+}
+process.on('SIGINT', () => void shutdown('SIGINT'))
+process.on('SIGTERM', () => void shutdown('SIGTERM'))

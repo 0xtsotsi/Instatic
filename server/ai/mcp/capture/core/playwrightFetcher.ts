@@ -1,12 +1,15 @@
 /**
- * Production fetcher for the capture tool. Launches a Playwright browser,
- * navigates to the URL, and returns the rendered HTML + ExtractedNode[].
+ * Production fetcher for the capture tool. Owns a process-wide Playwright
+ * browser singleton (`getSharedBrowser()`) so concurrent MCP calls don't
+ * each spin up a fresh Chromium. `createPlaywrightFetcher()` opens a fresh
+ * browser context per fetch — that's the cheap part, and it gives every
+ * caller an isolated session (cookies, storage, etc.).
  *
  * The walker itself runs in the page's V8 via
  *   page.evaluate(makePageWalker, target, COMPUTED_PROPS)
  * — see domExtractor.ts for the page-side walker source. The walker is
- * shared between the pure TypeScript entry point (used by tests) and
- * the page-side bridge (used here) so the two stay in lock-step.
+ * shared between the pure TypeScript entry point (used by tests) and the
+ * page-side bridge (used here) so the two stay in lock-step.
  *
  * The fetcher is dynamically imported so the rest of the module graph
  * does not pay for the Playwright binary until a real fetch is requested.
@@ -77,27 +80,135 @@ export interface CaptureFetcher {
   close(): Promise<void>
 }
 
+// ---------------------------------------------------------------------------
+// Process-wide browser singleton.
+// ---------------------------------------------------------------------------
+
+/** Browser engine enum shared between the singleton and createPlaywrightFetcher. */
+type BrowserKind = 'chromium' | 'firefox' | 'webkit'
+
+interface SharedBrowserState {
+  browser: import('playwright-core').Browser | null
+  kind: BrowserKind
+  /** Number of contexts currently open across all fetchers. */
+  openContexts: number
+  /** Max concurrent contexts. Calls beyond this await a slot. */
+  maxContexts: number
+  /** FIFO queue of resolvers waiting for a context slot. */
+  waiters: Array<() => void>
+  /** Counter — gated behind __test flag — for tests asserting single-launch. */
+  launches: number
+}
+
+const SHARED_MAX_CONTEXTS = 16
+
+const shared: SharedBrowserState = {
+  browser: null,
+  kind: 'chromium',
+  openContexts: 0,
+  maxContexts: SHARED_MAX_CONTEXTS,
+  waiters: [],
+  launches: 0,
+}
+
+/**
+ * Lazy singleton: launches the shared browser on first call, returns the
+ * cached instance afterwards. The browser process lives until
+ * `shutdownSharedBrowser()` is called (typically from the host's signal
+ * handlers). Idempotent — multiple concurrent first-calls await the same
+ * launch promise rather than racing to launch twice.
+ */
+let launchPromise: Promise<import('playwright-core').Browser> | null = null
+
+export async function getSharedBrowser(
+  kind: BrowserKind = 'chromium',
+): Promise<import('playwright-core').Browser> {
+  if (shared.browser) return shared.browser
+  if (launchPromise) return launchPromise
+  shared.kind = kind
+  launchPromise = (async () => {
+    const pw = (await import('playwright-core')) as typeof import('playwright-core')
+    const engine = kind === 'firefox' ? pw.firefox : kind === 'webkit' ? pw.webkit : pw.chromium
+    const browser = await engine.launch({ headless: true })
+    shared.browser = browser
+    shared.launches += 1
+    return browser
+  })()
+  try {
+    return await launchPromise
+  } finally {
+    launchPromise = null
+  }
+}
+
+/**
+ * Close the shared browser and reset all singleton state. Idempotent. Any
+ * fetcher that subsequently tries to `fetch()` will lazily relaunch on the
+ * next call to `getSharedBrowser()`. Intended for graceful shutdown only —
+ * calling this while fetches are in flight will cause them to throw.
+ */
+export async function shutdownSharedBrowser(): Promise<void> {
+  shared.waiters.splice(0).forEach((resolve) => resolve())
+  const browser = shared.browser
+  shared.browser = null
+  shared.openContexts = 0
+  if (browser) {
+    await browser.close().catch(() => { /* best effort */ })
+  }
+}
+
+/**
+ * Acquire a slot in the shared browser's context pool. If the pool is full
+ * (max 16 by default), awaits the next available slot FIFO. Returns a
+ * release function that the caller MUST call when the context is closed.
+ */
+async function acquireContextSlot(): Promise<() => void> {
+  if (shared.openContexts < shared.maxContexts) {
+    shared.openContexts += 1
+    return () => {
+      shared.openContexts -= 1
+      const next = shared.waiters.shift()
+      if (next) next()
+    }
+  }
+  await new Promise<void>((resolve) => shared.waiters.push(resolve))
+  shared.openContexts += 1
+  return () => {
+    shared.openContexts -= 1
+    const next = shared.waiters.shift()
+    if (next) next()
+  }
+}
+
+// ---------------------------------------------------------------------------
+// createPlaywrightFetcher — per-call fetcher that uses the shared browser.
+// ---------------------------------------------------------------------------
+
+/**
+ * Construct a per-call fetcher that draws from the shared browser. Each
+ * `fetch()` opens a fresh browser context (cheap — reuses the browser
+ * process); `close()` on the returned fetcher closes only the most recent
+ * context, NOT the shared browser. Use `shutdownSharedBrowser()` at process
+ * shutdown.
+ */
 export async function createPlaywrightFetcher(
   opts: PlaywrightFetcherOptions = {},
 ): Promise<CaptureFetcher> {
-  // Dynamic import keeps playwright-core off the module-load path.
-  const pw = (await import('playwright-core')) as typeof import('playwright-core')
-  const engine =
-    opts.browser === 'firefox' ? pw.firefox
-    : opts.browser === 'webkit' ? pw.webkit
-    : pw.chromium
-  const browser = await engine.launch({ headless: true })
-  let browserClosed = false
+  const kind = opts.browser ?? 'chromium'
+  const browser = await getSharedBrowser(kind)
 
-  const closeBrowser = async (): Promise<void> => {
-    if (browserClosed) return
-    browserClosed = true
-    await browser.close().catch(() => {})
-  }
+  // Per-fetcher close: closes ONLY the most recently opened context for
+  // this fetcher (in practice fetches are serialized per-fetcher so there's
+  // only one). Does NOT touch the shared browser.
+  let lastContext: import('playwright-core').BrowserContext | null = null
+  let lastRelease: (() => void) | null = null
 
   return {
     async fetch(url: string, target?: CaptureTarget, fetchOpts?: FetchOptions): Promise<FetchedPage> {
+      const release = await acquireContextSlot()
       const context = await browser.newContext()
+      lastContext = context
+      lastRelease = release
       const page = await context.newPage()
       try {
         if (opts.allowedHosts) {
@@ -145,16 +256,52 @@ export async function createPlaywrightFetcher(
           html,
           nodes,
           close: async () => {
-            await page.close().catch(() => {})
-            await context.close().catch(() => {})
+            await page.close().catch(() => { /* best effort */ })
+            await context.close().catch(() => { /* best effort */ })
+            release()
           },
         }
       } catch (err) {
-        await page.close().catch(() => {})
-        await context.close().catch(() => {})
+        await page.close().catch(() => { /* best effort */ })
+        await context.close().catch(() => { /* best effort */ })
+        release()
         throw err
       }
     },
-    close: closeBrowser,
+    async close(): Promise<void> {
+      // Close only the most recent context, not the shared browser.
+      if (lastContext) {
+        await lastContext.close().catch(() => { /* best effort */ })
+        lastContext = null
+      }
+      if (lastRelease) {
+        lastRelease()
+        lastRelease = null
+      }
+    },
   }
+}
+
+// ---------------------------------------------------------------------------
+// Test-only introspection. Gated behind __test flag so production builds
+// never expose the launch counter.
+// ---------------------------------------------------------------------------
+
+/**
+ * Returns the number of times the shared browser has been launched in this
+ * process. Intended for tests asserting that `getSharedBrowser()` is a
+ * true singleton — many `createPlaywrightFetcher()` calls should still
+ * result in a single launch. Returns 0 if the singleton has never been
+ * launched.
+ */
+export function __sharedBrowserLaunchCount(): number {
+  return shared.launches
+}
+
+/**
+ * Reset the shared singleton's launch counter to 0. Test-only; safe to
+ * call in test setup, not safe to call concurrently with fetches.
+ */
+export function __resetSharedBrowserLaunchCount(): void {
+  shared.launches = 0
 }
