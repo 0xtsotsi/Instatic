@@ -33,8 +33,18 @@ export interface FetchedPage {
   close(): Promise<void>
 }
 
+export interface FetchOptions {
+  /** Cancel an in-flight navigation. */
+  signal?: AbortSignal
+  /**
+   * What to extract from the rendered page. Defaults to
+   * `{ selector: null, maxDepth: Infinity }` (the whole body).
+   */
+  target?: CaptureTarget
+}
+
 export interface PlaywrightFetcher {
-  fetch(url: string, signal?: AbortSignal): Promise<FetchedPage>
+  fetch(url: string, opts?: FetchOptions): Promise<FetchedPage>
   /** Close the browser. Idempotent. */
   close(): Promise<void>
 }
@@ -58,7 +68,8 @@ export async function createPlaywrightFetcher(
   }
 
   return {
-    async fetch(url: string, signal?: AbortSignal): Promise<FetchedPage> {
+    async fetch(url: string, fetchOpts: FetchOptions = {}): Promise<FetchedPage> {
+      const { signal, target: targetOpt } = fetchOpts
       const context = await browser.newContext()
       const page = await context.newPage()
       const onAbort = (): void => {
@@ -77,7 +88,9 @@ export async function createPlaywrightFetcher(
           timeout: opts.navigationTimeoutMs ?? (opts.networkIdleMs ?? 5000) + 5000,
         })
         const html = await page.content()
-        const target: CaptureTarget = { selector: null, maxDepth: Infinity }
+        // Default to the whole body. Callers pass a target via FetchOptions
+        // when they want a subtree or single-element capture.
+        const target: CaptureTarget = targetOpt ?? { selector: null, maxDepth: Infinity }
         // Run the page-side walker in the page's V8. `document` and
         // `window` are real globals there; makePageWalker bridges them.
         // page.evaluate takes a function + one arg, so we close over the

@@ -48,6 +48,28 @@ const FIXTURE = `
 </div>
 `
 
+/**
+ * Page with a hero section and a separate footer section. Used to verify
+ * that scope=subtree narrows the walk to the matched subtree only — no
+ * ancestors, no siblings, no other sections.
+ */
+const MULTI_SECTION_FIXTURE = `
+<main>
+  <section class="hero">
+    <h1>Hello</h1>
+    <p>Subtitle</p>
+    <button>CTA</button>
+  </section>
+  <section class="features">
+    <article>One</article>
+    <article>Two</article>
+  </section>
+  <footer>
+    <small>(c) 2026</small>
+  </footer>
+</main>
+`
+
 describe('extractDom (pure TypeScript walker)', () => {
   it('walks depth-first with maxDepth Infinity', () => {
     const ctx = makeCtx(FIXTURE)
@@ -120,6 +142,35 @@ describe('extractDom (pure TypeScript walker)', () => {
       expect(typeof v).toBe('string')
       expect(v.length).toBeGreaterThan(0)
     }
+  })
+
+  it('scope=subtree (selector + maxDepth: Infinity) returns ONLY the matched subtree, not ancestors or siblings', () => {
+    // Regression guard for the capture_from_url scope=subtree bug: the
+    // fetcher used to hard-code selector:null + maxDepth:Infinity, so the
+    // scope argument was validated but ignored. Here we assert the walker
+    // itself narrows correctly when given a selector + Infinity depth.
+    const ctx = makeCtx(MULTI_SECTION_FIXTURE)
+    const nodes = extractDom({ selector: '.hero', maxDepth: Infinity }, ctx)
+    const tags = nodes.map((n) => (n.outerHTML.match(/^<(\w+)/) ?? [])[1])
+    // .hero is a <section> with three direct children; none of the other
+    // sections or the footer must appear.
+    expect(tags).toEqual(['section', 'h1', 'p', 'button'])
+    // No leakage from outside the subtree.
+    expect(nodes.some((n) => n.outerHTML.includes('features'))).toBe(false)
+    expect(nodes.some((n) => n.outerHTML.includes('footer'))).toBe(false)
+    expect(nodes.some((n) => n.outerHTML.includes('<main'))).toBe(false)
+  })
+
+  it('scope=element (selector + maxDepth: 0) returns only the matched element', () => {
+    // Regression guard for the capture_from_url scope=element case.
+    const ctx = makeCtx(MULTI_SECTION_FIXTURE)
+    const nodes = extractDom({ selector: '.hero', maxDepth: 0 }, ctx)
+    expect(nodes).toHaveLength(1)
+    expect(nodes[0]!.outerHTML.toLowerCase()).toContain('class="hero"')
+    // No descendants of the matched element are included.
+    expect(nodes.some((n) => n.outerHTML.startsWith('<h1'))).toBe(false)
+    expect(nodes.some((n) => n.outerHTML.startsWith('<p'))).toBe(false)
+    expect(nodes.some((n) => n.outerHTML.startsWith('<button'))).toBe(false)
   })
 })
 

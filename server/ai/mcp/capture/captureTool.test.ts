@@ -14,7 +14,7 @@ import { readdirSync, readFileSync } from 'node:fs'
 import { join } from 'node:path'
 import type { CoreCapability } from '@core/capabilities'
 import { mcpToolsForCapabilities } from '../registry'
-import { captureTool } from './captureTool'
+import { captureTool, targetForScope } from './captureTool'
 
 const CAPS_FOR_CAPTURE: readonly CoreCapability[] = [
   'site.read',
@@ -155,5 +155,38 @@ describe('capture_from_url handler (no browser)', () => {
       expect(typeof result.error).toBe('string')
       expect(result.error!.length).toBeGreaterThan(0)
     }
+  })
+})
+
+describe('targetForScope (scope → CaptureTarget translation)', () => {
+  // Regression guard for the scope/subtree/element bug: the handler used
+  // to validate scope+selector at the boundary but ignore them downstream,
+  // hard-coding selector:null + maxDepth:Infinity in the fetcher. This
+  // pins the translation contract so the bug cannot silently re-appear.
+
+  it('scope:page returns the whole body (selector:null, maxDepth:Infinity)', () => {
+    expect(targetForScope('page', undefined)).toEqual({
+      selector: null,
+      maxDepth: Infinity,
+    })
+    // A selector passed alongside page scope is intentionally ignored.
+    expect(targetForScope('page', '.hero')).toEqual({
+      selector: null,
+      maxDepth: Infinity,
+    })
+  })
+
+  it('scope:subtree returns the matched element and all its descendants', () => {
+    expect(targetForScope('subtree', '.hero')).toEqual({
+      selector: '.hero',
+      maxDepth: Infinity,
+    })
+  })
+
+  it('scope:element returns only the matched element (maxDepth:0)', () => {
+    expect(targetForScope('element', '.hero')).toEqual({
+      selector: '.hero',
+      maxDepth: 0,
+    })
   })
 })

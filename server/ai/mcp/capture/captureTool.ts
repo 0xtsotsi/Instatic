@@ -20,6 +20,7 @@ import { Type } from '@core/utils/typeboxHelpers'
 import type { CoreCapability } from '@core/capabilities'
 import type { AiTool, ToolContext } from '../../runtime/types'
 import { createPlaywrightFetcher, type FetchedPage, type PlaywrightFetcher } from './core/playwrightFetcher'
+import type { CaptureTarget } from './core/domExtractor'
 import { collapseStyles } from './core/styleCollapse'
 import { rewriteCss } from './core/cssRewriter'
 import { collectAssets, type CollectedAsset, type UnavailableAsset } from './core/assets'
@@ -78,6 +79,24 @@ function fnv1a32(s: string): string {
   return h.toString(36).padStart(8, '0')
 }
 
+/**
+ * Translate the user-facing `scope` + `selector` pair into a CaptureTarget
+ * the fetcher's DOM walker understands. Three cases:
+ *   - scope: 'page'      → walk the whole body (selector: null, maxDepth: Infinity)
+ *   - scope: 'subtree'   → walk from the selector down, include all descendants
+ *   - scope: 'element'   → only the single element matching the selector
+ */
+export function targetForScope(scope: 'page' | 'subtree' | 'element', selector: string | undefined): CaptureTarget {
+  switch (scope) {
+    case 'subtree':
+      return { selector, maxDepth: Infinity }
+    case 'element':
+      return { selector, maxDepth: 0 }
+    case 'page':
+      return { selector: null, maxDepth: Infinity }
+  }
+}
+
 interface CaptureOutput {
   ok: boolean
   error?: string
@@ -102,12 +121,13 @@ export const captureTool: AiTool = {
     if (scope !== 'page' && !selector) {
       return { ok: false, error: `scope=${scope} requires a selector` }
     }
+    const target = targetForScope(scope, selector)
     let fetcher: PlaywrightFetcher | null = null
     let fetched: FetchedPage | null = null
     try {
       // 1. Fetch + extract
       fetcher = await createPlaywrightFetcher()
-      fetched = await fetcher.fetch(url)
+      fetched = await fetcher.fetch(url, { target })
       const nodes = fetched.nodes
 
       // 2. Collapse styles
