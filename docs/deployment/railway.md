@@ -66,6 +66,16 @@ Railway resolves the `INSTATIC_SECRET_KEY` expression at template deploy time. I
 
 Source builds from GitHub remain useful for maintainers testing release candidates, but they are not the production distribution path for user installs. Image-source services avoid creating deployment activity in the public Instatic GitHub repository and can use Railway Image Auto Updates.
 
+## Fork Builds
+
+The image references above target the upstream `corebunch/instatic` package, which only contains releases from the upstream repository. Fork repositories (for example `0xtsotsi/Instatic`) that have committed hardening or feature work on top of upstream must build from the fork's GitHub source instead of pinning the published image, otherwise the deployed service will not include the fork's commits.
+
+For a one-click Railway Postgres template that builds from a fork repo, see [`railway/postgres/template.json`](railway/postgres/template.json) and the operator notes in [`railway/postgres/README.md`](railway/postgres/README.md). The same layout is reproduced programmatically by `scripts/deploy-railway.ts` (`bun run deploy:railway`), which talks to the Railway GraphQL API with a `RAILWAY_API_TOKEN`.
+
+## MCP Server
+
+Railway exposes a hosted remote MCP server at `https://mcp.railway.com` that operators can connect an external agent to for provisioning and operating services. The setup does not require installing the Railway CLI on the operator machine. See `docs.railway.com/agents.md` for the current connection flow.
+
 ## SQLite Template
 
 Use SQLite for the simplest one-service Railway install. Attach one volume to the app service:
@@ -122,8 +132,6 @@ The `Postgres` prefix is the Railway service name. If the database service is re
 Use `DATABASE_URL`, not `DATABASE_PUBLIC_URL`, for app-to-database traffic inside the same Railway project. `DATABASE_PUBLIC_URL` goes through Railway's public TCP proxy and is for external clients such as local admin tools.
 
 ## Backups
-
-Back up both data stores:
 
 - SQLite template: back up the app volume mounted at `/app/storage`; it contains both `data/cms.db` and `uploads/`.
 - Postgres template: back up the Postgres service volume/database and the app volume mounted at `/app/storage`; the app volume contains uploaded media, fonts, plugin packages, and published artefacts.
