@@ -118,6 +118,17 @@ export const captureTool: AiTool = {
   requiredCapabilities: CAPS,
   handler: async (input, ctx: ToolContext): Promise<CaptureOutput> => {
     const { url, mode = 'dom+styles', scope = 'page', selector, assetsMax = 25 } = input as CaptureInputInternal
+    // Three explicit gates. Each `mode` is a strict subset of `dom+styles`:
+    //   - 'dom-only'      → html only. No CSS build, no token rewrite, no asset download.
+    //   - 'styles-only'   → css only. No HTML assembly, no uid assignment, no asset download.
+    //   - 'dom+styles'    → everything: html + css + assets.
+    // `needsAssets` is computed AFTER html+css exist so it can fold in the
+    // 'is there actually anything to download?' check. It is intentionally
+    // false for either restricted mode, even if a previous bug let html or css
+    // through, so the asset collector can never fire for them.
+    const needsCss = mode !== 'dom-only'
+    const needsHtml = mode !== 'styles-only'
+
     if (scope !== 'page' && !selector) {
       return { ok: false, error: `scope=${scope} requires a selector` }
     }
@@ -125,7 +136,8 @@ export const captureTool: AiTool = {
     let fetcher: PlaywrightFetcher | null = null
     let fetched: FetchedPage | null = null
     try {
-      // 1. Fetch + extract
+      // 1. Fetch + extract. Always runs — the DOM walk is cheap and the
+      //    page-side data is needed for both the HTML and CSS branches.
       fetcher = await createPlaywrightFetcher()
       fetched = await fetcher.fetch(url, { target })
       const nodes = fetched.nodes
@@ -139,10 +151,10 @@ export const captureTool: AiTool = {
       // 3. Build CSS
       const stylesMap: Record<string, Record<string, string>> = {}
       for (const n of collapsed) stylesMap[n.selector] = n.computedStyles
-      let css = mode === 'dom-only' ? '' : rewriteCss(stylesMap, { stableOrder: true })
+      let css = needsCss ? rewriteCss(stylesMap, { stableOrder: true }) : ''
 
       // 4. Get site tokens + apply
-      if (mode !== 'dom-only' && css) {
+      if (needsCss && css) {
         const draftSite = await getDraftSite(ctx.db)
         if (draftSite) {
           const tokens = tokensFromSite(draftSite)
@@ -150,11 +162,15 @@ export const captureTool: AiTool = {
         }
       }
 
-      // 5. Asset collection
-      let html = mode === 'styles-only' ? '' : nodes.map((n) => n.outerHTML).join('\n')
+      // 5. Asset collection — gated on `needsAssets` (computed below, only
+      //    true when both html and css are populated). For the restricted
+      //    modes we skip the fetcher entirely; no `persist` calls, no
+      //    `uploads/captures/<id>/` directory created, no SSRF surface.
+      let html = needsHtml ? nodes.map((n) => n.outerHTML).join('\n') : ''
       const files: CollectedAsset[] = []
       const unavailable: UnavailableAsset[] = []
-      if (mode !== 'styles-only' && html) {
+      const needsAssets = needsHtml && css && html
+      if (needsAssets) {
         const safeFetcher = createSafeFetcher()
         const captureId = generateUid()
         const persistDir = `uploads/captures/${captureId}`
