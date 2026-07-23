@@ -124,7 +124,7 @@ You opted out of a custom domain for this deploy. To add one later:
 1. In Railway, open the app service → **Settings** → **Domains**.
 2. Add your custom domain. Railway will give you a CNAME target.
 3. At your DNS provider, add the CNAME.
-4. In the app service **Variables** tab, edit `PUBLIC_ORIGIN` to include the new domain as a comma-separated second entry, e.g. `https://${{RAILWAY_PUBLIC_DOMAIN}},https://www.example.com`.
+4. The template does not set `PUBLIC_ORIGIN` by default — Railway auto-detects it from `RAILWAY_PUBLIC_DOMAIN`. To accept both the Railway domain and your custom domain, create `PUBLIC_ORIGIN` in the app service **Variables** tab as a comma-separated list of literal URLs, e.g. `PUBLIC_ORIGIN=https://instatic-production-ac53.up.railway.app,https://www.example.com`. Do **not** include `${{RAILWAY_PUBLIC_DOMAIN}}` — that syntax is resolved only inside template `reference` fields, not inside service env var values, and including it makes the server fall back to the wrong origin.
 5. Redeploy.
 
 ## 7. Backups
