@@ -70,7 +70,7 @@ Source builds from GitHub remain useful for maintainers testing release candidat
 
 The image references above target the upstream `corebunch/instatic` package, which only contains releases from the upstream repository. Fork repositories (for example `0xtsotsi/Instatic`) that have committed hardening or feature work on top of upstream must build from the fork's GitHub source instead of pinning the published image, otherwise the deployed service will not include the fork's commits.
 
-For a one-click Railway Postgres template that builds from a fork repo, see [`railway/postgres/template.json`](railway/postgres/template.json) and the operator notes in [`railway/postgres/README.md`](railway/postgres/README.md). The same layout is reproduced programmatically by `scripts/deploy-railway.ts` (`bun run deploy:railway`), which talks to the Railway GraphQL API with a `RAILWAY_API_TOKEN`.
+For a one-click Railway Postgres template that builds from a fork repo, see [`railway/postgres/template.json`](railway/postgres/template.json) and the operator notes in [`railway/postgres/README.md`](railway/postgres/README.md).
 
 ## MCP Server
 

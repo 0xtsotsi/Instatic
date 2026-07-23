@@ -12,7 +12,7 @@ Instatic is one Bun server packaged by the root `Dockerfile`. The server reads r
 |---|---|---|---|---|
 | Railway SQLite template | Fastest managed install for a single site | SQLite file | One Railway app volume mounted at `/app/storage` | [railway.md](railway.md) |
 | Railway Postgres template | Managed install for teams or horizontal scale later | Railway Postgres | App volume for uploads, Postgres service volume for DB | [railway.md](railway.md), [railway/postgres/template.json](railway/postgres/template.json) |
-| Railway Postgres (fork build) | Same as above but built from a fork's GitHub source instead of the upstream image | Railway Postgres | App volume for uploads, Postgres service volume for DB | [railway/postgres/template.json](railway/postgres/template.json), [scripts/deploy-railway.ts](../../scripts/deploy-railway.ts) |
+| Railway Postgres (fork build) | Same as above but built from a fork's GitHub source instead of the upstream image | Railway Postgres | App volume for uploads, Postgres service volume for DB | [railway/postgres/template.json](railway/postgres/template.json) |
 | Render SQLite template | Managed Docker install outside Railway | SQLite file | One Render disk mounted at `/app/storage` | [render.md](render.md) |
 | Render Postgres template | Managed Postgres install outside Railway | Render Postgres | Render disk for uploads, Render Postgres storage for DB | [render.md](render.md) |
 | VPS Docker Compose | Self-hosted server, full control | SQLite or bundled Postgres | Docker named volumes | [vps.md](vps.md) |
