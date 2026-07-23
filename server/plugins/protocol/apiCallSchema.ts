@@ -17,6 +17,7 @@
 
 import { Type, type Static, type TSchema } from '@sinclair/typebox'
 import { StorageListOptionsSchema } from '@core/plugin-sdk/storageSchemas'
+import { CaptureInputSchema } from '@core/plugin-sdk/captureSchemas'
 import { RouteRegistrationArgSchema } from './schemas/routes'
 import { HookListenerArgSchema, HookFilterArgSchema, HookEmitArgSchema } from './schemas/hooks'
 import { LoopSourceDescriptorSchema } from './schemas/loops'
@@ -97,6 +98,7 @@ export const ApiCallSchemas = {
     Type.String({ minLength: 1 }),
   ])),
   'cms.settings.replace': apiCallSchema('cms.settings.replace', Type.Tuple([JsonRecordSchema])),
+  'cms.capture.fromUrl': apiCallSchema('cms.capture.fromUrl', Type.Tuple([CaptureInputSchema])),
   'network.fetch': apiCallSchema('network.fetch', Type.Tuple([
     Type.String({ minLength: 1, maxLength: 2048 }),
     NetworkFetchInitSchema,

@@ -17,6 +17,7 @@ import type {
   TreeMutateResult,
   UpdateContentEntryInput,
 } from '../contentSchemas'
+import type { CaptureInput, CaptureOutput } from '../captureSchemas'
 import type { ServerPluginHooksApi } from './hooks'
 import type { LoopEntitySource } from './loops'
 import type { ServerPluginMediaApi } from './media'
@@ -116,6 +117,9 @@ export interface ServerPluginApi {
       }
     }
     hooks: ServerPluginHooksApi
+    capture: {
+      fromUrl: (input: CaptureInput) => Promise<CaptureOutput>
+    }
     /**
      * Register handlers that fire on a cadence. Requires the
      * `cms.schedule` permission. Handlers run inside the same QuickJS

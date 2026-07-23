@@ -397,6 +397,12 @@ globalThis.__buildApi = function buildApi() {
       loops: { registerSource: registerSource },
       settings: settingsApi,
       schedule: scheduleApi,
+      capture: {
+        fromUrl: function (input: unknown) {
+          assertTargetPermission('cms.capture.fromUrl')
+          return call('cms.capture.fromUrl', [input])
+        },
+      },
       content: {
         // Schema introspection
         tables: {

@@ -55,6 +55,13 @@ export const PLUGIN_CAPABILITIES: PluginCapability[] = [
     surfaces: ['server', 'cms'],
   },
   {
+    permission: 'cms.capture',
+    label: 'Capture content from URLs',
+    description: 'Allows the plugin to invoke the headless URL capture pipeline (api.cms.capture.fromUrl).',
+    risk: 'high',
+    surfaces: ['server', 'cms'],
+  },
+  {
     permission: 'editor.toolbar',
     label: 'Add controls to the editor toolbar',
     description: 'Allows the plugin editor entrypoint to add toolbar buttons.',

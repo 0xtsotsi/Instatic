@@ -48,6 +48,8 @@ export const TARGET_PERMISSIONS = {
   'cms.hooks.on': 'cms.hooks',
   'cms.hooks.filter': 'cms.hooks',
   'cms.hooks.emit': 'cms.hooks',
+  // Headless URL capture (host allowlist enforced separately in the handler).
+  'cms.capture.fromUrl': 'cms.capture',
   // Loops
   'cms.loops.registerSource': 'loops.register',
   // Storage

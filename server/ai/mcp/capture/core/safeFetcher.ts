@@ -66,6 +66,19 @@ type DnsLookup = (hostname: string, options: { all: true; verbatim: true }) => P
 const MAX_REDIRECTS_DEFAULT = 3
 const REDIRECT_STATUSES: ReadonlySet<number> = new Set([301, 302, 303, 307, 308])
 
+/** Match exact hosts and one-label wildcards using plugin manifest semantics. */
+function hostMatchesAllowlist(host: string, allowedHosts: ReadonlyArray<string>): boolean {
+  const lower = host.toLowerCase()
+  return allowedHosts.some((entry) => {
+    const allowed = entry.toLowerCase()
+    if (!allowed.startsWith('*.')) return lower === allowed
+    const suffix = `.${allowed.slice(2)}`
+    if (!lower.endsWith(suffix)) return false
+    const prefix = lower.slice(0, -suffix.length)
+    return prefix.length > 0 && !prefix.includes('.')
+  })
+}
+
 export function createSafeFetcher(
   fetchImpl: FetchImpl = (input, init) => globalThis.fetch(input as never, init),
   dnsLookup: DnsLookup = (hostname, options) => lookup(hostname, options) as unknown as Promise<{ address: string; family: number }[]>,
@@ -103,6 +116,9 @@ export function createSafeFetcher(
     const host = parsed.hostname
     if (BLOCKED_HOSTNAMES.has(host)) return { error: `blocked hostname: ${host}` }
     if (isPrivateLiteral(host)) return { error: 'private host blocked' }
+    if (opts.allowedHosts && !hostMatchesAllowlist(host, opts.allowedHosts)) {
+      return { error: `host not allowed: ${host}` }
+    }
 
     // IP literal: already connect-safe, no DNS lookup needed.
     if (isIP(host) !== 0) {

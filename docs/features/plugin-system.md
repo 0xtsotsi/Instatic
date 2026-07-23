@@ -848,6 +848,20 @@ api.cms.media.registerVariantDelegate({
 
 Storage adapter and variant delegate ids must be namespaced under the plugin id (`<pluginId>.<rest>`). Registration is host-side state; re-registering the same id on re-activation replaces the previous definition.
 
+### URL capture — requires `cms.capture` + `networkAllowedHosts`
+
+Server plugins can invoke the same headless pipeline used by the `capture_from_url` MCP tool:
+
+```ts
+const result = await api.cms.capture.fromUrl({
+  url: 'https://reference.example/landing',
+  scope: 'subtree',
+  selector: '.hero',
+})
+```
+
+The input URL, browser requests, redirects, and downloaded assets are constrained to the plugin manifest's `networkAllowedHosts` entries. A missing or non-matching allowlist fails closed. The result contains the captured HTML/CSS, assigned uids, asset metadata, unavailable assets, and suggested next actions.
+
 ### Outbound HTTP — requires `network.outbound` + `networkAllowedHosts`
 
 ```js
@@ -924,6 +938,7 @@ Risk levels:
 | `cms.routes.public`         | Server               | Dangerous | Register anonymously-callable routes; requires `cms.routes` too          |
 | `cms.hooks`                 | Server               | High      | Listen to CMS events / filter values                                    |
 | `cms.schedule`              | Server               | High      | Register cadence-driven handlers                                        |
+| `cms.capture`               | Server               | High      | Invoke `api.cms.capture.fromUrl` within `networkAllowedHosts`            |
 | `cms.content.read`          | Server               | Low       | List / read entries; read trees; search; published snapshots             |
 | `cms.content.write`         | Server               | High      | Create / update entries; mutate trees; move between tables               |
 | `cms.content.publish`       | Server               | High      | Publish / schedule-publish entries; `republishAll()`                     |

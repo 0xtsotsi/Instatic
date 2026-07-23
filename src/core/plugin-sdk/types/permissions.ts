@@ -16,6 +16,8 @@ export const PLUGIN_PERMISSION_VALUES = [
   // before they approve installation.
   'cms.routes.public',
   'cms.hooks',
+  // Headless URL capture pipeline exposed as `api.cms.capture.fromUrl`.
+  'cms.capture',
   // CMS content — read/write/publish/delete the host's content tables
   // (`data_tables` + `data_rows`) through the `api.cms.content.*` surface.
   // Each mode is split so a typical plugin (SEO assistant, translator)

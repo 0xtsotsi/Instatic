@@ -20,6 +20,35 @@ const mockDnsPrivate: DnsLookup = async () => [{ address: '10.0.0.1', family: 4 
 const mockDnsFail: DnsLookup = async () => { throw new Error('ENOTFOUND') }
 
 describe('createSafeFetcher', () => {
+  it('fails closed when the URL host is outside allowedHosts', async () => {
+    let fetched = false
+    const fetcher = createSafeFetcher(
+      async () => {
+        fetched = true
+        return new Response('unexpected')
+      },
+      mockDnsPublic,
+      { allowedHosts: ['allowed.example'] },
+    )
+
+    const result = await fetcher.fetch('https://blocked.example/file.png')
+
+    expect(result).toEqual({ ok: false, error: 'host not allowed: blocked.example' })
+    expect(fetched).toBe(false)
+  })
+
+  it('supports one-label wildcards in allowedHosts', async () => {
+    const fetcher = createSafeFetcher(
+      async () => new Response('ok'),
+      mockDnsPublic,
+      { allowedHosts: ['*.example.com'] },
+    )
+
+    expect((await fetcher.fetch('https://cdn.example.com/file.png')).ok).toBe(true)
+    expect((await fetcher.fetch('https://a.cdn.example.com/file.png')).ok).toBe(false)
+    expect((await fetcher.fetch('https://example.com/file.png')).ok).toBe(false)
+  })
+
   it('blocks http:// when allowInsecure is false', async () => {
     const fetcher = createSafeFetcher(undefined, mockDnsPublic)
     const result = await fetcher.fetch('http://example.com/foo.png')

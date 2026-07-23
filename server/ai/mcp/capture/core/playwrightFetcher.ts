@@ -25,6 +25,20 @@ export interface PlaywrightFetcherOptions {
   networkIdleMs?: number
   /** Total navigation timeout. Default = networkIdleMs + 5000. */
   navigationTimeoutMs?: number
+  /** Optional exact/one-label-wildcard host allowlist applied to every browser request. */
+  allowedHosts?: string[]
+}
+
+function hostMatchesAllowlist(host: string, allowedHosts: ReadonlyArray<string>): boolean {
+  const lower = host.toLowerCase()
+  return allowedHosts.some((entry) => {
+    const allowed = entry.toLowerCase()
+    if (!allowed.startsWith('*.')) return lower === allowed
+    const suffix = `.${allowed.slice(2)}`
+    if (!lower.endsWith(suffix)) return false
+    const prefix = lower.slice(0, -suffix.length)
+    return prefix.length > 0 && !prefix.includes('.')
+  })
 }
 
 export interface FetchedPage {
@@ -68,6 +82,19 @@ export async function createPlaywrightFetcher(
       const context = await browser.newContext()
       const page = await context.newPage()
       try {
+        if (opts.allowedHosts) {
+          await page.route('**/*', async (route) => {
+            const requestUrl = new URL(route.request().url())
+            if (
+              (requestUrl.protocol === 'http:' || requestUrl.protocol === 'https:')
+              && !hostMatchesAllowlist(requestUrl.hostname, opts.allowedHosts!)
+            ) {
+              await route.abort('blockedbyclient')
+              return
+            }
+            await route.continue()
+          })
+        }
         await page.goto(url, {
           waitUntil: 'networkidle',
           timeout: opts.navigationTimeoutMs ?? (opts.networkIdleMs ?? 5000) + 5000,

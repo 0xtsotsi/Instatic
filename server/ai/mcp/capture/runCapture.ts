@@ -26,7 +26,7 @@ import { applyPipeline, type CaptureMode } from './pipeline'
 // into pipeline.ts directly.
 export { validateSelector } from './pipeline'
 import type { CaptureTarget } from './core/domExtractor'
-import type { CollectedAsset, UnavailableAsset } from './core/assets'
+import type { AssetFetcher, CollectedAsset, UnavailableAsset } from './core/assets'
 import type { NextAction } from './adapters/nextActions'
 
 export interface RunCaptureInput {
@@ -44,6 +44,8 @@ export interface RunCaptureDeps {
   db: DbClient
   /** Persist a downloaded asset to local storage. */
   persist: (localPath: string, bytes: Uint8Array) => Promise<void>
+  /** Optional caller-constrained asset fetcher (for example, a plugin host allowlist). */
+  assetFetcher?: AssetFetcher
 }
 
 export interface RunCaptureResult {
@@ -138,7 +140,7 @@ export async function runCapture(
     const captureId = generateUid()
     const persistDir = `uploads/captures/${captureId}`
     const needsAssets = mode !== 'dom-only' && mode !== 'styles-only'
-    const safeFetcher = needsAssets ? createSafeFetcher() : null
+    const safeFetcher = needsAssets ? (deps.assetFetcher ?? createSafeFetcher()) : null
 
     // Stages 2-7: pure pipeline. All I/O is parameterized via the args
     // below so the pipeline module itself never touches Bun, the DB, or
