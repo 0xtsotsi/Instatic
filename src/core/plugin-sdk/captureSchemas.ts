@@ -25,6 +25,34 @@ export const CaptureInputSchema = Type.Object(
     ),
     selector: Type.Optional(Type.String({ maxLength: 500 })),
     assetsMax: Type.Optional(Type.Integer({ minimum: 0, maximum: 100 })),
+    interactions: Type.Optional(
+      Type.Array(
+        Type.Object(
+          {
+            action: Type.Union([
+              Type.Literal('click'),
+              Type.Literal('fill'),
+              Type.Literal('type'),
+              Type.Literal('hover'),
+              Type.Literal('wait_for'),
+              Type.Literal('wait_for_url'),
+              Type.Literal('wait'),
+              Type.Literal('press'),
+            ]),
+            selector: Type.Optional(Type.String()),
+            value: Type.Optional(Type.String()),
+            text: Type.Optional(Type.String()),
+            pattern: Type.Optional(Type.String()),
+            key: Type.Optional(Type.String()),
+            ms: Type.Optional(Type.Integer({ minimum: 0, maximum: 30_000 })),
+            timeoutMs: Type.Optional(Type.Integer({ minimum: 0, maximum: 60_000 })),
+            delayMs: Type.Optional(Type.Integer({ minimum: 0, maximum: 5_000 })),
+          },
+          { additionalProperties: false },
+        ),
+        { maxLength: 50 },
+      ),
+    ),
   },
   { additionalProperties: false },
 )

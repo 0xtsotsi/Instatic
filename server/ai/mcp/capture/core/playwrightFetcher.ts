@@ -17,6 +17,12 @@ import {
   type CaptureTarget,
   type ExtractedNode,
 } from './domExtractor'
+import {
+  applyInteractions,
+  INTERACTION_TIMEOUT_MS,
+  MAX_INTERACTIONS,
+  type InteractionStep,
+} from './interactions'
 
 export interface PlaywrightFetcherOptions {
   /** Browser engine. Default 'chromium'. */
@@ -27,6 +33,18 @@ export interface PlaywrightFetcherOptions {
   navigationTimeoutMs?: number
   /** Optional exact/one-label-wildcard host allowlist applied to every browser request. */
   allowedHosts?: string[]
+}
+
+/** Per-fetch options that vary per call (as opposed to PlaywrightFetcherOptions
+ * which configures the browser/engine). Carries the interaction list and
+ * per-step caps that the orchestrator passes in. */
+export interface FetchOptions {
+  /** Pre-capture interactions applied AFTER goto and BEFORE the DOM walker. */
+  interactions?: readonly InteractionStep[]
+  /** Cap on number of interactions. Default MAX_INTERACTIONS (50). */
+  interactionsCap?: number
+  /** Default per-step timeout in ms. Default INTERACTION_TIMEOUT_MS (60_000). */
+  interactionTimeoutMs?: number
 }
 
 function hostMatchesAllowlist(host: string, allowedHosts: ReadonlyArray<string>): boolean {
@@ -55,7 +73,7 @@ export interface FetchedPage {
  * tests inject a stub.
  */
 export interface CaptureFetcher {
-  fetch(url: string, target?: CaptureTarget): Promise<FetchedPage>
+  fetch(url: string, target?: CaptureTarget, opts?: FetchOptions): Promise<FetchedPage>
   close(): Promise<void>
 }
 
@@ -78,7 +96,7 @@ export async function createPlaywrightFetcher(
   }
 
   return {
-    async fetch(url: string, target?: CaptureTarget): Promise<FetchedPage> {
+    async fetch(url: string, target?: CaptureTarget, fetchOpts?: FetchOptions): Promise<FetchedPage> {
       const context = await browser.newContext()
       const page = await context.newPage()
       try {
@@ -99,6 +117,15 @@ export async function createPlaywrightFetcher(
           waitUntil: 'networkidle',
           timeout: opts.navigationTimeoutMs ?? (opts.networkIdleMs ?? 5000) + 5000,
         })
+        // Pre-capture interactions: drive the page (login click, fill, etc.)
+        // before the DOM walker reads it. Stops at the first failure and
+        // surfaces a structured error so the orchestrator can wrap it.
+        if (fetchOpts?.interactions && fetchOpts.interactions.length > 0) {
+          await applyInteractions(page, fetchOpts.interactions, {
+            interactionsCap: fetchOpts.interactionsCap ?? MAX_INTERACTIONS,
+            interactionTimeoutMs: fetchOpts.interactionTimeoutMs ?? INTERACTION_TIMEOUT_MS,
+          })
+        }
         const html = await page.content()
         // Default to the whole body. Callers pass a target when they want
         // a subtree or single-element capture.

@@ -56,7 +56,7 @@ const mockFetchedPage = {
 }
 
 const mockFetcherInstance = {
-  fetch: mock(async () => mockFetchedPage),
+  fetch: mock(async (_url: string, _target?: unknown, _opts?: { interactions?: unknown }) => mockFetchedPage),
   close: async () => {},
 }
 
@@ -609,5 +609,23 @@ describe('capture_from_url mode gates', () => {
     expect(mockCreateSafeFetcher).toHaveBeenCalledTimes(1)
     expect(mockSafeFetcherInstance.fetch).toHaveBeenCalledTimes(1)
     expect(result.assetFiles).toEqual([])
+  })
+
+  it('passes interactions[] through to the fetcher', async () => {
+    resetMocks()
+    const interactions = [
+      { action: 'click', selector: 'button.login' },
+      { action: 'fill', selector: 'input[name=email]', value: 'x@y.z' },
+      { action: 'wait_for_url', pattern: '/dashboard' },
+    ] as never
+    await captureTool.handler(
+      { url: 'https://example.test/', interactions } as never,
+      stubCtx,
+    )
+    expect(mockFetcherInstance.fetch).toHaveBeenCalledTimes(1)
+    const fetchArgs = mockFetcherInstance.fetch.mock.calls[0]
+    // The fetcher's fetch signature is (url, target, opts?) where opts
+    // includes interactions. Verify the list reached the fetcher intact.
+    expect(fetchArgs[2]?.interactions).toEqual(interactions)
   })
 })

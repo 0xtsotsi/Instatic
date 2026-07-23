@@ -20,6 +20,11 @@ import { type CaptureFetcher, type FetchedPage } from './core/playwrightFetcher'
 import { generateUid } from './adapters/uids'
 import { tokensFromSite } from './adapters/tokens'
 import { applyPipeline, type CaptureMode } from './pipeline'
+import {
+  INTERACTION_TIMEOUT_MS,
+  MAX_INTERACTIONS,
+  type InteractionStep,
+} from './core/interactions'
 
 // Re-export so captureTool.ts (and any test that imports from this module)
 // can keep using the validateSelector boundary check without crossing
@@ -35,6 +40,19 @@ export interface RunCaptureInput {
   scope?: 'page' | 'subtree' | 'element'
   selector?: string
   assetsMax?: number
+  /**
+   * Pre-capture interactions applied after page navigation and before the
+   * DOM walker. Lets the agent drive the page (login click, fill a form,
+   * wait for a redirect) so the captured HTML reflects post-interaction
+   * state. Each step is validated against per-action required fields;
+   * a single failure aborts the sequence and the orchestrator returns
+   * `{ ok: false, error: "interaction step N failed: <selector>: <reason>" }`.
+   */
+  interactions?: readonly InteractionStep[]
+  /** Cap on number of interaction steps. Default MAX_INTERACTIONS (50). */
+  interactionsCap?: number
+  /** Default per-step timeout in ms. Default INTERACTION_TIMEOUT_MS (60_000). */
+  interactionTimeoutMs?: number
 }
 
 export interface RunCaptureDeps {
@@ -107,6 +125,9 @@ export async function runCapture(
     scope = 'page',
     selector,
     assetsMax = 25,
+    interactions,
+    interactionsCap = MAX_INTERACTIONS,
+    interactionTimeoutMs = INTERACTION_TIMEOUT_MS,
   } = input
   const target = targetForScope(scope, selector)
   let fetched: FetchedPage | null = null
@@ -114,7 +135,13 @@ export async function runCapture(
   try {
     // Stage 1: fetch + extract. Always runs — the DOM walk is cheap and the
     // page-side data is needed for both the HTML and CSS branches.
-    fetched = await deps.fetcher.fetch(url, target)
+    // The interactions list (when present) is applied by the fetcher between
+    // page.goto() and the DOM walker.
+    fetched = await deps.fetcher.fetch(url, target, {
+      interactions,
+      interactionsCap,
+      interactionTimeoutMs,
+    })
     const nodes = fetched.nodes
 
     // Selector matched nothing on the rendered page. Surface as a clean

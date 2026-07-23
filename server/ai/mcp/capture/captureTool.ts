@@ -26,6 +26,7 @@ type CaptureInputInternal = {
   scope?: 'page' | 'subtree' | 'element'
   selector?: string
   assetsMax?: number
+  interactions?: ReadonlyArray<import('./core/interactions').InteractionStep>
 }
 
 const CAPS: readonly CoreCapability[] = [
@@ -55,6 +56,34 @@ const CaptureInput = Type.Object(
     assetsMax: Type.Optional(
       Type.Integer({ minimum: 0, maximum: 100, description: 'Cap on asset downloads. Default 25.' }),
     ),
+    interactions: Type.Optional(
+      Type.Array(
+        Type.Object(
+          {
+            action: Type.Union([
+              Type.Literal('click'),
+              Type.Literal('fill'),
+              Type.Literal('type'),
+              Type.Literal('hover'),
+              Type.Literal('wait_for'),
+              Type.Literal('wait_for_url'),
+              Type.Literal('wait'),
+              Type.Literal('press'),
+            ]),
+            selector: Type.Optional(Type.String()),
+            value: Type.Optional(Type.String()),
+            text: Type.Optional(Type.String()),
+            pattern: Type.Optional(Type.String()),
+            key: Type.Optional(Type.String()),
+            ms: Type.Optional(Type.Integer({ minimum: 0, maximum: 30_000 })),
+            timeoutMs: Type.Optional(Type.Integer({ minimum: 0, maximum: 60_000 })),
+            delayMs: Type.Optional(Type.Integer({ minimum: 0, maximum: 5_000 })),
+          },
+          { additionalProperties: false },
+        ),
+        { maxLength: 50, description: 'Pre-capture interactions applied after navigation and before extraction (SPA support).' },
+      ),
+    ),
   },
   { additionalProperties: false },
 )
@@ -79,7 +108,7 @@ export const captureTool: AiTool = {
   inputSchema: CaptureInput,
   requiredCapabilities: CAPS,
   handler: async (input, ctx: ToolContext): Promise<CaptureOutput> => {
-    const { url, mode = 'dom+styles', scope = 'page', selector, assetsMax = 25 } = input as CaptureInputInternal
+    const { url, mode = 'dom+styles', scope = 'page', selector, assetsMax = 25, interactions } = input as CaptureInputInternal
 
     // Boundary validation: scope/subtree/element require a selector; the
     // selector itself must pass validateSelector. Both checks fire BEFORE
@@ -101,7 +130,7 @@ export const captureTool: AiTool = {
     // owns the lifecycle (close in its own finally block).
     const fetcher = await createPlaywrightFetcher()
     return runCapture(
-      { url, mode, scope, selector, assetsMax },
+      { url, mode, scope, selector, assetsMax, interactions },
       {
         fetcher,
         db: ctx.db,
