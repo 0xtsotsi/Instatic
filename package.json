@@ -64,7 +64,8 @@
     "bench:health": "bun run scripts/bench/index.ts --only=health",
     "bench:browser": "bun run scripts/bench/index.ts --only=browser",
     "bench:browser:install": "bunx playwright install chromium",
-    "doctor": "react-doctor"
+    "doctor": "react-doctor",
+    "prepare": "husky"
   },
   "dependencies": {
     "@codemirror/lang-css": "^6.3.1",
@@ -135,8 +136,10 @@
     "eslint-plugin-react-hooks": "^7.1.1",
     "eslint-plugin-react-refresh": "^0.5.2",
     "globals": "^17.6.0",
+    "husky": "^9.1.7",
     "jscpd": "^4.0.9",
     "knip": "^6.11.0",
+    "lint-staged": "^17.2.0",
     "madge": "^8.0.0",
     "playwright-core": "^1.60.0",
     "prettier": "^3.9.6",
@@ -145,5 +148,14 @@
     "typescript": "~6.0.3",
     "typescript-eslint": "^8.59.1",
     "vite": "^8.0.10"
+  },
+  "lint-staged": {
+    "*.{ts,tsx}": [
+      "eslint --cache --cache-location .tmp-lint/eslint-cache --fix",
+      "prettier --write"
+    ],
+    "*.{json,md,yml,yaml}": [
+      "prettier --write"
+    ]
   }
 }
