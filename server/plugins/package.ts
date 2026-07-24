@@ -32,6 +32,13 @@ function isBinaryPath(path: string): boolean {
   return BINARY_EXTENSIONS.test(path) && !/\.svg$/i.test(path)
 }
 
+// Manifest paths may be authored as `./admin/workflow.js`; the zip-key
+// store uses bare relative paths (no leading `./`), so strip it before
+// any file lookup or the check fails even when the file is present.
+function packageKey(entry: string): string {
+  return entry.startsWith('./') ? entry.slice(2) : entry
+}
+
 export async function readPluginPackage(file: File): Promise<PluginPackage> {
   const archive = unzipSync(new Uint8Array(await file.arrayBuffer()))
   const files: Record<string, string | Uint8Array> = {}
@@ -58,7 +65,8 @@ export async function readPluginPackage(file: File): Promise<PluginPackage> {
   ]
 
   for (const entry of entrypoints) {
-    if (entry && !files[entry]) {
+    if (!entry) continue
+    if (!files[packageKey(entry)]) {
       throw new Error(`Missing plugin entrypoint "${entry}"`)
     }
   }
@@ -66,17 +74,20 @@ export async function readPluginPackage(file: File): Promise<PluginPackage> {
   // Install-time sandbox scan — defense-in-depth against bundles that
   // didn't go through `instatic-plugin build` (raw zips, third-party packagers).
   // The server entrypoint and module pack BOTH run inside the QuickJS
-  // sandbox; both must be free of Node/Bun primitives.
+  // sandbox; both must be free of Node/Bun primitives. Lookup uses the
+  // same packageKey normalisation as the existence check above so a
+  // manifest path authored with a leading `./` doesn't silently skip
+  // the scan.
   const serverEntry = manifest.entrypoints?.server
   if (serverEntry) {
-    const serverSource = files[serverEntry]
+    const serverSource = files[packageKey(serverEntry)]
     if (typeof serverSource === 'string') {
       assertSandboxSafe(serverSource, `${manifest.id}/${serverEntry}`)
     }
   }
   const modulesEntry = manifest.entrypoints?.modules
   if (modulesEntry) {
-    const modulesSource = files[modulesEntry]
+    const modulesSource = files[packageKey(modulesEntry)]
     if (typeof modulesSource === 'string') {
       assertSandboxSafe(modulesSource, `${manifest.id}/${modulesEntry}`)
     }
