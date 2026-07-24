@@ -1,0 +1,14 @@
+dist
+.tmp
+.worktrees
+.coverage
+node_modules
+bun.lock
+playwright-report
+test-results
+uploads
+.env
+.env.*
+bun.lockb
+vendor
+.agents/skills
