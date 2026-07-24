@@ -33,4 +33,4 @@ The command creates a plugin zip in `dist/`. Start Instatic, sign in as an admin
 
 ## Add capture presets
 
-A preset is just a preselected `mode`, `scope`, and optional `selector`. Add preset buttons or a select control in `admin/workflow.tsx`, then update the corresponding React state (`setMode`, `setScope`, and `setSelector`). If a preset needs an asset limit, add `assetsMax` to the JSON body sent to the runtime route. No capture implementation belongs in `src/server.ts`; keep the route as a thin `api.cms.capture.fromUrl(body)` proxy.
+A preset is just a preselected `mode`, `scope`, and optional `selector`. Add preset buttons or a select control in `admin/workflow.tsx`, then update the corresponding React state (`setMode`, `setScope`, and `setSelector`). If a preset needs an asset limit, add `assetsMax` to the JSON body sent to the runtime route. No capture implementation belongs in `server/index.ts`; keep the route as a thin `api.cms.capture.fromUrl(body)` proxy.
