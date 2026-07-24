@@ -17,6 +17,13 @@
     "url": "https://github.com/corebunch/instatic/issues"
   },
   "type": "module",
+  "prettier": {
+    "printWidth": 100,
+    "semi": false,
+    "singleQuote": true,
+    "trailingComma": "all",
+    "arrowParens": "always"
+  },
   "scripts": {
     "dev": "bun run scripts/dev.ts",
     "dev:agent": "bun run dev:server",
@@ -40,6 +47,8 @@
     "fallow:health": "bun run test:coverage && npx fallow health --coverage .coverage/coverage-final.json",
     "icons:sync": "bun run scripts/sync-icons.ts",
     "icons:check": "bun run scripts/sync-icons.ts --check",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
     "bootstrap:sync": "bun run scripts/sync-plugin-bootstrap.ts",
     "bootstrap:check": "bun run scripts/sync-plugin-bootstrap.ts --check",
     "instatic-plugin": "bun run src/core/plugin-sdk/cli/index.ts",
@@ -130,6 +139,7 @@
     "knip": "^6.11.0",
     "madge": "^8.0.0",
     "playwright-core": "^1.60.0",
+    "prettier": "^3.9.6",
     "react-doctor": "^0.2.14",
     "secretlint": "^12.3.1",
     "typescript": "~6.0.3",
