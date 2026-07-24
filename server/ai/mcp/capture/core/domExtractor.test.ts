@@ -17,7 +17,7 @@ import { Window } from 'happy-dom'
 import {
   COMPUTED_PROPS,
   extractDom,
-  makePageWalker,
+  PAGE_WALKER_SOURCE,
   type ExtractContext,
 } from './domExtractor'
 
@@ -192,25 +192,73 @@ describe('COMPUTED_PROPS', () => {
   })
 })
 
-describe('makePageWalker (page-side bridge)', () => {
-  it('is callable as a function and returns an array (or throws if no DOM)', () => {
-    // bun:test sets up a stub document/window, so makePageWalker may
-    // either return [] or throw — what we care about is that it is a
-    // well-formed function that doesn't hang, and that when it does
-    // succeed it returns the same ExtractedNode[] shape extractDom does.
-    // The real production caller is Playwright's page.evaluate, which
-    // provides real page-globals; that's covered by Task 6's integration test.
-    let result: unknown = undefined
-    let threw = false
-    try {
-      result = makePageWalker({ selector: '.nope', maxDepth: 0 }, COMPUTED_PROPS)
-    } catch {
-      threw = true
-    }
-    if (!threw) {
-      expect(Array.isArray(result)).toBe(true)
-    }
-    // Either way, the function is callable and terminates. Smoke-test passed.
-    expect(true).toBe(true)
+describe('PAGE_WALKER_SOURCE (page-side bridge)', () => {
+  // The Playwright fetcher ships PAGE_WALKER_SOURCE into the page's V8 via
+  // page.evaluate, where it runs inside a self-invoking function whose
+  // args are JSON-baked at the call site:
+  //   page.evaluate(
+  //     `(function (target, COMPUTED_PROPS_) { ${PAGE_WALKER_SOURCE}
+  //       return runExtract(target, COMPUTED_PROPS_);
+  //     })(${JSON.stringify(target)}, ${JSON.stringify(props)})`,
+  //   )
+  // Playwright serialises string expressions by source and runs them in
+  // the page's V8. PAGE_WALKER_SOURCE has to be plain JS that declares
+  // every helper the trailing `runExtract` call uses — no `new Function`
+  // host side, no closure bridging.
+  it('is a non-empty string', () => {
+    expect(typeof PAGE_WALKER_SOURCE).toBe('string')
+    expect(PAGE_WALKER_SOURCE.length).toBeGreaterThan(0)
+  })
+
+  it('declares the walker helpers the fetcher depends on', () => {
+    expect(PAGE_WALKER_SOURCE).toContain('function runExtract(')
+    expect(PAGE_WALKER_SOURCE).toContain('function walk(')
+    expect(PAGE_WALKER_SOURCE).toContain('function uniqueSelector(')
+    expect(PAGE_WALKER_SOURCE).toContain('function captureStyles(')
+  })
+
+  it('closes runExtract on its own — the fetcher appends the trailing call', () => {
+    expect(PAGE_WALKER_SOURCE.trimEnd().endsWith('return out;\n}')).toBe(true)
+  })
+
+  it('runs end-to-end inside a happy-dom realm via the fetcher\'s wrapper shape', () => {
+    // Re-create the page-side shape the fetcher uses: an IIFE whose body
+    // inlines PAGE_WALKER_SOURCE and then calls runExtract on the JSON-
+    // baked args. PAGE_WALKER_SOURCE references `document` and `window`
+    // as bare globals (which is correct in a real page's V8). In this
+    // test we bridge happy-dom's realm into the function body by
+    // materialising the source via `new Function`, binding `this` to the
+    // happy-dom Window, and aliasing `document` and `window` to the
+    // realm-bound versions. This is the closest in-process approximation
+    // of the page-side execution the fetcher triggers in production;
+    // the actual page-side run is exercised by the Playwright integration
+    // test gated on CAPTURE_LIVE=1.
+    const win = new Window()
+    ;(win as unknown as Record<string, unknown>).SyntaxError = SyntaxError
+    ;(win as unknown as Record<string, unknown>).TypeError = TypeError
+    ;(win as unknown as Record<string, unknown>).Error = Error
+    win.document.write(FIXTURE)
+    const realmWindow = win as unknown as { document: unknown; window: unknown }
+    const body = [
+      'var document = this.document;',
+      'var window = this.window;',
+      PAGE_WALKER_SOURCE,
+      'return runExtract(target, COMPUTED_PROPS_);',
+    ].join('\n')
+    const fn = new Function(
+      'target',
+      'COMPUTED_PROPS_',
+      body,
+    ) as unknown as (this: { document: unknown; window: unknown }, target: { selector: string | null; maxDepth: number }, props: readonly string[]) => ExtractedNodeFromWalker[]
+    const result = fn.call(realmWindow, { selector: '.root', maxDepth: Infinity }, COMPUTED_PROPS)
+    expect(Array.isArray(result)).toBe(true)
+    const tags = result.map((n) => (n.outerHTML.match(/^<(\w+)/) ?? [])[1])
+    expect(tags).toEqual(['div', 'h1', 'p', 'span', 'div', 'div'])
   })
 })
+
+type ExtractedNodeFromWalker = {
+  selector: string
+  outerHTML: string
+  computedStyles: Record<string, string>
+}

@@ -5,18 +5,20 @@
  * browser context per fetch — that's the cheap part, and it gives every
  * caller an isolated session (cookies, storage, etc.).
  *
- * The walker itself runs in the page's V8 via
- *   page.evaluate(makePageWalker, target, COMPUTED_PROPS)
- * — see domExtractor.ts for the page-side walker source. The walker is
- * shared between the pure TypeScript entry point (used by tests) and the
- * page-side bridge (used here) so the two stay in lock-step.
+ * The walker itself runs in the page's V8 via `page.evaluate`. The
+ * page-side walker source lives in `domExtractor.ts` as
+ * `PAGE_WALKER_SOURCE`; the fetcher inlines it into a self-invoking
+ * function expression with the walker args JSON-baked at the call
+ * site. Playwright serialises string expressions by source and runs
+ * them in the page's V8. The pure TypeScript walker (`extractDom`)
+ * and the page-side source must stay in lock-step.
  *
  * The fetcher is dynamically imported so the rest of the module graph
  * does not pay for the Playwright binary until a real fetch is requested.
  */
 import {
   COMPUTED_PROPS,
-  makePageWalker,
+  PAGE_WALKER_SOURCE,
   type CaptureTarget,
   type ExtractedNode,
 } from './domExtractor'
@@ -258,16 +260,19 @@ export async function createPlaywrightFetcher(
         // a subtree or single-element capture.
         const resolvedTarget: CaptureTarget = target ?? { selector: null, maxDepth: Infinity }
         // Run the page-side walker in the page's V8. `document` and
-        // `window` are real globals there; makePageWalker bridges them.
-        // page.evaluate takes a function + one arg, so we close over the
-        // two-call args inside a wrapper that accepts a single arg.
+        // `window` are real globals there; PAGE_WALKER_SOURCE is the
+        // walker body in plain JS (declared in domExtractor.ts). When
+        // `page.evaluate` is called with a STRING expression, Playwright
+        // evaluates it in the page's V8 but does NOT bind any arg
+        // (`arguments[0]` is undefined; the arg is only bound when the
+        // script is a function). To pass `target` and `COMPUTED_PROPS_`
+        // without reaching back into a host closure, we serialise them
+        // as JSON and bake them into a self-invoking function expression.
+        // This mirrors the cypress / kaihv pattern of shipping a complete
+        // IIFE as a string to page.evaluate.
         const nodes = await page.evaluate(
-          ((targetAndProps: { target: CaptureTarget; props: readonly string[] }) =>
-            makePageWalker(targetAndProps.target, targetAndProps.props)) as unknown as (
-            arg: { target: CaptureTarget; props: readonly string[] },
-          ) => ExtractedNode[],
-          { target: resolvedTarget, props: COMPUTED_PROPS },
-        )
+          `(function (target, COMPUTED_PROPS_) { ${PAGE_WALKER_SOURCE}\nreturn runExtract(target, COMPUTED_PROPS_); })(${JSON.stringify(resolvedTarget)}, ${JSON.stringify(COMPUTED_PROPS)})`,
+        ) as ExtractedNode[]
         return {
           html,
           nodes,

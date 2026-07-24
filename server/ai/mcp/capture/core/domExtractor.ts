@@ -1,23 +1,26 @@
 /**
  * Walk a rendered DOM and produce ExtractedNode records.
  *
- * Two entry points:
+ * One entry point:
  *   - extractDom(target, ctx) — PURE TypeScript. Takes a Document + Window
- *     and walks in-process. Used by tests (which inject a happy-dom Window).
- *   - makePageWalker(target, props) — bridges to a page realm via
- *     page.evaluate. The Playwright fetcher uses this; the actual walking
- *     happens in the page's V8 where document and window are real globals.
+ *     and walks in-process. Used by tests (which inject a happy-dom Window)
+ *     and by any caller that already holds a Document reference.
+ *
+ * The Playwright fetcher does NOT use `extractDom` — it ships
+ * `PAGE_WALKER_SOURCE` (below) into the page's V8 via `page.evaluate` and
+ * runs an equivalent walker there, because page.evaluate runs in the
+ * page's V8 where `document` and `window` are real globals.
  *
  * PURE module: no Instatic imports, no DB, no top-level side effects.
  * The architecture test in captureTool.test.ts only bans @core/, server/,
  * and src/core/ specifiers in core/ — happy-dom and playwright-core are
  * allowed.
  *
- * NO `new Function`, NO `Function` constructor, NO string-serialised
- * walker on the test path. The only `new Function` use is inside
- * makePageWalker, which exists to bridge the Playwright page.evaluate
- * boundary — it is acceptable at this boundary because document/window
- * must be live page globals there.
+ * `PAGE_WALKER_SOURCE` is plain JS source evaluated by the browser; the
+ * host never invokes it via `new Function` directly. The only `new Function`
+ * use in this module's surface is in tests, where happy-dom's realm is
+ * asked to materialise the page-side source so its execution can be
+ * smoke-tested in-process.
  */
 
 export type ExtractedNode = {
@@ -163,7 +166,7 @@ export function extractDom(target: CaptureTarget, ctx: ExtractContext): Extracte
 // `document` and `window` as ambient page-globals (Playwright's
 // page.evaluate runs in the page's V8 context where those are real
 // globals), where the TypeScript version takes them as arguments.
-const PAGE_WALKER_SOURCE = `
+export const PAGE_WALKER_SOURCE = `
 "use strict";
 function uniqueSelector(el, root) {
   var parts = [];
@@ -216,23 +219,16 @@ function runExtract(target, COMPUTED_PROPS_) {
   walk(root, 0, maxDepth, root, window, COMPUTED_PROPS_, out);
   return out;
 }
-return runExtract(target, COMPUTED_PROPS_);
 `
 
-/**
- * Page-side walker. Used by the Playwright fetcher via page.evaluate —
- * the function body runs in the page's V8 where `document` and `window`
- * are real globals. Bun serialises the function source before Playwright
- * sends it to the page.
- *
- * This is the ONLY place in the module that uses `new Function` —
- * it exists to bridge the Playwright page.evaluate boundary. The pure
- * TypeScript walker used by tests (extractDom) never touches this.
- */
-export function makePageWalker(target: CaptureTarget, props: readonly string[]): ExtractedNode[] {
-  const fn = new Function('target', 'COMPUTED_PROPS_', PAGE_WALKER_SOURCE) as (
-    target: CaptureTarget,
-    props: readonly string[],
-  ) => ExtractedNode[]
-  return fn(target, props)
-}
+// PAGE_WALKER_SOURCE is the body of the page-side walker, inlined
+// into a self-invoking function expression by `playwrightFetcher.ts`:
+//   page.evaluate(`(function (target, COMPUTED_PROPS_) { ${PAGE_WALKER_SOURCE}
+//     return runExtract(target, COMPUTED_PROPS_);
+//   })(${JSON.stringify(target)}, ${JSON.stringify(props)})`)
+// The walker helpers (`uniqueSelector`, `captureStyles`, `walk`,
+// `runExtract`) are declared inline so the IIFE is self-contained.
+// `runExtract` is declared but NOT called — the trailing `return
+// runExtract(...)` is appended by the fetcher. Playwright serialises
+// string expressions by source and runs them in the page's V8, so this
+// string has to be plain JS, not a function expression.
