@@ -10,14 +10,13 @@
  * externally observable stream events + DB writes.
  */
 
-import { afterEach, beforeEach, describe, expect, it } from 'bun:test'
+import { beforeEach, describe, expect, it } from 'bun:test'
 import { createSqliteClient } from '../../../db/sqlite'
 import { sqliteMigrations } from '../../../db/migrations-sqlite'
 import { runMigrations } from '../../../db/runMigrations'
 import type { DbClient } from '../../../db/client'
 import { runChat } from '../runner'
 import { createConversationsPersister } from '../persister'
-import type { ConversationsPersister } from '../persister'
 import type { AiProvider, AiStreamRequest } from '../../drivers/types'
 import type { AiStreamEvent } from '../types'
 import { INTERRUPTED_TOOL_RESULT_ERROR } from '@core/ai'
@@ -85,7 +84,11 @@ function req(overrides: Partial<AiStreamRequest> = {}): AiStreamRequest {
       baseUrl: null,
     },
     signal: new AbortController().signal,
-    bridge: { callBrowser: async () => { throw new Error('no bridge') } },
+    bridge: {
+      callBrowser: async () => {
+        throw new Error('no bridge')
+      },
+    },
     toolContextBase: {
       db: undefined as never,
       userId: 'u1',
@@ -100,7 +103,9 @@ function req(overrides: Partial<AiStreamRequest> = {}): AiStreamRequest {
 
 describe('runChat — contract characterization', () => {
   let db: DbClient
-  beforeEach(async () => { db = await resetDb() })
+  beforeEach(async () => {
+    db = await resetDb()
+  })
 
   it('emits done after a clean text-only stream and persists an assistant text row', async () => {
     const collected: AiStreamEvent[] = []
@@ -115,11 +120,12 @@ describe('runChat — contract characterization', () => {
         cacheCreationTokens: 0,
       },
     ])
-    const per = createConversationsPersister(db, 'conv1', { providerId: 'anthropic', modelId: 'm1' })
+    const per = createConversationsPersister(db, 'conv1', {
+      providerId: 'anthropic',
+      modelId: 'm1',
+    })
     await runChat({ driver, request: req(), persister: per, emit: (e) => collected.push(e) })
-    expect(collected.map((e) => e.type)).toEqual([
-      'text', 'text', 'usage', 'done',
-    ])
+    expect(collected.map((e) => e.type)).toEqual(['text', 'text', 'usage', 'done'])
     const { rows } = await db<{ role: string; content_json: unknown }>`
       select role, content_json from ai_messages where conversation_id = 'conv1' order by created_at
     `
@@ -133,7 +139,10 @@ describe('runChat — contract characterization', () => {
   it('emits done when the stream ends without an explicit done/error', async () => {
     const collected: AiStreamEvent[] = []
     const driver = fakeProvider([{ type: 'text', text: 'x' }])
-    const per = createConversationsPersister(db, 'conv1', { providerId: 'anthropic', modelId: 'm1' })
+    const per = createConversationsPersister(db, 'conv1', {
+      providerId: 'anthropic',
+      modelId: 'm1',
+    })
     await runChat({ driver, request: req(), persister: per, emit: (e) => collected.push(e) })
     expect(collected.at(-1)?.type).toBe('done')
     expect(collected.map((e) => e.type)).not.toContain('error')
@@ -142,12 +151,22 @@ describe('runChat — contract characterization', () => {
   it('interrupts trailing tool calls when the driver emits an error event', async () => {
     const collected: AiStreamEvent[] = []
     const driver = fakeProvider([
-      { type: 'toolCall', toolCallId: 't1', toolName: 'site_insert_html', input: {}, status: 'pending' },
+      {
+        type: 'toolCall',
+        toolCallId: 't1',
+        toolName: 'site_insert_html',
+        input: {},
+        status: 'pending',
+      },
       { type: 'error', message: 'boom' },
     ])
-    const per = createConversationsPersister(db, 'conv1', { providerId: 'anthropic', modelId: 'm1' })
+    const per = createConversationsPersister(db, 'conv1', {
+      providerId: 'anthropic',
+      modelId: 'm1',
+    })
     await runChat({ driver, request: req(), persister: per, emit: (e) => collected.push(e) })
-    const terminated = collected.find((e) => e.type === 'toolResult') as Extract<AiStreamEvent, { type: 'toolResult' }> | undefined
+    const terminated = collected.find((e) => e.type === 'toolResult') as
+      Extract<AiStreamEvent, { type: 'toolResult' }> | undefined
     expect(terminated).toBeDefined()
     expect(terminated?.ok).toBe(false)
     expect(terminated?.error).toBe(INTERRUPTED_TOOL_RESULT_ERROR)
@@ -163,9 +182,18 @@ describe('runChat — contract characterization', () => {
         throw new Error('network down')
       },
     }
-    const per = createConversationsPersister(db, 'conv1', { providerId: 'anthropic', modelId: 'm1' })
-    await runChat({ driver: throwing, request: req(), persister: per, emit: (e) => collected.push(e) })
-    const err = collected.find((e) => e.type === 'error') as Extract<AiStreamEvent, { type: 'error' }> | undefined
+    const per = createConversationsPersister(db, 'conv1', {
+      providerId: 'anthropic',
+      modelId: 'm1',
+    })
+    await runChat({
+      driver: throwing,
+      request: req(),
+      persister: per,
+      emit: (e) => collected.push(e),
+    })
+    const err = collected.find((e) => e.type === 'error') as
+      Extract<AiStreamEvent, { type: 'error' }> | undefined
     expect(err).toBeDefined()
     expect(err?.message).toContain('network down')
     expect(collected.find((e) => e.type === 'done')).toBeUndefined()
@@ -175,11 +203,21 @@ describe('runChat — contract characterization', () => {
     const collected: AiStreamEvent[] = []
     const driver = fakeProvider([
       { type: 'text', text: 'hi' },
-      { type: 'usage', promptTokens: 7, completionTokens: 3, cacheReadTokens: 0, cacheCreationTokens: 0 },
+      {
+        type: 'usage',
+        promptTokens: 7,
+        completionTokens: 3,
+        cacheReadTokens: 0,
+        cacheCreationTokens: 0,
+      },
     ])
-    const per = createConversationsPersister(db, 'conv1', { providerId: 'anthropic', modelId: 'm1' })
+    const per = createConversationsPersister(db, 'conv1', {
+      providerId: 'anthropic',
+      modelId: 'm1',
+    })
     await runChat({ driver, request: req(), persister: per, emit: (e) => collected.push(e) })
-    const usage = collected.find((e) => e.type === 'usage') as Extract<AiStreamEvent, { type: 'usage' }> | undefined
+    const usage = collected.find((e) => e.type === 'usage') as
+      Extract<AiStreamEvent, { type: 'usage' }> | undefined
     expect(usage).toBeDefined()
     expect(usage?.costUsd).toBeGreaterThanOrEqual(0)
     const { rows } = await db`
@@ -194,12 +232,27 @@ describe('runChat — contract characterization', () => {
     const collected: AiStreamEvent[] = []
     const driver = fakeProvider([
       { type: 'text', text: 'checking' },
-      { type: 'toolCall', toolCallId: 'tc1', toolName: 'site_read_document', input: { part: 1 }, status: 'pending' },
+      {
+        type: 'toolCall',
+        toolCallId: 'tc1',
+        toolName: 'site_read_document',
+        input: { part: 1 },
+        status: 'pending',
+      },
       { type: 'toolResult', toolCallId: 'tc1', toolName: 'site_read_document', ok: true },
       { type: 'text', text: 'done' },
-      { type: 'usage', promptTokens: 1, completionTokens: 1, cacheReadTokens: 0, cacheCreationTokens: 0 },
+      {
+        type: 'usage',
+        promptTokens: 1,
+        completionTokens: 1,
+        cacheReadTokens: 0,
+        cacheCreationTokens: 0,
+      },
     ])
-    const per = createConversationsPersister(db, 'conv1', { providerId: 'anthropic', modelId: 'm1' })
+    const per = createConversationsPersister(db, 'conv1', {
+      providerId: 'anthropic',
+      modelId: 'm1',
+    })
     await runChat({ driver, request: req(), persister: per, emit: (e) => collected.push(e) })
     const order = collected.map((e) => e.type)
     expect(order.indexOf('text')).toBeLessThan(order.indexOf('toolCall'))
@@ -211,24 +264,39 @@ describe('runChat — contract characterization', () => {
 
 describe('createConversationsPersister — contract accounting', () => {
   let db: DbClient
-  beforeEach(async () => { db = await resetDb() })
+  beforeEach(async () => {
+    db = await resetDb()
+  })
 
   it('propagates prompt/completion deltas onto the conversation row', async () => {
-    const per = createConversationsPersister(db, 'conv1', { providerId: 'anthropic', modelId: 'm1' })
+    const per = createConversationsPersister(db, 'conv1', {
+      providerId: 'anthropic',
+      modelId: 'm1',
+    })
     await per.appendAssistantText('a')
     await per.recordUsage({
-      promptTokens: 12, completionTokens: 4, cacheReadTokens: 0, cacheCreationTokens: 0,
+      promptTokens: 12,
+      completionTokens: 4,
+      cacheReadTokens: 0,
+      cacheCreationTokens: 0,
     })
-    const { rows } = await db`select prompt_tokens_total as p, completion_tokens_total as c from ai_conversations where id = 'conv1'`
+    const { rows } =
+      await db`select prompt_tokens_total as p, completion_tokens_total as c from ai_conversations where id = 'conv1'`
     expect(Number(rows[0].p)).toBe(12)
     expect(Number(rows[0].c)).toBe(4)
   })
 
   it('returns the resolved costUsd from recordUsage', async () => {
-    const per = createConversationsPersister(db, 'conv1', { providerId: 'anthropic', modelId: 'm1' })
+    const per = createConversationsPersister(db, 'conv1', {
+      providerId: 'anthropic',
+      modelId: 'm1',
+    })
     await per.appendAssistantText('a')
     const cost = await per.recordUsage({
-      promptTokens: 1, completionTokens: 1, cacheReadTokens: 0, cacheCreationTokens: 0,
+      promptTokens: 1,
+      completionTokens: 1,
+      cacheReadTokens: 0,
+      cacheCreationTokens: 0,
     })
     expect(typeof cost).toBe('number')
     expect(cost).toBeGreaterThanOrEqual(0)

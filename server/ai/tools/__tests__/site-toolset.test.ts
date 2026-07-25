@@ -85,7 +85,13 @@ describe('selectToolsForScope capability filter', () => {
   })
 
   it('exposes mutating tools to a caller with ai.tools.write + site.structure.edit + site.style.edit', () => {
-    const tools = selectToolsForScope('site', ['ai.chat', 'ai.tools.write', 'site.read', 'site.structure.edit', 'site.style.edit'])
+    const tools = selectToolsForScope('site', [
+      'ai.chat',
+      'ai.tools.write',
+      'site.read',
+      'site.structure.edit',
+      'site.style.edit',
+    ])
     expect(tools.map((t) => t.name)).toContain('site_insert_html')
     expect(tools.map((t) => t.name)).toContain('site_apply_css')
   })
@@ -96,7 +102,9 @@ describe('selectToolsForScope capability filter', () => {
   })
 
   it('toolAllowedForCapabilities denies a tool with requiredCapabilities when the caller lacks them', () => {
-    const tools = siteTools.filter((t) => t.requiredCapabilities && t.requiredCapabilities.length > 0)
+    const tools = siteTools.filter(
+      (t) => t.requiredCapabilities && t.requiredCapabilities.length > 0,
+    )
     expect(tools.length).toBeGreaterThan(0)
     for (const tool of tools) {
       const allowed = toolAllowedForCapabilities(tool, ['ai.chat'])

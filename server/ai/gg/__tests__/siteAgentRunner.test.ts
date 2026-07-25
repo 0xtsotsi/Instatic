@@ -18,7 +18,6 @@ import { createSqliteClient } from '../../../db/sqlite'
 import { sqliteMigrations } from '../../../db/migrations-sqlite'
 import { runMigrations } from '../../../db/runMigrations'
 import type { DbClient } from '../../../db/client'
-import { createSqliteClient as _createSqliteClient } from '../../../db/sqlite'
 import { Type, type Static } from '@core/utils/typeboxHelpers'
 import {
   registerPalsuProvider,
@@ -26,11 +25,10 @@ import {
   palsuToolCall,
   type PalsuProviderHandle,
 } from '@kenkaiiii/gg-ai'
-import type { PalsuProviderHandle as _PalsuProviderHandle } from '@kenkaiiii/gg-ai'
 import { runSiteAgent } from '../siteAgentRunner'
 import { createConversationsPersister } from '../../runtime/persister'
-import { invalidateSkillCache, loadSkillsFromDirectory } from '../../skills/loader'
-import { mkdtemp, mkdir, rm, writeFile } from 'node:fs/promises'
+import { invalidateSkillCache } from '../../skills/loader'
+import { mkdtemp, rm, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import type { AiMessage, AiTool, AiBrowserBridge } from '../../runtime/types'
@@ -128,9 +126,16 @@ describe('runSiteAgent — text-only turn', () => {
     palsu.appendResponses(palsuText('hello world'))
 
     const collected: AiStreamEvent[] = []
-    const per = createConversationsPersister(db, 'conv1', { providerId: 'anthropic', modelId: 'm1' })
+    const per = createConversationsPersister(db, 'conv1', {
+      providerId: 'anthropic',
+      modelId: 'm1',
+    })
     const ac = new AbortController()
-    const bridge: AiBrowserBridge = { callBrowser: async () => { throw new Error('no') } }
+    const bridge: AiBrowserBridge = {
+      callBrowser: async () => {
+        throw new Error('no')
+      },
+    }
     await runSiteAgent({
       credential: cred(),
       modelId: 'm1',
@@ -148,8 +153,12 @@ describe('runSiteAgent — text-only turn', () => {
         signal: ac.signal,
         emit: () => {},
         toolContext: {
-          db, userId: 'u1', capabilities: ['ai.chat'],
-          scope: 'site', conversationId: 'conv1', snapshot: null,
+          db,
+          userId: 'u1',
+          capabilities: ['ai.chat'],
+          scope: 'site',
+          conversationId: 'conv1',
+          snapshot: null,
           signal: ac.signal,
         },
       },
@@ -171,15 +180,20 @@ describe('runSiteAgent — text-only turn', () => {
   it('persists one assistant text message into the conversation', async () => {
     palsu.appendResponses(palsuText('hi from gg-agent'))
 
-    const per = createConversationsPersister(db, 'conv1', { providerId: 'anthropic', modelId: 'm1' })
+    const per = createConversationsPersister(db, 'conv1', {
+      providerId: 'anthropic',
+      modelId: 'm1',
+    })
     const ac = new AbortController()
-    const bridge: AiBrowserBridge = { callBrowser: async () => { throw new Error('no') } }
+    const bridge: AiBrowserBridge = {
+      callBrowser: async () => {
+        throw new Error('no')
+      },
+    }
     await runSiteAgent({
       credential: cred(),
       modelId: 'm1',
-      messages: [
-        { role: 'user', content: [{ kind: 'text', text: 'Hi' }] },
-      ] as AiMessage[],
+      messages: [{ role: 'user', content: [{ kind: 'text', text: 'Hi' }] }] as AiMessage[],
       systemPrompt: ['sys'],
       tools: [],
       signal: ac.signal,
@@ -190,8 +204,12 @@ describe('runSiteAgent — text-only turn', () => {
         signal: ac.signal,
         emit: () => {},
         toolContext: {
-          db, userId: 'u1', capabilities: ['ai.chat'],
-          scope: 'site', conversationId: 'conv1', snapshot: null,
+          db,
+          userId: 'u1',
+          capabilities: ['ai.chat'],
+          scope: 'site',
+          conversationId: 'conv1',
+          snapshot: null,
           signal: ac.signal,
         },
       },
@@ -220,15 +238,20 @@ describe('runSiteAgent — tool-call turn', () => {
     palsu.appendResponses(palsuText('reply after echo'))
 
     const collected: AiStreamEvent[] = []
-    const per = createConversationsPersister(db, 'conv1', { providerId: 'anthropic', modelId: 'm1' })
+    const per = createConversationsPersister(db, 'conv1', {
+      providerId: 'anthropic',
+      modelId: 'm1',
+    })
     const ac = new AbortController()
-    const bridge: AiBrowserBridge = { callBrowser: async () => { throw new Error('no') } }
+    const bridge: AiBrowserBridge = {
+      callBrowser: async () => {
+        throw new Error('no')
+      },
+    }
     await runSiteAgent({
       credential: cred(),
       modelId: 'm1',
-      messages: [
-        { role: 'user', content: [{ kind: 'text', text: 'echo please' }] },
-      ] as AiMessage[],
+      messages: [{ role: 'user', content: [{ kind: 'text', text: 'echo please' }] }] as AiMessage[],
       systemPrompt: ['sys'],
       tools: [echoTool],
       signal: ac.signal,
@@ -239,8 +262,12 @@ describe('runSiteAgent — tool-call turn', () => {
         signal: ac.signal,
         emit: () => {},
         toolContext: {
-          db, userId: 'u1', capabilities: ['ai.chat'],
-          scope: 'site', conversationId: 'conv1', snapshot: null,
+          db,
+          userId: 'u1',
+          capabilities: ['ai.chat'],
+          scope: 'site',
+          conversationId: 'conv1',
+          snapshot: null,
           signal: ac.signal,
         },
       },
@@ -267,16 +294,21 @@ describe('runSiteAgent — fail-closed paths', () => {
     // No responses, the provider will surface something — we just want
     // exactly one terminal event in the caught-error path.
     const collected: AiStreamEvent[] = []
-    const per = createConversationsPersister(db, 'conv1', { providerId: 'anthropic', modelId: 'm1' })
+    const per = createConversationsPersister(db, 'conv1', {
+      providerId: 'anthropic',
+      modelId: 'm1',
+    })
     const ac = new AbortController()
-    const bridge: AiBrowserBridge = { callBrowser: async () => { throw new Error('no') } }
+    const bridge: AiBrowserBridge = {
+      callBrowser: async () => {
+        throw new Error('no')
+      },
+    }
     // Use a model id that no provider knows — the loop will throw.
     await runSiteAgent({
       credential: cred(),
       modelId: 'definitely-unknown',
-      messages: [
-        { role: 'user', content: [{ kind: 'text', text: 'go' }] },
-      ] as AiMessage[],
+      messages: [{ role: 'user', content: [{ kind: 'text', text: 'go' }] }] as AiMessage[],
       systemPrompt: ['sys'],
       tools: [],
       signal: ac.signal,
@@ -287,8 +319,12 @@ describe('runSiteAgent — fail-closed paths', () => {
         signal: ac.signal,
         emit: () => {},
         toolContext: {
-          db, userId: 'u1', capabilities: ['ai.chat'],
-          scope: 'site', conversationId: 'conv1', snapshot: null,
+          db,
+          userId: 'u1',
+          capabilities: ['ai.chat'],
+          scope: 'site',
+          conversationId: 'conv1',
+          snapshot: null,
           signal: ac.signal,
         },
       },
@@ -307,14 +343,19 @@ describe('runSiteAgent — fail-closed paths', () => {
     // Abort before running — the runner should NOT make a network call.
     ac.abort()
     const collected: AiStreamEvent[] = []
-    const per = createConversationsPersister(db, 'conv1', { providerId: 'anthropic', modelId: 'm1' })
-    const bridge: AiBrowserBridge = { callBrowser: async () => { throw new Error('no') } }
+    const per = createConversationsPersister(db, 'conv1', {
+      providerId: 'anthropic',
+      modelId: 'm1',
+    })
+    const bridge: AiBrowserBridge = {
+      callBrowser: async () => {
+        throw new Error('no')
+      },
+    }
     await runSiteAgent({
       credential: cred(),
       modelId: 'm1',
-      messages: [
-        { role: 'user', content: [{ kind: 'text', text: 'go' }] },
-      ] as AiMessage[],
+      messages: [{ role: 'user', content: [{ kind: 'text', text: 'go' }] }] as AiMessage[],
       systemPrompt: ['sys'],
       tools: [],
       signal: ac.signal,
@@ -325,8 +366,12 @@ describe('runSiteAgent — fail-closed paths', () => {
         signal: ac.signal,
         emit: () => {},
         toolContext: {
-          db, userId: 'u1', capabilities: ['ai.chat'],
-          scope: 'site', conversationId: 'conv1', snapshot: null,
+          db,
+          userId: 'u1',
+          capabilities: ['ai.chat'],
+          scope: 'site',
+          conversationId: 'conv1',
+          snapshot: null,
           signal: ac.signal,
         },
       },

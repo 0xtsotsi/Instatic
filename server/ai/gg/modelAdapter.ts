@@ -163,11 +163,17 @@ export function projectMessages(history: ReadonlyArray<AiMessage>): Message[] {
           })
           .filter((p): p is NonNullable<typeof p> => p !== null)
         if (content.length === 0) continue
-        out.push({ role: 'user', content: content as Message extends { role: 'user' } ? typeof content : never })
+        out.push({
+          role: 'user',
+          content: content as Message extends { role: 'user' } ? typeof content : never,
+        })
         break
       }
       case 'assistant': {
-        const parts: Array<{ type: 'text'; text: string } | { type: 'tool_call'; id: string; name: string; args: Record<string, unknown> }> = []
+        const parts: Array<
+          | { type: 'text'; text: string }
+          | { type: 'tool_call'; id: string; name: string; args: Record<string, unknown> }
+        > = []
         for (const b of msg.content) {
           if (b.kind === 'text') {
             parts.push({ type: 'text', text: b.text })
@@ -189,19 +195,22 @@ export function projectMessages(history: ReadonlyArray<AiMessage>): Message[] {
         // Instatic's AiToolOutput shape: { ok, data?, error?, images? }.
         // We map the text payload into the upstream ToolResult shape and
         // surface errors as `isError: true`.
-        const textFromData = typeof tr.data === 'string'
-          ? tr.data
-          : tr.data !== undefined
-            ? JSON.stringify(tr.data)
-            : tr.error ?? (tr.ok ? 'Tool returned no content.' : 'Tool call failed.')
+        const textFromData =
+          typeof tr.data === 'string'
+            ? tr.data
+            : tr.data !== undefined
+              ? JSON.stringify(tr.data)
+              : (tr.error ?? (tr.ok ? 'Tool returned no content.' : 'Tool call failed.'))
         out.push({
           role: 'tool',
-          content: [{
-            type: 'tool_result',
-            toolCallId: msg.toolCallId,
-            content: [{ type: 'text' as const, text: textFromData }],
-            isError: !tr.ok,
-          }],
+          content: [
+            {
+              type: 'tool_result',
+              toolCallId: msg.toolCallId,
+              content: [{ type: 'text' as const, text: textFromData }],
+              isError: !tr.ok,
+            },
+          ],
         })
         break
       }
@@ -223,7 +232,9 @@ function composeSystemPrompt(form: string[]): string {
   // Concatenate, dropping the boundary marker. If the caller passes a flat
   // single-string, surface it unchanged.
   if (form.length === 1) return form[0]
-  return [form[0], form[2]].filter((s): s is string => typeof s === 'string' && s.length > 0).join('\n\n')
+  return [form[0], form[2]]
+    .filter((s): s is string => typeof s === 'string' && s.length > 0)
+    .join('\n\n')
 }
 
 /**

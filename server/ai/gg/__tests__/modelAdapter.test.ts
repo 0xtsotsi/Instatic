@@ -9,7 +9,7 @@
 
 import { afterEach, beforeEach, describe, expect, it } from 'bun:test'
 import { registerPalsuProvider, palsuText, type PalsuProviderHandle } from '@kenkaiiii/gg-ai'
-import { buildAgent, buildAgentOptions, projectMessages } from '../modelAdapter'
+import { buildAgentOptions, projectMessages } from '../modelAdapter'
 import { mapProviderId } from '../types'
 import { _noopAgentTool } from '../modelAdapter'
 import type { AiMessage } from '../../runtime/types'
@@ -89,7 +89,12 @@ describe('buildAgentOptions', () => {
 
   it('omits apiKey when the credential has no secret', () => {
     const opts = buildAgentOptions({
-      credential: cred({ providerId: 'ollama', authMode: 'baseUrl', baseUrl: 'http://localhost:11434/v1', apiKey: null }),
+      credential: cred({
+        providerId: 'ollama',
+        authMode: 'baseUrl',
+        baseUrl: 'http://localhost:11434/v1',
+        apiKey: null,
+      }),
       modelId: 'llama3',
       messages: history(),
       systemPrompt: ['s'],
@@ -133,7 +138,10 @@ describe('projectMessages', () => {
 
   it('maps assistant tool calls to tool_call content parts', () => {
     const out = projectMessages([
-      { role: 'assistant', content: [{ kind: 'toolCall', toolCallId: 't1', toolName: 'noop', input: {} }] },
+      {
+        role: 'assistant',
+        content: [{ kind: 'toolCall', toolCallId: 't1', toolName: 'noop', input: {} }],
+      },
     ])
     const a = out[0] as { role: 'assistant'; content: Array<{ type: string }> }
     expect(a.content[0]?.type).toBe('tool_call')

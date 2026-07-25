@@ -79,10 +79,7 @@ export async function loadSkillsFromDirectory(
     const raw = await readFile(filePath, 'utf8')
     const skill = parseSkillMarkdown(filePath, raw, fileBytes)
     if (out.has(skill.frontmatter.id)) {
-      throw new SkillLoadError(
-        `Duplicate skill id "${skill.frontmatter.id}".`,
-        filePath,
-      )
+      throw new SkillLoadError(`Duplicate skill id "${skill.frontmatter.id}".`, filePath)
     }
     out.set(skill.frontmatter.id, skill)
   }
@@ -133,11 +130,7 @@ export function invalidateSkillCache(): void {
  * string value. `tags` is the only field that takes a list and is parsed
  * from a JSON array on a single line for safety.
  */
-export function parseSkillMarkdown(
-  sourcePath: string,
-  raw: string,
-  bytes: number,
-): ValidatedSkill {
+export function parseSkillMarkdown(sourcePath: string, raw: string, bytes: number): ValidatedSkill {
   const extracted = extractFrontmatter(raw)
   if (extracted.frontmatterRaw === null) {
     throw new SkillLoadError('Missing leading "---" frontmatter block.', sourcePath)
@@ -145,10 +138,7 @@ export function parseSkillMarkdown(
   const fm = parseFrontmatterLine(extracted.frontmatterRaw)
   const validated = safeParseValue(SkillFrontmatterSchema, fm)
   if (!validated.ok) {
-    throw new SkillLoadError(
-      `Invalid frontmatter: ${JSON.stringify(validated.errors)}`,
-      sourcePath,
-    )
+    throw new SkillLoadError(`Invalid frontmatter: ${JSON.stringify(validated.errors)}`, sourcePath)
   }
   return {
     frontmatter: validated.value,
@@ -204,7 +194,10 @@ function parseFrontmatterLine(raw: string): Record<string, unknown> {
       try {
         out[key] = JSON.parse(value)
       } catch {
-        out[key] = value.split(',').map((s) => s.trim()).filter((s) => s.length > 0)
+        out[key] = value
+          .split(',')
+          .map((s) => s.trim())
+          .filter((s) => s.length > 0)
       }
       continue
     }

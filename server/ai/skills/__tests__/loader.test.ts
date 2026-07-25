@@ -13,14 +13,10 @@
  */
 
 import { afterEach, beforeEach, describe, expect, it } from 'bun:test'
-import { mkdtemp, mkdir, rm, symlink, writeFile } from 'node:fs/promises'
+import { mkdtemp, rm, symlink, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
-import {
-  loadSkillsFromDirectory,
-  parseSkillMarkdown,
-  invalidateSkillCache,
-} from '../loader'
+import { loadSkillsFromDirectory, parseSkillMarkdown, invalidateSkillCache } from '../loader'
 import { SkillLoadError } from '../types'
 
 let dir: string
@@ -88,7 +84,10 @@ describe('parseSkillMarkdown', () => {
 describe('loadSkillsFromDirectory', () => {
   it('loads every .md skill in the directory', async () => {
     await write('a.md', VALID_SKILL)
-    await write('b.md', `---\nid: another\nname: Another\ndescription: d\nversion: 0.1.0\n---\nbody b`)
+    await write(
+      'b.md',
+      `---\nid: another\nname: Another\ndescription: d\nversion: 0.1.0\n---\nbody b`,
+    )
     const out = await loadSkillsFromDirectory(dir)
     expect(out.size).toBe(2)
     expect(out.has('website-design')).toBe(true)
@@ -113,7 +112,9 @@ describe('loadSkillsFromDirectory', () => {
     const big = 'x'.repeat(2 * 1024 * 1024)
     await write('a.md', VALID_SKILL)
     await write('big.md', `---\nid: big\nname: b\ndescription: d\nversion: 1.0.0\n---\n${big}`)
-    expect(loadSkillsFromDirectory(dir, { maxFileBytes: 1024 * 1024 })).rejects.toThrow(/File too large/)
+    expect(loadSkillsFromDirectory(dir, { maxFileBytes: 1024 * 1024 })).rejects.toThrow(
+      /File too large/,
+    )
   })
 
   it('throws on too many files', async () => {

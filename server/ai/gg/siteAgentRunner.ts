@@ -26,7 +26,12 @@
 
 import type { Agent, AgentEvent, AgentTool } from '@kenkaiiii/gg-agent'
 import { buildAgent } from './modelAdapter'
-import { adaptToolsToAgent, bindAdapterContext, releaseAdapterContext, type AdapterContext } from './siteToolAdapter'
+import {
+  adaptToolsToAgent,
+  bindAdapterContext,
+  releaseAdapterContext,
+  type AdapterContext,
+} from './siteToolAdapter'
 import { resolveSkillsForScope } from '../skills/catalog'
 import { composeSystemPrompt } from '../skills/compose'
 import { PRODUCT_SKILL_DIRECTORY } from '../skills/catalog'
@@ -70,10 +75,7 @@ export interface RunSiteAgentArgs {
  * event is always emitted unless the agent surfaced an error event.
  */
 export async function runSiteAgent(args: RunSiteAgentArgs): Promise<void> {
-  const skills = await resolveSkillsForScope(
-    args.scope,
-    args.skillDir ?? PRODUCT_SKILL_DIRECTORY,
-  )
+  const skills = await resolveSkillsForScope(args.scope, args.skillDir ?? PRODUCT_SKILL_DIRECTORY)
   const composedPrompt = composeSystemPrompt({
     operatingRules: args.systemPrompt.join('\n\n'),
     skills,
@@ -81,12 +83,14 @@ export async function runSiteAgent(args: RunSiteAgentArgs): Promise<void> {
   })
   const agentTools: AgentTool[] = adaptToolsToAgent(args.tools)
   bindAdapterContext(args.tools, args.adapterContext)
-  let agent: Agent | null = null
   try {
     const effectiveCredential = args.providerIdOverride
-      ? { ...args.credential, providerId: args.providerIdOverride as typeof args.credential.providerId }
+      ? {
+          ...args.credential,
+          providerId: args.providerIdOverride as typeof args.credential.providerId,
+        }
       : args.credential
-    agent = buildAgent({
+    const agent = buildAgent({
       credential: effectiveCredential,
       modelId: args.modelId,
       messages: args.messages,
@@ -114,13 +118,8 @@ export async function runSiteAgent(args: RunSiteAgentArgs): Promise<void> {
  * The state machine below mirrors the legacy `runChat` so the wire
  * shape is identical no matter which runtime is selected.
  */
-async function driveAgentLoop(
-  agent: Agent,
-  args: RunSiteAgentArgs,
-): Promise<void> {
-  const {
-    emit, persister, signal,
-  } = args
+async function driveAgentLoop(agent: Agent, args: RunSiteAgentArgs): Promise<void> {
+  const { emit, persister, signal } = args
   let pendingAssistantText = ''
   const pendingToolCalls = new Map<string, { name: string }>()
 
@@ -152,21 +151,31 @@ async function driveAgentLoop(
   }
 
   let terminalEmitted = false
+  const emitTerminal = (event: AiStreamEvent) => {
+    if (terminalEmitted) return
+    terminalEmitted = true
+    emit(event)
+  }
   try {
     const stream = agent.prompt('')
     for await (const event of stream as AsyncIterable<AgentEvent>) {
       if (signal.aborted && !terminalEmitted) {
         // Wire an abort as a terminal error if the upstream hasn't already.
-        await flushAssistantText().catch(() => { /* noop */ })
-        await finalizePendingToolCalls().catch(() => { /* noop */ })
-        emit({ type: 'error', message: 'AI chat aborted.' })
-        terminalEmitted = true
+        await flushAssistantText().catch(() => {
+          /* noop */
+        })
+        await finalizePendingToolCalls().catch(() => {
+          /* noop */
+        })
+        emitTerminal({ type: 'error', message: 'AI chat aborted.' })
         return
       }
       // Translate the event.
       await translateEvent(event, {
         pendingAssistantText,
-        setAssistantText: (t) => { pendingAssistantText = t },
+        setAssistantText: (t) => {
+          pendingAssistantText = t
+        },
         pendingToolCalls,
         persister,
         emit,
@@ -179,18 +188,17 @@ async function driveAgentLoop(
     }
     await flushAssistantText()
     await finalizePendingToolCalls()
-    if (!terminalEmitted) {
-      emit({ type: 'done' })
-      terminalEmitted = true
-    }
+    emitTerminal({ type: 'done' })
   } catch (err) {
-    if (terminalEmitted) return
     const detail = err instanceof Error ? err.message : String(err)
     console.error('[ai/gg-runner] agent loop threw:', err)
-    await flushAssistantText().catch(() => { /* noop */ })
-    await finalizePendingToolCalls().catch(() => { /* noop */ })
-    emit({ type: 'error', message: `AI runtime error: ${detail}` })
-    terminalEmitted = true
+    await flushAssistantText().catch(() => {
+      /* noop */
+    })
+    await finalizePendingToolCalls().catch(() => {
+      /* noop */
+    })
+    emitTerminal({ type: 'error', message: `AI runtime error: ${detail}` })
   }
 }
 

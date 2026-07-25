@@ -53,9 +53,7 @@ export async function resolveSkillsForScope(
       // The catalog promised this id. A missing skill is a configuration
       // bug, not a soft failure — surface it loudly so the deploy doesn't
       // ship silently without its curated guidance.
-      throw new Error(
-        `[skills] Catalog references "${id}" but it is not present in ${skillDir}.`,
-      )
+      throw new Error(`[skills] Catalog references "${id}" but it is not present in ${skillDir}.`)
     }
     out.push(skill)
   }

@@ -134,9 +134,7 @@ function adaptOneTool(tool: AiTool): AgentTool {
           })
           return formatToolResult(tool.name, out)
         } catch (err) {
-          return formatToolError(
-            err instanceof Error ? err.message : String(err),
-          )
+          return formatToolError(err instanceof Error ? err.message : String(err))
         }
       }
       // Browser execution — delegate to the bridge.
@@ -144,9 +142,7 @@ function adaptOneTool(tool: AiTool): AgentTool {
         const out = await adapterCtx.bridge.callBrowser(tool.name, validated.value)
         return formatToolResult(tool.name, out)
       } catch (err) {
-        return formatToolError(
-          err instanceof Error ? err.message : String(err),
-        )
+        return formatToolError(err instanceof Error ? err.message : String(err))
       }
     },
   }
@@ -169,10 +165,7 @@ function adaptOneTool(tool: AiTool): AgentTool {
  */
 const adapterContextByTool = new Map<string, AdapterContext>()
 
-export function bindAdapterContext(
-  tools: ReadonlyArray<AiTool>,
-  ctx: AdapterContext,
-): void {
+export function bindAdapterContext(tools: ReadonlyArray<AiTool>, ctx: AdapterContext): void {
   for (const tool of tools) adapterContextByTool.set(tool.name, ctx)
 }
 
@@ -200,11 +193,7 @@ export function __listBoundAdapterContextsForTesting(): string[] {
  */
 function formatToolResult(toolName: string, value: unknown): string {
   const body = serialiseToolOutput(value)
-  return [
-    `<tool_result name="${toolName}">`,
-    body,
-    `</tool_result>`,
-  ].join('\n')
+  return [`<tool_result name="${toolName}">`, body, `</tool_result>`].join('\n')
 }
 
 /**
@@ -213,11 +202,7 @@ function formatToolResult(toolName: string, value: unknown): string {
  * confuse a failure with a free-form text reply.
  */
 function formatToolError(message: string): string {
-  return [
-    `<tool_result name="error">`,
-    `Error: ${message}`,
-    `</tool_result>`,
-  ].join('\n')
+  return [`<tool_result name="error">`, `Error: ${message}`, `</tool_result>`].join('\n')
 }
 
 function serialiseToolOutput(value: unknown): string {

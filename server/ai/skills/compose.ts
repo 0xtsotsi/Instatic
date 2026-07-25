@@ -88,9 +88,10 @@ export function composeSystemPromptFlat(args: ComposeArgs): string {
 function renderSkills(skills: ReadonlyArray<ValidatedSkill>): string {
   if (skills.length === 0) return ''
   const parts = skills.map((skill) => {
-    const tags = skill.frontmatter.tags && skill.frontmatter.tags.length > 0
-      ? ` [tags: ${skill.frontmatter.tags.join(', ')}]`
-      : ''
+    const tags =
+      skill.frontmatter.tags && skill.frontmatter.tags.length > 0
+        ? ` [tags: ${skill.frontmatter.tags.join(', ')}]`
+        : ''
     return [
       `<skill id="${skill.frontmatter.id}" version="${skill.frontmatter.version}"${tags}>`,
       `name: ${skill.frontmatter.name}`,
