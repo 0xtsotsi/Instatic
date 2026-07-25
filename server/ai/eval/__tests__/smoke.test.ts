@@ -33,12 +33,14 @@ describe('phase 5 eval harness (mock mode)', () => {
     const scenarios = await loadScenarios()
     const runs = await runAll({ outDir, mode: 'mock' })
     expect(runs).toHaveLength(scenarios.length * 2)
-    const ggRuns = runs.filter((r) => r.runtime === 'gg-agent')
-    expect(ggRuns).toHaveLength(scenarios.length)
-    for (const r of ggRuns) {
-      const terminals = r.events.filter((e) => e.terminal)
-      expect(terminals.length).toBeGreaterThanOrEqual(1)
-      expect(terminals.at(-1)?.type).toBe('done')
+    for (const runtime of ['legacy', 'gg-agent'] as const) {
+      const subset = runs.filter((r) => r.runtime === runtime)
+      expect(subset).toHaveLength(scenarios.length)
+      for (const r of subset) {
+        const terminals = r.events.filter((e) => e.terminal)
+        expect(terminals.length).toBeGreaterThanOrEqual(1)
+        expect(terminals.at(-1)?.type).toBe('done')
+      }
     }
     const report: EvalReport = {
       generatedAt: new Date().toISOString(),
@@ -53,16 +55,15 @@ describe('phase 5 eval harness (mock mode)', () => {
     expect(body).toContain('saas-landing')
   }, 30_000)
 
-  it('writes render HTML for every gg-agent scenario', async () => {
+  it('writes render HTML for every (scenario, runtime) pair', async () => {
     const scenarios = await loadScenarios()
     for (const s of scenarios) {
-      // In mock mode the legacy path is a stub (no AiProvider mock), so
-      // we only assert on the gg-agent rendered previews here. The
-      // legacy side is exercised in live mode.
-      const desktop = resolve(outDir, s.id, 'gg-agent', 'render', 'desktop.html')
-      const mobile = resolve(outDir, s.id, 'gg-agent', 'render', 'mobile.html')
-      expect((await stat(desktop)).isFile()).toBe(true)
-      expect((await stat(mobile)).isFile()).toBe(true)
+      for (const runtime of ['legacy', 'gg-agent'] as const) {
+        const desktop = resolve(outDir, s.id, runtime, 'render', 'desktop.html')
+        const mobile = resolve(outDir, s.id, runtime, 'render', 'mobile.html')
+        expect((await stat(desktop)).isFile()).toBe(true)
+        expect((await stat(mobile)).isFile()).toBe(true)
+      }
     }
   }, 10_000)
 })

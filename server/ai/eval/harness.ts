@@ -29,9 +29,13 @@ import { sqliteMigrations } from '../../db/migrations-sqlite'
 import { runMigrations } from '../../db/runMigrations'
 import type { DbClient } from '../../db/client'
 import { runSiteAgent } from '../gg/siteAgentRunner'
+import { runChat } from '../runtime/runner'
 import { createConversationsPersister } from '../runtime/persister'
 import { invalidateSkillCache } from '../skills/loader'
 import { renderScenario } from './render'
+import type { AiProvider, AiStreamRequest, AiResolvedCredential } from '../drivers/types'
+import type { AiMessage, AiStreamEvent } from '../runtime/types'
+import type { CoreCapability } from '@core/capabilities'
 import type { RunResult, RuntimeKind, Scenario } from './types'
 
 // ---------------------------------------------------------------------------
@@ -77,9 +81,9 @@ export async function runOne(args: RunOneArgs): Promise<RunResult> {
     providerId: 'anthropic',
     modelId: 'palsu-mock',
   })
-  const messages = [
-    { role: 'system' as const, content: 'You are a careful site-design assistant.' },
-    { role: 'user' as const, content: [{ kind: 'text' as const, text: scenario.prompt }] },
+  const messages: AiMessage[] = [
+    { role: 'system', content: 'You are a careful site-design assistant.' },
+    { role: 'user', content: [{ kind: 'text', text: scenario.prompt }] },
   ]
   const events: Array<{ type: string; toolCallId?: string; terminal?: boolean }> = []
   const toolCallIds = new Set<string>()
@@ -103,7 +107,7 @@ export async function runOne(args: RunOneArgs): Promise<RunResult> {
         baseUrl: null,
       },
       modelId: 'palsu-mock',
-      messages: messages as never,
+      messages,
       systemPrompt: ['prefix', '__SYSTEM_PROMPT_DYNAMIC_BOUNDARY__', 'suffix'],
       tools: [],
       signal: ac.signal,
@@ -116,7 +120,7 @@ export async function runOne(args: RunOneArgs): Promise<RunResult> {
         toolContext: {
           db,
           userId: 'eval-user',
-          capabilities: scenario.expectedCapabilities as never,
+          capabilities: scenario.expectedCapabilities as ReadonlyArray<CoreCapability>,
           scope: 'site',
           conversationId,
           snapshot: () => scenario.preSnapshot,
@@ -151,13 +155,67 @@ export async function runOne(args: RunOneArgs): Promise<RunResult> {
       providerIdOverride: 'palsu',
     })
   } else {
-    // Legacy path in mock mode is intentionally a stub: the legacy
-    // `runChat` consumes a real `AiProvider` from `server/ai/drivers/*`,
-    // which the `palsu` gg-ai mock doesn't emulate. A side-by-side
-    // compare still happens in `runAll` for live mode once a provider
-    // credential is supplied; in mock mode the gg-agent path is the
-    // reference and the legacy run is recorded as not-executed.
-    events.push({ type: 'skipped', terminal: false })
+    // Legacy path uses a minimal in-process `AiProvider` mock that
+    // yields a deterministic text + usage + done sequence. The driver
+    // shape matches `server/ai/drivers/types.ts` exactly, so the
+    // persister, accounting, and terminal-event contract are exercised
+    // the same way a real provider would exercise them.
+    const driver = makeMockLegacyDriver()
+    const credStub: AiResolvedCredential = {
+      id: 'palsu-cred',
+      providerId: 'anthropic',
+      authMode: 'apiKey',
+      apiKey: 'palsu-key',
+      baseUrl: null,
+    }
+    await runChat({
+      driver,
+      request: {
+        modelId: 'palsu-mock',
+        messages,
+        systemPrompt: ['You are a careful site-design assistant.'],
+        tools: [],
+        modelCapabilities: {
+          toolCalling: false,
+          visionInput: false,
+          toolResultImages: false,
+          promptCache: false,
+          streaming: true,
+        },
+        credentials: credStub,
+        signal: ac.signal,
+        bridge: { callBrowser: async () => ({ ok: false, error: 'no browser' }) },
+        toolContextBase: {
+          db,
+          userId: 'eval-user',
+          capabilities: scenario.expectedCapabilities as ReadonlyArray<CoreCapability>,
+          scope: 'site',
+          conversationId,
+          snapshot: scenario.preSnapshot,
+        },
+      },
+      persister,
+      emit: (e) => {
+        const ev: RunResult['events'][number] = {
+          type: e.type,
+          toolCallId: 'toolCallId' in e ? (e.toolCallId as string) : undefined,
+          terminal: e.type === 'done' || e.type === 'error',
+        }
+        events.push(ev)
+        if (e.type === 'toolResult' && 'toolCallId' in e) {
+          const r = e as { ok?: boolean }
+          if (r.ok === false) toolFailed += 1
+          else if (r.ok === true) toolSucceeded += 1
+          else toolAborted += 1
+        }
+        if (e.type === 'usage') {
+          const u = e as { promptTokens?: number; completionTokens?: number; costUsd?: number }
+          inputTokens = u.promptTokens ?? inputTokens
+          outputTokens = u.completionTokens ?? outputTokens
+          costUsd = u.costUsd ?? costUsd
+        }
+      },
+    })
   }
   const finishedAt = new Date().toISOString()
   const startedAt = new Date(start).toISOString()
@@ -192,8 +250,42 @@ export async function runOne(args: RunOneArgs): Promise<RunResult> {
 }
 
 // ---------------------------------------------------------------------------
-// (mock driver removed — see legacy branch comment above)
+// Mock legacy driver
 // ---------------------------------------------------------------------------
+
+/**
+ * Minimal in-process `AiProvider` used by the legacy branch in mock mode.
+ * Yields one text event, one usage event, and a terminal done — enough
+ * to exercise the chat runner's persister, accounting, and terminal-event
+ * contract without touching a real provider SDK.
+ *
+ * Real-provider runs swap this driver out via the chat handler's
+ * credential store; the harness never reads the key directly.
+ */
+function makeMockLegacyDriver(): AiProvider {
+  return {
+    id: 'anthropic',
+    label: 'Mock Legacy',
+    supportedAuthModes: ['apiKey'],
+    capabilities: () => ({
+      toolCalling: false,
+      visionInput: false,
+      toolResultImages: false,
+      promptCache: false,
+      streaming: true,
+    }),
+    listModels: async () => [],
+    async *stream(_req: AiStreamRequest): AsyncIterable<AiStreamEvent> {
+      yield { type: 'text', text: 'mock legacy reply' }
+      yield {
+        type: 'usage',
+        promptTokens: 12,
+        completionTokens: 4,
+        costUsd: 0.0001,
+      }
+    },
+  } as unknown as AiProvider
+}
 
 // ---------------------------------------------------------------------------
 // Top-level: run all scenarios against both runtimes

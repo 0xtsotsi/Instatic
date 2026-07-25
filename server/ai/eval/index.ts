@@ -20,12 +20,12 @@ async function main(): Promise<void> {
   const outDir = resolve('.tmp/eval')
   await mkdir(outDir, { recursive: true })
   const mode: 'mock' | 'live' = process.env.IN_STATIC_AI_EVAL_LIVE === '1' ? 'live' : 'mock'
-  if (mode === 'live') {
-    // Live mode requires a real provider credential. We never read the
-    // key here — it must already be present in process.env via the
-    // chat handler's credential store. The harness still uses the
-    // `palsu` provider for the gg path; the live signal flips later.
-  }
+  // Note: in live mode the harness still uses mock drivers for both
+  // runtimes. A real-provider run requires swapping `runOne`'s gg-agent
+  // branch to use a real `palsu` model behind a real key, and the
+  // legacy branch to use a real `AiProvider` from `server/ai/drivers/*`.
+  // Both swaps live behind credential-store plumbing that is out of
+  // scope for this PR — see `server/ai/eval/ROLLOUT.md`.
   const scenarios = await loadScenarios()
   const runs = await runAll({ outDir, mode })
   const report: EvalReport = {

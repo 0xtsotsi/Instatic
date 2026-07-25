@@ -1,20 +1,19 @@
 /**
  * Phase 5 render step.
  *
- * Takes a scenario's `preSnapshot` and produces two PNGs:
- *  - desktop (1440x900)
- *  - mobile (390x844)
+ * Synthesizes a static HTML preview from a scenario's `preSnapshot` and
+ * writes it to disk so a human reviewer can open it in a browser, take
+ * a screenshot, and grade the rubric. The harness produces:
+ *  - desktop preview (1440px-class layout, single column)
+ *  - mobile preview (390px-class layout, same markup)
  *
- * The render is a static HTML preview — it's not a real product preview
- * of the agent's output, because in mock mode the agent has not actually
- * mutated the document. The previews serve as baseline artifacts the
- * human reviewer can compare against once a live provider run produces
- * real output. They are written to `.tmp/eval/render/...` and
- * gitignored.
+ * The preview is a baseline artifact — in mock mode the agent has not
+ * actually mutated the document, so this is the pre-state only. A real
+ * live-provider run would write post-mutation HTML to a sibling path
+ * (not yet implemented; see ROLLOUT.md).
  *
- * If a real rendered HTML is found at `.tmp/eval/live/<scenarioId>.html`
- * (written by the live mode harness) we prefer that. Otherwise we
- * synthesize a placeholder from the preSnapshot.
+ * Written to `<outDir>/{desktop,mobile}.html` and gitignored via
+ * `.tmp/eval/`.
  */
 
 import { writeFile, mkdir } from 'node:fs/promises'
@@ -38,9 +37,9 @@ export async function renderScenario(args: RenderArgs): Promise<RenderPaths> {
   const mobile = join(args.outDir, 'mobile.html')
   await writeFile(desktop, html, 'utf8')
   await writeFile(mobile, html, 'utf8')
-  // PNG capture is the responsibility of the human review step. The
-  // harness writes HTML the reviewer opens in a browser; the report
-  // references these paths so the reviewer can render screenshots.
+  // PNG capture is the human reviewer's job: open the HTML in a browser
+  // and screenshot. The report references these paths so the reviewer
+  // can render screenshots from the markdown report.
   return { desktop, mobile }
 }
 
