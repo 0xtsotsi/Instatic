@@ -10,6 +10,7 @@
  * directories.
  */
 
+import { join } from 'node:path'
 import { loadSkillsFromDirectoryCached } from './loader'
 import type { ValidatedSkill } from './types'
 
@@ -68,4 +69,9 @@ export function listSkillIdsForScope(scope: string): ReadonlyArray<string> {
   return SCOPE_TO_IDS[scope] ?? []
 }
 
-export const PRODUCT_SKILL_DIRECTORY = 'server/ai/skills/site'
+/**
+ * Absolute path to the curated product skill directory. Resolved from this
+ * module's location so production deploys (Docker, non-cwd) find the same
+ * skills the dev server does.
+ */
+export const PRODUCT_SKILL_DIRECTORY = join(import.meta.dir, 'site')

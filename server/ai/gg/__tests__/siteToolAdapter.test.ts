@@ -14,7 +14,7 @@ import { afterEach, describe, expect, it } from 'bun:test'
 import { Type, type Static } from '@core/utils/typeboxHelpers'
 import { adaptToolsToAgent, bindAdapterContext, releaseAdapterContext } from '../siteToolAdapter'
 import type { AdapterContext } from '../siteToolAdapter'
-import type { AiTool, ToolContext } from '../../runtime/types'
+import type { AiTool } from '../../runtime/types'
 import type { AiBrowserBridge } from '../../runtime/types'
 
 // ---------------------------------------------------------------------------
@@ -58,13 +58,13 @@ const browserTool: AiTool = {
 }
 
 function mkContext(bridge: AiBrowserBridge): AdapterContext {
-  const toolContext: ToolContext = {
+  const toolContext = {
     db: undefined as never,
     userId: 'u1',
-    capabilities: ['ai.chat'],
-    scope: 'site',
+    capabilities: ['ai.chat'] as const,
+    scope: 'site' as const,
     conversationId: 'c1',
-    snapshot: { root: 'r1' },
+    snapshot: () => ({ root: 'r1' }),
     signal: new AbortController().signal,
   }
   return {

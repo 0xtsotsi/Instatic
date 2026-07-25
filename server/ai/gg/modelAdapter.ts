@@ -23,7 +23,6 @@ import type { Message } from '@kenkaiiii/gg-ai'
 import { mapProviderId } from './types'
 import type { AiMessage } from '../runtime/types'
 import type { AiResolvedCredential } from '../drivers/types'
-import type { AiTool } from '../runtime/types'
 
 // ---------------------------------------------------------------------------
 // Public inputs
@@ -223,8 +222,7 @@ export function projectMessages(history: ReadonlyArray<AiMessage>): Message[] {
  * Compose the 3-element system prompt (legacy cache-control shape) into a
  * single string. The boundary marker is dropped — gg-ai has no native
  * cache_control, so the prefix information is preserved as just the joined
- * text. The background skill scaffolding (Phase 3) will inject additional
- * layers here.
+ * text.
  */
 function composeSystemPrompt(form: string[]): string {
   if (form.length === 0) return ''
@@ -236,29 +234,3 @@ function composeSystemPrompt(form: string[]): string {
     .filter((s): s is string => typeof s === 'string' && s.length > 0)
     .join('\n\n')
 }
-
-/**
- * Build an no-op AgentTool shell. Used by the test runner to satisfy
- * `AgentOptions.tools` when the runtime asks the agent to operate
- * without a toolset (Phase 1b: text-only turn).
- */
-export function _noopAgentTool(): AgentTool {
-  return {
-    name: 'noop',
-    description: 'Stub tool — never called. Used for text-only smoke tests.',
-    parameters: {
-      // A trivial zod schema that accepts nothing.
-      parse: () => ({}),
-      safeParse: () => ({ success: true, data: {} }),
-      _def: { typeName: 'ZodObject' },
-    } as unknown as AgentTool['parameters'],
-    execute: () => '',
-  }
-}
-
-/**
- * Place the legacy driver's `selectToolsForScope` output through the
- * AgentTool projector. Implemented in `siteToolAdapter.ts`; this module
- * only declares the seam so the test can guard the surface.
- */
-export type ProjectAiToolsFn = (tools: ReadonlyArray<AiTool>) => AgentTool[]

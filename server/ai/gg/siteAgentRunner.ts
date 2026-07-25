@@ -76,10 +76,15 @@ export interface RunSiteAgentArgs {
  */
 export async function runSiteAgent(args: RunSiteAgentArgs): Promise<void> {
   const skills = await resolveSkillsForScope(args.scope, args.skillDir ?? PRODUCT_SKILL_DIRECTORY)
+  // Split the legacy 3-element cache form: the static prefix is the
+  // operating rules (caller-trusted), the dynamic suffix is the snapshot
+  // (untrusted — framed separately by the composer so the model cannot
+  // mistake it for instructions).
+  const [prefix = '', , suffix = ''] = args.systemPrompt
   const composedPrompt = composeSystemPrompt({
-    operatingRules: args.systemPrompt.join('\n\n'),
+    operatingRules: prefix,
     skills,
-    snapshotSummary: '',
+    snapshotSummary: suffix,
   })
   const agentTools: AgentTool[] = adaptToolsToAgent(args.tools)
   bindAdapterContext(args.tools, args.adapterContext)
@@ -156,38 +161,90 @@ async function driveAgentLoop(agent: Agent, args: RunSiteAgentArgs): Promise<voi
     terminalEmitted = true
     emit(event)
   }
+  // Cumulative token usage across rounds. The legacy wire shape emits a
+  // single `usage` event at the end of the stream; gg-agent surfaces
+  // `turn_end` per round. We sum the per-round totals and emit one
+  // wire `usage` event alongside the terminal `done` so the browser
+  // sees the same contract regardless of runtime.
+  const totals = {
+    promptTokens: 0,
+    completionTokens: 0,
+    costUsd: 0,
+    cacheReadTokens: 0,
+    cacheCreationTokens: 0,
+  }
+  let usageResolved = false
   try {
     const stream = agent.prompt('')
-    for await (const event of stream as AsyncIterable<AgentEvent>) {
-      if (signal.aborted && !terminalEmitted) {
-        // Wire an abort as a terminal error if the upstream hasn't already.
-        await flushAssistantText().catch(() => {
-          /* noop */
+    try {
+      for await (const event of stream as AsyncIterable<AgentEvent>) {
+        if (signal.aborted && !terminalEmitted) {
+          // Wire an abort as a terminal error if the upstream hasn't already.
+          await flushAssistantText().catch(() => {
+            /* noop */
+          })
+          await finalizePendingToolCalls().catch(() => {
+            /* noop */
+          })
+          emitTerminal({ type: 'error', message: 'AI chat aborted.' })
+          return
+        }
+        // Translate the event. Per-round usage is folded into the
+        // cumulative totals; the wire `usage` event is emitted once at
+        // the end of the stream (mirrors the legacy runner).
+        await translateEvent(event, {
+          pendingAssistantText,
+          setAssistantText: (t) => {
+            pendingAssistantText = t
+          },
+          pendingToolCalls,
+          persister,
+          emit,
+          signal,
+          totals,
+          setUsageResolved: () => {
+            usageResolved = true
+          },
         })
-        await finalizePendingToolCalls().catch(() => {
-          /* noop */
-        })
-        emitTerminal({ type: 'error', message: 'AI chat aborted.' })
-        return
+        // Re-read the closure-side pending text after translation.
+        if (event.type === 'text_delta') {
+          pendingAssistantText += event.text
+        }
       }
-      // Translate the event.
-      await translateEvent(event, {
-        pendingAssistantText,
-        setAssistantText: (t) => {
-          pendingAssistantText = t
+    } finally {
+      // The AgentStream's result promise can reject AFTER the events
+      // queue drains (e.g. a context overflow surfaced only on
+      // generator return). Drain it so an unhandled rejection cannot
+      // silently flip a failed run into a `done` event.
+      await stream.then(
+        () => {},
+        async (err: unknown) => {
+          if (terminalEmitted) return
+          const detail = err instanceof Error ? err.message : String(err)
+          console.error('[ai/gg-runner] agent result rejected:', err)
+          await flushAssistantText().catch(() => {
+            /* noop */
+          })
+          await finalizePendingToolCalls().catch(() => {
+            /* noop */
+          })
+          emitTerminal({ type: 'error', message: `AI runtime error: ${detail}` })
         },
-        pendingToolCalls,
-        persister,
-        emit,
-        signal,
-      })
-      // Re-read the closure-side pending text after translation.
-      if (event.type === 'text_delta') {
-        pendingAssistantText += event.text
-      }
+      )
     }
     await flushAssistantText()
     await finalizePendingToolCalls()
+    if (usageResolved) {
+      // Single cumulative `usage` event — matches the legacy wire shape.
+      emit({
+        type: 'usage',
+        promptTokens: totals.promptTokens,
+        completionTokens: totals.completionTokens,
+        costUsd: totals.costUsd,
+        cacheReadTokens: totals.cacheReadTokens,
+        cacheCreationTokens: totals.cacheCreationTokens,
+      })
+    }
     emitTerminal({ type: 'done' })
   } catch (err) {
     const detail = err instanceof Error ? err.message : String(err)
@@ -209,6 +266,15 @@ interface TranslateCtx {
   persister: ConversationsPersister
   emit(event: AiStreamEvent): void
   signal: AbortSignal
+  totals: {
+    promptTokens: number
+    completionTokens: number
+    costUsd: number
+    cacheReadTokens: number
+    cacheCreationTokens: number
+  }
+  /** Mark the cumulative `usage` totals as filled in for this stream. */
+  setUsageResolved(): void
 }
 
 async function translateEvent(event: AgentEvent, ctx: TranslateCtx): Promise<void> {
@@ -258,26 +324,31 @@ async function translateEvent(event: AgentEvent, ctx: TranslateCtx): Promise<voi
       return
     }
     case 'turn_end': {
+      // Persist per-round usage so the conversation totals stay correct,
+      // fold the deltas into the cumulative totals, and emit a single
+      // `context` event per round (matches the legacy per-round meter).
       const usage = event.usage
+      const promptTokens = usage.inputTokens
+      const completionTokens = usage.outputTokens
+      const cacheReadTokens = usage.cacheRead ?? 0
+      const cacheCreationTokens = usage.cacheWrite ?? 0
       const costUsd = await ctx.persister.recordUsage({
-        promptTokens: usage.inputTokens,
-        completionTokens: usage.outputTokens,
-        cacheReadTokens: usage.cacheRead ?? 0,
-        cacheCreationTokens: usage.cacheWrite ?? 0,
+        promptTokens,
+        completionTokens,
+        cacheReadTokens,
+        cacheCreationTokens,
       })
-      ctx.emit({
-        type: 'usage',
-        promptTokens: usage.inputTokens,
-        completionTokens: usage.outputTokens,
-        costUsd,
-        cacheReadTokens: usage.cacheRead ?? 0,
-        cacheCreationTokens: usage.cacheWrite ?? 0,
-      })
+      ctx.totals.promptTokens += promptTokens
+      ctx.totals.completionTokens += completionTokens
+      ctx.totals.costUsd += costUsd
+      ctx.totals.cacheReadTokens += cacheReadTokens
+      ctx.totals.cacheCreationTokens += cacheCreationTokens
+      ctx.setUsageResolved()
       ctx.emit({
         type: 'context',
-        promptTokens: usage.inputTokens,
-        cacheReadTokens: usage.cacheRead ?? 0,
-        cacheCreationTokens: usage.cacheWrite ?? 0,
+        promptTokens,
+        cacheReadTokens,
+        cacheCreationTokens,
       })
       return
     }

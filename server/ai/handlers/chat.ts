@@ -44,10 +44,7 @@ import {
   deriveConversationTitle,
   DEFAULT_CONVERSATION_TITLE,
 } from '../conversations/store'
-import {
-  buildMessageHistory,
-  projectUserImagesForModel,
-} from '../conversations/history'
+import { buildMessageHistory, projectUserImagesForModel } from '../conversations/history'
 import {
   readCredentialForUser,
   resolveCredentialForDriver,
@@ -66,21 +63,10 @@ import {
   SiteAgentSnapshotSchema,
   type SiteAgentSnapshot,
 } from '../tools/site'
-import {
-  buildContentSystemPrompt,
-  type ContentSnapshot,
-} from '../tools/content'
-import {
-  createBridge,
-  createConversationsPersister,
-  encodeStreamEvent,
-  runChat,
-} from '../runtime'
+import { buildContentSystemPrompt, type ContentSnapshot } from '../tools/content'
+import { createBridge, createConversationsPersister, encodeStreamEvent, runChat } from '../runtime'
 import { normalizeContextTokens } from '../contextTokens'
-import type {
-  AiStreamEvent,
-  ToolScope,
-} from '../runtime/types'
+import type { AiStreamEvent, ToolScope } from '../runtime/types'
 import type { AiStreamRequest } from '../drivers/types'
 
 const VALID_SCOPES: ToolScope[] = ['site', 'content', 'data', 'plugin']
@@ -101,11 +87,7 @@ export function tryHandleAiChat(
   return handleAiChat(req, db, scope as ToolScope)
 }
 
-async function handleAiChat(
-  req: Request,
-  db: DbClient,
-  scope: ToolScope,
-): Promise<Response> {
+async function handleAiChat(req: Request, db: DbClient, scope: ToolScope): Promise<Response> {
   if (req.method !== 'POST') {
     return jsonResponse({ error: 'Method not allowed' }, { status: 405 })
   }
@@ -152,10 +134,7 @@ async function handleAiChat(
 
   const credential = await readCredentialForUser(db, user.id, conversation.credentialId)
   if (!credential) {
-    return jsonResponse(
-      { error: 'Credential not found or no longer accessible.' },
-      { status: 404 },
-    )
+    return jsonResponse({ error: 'Credential not found or no longer accessible.' }, { status: 404 })
   }
   let resolvedCredential
   try {
@@ -244,12 +223,15 @@ async function handleAiChat(
     }
     latestConversation = refreshedConversation
     if (
-      latestConversation.credentialId !== conversation.credentialId
-      || latestConversation.modelId !== conversation.modelId
+      latestConversation.credentialId !== conversation.credentialId ||
+      latestConversation.modelId !== conversation.modelId
     ) {
       releaseConversation()
       return jsonResponse(
-        { error: 'The conversation model changed while this message was being prepared. Send again.' },
+        {
+          error:
+            'The conversation model changed while this message was being prepared. Send again.',
+        },
         { status: 409 },
       )
     }
@@ -277,12 +259,18 @@ async function handleAiChat(
       if (latestConversation.title === DEFAULT_CONVERSATION_TITLE) {
         const text = userContent.find((block) => block.kind === 'text')
         const imageCount = userContent.filter((block) => block.kind === 'image').length
-        const derivedTitle = text?.kind === 'text'
-          ? deriveConversationTitle(text.text)
-          : imageCount === 1 ? 'Image' : 'Images'
+        const derivedTitle =
+          text?.kind === 'text'
+            ? deriveConversationTitle(text.text)
+            : imageCount === 1
+              ? 'Image'
+              : 'Images'
         if (derivedTitle) {
-          await replaceDefaultConversationTitle(db, user.id, conversation.id, derivedTitle)
-            .catch((err) => { console.error('[ai/chat] auto-title failed:', err) })
+          await replaceDefaultConversationTitle(db, user.id, conversation.id, derivedTitle).catch(
+            (err) => {
+              console.error('[ai/chat] auto-title failed:', err)
+            },
+          )
         }
       }
 
@@ -336,7 +324,11 @@ async function handleAiChat(
       const closeStream = () => {
         if (streamClosed) return
         streamClosed = true
-        try { controller.close() } catch { /* already closed */ }
+        try {
+          controller.close()
+        } catch {
+          /* already closed */
+        }
       }
       const emit = (event: AiStreamEvent): void => {
         if (streamClosed) return
@@ -372,12 +364,9 @@ async function handleAiChat(
           conversationId: conversation.id,
           snapshot,
         }
-        const { bridgeId, bridge, destroy } = createBridge(
-          emit,
-          turnSignal,
-          undefined,
-          (next) => { toolContextBase.snapshot = next },
-        )
+        const { bridgeId, bridge, destroy } = createBridge(emit, turnSignal, undefined, (next) => {
+          toolContextBase.snapshot = next
+        })
         destroyBridge = destroy
         emit({ type: 'bridgeReady', bridgeId })
 
@@ -400,10 +389,15 @@ async function handleAiChat(
           modelId: conversation.modelId,
         })
         await dispatchRuntime({
-          driver, request, persister, emit,
+          driver,
+          request,
+          persister,
+          emit,
           userId: user.id,
-          scope, signal: turnSignal,
-          bridge, toolContextBase,
+          scope,
+          signal: turnSignal,
+          bridge,
+          toolContextBase,
           resolvedCredential: resolvedCredential,
           modelId: conversation.modelId,
           modelCapabilities,
@@ -411,7 +405,9 @@ async function handleAiChat(
         })
 
         // Best-effort: record that this credential was used.
-        await touchCredentialLastUsed(db, credential.id).catch(() => { /* noop */ })
+        await touchCredentialLastUsed(db, credential.id).catch(() => {
+          /* noop */
+        })
       } catch (err) {
         const detail = err instanceof Error ? err.message : String(err)
         // Full Error preserves the stack trace in the operator's terminal.
@@ -558,7 +554,11 @@ async function dispatchRuntime(args: DispatchArgs): Promise<void> {
         capabilities: args.toolContextBase.capabilities,
         scope: args.scope,
         conversationId: args.toolContextBase.conversationId,
-        snapshot: args.toolContextBase.snapshot,
+        // Live snapshot getter: the bridge's onSnapshot mutates
+        // toolContextBase.snapshot after every browser write, so read
+        // tools run later in the same turn must see the post-mutation
+        // value, not the stale turn-start one.
+        snapshot: () => args.toolContextBase.snapshot,
         signal: args.signal,
       },
     },
@@ -567,7 +567,10 @@ async function dispatchRuntime(args: DispatchArgs): Promise<void> {
   })
 }
 
-function waitForRequest<T>(promise: Promise<T>, signal: AbortSignal): Promise<T | typeof REQUEST_ABORTED> {
+function waitForRequest<T>(
+  promise: Promise<T>,
+  signal: AbortSignal,
+): Promise<T | typeof REQUEST_ABORTED> {
   if (signal.aborted) return Promise.resolve(REQUEST_ABORTED)
   return new Promise<T | typeof REQUEST_ABORTED>((resolve, reject) => {
     const onAbort = () => resolve(REQUEST_ABORTED)
@@ -576,10 +579,7 @@ function waitForRequest<T>(promise: Promise<T>, signal: AbortSignal): Promise<T 
   })
 }
 
-export function buildSystemPromptForScope(
-  scope: ToolScope,
-  snapshot: unknown,
-): string[] {
+export function buildSystemPromptForScope(scope: ToolScope, snapshot: unknown): string[] {
   if (scope === 'site') {
     if (snapshot === undefined || snapshot === null) {
       return buildSiteSystemPrompt(emptySiteAgentSnapshot())
@@ -601,7 +601,7 @@ export function buildSystemPromptForScope(
   // prompt so the conversation isn't completely contextless.
   return [
     `You are an AI assistant embedded in the "${scope}" workspace of a CMS. ` +
-    `No scope-specific tools are wired up yet — respond conversationally only.`,
+      `No scope-specific tools are wired up yet — respond conversationally only.`,
   ]
 }
 
