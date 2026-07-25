@@ -1,0 +1,38 @@
+{
+  "id": "local-business",
+  "title": "Local business site",
+  "description": "Build a small site for an independent bakery. Hero, about, menu highlights, hours, contact. Real, grounded copy.",
+  "prompt": "Build a site for 'Hearth & Crumb', an independent bakery in Portland, ME. Include a hero with a quiet hand-set feel, an about blurb, three menu highlights, hours, and a contact card. The audience is local — favor plain prose over marketing-speak.",
+  "preSnapshot": {
+    "pageTitle": "Hearth & Crumb",
+    "sections": [{ "kind": "h1", "text": "Hearth & Crumb" }]
+  },
+  "expectedCapabilities": ["ai.chat", "site.write"],
+  "rubric": [
+    {
+      "id": "hero-quiet",
+      "label": "Hero feels hand-set, not stock template",
+      "guidance": "Type, weight, and color are intentional."
+    },
+    {
+      "id": "about-voice",
+      "label": "About reads as a person wrote it",
+      "guidance": "Specific details, no 'passionate about' filler."
+    },
+    {
+      "id": "menu",
+      "label": "Three menu highlights with real-sounding items",
+      "guidance": "Not Lorem; plausible bakery items."
+    },
+    {
+      "id": "hours",
+      "label": "Hours section present and readable",
+      "guidance": "Days + times clearly listed."
+    },
+    {
+      "id": "contact",
+      "label": "Contact info present (address, phone or form)",
+      "guidance": "No placeholder only."
+    }
+  ]
+}

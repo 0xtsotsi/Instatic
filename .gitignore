@@ -83,3 +83,6 @@ docs/superpowers/
 .factory/
 .trae/
 .windsurf/
+
+# Phase 5 evaluation artifacts (rendered HTML, runs.json, PNGs)
+.tmp/eval/

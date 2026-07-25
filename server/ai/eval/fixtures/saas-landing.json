@@ -1,0 +1,38 @@
+{
+  "id": "saas-landing",
+  "title": "SaaS landing page",
+  "description": "Build a single-page SaaS landing page for a fictional developer tool. Distinct hero, feature grid, pricing, footer. Must avoid generic Lorem layouts.",
+  "prompt": "Create a landing page for 'Driftlight' — a tiny observability tool for Bun servers. Include a hero, three-feature grid, pricing, and a footer. The brand voice is warm-technical; avoid the usual purple-gradient SaaS look.",
+  "preSnapshot": {
+    "pageTitle": "Driftlight — landing",
+    "sections": [{ "kind": "h1", "text": "Untitled page" }]
+  },
+  "expectedCapabilities": ["ai.chat", "site.write"],
+  "rubric": [
+    {
+      "id": "hero-distinct",
+      "label": "Hero has a distinctive composition, not a stock hero",
+      "guidance": "Look for a non-default layout (split, asymmetric, type-driven)."
+    },
+    {
+      "id": "feature-grid",
+      "label": "Three features rendered as a coherent grid",
+      "guidance": "Items share visual rhythm, not random icon + text cards."
+    },
+    {
+      "id": "pricing",
+      "label": "Pricing section with three tiers",
+      "guidance": "Tier comparison legible at a glance."
+    },
+    {
+      "id": "footer",
+      "label": "Footer present with at least nav + small print",
+      "guidance": "Not blank, not Lorem."
+    },
+    {
+      "id": "voice",
+      "label": "Brand voice reads warm-technical, not generic SaaS",
+      "guidance": "Read aloud: does it sound human?"
+    }
+  ]
+}
