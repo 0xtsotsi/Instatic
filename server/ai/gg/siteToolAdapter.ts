@@ -72,10 +72,15 @@ export interface AdapterContext {
   readonly emit: (event: AiStreamEvent) => void
   /**
    * Per-request tool context the legacy handlers expect (db, userId,
-   * capabilities, scope, conversationId, snapshot, signal). The adapter
-   * forwards this verbatim.
+   * capabilities, scope, conversationId, signal). The snapshot is a
+   * LIVE getter: the chat handler's bridge updates
+   * `toolContextBase.snapshot` after every mutating browser tool, and
+   * each read tool run must observe the post-mutation value, not the
+   * stale turn-start one.
    */
-  readonly toolContext: InstaticToolContext
+  readonly toolContext: Omit<InstaticToolContext, 'snapshot'> & {
+    readonly snapshot: () => unknown
+  }
 }
 
 /**
@@ -130,6 +135,7 @@ function adaptOneTool(tool: AiTool): AgentTool {
         try {
           const out = await tool.handler(validated.value, {
             ...adapterCtx.toolContext,
+            snapshot: adapterCtx.toolContext.snapshot(),
             signal: ctx.signal,
           })
           return formatToolResult(tool.name, out)

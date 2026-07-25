@@ -9,11 +9,24 @@
 
 import { afterEach, beforeEach, describe, expect, it } from 'bun:test'
 import { registerPalsuProvider, palsuText, type PalsuProviderHandle } from '@kenkaiiii/gg-ai'
+import type { AgentTool } from '@kenkaiiii/gg-agent'
 import { buildAgentOptions, projectMessages } from '../modelAdapter'
 import { mapProviderId } from '../types'
-import { _noopAgentTool } from '../modelAdapter'
 import type { AiMessage } from '../../runtime/types'
 import type { AiResolvedCredential } from '../../drivers/types'
+
+function noopAgentTool(): AgentTool {
+  return {
+    name: 'noop',
+    description: 'Stub tool — never called. Used for text-only smoke tests.',
+    parameters: {
+      parse: () => ({}),
+      safeParse: () => ({ success: true, data: {} }),
+      _def: { typeName: 'ZodObject' },
+    } as unknown as AgentTool['parameters'],
+    execute: () => '',
+  }
+}
 
 function cred(overrides: Partial<AiResolvedCredential> = {}): AiResolvedCredential {
   return {
@@ -55,7 +68,7 @@ describe('buildAgentOptions', () => {
       modelId: 'claude-sonnet-4-5',
       messages: history(),
       systemPrompt: ['prefix', '__SYSTEM_PROMPT_DYNAMIC_BOUNDARY__', 'suffix'],
-      tools: [_noopAgentTool()],
+      tools: [noopAgentTool()],
       signal: ac.signal,
       supportsImages: true,
     })
