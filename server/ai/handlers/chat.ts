@@ -399,7 +399,16 @@ async function handleAiChat(
           providerId: credential.providerId,
           modelId: conversation.modelId,
         })
-        await runChat({ driver, request, persister, emit })
+        await dispatchRuntime({
+          driver, request, persister, emit,
+          userId: user.id,
+          scope, signal: turnSignal,
+          bridge, toolContextBase,
+          resolvedCredential: resolvedCredential,
+          modelId: conversation.modelId,
+          modelCapabilities,
+          db,
+        })
 
         // Best-effort: record that this credential was used.
         await touchCredentialLastUsed(db, credential.id).catch(() => { /* noop */ })
@@ -478,6 +487,84 @@ function acquireConversationStream(conversationId: string): (() => void) | null 
 
 function clientClosedRequest(): Response {
   return new Response(null, { status: 499, statusText: 'Client Closed Request' })
+}
+
+/**
+ * Runtime selection — `legacy` (default) or `gg-agent`. The flag is read
+ * from `IN_STATIC_AI_RUNTIME` so operators can flip the runtime without
+ * a deploy. Phase 1 ships with `legacy` as the only viable choice;
+ * `gg-agent` is wired through but must be enabled explicitly.
+ */
+export type AiRuntimeKind = 'legacy' | 'gg-agent'
+
+function readSelectedRuntime(): AiRuntimeKind {
+  const fromEnv = process.env.IN_STATIC_AI_RUNTIME
+  if (fromEnv === 'gg-agent') return 'gg-agent'
+  return 'legacy'
+}
+
+interface DispatchArgs {
+  driver: import('../drivers/types').AiProvider
+  request: import('../drivers/types').AiStreamRequest
+  persister: import('../runtime/persister').ConversationsPersister
+  emit: (event: import('../runtime/types').AiStreamEvent) => void
+  userId: string
+  scope: import('../runtime/types').ToolScope
+  signal: AbortSignal
+  bridge: import('../runtime/types').AiBrowserBridge
+  toolContextBase: {
+    readonly db: import('../../db/client').DbClient
+    readonly userId: string
+    readonly capabilities: readonly import('@core/capabilities').CoreCapability[]
+    readonly scope: import('../runtime/types').ToolScope
+    readonly conversationId: string
+    snapshot: unknown
+  }
+  resolvedCredential: import('../drivers/types').AiResolvedCredential
+  modelId: string
+  modelCapabilities: import('../drivers/types').AiProviderCapabilities
+  db: import('../../db/client').DbClient
+}
+
+async function dispatchRuntime(args: DispatchArgs): Promise<void> {
+  const runtime = readSelectedRuntime()
+  if (runtime === 'legacy') {
+    await runChat({
+      driver: args.driver,
+      request: args.request,
+      persister: args.persister,
+      emit: args.emit,
+    })
+    return
+  }
+  // gg-agent — wire the same request shape through the new runner.
+  const { runSiteAgent } = await import('../gg/siteAgentRunner')
+  await runSiteAgent({
+    credential: args.resolvedCredential,
+    modelId: args.modelId,
+    messages: args.request.messages,
+    systemPrompt: args.request.systemPrompt,
+    tools: args.request.tools,
+    signal: args.signal,
+    supportsImages: args.modelCapabilities.visionInput,
+    persister: args.persister,
+    adapterContext: {
+      bridge: args.bridge,
+      signal: args.signal,
+      emit: args.emit,
+      toolContext: {
+        db: args.db,
+        userId: args.userId,
+        capabilities: args.toolContextBase.capabilities,
+        scope: args.scope,
+        conversationId: args.toolContextBase.conversationId,
+        snapshot: args.toolContextBase.snapshot,
+        signal: args.signal,
+      },
+    },
+    emit: args.emit,
+    scope: args.scope,
+  })
 }
 
 function waitForRequest<T>(promise: Promise<T>, signal: AbortSignal): Promise<T | typeof REQUEST_ABORTED> {

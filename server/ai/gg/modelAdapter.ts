@@ -51,6 +51,13 @@ export interface BuildAgentArgs {
   readonly supportsImages: boolean
   /** True when the model accepts video content blocks. Default false. */
   readonly supportsVideo?: boolean
+  /**
+   * Test-only override: skip the Instatic -> gg-ai provider mapping
+   * and use the supplied provider id verbatim. Production callers do
+   * not set this — the runner only forwards it so tests can pin the
+   * upstream `palsu` mock provider.
+   */
+  readonly providerOverride?: string
 }
 
 // ---------------------------------------------------------------------------
@@ -75,12 +82,12 @@ export function buildAgent(args: BuildAgentArgs): Agent {
  * loop.
  */
 export function buildAgentOptions(args: BuildAgentArgs): AgentOptions {
-  const provider = mapProviderId(args.credential.providerId)
+  const provider = args.providerOverride ?? mapProviderId(args.credential.providerId)
   const messages = projectMessages(args.messages)
   const system = composeSystemPrompt(args.systemPrompt)
   const auth = resolveAuth(args.credential)
   return {
-    provider,
+    provider: provider as AgentOptions['provider'],
     model: args.modelId,
     priorMessages: messages,
     system,
