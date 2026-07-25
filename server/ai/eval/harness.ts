@@ -309,7 +309,7 @@ export async function runAll(args: RunAllArgs): Promise<RunResult[]> {
   const skillDir = await seedSkillDir()
   invalidateSkillCache()
   // Register the mock provider once; the gg path uses it directly, the
-  // legacy path uses `makeMockDriver`.
+  // legacy path uses `makeMockLegacyDriver`.
   let palsu: PalsuProviderHandle | null = null
   const results: RunResult[] = []
   try {
