@@ -38,6 +38,8 @@
     "lint": "eslint . --cache --cache-location .tmp-lint/eslint-cache",
     "preview": "bun run scripts/vite.ts preview",
     "test": "bun test",
+    "eval:phase5": "bun run server/ai/eval/index.ts",
+    "smoke:runtime": "bun test server/ai/handlers/__tests__/chat.runtime.test.ts server/ai/gg/__tests__/trace.test.ts server/ai/eval/__tests__/smoke.test.ts",
     "test:e2e": "playwright test",
     "test:e2e:install": "playwright install chromium",
     "test:e2e:ui": "playwright test --ui",

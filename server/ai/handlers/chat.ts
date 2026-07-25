@@ -494,8 +494,16 @@ function clientClosedRequest(): Response {
 export type AiRuntimeKind = 'legacy' | 'gg-agent'
 
 function readSelectedRuntime(): AiRuntimeKind {
-  const fromEnv = process.env.IN_STATIC_AI_RUNTIME
-  if (fromEnv === 'gg-agent') return 'gg-agent'
+  return resolveRuntimeKind(process.env.IN_STATIC_AI_RUNTIME)
+}
+
+/**
+ * Pure runtime resolver — exported for tests. The handler reads the env
+ * through this helper so unit tests can exercise the same branching
+ * without mutating `process.env`.
+ */
+export function resolveRuntimeKind(value: string | undefined): AiRuntimeKind {
+  if (value === 'gg-agent') return 'gg-agent'
   return 'legacy'
 }
 

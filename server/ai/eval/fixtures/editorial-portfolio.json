@@ -1,0 +1,33 @@
+{
+  "id": "editorial-portfolio",
+  "title": "Editorial portfolio",
+  "description": "Build a personal portfolio for a writer/editor. Long-form typography, project list, contact.",
+  "prompt": "Build a portfolio for a writer/editor named Adaora Onyemaechi. Long-form typography, a list of three recent pieces with a one-line summary each, a short bio, and a contact block. Tone: editorial, calm, no emoji.",
+  "preSnapshot": {
+    "pageTitle": "Adaora Onyemaechi — writer",
+    "sections": [{ "kind": "h1", "text": "Adaora Onyemaechi" }]
+  },
+  "expectedCapabilities": ["ai.chat", "site.write"],
+  "rubric": [
+    {
+      "id": "type",
+      "label": "Type system tuned for long-form reading",
+      "guidance": "Comfortable measure and leading, not a UI default."
+    },
+    {
+      "id": "pieces",
+      "label": "Three pieces listed with summaries",
+      "guidance": "Realistic titles, not 'Project 1'."
+    },
+    {
+      "id": "bio",
+      "label": "Bio is concrete, not a list of adjectives",
+      "guidance": "Mentions venues, beats, or specifics."
+    },
+    {
+      "id": "contact",
+      "label": "Contact block is understated",
+      "guidance": "Email, mastodon, or form — no splashy CTA."
+    }
+  ]
+}

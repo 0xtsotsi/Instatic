@@ -1,0 +1,36 @@
+{
+  "id": "redesign-existing",
+  "title": "Redesign an existing page",
+  "description": "Take a sparse existing page and propose a tighter redesign. Single-step, no scope creep.",
+  "prompt": "The current page has only a title and a paragraph. Redesign it as a small studio home for 'Folded Light', a one-person letterpress shop. Keep the same single-page structure but add a short hero, three recent prints as captions, and a contact line. Do not invent a navbar or a footer.",
+  "preSnapshot": {
+    "pageTitle": "Folded Light",
+    "sections": [
+      { "kind": "h1", "text": "Folded Light" },
+      { "kind": "p", "text": "A letterpress shop." }
+    ]
+  },
+  "expectedCapabilities": ["ai.chat", "site.write"],
+  "rubric": [
+    {
+      "id": "scope",
+      "label": "Stays within single page; no navbar or footer invented",
+      "guidance": "Discipline: does the agent respect the brief?"
+    },
+    {
+      "id": "hero",
+      "label": "Short hero is intentional, not stock",
+      "guidance": "Type-driven, calm."
+    },
+    {
+      "id": "prints",
+      "label": "Three prints shown as captions",
+      "guidance": "Not images, captions. Real-sounding titles."
+    },
+    {
+      "id": "contact",
+      "label": "One contact line, not a CTA block",
+      "guidance": "Plain, restrained."
+    }
+  ]
+}

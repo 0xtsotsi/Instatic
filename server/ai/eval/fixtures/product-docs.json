@@ -1,0 +1,33 @@
+{
+  "id": "product-docs",
+  "title": "Product documentation",
+  "description": "Build a docs landing page for a CLI tool. Three-pane nav, code example, version badge.",
+  "prompt": "Build the landing page for 'Quill', a CLI for converting markdown to EPUB. Left rail TOC, an intro with a copy-pasteable command, a small feature list, and a version badge. Documentation-voice, not marketing-voice.",
+  "preSnapshot": {
+    "pageTitle": "Quill — docs",
+    "sections": [{ "kind": "h1", "text": "Quill" }]
+  },
+  "expectedCapabilities": ["ai.chat", "site.write"],
+  "rubric": [
+    {
+      "id": "toc",
+      "label": "Left rail TOC present and populated",
+      "guidance": "Real sections, not placeholder links."
+    },
+    {
+      "id": "example",
+      "label": "Copy-pasteable command example",
+      "guidance": "Monospace, copyable, plausible CLI."
+    },
+    {
+      "id": "features",
+      "label": "Short feature list, not marketing bullets",
+      "guidance": "Documentation-voice: verbs, not adjectives."
+    },
+    {
+      "id": "version",
+      "label": "Version badge present",
+      "guidance": "Semver-looking string, subtle styling."
+    }
+  ]
+}
