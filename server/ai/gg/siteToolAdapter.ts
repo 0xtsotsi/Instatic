@@ -34,30 +34,47 @@ import type { AiTool, ToolContext as InstaticToolContext } from '../runtime/type
 import type { AiBrowserBridge, AiStreamEvent } from '../runtime/types'
 
 /**
- * Minimal zod-like schema used as the parameter shape for adapted
- * Instatic tools. The legacy `AiTool` validates its input via TypeBox
- * at handler-execution time, so the upstream gg-agent's "run
- * schema-first" loop is satisfied by a permissive passthrough: the
- * upstream provider never sees a JSON schema other than `{}`.
+ * Permissive JSON Schema for adapted Instatic tools. The legacy `AiTool`
+ * validates its input via TypeBox at handler-execution time, so the
+ * upstream gg-agent loop is satisfied with the empty object schema —
+ * the upstream provider sees `{}` (accept any object) and the legacy
+ * TypeBox validator inside the handler still rejects invalid input.
  *
- * The structural signature is intentionally narrow (just `parse` and
- * `safeParse`) so the type system accepts it as a zod v4 `ZodType` at
- * the import boundary without dragging the zod v4 runtime into the
- * adapter itself.
+ * The `zod` package is banned repo-wide (see
+ * `src/__tests__/architecture/ai-driver-isolation.test.ts`), so we
+ * cannot import it here to construct a real Zod v4 schema. gg-ai's
+ * `resolveToolSchema` consults `rawInputSchema` BEFORE calling
+ * `zodToJsonSchema(parameters)`, so setting `rawInputSchema` skips the
+ * Zod path entirely — see `@kenkaiiii/gg-ai` line 447
+ * (`tool.rawInputSchema ?? zodToJsonSchema(tool.parameters)`). MCP tools
+ * use the same path; we're matching it here.
  */
-interface PermissiveSchema {
-  parse(value: unknown): unknown
-  safeParse(value: unknown): { success: true; data: unknown } | { success: false; error: unknown }
-  optional(): PermissiveSchema
-  describe(description?: string): PermissiveSchema
+const RAW_INPUT_SCHEMA: Record<string, unknown> = {
+  type: 'object',
+  properties: {},
+  additionalProperties: true,
 }
 
-const PASS_THROUGH_SCHEMA: PermissiveSchema = {
-  parse: (value) => value,
-  safeParse: (value) => ({ success: true, data: value }),
-  optional: () => PASS_THROUGH_SCHEMA,
-  describe: () => PASS_THROUGH_SCHEMA,
-} as const
+/**
+ * Defensive fallback for the `parameters` slot of an `AgentTool`.
+ *
+ * `AgentTool.parameters` is typed as `z.ZodType` in gg-agent's public
+ * surface, but gg-ai also reads `tool.parameters` directly when
+ * serialising tool schemas for providers that don't take a raw JSON
+ * schema override. To survive those code paths without importing `zod`,
+ * we hand-roll the *minimal* shape Zod v4's `toJSONSchema.process`
+ * consults: `{ _zod: { def: { type: 'any' } } }`. The `'any'` branch in
+ * `zod/v4/core/json-schema-processors.js` is a no-op (`anyProcessor`
+ * returns `{}`), so any tool spec the agent emits will be the empty
+ * JSON Schema — i.e. accept anything — exactly matching
+ * `RAW_INPUT_SCHEMA` above. If gg-ai's path ever ignores
+ * `rawInputSchema`, this fallback still doesn't crash.
+ *
+ * Cast to `unknown as AgentTool['parameters']` because we cannot import
+ * the real Zod v4 type — and we don't need to: gg-ai only reads
+ * `schema._zod.def.type` at runtime.
+ */
+const FAKE_ZOD_ANY = { _zod: { def: { type: 'any' } } } as unknown as AgentTool['parameters']
 
 // ---------------------------------------------------------------------------
 // Public adapter seam
@@ -99,16 +116,26 @@ export function adaptToolsToAgent(tools: ReadonlyArray<AiTool>): AgentTool[] {
 
 function adaptOneTool(tool: AiTool): AgentTool {
   /**
-   * Permissive schema — the upstream provider sees an empty JSON schema
-   * (the agent loop never blocks the model's call), and the legacy
-   * TypeBox validator inside the handler still rejects invalid input.
+   * Two slots carry the tool's input shape:
+   *
+   *   - `rawInputSchema` — plain JSON Schema, preferred by gg-ai's
+   *     `resolveToolSchema` and never converted via Zod. MCP tools use
+   *     this exact path; we're matching it.
+   *   - `parameters` — Zod-typed per `AgentTool`'s public surface. We
+   *     can't import `zod` (repo-banned) but we can satisfy
+   *     `zodToJsonSchema` with the minimum shape it inspects
+   *     (`{ _zod: { def: { type: 'any' } } }`).
+   *
+   * The legacy TypeBox validator inside `tool.handler` remains the
+   * source of truth for input validation.
    */
-  const parameters = PASS_THROUGH_SCHEMA as AgentTool['parameters']
+  const parameters = FAKE_ZOD_ANY
 
   return {
     name: tool.name,
     description: tool.description,
     parameters,
+    rawInputSchema: RAW_INPUT_SCHEMA,
     execute: async (args: unknown, ctx: ToolContext) => {
       // Adapter-side signal: the upstream ctx.signal is the agent's overall
       // cancel; the per-request bridge timeout is in adapterContext.signal.
