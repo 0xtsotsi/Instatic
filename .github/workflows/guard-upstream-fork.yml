@@ -24,11 +24,20 @@ on:
 permissions:
   contents: read
 
+# Cancel superseded runs on the same ref — a follow-up push that re-routes
+# `origin` to the correct fork can safely cancel the prior failed attempt.
+concurrency:
+  group: fork-guard-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   fork-identity-check:
     name: Fork identity check
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     steps:
+      - uses: actions/checkout@v7
+
       - name: Block pushes not from the configured fork
         env:
           REPOSITORY: ${{ github.repository }}
