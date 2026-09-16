@@ -135,7 +135,10 @@ function readFirstStringBeforeStatementEnd(
   return null
 }
 
-function readStringAfterFrom(source: string, index: number): { value: string; start: number; end: number } | null {
+function readStringAfterFrom(
+  source: string,
+  index: number,
+): { value: string; start: number; end: number } | null {
   let i = index
   while (i < source.length) {
     const skipped = skipNonCode(source, i)
@@ -241,7 +244,12 @@ export function extractRuntimeImportSpecifiers(source: string): RuntimeImportSpe
 }
 
 export function packageNameFromImportSpecifier(specifier: string): string | null {
-  if (!specifier || specifier.startsWith('.') || specifier.startsWith('/') || specifier.startsWith('#')) {
+  if (
+    !specifier ||
+    specifier.startsWith('.') ||
+    specifier.startsWith('/') ||
+    specifier.startsWith('#')
+  ) {
     return null
   }
   if (/^[a-z][a-z0-9+.-]*:/i.test(specifier)) return null
@@ -254,7 +262,9 @@ export function packageNameFromImportSpecifier(specifier: string): string | null
 }
 
 function isNodeBuiltinImportSpecifier(specifier: string): boolean {
-  const withoutProtocol = specifier.startsWith('node:') ? specifier.slice('node:'.length) : specifier
+  const withoutProtocol = specifier.startsWith('node:')
+    ? specifier.slice('node:'.length)
+    : specifier
   const packageName = packageNameFromImportSpecifier(withoutProtocol) ?? withoutProtocol
   return NODE_BUILTIN_PACKAGES.has(packageName)
 }
@@ -315,40 +325,46 @@ export function analyzeRuntimeScriptImports(
     for (const importEntry of extractRuntimeImportSpecifiers(file.content)) {
       imports.push(importEntry)
       if (isNodeBuiltinImportSpecifier(importEntry.specifier)) {
-        diagnostics.push(importDiagnostic(
-          'runtime-dependency-node-builtin',
-          `Node builtin "${importEntry.specifier}" cannot be imported by browser runtime scripts`,
-          'error',
-          file,
-          importEntry.kind,
-          importEntry.specifier,
-        ))
+        diagnostics.push(
+          importDiagnostic(
+            'runtime-dependency-node-builtin',
+            `Node builtin "${importEntry.specifier}" cannot be imported by browser runtime scripts`,
+            'error',
+            file,
+            importEntry.kind,
+            importEntry.specifier,
+          ),
+        )
         continue
       }
 
       const packageName = packageNameFromImportSpecifier(importEntry.specifier)
       if (!packageName) {
         if (/^[a-z][a-z0-9+.-]*:/i.test(importEntry.specifier)) {
-          diagnostics.push(importDiagnostic(
-            'runtime-dependency-external-url',
-            `External runtime import "${importEntry.specifier}" is not self-hosted`,
-            'warning',
-            file,
-            importEntry.kind,
-          ))
+          diagnostics.push(
+            importDiagnostic(
+              'runtime-dependency-external-url',
+              `External runtime import "${importEntry.specifier}" is not self-hosted`,
+              'warning',
+              file,
+              importEntry.kind,
+            ),
+          )
         }
         continue
       }
 
       if (!isSafePackageName(packageName)) {
-        diagnostics.push(importDiagnostic(
-          'runtime-dependency-invalid-name',
-          `Invalid runtime package name "${packageName}"`,
-          'error',
-          file,
-          importEntry.kind,
-          packageName,
-        ))
+        diagnostics.push(
+          importDiagnostic(
+            'runtime-dependency-invalid-name',
+            `Invalid runtime package name "${packageName}"`,
+            'error',
+            file,
+            importEntry.kind,
+            packageName,
+          ),
+        )
         continue
       }
 
@@ -358,25 +374,29 @@ export function analyzeRuntimeScriptImports(
 
       if (runtimeVersion) continue
       if (devVersion) {
-        diagnostics.push(importDiagnostic(
-          'runtime-dependency-dev-only',
-          `Package "${packageName}" is declared as a dev dependency but is imported by a runtime script`,
+        diagnostics.push(
+          importDiagnostic(
+            'runtime-dependency-dev-only',
+            `Package "${packageName}" is declared as a dev dependency but is imported by a runtime script`,
+            'error',
+            file,
+            importEntry.kind,
+            packageName,
+          ),
+        )
+        continue
+      }
+
+      diagnostics.push(
+        importDiagnostic(
+          'runtime-dependency-missing',
+          `Package "${packageName}" is imported by a runtime script but is not declared in dependencies`,
           'error',
           file,
           importEntry.kind,
           packageName,
-        ))
-        continue
-      }
-
-      diagnostics.push(importDiagnostic(
-        'runtime-dependency-missing',
-        `Package "${packageName}" is imported by a runtime script but is not declared in dependencies`,
-        'error',
-        file,
-        importEntry.kind,
-        packageName,
-      ))
+        ),
+      )
     }
   }
 

@@ -12,7 +12,13 @@
  *   - Inline create (opens a small input row under the active parent).
  *   - Rename / delete via the existing ExplorerItemContextMenu.
  */
-import { useState, type DragEvent, type FormEvent, type KeyboardEvent, type MouseEvent } from 'react'
+import {
+  useState,
+  type DragEvent,
+  type FormEvent,
+  type KeyboardEvent,
+  type MouseEvent,
+} from 'react'
 import { Button } from '@ui/components/Button'
 import { Input } from '@ui/components/Input'
 import { EmptyState } from '@ui/components/EmptyState'
@@ -29,10 +35,7 @@ import { ReloadIcon } from 'pixel-art-icons/icons/reload'
 import { TrashSolidIcon } from 'pixel-art-icons/icons/trash-solid'
 import { WarningDiamondSolidIcon } from 'pixel-art-icons/icons/warning-diamond-solid'
 import type { IconComponent } from 'pixel-art-icons/types'
-import {
-  ExplorerItemContextMenu,
-  ExplorerRenameDialog,
-} from '@site/explorer-actions'
+import { ExplorerItemContextMenu, ExplorerRenameDialog } from '@site/explorer-actions'
 import {
   TreeChevron,
   TreeContainer,
@@ -208,7 +211,7 @@ export function MediaFolderPanel({ workspace }: MediaFolderPanelProps) {
   }
 
   const rows = flattenFolderTree(workspace.folderTree, expanded)
-  const renameFolder = renameState ? workspace.folderById.get(renameState.folderId) ?? null : null
+  const renameFolder = renameState ? (workspace.folderById.get(renameState.folderId) ?? null) : null
   const allAssetCount = workspace.assets.length
 
   return (
@@ -275,7 +278,9 @@ export function MediaFolderPanel({ workspace }: MediaFolderPanelProps) {
           compact
           plain
           title="No folders yet"
-          description={canWrite ? 'Click + to create your first folder.' : 'No folders have been created yet.'}
+          description={
+            canWrite ? 'Click + to create your first folder.' : 'No folders have been created yet.'
+          }
         />
       ) : (
         <TreeContainer ariaLabel="Folder tree" className={styles.tree}>
@@ -340,17 +345,21 @@ export function MediaFolderPanel({ workspace }: MediaFolderPanelProps) {
           }}
           showRename={canWrite}
           showDelete={canDelete}
-          extraItems={canWrite ? [
-            {
-              label: 'New subfolder',
-              icon: <PlusIcon size={13} />,
-              action: () => {
-                const folderId = contextMenu.folderId
-                setContextMenu(null)
-                startCreate(folderId)
-              },
-            },
-          ] : []}
+          extraItems={
+            canWrite
+              ? [
+                  {
+                    label: 'New subfolder',
+                    icon: <PlusIcon size={13} />,
+                    action: () => {
+                      const folderId = contextMenu.folderId
+                      setContextMenu(null)
+                      startCreate(folderId)
+                    },
+                  },
+                ]
+              : []
+          }
         />
       )}
 
@@ -398,9 +407,8 @@ function SentinelRow({
   onDragLeave,
   onDrop,
 }: SentinelRowProps) {
-  const ariaLabel = meta !== undefined
-    ? `${label} — ${meta} ${meta === 1 ? 'asset' : 'assets'}`
-    : label
+  const ariaLabel =
+    meta !== undefined ? `${label} — ${meta} ${meta === 1 ? 'asset' : 'assets'}` : label
   return (
     <TreeRow
       depth={0}
@@ -567,7 +575,9 @@ function CreateRow({ depth, value, onValueChange, onSubmit, onCancel }: CreateRo
         placeholder="Folder name"
         autoFocus
         aria-label="New folder name"
-        onKeyDown={(event) => { if (event.key === 'Escape') onCancel() }}
+        onKeyDown={(event) => {
+          if (event.key === 'Escape') onCancel()
+        }}
       />
     </form>
   )

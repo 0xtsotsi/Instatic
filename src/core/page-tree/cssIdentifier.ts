@@ -20,12 +20,7 @@ export function escapeCssIdentifier(value: string): string {
       (codeUnit >= 0x0001 && codeUnit <= 0x001f) ||
       codeUnit === 0x007f ||
       (index === 0 && codeUnit >= 0x0030 && codeUnit <= 0x0039) ||
-      (
-        index === 1 &&
-        codeUnit >= 0x0030 &&
-        codeUnit <= 0x0039 &&
-        value.charCodeAt(0) === 0x002d
-      )
+      (index === 1 && codeUnit >= 0x0030 && codeUnit <= 0x0039 && value.charCodeAt(0) === 0x002d)
     ) {
       escaped += `\\${codeUnit.toString(16)} `
       continue

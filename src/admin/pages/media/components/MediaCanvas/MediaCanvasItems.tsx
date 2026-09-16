@@ -68,9 +68,22 @@ export function AssetTile({
       >
         <span className={styles.tilePreview} aria-hidden="true" style={previewStyle}>
           {bucket === 'image' && thumbUrl ? (
-            <img src={thumbUrl} alt="" className={styles.tileImage} loading="lazy" decoding="async" draggable={false} />
+            <img
+              src={thumbUrl}
+              alt=""
+              className={styles.tileImage}
+              loading="lazy"
+              decoding="async"
+              draggable={false}
+            />
           ) : bucket === 'video' ? (
-            <video src={asset.publicPath} preload="metadata" muted className={styles.tileVideo} draggable={false} />
+            <video
+              src={asset.publicPath}
+              preload="metadata"
+              muted
+              className={styles.tileVideo}
+              draggable={false}
+            />
           ) : (
             <FolderGlyphIcon size={28} />
           )}
@@ -117,7 +130,13 @@ export function AssetRow({
       >
         <span className={styles.rowPreview} aria-hidden="true" style={previewStyle}>
           {bucket === 'image' && thumbUrl ? (
-            <img src={thumbUrl} alt="" className={styles.rowImage} loading="lazy" decoding="async" />
+            <img
+              src={thumbUrl}
+              alt=""
+              className={styles.rowImage}
+              loading="lazy"
+              decoding="async"
+            />
           ) : bucket === 'video' ? (
             <VideoSolidIcon size={13} />
           ) : (
@@ -240,7 +259,12 @@ export function ParentFolderTile({
         variant="ghost"
         size="sm"
         aria-label={`Back to ${entry.label}`}
-        className={cn(styles.tile, styles.folderTile, styles.parentFolderTile, dropActive && styles.folderDropActive)}
+        className={cn(
+          styles.tile,
+          styles.folderTile,
+          styles.parentFolderTile,
+          dropActive && styles.folderDropActive,
+        )}
         onClick={onOpen}
         onDragOver={(event) => onDragOver(event, entry.targetFolderId)}
         onDragLeave={onDragLeave}
@@ -275,7 +299,12 @@ export function ParentFolderRow({
         variant="ghost"
         size="sm"
         aria-label={`Back to ${entry.label}`}
-        className={cn(styles.row, styles.folderRow, styles.parentFolderRow, dropActive && styles.folderDropActive)}
+        className={cn(
+          styles.row,
+          styles.folderRow,
+          styles.parentFolderRow,
+          dropActive && styles.folderDropActive,
+        )}
         onClick={onOpen}
         onDragOver={(event) => onDragOver(event, entry.targetFolderId)}
         onDragLeave={onDragLeave}

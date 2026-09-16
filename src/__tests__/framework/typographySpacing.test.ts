@@ -23,14 +23,8 @@ import {
 import { generateClassCSS } from '@core/publisher'
 import { DEFAULT_FRAMEWORK_PREFERENCES } from '@core/framework'
 import { resolveFrameworkPreferences } from '@core/framework'
-import {
-  buildDefaultSpacingSettings,
-  buildDefaultTypographySettings,
-} from '@core/framework'
-import type {
-  FrameworkSpacingSettings,
-  FrameworkTypographySettings,
-} from '@core/framework-schema'
+import { buildDefaultSpacingSettings, buildDefaultTypographySettings } from '@core/framework'
+import type { FrameworkSpacingSettings, FrameworkTypographySettings } from '@core/framework-schema'
 
 const NOW = 1_700_000_000_000
 
@@ -143,7 +137,9 @@ describe('framework/typography', () => {
 
   it('expands * patterns in the class generator into one class per step', () => {
     const classes = generateFrameworkTypographyUtilityClasses(fixedTypographySettings())
-    const names = Object.values(classes).map((c) => c.name).sort()
+    const names = Object.values(classes)
+      .map((c) => c.name)
+      .sort()
     expect(names).toContain('text-xs')
     expect(names).toContain('text-m')
     expect(names).toContain('text-4xl')
@@ -328,8 +324,12 @@ describe('framework/preferences', () => {
       treeShakeGeneratedFrameworkUtilities: true,
     }
     expect(Value.Check(FrameworkPreferencesSettingsSchema, valid)).toBe(true)
-    expect(Value.Check(FrameworkPreferencesSettingsSchema, { ...valid, rootFontSize: 0 })).toBe(false)
-    expect(Value.Check(FrameworkPreferencesSettingsSchema, { ...valid, rootFontSize: -5 })).toBe(false)
+    expect(Value.Check(FrameworkPreferencesSettingsSchema, { ...valid, rootFontSize: 0 })).toBe(
+      false,
+    )
+    expect(Value.Check(FrameworkPreferencesSettingsSchema, { ...valid, rootFontSize: -5 })).toBe(
+      false,
+    )
   })
 })
 

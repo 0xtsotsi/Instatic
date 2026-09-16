@@ -1,7 +1,12 @@
 import { useState, type KeyboardEvent, type MouseEvent } from 'react'
 import { useEditorStore } from '@site/store/store'
 import type { SiteFile } from '@core/files/schemas'
-import type { ExplorerPathChangePlan, Page, SiteExplorerSectionId, StructuralSiteExplorerSectionId } from '@core/page-tree'
+import type {
+  ExplorerPathChangePlan,
+  Page,
+  SiteExplorerSectionId,
+  StructuralSiteExplorerSectionId,
+} from '@core/page-tree'
 import { createUniquePageSlug, pagePublicPath, isHomePage } from '@core/page-tree'
 import { templateTargetLabel } from '@core/templates'
 import { SkeletonBlock } from '@ui/components/Skeleton'
@@ -12,9 +17,19 @@ import { PaintBucketSolidIcon } from 'pixel-art-icons/icons/paint-bucket-solid'
 import { CodeIcon } from 'pixel-art-icons/icons/code'
 import { ExternalLinkSolidIcon } from 'pixel-art-icons/icons/external-link-solid'
 import { GlobeSolidIcon } from 'pixel-art-icons/icons/globe-solid'
-import { SiteCreateDialog, buildScriptPath, buildStylePath, slugifySiteItemName, type SiteCreatePayload, type SiteCreateKind } from '@admin/shared/dialogs/SiteCreateDialog'
+import {
+  SiteCreateDialog,
+  buildScriptPath,
+  buildStylePath,
+  slugifySiteItemName,
+  type SiteCreatePayload,
+  type SiteCreateKind,
+} from '@admin/shared/dialogs/SiteCreateDialog'
 import type { ExplorerContextMenuItem } from '@site/explorer-actions'
-import { TemplateSettingsDialog, type TemplateSettingsPayload } from '@admin/shared/dialogs/TemplateSettingsDialog'
+import {
+  TemplateSettingsDialog,
+  type TemplateSettingsPayload,
+} from '@admin/shared/dialogs/TemplateSettingsDialog'
 import { useVCDeletionConfirm } from '@admin/shared/dialogs/VCDeletionConfirmDialog'
 import { useConfirmDelete } from '@admin/shared/dialogs/ConfirmDeleteDialog'
 import {
@@ -25,12 +40,28 @@ import {
 } from './siteExplorerModel'
 import type { SiteExplorerInlineRenameTarget } from './SiteExplorerTreeSection'
 import { SiteExplorerDndScope, type SiteExplorerDndState } from './SiteExplorerDndScope'
-import { bulkDeleteConfirmDescription, bulkDeleteConfirmLabel, bulkDeleteConfirmTitle, bulkWrapLabel, fileName, groupSiteFiles, keyboardMenuPosition, pathFromRenameInput } from './siteExplorerPanelUtils'
+import {
+  bulkDeleteConfirmDescription,
+  bulkDeleteConfirmLabel,
+  bulkDeleteConfirmTitle,
+  bulkWrapLabel,
+  fileName,
+  groupSiteFiles,
+  keyboardMenuPosition,
+  pathFromRenameInput,
+} from './siteExplorerPanelUtils'
 import { useSiteExplorerSelection, type SiteExplorerMenuSelection } from './siteExplorerSelection'
-import { SiteExplorerContextMenu, type SiteExplorerContextMenuState } from './SiteExplorerContextMenu'
+import {
+  SiteExplorerContextMenu,
+  type SiteExplorerContextMenuState,
+} from './SiteExplorerContextMenu'
 import { SiteExplorerPathConfirmDialog } from './SiteExplorerPathConfirmDialog'
 import { SiteExplorerPanelSections } from './SiteExplorerPanelSections'
-import type { SiteExplorerAnySectionModel, SiteExplorerContextTarget, SiteExplorerSectionGroup } from './siteExplorerPanelTypes'
+import type {
+  SiteExplorerAnySectionModel,
+  SiteExplorerContextTarget,
+  SiteExplorerSectionGroup,
+} from './siteExplorerPanelTypes'
 import styles from './SiteExplorerPanel.module.css'
 
 interface SiteExplorerPanelProps {
@@ -52,11 +83,16 @@ function renameValueForTarget(target: SiteExplorerContextTarget): string {
   return fileName(target.path)
 }
 
-function folderTarget(sectionId: SiteExplorerSectionId, folder: SiteExplorerTreeFolder): SiteExplorerContextTarget {
+function folderTarget(
+  sectionId: SiteExplorerSectionId,
+  folder: SiteExplorerTreeFolder,
+): SiteExplorerContextTarget {
   return { kind: 'folder', sectionId, id: folder.id, name: folder.name }
 }
 
-function isStructuralSection(sectionId: SiteExplorerSectionId): sectionId is StructuralSiteExplorerSectionId {
+function isStructuralSection(
+  sectionId: SiteExplorerSectionId,
+): sectionId is StructuralSiteExplorerSectionId {
   return sectionId === 'pages' || sectionId === 'styles' || sectionId === 'scripts'
 }
 
@@ -67,12 +103,13 @@ function renamedFolderPath(
 ): string {
   const index = currentPath.lastIndexOf('/')
   const parentPath = index === -1 ? '' : currentPath.slice(0, index)
-  const segment = nextName
-    .trim()
-    .toLowerCase()
-    .replace(sectionId === 'pages' ? /[^a-z0-9-]+/g : /[^a-z0-9._-]+/g, '-')
-    .replace(/-+/g, '-')
-    .replace(/^-+|-+$/g, '') || 'new-folder'
+  const segment =
+    nextName
+      .trim()
+      .toLowerCase()
+      .replace(sectionId === 'pages' ? /[^a-z0-9-]+/g : /[^a-z0-9._-]+/g, '-')
+      .replace(/-+/g, '-')
+      .replace(/^-+|-+$/g, '') || 'new-folder'
   return parentPath ? `${parentPath}/${segment}` : segment
 }
 
@@ -120,7 +157,9 @@ export function SiteExplorerPanel({
   const confirmDelete = useConfirmDelete()
   const [createKind, setCreateKind] = useState<SiteCreateKind | null>(null)
   const [contextMenu, setContextMenu] = useState<ContextMenuState | null>(null)
-  const [inlineRenameTarget, setInlineRenameTarget] = useState<SiteExplorerContextTarget | null>(null)
+  const [inlineRenameTarget, setInlineRenameTarget] = useState<SiteExplorerContextTarget | null>(
+    null,
+  )
   const [templateSettingsTarget, setTemplateSettingsTarget] = useState<Page | null>(null)
   const [pathConfirmPlan, setPathConfirmPlan] = useState<ExplorerPathChangePlan | null>(null)
   const explorerSelection = useSiteExplorerSelection<SiteExplorerContextTarget>()
@@ -182,7 +221,9 @@ export function SiteExplorerPanel({
     setContextMenu({ ...keyboardMenuPosition(event.currentTarget), target, selection })
   }
 
-  function inlineRenameSectionTarget(sectionId: SiteExplorerSectionId): SiteExplorerInlineRenameTarget | null {
+  function inlineRenameSectionTarget(
+    sectionId: SiteExplorerSectionId,
+  ): SiteExplorerInlineRenameTarget | null {
     if (!inlineRenameTarget) return null
     if (inlineRenameTarget.kind === 'folder') {
       if (inlineRenameTarget.sectionId !== sectionId) return null
@@ -202,11 +243,8 @@ export function SiteExplorerPanel({
     } else {
       const file = files.find((candidate) => candidate.id === inlineRenameTarget.id)
       if (!file) return null
-      const targetSectionId: SiteExplorerSectionId | null = file.type === 'style'
-        ? 'styles'
-        : file.type === 'script'
-          ? 'scripts'
-          : null
+      const targetSectionId: SiteExplorerSectionId | null =
+        file.type === 'style' ? 'styles' : file.type === 'script' ? 'scripts' : null
       if (targetSectionId !== sectionId) return null
     }
 
@@ -253,8 +291,18 @@ export function SiteExplorerPanel({
         renameVisualComponent(inlineRenameTarget.id, value)
       } else if (inlineRenameTarget.kind === 'folder') {
         if (isStructuralSection(inlineRenameTarget.sectionId)) {
-          const nextFolderPath = renamedFolderPath(inlineRenameTarget.sectionId, inlineRenameTarget.id, value)
-          presentStructuralPathPlan(previewRenameExplorerFolder(inlineRenameTarget.sectionId, inlineRenameTarget.id, nextFolderPath))
+          const nextFolderPath = renamedFolderPath(
+            inlineRenameTarget.sectionId,
+            inlineRenameTarget.id,
+            value,
+          )
+          presentStructuralPathPlan(
+            previewRenameExplorerFolder(
+              inlineRenameTarget.sectionId,
+              inlineRenameTarget.id,
+              nextFolderPath,
+            ),
+          )
         } else {
           renameExplorerFolder(inlineRenameTarget.sectionId, inlineRenameTarget.id, value)
         }
@@ -328,7 +376,10 @@ export function SiteExplorerPanel({
           for (const fileId of selection.itemIds) deleteFile(fileId)
         } else {
           for (const vcId of selection.itemIds) deleteVisualComponent(vcId)
-          if (activeDocument?.kind === 'visualComponent' && selection.itemIds.includes(activeDocument.vcId)) {
+          if (
+            activeDocument?.kind === 'visualComponent' &&
+            selection.itemIds.includes(activeDocument.vcId)
+          ) {
             setActiveDocument(null)
           }
         }
@@ -342,7 +393,12 @@ export function SiteExplorerPanel({
     const folderId = wrapExplorerItemsInFolder(selection.sectionId, selection.itemIds, 'New folder')
     setContextMenu(null)
     if (!folderId) return
-    setInlineRenameTarget({ kind: 'folder', sectionId: selection.sectionId, id: folderId, name: 'New folder' })
+    setInlineRenameTarget({
+      kind: 'folder',
+      sectionId: selection.sectionId,
+      id: folderId,
+      name: 'New folder',
+    })
     explorerSelection.setSelectionForIds(selection.sectionId, selection.itemIds)
   }
 
@@ -386,14 +442,16 @@ export function SiteExplorerPanel({
       ]
     }
 
-    return [{
-      label: 'Use as template',
-      icon: <FileTextSolidIcon size={13} />,
-      action: () => {
-        setTemplateSettingsTarget(page)
-        setContextMenu(null)
+    return [
+      {
+        label: 'Use as template',
+        icon: <FileTextSolidIcon size={13} />,
+        action: () => {
+          setTemplateSettingsTarget(page)
+          setContextMenu(null)
+        },
       },
-    }]
+    ]
   }
 
   function pageMenuItems(target: SiteExplorerContextTarget) {
@@ -401,14 +459,18 @@ export function SiteExplorerPanel({
     if (!page) return []
 
     return [
-      ...(!page.template && !isHomePage(page) ? [{
-        label: 'Set as homepage',
-        icon: <GlobeSolidIcon size={13} />,
-        action: () => {
-          setPageAsHomepage(page.id)
-          setContextMenu(null)
-        },
-      }] : []),
+      ...(!page.template && !isHomePage(page)
+        ? [
+            {
+              label: 'Set as homepage',
+              icon: <GlobeSolidIcon size={13} />,
+              action: () => {
+                setPageAsHomepage(page.id)
+                setContextMenu(null)
+              },
+            },
+          ]
+        : []),
       {
         label: 'Open in new tab',
         icon: <ExternalLinkSolidIcon size={13} />,
@@ -426,11 +488,17 @@ export function SiteExplorerPanel({
     if (selection && selection.itemIds.length > 1) {
       const wrappableIds = wrappableSelectionIds(selection)
       return wrappableIds.length > 0
-        ? [{
-          label: bulkWrapLabel(selection.sectionId, wrappableIds.length),
-          icon: <FolderGlyphIcon size={13} />,
-          action: () => handleWrapSelectionInFolder({ sectionId: selection.sectionId, itemIds: wrappableIds }),
-        }]
+        ? [
+            {
+              label: bulkWrapLabel(selection.sectionId, wrappableIds.length),
+              icon: <FolderGlyphIcon size={13} />,
+              action: () =>
+                handleWrapSelectionInFolder({
+                  sectionId: selection.sectionId,
+                  itemIds: wrappableIds,
+                }),
+            },
+          ]
         : []
     }
 
@@ -445,7 +513,8 @@ export function SiteExplorerPanel({
       {
         label: 'Wrap in folder',
         icon: <FolderGlyphIcon size={13} />,
-        action: () => handleWrapSelectionInFolder({ sectionId: selection.sectionId, itemIds: wrappableIds }),
+        action: () =>
+          handleWrapSelectionInFolder({ sectionId: selection.sectionId, itemIds: wrappableIds }),
       },
     ]
   }
@@ -510,90 +579,94 @@ export function SiteExplorerPanel({
     openKeyboardContextMenu(item.target, event, selection)
   }
 
-  function renameExplorerFolderTarget(sectionId: SiteExplorerSectionId, folder: SiteExplorerTreeFolder) {
+  function renameExplorerFolderTarget(
+    sectionId: SiteExplorerSectionId,
+    folder: SiteExplorerTreeFolder,
+  ) {
     startInlineRename(folderTarget(sectionId, folder))
   }
 
   const pageTreeModel = site
     ? buildStructuralExplorerTreeSection<SiteExplorerContextTarget>(
-      'pages',
-      site.explorer.pages,
-      normalPages.map((page) => ({
-        id: page.id,
-        label: page.title,
-        path: page.slug,
-        meta: pagePublicPath(page.slug),
-        icon: FileTextSolidIcon,
-        active: page.id === activePageId && activeDocument?.kind !== 'visualComponent',
-        pinned: isHomePage(page),
-        ariaLabel: `Open page ${page.title}`,
-        target: { kind: 'page', id: page.id, title: page.title, slug: page.slug },
-      })),
-    )
+        'pages',
+        site.explorer.pages,
+        normalPages.map((page) => ({
+          id: page.id,
+          label: page.title,
+          path: page.slug,
+          meta: pagePublicPath(page.slug),
+          icon: FileTextSolidIcon,
+          active: page.id === activePageId && activeDocument?.kind !== 'visualComponent',
+          pinned: isHomePage(page),
+          ariaLabel: `Open page ${page.title}`,
+          target: { kind: 'page', id: page.id, title: page.title, slug: page.slug },
+        })),
+      )
     : null
   const templateTreeModel = site
     ? buildSiteExplorerTreeSection<SiteExplorerContextTarget>(
-      'templates',
-      site.explorer.templates.folders,
-      site.explorer.templates.items,
-      templatePages.map((page) => ({
-        id: page.id,
-        label: page.title,
-        meta: templateTargetLabel(page),
-        icon: FileTextSolidIcon,
-        active: page.id === activePageId && activeDocument?.kind !== 'visualComponent',
-        ariaLabel: `Open template ${page.title}`,
-        target: { kind: 'page', id: page.id, title: page.title, slug: page.slug },
-      })),
-    )
+        'templates',
+        site.explorer.templates.folders,
+        site.explorer.templates.items,
+        templatePages.map((page) => ({
+          id: page.id,
+          label: page.title,
+          meta: templateTargetLabel(page),
+          icon: FileTextSolidIcon,
+          active: page.id === activePageId && activeDocument?.kind !== 'visualComponent',
+          ariaLabel: `Open template ${page.title}`,
+          target: { kind: 'page', id: page.id, title: page.title, slug: page.slug },
+        })),
+      )
     : null
   const componentTreeModel = site
     ? buildSiteExplorerTreeSection<SiteExplorerContextTarget>(
-      'components',
-      site.explorer.components.folders,
-      site.explorer.components.items,
-      components.map((component) => ({
-        id: component.id,
-        label: component.name,
-        meta: `${component.params.length} props`,
-        icon: BracesIcon,
-        active: activeDocument?.kind === 'visualComponent' && activeDocument.vcId === component.id,
-        ariaLabel: `Open component ${component.name}`,
-        target: { kind: 'component', id: component.id, name: component.name },
-      })),
-    )
+        'components',
+        site.explorer.components.folders,
+        site.explorer.components.items,
+        components.map((component) => ({
+          id: component.id,
+          label: component.name,
+          meta: `${component.params.length} props`,
+          icon: BracesIcon,
+          active:
+            activeDocument?.kind === 'visualComponent' && activeDocument.vcId === component.id,
+          ariaLabel: `Open component ${component.name}`,
+          target: { kind: 'component', id: component.id, name: component.name },
+        })),
+      )
     : null
   const styleTreeModel = site
     ? buildStructuralExplorerTreeSection<SiteExplorerContextTarget>(
-      'styles',
-      site.explorer.styles,
-      fileBuckets.styles.map((file) => ({
-        id: file.id,
-        label: fileName(file.path),
-        path: file.path,
-        meta: file.path,
-        icon: PaintBucketSolidIcon,
-        active: activeEditorFileId === file.id,
-        ariaLabel: `Open ${fileName(file.path)}`,
-        target: { kind: 'file', id: file.id, path: file.path },
-      })),
-    )
+        'styles',
+        site.explorer.styles,
+        fileBuckets.styles.map((file) => ({
+          id: file.id,
+          label: fileName(file.path),
+          path: file.path,
+          meta: file.path,
+          icon: PaintBucketSolidIcon,
+          active: activeEditorFileId === file.id,
+          ariaLabel: `Open ${fileName(file.path)}`,
+          target: { kind: 'file', id: file.id, path: file.path },
+        })),
+      )
     : null
   const scriptTreeModel = site
     ? buildStructuralExplorerTreeSection<SiteExplorerContextTarget>(
-      'scripts',
-      site.explorer.scripts,
-      fileBuckets.scripts.map((file) => ({
-        id: file.id,
-        label: fileName(file.path),
-        path: file.path,
-        meta: file.path,
-        icon: CodeIcon,
-        active: activeEditorFileId === file.id,
-        ariaLabel: `Open ${fileName(file.path)}`,
-        target: { kind: 'file', id: file.id, path: file.path },
-      })),
-    )
+        'scripts',
+        site.explorer.scripts,
+        fileBuckets.scripts.map((file) => ({
+          id: file.id,
+          label: fileName(file.path),
+          path: file.path,
+          meta: file.path,
+          icon: CodeIcon,
+          active: activeEditorFileId === file.id,
+          ariaLabel: `Open ${fileName(file.path)}`,
+          target: { kind: 'file', id: file.id, path: file.path },
+        })),
+      )
     : null
 
   function renderPanel(explorerDnd: SiteExplorerDndState) {
@@ -616,7 +689,9 @@ export function SiteExplorerPanel({
             styleCount={fileBuckets.styles.length}
             scriptCount={fileBuckets.scripts.length}
             inlineRenameTargetForSection={inlineRenameSectionTarget}
-            selectedItemIdsForSection={(sectionId) => explorerSelection.selectedItemIdsForSection(sectionId)}
+            selectedItemIdsForSection={(sectionId) =>
+              explorerSelection.selectedItemIdsForSection(sectionId)
+            }
             onCreatePage={() => setCreateKind('page')}
             onCreateTemplate={handleCreateTemplate}
             onCreateComponent={() => setCreateKind('component')}
@@ -630,8 +705,12 @@ export function SiteExplorerPanel({
             onOpenItem={openExplorerItem}
             onContextMenuItem={contextMenuForItem}
             onKeyDownItem={keyboardContextMenuForItem}
-            onContextMenuFolder={(sectionId, folder, event) => openContextMenu(folderTarget(sectionId, folder), event)}
-            onKeyDownFolder={(sectionId, folder, event) => openKeyboardContextMenu(folderTarget(sectionId, folder), event)}
+            onContextMenuFolder={(sectionId, folder, event) =>
+              openContextMenu(folderTarget(sectionId, folder), event)
+            }
+            onKeyDownFolder={(sectionId, folder, event) =>
+              openKeyboardContextMenu(folderTarget(sectionId, folder), event)
+            }
           />
         )}
         {createKind && (

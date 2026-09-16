@@ -51,13 +51,15 @@ function renderDraft(entry: DataRow) {
 
 describe('useContentEntryDraft custom cells', () => {
   it('hydrates customCells from the entry, excluding built-in field ids', () => {
-    const { result } = renderDraft(fakeRow({
-      title: 'Hello',
-      slug: 'hello',
-      body: '# Hello',
-      subtitle: 'World',
-      rating: 4,
-    }))
+    const { result } = renderDraft(
+      fakeRow({
+        title: 'Hello',
+        slug: 'hello',
+        body: '# Hello',
+        subtitle: 'World',
+        rating: 4,
+      }),
+    )
 
     expect(result.current.customCells).toEqual({ subtitle: 'World', rating: 4 })
     expect(result.current.isDirty).toBe(false)

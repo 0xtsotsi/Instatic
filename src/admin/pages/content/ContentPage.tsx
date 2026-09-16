@@ -1,16 +1,8 @@
 import { Suspense, lazy, useEffect, useId, useRef, useState } from 'react'
-import {
-  readWorkspaceLayout,
-  writeWorkspaceLayout,
-} from '@admin/state/workspaceLayoutStorage'
+import { readWorkspaceLayout, writeWorkspaceLayout } from '@admin/state/workspaceLayoutStorage'
 import { useAdminUi } from '@admin/state/adminUi'
 import { readTitleCell } from '@core/data/cells'
-import type {
-  DataTable,
-  DataRow,
-  DataRowStatus,
-  UpdateDataTableInput,
-} from '@core/data/schemas'
+import type { DataTable, DataRow, DataRowStatus, UpdateDataTableInput } from '@core/data/schemas'
 import { HeadingIcon } from 'pixel-art-icons/icons/heading'
 import { ImagesSolidIcon } from 'pixel-art-icons/icons/images-solid'
 import { TextPlusIcon } from 'pixel-art-icons/icons/text-plus'
@@ -35,9 +27,9 @@ import type { TiptapBodyEditorHandle } from './TiptapBodyEditor'
 // only pay for it the first time the user opens the picker — typing in the
 // content editor doesn't need it.
 const MediaPickerModal = lazy(() =>
-  import('@admin/pages/media/components/MediaPickerModal/MediaPickerModal').then(
-    (m) => ({ default: m.MediaPickerModal }),
-  ),
+  import('@admin/pages/media/components/MediaPickerModal/MediaPickerModal').then((m) => ({
+    default: m.MediaPickerModal,
+  })),
 )
 import { runEntryOp, type EntryOpDeps, type EntryOpOptions } from './utils/entryOp'
 import { useContentEntryDraft } from './hooks/useContentEntryDraft'
@@ -119,9 +111,8 @@ export function ContentPage() {
   const canCreateEntries = canCreateContent(permissionUser)
   const canManageCollections = canManageContentCollections(permissionUser)
   const canUseAgent = canUseAiChat(permissionUser)
-  const visibleContentPanel = activeContentPanel === 'agent' && !canUseAgent
-    ? null
-    : activeContentPanel
+  const visibleContentPanel =
+    activeContentPanel === 'agent' && !canUseAgent ? null : activeContentPanel
   const workspace = useContentWorkspace({ loadAuthors: canReassignAuthor })
   // Collection schema mutations (create/update/delete) are step-up gated on
   // the server — they change the public route surface — so they must run
@@ -152,9 +143,10 @@ export function ContentPage() {
     entries: workspace.entries,
   })
 
-  const publicPath = workspace.selectedCollection && draft.slug
-    ? publicContentPath(workspace.selectedCollection.routeBase, draft.slug)
-    : ''
+  const publicPath =
+    workspace.selectedCollection && draft.slug
+      ? publicContentPath(workspace.selectedCollection.routeBase, draft.slug)
+      : ''
   const canEditSelectedEntry = canEditContentEntry(permissionUser, workspace.selectedEntry)
   const canMoveRows = canMoveDataRow(permissionUser)
   const canMoveSelectedEntry = canEditSelectedEntry && canMoveRows
@@ -218,7 +210,9 @@ export function ContentPage() {
       permMsg: 'Your role cannot move this entry',
       fallback: 'Could not move entry',
       phase: SAVE_PHASE,
-      apply: (entry) => { if (entry) draft.applySelectedEntry(entry) },
+      apply: (entry) => {
+        if (entry) draft.applySelectedEntry(entry)
+      },
     })
   }
 
@@ -238,10 +232,7 @@ export function ContentPage() {
   // (whose generic catch would surface a step-up *cancellation* as a visible
   // error). Instead they run through `runStepUp` directly and let the calling
   // settings dialog render real errors; a cancellation is a silent no-op.
-  async function handleUpdateCollection(
-    collection: DataTable,
-    input: UpdateDataTableInput,
-  ) {
+  async function handleUpdateCollection(collection: DataTable, input: UpdateDataTableInput) {
     if (!canManageCollections) {
       workspace.setError('Your role cannot manage content collections')
       return
@@ -269,37 +260,38 @@ export function ContentPage() {
     }
   }
 
-  function handleRenameEntry(
-    entry: DataRow,
-    input: { title: string; slug: string },
-  ) {
-    return withEntryOp(() => {
-      const entrySnapshot = workspace.selectedEntry?.id === entry.id
-        ? {
-            ...entry,
-            cells: {
-              ...entry.cells,
-              ...draft.customCells,
-              body: draft.body,
-              featuredMedia: draft.featuredMediaId,
-              seoTitle: draft.seoTitle,
-              seoDescription: draft.seoDescription,
-            },
-          }
-        : entry
-      return workspace.renameEntry(entrySnapshot, input)
-    }, {
-      permitted: canEditContentEntry(permissionUser, entry),
-      permMsg: 'Your role cannot edit this entry',
-      fallback: 'Could not rename entry',
-      phase: SAVE_PHASE,
-      rethrow: true,
-      apply: (updatedEntry) => {
-        if (workspace.selectedEntry?.id === entry.id) {
-          draft.applySelectedEntry(updatedEntry)
-        }
+  function handleRenameEntry(entry: DataRow, input: { title: string; slug: string }) {
+    return withEntryOp(
+      () => {
+        const entrySnapshot =
+          workspace.selectedEntry?.id === entry.id
+            ? {
+                ...entry,
+                cells: {
+                  ...entry.cells,
+                  ...draft.customCells,
+                  body: draft.body,
+                  featuredMedia: draft.featuredMediaId,
+                  seoTitle: draft.seoTitle,
+                  seoDescription: draft.seoDescription,
+                },
+              }
+            : entry
+        return workspace.renameEntry(entrySnapshot, input)
       },
-    })
+      {
+        permitted: canEditContentEntry(permissionUser, entry),
+        permMsg: 'Your role cannot edit this entry',
+        fallback: 'Could not rename entry',
+        phase: SAVE_PHASE,
+        rethrow: true,
+        apply: (updatedEntry) => {
+          if (workspace.selectedEntry?.id === entry.id) {
+            draft.applySelectedEntry(updatedEntry)
+          }
+        },
+      },
+    )
   }
 
   function handleDeleteEntry(entry: DataRow) {
@@ -317,33 +309,37 @@ export function ContentPage() {
   }
 
   function handleDuplicateEntry(entry: DataRow) {
-    return withEntryOp(() => {
-      // If duplicating the currently-edited entry, capture the in-memory draft
-      // so the duplicate reflects the latest unsaved edits instead of the
-      // last-saved body — the user clicked duplicate on the row they can see.
-      const source = workspace.selectedEntry?.id === entry.id
-        ? {
-            ...entry,
-            cells: {
-              ...entry.cells,
-              ...draft.customCells,
-              body: draft.body,
-              featuredMedia: draft.featuredMediaId,
-              seoTitle: draft.seoTitle,
-              seoDescription: draft.seoDescription,
-              title: draft.title || readTitleCell(entry.cells),
-            },
-          }
-        : entry
-      return workspace.duplicateEntry(source)
-    }, {
-      permitted: canCreateEntries,
-      permMsg: 'Your role cannot create content entries',
-      fallback: 'Could not duplicate entry',
-      phase: SAVE_PHASE,
-      rethrow: true,
-      apply: (duplicated) => draft.applySelectedEntry(duplicated),
-    })
+    return withEntryOp(
+      () => {
+        // If duplicating the currently-edited entry, capture the in-memory draft
+        // so the duplicate reflects the latest unsaved edits instead of the
+        // last-saved body — the user clicked duplicate on the row they can see.
+        const source =
+          workspace.selectedEntry?.id === entry.id
+            ? {
+                ...entry,
+                cells: {
+                  ...entry.cells,
+                  ...draft.customCells,
+                  body: draft.body,
+                  featuredMedia: draft.featuredMediaId,
+                  seoTitle: draft.seoTitle,
+                  seoDescription: draft.seoDescription,
+                  title: draft.title || readTitleCell(entry.cells),
+                },
+              }
+            : entry
+        return workspace.duplicateEntry(source)
+      },
+      {
+        permitted: canCreateEntries,
+        permMsg: 'Your role cannot create content entries',
+        fallback: 'Could not duplicate entry',
+        phase: SAVE_PHASE,
+        rethrow: true,
+        apply: (duplicated) => draft.applySelectedEntry(duplicated),
+      },
+    )
   }
 
   function handleMoveEntryToCollection(entry: DataRow, tableId: string) {
@@ -460,7 +456,7 @@ export function ContentPage() {
     <>
       <AdminWorkspaceCanvasLayout
         workspace="content"
-        toolbarRightSlot={(
+        toolbarRightSlot={
           <ContentToolbar
             contentLoading={workspace.contentLoading}
             saveMessage={draft.saveMessage}
@@ -476,15 +472,15 @@ export function ContentPage() {
             }}
             onSchedule={handleScheduleEntry}
           />
-        )}
-        contentSidebar={(
+        }
+        contentSidebar={
           <ContentSidebar
             activePanel={visibleContentPanel}
             onActivePanelChange={(panel) => {
               if (panel === 'agent' && !canUseAgent) return
               setActiveContentPanel(panel)
             }}
-            contentPanel={(
+            contentPanel={
               <ContentExplorerPanel
                 loading={workspace.contentLoading}
                 error={workspace.error}
@@ -516,23 +512,19 @@ export function ContentPage() {
                 }}
                 onClose={() => setActiveContentPanel(null)}
               />
-            )}
-            mediaPanel={(
+            }
+            mediaPanel={
               <MediaExplorerPanel
                 variant="docked"
                 open={activeContentPanel === 'media'}
                 onOpenChange={(open) => setActiveContentPanel(open ? 'media' : null)}
               />
-            )}
-            agentPanel={(
-              <ContentAgentMount
-                isVisible={visibleContentPanel === 'agent'}
-              />
-            )}
+            }
+            agentPanel={<ContentAgentMount isVisible={visibleContentPanel === 'agent'} />}
             canUseAiChat={canUseAgent}
           />
-        )}
-        contentCanvas={(
+        }
+        contentCanvas={
           <ContentDocumentCanvas
             ref={bodyEditorRef}
             selectedEntry={workspace.selectedEntry}
@@ -554,47 +546,49 @@ export function ContentPage() {
             onInsertDataToken={() => bodyEditorRef.current?.insertText('{currentEntry.title}')}
             onCreateEntry={() => void handleCreateEntry()}
           />
-        )}
-        contentRightPanel={workspace.selectedEntry ? (
-          <ContentSettingsPanel
-            selectedEntry={workspace.selectedEntry}
-            authors={workspace.authors}
-            authorsLoading={workspace.authorsLoading}
-            collections={workspace.collections}
-            tables={workspace.tables}
-            selectedCollection={workspace.selectedCollection}
-            loading={workspace.contentLoading}
-            slug={draft.slug}
-            slugId={slugId}
-            seoTitle={draft.seoTitle}
-            seoTitleId={seoTitleId}
-            seoDescription={draft.seoDescription}
-            seoDescriptionId={seoDescriptionId}
-            publicPath={publicPath}
-            mediaError={mediaPicker.mediaError}
-            featuredMediaId={draft.featuredMediaId}
-            featuredMediaAsset={mediaPicker.featuredMediaAsset}
-            customCells={draft.customCells}
-            onCollectionChange={(tableId) => void handleMoveEntryCollection(tableId)}
-            onAuthorChange={(authorUserId) => void handleUpdateEntryAuthor(authorUserId)}
-            onSlugChange={draft.setSlug}
-            onSeoTitleChange={draft.setSeoTitle}
-            onSeoDescriptionChange={draft.setSeoDescription}
-            onCustomCellChange={draft.setCustomCell}
-            onStatusChange={(status) => void handleStatusChange(status)}
-            onChooseFeaturedMedia={() => void mediaPicker.openMediaPicker('featured')}
-            onClearFeaturedMedia={() => draft.setFeaturedMediaId(null)}
-            onEditFeaturedMedia={() => {
-              if (mediaPicker.featuredMediaAsset) {
-                mediaPicker.openMediaViewer(mediaPicker.featuredMediaAsset.id)
-              }
-            }}
-            canEditEntry={canEditSelectedEntry}
-            canMoveEntry={canMoveSelectedEntry}
-            canPublishEntry={canPublishSelectedEntry}
-            canChangeAuthor={canReassignAuthor}
-          />
-        ) : undefined}
+        }
+        contentRightPanel={
+          workspace.selectedEntry ? (
+            <ContentSettingsPanel
+              selectedEntry={workspace.selectedEntry}
+              authors={workspace.authors}
+              authorsLoading={workspace.authorsLoading}
+              collections={workspace.collections}
+              tables={workspace.tables}
+              selectedCollection={workspace.selectedCollection}
+              loading={workspace.contentLoading}
+              slug={draft.slug}
+              slugId={slugId}
+              seoTitle={draft.seoTitle}
+              seoTitleId={seoTitleId}
+              seoDescription={draft.seoDescription}
+              seoDescriptionId={seoDescriptionId}
+              publicPath={publicPath}
+              mediaError={mediaPicker.mediaError}
+              featuredMediaId={draft.featuredMediaId}
+              featuredMediaAsset={mediaPicker.featuredMediaAsset}
+              customCells={draft.customCells}
+              onCollectionChange={(tableId) => void handleMoveEntryCollection(tableId)}
+              onAuthorChange={(authorUserId) => void handleUpdateEntryAuthor(authorUserId)}
+              onSlugChange={draft.setSlug}
+              onSeoTitleChange={draft.setSeoTitle}
+              onSeoDescriptionChange={draft.setSeoDescription}
+              onCustomCellChange={draft.setCustomCell}
+              onStatusChange={(status) => void handleStatusChange(status)}
+              onChooseFeaturedMedia={() => void mediaPicker.openMediaPicker('featured')}
+              onClearFeaturedMedia={() => draft.setFeaturedMediaId(null)}
+              onEditFeaturedMedia={() => {
+                if (mediaPicker.featuredMediaAsset) {
+                  mediaPicker.openMediaViewer(mediaPicker.featuredMediaAsset.id)
+                }
+              }}
+              canEditEntry={canEditSelectedEntry}
+              canMoveEntry={canMoveSelectedEntry}
+              canPublishEntry={canPublishSelectedEntry}
+              canChangeAuthor={canReassignAuthor}
+            />
+          ) : undefined
+        }
       />
 
       {mediaPicker.mediaPicker && (
@@ -603,9 +597,11 @@ export function ContentPage() {
             open
             onClose={mediaPicker.closeMediaPicker}
             mediaKind="any"
-            currentValue={mediaPicker.mediaPicker.kind === 'featured'
-              ? (mediaPicker.featuredMediaAsset?.publicPath ?? null)
-              : null}
+            currentValue={
+              mediaPicker.mediaPicker.kind === 'featured'
+                ? (mediaPicker.featuredMediaAsset?.publicPath ?? null)
+                : null
+            }
             onPick={mediaPicker.pickMedia}
           />
         </Suspense>
@@ -616,7 +612,6 @@ export function ContentPage() {
         open={mediaPicker.viewerOpen}
         onClose={mediaPicker.closeMediaViewer}
       />
-
 
       {collectionDialogOpen && (
         <ContentCollectionCreateDialog

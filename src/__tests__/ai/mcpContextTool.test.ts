@@ -1,5 +1,8 @@
 import { afterEach, beforeEach, describe, expect, it } from 'bun:test'
-import { createCapabilityTestHarness, type CapabilityTestHarness } from '../helpers/capabilityHarness'
+import {
+  createCapabilityTestHarness,
+  type CapabilityTestHarness,
+} from '../helpers/capabilityHarness'
 import { contextMcpTools } from '../../../server/ai/mcp/tools/contextTool'
 import { createEditorBridgeStream } from '../../../server/ai/mcp/editorBridge'
 import type { ToolContext } from '../../../server/ai/runtime/types'
@@ -27,7 +30,9 @@ describe('get_context', () => {
     harness = await createCapabilityTestHarness()
     await harness.setupOwner()
   })
-  afterEach(() => { console.error = originalError })
+  afterEach(() => {
+    console.error = originalError
+  })
 
   it('reports editor disconnected when no bridge is open and lists templates', async () => {
     const out = (await getContext.handler!({}, ctxFor(harness))) as {
@@ -43,15 +48,44 @@ describe('get_context', () => {
 
   it('surfaces an everywhere template as wrapping a page', async () => {
     const cells = JSON.stringify({
-      title: 'Shell', slug: 'shell',
-      body: { rootNodeId: 'r', nodes: { r: { id: 'r', moduleId: 'base.body', props: {}, breakpointOverrides: {}, classIds: [], children: [] } } },
+      title: 'Shell',
+      slug: 'shell',
+      body: {
+        rootNodeId: 'r',
+        nodes: {
+          r: {
+            id: 'r',
+            moduleId: 'base.body',
+            props: {},
+            breakpointOverrides: {},
+            classIds: [],
+            children: [],
+          },
+        },
+      },
       templateEnabled: true,
       templateTarget: { kind: 'everywhere' },
       templatePriority: 10,
     })
     await harness.db`insert into data_rows (id, table_id, cells_json, slug, status)
                      values ('tpl1', 'pages', ${cells}, 'shell', 'draft')`
-    const pageCells = JSON.stringify({ title: 'Home', slug: 'home', body: { rootNodeId: 'r', nodes: { r: { id: 'r', moduleId: 'base.body', props: {}, breakpointOverrides: {}, classIds: [], children: [] } } } })
+    const pageCells = JSON.stringify({
+      title: 'Home',
+      slug: 'home',
+      body: {
+        rootNodeId: 'r',
+        nodes: {
+          r: {
+            id: 'r',
+            moduleId: 'base.body',
+            props: {},
+            breakpointOverrides: {},
+            classIds: [],
+            children: [],
+          },
+        },
+      },
+    })
     await harness.db`insert into data_rows (id, table_id, cells_json, slug, status)
                      values ('home1', 'pages', ${pageCells}, 'home', 'draft')`
 

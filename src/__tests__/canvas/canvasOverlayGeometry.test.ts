@@ -66,12 +66,7 @@ describe('measureCanvasElementRect', () => {
   })
 })
 
-function testRect(rect: {
-  left: number
-  top: number
-  width: number
-  height: number
-}): DOMRect {
+function testRect(rect: { left: number; top: number; width: number; height: number }): DOMRect {
   return {
     ...rect,
     x: rect.left,

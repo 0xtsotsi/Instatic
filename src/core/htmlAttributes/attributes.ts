@@ -2,11 +2,7 @@ import { isSafeUrl } from '@core/html-sanitize'
 
 const HTML_ATTRIBUTE_NAME_RE = /^[a-z][a-z0-9_.:-]*$/i
 const RESERVED_DATA_PREFIX_RE = /^data-(instatic|canvas)-/i
-const RESERVED_DATA_NAMES = new Set([
-  'data-node-id',
-  'data-module-id',
-  'data-hovered',
-])
+const RESERVED_DATA_NAMES = new Set(['data-node-id', 'data-module-id', 'data-hovered'])
 const RESERVED_HTML_ATTRIBUTE_NAMES = new Set(['class', 'style'])
 
 /**

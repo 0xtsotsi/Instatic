@@ -1,16 +1,8 @@
-import {
-  useEffect,
-  useRef,
-  useState,
-  type ChangeEvent,
-} from 'react'
+import { useEffect, useRef, useState, type ChangeEvent } from 'react'
 import { useAgentStore } from '@admin/ai/useAgentStore'
 import { useAsyncResource } from '@admin/lib/useAsyncResource'
 import { listModels, type CredentialView } from '@admin/ai/api'
-import {
-  AI_USER_IMAGE_MAX_PER_MESSAGE,
-  type AiUserContentBlock,
-} from '@core/ai'
+import { AI_USER_IMAGE_MAX_PER_MESSAGE, type AiUserContentBlock } from '@core/ai'
 import { Button } from '@ui/components/Button'
 import { FileUpload } from '@ui/components/FileUpload'
 import { Textarea } from '@ui/components/Input'
@@ -20,10 +12,7 @@ import { SquareSolidIcon } from 'pixel-art-icons/icons/square-solid'
 import { ImageSolidIcon } from 'pixel-art-icons/icons/image-solid'
 import { ContextMeter } from './ContextMeter'
 import { ModelPicker } from './ModelPicker'
-import {
-  type AgentPreviewImage,
-  type OpenAgentImageMenu,
-} from './agentImageTypes'
+import { type AgentPreviewImage, type OpenAgentImageMenu } from './agentImageTypes'
 import { PendingImageAttachmentGrid } from './PendingImageAttachmentGrid'
 import { usePendingImageAttachments } from './usePendingImageAttachments'
 import styles from './AgentPanel.module.css'
@@ -93,8 +82,8 @@ export function AgentComposer({
   )
   const resolvedSelection = activeModelResource.data
   const activeModel =
-    resolvedSelection?.credentialId === activeCredentialId
-    && resolvedSelection.modelId === activeModelId
+    resolvedSelection?.credentialId === activeCredentialId &&
+    resolvedSelection.modelId === activeModelId
       ? resolvedSelection.model
       : null
   const modelCannotRunAgent = activeModel?.capabilities.toolCalling === false
@@ -110,23 +99,22 @@ export function AgentComposer({
           ? 'checking-model'
           : activeModelResource.error || !resolvedSelection
             ? 'model-error'
-          : activeModel?.capabilities.visionInput
-            ? 'ready'
-            : 'unsupported-model'
+            : activeModel?.capabilities.visionInput
+              ? 'ready'
+              : 'unsupported-model'
 
   async function submit(): Promise<void> {
-    if (
-      isStreaming
-      || conversationPending
-      || providerPending
-      || submitting
-      || modelCannotRunAgent
-    ) return
+    if (isStreaming || conversationPending || providerPending || submitting || modelCannotRunAgent)
+      return
     const text = draft.trim()
     const pending = attachments.current()
     if (!text && pending.length === 0) return
     if (pending.some((entry) => entry.status === 'processing')) {
-      pushToast({ kind: 'error', title: 'Images are still processing', body: 'Wait a moment, then send again.' })
+      pushToast({
+        kind: 'error',
+        title: 'Images are still processing',
+        body: 'Wait a moment, then send again.',
+      })
       return
     }
     if (pending.some((entry) => entry.status === 'error' || !entry.block)) return
@@ -170,12 +158,12 @@ export function AgentComposer({
 
   const imageBlocksSend = imageStatus !== 'none' && imageStatus !== 'ready'
   const sendDisabled =
-    composerLocked
-    || conversationPending
-    || providerPending
-    || submitting
-    || imageBlocksSend
-    || modelCannotRunAgent
+    composerLocked ||
+    conversationPending ||
+    providerPending ||
+    submitting ||
+    imageBlocksSend ||
+    modelCannotRunAgent
   let sendTooltip = 'Send'
   if (lockReason === 'setup') sendTooltip = 'Add AI credentials first'
   else if (lockReason === 'chooseModel') sendTooltip = 'Choose a model first'
@@ -198,7 +186,9 @@ export function AgentComposer({
         />
       )}
       {hasAttachments && imageStatus === 'checking-model' && (
-        <p role="status" className={styles.attachmentNotice}>Checking whether this model accepts images…</p>
+        <p role="status" className={styles.attachmentNotice}>
+          Checking whether this model accepts images…
+        </p>
       )}
       {hasAttachments && imageStatus === 'unsupported-model' && (
         <p role="alert" className={styles.attachmentWarning}>
@@ -226,11 +216,13 @@ export function AgentComposer({
           <Textarea
             ref={inputRef}
             value={draft}
-            placeholder={lockReason === 'setup'
-              ? 'Add AI credentials to start chatting'
-              : lockReason === 'chooseModel'
-                ? 'Choose a model below to start'
-                : 'Tell me what to build… (attach images or press Enter to send)'}
+            placeholder={
+              lockReason === 'setup'
+                ? 'Add AI credentials to start chatting'
+                : lockReason === 'chooseModel'
+                  ? 'Choose a model below to start'
+                  : 'Tell me what to build… (attach images or press Enter to send)'
+            }
             aria-label="Message to AI assistant"
             rows={2}
             resize="none"
@@ -267,15 +259,17 @@ export function AgentComposer({
                 variant: 'ghost',
                 size: 'sm',
                 iconOnly: true,
-                disabled: composerLocked
-                  || isStreaming
-                  || conversationPending
-                  || providerPending
-                  || submitting
-                  || attachments.pending.length >= AI_USER_IMAGE_MAX_PER_MESSAGE,
-                tooltip: attachments.pending.length >= AI_USER_IMAGE_MAX_PER_MESSAGE
-                  ? `Maximum ${AI_USER_IMAGE_MAX_PER_MESSAGE} images per message`
-                  : 'Attach images',
+                disabled:
+                  composerLocked ||
+                  isStreaming ||
+                  conversationPending ||
+                  providerPending ||
+                  submitting ||
+                  attachments.pending.length >= AI_USER_IMAGE_MAX_PER_MESSAGE,
+                tooltip:
+                  attachments.pending.length >= AI_USER_IMAGE_MAX_PER_MESSAGE
+                    ? `Maximum ${AI_USER_IMAGE_MAX_PER_MESSAGE} images per message`
+                    : 'Attach images',
                 'aria-label': 'Attach images',
               }}
             >

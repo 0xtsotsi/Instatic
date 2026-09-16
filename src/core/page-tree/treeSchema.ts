@@ -47,7 +47,6 @@ export const NodeTreeSchema = Type.Object({
   rootNodeId: Type.String(),
 })
 
-
 /**
  * Generic NodeTree type. `TNode` defaults to BaseNode (the persistence-level
  * shape) but callers that work with PageNode (page tree) or VCNode (VC tree)

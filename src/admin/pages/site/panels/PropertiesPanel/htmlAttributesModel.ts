@@ -67,9 +67,7 @@ export function validateHtmlAttributeRows(
 }
 
 export function htmlAttributesKey(attributes: Record<string, string>): string {
-  return JSON.stringify(
-    Object.entries(attributes).toSorted(([a], [b]) => a.localeCompare(b)),
-  )
+  return JSON.stringify(Object.entries(attributes).toSorted(([a], [b]) => a.localeCompare(b)))
 }
 
 export function htmlAttributesValueKey(value: unknown): string {

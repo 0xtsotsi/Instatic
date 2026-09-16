@@ -42,11 +42,12 @@ export function AgentImagePreview({
         return
       }
       if (
-        !isContextMenuKey(event)
-        || imageMenuOpen
-        || !windowRef.current?.contains(document.activeElement)
-        || !imageRef.current
-      ) return
+        !isContextMenuKey(event) ||
+        imageMenuOpen ||
+        !windowRef.current?.contains(document.activeElement) ||
+        !imageRef.current
+      )
+        return
       event.preventDefault()
       event.stopImmediatePropagation()
       openMenuFromKeyboard({
@@ -61,9 +62,8 @@ export function AgentImagePreview({
 
   useEffect(() => {
     if (!image) return
-    const returnFocus = document.activeElement instanceof HTMLElement
-      ? document.activeElement
-      : null
+    const returnFocus =
+      document.activeElement instanceof HTMLElement ? document.activeElement : null
     const frame = requestAnimationFrame(() => windowRef.current?.focus())
     return () => {
       cancelAnimationFrame(frame)

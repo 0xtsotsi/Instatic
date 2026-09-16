@@ -47,12 +47,40 @@ afterEach(() => {
 })
 
 const WELL_FORMED: PluginEvent[] = [
-  { kind: 'crash', pluginId: 'acme.demo', reason: 'boom', recentCrashCount: 2, occurredAt: '2026-06-06T00:00:00.000Z' },
-  { kind: 'recovered', pluginId: 'acme.demo', afterCrashCount: 1, occurredAt: '2026-06-06T00:00:00.000Z' },
-  { kind: 'parked', pluginId: 'acme.demo', reason: 'budget', recentCrashCount: 5, occurredAt: '2026-06-06T00:00:00.000Z' },
+  {
+    kind: 'crash',
+    pluginId: 'acme.demo',
+    reason: 'boom',
+    recentCrashCount: 2,
+    occurredAt: '2026-06-06T00:00:00.000Z',
+  },
+  {
+    kind: 'recovered',
+    pluginId: 'acme.demo',
+    afterCrashCount: 1,
+    occurredAt: '2026-06-06T00:00:00.000Z',
+  },
+  {
+    kind: 'parked',
+    pluginId: 'acme.demo',
+    reason: 'budget',
+    recentCrashCount: 5,
+    occurredAt: '2026-06-06T00:00:00.000Z',
+  },
   { kind: 'restarted', pluginId: 'acme.demo', occurredAt: '2026-06-06T00:00:00.000Z' },
-  { kind: 'installed', pluginId: 'acme.demo', version: '1.0.0', occurredAt: '2026-06-06T00:00:00.000Z' },
-  { kind: 'updated', pluginId: 'acme.demo', fromVersion: '1.0.0', toVersion: '1.1.0', occurredAt: '2026-06-06T00:00:00.000Z' },
+  {
+    kind: 'installed',
+    pluginId: 'acme.demo',
+    version: '1.0.0',
+    occurredAt: '2026-06-06T00:00:00.000Z',
+  },
+  {
+    kind: 'updated',
+    pluginId: 'acme.demo',
+    fromVersion: '1.0.0',
+    toVersion: '1.1.0',
+    occurredAt: '2026-06-06T00:00:00.000Z',
+  },
   { kind: 'uninstalled', pluginId: 'acme.demo', occurredAt: '2026-06-06T00:00:00.000Z' },
   { kind: 'enabled', pluginId: 'acme.demo', occurredAt: '2026-06-06T00:00:00.000Z' },
   { kind: 'disabled', pluginId: 'acme.demo', occurredAt: '2026-06-06T00:00:00.000Z' },

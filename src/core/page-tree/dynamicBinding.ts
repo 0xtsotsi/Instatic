@@ -77,13 +77,17 @@ function parseDynamicPropBinding(raw: unknown): DynamicPropBinding | null {
   if (typeof r.field !== 'string' || r.field.length === 0) return null
 
   const VALID_FORMATS: DynamicBindingFormat[] = ['plain', 'html', 'url', 'media']
-  const format: DynamicBindingFormat | undefined = VALID_FORMATS.includes(r.format as DynamicBindingFormat)
+  const format: DynamicBindingFormat | undefined = VALID_FORMATS.includes(
+    r.format as DynamicBindingFormat,
+  )
     ? (r.format as DynamicBindingFormat)
     : undefined
 
   const VALID_FALLBACKS = ['static', 'empty'] as const
-  type Fallback = typeof VALID_FALLBACKS[number]
-  const fallback: Fallback | undefined = (VALID_FALLBACKS as readonly unknown[]).includes(r.fallback)
+  type Fallback = (typeof VALID_FALLBACKS)[number]
+  const fallback: Fallback | undefined = (VALID_FALLBACKS as readonly unknown[]).includes(
+    r.fallback,
+  )
     ? (r.fallback as Fallback)
     : undefined
 

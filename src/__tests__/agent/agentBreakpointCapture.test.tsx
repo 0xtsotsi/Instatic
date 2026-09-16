@@ -3,11 +3,7 @@ import { act, cleanup, render, waitFor } from '@testing-library/react'
 import type { AiToolOutput } from '@core/ai'
 import { DEFAULT_BREAKPOINTS, type Breakpoint } from '@core/page-tree'
 import { DEFAULT_MODULE_INSERTER_PREFERENCE } from '@core/persistence/userPreferences'
-import {
-  executeAgentTool,
-  findAgentRenderFrame,
-  waitForAgentRenderFrame,
-} from '@site/agent'
+import { executeAgentTool, findAgentRenderFrame, waitForAgentRenderFrame } from '@site/agent'
 import { CanvasRoot } from '@site/canvas/CanvasRoot'
 import { useEditorStore } from '@site/store/store'
 import { __resetModuleInserterPreferenceForTests } from '@site/module-picker/useModuleInserterPreference'
@@ -30,9 +26,7 @@ const POSTS_TABLE = {
   singularLabel: 'Post',
   pluralLabel: 'Posts',
   primaryFieldId: 'title',
-  fields: [
-    { type: 'text', id: 'title', label: 'Title', required: true, builtIn: true },
-  ],
+  fields: [{ type: 'text', id: 'title', label: 'Title', required: true, builtIn: true }],
   system: true,
   rowCount: 1,
   createdByUserId: null,
@@ -145,14 +139,18 @@ describe('agent breakpoint snapshot capture', () => {
     expect(iframe?.style.width).toBe('375px')
     expect(iframe?.dataset.instaticCanvasDocumentLoaded).toBe('true')
     expect(iframe?.dataset.agentSnapshotReady).toBe('manual-mobile-capture')
-    expect(iframe?.contentDocument?.documentElement.hasAttribute(
-      'data-instatic-canvas-document',
-    )).toBe(false)
-    expect(iframe?.contentDocument?.querySelector('[data-instatic-canvas-runtime-script]')).toBeNull()
+    expect(
+      iframe?.contentDocument?.documentElement.hasAttribute('data-instatic-canvas-document'),
+    ).toBe(false)
+    expect(
+      iframe?.contentDocument?.querySelector('[data-instatic-canvas-runtime-script]'),
+    ).toBeNull()
     expect(iframe?.contentDocument?.body.querySelector('[data-instatic-body-probe]')).toBeNull()
     expect(iframe?.contentDocument?.body.hasAttribute('data-agent-snapshot-ready')).toBe(false)
     expect(iframe?.contentDocument?.body.children).toHaveLength(1)
-    expect(iframe?.contentDocument?.body.firstElementChild?.getAttribute('data-node-id')).toBe('headline')
+    expect(iframe?.contentDocument?.body.firstElementChild?.getAttribute('data-node-id')).toBe(
+      'headline',
+    )
     expect(findAgentRenderFrame({ breakpointId: 'mobile', source: 'visible' })).toBeNull()
 
     act(() => useEditorStore.getState().setAgentSnapshotCaptureRequest(null))
@@ -283,10 +281,13 @@ describe('agent breakpoint snapshot capture', () => {
       const breakpointId = state.agentSnapshotCaptureRequest?.breakpointId
       if (breakpointId) requests.push(breakpointId)
     })
-    const result = await act(async () => await executeAgentTool('site_render_snapshot', {
-      breakpointId: 'desktop',
-      captureScreenshot: false,
-    }))
+    const result = await act(
+      async () =>
+        await executeAgentTool('site_render_snapshot', {
+          breakpointId: 'desktop',
+          captureScreenshot: false,
+        }),
+    )
     unsubscribe()
 
     expect(result.ok).toBe(true)
@@ -495,16 +496,19 @@ describe('agent breakpoint snapshot capture', () => {
       if (breakpointId && requests.at(-1) !== breakpointId) requests.push(breakpointId)
     })
 
-    const [mobileResult, tabletResult] = await act(async () => await Promise.all([
-      executeAgentTool('site_render_snapshot', {
-        breakpointId: 'mobile',
-        captureScreenshot: false,
-      }),
-      executeAgentTool('site_render_snapshot', {
-        breakpointId: 'tablet',
-        captureScreenshot: false,
-      }),
-    ]))
+    const [mobileResult, tabletResult] = await act(
+      async () =>
+        await Promise.all([
+          executeAgentTool('site_render_snapshot', {
+            breakpointId: 'mobile',
+            captureScreenshot: false,
+          }),
+          executeAgentTool('site_render_snapshot', {
+            breakpointId: 'tablet',
+            captureScreenshot: false,
+          }),
+        ]),
+    )
     unsubscribe()
 
     expect(mobileResult).toMatchObject({ ok: true, data: { breakpointId: 'mobile' } })
@@ -522,17 +526,22 @@ describe('agent breakpoint snapshot capture', () => {
         source: 'visible',
       })
     })
-    const result = await act(async () => await executeAgentTool('site_render_snapshot', {
-      breakpointId: 'invented-phone',
-      captureScreenshot: false,
-    }))
+    const result = await act(
+      async () =>
+        await executeAgentTool('site_render_snapshot', {
+          breakpointId: 'invented-phone',
+          captureScreenshot: false,
+        }),
+    )
 
     expect(result).toEqual({ ok: false, error: 'Breakpoint not found: invented-phone' })
     expect(useEditorStore.getState().agentSnapshotCaptureRequest).toBeNull()
-    expect(findAgentRenderFrame({
-      breakpointId: 'invented-phone',
-      source: 'transient',
-    })).toBeNull()
+    expect(
+      findAgentRenderFrame({
+        breakpointId: 'invented-phone',
+        source: 'transient',
+      }),
+    ).toBeNull()
   })
 })
 

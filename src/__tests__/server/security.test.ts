@@ -21,7 +21,10 @@ import {
  * real HTTP request. We mutate the Headers object after construction; both
  * happy-dom and Bun's native Request allow that path.
  */
-function makeReq(url: string, init: { method?: string; headers?: Record<string, string> } = {}): Request {
+function makeReq(
+  url: string,
+  init: { method?: string; headers?: Record<string, string> } = {},
+): Request {
   const req = new Request(url, { method: init.method ?? 'GET' })
   for (const [k, v] of Object.entries(init.headers ?? {})) {
     req.headers.set(k, v)

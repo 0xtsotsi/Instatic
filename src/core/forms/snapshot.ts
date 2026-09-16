@@ -30,12 +30,12 @@ export function derivePageFormSnapshots(page: Page): PublishedFormSnapshot[] {
   return snapshots
 }
 
-function deriveFormSnapshot(
-  page: Page,
-  formNode: PageNode,
-): PublishedFormSnapshot {
+function deriveFormSnapshot(page: Page, formNode: PageNode): PublishedFormSnapshot {
   const fallbackFormId = normalizeIdentifierValue(formNode.id, 'form')
-  const formId = normalizeIdentifierValue(stringProp(formNode, 'formId', formNode.id), fallbackFormId)
+  const formId = normalizeIdentifierValue(
+    stringProp(formNode, 'formId', formNode.id),
+    fallbackFormId,
+  )
   const descendantIds = flattenSubtree(page, formNode.id).filter((nodeId) => nodeId !== formNode.id)
   const controls: FormControlBinding[] = []
   const labels: PublishedFormLabel[] = []
@@ -111,23 +111,29 @@ function controlBindingFromNode(node: PageNode): FormControlBinding | null {
     name,
     ...(node.moduleId === 'base.input' ? { inputType: stringProp(node, 'inputType', 'text') } : {}),
     ...(booleanProp(node, 'required') ? { required: true } : {}),
-    ...(positiveNumberProp(node, 'minLength') !== undefined ? { minLength: positiveNumberProp(node, 'minLength') } : {}),
-    ...(positiveNumberProp(node, 'maxLength') !== undefined ? { maxLength: positiveNumberProp(node, 'maxLength') } : {}),
-    ...(numberPropOrUndefined(node, 'min') !== undefined ? { min: numberPropOrUndefined(node, 'min') } : {}),
-    ...(numberPropOrUndefined(node, 'max') !== undefined ? { max: numberPropOrUndefined(node, 'max') } : {}),
+    ...(positiveNumberProp(node, 'minLength') !== undefined
+      ? { minLength: positiveNumberProp(node, 'minLength') }
+      : {}),
+    ...(positiveNumberProp(node, 'maxLength') !== undefined
+      ? { maxLength: positiveNumberProp(node, 'maxLength') }
+      : {}),
+    ...(numberPropOrUndefined(node, 'min') !== undefined
+      ? { min: numberPropOrUndefined(node, 'min') }
+      : {}),
+    ...(numberPropOrUndefined(node, 'max') !== undefined
+      ? { max: numberPropOrUndefined(node, 'max') }
+      : {}),
     ...(stringProp(node, 'pattern', '') ? { pattern: stringProp(node, 'pattern', '') } : {}),
   }
 }
 
-function inferLabelTarget(
-  page: Page,
-  labelNode: PageNode,
-  formNodeId: string,
-): string | null {
+function inferLabelTarget(page: Page, labelNode: PageNode, formNodeId: string): string | null {
   const targetMode = stringProp(labelNode, 'targetMode', 'auto')
   const explicit = stringProp(labelNode, 'targetId', '')
   if (targetMode === 'explicit' && explicit) {
-    const target = Object.values(page.nodes).find((node) => stringProp(node, 'id', node.id) === explicit || node.id === explicit)
+    const target = Object.values(page.nodes).find(
+      (node) => stringProp(node, 'id', node.id) === explicit || node.id === explicit,
+    )
     return target?.id ?? explicit
   }
 

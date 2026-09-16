@@ -139,7 +139,10 @@ beforeEach(resetStore)
 describe('SiteExplorerPanel', () => {
   it('uses the shared site creation dialog instead of native prompts', () => {
     const source = readFileSync(
-      new URL('../../admin/pages/site/panels/SiteExplorerPanel/SiteExplorerPanel.tsx', import.meta.url),
+      new URL(
+        '../../admin/pages/site/panels/SiteExplorerPanel/SiteExplorerPanel.tsx',
+        import.meta.url,
+      ),
       'utf-8',
     )
 
@@ -199,20 +202,24 @@ describe('SiteExplorerPanel', () => {
     loadSite()
     useEditorStore.setState((state) => {
       if (!state.site) return
-      state.site.pages.push(makePage({
-        id: 'page-docs',
-        title: 'Documentation',
-        slug: 'documentation',
-        rootNodeId: 'root-docs',
-        nodes: { 'root-docs': makeNode({ id: 'root-docs', moduleId: 'base.body' }) },
-      }))
-      state.site.pages.push(makePage({
-        id: 'page-setup',
-        title: 'Setup',
-        slug: 'documentation/setup',
-        rootNodeId: 'root-setup',
-        nodes: { 'root-setup': makeNode({ id: 'root-setup', moduleId: 'base.body' }) },
-      }))
+      state.site.pages.push(
+        makePage({
+          id: 'page-docs',
+          title: 'Documentation',
+          slug: 'documentation',
+          rootNodeId: 'root-docs',
+          nodes: { 'root-docs': makeNode({ id: 'root-docs', moduleId: 'base.body' }) },
+        }),
+      )
+      state.site.pages.push(
+        makePage({
+          id: 'page-setup',
+          title: 'Setup',
+          slug: 'documentation/setup',
+          rootNodeId: 'root-setup',
+          nodes: { 'root-setup': makeNode({ id: 'root-setup', moduleId: 'base.body' }) },
+        }),
+      )
       state.site.files.push({
         id: 'script-vendor',
         path: 'documentation/assets/js/vendor/jquery.min.js',
@@ -242,25 +249,31 @@ describe('SiteExplorerPanel', () => {
     loadSite()
     useEditorStore.setState((state) => {
       if (!state.site) return
-      state.site.pages.push(makePage({
-        id: 'page-docs',
-        title: 'Documentation',
-        slug: 'documentation',
-        rootNodeId: 'root-docs',
-        nodes: { 'root-docs': makeNode({ id: 'root-docs', moduleId: 'base.body' }) },
-      }))
-      state.site.pages.push(makePage({
-        id: 'page-setup',
-        title: 'Setup',
-        slug: 'documentation/setup',
-        rootNodeId: 'root-setup',
-        nodes: { 'root-setup': makeNode({ id: 'root-setup', moduleId: 'base.body' }) },
-      }))
+      state.site.pages.push(
+        makePage({
+          id: 'page-docs',
+          title: 'Documentation',
+          slug: 'documentation',
+          rootNodeId: 'root-docs',
+          nodes: { 'root-docs': makeNode({ id: 'root-docs', moduleId: 'base.body' }) },
+        }),
+      )
+      state.site.pages.push(
+        makePage({
+          id: 'page-setup',
+          title: 'Setup',
+          slug: 'documentation/setup',
+          rootNodeId: 'root-setup',
+          nodes: { 'root-setup': makeNode({ id: 'root-setup', moduleId: 'base.body' }) },
+        }),
+      )
     })
 
     render(<SiteExplorerPanel sectionGroup="site" />)
 
-    const pagesTree = within(screen.getByTestId('site-explorer-panel')).getByRole('tree', { name: 'Pages' })
+    const pagesTree = within(screen.getByTestId('site-explorer-panel')).getByRole('tree', {
+      name: 'Pages',
+    })
     fireEvent.contextMenu(within(pagesTree).getByRole('button', { name: 'documentation' }), {
       clientX: 120,
       clientY: 160,
@@ -275,7 +288,10 @@ describe('SiteExplorerPanel', () => {
     expect(within(dialog).getByText('docs/setup')).toBeDefined()
     fireEvent.click(within(dialog).getByRole('button', { name: 'Apply' }))
 
-    const slugs = useEditorStore.getState().site!.pages.map((page) => page.slug).sort()
+    const slugs = useEditorStore
+      .getState()
+      .site!.pages.map((page) => page.slug)
+      .sort()
     expect(slugs).toEqual(['docs', 'docs/setup', 'index', 'pricing'])
   })
 
@@ -283,25 +299,31 @@ describe('SiteExplorerPanel', () => {
     loadSite()
     useEditorStore.setState((state) => {
       if (!state.site) return
-      state.site.pages.push(makePage({
-        id: 'page-docs',
-        title: 'Documentation',
-        slug: 'documentation',
-        rootNodeId: 'root-docs',
-        nodes: { 'root-docs': makeNode({ id: 'root-docs', moduleId: 'base.body' }) },
-      }))
-      state.site.pages.push(makePage({
-        id: 'page-setup',
-        title: 'Setup',
-        slug: 'documentation/setup',
-        rootNodeId: 'root-setup',
-        nodes: { 'root-setup': makeNode({ id: 'root-setup', moduleId: 'base.body' }) },
-      }))
+      state.site.pages.push(
+        makePage({
+          id: 'page-docs',
+          title: 'Documentation',
+          slug: 'documentation',
+          rootNodeId: 'root-docs',
+          nodes: { 'root-docs': makeNode({ id: 'root-docs', moduleId: 'base.body' }) },
+        }),
+      )
+      state.site.pages.push(
+        makePage({
+          id: 'page-setup',
+          title: 'Setup',
+          slug: 'documentation/setup',
+          rootNodeId: 'root-setup',
+          nodes: { 'root-setup': makeNode({ id: 'root-setup', moduleId: 'base.body' }) },
+        }),
+      )
     })
 
     render(<SiteExplorerPanel sectionGroup="site" />)
 
-    const pagesTree = within(screen.getByTestId('site-explorer-panel')).getByRole('tree', { name: 'Pages' })
+    const pagesTree = within(screen.getByTestId('site-explorer-panel')).getByRole('tree', {
+      name: 'Pages',
+    })
     fireEvent.contextMenu(within(pagesTree).getByRole('button', { name: 'documentation' }), {
       clientX: 120,
       clientY: 160,
@@ -321,19 +343,31 @@ describe('SiteExplorerPanel', () => {
 
   it('uses left-aligned tree row buttons and DOM-panel-style drop helpers', () => {
     const treeSectionSource = readFileSync(
-      new URL('../../admin/pages/site/panels/SiteExplorerPanel/SiteExplorerTreeSection.tsx', import.meta.url),
+      new URL(
+        '../../admin/pages/site/panels/SiteExplorerPanel/SiteExplorerTreeSection.tsx',
+        import.meta.url,
+      ),
       'utf-8',
     )
     const treeRowsSource = readFileSync(
-      new URL('../../admin/pages/site/panels/SiteExplorerPanel/SiteExplorerTreeRows.tsx', import.meta.url),
+      new URL(
+        '../../admin/pages/site/panels/SiteExplorerPanel/SiteExplorerTreeRows.tsx',
+        import.meta.url,
+      ),
       'utf-8',
     )
     const panelSource = readFileSync(
-      new URL('../../admin/pages/site/panels/SiteExplorerPanel/SiteExplorerPanel.tsx', import.meta.url),
+      new URL(
+        '../../admin/pages/site/panels/SiteExplorerPanel/SiteExplorerPanel.tsx',
+        import.meta.url,
+      ),
       'utf-8',
     )
     const dndScopeSource = readFileSync(
-      new URL('../../admin/pages/site/panels/SiteExplorerPanel/SiteExplorerDndScope.tsx', import.meta.url),
+      new URL(
+        '../../admin/pages/site/panels/SiteExplorerPanel/SiteExplorerDndScope.tsx',
+        import.meta.url,
+      ),
       'utf-8',
     )
     const editorBodySource = readFileSync(
@@ -345,7 +379,10 @@ describe('SiteExplorerPanel', () => {
       'utf-8',
     )
     const css = readFileSync(
-      new URL('../../admin/pages/site/panels/SiteExplorerPanel/SiteExplorerPanel.module.css', import.meta.url),
+      new URL(
+        '../../admin/pages/site/panels/SiteExplorerPanel/SiteExplorerPanel.module.css',
+        import.meta.url,
+      ),
       'utf-8',
     )
 
@@ -367,7 +404,10 @@ describe('SiteExplorerPanel', () => {
     expect(treeDropCss).toContain('.dropInside')
     expect(css).toContain('.dragOverlayRow')
 
-    const beforeAfterBlock = treeDropCss.match(/\.dropBefore::before,\n\.dropAfter::after,\n\.dropRoot::after,\n\.rootDropGapActive::after\s*\{[^}]*\}/s)?.[0] ?? ''
+    const beforeAfterBlock =
+      treeDropCss.match(
+        /\.dropBefore::before,\n\.dropAfter::after,\n\.dropRoot::after,\n\.rootDropGapActive::after\s*\{[^}]*\}/s,
+      )?.[0] ?? ''
     expect(beforeAfterBlock).toContain('position: absolute')
     expect(beforeAfterBlock).not.toMatch(/(?:^|\n)\s*(margin|padding)\b/)
 
@@ -383,11 +423,17 @@ describe('SiteExplorerPanel', () => {
       'utf-8',
     )
     const panelSource = readFileSync(
-      new URL('../../admin/pages/site/panels/SiteExplorerPanel/SiteExplorerPanel.tsx', import.meta.url),
+      new URL(
+        '../../admin/pages/site/panels/SiteExplorerPanel/SiteExplorerPanel.tsx',
+        import.meta.url,
+      ),
       'utf-8',
     )
     const treeSectionSource = readFileSync(
-      new URL('../../admin/pages/site/panels/SiteExplorerPanel/SiteExplorerTreeRows.tsx', import.meta.url),
+      new URL(
+        '../../admin/pages/site/panels/SiteExplorerPanel/SiteExplorerTreeRows.tsx',
+        import.meta.url,
+      ),
       'utf-8',
     )
 
@@ -405,7 +451,9 @@ describe('SiteExplorerPanel', () => {
 
     render(<SiteExplorerPanel sectionGroup="site" />)
 
-    const pagesTree = within(screen.getByTestId('site-explorer-panel')).getByRole('tree', { name: 'Pages' })
+    const pagesTree = within(screen.getByTestId('site-explorer-panel')).getByRole('tree', {
+      name: 'Pages',
+    })
     expect(within(pagesTree).getByRole('treeitem', { name: 'marketing' })).toBeDefined()
     const pricingRow = within(pagesTree).getByRole('treeitem', { name: /open page pricing/i })
     expect(pricingRow.getAttribute('aria-level')).toBe('2')
@@ -443,15 +491,21 @@ describe('SiteExplorerPanel', () => {
 
     render(<SiteExplorerPanel sectionGroup="site" />)
 
-    fireEvent.click(screen.getByRole('button', { name: /open component herocard/i }), { metaKey: true })
-    fireEvent.click(screen.getByRole('button', { name: /open component footercard/i }), { metaKey: true })
+    fireEvent.click(screen.getByRole('button', { name: /open component herocard/i }), {
+      metaKey: true,
+    })
+    fireEvent.click(screen.getByRole('button', { name: /open component footercard/i }), {
+      metaKey: true,
+    })
     fireEvent.contextMenu(screen.getByRole('button', { name: /open component herocard/i }), {
       clientX: 120,
       clientY: 140,
     })
     fireEvent.click(screen.getByRole('menuitem', { name: /wrap 2 components in folder/i }))
 
-    const folder = useEditorStore.getState().site?.explorer.components.folders.find((entry) => entry.name === 'New folder')
+    const folder = useEditorStore
+      .getState()
+      .site?.explorer.components.folders.find((entry) => entry.name === 'New folder')
     expect(folder).toBeDefined()
     const placements = useEditorStore.getState().site?.explorer.components.items ?? []
     expect(placements.find((item) => item.id === 'vc-HeroCard')?.parentFolderId).toBe(folder?.id)
@@ -482,11 +536,15 @@ describe('SiteExplorerPanel', () => {
   it('interleaves root folders and root items by their explorer order', () => {
     loadSite()
     const folderPath = useEditorStore.getState().createExplorerFolder('pages', 'Marketing')
-    useEditorStore.getState().moveStructuralExplorerRow('pages', { kind: 'folder', id: folderPath }, 1)
+    useEditorStore
+      .getState()
+      .moveStructuralExplorerRow('pages', { kind: 'folder', id: folderPath }, 1)
 
     render(<SiteExplorerPanel sectionGroup="site" />)
 
-    const pagesTree = within(screen.getByTestId('site-explorer-panel')).getByRole('tree', { name: 'Pages' })
+    const pagesTree = within(screen.getByTestId('site-explorer-panel')).getByRole('tree', {
+      name: 'Pages',
+    })
     const rows = within(pagesTree).getAllByRole('treeitem')
     expect(rows.map((row) => row.textContent?.replace(/\s+/g, ' ').trim())).toEqual([
       'Home/',
@@ -497,7 +555,10 @@ describe('SiteExplorerPanel', () => {
 
   it('Media Explorer uses CMS media instead of base64 site files', () => {
     const source = readFileSync(
-      new URL('../../admin/pages/site/panels/MediaExplorerPanel/MediaExplorerPanel.tsx', import.meta.url),
+      new URL(
+        '../../admin/pages/site/panels/MediaExplorerPanel/MediaExplorerPanel.tsx',
+        import.meta.url,
+      ),
       'utf-8',
     )
 
@@ -511,13 +572,40 @@ describe('SiteExplorerPanel', () => {
     loadSite()
     const originalFetch = globalThis.fetch
     globalThis.fetch = (async () =>
-      new Response(JSON.stringify({
-        assets: [
-          { id: 'media-image', filename: 'logo.svg', mimeType: 'image/svg+xml', sizeBytes: 12, publicPath: '/uploads/logo.svg', uploadedByUserId: null, createdAt: '2026-01-03T00:00:00.000Z' },
-          { id: 'media-video', filename: 'intro.mp4', mimeType: 'video/mp4', sizeBytes: 24, publicPath: '/uploads/intro.mp4', uploadedByUserId: null, createdAt: '2026-01-03T00:00:00.000Z' },
-          { id: 'media-other', filename: 'catalog.pdf', mimeType: 'application/pdf', sizeBytes: 36, publicPath: '/uploads/catalog.pdf', uploadedByUserId: null, createdAt: '2026-01-03T00:00:00.000Z' },
-        ],
-      }), { status: 200 })) as typeof fetch
+      new Response(
+        JSON.stringify({
+          assets: [
+            {
+              id: 'media-image',
+              filename: 'logo.svg',
+              mimeType: 'image/svg+xml',
+              sizeBytes: 12,
+              publicPath: '/uploads/logo.svg',
+              uploadedByUserId: null,
+              createdAt: '2026-01-03T00:00:00.000Z',
+            },
+            {
+              id: 'media-video',
+              filename: 'intro.mp4',
+              mimeType: 'video/mp4',
+              sizeBytes: 24,
+              publicPath: '/uploads/intro.mp4',
+              uploadedByUserId: null,
+              createdAt: '2026-01-03T00:00:00.000Z',
+            },
+            {
+              id: 'media-other',
+              filename: 'catalog.pdf',
+              mimeType: 'application/pdf',
+              sizeBytes: 36,
+              publicPath: '/uploads/catalog.pdf',
+              uploadedByUserId: null,
+              createdAt: '2026-01-03T00:00:00.000Z',
+            },
+          ],
+        }),
+        { status: 200 },
+      )) as typeof fetch
 
     try {
       render(<MediaExplorerPanel variant="tab" />)
@@ -526,8 +614,12 @@ describe('SiteExplorerPanel', () => {
       expect(within(panel).getByRole('heading', { name: 'Images' })).toBeDefined()
       expect(within(panel).getByRole('heading', { name: 'Videos' })).toBeDefined()
       expect(within(panel).queryByRole('heading', { name: 'Other' })).toBeNull()
-      expect(await within(panel).findByRole('button', { name: /open media logo\.svg/i })).toBeDefined()
-      expect(await within(panel).findByRole('button', { name: /open media intro\.mp4/i })).toBeDefined()
+      expect(
+        await within(panel).findByRole('button', { name: /open media logo\.svg/i }),
+      ).toBeDefined()
+      expect(
+        await within(panel).findByRole('button', { name: /open media intro\.mp4/i }),
+      ).toBeDefined()
       // Non-media files are dropped entirely — no "Other" bucket to land in.
       expect(within(panel).queryByRole('button', { name: /open media catalog\.pdf/i })).toBeNull()
     } finally {
@@ -539,9 +631,10 @@ describe('SiteExplorerPanel', () => {
     loadSite()
     const originalFetch = globalThis.fetch
     let resolveList!: (response: Response) => void
-    globalThis.fetch = (() => new Promise<Response>((resolve) => {
-      resolveList = resolve
-    })) as typeof fetch
+    globalThis.fetch = (() =>
+      new Promise<Response>((resolve) => {
+        resolveList = resolve
+      })) as typeof fetch
 
     try {
       render(<MediaExplorerPanel variant="tab" />)
@@ -556,15 +649,17 @@ describe('SiteExplorerPanel', () => {
       })
       act(() => publishCmsMediaAssetCreated(created))
       const panel = screen.getByTestId('media-explorer-panel')
-      expect(await within(panel).findByRole('button', { name: /open media agent-reference\.jpg/i }))
-        .toBeDefined()
+      expect(
+        await within(panel).findByRole('button', { name: /open media agent-reference\.jpg/i }),
+      ).toBeDefined()
 
       await act(async () => {
         resolveList(new Response(JSON.stringify({ assets: [] }), { status: 200 }))
       })
       await waitFor(() => {
-        expect(within(panel).getByRole('button', { name: /open media agent-reference\.jpg/i }))
-          .toBeDefined()
+        expect(
+          within(panel).getByRole('button', { name: /open media agent-reference\.jpg/i }),
+        ).toBeDefined()
       })
     } finally {
       globalThis.fetch = originalFetch
@@ -575,12 +670,31 @@ describe('SiteExplorerPanel', () => {
     loadSite()
     const originalFetch = globalThis.fetch
     globalThis.fetch = (async () =>
-      new Response(JSON.stringify({
-        assets: [
-          { id: 'media-image', filename: 'logo.svg', mimeType: 'image/svg+xml', sizeBytes: 12, publicPath: '/uploads/logo.svg', uploadedByUserId: null, createdAt: '2026-01-03T00:00:00.000Z' },
-          { id: 'media-video', filename: 'intro.mp4', mimeType: 'video/mp4', sizeBytes: 24, publicPath: '/uploads/intro.mp4', uploadedByUserId: null, createdAt: '2026-01-03T00:00:00.000Z' },
-        ],
-      }), { status: 200 })) as typeof fetch
+      new Response(
+        JSON.stringify({
+          assets: [
+            {
+              id: 'media-image',
+              filename: 'logo.svg',
+              mimeType: 'image/svg+xml',
+              sizeBytes: 12,
+              publicPath: '/uploads/logo.svg',
+              uploadedByUserId: null,
+              createdAt: '2026-01-03T00:00:00.000Z',
+            },
+            {
+              id: 'media-video',
+              filename: 'intro.mp4',
+              mimeType: 'video/mp4',
+              sizeBytes: 24,
+              publicPath: '/uploads/intro.mp4',
+              uploadedByUserId: null,
+              createdAt: '2026-01-03T00:00:00.000Z',
+            },
+          ],
+        }),
+        { status: 200 },
+      )) as typeof fetch
 
     try {
       render(<MediaExplorerPanel variant="tab" />)
@@ -589,8 +703,16 @@ describe('SiteExplorerPanel', () => {
       await within(panel).findByRole('button', { name: /open media intro\.mp4/i })
 
       // Grid is the default view — no prior list-mode preference stored.
-      expect(within(panel).getByRole('button', { name: /grid view/i }).getAttribute('aria-pressed')).toBe('true')
-      expect(within(panel).getByRole('button', { name: /list view/i }).getAttribute('aria-pressed')).toBe('false')
+      expect(
+        within(panel)
+          .getByRole('button', { name: /grid view/i })
+          .getAttribute('aria-pressed'),
+      ).toBe('true')
+      expect(
+        within(panel)
+          .getByRole('button', { name: /list view/i })
+          .getAttribute('aria-pressed'),
+      ).toBe('false')
       expect(within(panel).getByTestId('media-grid-images')).toBeDefined()
       expect(within(panel).getByTestId('media-grid-videos')).toBeDefined()
 
@@ -606,7 +728,11 @@ describe('SiteExplorerPanel', () => {
       })
       fireEvent.click(within(panel).getByRole('button', { name: /list view/i }))
 
-      expect(within(panel).getByRole('button', { name: /list view/i }).getAttribute('aria-pressed')).toBe('true')
+      expect(
+        within(panel)
+          .getByRole('button', { name: /list view/i })
+          .getAttribute('aria-pressed'),
+      ).toBe('true')
       expect(within(panel).queryByTestId('media-grid-images')).toBeNull()
     } finally {
       globalThis.fetch = originalFetch
@@ -617,28 +743,31 @@ describe('SiteExplorerPanel', () => {
     loadSite()
     const originalFetch = globalThis.fetch
     globalThis.fetch = (async () =>
-      new Response(JSON.stringify({
-        assets: [
-          {
-            id: 'media-image',
-            filename: 'hero.png',
-            mimeType: 'image/png',
-            sizeBytes: 12,
-            publicPath: '/uploads/hero.png',
-            uploadedByUserId: null,
-            createdAt: '2026-01-03T00:00:00.000Z',
-          },
-          {
-            id: 'media-video',
-            filename: 'intro.mp4',
-            mimeType: 'video/mp4',
-            sizeBytes: 24,
-            publicPath: '/uploads/intro.mp4',
-            uploadedByUserId: null,
-            createdAt: '2026-01-03T00:00:00.000Z',
-          },
-        ],
-      }), { status: 200 })) as typeof fetch
+      new Response(
+        JSON.stringify({
+          assets: [
+            {
+              id: 'media-image',
+              filename: 'hero.png',
+              mimeType: 'image/png',
+              sizeBytes: 12,
+              publicPath: '/uploads/hero.png',
+              uploadedByUserId: null,
+              createdAt: '2026-01-03T00:00:00.000Z',
+            },
+            {
+              id: 'media-video',
+              filename: 'intro.mp4',
+              mimeType: 'video/mp4',
+              sizeBytes: 24,
+              publicPath: '/uploads/intro.mp4',
+              uploadedByUserId: null,
+              createdAt: '2026-01-03T00:00:00.000Z',
+            },
+          ],
+        }),
+        { status: 200 },
+      )) as typeof fetch
 
     try {
       render(<MediaExplorerPanel variant="tab" />)
@@ -669,17 +798,22 @@ describe('SiteExplorerPanel', () => {
       },
     })
     globalThis.fetch = (async () =>
-      new Response(JSON.stringify({
-        assets: [{
-          id: 'media-1',
-          filename: 'hero.png',
-          mimeType: 'image/png',
-          sizeBytes: 12,
-          publicPath: '/uploads/hero.png',
-          uploadedByUserId: null,
-          createdAt: '2026-01-03T00:00:00.000Z',
-        }],
-      }), { status: 200 })) as typeof fetch
+      new Response(
+        JSON.stringify({
+          assets: [
+            {
+              id: 'media-1',
+              filename: 'hero.png',
+              mimeType: 'image/png',
+              sizeBytes: 12,
+              publicPath: '/uploads/hero.png',
+              uploadedByUserId: null,
+              createdAt: '2026-01-03T00:00:00.000Z',
+            },
+          ],
+        }),
+        { status: 200 },
+      )) as typeof fetch
 
     try {
       render(<MediaExplorerPanel variant="tab" />)
@@ -735,28 +869,31 @@ describe('SiteExplorerPanel', () => {
 
     const originalFetch = globalThis.fetch
     globalThis.fetch = (async () =>
-      new Response(JSON.stringify({
-        assets: [
-          {
-            id: 'media-image',
-            filename: 'hero.png',
-            mimeType: 'image/png',
-            sizeBytes: 12,
-            publicPath: '/uploads/hero.png',
-            uploadedByUserId: null,
-            createdAt: '2026-01-03T00:00:00.000Z',
-          },
-          {
-            id: 'media-video',
-            filename: 'intro.mp4',
-            mimeType: 'video/mp4',
-            sizeBytes: 24,
-            publicPath: '/uploads/intro.mp4',
-            uploadedByUserId: null,
-            createdAt: '2026-01-03T00:00:00.000Z',
-          },
-        ],
-      }), { status: 200 })) as typeof fetch
+      new Response(
+        JSON.stringify({
+          assets: [
+            {
+              id: 'media-image',
+              filename: 'hero.png',
+              mimeType: 'image/png',
+              sizeBytes: 12,
+              publicPath: '/uploads/hero.png',
+              uploadedByUserId: null,
+              createdAt: '2026-01-03T00:00:00.000Z',
+            },
+            {
+              id: 'media-video',
+              filename: 'intro.mp4',
+              mimeType: 'video/mp4',
+              sizeBytes: 24,
+              publicPath: '/uploads/intro.mp4',
+              uploadedByUserId: null,
+              createdAt: '2026-01-03T00:00:00.000Z',
+            },
+          ],
+        }),
+        { status: 200 },
+      )) as typeof fetch
 
     try {
       render(<MediaExplorerPanel variant="tab" />)
@@ -765,10 +902,14 @@ describe('SiteExplorerPanel', () => {
       fireEvent.contextMenu(imageRow, { clientX: 120, clientY: 140 })
       fireEvent.click(screen.getByRole('menuitem', { name: /use in selected image/i }))
 
-      expect(useEditorStore.getState().site?.pages[0]?.nodes['image-node']?.props.src).toBe('/uploads/hero.png')
+      expect(useEditorStore.getState().site?.pages[0]?.nodes['image-node']?.props.src).toBe(
+        '/uploads/hero.png',
+      )
 
       act(() => {
-        useEditorStore.setState({ selectedNodeId: 'video-node' } as Parameters<typeof useEditorStore.setState>[0])
+        useEditorStore.setState({ selectedNodeId: 'video-node' } as Parameters<
+          typeof useEditorStore.setState
+        >[0])
       })
       const videoRow = await screen.findByRole('button', { name: /open media intro\.mp4/i })
       fireEvent.contextMenu(videoRow, { clientX: 120, clientY: 140 })
@@ -787,17 +928,22 @@ describe('SiteExplorerPanel', () => {
     const originalOpen = window.open
     const openCalls: unknown[] = []
     globalThis.fetch = (async () =>
-      new Response(JSON.stringify({
-        assets: [{
-          id: 'media-1',
-          filename: 'hero.png',
-          mimeType: 'image/png',
-          sizeBytes: 12,
-          publicPath: '/uploads/hero.png',
-          uploadedByUserId: null,
-          createdAt: '2026-01-03T00:00:00.000Z',
-        }],
-      }), { status: 200 })) as typeof fetch
+      new Response(
+        JSON.stringify({
+          assets: [
+            {
+              id: 'media-1',
+              filename: 'hero.png',
+              mimeType: 'image/png',
+              sizeBytes: 12,
+              publicPath: '/uploads/hero.png',
+              uploadedByUserId: null,
+              createdAt: '2026-01-03T00:00:00.000Z',
+            },
+          ],
+        }),
+        { status: 200 },
+      )) as typeof fetch
     window.open = ((...args: unknown[]) => {
       openCalls.push(args)
       return null
@@ -826,18 +972,25 @@ describe('SiteExplorerPanel', () => {
       'utf-8',
     )
     const leftSidebarCss = readFileSync(
-      new URL('../../admin/pages/site/sidebars/LeftSidebar/LeftSidebar.module.css', import.meta.url),
+      new URL(
+        '../../admin/pages/site/sidebars/LeftSidebar/LeftSidebar.module.css',
+        import.meta.url,
+      ),
       'utf-8',
     )
     const rightSidebarCss = readFileSync(
-      new URL('../../admin/pages/site/sidebars/RightSidebar/RightSidebar.module.css', import.meta.url),
+      new URL(
+        '../../admin/pages/site/sidebars/RightSidebar/RightSidebar.module.css',
+        import.meta.url,
+      ),
       'utf-8',
     )
 
     const panelRule = editorPanelCss.match(/\.panel\s*\{[\s\S]*?\}/)?.[0] ?? ''
     const panelZIndex = Number(panelRule.match(/z-index:\s*(\d+)/)?.[1])
-    const sidebarZIndexes = [leftSidebarCss, rightSidebarCss]
-      .flatMap((css) => [...css.matchAll(/z-index:\s*(\d+)/g)].map((match) => Number(match[1])))
+    const sidebarZIndexes = [leftSidebarCss, rightSidebarCss].flatMap((css) =>
+      [...css.matchAll(/z-index:\s*(\d+)/g)].map((match) => Number(match[1])),
+    )
 
     expect(panelRule).toContain('position: fixed;')
     // The code editor is a focused, draggable surface — it must float OVER the
@@ -928,7 +1081,9 @@ describe('SiteExplorerPanel', () => {
 
     const state = useEditorStore.getState()
     // Component names are stored verbatim (free-form, no PascalCase coercion).
-    const created = state.site?.visualComponents.find((component) => component.name === 'feature row')
+    const created = state.site?.visualComponents.find(
+      (component) => component.name === 'feature row',
+    )
     expect(created).toBeDefined()
     expect(state.activeDocument).toEqual({
       kind: 'visualComponent',
@@ -1020,7 +1175,9 @@ describe('SiteExplorerPanel', () => {
     })
     fireEvent.keyDown(input, { key: 'Enter' })
 
-    let component = useEditorStore.getState().site?.visualComponents.find((item) => item.id === 'vc-HeroCard')
+    let component = useEditorStore
+      .getState()
+      .site?.visualComponents.find((item) => item.id === 'vc-HeroCard')
     // Component names are stored verbatim (free-form, no PascalCase coercion).
     expect(component?.name).toBe('Promo card')
 
@@ -1030,7 +1187,9 @@ describe('SiteExplorerPanel', () => {
     })
     fireEvent.click(screen.getByRole('menuitem', { name: /delete/i }))
 
-    component = useEditorStore.getState().site?.visualComponents.find((item) => item.id === 'vc-HeroCard')
+    component = useEditorStore
+      .getState()
+      .site?.visualComponents.find((item) => item.id === 'vc-HeroCard')
     expect(component).toBeUndefined()
   })
 
@@ -1089,32 +1248,40 @@ describe('SiteExplorerPanel', () => {
     globalThis.fetch = (async (input, init) => {
       calls.push({ input, init })
       if (init?.method === 'PATCH') {
-        return new Response(JSON.stringify({
-          asset: {
-            id: 'media-1',
-            filename: 'Hero renamed.png',
-            mimeType: 'image/png',
-            sizeBytes: 12,
-            publicPath: '/uploads/hero.png',
-            uploadedByUserId: null,
-            createdAt: '2026-01-03T00:00:00.000Z',
-          },
-        }), { status: 200 })
+        return new Response(
+          JSON.stringify({
+            asset: {
+              id: 'media-1',
+              filename: 'Hero renamed.png',
+              mimeType: 'image/png',
+              sizeBytes: 12,
+              publicPath: '/uploads/hero.png',
+              uploadedByUserId: null,
+              createdAt: '2026-01-03T00:00:00.000Z',
+            },
+          }),
+          { status: 200 },
+        )
       }
       if (init?.method === 'DELETE') {
         return new Response(JSON.stringify({ ok: true }), { status: 200 })
       }
-      return new Response(JSON.stringify({
-        assets: [{
-          id: 'media-1',
-          filename: 'hero.png',
-          mimeType: 'image/png',
-          sizeBytes: 12,
-          publicPath: '/uploads/hero.png',
-          uploadedByUserId: null,
-          createdAt: '2026-01-03T00:00:00.000Z',
-        }],
-      }), { status: 200 })
+      return new Response(
+        JSON.stringify({
+          assets: [
+            {
+              id: 'media-1',
+              filename: 'hero.png',
+              mimeType: 'image/png',
+              sizeBytes: 12,
+              publicPath: '/uploads/hero.png',
+              uploadedByUserId: null,
+              createdAt: '2026-01-03T00:00:00.000Z',
+            },
+          ],
+        }),
+        { status: 200 },
+      )
     }) as typeof fetch
 
     try {
@@ -1130,8 +1297,14 @@ describe('SiteExplorerPanel', () => {
       })
       fireEvent.click(within(dialog).getByRole('button', { name: 'Save' }))
 
-      expect(await screen.findByRole('button', { name: /open media hero renamed\.png/i })).toBeDefined()
-      expect(calls.some((call) => call.input === '/admin/api/cms/media/media-1' && call.init?.method === 'PATCH')).toBe(true)
+      expect(
+        await screen.findByRole('button', { name: /open media hero renamed\.png/i }),
+      ).toBeDefined()
+      expect(
+        calls.some(
+          (call) => call.input === '/admin/api/cms/media/media-1' && call.init?.method === 'PATCH',
+        ),
+      ).toBe(true)
 
       fireEvent.contextMenu(screen.getByRole('button', { name: /open media hero renamed\.png/i }), {
         clientX: 120,
@@ -1142,7 +1315,11 @@ describe('SiteExplorerPanel', () => {
       await waitFor(() => {
         expect(screen.queryByRole('button', { name: /open media hero renamed\.png/i })).toBeNull()
       })
-      expect(calls.some((call) => call.input === '/admin/api/cms/media/media-1' && call.init?.method === 'DELETE')).toBe(true)
+      expect(
+        calls.some(
+          (call) => call.input === '/admin/api/cms/media/media-1' && call.init?.method === 'DELETE',
+        ),
+      ).toBe(true)
     } finally {
       globalThis.fetch = originalFetch
     }

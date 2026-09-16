@@ -34,7 +34,7 @@ function makeManifest(
 }
 
 const GRANTED = makeManifest('test.plugin', ['editor.commands'])
-const DENIED  = makeManifest('test.plugin', [])
+const DENIED = makeManifest('test.plugin', [])
 
 // A no-op fetch shim (palette.registerCommand / registerProvider don't use fetch)
 const noopFetch = () => Promise.resolve(new Response('{}'))
@@ -270,9 +270,7 @@ describe('editor.commands permission is required', () => {
     })
 
     expect(getPluginPaletteSpotlightProviders()).toHaveLength(0)
-    expect(consoleWarnSpy).toHaveBeenCalledWith(
-      expect.stringContaining('editor.commands'),
-    )
+    expect(consoleWarnSpy).toHaveBeenCalledWith(expect.stringContaining('editor.commands'))
 
     consoleWarnSpy.mockRestore()
   })

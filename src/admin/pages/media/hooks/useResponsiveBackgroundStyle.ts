@@ -73,7 +73,9 @@ export function responsiveBackgroundReactStyle(
   })
 }
 
-export function useResponsiveEditorMediaAssets(paths: readonly string[]): ResponsiveEditorMediaAssets {
+export function useResponsiveEditorMediaAssets(
+  paths: readonly string[],
+): ResponsiveEditorMediaAssets {
   const uniquePaths = [...new Set(paths)]
   const assets = useCmsMediaAssetsByPath(uniquePaths)
   return responsiveMediaAssetsFromCms(uniquePaths, assets)

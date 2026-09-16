@@ -49,7 +49,9 @@ export function createBreakpointActions({
       })
       // If the active breakpoint was removed, fall back to desktop
       if (removed && get().activeBreakpointId === id) {
-        set((state) => { state.activeBreakpointId = 'desktop' })
+        set((state) => {
+          state.activeBreakpointId = 'desktop'
+        })
       }
     },
 

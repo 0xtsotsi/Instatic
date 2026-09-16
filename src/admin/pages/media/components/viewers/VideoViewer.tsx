@@ -21,14 +21,7 @@ export function VideoViewer({ src }: VideoViewerProps) {
         playback state doesn't bleed into the next clip (Safari otherwise
         reuses the previous time index).
       */}
-      <video
-        key={src}
-        src={src}
-        controls
-        playsInline
-        preload="metadata"
-        className={styles.video}
-      />
+      <video key={src} src={src} controls playsInline preload="metadata" className={styles.video} />
     </div>
   )
 }

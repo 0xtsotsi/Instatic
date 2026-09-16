@@ -72,7 +72,9 @@ function finiteNumberOr(value: unknown, fallback: number): number {
 }
 
 function stringArray(value: unknown): string[] {
-  return Array.isArray(value) ? value.filter((item): item is string => typeof item === 'string') : []
+  return Array.isArray(value)
+    ? value.filter((item): item is string => typeof item === 'string')
+    : []
 }
 
 /**
@@ -83,7 +85,8 @@ function stringArray(value: unknown): string[] {
 function normalizeAssetScope(raw: unknown): SiteAssetScope {
   if (!isRecord(raw)) return { type: 'all-pages' }
   if (raw.type === 'pages') return { type: 'pages', pageIds: stringArray(raw.pageIds) }
-  if (raw.type === 'templates') return { type: 'templates', templatePageIds: stringArray(raw.templatePageIds) }
+  if (raw.type === 'templates')
+    return { type: 'templates', templatePageIds: stringArray(raw.templatePageIds) }
   return { type: 'all-pages' }
 }
 
@@ -92,16 +95,22 @@ export function normalizeScriptRuntimeConfig(raw: unknown): SiteScriptRuntimeCon
 
   return {
     enabled: typeof raw.enabled === 'boolean' ? raw.enabled : DEFAULT_SCRIPT_RUNTIME_CONFIG.enabled,
-    runInCanvas: typeof raw.runInCanvas === 'boolean' ? raw.runInCanvas : DEFAULT_SCRIPT_RUNTIME_CONFIG.runInCanvas,
-    format: raw.format === 'classic' || raw.format === 'module'
-      ? raw.format
-      : DEFAULT_SCRIPT_RUNTIME_CONFIG.format,
-    placement: raw.placement === 'head' || raw.placement === 'body-end'
-      ? raw.placement
-      : DEFAULT_SCRIPT_RUNTIME_CONFIG.placement,
-    timing: raw.timing === 'immediate' || raw.timing === 'dom-ready' || raw.timing === 'idle'
-      ? raw.timing
-      : DEFAULT_SCRIPT_RUNTIME_CONFIG.timing,
+    runInCanvas:
+      typeof raw.runInCanvas === 'boolean'
+        ? raw.runInCanvas
+        : DEFAULT_SCRIPT_RUNTIME_CONFIG.runInCanvas,
+    format:
+      raw.format === 'classic' || raw.format === 'module'
+        ? raw.format
+        : DEFAULT_SCRIPT_RUNTIME_CONFIG.format,
+    placement:
+      raw.placement === 'head' || raw.placement === 'body-end'
+        ? raw.placement
+        : DEFAULT_SCRIPT_RUNTIME_CONFIG.placement,
+    timing:
+      raw.timing === 'immediate' || raw.timing === 'dom-ready' || raw.timing === 'idle'
+        ? raw.timing
+        : DEFAULT_SCRIPT_RUNTIME_CONFIG.timing,
     scope: normalizeAssetScope(raw.scope),
     priority: finiteNumberOr(raw.priority, DEFAULT_SCRIPT_RUNTIME_CONFIG.priority),
   }
@@ -121,20 +130,21 @@ function normalizeLockedDependency(rawKey: string, raw: unknown): LockedSiteDepe
   const key = rawKey.trim()
   if (!key || !isSafePackageName(key) || !isRecord(raw)) return null
 
-  const requested = typeof raw.requested === 'string' && raw.requested.trim()
-    ? raw.requested.trim()
-    : ''
-  const version = typeof raw.version === 'string' && raw.version.trim()
-    ? raw.version.trim()
-    : ''
+  const requested =
+    typeof raw.requested === 'string' && raw.requested.trim() ? raw.requested.trim() : ''
+  const version = typeof raw.version === 'string' && raw.version.trim() ? raw.version.trim() : ''
   if (!requested || !version) return null
 
   return {
     name: key,
     requested,
     version,
-    ...(typeof raw.integrity === 'string' && raw.integrity.trim() ? { integrity: raw.integrity.trim() } : {}),
-    ...(typeof raw.tarballUrl === 'string' && raw.tarballUrl.trim() ? { tarballUrl: raw.tarballUrl.trim() } : {}),
+    ...(typeof raw.integrity === 'string' && raw.integrity.trim()
+      ? { integrity: raw.integrity.trim() }
+      : {}),
+    ...(typeof raw.tarballUrl === 'string' && raw.tarballUrl.trim()
+      ? { tarballUrl: raw.tarballUrl.trim() }
+      : {}),
     resolvedAt: finiteNumberOr(raw.resolvedAt, 0),
   }
 }
@@ -159,13 +169,19 @@ function normalizeDependencyLock(raw: unknown): SiteDependencyLock {
 
 function normalizePackageImportmap(raw: unknown): RuntimePackageImportmap | undefined {
   if (!isRecord(raw)) return undefined
-  const lockHash = typeof raw.lockHash === 'string' && raw.lockHash.trim() ? raw.lockHash.trim() : ''
+  const lockHash =
+    typeof raw.lockHash === 'string' && raw.lockHash.trim() ? raw.lockHash.trim() : ''
   if (!lockHash) return undefined
   const importsRaw = isRecord(raw.imports) ? raw.imports : null
   if (!importsRaw) return undefined
   const imports: Record<string, string> = {}
   for (const [key, value] of Object.entries(importsRaw)) {
-    if (typeof key === 'string' && key.length > 0 && typeof value === 'string' && value.length > 0) {
+    if (
+      typeof key === 'string' &&
+      key.length > 0 &&
+      typeof value === 'string' &&
+      value.length > 0
+    ) {
       imports[key] = value
     }
   }
@@ -175,7 +191,11 @@ function normalizePackageImportmap(raw: unknown): RuntimePackageImportmap | unde
 
 export function normalizeSiteRuntimeConfig(raw: unknown): SiteRuntimeConfig {
   if (!isRecord(raw)) {
-    return { dependencyLock: { ...DEFAULT_SITE_DEPENDENCY_LOCK, packages: {} }, scripts: {}, styles: {} }
+    return {
+      dependencyLock: { ...DEFAULT_SITE_DEPENDENCY_LOCK, packages: {} },
+      scripts: {},
+      styles: {},
+    }
   }
 
   const scripts: Record<string, SiteScriptRuntimeConfig> = {}
@@ -201,7 +221,9 @@ export function normalizeSiteRuntimeConfig(raw: unknown): SiteRuntimeConfig {
   }
 }
 
-export function cloneSiteRuntimeConfig(runtime: SiteRuntimeConfig = DEFAULT_SITE_RUNTIME): SiteRuntimeConfig {
+export function cloneSiteRuntimeConfig(
+  runtime: SiteRuntimeConfig = DEFAULT_SITE_RUNTIME,
+): SiteRuntimeConfig {
   return normalizeSiteRuntimeConfig(runtime)
 }
 
@@ -252,7 +274,10 @@ export function collectAppliedStyles({
   page,
 }: CollectAppliedStylesInput): Array<{ file: SiteFile; config: SiteStyleRuntimeConfig }> {
   return files
-    .filter((file) => file.type === 'style' && typeof file.content === 'string' && file.content.length > 0)
+    .filter(
+      (file) =>
+        file.type === 'style' && typeof file.content === 'string' && file.content.length > 0,
+    )
     .map((file) => ({
       file,
       config: runtime.styles[file.id] ?? { ...DEFAULT_STYLE_RUNTIME_CONFIG },

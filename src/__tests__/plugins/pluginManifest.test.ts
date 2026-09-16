@@ -26,9 +26,7 @@ describe('plugin manifest validation', () => {
             heading: 'Store Map',
             body: 'Track important locations.',
             centerLabel: 'Prague',
-            pins: [
-              { label: 'HQ', detail: 'Main office', x: 42, y: 55 },
-            ],
+            pins: [{ label: 'HQ', detail: 'Main office', x: 42, y: 55 }],
           },
         },
       ],
@@ -101,11 +99,7 @@ describe('plugin manifest validation', () => {
       permissions: ['network.outbound'],
       networkAllowedHosts: ['example.com', 'api.github.com', '*.github.com'],
     })
-    expect(manifest.networkAllowedHosts).toEqual([
-      'example.com',
-      'api.github.com',
-      '*.github.com',
-    ])
+    expect(manifest.networkAllowedHosts).toEqual(['example.com', 'api.github.com', '*.github.com'])
   })
 
   // Defense-in-depth for ISS-011 / ISS-005: an allowlist should never name a
@@ -187,11 +181,13 @@ describe('plugin manifest validation', () => {
         version: '1.0.0',
         apiVersion: 1,
         permissions: ['admin.navigation', 'editor.code'],
-        adminPages: [{
-          id: 'dashboard',
-          title: 'Dashboard',
-          content: { kind: 'app', heading: 'Dashboard', entry: '../secrets.js' },
-        }],
+        adminPages: [
+          {
+            id: 'dashboard',
+            title: 'Dashboard',
+            content: { kind: 'app', heading: 'Dashboard', entry: '../secrets.js' },
+          },
+        ],
       }),
     ).toThrow('Invalid plugin manifest')
   })
@@ -286,7 +282,9 @@ describe('plugin manifest validation', () => {
       version: '1.0.0',
       apiVersion: 1,
       permissions: ['admin.navigation'],
-      adminPages: [{ id: 'dashboard', title: 'Enabled', content: { kind: 'markdown', body: 'Visible' } }],
+      adminPages: [
+        { id: 'dashboard', title: 'Enabled', content: { kind: 'markdown', body: 'Visible' } },
+      ],
     })
     const disabled = parsePluginManifest({
       id: 'local.disabled',
@@ -294,7 +292,9 @@ describe('plugin manifest validation', () => {
       version: '1.0.0',
       apiVersion: 1,
       permissions: ['admin.navigation'],
-      adminPages: [{ id: 'dashboard', title: 'Disabled', content: { kind: 'markdown', body: 'Hidden' } }],
+      adminPages: [
+        { id: 'dashboard', title: 'Disabled', content: { kind: 'markdown', body: 'Hidden' } },
+      ],
     })
 
     expect(
@@ -312,12 +312,19 @@ describe('plugin manifest validation', () => {
       version: '1.0.0',
       apiVersion: 1,
       permissions: ['admin.navigation'],
-      adminPages: [{ id: 'dashboard', title: 'Broken', content: { kind: 'markdown', body: 'Hidden' } }],
+      adminPages: [
+        { id: 'dashboard', title: 'Broken', content: { kind: 'markdown', body: 'Hidden' } },
+      ],
     })
 
     expect(
       collectEnabledAdminPages([
-        { manifest, enabled: true, lifecycleStatus: 'error', grantedPermissions: ['admin.navigation'] },
+        {
+          manifest,
+          enabled: true,
+          lifecycleStatus: 'error',
+          grantedPermissions: ['admin.navigation'],
+        },
       ]),
     ).toEqual([])
   })
@@ -329,14 +336,14 @@ describe('plugin manifest validation', () => {
       version: '1.0.0',
       apiVersion: 1,
       permissions: ['admin.navigation'],
-      adminPages: [{ id: 'dashboard', title: 'Silent', content: { kind: 'markdown', body: 'Hidden' } }],
+      adminPages: [
+        { id: 'dashboard', title: 'Silent', content: { kind: 'markdown', body: 'Hidden' } },
+      ],
     })
 
-    expect(
-      collectEnabledAdminPages([
-        { manifest, enabled: true, grantedPermissions: [] },
-      ]),
-    ).toEqual([])
+    expect(collectEnabledAdminPages([{ manifest, enabled: true, grantedPermissions: [] }])).toEqual(
+      [],
+    )
   })
 
   // -------------------------------------------------------------------------
@@ -389,11 +396,13 @@ describe('plugin manifest validation', () => {
         version: '1.0.0',
         apiVersion: 1,
         permissions: ['admin.navigation'],
-        adminPages: [{
-          id: 'dashboard',
-          title: 'Dashboard',
-          content: { kind: 'app', heading: 'Dashboard', entry: 'admin/dashboard.js' },
-        }],
+        adminPages: [
+          {
+            id: 'dashboard',
+            title: 'Dashboard',
+            content: { kind: 'app', heading: 'Dashboard', entry: 'admin/dashboard.js' },
+          },
+        ],
       }),
     ).toThrow(/kind "app".*requires the `editor\.code` permission/)
   })
@@ -423,16 +432,18 @@ describe('plugin manifest validation', () => {
       version: '1.0.0',
       apiVersion: 1,
       permissions: ['admin.navigation', 'editor.code'],
-      adminPages: [{
-        id: 'dashboard',
-        title: 'Dashboard',
-        content: {
-          kind: 'app',
-          heading: 'Dashboard',
-          entry: 'admin/dashboard.js',
-          assetPath: '/uploads/plugins/acme.insights/1.0.0',
+      adminPages: [
+        {
+          id: 'dashboard',
+          title: 'Dashboard',
+          content: {
+            kind: 'app',
+            heading: 'Dashboard',
+            entry: 'admin/dashboard.js',
+            assetPath: '/uploads/plugins/acme.insights/1.0.0',
+          },
         },
-      }],
+      ],
     })
     const content = manifest.adminPages[0].content
     expect(content.kind === 'app' && content.assetPath).toBe('/uploads/plugins/acme.insights/1.0.0')
@@ -446,16 +457,18 @@ describe('plugin manifest validation', () => {
         version: '1.0.0',
         apiVersion: 1,
         permissions: ['admin.navigation', 'editor.code'],
-        adminPages: [{
-          id: 'dashboard',
-          title: 'Dashboard',
-          content: {
-            kind: 'app',
-            heading: 'Dashboard',
-            entry: 'admin/dashboard.js',
-            assetPath: '/uploads/plugins/legit.workflow/2.0.0',
+        adminPages: [
+          {
+            id: 'dashboard',
+            title: 'Dashboard',
+            content: {
+              kind: 'app',
+              heading: 'Dashboard',
+              entry: 'admin/dashboard.js',
+              assetPath: '/uploads/plugins/legit.workflow/2.0.0',
+            },
           },
-        }],
+        ],
       }),
     ).toThrow(/assetPath must stay within "\/uploads\/plugins\/atk\.evil\/1\.0\.0"/)
   })
@@ -474,11 +487,18 @@ describe('plugin manifest validation', () => {
           version: '1.0.0',
           apiVersion: 1,
           permissions: ['admin.navigation', 'editor.code'],
-          adminPages: [{
-            id: 'dashboard',
-            title: 'Dashboard',
-            content: { kind: 'app', heading: 'Dashboard', entry: 'admin/dashboard.js', assetPath },
-          }],
+          adminPages: [
+            {
+              id: 'dashboard',
+              title: 'Dashboard',
+              content: {
+                kind: 'app',
+                heading: 'Dashboard',
+                entry: 'admin/dashboard.js',
+                assetPath,
+              },
+            },
+          ],
         }),
       ).toThrow('Invalid plugin manifest')
     }
@@ -516,7 +536,8 @@ describe('plugin manifest validation', () => {
       pages: 165,
       featured: true,
     })
-    expect(() => validatePluginRecordData(manifest.resources[0], { pages: 'many' }))
-      .toThrow('Missing required field "Title"')
+    expect(() => validatePluginRecordData(manifest.resources[0], { pages: 'many' })).toThrow(
+      'Missing required field "Title"',
+    )
   })
 })

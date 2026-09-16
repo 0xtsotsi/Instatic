@@ -19,10 +19,7 @@
 import { create, type StateCreator } from 'zustand'
 import { mutative } from 'zustand-mutative'
 import { subscribeWithSelector } from 'zustand/middleware'
-import {
-  createAgentSlice,
-  type AgentSlice,
-} from '@site/agent'
+import { createAgentSlice, type AgentSlice } from '@site/agent'
 import { contentAgentSliceConfig } from './agentSliceConfig.content'
 
 type ContentAgentStore = AgentSlice
@@ -40,8 +37,12 @@ type ContentAgentStore = AgentSlice
  * factory's logic for each store shape.
  */
 export function createContentAgentStore() {
-  const sliceCreator = createAgentSlice(contentAgentSliceConfig) as unknown as
-    StateCreator<AgentSlice, [['zustand/mutative', never]], [], AgentSlice>
+  const sliceCreator = createAgentSlice(contentAgentSliceConfig) as unknown as StateCreator<
+    AgentSlice,
+    [['zustand/mutative', never]],
+    [],
+    AgentSlice
+  >
   return create<ContentAgentStore>()(
     subscribeWithSelector(
       mutative(

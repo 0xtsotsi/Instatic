@@ -140,10 +140,7 @@ const FALLBACK_PROPS: ReadonlyArray<keyof CSSPropertyBag> = [
  * Showing them unconditionally lets users style children of flex/grid
  * parents without flipping this element's display first.
  */
-const CONTAINER_ONLY_PROPS = new Set<keyof CSSPropertyBag>([
-  'rowGap',
-  'columnGap',
-])
+const CONTAINER_ONLY_PROPS = new Set<keyof CSSPropertyBag>(['rowGap', 'columnGap'])
 
 // ---------------------------------------------------------------------------
 // Display switcher config — Flex | Grid + dropdown of every other value
@@ -210,7 +207,9 @@ export function LayoutSection({
         allOptions={DISPLAY_OPTIONS}
         onChange={(v) => onChange('display', v)}
         onClear={clearDisplayAndDeps}
-        onPreview={onPreview ? (v) => onPreview({ display: v } as Partial<CSSPropertyBag>) : undefined}
+        onPreview={
+          onPreview ? (v) => onPreview({ display: v } as Partial<CSSPropertyBag>) : undefined
+        }
         onClearPreview={onClearPreview}
       />
 
@@ -251,7 +250,11 @@ export function LayoutSection({
             value={readString(currentStyles, 'gap')}
             isSet={hasStyleValue(storedStyles.gap)}
             onChange={(v) => onChange('gap', v)}
-            onPreview={onPreview ? (v) => onPreview({ gap: v ?? null } as Partial<CSSPropertyBag>) : undefined}
+            onPreview={
+              onPreview
+                ? (v) => onPreview({ gap: v ?? null } as Partial<CSSPropertyBag>)
+                : undefined
+            }
             onClearPreview={onClearPreview}
           />
         </div>
@@ -296,7 +299,11 @@ export function LayoutSection({
             value={readString(currentStyles, 'gap')}
             isSet={hasStyleValue(storedStyles.gap)}
             onChange={(v) => onChange('gap', v)}
-            onPreview={onPreview ? (v) => onPreview({ gap: v ?? null } as Partial<CSSPropertyBag>) : undefined}
+            onPreview={
+              onPreview
+                ? (v) => onPreview({ gap: v ?? null } as Partial<CSSPropertyBag>)
+                : undefined
+            }
             onClearPreview={onClearPreview}
           />
         </div>
@@ -311,11 +318,7 @@ export function LayoutSection({
           rowGap, columnGap) are skipped when this element isn't a flex
           or grid container — they have no effect on `display: block` etc. */}
       {FALLBACK_PROPS.map((prop) => {
-        if (
-          CONTAINER_ONLY_PROPS.has(prop) &&
-          display !== 'flex' &&
-          display !== 'grid'
-        ) {
+        if (CONTAINER_ONLY_PROPS.has(prop) && display !== 'flex' && display !== 'grid') {
           return null
         }
         const storedValue = storedStyles[prop]

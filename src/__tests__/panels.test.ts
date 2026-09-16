@@ -67,7 +67,9 @@ describe('J6 DomPanel — store layer', () => {
 
   it('toggleLeftSidebarPanel("explorer") opens and closes the Explorer panel', () => {
     const state = useEditorStore.getState()
-    useEditorStore.setState({ explorerPanelOpen: false } as Parameters<typeof useEditorStore.setState>[0])
+    useEditorStore.setState({ explorerPanelOpen: false } as Parameters<
+      typeof useEditorStore.setState
+    >[0])
     state.toggleLeftSidebarPanel('explorer')
     expect(useEditorStore.getState().explorerPanelOpen).toBe(true)
     useEditorStore.getState().toggleLeftSidebarPanel('explorer')
@@ -102,7 +104,13 @@ describe('J6 DomPanel — flattenSubtree', () => {
       slug: 'index',
       rootNodeId: 'root',
       nodes: {
-        root: { id: 'root', moduleId: 'base.body', props: {}, children: [], breakpointOverrides: {} },
+        root: {
+          id: 'root',
+          moduleId: 'base.body',
+          props: {},
+          children: [],
+          breakpointOverrides: {},
+        },
       },
     }
     expect(flattenSubtree(page, 'root')).toEqual(['root'])
@@ -115,8 +123,20 @@ describe('J6 DomPanel — flattenSubtree', () => {
       slug: 'index',
       rootNodeId: 'root',
       nodes: {
-        root: { id: 'root', moduleId: 'base.body', props: {}, children: ['a', 'b'], breakpointOverrides: {} },
-        a: { id: 'a', moduleId: 'base.container', props: {}, children: ['a1'], breakpointOverrides: {} },
+        root: {
+          id: 'root',
+          moduleId: 'base.body',
+          props: {},
+          children: ['a', 'b'],
+          breakpointOverrides: {},
+        },
+        a: {
+          id: 'a',
+          moduleId: 'base.container',
+          props: {},
+          children: ['a1'],
+          breakpointOverrides: {},
+        },
         a1: { id: 'a1', moduleId: 'base.text', props: {}, children: [], breakpointOverrides: {} },
         b: { id: 'b', moduleId: 'base.image', props: {}, children: [], breakpointOverrides: {} },
       },
@@ -163,8 +183,8 @@ describe('J7+J8 PropertiesPanel — evaluateCondition', () => {
             { field: 'visible', eq: true },
           ],
         },
-        props
-      )
+        props,
+      ),
     ).toBe(true)
   })
 
@@ -177,8 +197,8 @@ describe('J7+J8 PropertiesPanel — evaluateCondition', () => {
             { field: 'visible', eq: false },
           ],
         },
-        props
-      )
+        props,
+      ),
     ).toBe(false)
   })
 
@@ -191,8 +211,8 @@ describe('J7+J8 PropertiesPanel — evaluateCondition', () => {
             { field: 'visible', eq: true },
           ],
         },
-        props
-      )
+        props,
+      ),
     ).toBe(true)
   })
 })

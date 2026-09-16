@@ -68,8 +68,11 @@ export function CanvasContextSelector() {
 
   if (breakpoints.length === 0) return null
 
-  const activeConditionValid = activeConditionId !== null && conditions.some((c) => c.id === activeConditionId)
-  const activeCondition = activeConditionValid ? conditions.find((c) => c.id === activeConditionId) : undefined
+  const activeConditionValid =
+    activeConditionId !== null && conditions.some((c) => c.id === activeConditionId)
+  const activeCondition = activeConditionValid
+    ? conditions.find((c) => c.id === activeConditionId)
+    : undefined
   const activeBp = breakpoints.find((b) => b.id === activeBreakpointId) ?? breakpoints[0]
 
   const closeMenu = () => setMenuOpen(false)
@@ -94,11 +97,15 @@ export function CanvasContextSelector() {
           tooltip="Editing context"
           onClick={() => setMenuOpen((v) => !v)}
         >
-          {activeConditionValid
-            ? <SlidersHorizontalIcon size={12} aria-hidden="true" />
-            : <BreakpointIcon name={activeBp?.icon ?? 'monitor'} />}
+          {activeConditionValid ? (
+            <SlidersHorizontalIcon size={12} aria-hidden="true" />
+          ) : (
+            <BreakpointIcon name={activeBp?.icon ?? 'monitor'} />
+          )}
           <span className={styles.triggerLabel}>
-            {activeConditionValid ? (activeCondition?.label ?? 'Condition') : (activeBp?.label ?? '')}
+            {activeConditionValid
+              ? (activeCondition?.label ?? 'Condition')
+              : (activeBp?.label ?? '')}
           </span>
           <ChevronDownIcon size={10} aria-hidden="true" />
         </Button>
@@ -122,7 +129,10 @@ export function CanvasContextSelector() {
                 <ContextMenuItem
                   className={cn(styles.menuRowMain, isActive && styles.menuRowActive)}
                   aria-current={isActive ? 'true' : undefined}
-                  onClick={() => { setActiveBreakpoint(bp.id); closeMenu() }}
+                  onClick={() => {
+                    setActiveBreakpoint(bp.id)
+                    closeMenu()
+                  }}
                 >
                   <BreakpointIcon name={bp.icon} />
                   <span className={styles.rowLabel}>{bp.label}</span>
@@ -134,7 +144,11 @@ export function CanvasContextSelector() {
                   className={styles.rowAction}
                   aria-label={`Edit ${bp.label} breakpoint`}
                   tooltip="Edit breakpoint"
-                  onClick={(e) => { e.stopPropagation(); closeMenu(); setDialog({ bp }) }}
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    closeMenu()
+                    setDialog({ bp })
+                  }}
                 >
                   <EditSolidIcon size={11} aria-hidden="true" />
                 </Button>
@@ -145,7 +159,10 @@ export function CanvasContextSelector() {
                     className={styles.rowRemove}
                     aria-label={`Delete ${bp.label} breakpoint`}
                     tooltip="Delete breakpoint"
-                    onClick={(e) => { e.stopPropagation(); removeBreakpoint(bp.id) }}
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      removeBreakpoint(bp.id)
+                    }}
                   >
                     <CloseIcon size={11} aria-hidden="true" />
                   </Button>
@@ -163,7 +180,10 @@ export function CanvasContextSelector() {
                 <ContextMenuItem
                   className={cn(styles.menuRowMain, isActive && styles.menuRowActive)}
                   aria-current={isActive ? 'true' : undefined}
-                  onClick={() => { setActiveConditionId(def.id); closeMenu() }}
+                  onClick={() => {
+                    setActiveConditionId(def.id)
+                    closeMenu()
+                  }}
                 >
                   <SlidersHorizontalIcon size={12} aria-hidden="true" />
                   <span className={styles.rowLabel}>{def.label}</span>
@@ -175,7 +195,11 @@ export function CanvasContextSelector() {
                   className={styles.rowAction}
                   aria-label={`Edit ${def.label} condition`}
                   tooltip="Edit condition"
-                  onClick={(e) => { e.stopPropagation(); closeMenu(); setDialog({ def }) }}
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    closeMenu()
+                    setDialog({ def })
+                  }}
                 >
                   <EditSolidIcon size={11} aria-hidden="true" />
                 </Button>
@@ -185,7 +209,10 @@ export function CanvasContextSelector() {
                   className={styles.rowRemove}
                   aria-label={`Delete ${def.label} condition`}
                   tooltip="Delete condition"
-                  onClick={(e) => { e.stopPropagation(); removeCondition(def.id) }}
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    removeCondition(def.id)
+                  }}
                 >
                   <CloseIcon size={11} aria-hidden="true" />
                 </Button>
@@ -197,7 +224,10 @@ export function CanvasContextSelector() {
 
           <ContextMenuItem
             className={styles.menuRowMain}
-            onClick={() => { closeMenu(); setDialog('add') }}
+            onClick={() => {
+              closeMenu()
+              setDialog('add')
+            }}
           >
             <PlusIcon size={12} aria-hidden="true" />
             <span className={styles.rowLabel}>Add context…</span>
@@ -226,9 +256,7 @@ export function CanvasContextSelector() {
         </div>
       )}
 
-      {dialog !== null && (
-        <ContextDialog mode={dialog} onClose={() => setDialog(null)} />
-      )}
+      {dialog !== null && <ContextDialog mode={dialog} onClose={() => setDialog(null)} />}
     </div>
   )
 }
@@ -262,7 +290,11 @@ const CONDITION_KIND_OPTIONS = [
   { value: 'supports', label: 'Supports', ariaLabel: 'Feature query' },
 ] satisfies ReadonlyArray<{ value: SegmentKind; label: string; ariaLabel: string }>
 
-const BREAKPOINT_SEGMENT = { value: 'breakpoint', label: 'Viewport', ariaLabel: 'Viewport context' } as const
+const BREAKPOINT_SEGMENT = {
+  value: 'breakpoint',
+  label: 'Viewport',
+  ariaLabel: 'Viewport context',
+} as const
 
 const ICON_OPTIONS = [
   { value: 'smartphone', label: 'Smartphone', icon: <SmartphoneSolidIcon size={13} /> },
@@ -293,9 +325,11 @@ function isValidConditionQuery(kind: ConditionKind, query: string): boolean {
   if (/[{}]/.test(q) || /<\//.test(q) || /;/.test(q)) return false
   if (typeof CSSStyleSheet === 'undefined') return true
   const wrapped =
-    kind === 'media' ? `@media ${q} {}`
-    : kind === 'container' ? `@container ${ensureParens(q)} {}`
-    : `@supports ${ensureParens(q)} {}`
+    kind === 'media'
+      ? `@media ${q} {}`
+      : kind === 'container'
+        ? `@container ${ensureParens(q)} {}`
+        : `@supports ${ensureParens(q)} {}`
   try {
     const sheet = new CSSStyleSheet()
     sheet.insertRule(wrapped)
@@ -310,7 +344,13 @@ function ensureParens(q: string): string {
   return t.startsWith('(') ? t : `(${t})`
 }
 
-function ContextDialog({ mode, onClose }: { mode: Exclude<DialogState, null>; onClose: () => void }) {
+function ContextDialog({
+  mode,
+  onClose,
+}: {
+  mode: Exclude<DialogState, null>
+  onClose: () => void
+}) {
   const addCondition = useEditorStore((s) => s.addCondition)
   const updateCondition = useEditorStore((s) => s.updateCondition)
   const addBreakpoint = useEditorStore((s) => s.addBreakpoint)
@@ -364,7 +404,10 @@ function ContextDialog({ mode, onClose }: { mode: Exclude<DialogState, null>; on
   function handleSubmit(e: FormEvent) {
     e.preventDefault()
     if (onBreakpoint) {
-      if (!(bpWidth > 0)) { setError('Enter a width in pixels.'); return }
+      if (!(bpWidth > 0)) {
+        setError('Enter a width in pixels.')
+        return
+      }
       const mediaQuery = bpMediaQuery.trim() || defaultBreakpointMediaQuery(bpWidth)
       if (!isValidConditionQuery('media', mediaQuery)) {
         setError('That media query is not valid CSS.')
@@ -401,9 +444,15 @@ function ContextDialog({ mode, onClose }: { mode: Exclude<DialogState, null>; on
       return
     }
     const condition: Condition =
-      kind === 'media' ? { kind: 'media', query: q }
-      : kind === 'container' ? { kind: 'container', query: q, ...(containerName.trim() ? { name: containerName.trim() } : {}) }
-      : { kind: 'supports', query: q }
+      kind === 'media'
+        ? { kind: 'media', query: q }
+        : kind === 'container'
+          ? {
+              kind: 'container',
+              query: q,
+              ...(containerName.trim() ? { name: containerName.trim() } : {}),
+            }
+          : { kind: 'supports', query: q }
     if (isEditDef && editDef) {
       updateCondition(editDef.id, condition, label.trim() || undefined)
       setActiveConditionId(editDef.id)
@@ -415,13 +464,18 @@ function ContextDialog({ mode, onClose }: { mode: Exclude<DialogState, null>; on
   }
 
   // Live label preview for conditions.
-  const previewLabel = !onBreakpoint && query.trim()
-    ? conditionLabel(
-        segment === 'container'
-          ? { kind: 'container', query: query.trim(), ...(containerName.trim() ? { name: containerName.trim() } : {}) }
-          : { kind: segment as ConditionKind, query: query.trim() },
-      )
-    : ''
+  const previewLabel =
+    !onBreakpoint && query.trim()
+      ? conditionLabel(
+          segment === 'container'
+            ? {
+                kind: 'container',
+                query: query.trim(),
+                ...(containerName.trim() ? { name: containerName.trim() } : {}),
+              }
+            : { kind: segment as ConditionKind, query: query.trim() },
+        )
+      : ''
   // Nudge width media queries toward the Viewport segment.
   const widthInMedia = segment === 'media' && detectWidthPx(query) !== null
   const title = isEditBp ? 'Edit viewport' : isEditDef ? 'Edit condition' : 'Add context'
@@ -436,8 +490,16 @@ function ContextDialog({ mode, onClose }: { mode: Exclude<DialogState, null>; on
       size="sm"
       footer={
         <>
-          <Button variant="secondary" size="sm" type="button" onClick={onClose}>Cancel</Button>
-          <Button variant="primary" size="sm" type="submit" form={CONDITION_FORM_ID} disabled={submitDisabled}>
+          <Button variant="secondary" size="sm" type="button" onClick={onClose}>
+            Cancel
+          </Button>
+          <Button
+            variant="primary"
+            size="sm"
+            type="submit"
+            form={CONDITION_FORM_ID}
+            disabled={submitDisabled}
+          >
             {submitLabel}
           </Button>
         </>
@@ -448,7 +510,10 @@ function ContextDialog({ mode, onClose }: { mode: Exclude<DialogState, null>; on
           <SegmentedControl<SegmentKind>
             value={segment}
             options={segOptions}
-            onChange={(k) => { setSegment(k); setError(null) }}
+            onChange={(k) => {
+              setSegment(k)
+              setError(null)
+            }}
             size="sm"
             fullWidth
             aria-label="Context type"
@@ -491,22 +556,37 @@ function ContextDialog({ mode, onClose }: { mode: Exclude<DialogState, null>; on
                 autoComplete="off"
                 spellCheck={false}
                 aria-label="Viewport CSS media query"
-                onChange={(e) => { setBpMediaQuery(e.target.value); setError(null) }}
+                onChange={(e) => {
+                  setBpMediaQuery(e.target.value)
+                  setError(null)
+                }}
               />
               <div className={styles.chips}>
                 <Button
                   type="button"
                   size="micro"
-                  variant={bpMediaQuery.trim() === defaultBreakpointMediaQuery(bpWidth) ? 'primary' : 'secondary'}
-                  onClick={() => { setBpMediaQuery(defaultBreakpointMediaQuery(bpWidth)); setError(null) }}
+                  variant={
+                    bpMediaQuery.trim() === defaultBreakpointMediaQuery(bpWidth)
+                      ? 'primary'
+                      : 'secondary'
+                  }
+                  onClick={() => {
+                    setBpMediaQuery(defaultBreakpointMediaQuery(bpWidth))
+                    setError(null)
+                  }}
                 >
                   Max-width
                 </Button>
                 <Button
                   type="button"
                   size="micro"
-                  variant={bpMediaQuery.trim() === `(min-width: ${bpWidth}px)` ? 'primary' : 'secondary'}
-                  onClick={() => { setBpMediaQuery(`(min-width: ${bpWidth}px)`); setError(null) }}
+                  variant={
+                    bpMediaQuery.trim() === `(min-width: ${bpWidth}px)` ? 'primary' : 'secondary'
+                  }
+                  onClick={() => {
+                    setBpMediaQuery(`(min-width: ${bpWidth}px)`)
+                    setError(null)
+                  }}
                 >
                   Min-width
                 </Button>
@@ -536,7 +616,10 @@ function ContextDialog({ mode, onClose }: { mode: Exclude<DialogState, null>; on
             <ConditionBuilder
               kind={segment as ConditionKind}
               query={query}
-              onQueryChange={(q) => { setQuery(q); setError(null) }}
+              onQueryChange={(q) => {
+                setQuery(q)
+                setError(null)
+              }}
               name={containerName}
               onNameChange={setContainerName}
               range={range}
@@ -547,11 +630,19 @@ function ContextDialog({ mode, onClose }: { mode: Exclude<DialogState, null>; on
                 Tip: for viewport width, use the Viewport tab so the context gets a canvas frame.
               </p>
             )}
-            {previewLabel && <p className={styles.hint} role="status">Saves as: {previewLabel}</p>}
+            {previewLabel && (
+              <p className={styles.hint} role="status">
+                Saves as: {previewLabel}
+              </p>
+            )}
           </>
         )}
 
-        {error && <p role="alert" className={styles.error}>{error}</p>}
+        {error && (
+          <p role="alert" className={styles.error}>
+            {error}
+          </p>
+        )}
       </form>
     </Dialog>
   )

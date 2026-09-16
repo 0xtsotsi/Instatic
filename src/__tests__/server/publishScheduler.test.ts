@@ -68,7 +68,11 @@ describe('publish scheduler', () => {
     `
     expect(dataRows[0]?.active_version_id).toBeString()
 
-    const { rows: versions } = await db<{ row_id: string; slug: string; published_by_user_id: string | null }>`
+    const { rows: versions } = await db<{
+      row_id: string
+      slug: string
+      published_by_user_id: string | null
+    }>`
       select row_id, slug, published_by_user_id
       from data_row_versions
       where row_id = ${rowId}

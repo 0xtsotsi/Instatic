@@ -13,10 +13,7 @@
  */
 
 import type { FrameworkPreferencesSettings } from '@core/framework-schema'
-import {
-  DEFAULT_FRAMEWORK_PREFERENCES,
-  type FrameworkPreferences,
-} from './scale'
+import { DEFAULT_FRAMEWORK_PREFERENCES, type FrameworkPreferences } from './scale'
 
 export function resolveFrameworkPreferences(
   raw: FrameworkPreferencesSettings | null | undefined,

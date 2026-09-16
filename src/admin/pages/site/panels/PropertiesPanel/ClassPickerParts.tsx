@@ -63,13 +63,7 @@ function AssignedClassPill({
   )
 }
 
-function AmbientSelectorPill({
-  pill,
-  onToggle,
-}: {
-  pill: SelectorPillItem
-  onToggle: () => void
-}) {
+function AmbientSelectorPill({ pill, onToggle }: { pill: SelectorPillItem; onToggle: () => void }) {
   const selectorLabel = styleRuleSelector(pill.rule)
   const handleKeyDown = (e: KeyboardEvent<HTMLElement>) => {
     if (e.key === 'Enter' || e.key === ' ') {
@@ -150,27 +144,25 @@ export function SelectorPillStack({
 
   return (
     <div className={styles.pillsContainer}>
-      {pills.map((pill) => (
-        pill.rule.kind === 'ambient'
-          ? (
-              <AmbientSelectorPill
-                key={pill.rule.id}
-                pill={pill}
-                onToggle={() => onToggleRule(pill.rule.id, pill.active)}
-              />
-            )
-          : (
-              <AssignedClassPill
-                key={pill.rule.id}
-                cls={pill.rule}
-                isActive={pill.active}
-                onToggle={() => onToggleRule(pill.rule.id, pill.active)}
-                onContextMenu={(e) => onClassContextMenu(pill.rule.id, e)}
-                onKeyboardContextMenu={(e) => onKeyboardClassContextMenu(pill.rule.id, e)}
-                onRemove={() => onRemoveClass(pill.rule.id)}
-              />
-            )
-      ))}
+      {pills.map((pill) =>
+        pill.rule.kind === 'ambient' ? (
+          <AmbientSelectorPill
+            key={pill.rule.id}
+            pill={pill}
+            onToggle={() => onToggleRule(pill.rule.id, pill.active)}
+          />
+        ) : (
+          <AssignedClassPill
+            key={pill.rule.id}
+            cls={pill.rule}
+            isActive={pill.active}
+            onToggle={() => onToggleRule(pill.rule.id, pill.active)}
+            onContextMenu={(e) => onClassContextMenu(pill.rule.id, e)}
+            onKeyboardContextMenu={(e) => onKeyboardClassContextMenu(pill.rule.id, e)}
+            onRemove={() => onRemoveClass(pill.rule.id)}
+          />
+        ),
+      )}
       {showInlinePill && (
         <InlineStylePill
           isActive={inlineStyleEditing}
@@ -311,9 +303,10 @@ function RankedSuggestionsList({
   const hasSelectorSuggestions = selectorSuggestions.length > 0
   const createLabel = createIntentKind === 'ambient' ? 'selector' : 'class'
   const trimmedQuery = query.trim()
-  const createText = createIntentKind === 'class'
-    ? classKindSelector(trimmedQuery.startsWith('.') ? trimmedQuery.slice(1) : trimmedQuery)
-    : trimmedQuery
+  const createText =
+    createIntentKind === 'class'
+      ? classKindSelector(trimmedQuery.startsWith('.') ? trimmedQuery.slice(1) : trimmedQuery)
+      : trimmedQuery
   return (
     <>
       {filteredSuggestions.map((cls) => {
@@ -352,10 +345,7 @@ function RankedSuggestionsList({
       {canCreateNew && (
         <>
           {(hasClassSuggestions || hasSelectorSuggestions) && <ContextMenuSeparator />}
-          <ContextMenuItem
-            onClick={onCreateAndAdd}
-            data-testid="class-picker-create-new"
-          >
+          <ContextMenuItem onClick={onCreateAndAdd} data-testid="class-picker-create-new">
             + Create {createLabel} &ldquo;{createText}&rdquo;
           </ContextMenuItem>
         </>
@@ -366,11 +356,12 @@ function RankedSuggestionsList({
           <InvalidSelectorSuggestionRow message={createValidationError} />
         </>
       )}
-      {!hasClassSuggestions && !hasSelectorSuggestions && !canCreateNew && !createValidationError && (
-        <div className={styles.noMatch}>
-          No selectors match &ldquo;{query}&rdquo;
-        </div>
-      )}
+      {!hasClassSuggestions &&
+        !hasSelectorSuggestions &&
+        !canCreateNew &&
+        !createValidationError && (
+          <div className={styles.noMatch}>No selectors match &ldquo;{query}&rdquo;</div>
+        )}
     </>
   )
 }
@@ -564,11 +555,7 @@ function ClassSuggestionSections({
   }
 
   if (!hasAny) {
-    return (
-      <div className={styles.noMatch}>
-        Type to search or create a selector
-      </div>
-    )
+    return <div className={styles.noMatch}>Type to search or create a selector</div>
   }
 
   return (

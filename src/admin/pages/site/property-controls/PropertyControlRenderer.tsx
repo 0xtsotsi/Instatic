@@ -15,11 +15,7 @@
  *     so individual controls don't need to repeat the resolution logic.
  */
 import { useState } from 'react'
-import type {
-  PropertyControl,
-  PropertyControlLayout,
-  PropertySchema,
-} from '@core/module-engine'
+import type { PropertyControl, PropertyControlLayout, PropertySchema } from '@core/module-engine'
 import { resolvePropertyControlCategory } from '@core/module-engine'
 import type { DynamicPropBinding } from '@core/page-tree'
 import { useEditorPermissions } from '@site/editorPermissionsContext'
@@ -115,9 +111,8 @@ export function PropertyControlRenderer({
   // editing permission.
   const permissions = useEditorPermissions()
   const category = resolvePropertyControlCategory(control)
-  const allowedByCategory = category === 'content'
-    ? permissions.canEditContent
-    : permissions.canEditStructure
+  const allowedByCategory =
+    category === 'content' ? permissions.canEditContent : permissions.canEditStructure
   const effectiveDisabled = disabled || !allowedByCategory
 
   const shared = {
@@ -234,11 +229,7 @@ export function PropertyControlRenderer({
   }
 
   if (control.type === 'group') {
-    return (
-      <div data-testid={`property-control-${propKey}`}>
-        {inner}
-      </div>
-    )
+    return <div data-testid={`property-control-${propKey}`}>{inner}</div>
   }
 
   // Bake the resolved disabled flag into the inner-content for the
@@ -251,31 +242,34 @@ export function PropertyControlRenderer({
   // as media URLs, numbers, and booleans.
   const bindingMode = getDynamicBindingMode(control)
 
-  const content = dynamicBinding && !isDisabled && bindingMode !== null ? (
-    <DynamicBindingControl
-      propKey={propKey}
-      label={control.label ?? propKey}
-      control={control}
-      layout={layout}
-      binding={dynamicBinding.binding}
-      onSet={dynamicBinding.onSet}
-      onClear={dynamicBinding.onClear}
-      insertMode={bindingMode === 'token'}
-      onInsertToken={(token) => {
-        // Append to the current string value with a leading space when
-        // the value isn't empty. Stage A — caret-position-aware
-        // insertion lands in Stage B with the chip UI.
-        const current = typeof value === 'string' ? value : ''
-        const next = current.length === 0 ? token : `${current} ${token}`
-        onChange(propKey, next)
-      }}
-      availableFields={dynamicBinding.availableFields}
-      sourceLabel={dynamicBinding.sourceLabel}
-      loopTableId={dynamicBinding.loopTableId}
-    >
-      {inner}
-    </DynamicBindingControl>
-  ) : inner
+  const content =
+    dynamicBinding && !isDisabled && bindingMode !== null ? (
+      <DynamicBindingControl
+        propKey={propKey}
+        label={control.label ?? propKey}
+        control={control}
+        layout={layout}
+        binding={dynamicBinding.binding}
+        onSet={dynamicBinding.onSet}
+        onClear={dynamicBinding.onClear}
+        insertMode={bindingMode === 'token'}
+        onInsertToken={(token) => {
+          // Append to the current string value with a leading space when
+          // the value isn't empty. Stage A — caret-position-aware
+          // insertion lands in Stage B with the chip UI.
+          const current = typeof value === 'string' ? value : ''
+          const next = current.length === 0 ? token : `${current} ${token}`
+          onChange(propKey, next)
+        }}
+        availableFields={dynamicBinding.availableFields}
+        sourceLabel={dynamicBinding.sourceLabel}
+        loopTableId={dynamicBinding.loopTableId}
+      >
+        {inner}
+      </DynamicBindingControl>
+    ) : (
+      inner
+    )
 
   return (
     <div

@@ -34,25 +34,18 @@ export function HtmlAttributesPanel({
   )
 }
 
-function HtmlAttributesPanelEditor({
-  nodeId,
-  htmlAttributes,
-  readOnly,
-}: HtmlAttributesPanelProps) {
+function HtmlAttributesPanelEditor({ nodeId, htmlAttributes, readOnly }: HtmlAttributesPanelProps) {
   const updateNodeProps = useEditorStore((s) => s.updateNodeProps)
   const externalAttributesKey = htmlAttributesValueKey(htmlAttributes)
   const syncedNodeId = useRef(nodeId)
   const syncedAttributesKey = useRef(externalAttributesKey)
   const nextRowId = useRef(0)
   const [rows, setRows] = useState<HtmlAttributeDraftRow[]>(() =>
-    htmlAttributeRowsFromValue(htmlAttributes)
+    htmlAttributeRowsFromValue(htmlAttributes),
   )
 
   useEffect(() => {
-    if (
-      syncedNodeId.current === nodeId &&
-      syncedAttributesKey.current === externalAttributesKey
-    ) {
+    if (syncedNodeId.current === nodeId && syncedAttributesKey.current === externalAttributesKey) {
       return
     }
 
@@ -81,10 +74,7 @@ function HtmlAttributesPanelEditor({
 
   function addRow() {
     nextRowId.current += 1
-    setRows((current) => [
-      { id: `new-${nextRowId.current}`, name: '', value: '' },
-      ...current,
-    ])
+    setRows((current) => [{ id: `new-${nextRowId.current}`, name: '', value: '' }, ...current])
   }
 
   function removeRow(id: string) {
@@ -140,13 +130,7 @@ interface HtmlAttributeRowProps {
   onRemove: (id: string) => void
 }
 
-function HtmlAttributeRow({
-  row,
-  error,
-  readOnly,
-  onChange,
-  onRemove,
-}: HtmlAttributeRowProps) {
+function HtmlAttributeRow({ row, error, readOnly, onChange, onRemove }: HtmlAttributeRowProps) {
   const errorId = `${row.id}-attribute-error`
 
   return (

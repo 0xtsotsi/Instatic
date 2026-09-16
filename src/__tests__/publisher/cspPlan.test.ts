@@ -48,7 +48,7 @@ describe('CspPlan — serialization is deterministic and sorted', () => {
     expect(serializeCsp(a)).toBe(serializeCsp(b))
   })
 
-  it('addCspSources drops `\'none\'` when a real source is unioned in', () => {
+  it("addCspSources drops `'none'` when a real source is unioned in", () => {
     const plan = createBaseCspPlan({ anyScriptTag: false }) // script-src 'none'
     addCspSources(plan, 'script-src', ["'self'"])
     expect(serializeCsp(plan)).toContain("script-src 'self';")
@@ -65,17 +65,13 @@ describe('CspPlan — serialization is deterministic and sorted', () => {
   it('parseCspContent round-trips through serializeCsp (sorted)', () => {
     const content = "default-src 'self'; script-src 'none'; img-src 'self' data:;"
     const plan = parseCspContent(content)
-    expect(serializeCsp(plan)).toBe(
-      "default-src 'self'; img-src 'self' data:; script-src 'none';",
-    )
+    expect(serializeCsp(plan)).toBe("default-src 'self'; img-src 'self' data:; script-src 'none';")
   })
 
   it('cspMetaTag matches the CSP_META_PATTERN the pipeline rewrites', () => {
     const plan = createBaseCspPlan({ anyScriptTag: false })
     const tag = cspMetaTag(plan)
-    expect(tag).toMatch(
-      /<meta http-equiv="Content-Security-Policy"\s+content="([^"]*)"\s*\/?>/i,
-    )
+    expect(tag).toMatch(/<meta http-equiv="Content-Security-Policy"\s+content="([^"]*)"\s*\/?>/i)
   })
 })
 
@@ -137,7 +133,12 @@ describe('frontend injection — CSP determinism', () => {
   it('is insensitive to mediaCspOrigins / networkAllowedHosts ordering', () => {
     const a = planWith({
       hasExternalScript: true,
-      tags: { head: [], 'head-end': [], 'body-start': [], 'body-end': ['<script src="/x/a.js"></script>'] },
+      tags: {
+        head: [],
+        'head-end': [],
+        'body-start': [],
+        'body-end': ['<script src="/x/a.js"></script>'],
+      },
       networkAllowedHosts: ['z.example', 'a.example'],
       mediaCspOrigins: [
         { directive: 'connect-src', origin: 'm2.example' },
@@ -146,7 +147,12 @@ describe('frontend injection — CSP determinism', () => {
     })
     const b = planWith({
       hasExternalScript: true,
-      tags: { head: [], 'head-end': [], 'body-start': [], 'body-end': ['<script src="/x/a.js"></script>'] },
+      tags: {
+        head: [],
+        'head-end': [],
+        'body-start': [],
+        'body-end': ['<script src="/x/a.js"></script>'],
+      },
       networkAllowedHosts: ['a.example', 'z.example'],
       mediaCspOrigins: [
         { directive: 'img-src', origin: 'm1.example' },
@@ -161,7 +167,12 @@ describe('frontend injection — CSP determinism', () => {
   it('every directive and its sources are sorted in the emitted CSP', () => {
     const plan = planWith({
       hasExternalScript: true,
-      tags: { head: [], 'head-end': [], 'body-start': [], 'body-end': ['<script src="/x/a.js"></script>'] },
+      tags: {
+        head: [],
+        'head-end': [],
+        'body-start': [],
+        'body-end': ['<script src="/x/a.js"></script>'],
+      },
       networkAllowedHosts: ['z.example', 'a.example'],
       mediaCspOrigins: [{ directive: 'media-src', origin: 'stream.example' }],
     })

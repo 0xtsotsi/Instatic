@@ -33,14 +33,14 @@ import { TextStartTIcon } from 'pixel-art-icons/icons/text-start-t'
  * directly from the icon catalog.
  */
 const PLUGIN_PANEL_ICONS: Record<string, IconComponent> = {
-  'box': BoxSolidIcon,
+  box: BoxSolidIcon,
   'box-stack': BoxStackSolidIcon,
   'circle-alert': CircleAlertSolidIcon,
   'ai-settings-solid': AiSettingsSolidIcon,
   'bulletlist-2-sharp': Bulletlist2SharpIcon,
   'colors-swatch': ColorsSwatchSolidIcon,
   'files-stack-2': FilesStack2SolidIcon,
-  'images': ImagesSolidIcon,
+  images: ImagesSolidIcon,
   'paint-bucket': PaintBucketSolidIcon,
   'ruler-dimension': RulerDimensionSolidIcon,
   'text-start-t': TextStartTIcon,

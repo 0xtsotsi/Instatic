@@ -55,7 +55,8 @@ export function makeOption(label: string): DraftOption {
 
 export function fieldIdError(id: string, existingIds: string[]): string | null {
   if (!id) return null
-  if (!FIELD_ID_PATTERN.test(id)) return 'Must start with a lowercase letter; use letters, numbers, underscores only.'
+  if (!FIELD_ID_PATTERN.test(id))
+    return 'Must start with a lowercase letter; use letters, numbers, underscores only.'
   if (existingIds.includes(id)) return 'This ID is already in use.'
   return null
 }

@@ -64,9 +64,7 @@ function collectFiles(dir: string, extensions: ReadonlyArray<string>): string[] 
 
 /** Strip `/* ... *\/` block comments and `// ...` line comments. */
 function stripComments(source: string): string {
-  return source
-    .replace(/\/\*[\s\S]*?\*\//g, '')
-    .replace(/^\s*\/\/.*$/gm, '')
+  return source.replace(/\/\*[\s\S]*?\*\//g, '').replace(/^\s*\/\/.*$/gm, '')
 }
 
 function findSpacingDeclarations(filePath: string, source: string): string[] {
@@ -109,7 +107,9 @@ function findSvgDimensions(filePath: string, source: string): string[] {
       const matchIndex = ruleIndex + rule[0].indexOf(body) + (match.index ?? 0)
       const before = stripped.slice(0, matchIndex)
       const line = before.split('\n').length
-      offenders.push(`  ${relative(SRC_ROOT, filePath)}:${line} -> ${selector} { ${match[0].trim()} }`)
+      offenders.push(
+        `  ${relative(SRC_ROOT, filePath)}:${line} -> ${selector} { ${match[0].trim()} }`,
+      )
     }
   }
 

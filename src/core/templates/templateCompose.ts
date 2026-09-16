@@ -2,15 +2,15 @@ import type { Page, PageNode } from '@core/page-tree'
 import { reindexNodeParents } from '@core/page-tree'
 import { firstOutletId, treeHasOutlet } from './outlet'
 
-type TerminalContent =
-  | { kind: 'page'; page: Page }
-  | { kind: 'entry' }
+type TerminalContent = { kind: 'page'; page: Page } | { kind: 'entry' }
 
 type Nodes = Record<string, PageNode>
 
 function hasMeaningfulBodyProps(node: PageNode): boolean {
-  return Object.keys(node.props ?? {}).length > 0
-    || Object.keys(node.breakpointOverrides ?? {}).length > 0
+  return (
+    Object.keys(node.props ?? {}).length > 0 ||
+    Object.keys(node.breakpointOverrides ?? {}).length > 0
+  )
 }
 
 /** Clone a tree's nodes with every id prefixed, returning the remapped root id. */
@@ -74,7 +74,13 @@ function contentRootIds(nodes: Nodes, rootId: string, prefix: string): string[] 
  * host is guaranteed (by the caller) to contain at least one outlet; extra
  * outlets are left untouched and render empty.
  */
-function spliceIntoOutlet(host: Nodes, hostRoot: string, inner: Nodes, innerRoot: string, prefix: string): { nodes: Nodes; rootId: string } {
+function spliceIntoOutlet(
+  host: Nodes,
+  hostRoot: string,
+  inner: Nodes,
+  innerRoot: string,
+  prefix: string,
+): { nodes: Nodes; rootId: string } {
   const outletId = firstOutletId(host)!
   const at = locate(host, outletId)
   const rekeyed = rekey(inner, innerRoot, prefix)
@@ -87,7 +93,11 @@ function spliceIntoOutlet(host: Nodes, hostRoot: string, inner: Nodes, innerRoot
     const parent = merged[at.parentId]
     merged[at.parentId] = {
       ...parent,
-      children: [...parent.children.slice(0, at.index), ...contentIds, ...parent.children.slice(at.index + 1)],
+      children: [
+        ...parent.children.slice(0, at.index),
+        ...contentIds,
+        ...parent.children.slice(at.index + 1),
+      ],
     }
   }
   return { nodes: merged, rootId: hostRoot }
@@ -112,16 +122,31 @@ export function composeTemplateChain(chain: Page[], terminal: TerminalContent): 
     // matched template as-is (chrome without a body). `chain` is non-empty here
     // because the renderer 404s an entry route with no matching template.
     const t = chain[chain.length - 1]
-    return { id: t.id, slug: t.slug, title: t.title, rootNodeId: t.rootNodeId, nodes: { ...t.nodes } }
+    return {
+      id: t.id,
+      slug: t.slug,
+      title: t.title,
+      rootNodeId: t.rootNodeId,
+      nodes: { ...t.nodes },
+    }
   }
 
   // Build the merged tree from the INNERMOST effective template outward.
   const innermost = effective[effective.length - 1]
-  let acc: { nodes: Nodes; rootId: string } = { nodes: { ...innermost.nodes }, rootId: innermost.rootNodeId }
+  let acc: { nodes: Nodes; rootId: string } = {
+    nodes: { ...innermost.nodes },
+    rootId: innermost.rootNodeId,
+  }
 
   // Innermost terminal handling.
   if (terminal.kind === 'page') {
-    acc = spliceIntoOutlet(acc.nodes, acc.rootId, terminal.page.nodes, terminal.page.rootNodeId, 'c0_')
+    acc = spliceIntoOutlet(
+      acc.nodes,
+      acc.rootId,
+      terminal.page.nodes,
+      terminal.page.rootNodeId,
+      'c0_',
+    )
   }
   // entry terminal: leave the innermost outlet in place (renders currentEntry.body).
 

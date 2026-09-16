@@ -28,7 +28,7 @@ import '@modules/base/index'
 
 const now = '2026-05-09T10:00:00.000Z'
 const originalFetch = globalThis.fetch
-type EventSourceCtor = (typeof globalThis) extends { EventSource: infer T } ? T : never
+type EventSourceCtor = typeof globalThis extends { EventSource: infer T } ? T : never
 const originalEventSource = (globalThis as { EventSource?: EventSourceCtor }).EventSource
 let eventSourceUrls: string[] = []
 
@@ -190,7 +190,14 @@ describe('AccountPage', () => {
 
   it('canAccessWorkspace allows account for any authenticated user', () => {
     const viewer = makeUser({
-      role: { id: 'member', slug: 'member', name: 'Member', description: '', isSystem: true, capabilities: ['site.read'] },
+      role: {
+        id: 'member',
+        slug: 'member',
+        name: 'Member',
+        description: '',
+        isSystem: true,
+        capabilities: ['site.read'],
+      },
       capabilities: ['site.read'],
     })
     expect(canAccessWorkspace(viewer, 'account')).toBe(true)
@@ -388,7 +395,8 @@ describe('AccountPage', () => {
       if (url.endsWith('/admin/api/cms/me/mfa/totp/start') && init?.method === 'POST') {
         return jsonResponse({
           secret: 'JBSWY3DPEHPK3PXP',
-          otpauthUrl: 'otpauth://totp/Page%20Builder%20CMS:owner%40example.com?secret=JBSWY3DPEHPK3PXP&issuer=Page%20Builder%20CMS',
+          otpauthUrl:
+            'otpauth://totp/Page%20Builder%20CMS:owner%40example.com?secret=JBSWY3DPEHPK3PXP&issuer=Page%20Builder%20CMS',
         })
       }
       if (url.endsWith('/admin/api/cms/me/mfa/totp/enable') && init?.method === 'POST') {
@@ -423,7 +431,9 @@ describe('AccountPage', () => {
     fireEvent.click(screen.getByTestId('security-mfa-submit'))
 
     await waitFor(() => {
-      expect(screen.getByText('Save these recovery codes now. They will not be shown again.')).toBeTruthy()
+      expect(
+        screen.getByText('Save these recovery codes now. They will not be shown again.'),
+      ).toBeTruthy()
     })
     expect(screen.getByText('aaaa-bbbb-cccc')).toBeTruthy()
     expect(screen.getByText('dddd-eeee-ffff')).toBeTruthy()
@@ -450,7 +460,8 @@ describe('AccountPage', () => {
         if (url.endsWith('/admin/api/cms/me/mfa/totp/start') && init?.method === 'POST') {
           return jsonResponse({
             secret: 'JBSWY3DPEHPK3PXP',
-            otpauthUrl: 'otpauth://totp/Page%20Builder%20CMS:owner%40example.com?secret=JBSWY3DPEHPK3PXP&issuer=Page%20Builder%20CMS',
+            otpauthUrl:
+              'otpauth://totp/Page%20Builder%20CMS:owner%40example.com?secret=JBSWY3DPEHPK3PXP&issuer=Page%20Builder%20CMS',
           })
         }
         if (url.endsWith('/admin/api/cms/me/mfa/totp/enable') && init?.method === 'POST') {
@@ -473,12 +484,18 @@ describe('AccountPage', () => {
       await waitFor(() => {
         expect(screen.getByText('QR code unavailable')).toBeTruthy()
       })
-      expect(screen.getByRole('alert').textContent).toBe('Could not render the QR code. Use the setup key instead.')
-      expect(screen.getByTestId('security-mfa-secret').textContent).toContain('JBSWY3DPEHPK3PXP')
-      expect(screen.getByRole('link', { name: 'Open authenticator app' }).getAttribute('href')).toContain(
-        'otpauth://totp/',
+      expect(screen.getByRole('alert').textContent).toBe(
+        'Could not render the QR code. Use the setup key instead.',
       )
-      expect(qrLogs.some((args) => String(args[0]).includes('[account-security] QR code generation failed:'))).toBe(true)
+      expect(screen.getByTestId('security-mfa-secret').textContent).toContain('JBSWY3DPEHPK3PXP')
+      expect(
+        screen.getByRole('link', { name: 'Open authenticator app' }).getAttribute('href'),
+      ).toContain('otpauth://totp/')
+      expect(
+        qrLogs.some((args) =>
+          String(args[0]).includes('[account-security] QR code generation failed:'),
+        ),
+      ).toBe(true)
 
       fireEvent.change(screen.getByTestId('security-mfa-code'), {
         target: { value: '123456' },
@@ -486,7 +503,9 @@ describe('AccountPage', () => {
       fireEvent.click(screen.getByTestId('security-mfa-submit'))
 
       await waitFor(() => {
-        expect(screen.getByText('Save these recovery codes now. They will not be shown again.')).toBeTruthy()
+        expect(
+          screen.getByText('Save these recovery codes now. They will not be shown again.'),
+        ).toBeTruthy()
       })
       expect(screen.getByText('aaaa-bbbb-cccc')).toBeTruthy()
       expect(screen.getByText('dddd-eeee-ffff')).toBeTruthy()
@@ -566,7 +585,9 @@ describe('AccountPage', () => {
     await waitFor(() => {
       expect(screen.getByTestId('account-activity-suspicious')).toBeTruthy()
     })
-    expect(screen.getByTestId('account-activity-failed-count').textContent).toBe('1 failed in last 24h')
+    expect(screen.getByTestId('account-activity-failed-count').textContent).toBe(
+      '1 failed in last 24h',
+    )
     expect(screen.getByText('Rate-limited')).toBeTruthy()
     expect(screen.getByText('Safari on iOS')).toBeTruthy()
     expect(screen.getByText('198.51.100.88')).toBeTruthy()
@@ -618,7 +639,9 @@ describe('AccountPage', () => {
     await waitFor(() => {
       // The chip counts only failure outcomes within the 24h window. The
       // single successful login is excluded.
-      expect(screen.getByTestId('account-activity-failed-count').textContent).toBe('2 failed in last 24h')
+      expect(screen.getByTestId('account-activity-failed-count').textContent).toBe(
+        '2 failed in last 24h',
+      )
     })
     // Known device label is rendered as-is.
     expect(screen.getByText('Firefox on Linux')).toBeTruthy()

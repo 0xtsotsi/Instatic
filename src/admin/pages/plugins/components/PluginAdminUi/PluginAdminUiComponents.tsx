@@ -145,11 +145,7 @@ export function PluginSelect<T extends string>(props: PluginUiSelectProps<T>) {
 
 export function PluginSwitch(props: PluginUiSwitchProps) {
   return (
-    <FormField
-      label={props.label}
-      description={props.description}
-      layout="inline-end"
-    >
+    <FormField label={props.label} description={props.description} layout="inline-end">
       <Switch
         checked={Boolean(props.checked)}
         disabled={props.disabled}
@@ -161,11 +157,7 @@ export function PluginSwitch(props: PluginUiSwitchProps) {
 
 export function PluginCheckbox(props: PluginUiCheckboxProps) {
   return (
-    <FormField
-      label={props.label}
-      description={props.description}
-      layout="inline-start"
-    >
+    <FormField label={props.label} description={props.description} layout="inline-start">
       <Checkbox
         checked={Boolean(props.checked)}
         disabled={props.disabled}
@@ -229,13 +221,7 @@ export function PluginSeparator(props: PluginUiSeparatorProps) {
 }
 
 export function PluginEmptyState(props: PluginUiEmptyStateProps) {
-  return (
-    <EmptyState
-      title={props.title}
-      description={props.body}
-      action={props.action}
-    />
-  )
+  return <EmptyState title={props.title} description={props.body} action={props.action} />
 }
 
 export function PluginAlert(props: PluginUiAlertProps) {

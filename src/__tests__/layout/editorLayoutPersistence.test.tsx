@@ -59,15 +59,18 @@ function installAmbientFetch() {
       })
     }
     if (url.endsWith('/admin/api/cms/publish/status')) {
-      return new Response(JSON.stringify({
-        hasPublishedVersion: false,
-        draftMatchesPublished: false,
-        draftPages: 0,
-        publishedPages: 0,
-      }), {
-        status: 200,
-        headers: { 'content-type': 'application/json' },
-      })
+      return new Response(
+        JSON.stringify({
+          hasPublishedVersion: false,
+          draftMatchesPublished: false,
+          draftPages: 0,
+          publishedPages: 0,
+        }),
+        {
+          status: 200,
+          headers: { 'content-type': 'application/json' },
+        },
+      )
     }
     if (url.endsWith('/admin/api/cms/me/preferences/module-inserter')) {
       return new Response(JSON.stringify({ value: null }), {
@@ -173,23 +176,25 @@ function renderEditorLayout({
   // The default mirrors an Editor — all rail capabilities present — so the
   // permanent rail renders all panel buttons. Tests that need a restricted
   // view (e.g. read-only) pass an explicit `user`.
-  const sessionUser = user ?? currentUser([
-    'site.read',
-    'site.structure.edit',
-    'site.content.edit',
-    'site.style.edit',
-    'pages.edit',
-    'pages.publish',
-    'media.read',
-    'media.write',
-    'media.replace',
-    'media.delete',
-    'plugins.read',
-    'plugins.configure',
-    'plugins.install',
-    'plugins.lifecycle',
-    'ai.chat',
-  ])
+  const sessionUser =
+    user ??
+    currentUser([
+      'site.read',
+      'site.structure.edit',
+      'site.content.edit',
+      'site.style.edit',
+      'pages.edit',
+      'pages.publish',
+      'media.read',
+      'media.write',
+      'media.replace',
+      'media.delete',
+      'plugins.read',
+      'plugins.configure',
+      'plugins.install',
+      'plugins.lifecycle',
+      'ai.chat',
+    ])
   render(
     <MemoryRouter>
       <AdminSessionProvider user={sessionUser}>
@@ -350,21 +355,24 @@ describe('AdminCanvasLayout — persisted panel layout', () => {
 
     renderEditorLayout()
 
-    await waitFor(() => {
-      const state = useEditorStore.getState()
-      expect(state.explorerPanelOpen).toBe(true)
-      expect(state.explorerPanelTab).toBe('code')
-      expect(state.propertiesPanel.collapsed).toBe(false)
-      expect(state.propertiesPanelMode).toBe('floating')
-      expect(state.propertiesPanel.width).toBe(390)
-      expect(state.leftSidebarWidth).toBe(410)
-      expect(state.codeEditorPanelOpen).toBe(true)
-      expect(state.activeEditorFileId).toBe('file-1')
-      expect(state.selectorsPanelOpen).toBe(false)
-      expect(state.frameworkPanelOpen).toBe(false)
-      expect(state.dependenciesPanelOpen).toBe(false)
-      expect(state.isAgentOpen).toBe(false)
-    }, { timeout: 150 })
+    await waitFor(
+      () => {
+        const state = useEditorStore.getState()
+        expect(state.explorerPanelOpen).toBe(true)
+        expect(state.explorerPanelTab).toBe('code')
+        expect(state.propertiesPanel.collapsed).toBe(false)
+        expect(state.propertiesPanelMode).toBe('floating')
+        expect(state.propertiesPanel.width).toBe(390)
+        expect(state.leftSidebarWidth).toBe(410)
+        expect(state.codeEditorPanelOpen).toBe(true)
+        expect(state.activeEditorFileId).toBe('file-1')
+        expect(state.selectorsPanelOpen).toBe(false)
+        expect(state.frameworkPanelOpen).toBe(false)
+        expect(state.dependenciesPanelOpen).toBe(false)
+        expect(state.isAgentOpen).toBe(false)
+      },
+      { timeout: 150 },
+    )
   })
 })
 
@@ -394,8 +402,7 @@ describe('AdminCanvasLayout — permanent panel rail', () => {
     const tree = within(sidebar).getByRole('tree', { name: /page element tree/i })
     const treeRows = within(tree).getAllByRole('treeitem')
     const selectedTreeRow =
-      treeRows.find((row) => row.getAttribute('aria-selected') === 'true') ??
-      treeRows[0]
+      treeRows.find((row) => row.getAttribute('aria-selected') === 'true') ?? treeRows[0]
     if (!selectedTreeRow) throw new Error('Expected at least one DOM tree row')
     fireEvent.keyDown(selectedTreeRow, { key: 'F2' })
     expect(within(selectedTreeRow).queryByRole('textbox')).toBeNull()
@@ -404,7 +411,9 @@ describe('AdminCanvasLayout — permanent panel rail', () => {
 
     const beforeNodeIds = Object.keys(useEditorStore.getState().site?.pages[0]?.nodes ?? {})
     fireEvent.keyDown(canvas, { key: 'Backspace' })
-    expect(Object.keys(useEditorStore.getState().site?.pages[0]?.nodes ?? {})).toEqual(beforeNodeIds)
+    expect(Object.keys(useEditorStore.getState().site?.pages[0]?.nodes ?? {})).toEqual(
+      beforeNodeIds,
+    )
 
     // The Explorer panel is a navigation surface available to read-only
     // callers — they can browse pages/media but not edit them. It is open by
@@ -466,7 +475,9 @@ describe('AdminCanvasLayout — permanent panel rail', () => {
     // used to resolve to — consolidating into one rail button shouldn't
     // change its established color.
     expect(primaryAccents[0]).toBe('gold')
-    expect(globalButtons.map((button) => button.getAttribute('data-testid'))).toEqual(['panel-rail-agent'])
+    expect(globalButtons.map((button) => button.getAttribute('data-testid'))).toEqual([
+      'panel-rail-agent',
+    ])
     expect(globalButtons[0]?.getAttribute('data-icon')).toBe('ai-settings-solid')
     expect(globalButtons[0]?.getAttribute('data-accent')).toBeTruthy()
     expect(rail.lastElementChild).toBe(screen.getByTestId('panel-rail-global'))
@@ -545,20 +556,28 @@ describe('AdminCanvasLayout — permanent panel rail', () => {
 
     const rightSidebar = await screen.findByTestId('right-sidebar')
 
-    await waitFor(() => {
-      expect(rightSidebar.getAttribute('data-expanded')).toBe('true')
-      expect(rightSidebar.getAttribute('data-mode')).toBe('docked')
-    }, { timeout: 150 })
+    await waitFor(
+      () => {
+        expect(rightSidebar.getAttribute('data-expanded')).toBe('true')
+        expect(rightSidebar.getAttribute('data-mode')).toBe('docked')
+      },
+      { timeout: 150 },
+    )
 
     expect(rightSidebar.getAttribute('style')).toContain('--right-sidebar-panel-width: 360px')
-    expect(within(rightSidebar).getByTestId('properties-panel').getAttribute('data-variant')).toBe('docked')
+    expect(within(rightSidebar).getByTestId('properties-panel').getAttribute('data-variant')).toBe(
+      'docked',
+    )
 
     fireEvent.click(within(rightSidebar).getByRole('button', { name: /unpin properties panel/i }))
 
-    await waitFor(() => {
-      expect(useEditorStore.getState().propertiesPanelMode).toBe('floating')
-      expect(rightSidebar.getAttribute('data-expanded')).toBe('false')
-    }, { timeout: 150 })
+    await waitFor(
+      () => {
+        expect(useEditorStore.getState().propertiesPanelMode).toBe('floating')
+        expect(rightSidebar.getAttribute('data-expanded')).toBe('false')
+      },
+      { timeout: 150 },
+    )
     expect(rightSidebar.style.getPropertyValue('--right-sidebar-panel-width')).toBe('0px')
     expect(rightSidebar.style.getPropertyValue('--right-sidebar-panel-layout-width')).toBe('360px')
 
@@ -567,30 +586,43 @@ describe('AdminCanvasLayout — permanent panel rail', () => {
 
     fireEvent.click(within(floatingPanel).getByRole('button', { name: /dock properties panel/i }))
 
-    await waitFor(() => {
-      expect(useEditorStore.getState().propertiesPanelMode).toBe('docked')
-      expect(rightSidebar.getAttribute('data-expanded')).toBe('true')
-      expect(within(rightSidebar).getByTestId('properties-panel').getAttribute('data-variant')).toBe('docked')
-    }, { timeout: 150 })
+    await waitFor(
+      () => {
+        expect(useEditorStore.getState().propertiesPanelMode).toBe('docked')
+        expect(rightSidebar.getAttribute('data-expanded')).toBe('true')
+        expect(
+          within(rightSidebar).getByTestId('properties-panel').getAttribute('data-variant'),
+        ).toBe('docked')
+      },
+      { timeout: 150 },
+    )
   })
 
   it('marks the canvas stage while the right sidebar is open', async () => {
     loadSiteWithSelectedHeading()
     renderEditorLayout()
 
-    const canvasStage = (await screen.findByTestId('canvas-root')).closest('[data-right-sidebar-expanded]')
+    const canvasStage = (await screen.findByTestId('canvas-root')).closest(
+      '[data-right-sidebar-expanded]',
+    )
     expect(canvasStage).not.toBeNull()
 
-    await waitFor(() => {
-      expect(canvasStage!.getAttribute('data-right-sidebar-expanded')).toBe('true')
-    }, { timeout: 150 })
+    await waitFor(
+      () => {
+        expect(canvasStage!.getAttribute('data-right-sidebar-expanded')).toBe('true')
+      },
+      { timeout: 150 },
+    )
 
     const rightSidebar = screen.getByTestId('right-sidebar')
     fireEvent.click(within(rightSidebar).getByRole('button', { name: /unpin properties panel/i }))
 
-    await waitFor(() => {
-      expect(canvasStage!.getAttribute('data-right-sidebar-expanded')).toBe('false')
-    }, { timeout: 150 })
+    await waitFor(
+      () => {
+        expect(canvasStage!.getAttribute('data-right-sidebar-expanded')).toBe('false')
+      },
+      { timeout: 150 },
+    )
   })
 
   it('resizes both sidebars with keyboard-accessible handles and persists the widths', async () => {
@@ -616,26 +648,38 @@ describe('AdminCanvasLayout — permanent panel rail', () => {
     const leftSidebar = await screen.findByTestId('left-sidebar')
     const rightSidebar = await screen.findByTestId('right-sidebar')
 
-    await waitFor(() => {
-      expect(leftSidebar.getAttribute('style')).toContain('--left-sidebar-panel-width: 410px')
-      expect(rightSidebar.getAttribute('style')).toContain('--right-sidebar-panel-width: 420px')
-    }, { timeout: 150 })
+    await waitFor(
+      () => {
+        expect(leftSidebar.getAttribute('style')).toContain('--left-sidebar-panel-width: 410px')
+        expect(rightSidebar.getAttribute('style')).toContain('--right-sidebar-panel-width: 420px')
+      },
+      { timeout: 150 },
+    )
 
-    fireEvent.keyDown(within(leftSidebar).getByRole('separator', { name: /resize left sidebar/i }), {
-      key: 'ArrowRight',
-    })
-    fireEvent.keyDown(within(rightSidebar).getByRole('separator', { name: /resize right sidebar/i }), {
-      key: 'ArrowLeft',
-    })
+    fireEvent.keyDown(
+      within(leftSidebar).getByRole('separator', { name: /resize left sidebar/i }),
+      {
+        key: 'ArrowRight',
+      },
+    )
+    fireEvent.keyDown(
+      within(rightSidebar).getByRole('separator', { name: /resize right sidebar/i }),
+      {
+        key: 'ArrowLeft',
+      },
+    )
 
-    await waitFor(() => {
-      const state = useEditorStore.getState()
-      expect(state.leftSidebarWidth).toBe(420)
-      expect(state.propertiesPanel.width).toBe(430)
-      const stored = JSON.parse(localStorage.getItem(LAYOUT_STORAGE_KEY) ?? '{}')
-      expect(stored.workspaces.site.leftWidth).toBe(420)
-      expect(stored.workspaces.site.rightWidth).toBe(430)
-    }, { timeout: 150 })
+    await waitFor(
+      () => {
+        const state = useEditorStore.getState()
+        expect(state.leftSidebarWidth).toBe(420)
+        expect(state.propertiesPanel.width).toBe(430)
+        const stored = JSON.parse(localStorage.getItem(LAYOUT_STORAGE_KEY) ?? '{}')
+        expect(stored.workspaces.site.leftWidth).toBe(420)
+        expect(stored.workspaces.site.rightWidth).toBe(430)
+      },
+      { timeout: 150 },
+    )
   })
 
   it('keeps the Properties panel disconnected from the left rail', async () => {

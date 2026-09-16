@@ -58,9 +58,7 @@ import { findMatchingShortcutCommand } from './shortcutDispatch'
 // Defined at module level so React.lazy doesn't recreate the wrapper on each
 // render (that would break Suspense caching of the loaded chunk).
 
-const LazySpotlight = lazy(() =>
-  import('./Spotlight').then((m) => ({ default: m.Spotlight })),
-)
+const LazySpotlight = lazy(() => import('./Spotlight').then((m) => ({ default: m.Spotlight })))
 
 // ─── Workspace detection ──────────────────────────────────────────────────────
 
@@ -133,11 +131,15 @@ export function SpotlightRoot({ children }: { children: ReactNode }) {
 
   // Stable ref so runCommand doesn't stale-close over the navigate function.
   const navigateRef = useRef(navigate)
-  useEffect(() => { navigateRef.current = navigate }, [navigate])
+  useEffect(() => {
+    navigateRef.current = navigate
+  }, [navigate])
   // Same pattern for `runStepUp` — captured here once and re-read at command
   // invocation time so the CommandRunContext stays callback-stable.
   const runStepUpRef = useRef(runStepUp)
-  useEffect(() => { runStepUpRef.current = runStepUp }, [runStepUp])
+  useEffect(() => {
+    runStepUpRef.current = runStepUp
+  }, [runStepUp])
 
   // ─── ProviderRunner (Phase 3) ─────────────────────────────────────────────
   // The react-hooks/refs rule forbids reading/writing ref.current during the
@@ -176,7 +178,9 @@ export function SpotlightRoot({ children }: { children: ReactNode }) {
   useEffect(() => {
     // Not on site workspace — subscribe nothing; cleanup resets ctx.
     if (workspace !== 'site') {
-      return () => { setEditorCtx(null) }
+      return () => {
+        setEditorCtx(null)
+      }
     }
 
     let cancelled = false
@@ -222,7 +226,8 @@ export function SpotlightRoot({ children }: { children: ReactNode }) {
           next.canRedo === last.canRedo &&
           next.activeBreakpointId === last.activeBreakpointId &&
           next.activeInlineEdit === last.activeInlineEdit
-        ) return
+        )
+          return
         last = next
         setEditorCtx(next)
       })
@@ -249,7 +254,9 @@ export function SpotlightRoot({ children }: { children: ReactNode }) {
   })()
 
   // Keep commandContextRef in sync so the runner's getContext() is always fresh.
-  useEffect(() => { commandContextRef.current = commandContext }, [commandContext])
+  useEffect(() => {
+    commandContextRef.current = commandContext
+  }, [commandContext])
 
   // ─── Fire async providers on open / query / scope change (Phase 3) ────────
 
@@ -288,8 +295,7 @@ export function SpotlightRoot({ children }: { children: ReactNode }) {
       args,
       navigate: (path) => navigateRef.current(path),
       closeSpotlight: () => dispatch({ type: 'CLOSE' }),
-      pushScope: (scopeId, pendingArgs) =>
-        dispatch({ type: 'PUSH_SCOPE', scopeId, pendingArgs }),
+      pushScope: (scopeId, pendingArgs) => dispatch({ type: 'PUSH_SCOPE', scopeId, pendingArgs }),
       popScope: () => dispatch({ type: 'POP_SCOPE' }),
       runStepUp: <T,>(action: () => Promise<T>) => runStepUpRef.current(action),
     }
@@ -411,8 +417,7 @@ export function SpotlightRoot({ children }: { children: ReactNode }) {
     close: () => dispatch({ type: 'CLOSE' }),
     toggle: () => dispatch({ type: 'TOGGLE' }),
     runShortcut,
-    pushScope: (scopeId, args) =>
-      dispatch({ type: 'PUSH_SCOPE', scopeId, pendingArgs: args }),
+    pushScope: (scopeId, args) => dispatch({ type: 'PUSH_SCOPE', scopeId, pendingArgs: args }),
     popScope: () => dispatch({ type: 'POP_SCOPE' }),
   }
 

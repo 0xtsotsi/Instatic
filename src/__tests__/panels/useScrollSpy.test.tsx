@@ -15,7 +15,17 @@ import type { RefObject } from 'react'
 import { useScrollSpy } from '@site/panels/PropertiesPanel/useScrollSpy'
 
 function rect(top: number): DOMRect {
-  return { top, left: 0, right: 0, bottom: 0, width: 0, height: 0, x: 0, y: 0, toJSON() {} } as DOMRect
+  return {
+    top,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    width: 0,
+    height: 0,
+    x: 0,
+    y: 0,
+    toJSON() {},
+  } as DOMRect
 }
 
 interface ContainerOptions {
@@ -29,10 +39,16 @@ function makeContainer(
 ): { container: HTMLDivElement; scrollCalls: ScrollToOptions[] } {
   const container = document.createElement('div')
   container.getBoundingClientRect = () => rect(containerTop)
-  Object.defineProperty(container, 'scrollTop', { value: scrollTop, configurable: true, writable: true })
+  Object.defineProperty(container, 'scrollTop', {
+    value: scrollTop,
+    configurable: true,
+    writable: true,
+  })
 
   const scrollCalls: ScrollToOptions[] = []
-  container.scrollTo = ((opts: ScrollToOptions) => { scrollCalls.push(opts) }) as typeof container.scrollTo
+  container.scrollTo = ((opts: ScrollToOptions) => {
+    scrollCalls.push(opts)
+  }) as typeof container.scrollTo
 
   for (const [id, top] of Object.entries(sectionTops)) {
     const section = document.createElement('div')

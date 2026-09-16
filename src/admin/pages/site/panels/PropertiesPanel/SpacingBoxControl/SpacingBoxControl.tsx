@@ -64,10 +64,7 @@ interface SpacingBoxControlProps {
   storedStyles: Record<string, unknown>
   /** Effective values including base-breakpoint inheritance — used for placeholders. */
   currentStyles: Record<string, unknown>
-  onChange: (
-    property: keyof CSSPropertyBag,
-    value: string | number | undefined,
-  ) => void
+  onChange: (property: keyof CSSPropertyBag, value: string | number | undefined) => void
   onRemove: (property: keyof CSSPropertyBag) => void
   /**
    * Apply a transient style preview while a user hovers a token
@@ -101,10 +98,7 @@ interface BoxState {
   isUniform: boolean
 }
 
-function computeBoxState(
-  storedStyles: Record<string, unknown>,
-  box: Box,
-): BoxState {
+function computeBoxState(storedStyles: Record<string, unknown>, box: Box): BoxState {
   const effective: Record<Side, string> = { top: '', right: '', bottom: '', left: '' }
   const storedFlags: Record<Side, boolean> = {
     top: false,
@@ -158,11 +152,11 @@ export function SpacingBoxControl({
   // ── Linked-mode toggles (UI state) ─────────────────────────────────────
   // Empty boxes start split: the first side edit should not fan out.
   // Uniform non-empty boxes start linked, but user unlinking is respected.
-  const [paddingLinked, setPaddingLinked] = useState<boolean>(() =>
-    padding.isUniform && !allEmpty(padding.effective),
+  const [paddingLinked, setPaddingLinked] = useState<boolean>(
+    () => padding.isUniform && !allEmpty(padding.effective),
   )
-  const [marginLinked, setMarginLinked] = useState<boolean>(() =>
-    margin.isUniform && !allEmpty(margin.effective),
+  const [marginLinked, setMarginLinked] = useState<boolean>(
+    () => margin.isUniform && !allEmpty(margin.effective),
   )
 
   // ── Last-focused side (for chip-apply target) ──────────────────────────
@@ -176,8 +170,7 @@ export function SpacingBoxControl({
   // ── Apply value to a box ───────────────────────────────────────────────
   const applyValue = (box: Box, side: Side | 'all', resolved: string | undefined) => {
     const isLinked = box === 'padding' ? paddingLinked : marginLinked
-    const sidesToWrite: Side[] =
-      side === 'all' || isLinked ? [...SIDES] : [side]
+    const sidesToWrite: Side[] = side === 'all' || isLinked ? [...SIDES] : [side]
 
     for (const s of sidesToWrite) {
       onChange(sideKey(box, s), resolved)
@@ -265,12 +258,8 @@ export function SpacingBoxControl({
             setFocused={(side) => setFocused({ box: 'padding', side })}
             linkedDraft={linkedDraft?.box === 'padding' ? linkedDraft.value : null}
             tokens={tokens}
-            onSideValue={(side, resolved) =>
-              applyValue('padding', side, resolved)
-            }
-            onSidePreview={(side, resolved) =>
-              previewValue('padding', side, resolved)
-            }
+            onSideValue={(side, resolved) => applyValue('padding', side, resolved)}
+            onSidePreview={(side, resolved) => previewValue('padding', side, resolved)}
             onSideDraft={(draft) => updateLinkedDraft('padding', draft)}
             onClearDraft={() => clearLinkedDraft('padding')}
             onClearPreview={clearPreview}
@@ -329,7 +318,10 @@ function SpacingBox({
   const setCount = SIDES.filter((s) => state.storedFlags[s]).length
 
   return (
-    <div className={cn(styles.box, styles[`box--${box}`])} data-linked={linked ? 'true' : undefined}>
+    <div
+      className={cn(styles.box, styles[`box--${box}`])}
+      data-linked={linked ? 'true' : undefined}
+    >
       <div className={styles.boxHeader}>
         <span className={styles.boxLabel}>{label}</span>
         <div className={styles.boxHeaderActions}>

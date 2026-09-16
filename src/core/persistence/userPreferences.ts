@@ -114,10 +114,7 @@ export const DEFAULT_MODULE_INSERTER_PREFERENCE: ModuleInserterPreference = {
  * into the user record (plugins have their own storage surface via
  * `cms.storage`).
  */
-export const USER_PREFERENCE_KEYS = [
-  'dashboard-layout',
-  'module-inserter',
-] as const
+export const USER_PREFERENCE_KEYS = ['dashboard-layout', 'module-inserter'] as const
 
 export type UserPreferenceKey = (typeof USER_PREFERENCE_KEYS)[number]
 
@@ -132,9 +129,7 @@ export const USER_PREFERENCE_SCHEMAS = {
   'module-inserter': ModuleInserterPreferenceSchema,
 } as const satisfies Record<UserPreferenceKey, TSchema>
 
-type UserPreferenceValue<K extends UserPreferenceKey> = Static<
-  (typeof USER_PREFERENCE_SCHEMAS)[K]
->
+type UserPreferenceValue<K extends UserPreferenceKey> = Static<(typeof USER_PREFERENCE_SCHEMAS)[K]>
 
 export function isUserPreferenceKey(value: unknown): value is UserPreferenceKey {
   return typeof value === 'string' && (USER_PREFERENCE_KEYS as readonly string[]).includes(value)
@@ -203,4 +198,3 @@ export async function setUserPreference<K extends UserPreferenceKey>(
   })
   return parseValue(USER_PREFERENCE_SCHEMAS[key], envelope.value) as UserPreferenceValue<K>
 }
-

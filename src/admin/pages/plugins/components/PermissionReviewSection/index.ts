@@ -1,4 +1,2 @@
 export { PermissionReviewSection } from './PermissionReviewSection'
-export {
-  computePermissionDiff,
-} from './computePermissionDiff'
+export { computePermissionDiff } from './computePermissionDiff'

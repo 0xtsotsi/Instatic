@@ -53,11 +53,10 @@ const ADMIN_APP_ASSET_PATH_PATTERN =
 // Outbound network allowlist: lowercase hostname, optional leading `*.`
 // wildcard. No paths, ports, query strings — just the host. This is the
 // allowlist the host's `network.fetch` bridge checks against.
-const NETWORK_HOST_PATTERN = /^(?:\*\.)?[a-z0-9]([a-z0-9-]*[a-z0-9])?(?:\.[a-z0-9]([a-z0-9-]*[a-z0-9])?)*$/
+const NETWORK_HOST_PATTERN =
+  /^(?:\*\.)?[a-z0-9]([a-z0-9-]*[a-z0-9])?(?:\.[a-z0-9]([a-z0-9-]*[a-z0-9])?)*$/
 
-const permissionSchema = Type.Union(
-  PLUGIN_PERMISSION_VALUES.map((v) => Type.Literal(v)),
-)
+const permissionSchema = Type.Union(PLUGIN_PERMISSION_VALUES.map((v) => Type.Literal(v)))
 
 const pinSchema = Type.Object({
   label: Type.String({ minLength: 1, maxLength: 80 }),
@@ -97,10 +96,12 @@ const contentSchema = Type.Union([
     // pins the path to THIS plugin's own `/uploads/plugins/{id}/{version}`
     // subtree so a manifest can't point the admin shell's dynamic import()
     // at an arbitrary location.
-    assetPath: Type.Optional(Type.String({
-      pattern: ADMIN_APP_ASSET_PATH_PATTERN.source,
-      maxLength: 500,
-    })),
+    assetPath: Type.Optional(
+      Type.String({
+        pattern: ADMIN_APP_ASSET_PATH_PATTERN.source,
+        maxLength: 500,
+      }),
+    ),
   }),
 ])
 
@@ -261,41 +262,51 @@ const manifestSchema = Type.Object({
   license: Type.Optional(Type.String({ pattern: SPDX_PATTERN.source })),
   homepage: Type.Optional(Type.String({ pattern: URL_PATTERN.source, maxLength: 500 })),
   repository: Type.Optional(Type.String({ pattern: URL_PATTERN.source, maxLength: 500 })),
-  keywords: Type.Optional(Type.Array(Type.String({ pattern: KEYWORD_PATTERN.source }), { maxItems: 20 })),
+  keywords: Type.Optional(
+    Type.Array(Type.String({ pattern: KEYWORD_PATTERN.source }), { maxItems: 20 }),
+  ),
   icon: Type.Optional(Type.String({ pattern: ICON_PATH_PATTERN.source, maxLength: 80 })),
   permissions: Type.Array(permissionSchema, { default: [] }),
   grantedPermissions: Type.Optional(Type.Array(permissionSchema)),
   // Per-host allowlist for outbound HTTP. Plain hostnames (`api.example.com`)
   // match exactly; the leading `*.` wildcard matches one subdomain segment.
   // Hostnames are normalized (lowercased, trimmed) at manifest parse time.
-  networkAllowedHosts: Type.Optional(Type.Array(
-    Type.String({ pattern: NETWORK_HOST_PATTERN.source, maxLength: 253 }),
-    { maxItems: 50 },
-  )),
+  networkAllowedHosts: Type.Optional(
+    Type.Array(Type.String({ pattern: NETWORK_HOST_PATTERN.source, maxLength: 253 }), {
+      maxItems: 50,
+    }),
+  ),
   // Per-table allowlist for the `api.cms.content.*` surface. The host
   // additionally enforces that each `mode` matches a granted permission
   // at install time (`assertContentAccessCoherent` below).
-  contentAccess: Type.Optional(Type.Array(
-    Type.Object({
-      table: Type.String({ pattern: MANIFEST_SLUG_PATTERN.source, maxLength: 80 }),
-      modes: Type.Array(
-        Type.Union([
-          Type.Literal('read'),
-          Type.Literal('write'),
-          Type.Literal('publish'),
-          Type.Literal('delete'),
-        ]),
-        { minItems: 1 },
+  contentAccess: Type.Optional(
+    Type.Array(
+      Type.Object(
+        {
+          table: Type.String({ pattern: MANIFEST_SLUG_PATTERN.source, maxLength: 80 }),
+          modes: Type.Array(
+            Type.Union([
+              Type.Literal('read'),
+              Type.Literal('write'),
+              Type.Literal('publish'),
+              Type.Literal('delete'),
+            ]),
+            { minItems: 1 },
+          ),
+        },
+        { additionalProperties: false },
       ),
-    }, { additionalProperties: false }),
-    { maxItems: 50 },
-  )),
-  entrypoints: Type.Optional(Type.Object({
-    server: Type.Optional(Type.String({ pattern: SAFE_ASSET_PATH_PATTERN.source })),
-    editor: Type.Optional(Type.String({ pattern: SAFE_ASSET_PATH_PATTERN.source })),
-    admin: Type.Optional(Type.String({ pattern: SAFE_ASSET_PATH_PATTERN.source })),
-    modules: Type.Optional(Type.String({ pattern: SAFE_ASSET_PATH_PATTERN.source })),
-  })),
+      { maxItems: 50 },
+    ),
+  ),
+  entrypoints: Type.Optional(
+    Type.Object({
+      server: Type.Optional(Type.String({ pattern: SAFE_ASSET_PATH_PATTERN.source })),
+      editor: Type.Optional(Type.String({ pattern: SAFE_ASSET_PATH_PATTERN.source })),
+      admin: Type.Optional(Type.String({ pattern: SAFE_ASSET_PATH_PATTERN.source })),
+      modules: Type.Optional(Type.String({ pattern: SAFE_ASSET_PATH_PATTERN.source })),
+    }),
+  ),
   /**
    * Declarative frontend tag list — scripts, styles, meta, link, and shared
    * host-runtime references the host injects into every published page on
@@ -304,59 +315,83 @@ const manifestSchema = Type.Object({
    * tags. Requires the `frontend.assets` permission (coherence checked
    * downstream in `assertFrontendAssetsCoherent`).
    */
-  frontend: Type.Optional(Type.Object({
-    assets: Type.Array(
-      Type.Union([
-        Type.Object({
-          kind: Type.Literal('script'),
-          src: Type.String({ pattern: SAFE_ASSET_PATH_PATTERN.source }),
-          placement: Type.Optional(FrontendAssetPlacementSchema),
-          strategy: Type.Optional(Type.Union([
-            Type.Literal('defer'),
-            Type.Literal('async'),
-            Type.Literal('module'),
-            Type.Literal('sync'),
-          ])),
-          attrs: Type.Optional(FrontendAssetAttrsSchema),
-        }, { additionalProperties: false }),
-        Type.Object({
-          kind: Type.Literal('script-inline'),
-          content: Type.String({ minLength: 1, maxLength: 64 * 1024 }),
-          placement: Type.Optional(FrontendAssetPlacementSchema),
-          attrs: Type.Optional(FrontendAssetAttrsSchema),
-        }, { additionalProperties: false }),
-        Type.Object({
-          kind: Type.Literal('style'),
-          href: Type.String({ pattern: SAFE_ASSET_PATH_PATTERN.source }),
-          placement: Type.Optional(FrontendAssetPlacementSchema),
-          attrs: Type.Optional(FrontendAssetAttrsSchema),
-        }, { additionalProperties: false }),
-        Type.Object({
-          kind: Type.Literal('style-inline'),
-          content: Type.String({ minLength: 1, maxLength: 64 * 1024 }),
-          placement: Type.Optional(FrontendAssetPlacementSchema),
-          attrs: Type.Optional(FrontendAssetAttrsSchema),
-        }, { additionalProperties: false }),
-        Type.Object({
-          kind: Type.Literal('link'),
-          attrs: FrontendAssetAttrsSchema,
-          placement: Type.Optional(FrontendAssetPlacementSchema),
-        }, { additionalProperties: false }),
-        Type.Object({
-          kind: Type.Literal('meta'),
-          attrs: FrontendAssetAttrsSchema,
-          placement: Type.Optional(FrontendAssetPlacementSchema),
-        }, { additionalProperties: false }),
-      ]),
-      { maxItems: 50 },
-    ),
-  })),
+  frontend: Type.Optional(
+    Type.Object({
+      assets: Type.Array(
+        Type.Union([
+          Type.Object(
+            {
+              kind: Type.Literal('script'),
+              src: Type.String({ pattern: SAFE_ASSET_PATH_PATTERN.source }),
+              placement: Type.Optional(FrontendAssetPlacementSchema),
+              strategy: Type.Optional(
+                Type.Union([
+                  Type.Literal('defer'),
+                  Type.Literal('async'),
+                  Type.Literal('module'),
+                  Type.Literal('sync'),
+                ]),
+              ),
+              attrs: Type.Optional(FrontendAssetAttrsSchema),
+            },
+            { additionalProperties: false },
+          ),
+          Type.Object(
+            {
+              kind: Type.Literal('script-inline'),
+              content: Type.String({ minLength: 1, maxLength: 64 * 1024 }),
+              placement: Type.Optional(FrontendAssetPlacementSchema),
+              attrs: Type.Optional(FrontendAssetAttrsSchema),
+            },
+            { additionalProperties: false },
+          ),
+          Type.Object(
+            {
+              kind: Type.Literal('style'),
+              href: Type.String({ pattern: SAFE_ASSET_PATH_PATTERN.source }),
+              placement: Type.Optional(FrontendAssetPlacementSchema),
+              attrs: Type.Optional(FrontendAssetAttrsSchema),
+            },
+            { additionalProperties: false },
+          ),
+          Type.Object(
+            {
+              kind: Type.Literal('style-inline'),
+              content: Type.String({ minLength: 1, maxLength: 64 * 1024 }),
+              placement: Type.Optional(FrontendAssetPlacementSchema),
+              attrs: Type.Optional(FrontendAssetAttrsSchema),
+            },
+            { additionalProperties: false },
+          ),
+          Type.Object(
+            {
+              kind: Type.Literal('link'),
+              attrs: FrontendAssetAttrsSchema,
+              placement: Type.Optional(FrontendAssetPlacementSchema),
+            },
+            { additionalProperties: false },
+          ),
+          Type.Object(
+            {
+              kind: Type.Literal('meta'),
+              attrs: FrontendAssetAttrsSchema,
+              placement: Type.Optional(FrontendAssetPlacementSchema),
+            },
+            { additionalProperties: false },
+          ),
+        ]),
+        { maxItems: 50 },
+      ),
+    }),
+  ),
   assetBasePath: Type.Optional(Type.String({ pattern: ASSET_BASE_PATH_PATTERN.source })),
   resources: Type.Array(resourceSchema, { maxItems: 20, default: [] }),
   adminPages: Type.Array(adminPageSchema, { maxItems: 20, default: [] }),
-  pack: Type.Optional(Type.Object({
-    path: Type.String({ pattern: SAFE_ASSET_PATH_PATTERN.source }),
-  })),
+  pack: Type.Optional(
+    Type.Object({
+      path: Type.String({ pattern: SAFE_ASSET_PATH_PATTERN.source }),
+    }),
+  ),
   settings: Type.Optional(Type.Array(settingDefinitionSchema, { maxItems: 50 })),
 })
 
@@ -371,13 +406,17 @@ type ManifestRaw = Static<typeof manifestSchema>
 function friendlyManifestError(message: string, path: string): string {
   if (message.includes(MANIFEST_SLUG_PATTERN.source)) {
     const field = path.split('/').pop() ?? 'field'
-    return `"${field}" must be lowercase kebab-case (a-z, 0-9, hyphens; must start with a letter). ` +
+    return (
+      `"${field}" must be lowercase kebab-case (a-z, 0-9, hyphens; must start with a letter). ` +
       `Examples: "subscribers", "seo-entries". Got: ${message}`
+    )
   }
   if (message.includes(RESOURCE_FIELD_ID_PATTERN.source)) {
     const field = path.split('/').pop() ?? 'field'
-    return `"${field}" must be a valid identifier (letters, digits, underscores, hyphens; must start with a letter or underscore). ` +
+    return (
+      `"${field}" must be a valid identifier (letters, digits, underscores, hyphens; must start with a letter or underscore). ` +
       `Examples: "email", "subscribedAt", "page_id". Got: ${message}`
+    )
   }
   return message
 }
@@ -413,9 +452,7 @@ export function parsePluginManifest(input: unknown): PluginManifest {
     const expected = `/uploads/plugins/${data.id}/${data.version}`
     const normalized = data.assetBasePath.replace(/\/+$/, '')
     if (normalized !== expected) {
-      throw new Error(
-        `Invalid plugin manifest: assetBasePath must equal "${expected}"`,
-      )
+      throw new Error(`Invalid plugin manifest: assetBasePath must equal "${expected}"`)
     }
   }
 
@@ -429,14 +466,14 @@ export function parsePluginManifest(input: unknown): PluginManifest {
   if (data.entrypoints?.editor && !data.permissions.includes('editor.code')) {
     throw new Error(
       `Invalid plugin manifest: \`entrypoints.editor\` runs unsandboxed JavaScript ` +
-      `in the admin window and requires the \`editor.code\` permission. ` +
-      `Add "editor.code" to \`permissions\`.`,
+        `in the admin window and requires the \`editor.code\` permission. ` +
+        `Add "editor.code" to \`permissions\`.`,
     )
   }
   if (data.entrypoints?.modules && !data.permissions.includes('modules.register')) {
     throw new Error(
       `Invalid plugin manifest: \`entrypoints.modules\` requires the ` +
-      `\`modules.register\` permission. Add "modules.register" to \`permissions\`.`,
+        `\`modules.register\` permission. Add "modules.register" to \`permissions\`.`,
     )
   }
 
@@ -465,7 +502,7 @@ export function parsePluginManifest(input: unknown): PluginManifest {
   if (data.adminPages.length > 0 && !data.permissions.includes('admin.navigation')) {
     throw new Error(
       `Invalid plugin manifest: \`adminPages\` requires the \`admin.navigation\` ` +
-      `permission. Add "admin.navigation" to \`permissions\`.`,
+        `permission. Add "admin.navigation" to \`permissions\`.`,
     )
   }
 
@@ -476,7 +513,9 @@ export function parsePluginManifest(input: unknown): PluginManifest {
     }
     duplicatePages.add(page.id)
     if (page.content.kind === 'resource' && !duplicateResources.has(page.content.resource)) {
-      throw new Error(`Invalid plugin manifest: resource page "${page.id}" references unknown resource "${page.content.resource}"`)
+      throw new Error(
+        `Invalid plugin manifest: resource page "${page.id}" references unknown resource "${page.content.resource}"`,
+      )
     }
     if (page.content.kind === 'app') {
       // App pages are unsandboxed plugin JavaScript in the admin window —
@@ -485,8 +524,8 @@ export function parsePluginManifest(input: unknown): PluginManifest {
       if (!data.permissions.includes('editor.code')) {
         throw new Error(
           `Invalid plugin manifest: admin page "${page.id}" has kind "app", which runs ` +
-          `unsandboxed JavaScript in the admin window and requires the \`editor.code\` ` +
-          `permission. Add "editor.code" to \`permissions\`.`,
+            `unsandboxed JavaScript in the admin window and requires the \`editor.code\` ` +
+            `permission. Add "editor.code" to \`permissions\`.`,
         )
       }
       // Pin `assetPath` to THIS plugin's own asset subtree. The schema
@@ -499,7 +538,7 @@ export function parsePluginManifest(input: unknown): PluginManifest {
         if (normalized !== expectedBase && !normalized.startsWith(`${expectedBase}/`)) {
           throw new Error(
             `Invalid plugin manifest: admin page "${page.id}" assetPath must stay within ` +
-            `"${expectedBase}"`,
+              `"${expectedBase}"`,
           )
         }
       }
@@ -507,9 +546,10 @@ export function parsePluginManifest(input: unknown): PluginManifest {
 
     // Normalise the content: apply the pins default for map pages explicitly,
     // since TypeBox union defaults are not reliably applied within union variants.
-    const content: PluginPageContent = page.content.kind === 'map'
-      ? { ...page.content, pins: page.content.pins ?? [] }
-      : page.content as PluginPageContent
+    const content: PluginPageContent =
+      page.content.kind === 'map'
+        ? { ...page.content, pins: page.content.pins ?? [] }
+        : (page.content as PluginPageContent)
 
     return {
       id: page.id,
@@ -529,7 +569,7 @@ export function parsePluginManifest(input: unknown): PluginManifest {
     if (!data.permissions.includes('frontend.assets')) {
       throw new Error(
         `Invalid plugin manifest: \`frontend.assets\` is non-empty but the ` +
-        `\`frontend.assets\` permission is not requested.`,
+          `\`frontend.assets\` permission is not requested.`,
       )
     }
     for (const asset of data.frontend.assets) {
@@ -539,14 +579,19 @@ export function parsePluginManifest(input: unknown): PluginManifest {
       if (asset.kind === 'link' && !asset.attrs.rel && !asset.attrs.href) {
         throw new Error(
           `Invalid plugin manifest: \`frontend.assets\` <link> declaration ` +
-          `must include at least \`rel\` or \`href\`.`,
+            `must include at least \`rel\` or \`href\`.`,
         )
       }
-      if (asset.kind === 'meta' && !asset.attrs.name && !asset.attrs.property
-          && !asset.attrs.charset && !asset.attrs['http-equiv']) {
+      if (
+        asset.kind === 'meta' &&
+        !asset.attrs.name &&
+        !asset.attrs.property &&
+        !asset.attrs.charset &&
+        !asset.attrs['http-equiv']
+      ) {
         throw new Error(
           `Invalid plugin manifest: \`frontend.assets\` <meta> declaration ` +
-          `must include \`name\`, \`property\`, \`charset\`, or \`http-equiv\`.`,
+            `must include \`name\`, \`property\`, \`charset\`, or \`http-equiv\`.`,
         )
       }
     }
@@ -557,44 +602,52 @@ export function parsePluginManifest(input: unknown): PluginManifest {
   // Fail-closed defense: a plugin that requests `cms.content.write` but
   // omits the allowlist would otherwise silently fail every write at the
   // host bridge with a cryptic per-call error.
-  const contentPerms = data.permissions.filter((p) =>
-    p === 'cms.content.read' ||
-    p === 'cms.content.write' ||
-    p === 'cms.content.publish' ||
-    p === 'cms.content.delete',
+  const contentPerms = data.permissions.filter(
+    (p) =>
+      p === 'cms.content.read' ||
+      p === 'cms.content.write' ||
+      p === 'cms.content.publish' ||
+      p === 'cms.content.delete',
   )
   const contentAccess = data.contentAccess ?? []
   if (contentPerms.length > 0 && contentAccess.length === 0) {
     throw new Error(
       `Invalid plugin manifest: \`contentAccess\` is required when any \`cms.content.*\` ` +
-      `permission is granted. List the tables the plugin can touch.`,
+        `permission is granted. List the tables the plugin can touch.`,
     )
   }
   if (contentAccess.length > 0) {
     const seenTables = new Set<string>()
     for (const entry of contentAccess) {
       if (seenTables.has(entry.table)) {
-        throw new Error(`Invalid plugin manifest: duplicate \`contentAccess\` entry for table "${entry.table}"`)
+        throw new Error(
+          `Invalid plugin manifest: duplicate \`contentAccess\` entry for table "${entry.table}"`,
+        )
       }
       seenTables.add(entry.table)
 
       const seenModes = new Set<string>()
       for (const mode of entry.modes) {
         if (seenModes.has(mode)) {
-          throw new Error(`Invalid plugin manifest: duplicate mode "${mode}" in \`contentAccess\` for table "${entry.table}"`)
+          throw new Error(
+            `Invalid plugin manifest: duplicate mode "${mode}" in \`contentAccess\` for table "${entry.table}"`,
+          )
         }
         seenModes.add(mode)
 
         const requiredPermission: PluginPermission =
-          mode === 'read' ? 'cms.content.read' :
-          mode === 'write' ? 'cms.content.write' :
-          mode === 'publish' ? 'cms.content.publish' :
-          'cms.content.delete'
+          mode === 'read'
+            ? 'cms.content.read'
+            : mode === 'write'
+              ? 'cms.content.write'
+              : mode === 'publish'
+                ? 'cms.content.publish'
+                : 'cms.content.delete'
 
         if (!data.permissions.includes(requiredPermission)) {
           throw new Error(
             `Invalid plugin manifest: \`contentAccess\` for table "${entry.table}" declares mode "${mode}" ` +
-            `but the matching permission "${requiredPermission}" is not in \`permissions\`.`,
+              `but the matching permission "${requiredPermission}" is not in \`permissions\`.`,
           )
         }
       }
@@ -632,7 +685,9 @@ export function parsePluginManifest(input: unknown): PluginManifest {
       }
       seen.add(s.id)
       if (s.type === 'select' && (!s.options || s.options.length === 0)) {
-        throw new Error(`Invalid plugin manifest: setting "${s.id}" of type "select" must declare options`)
+        throw new Error(
+          `Invalid plugin manifest: setting "${s.id}" of type "select" must declare options`,
+        )
       }
       // Secret values are encrypted at rest as strings; toggles and numbers
       // cannot ride that path. Mirrors validatePluginSettingsDefinitions.
@@ -667,7 +722,9 @@ export function parsePluginManifest(input: unknown): PluginManifest {
     adminPages,
     pack: data.pack,
     frontend: data.frontend
-      ? { assets: data.frontend.assets.map((asset) => ({ ...asset })) } as PluginManifest['frontend']
+      ? ({
+          assets: data.frontend.assets.map((asset) => ({ ...asset })),
+        } as PluginManifest['frontend'])
       : undefined,
     settings: data.settings,
     author: data.author,
@@ -690,4 +747,3 @@ export function missingPluginPermissionGrants(
 export function permissionLabel(permission: PluginPermission): string {
   return sdkPermissionLabel(permission)
 }
-

@@ -782,7 +782,9 @@ describe('collectStyleCss — <style> elements', () => {
   })
 
   it('multiple <style> tags are concatenated into styleCss', () => {
-    const result = imported('<style>.a{color:red}</style><style>.b{color:blue}</style><h1>Title</h1>')
+    const result = imported(
+      '<style>.a{color:red}</style><style>.b{color:blue}</style><h1>Title</h1>',
+    )
     expect(result.styleCss).toContain('.a')
     expect(result.styleCss).toContain('.b')
     expect(result.rootIds).toHaveLength(1)
@@ -861,7 +863,9 @@ describe('inline style="" → node.inlineStyles', () => {
     // CSSOM views of substitution declarations are lossy and engine-divergent;
     // the harvest re-encodes them as marker custom properties before parsing
     // (see @core/css-substitution).
-    const node = single(`<div style="border: 1px solid var(--rule); color: var(--ink); padding: 4px">x</div>`)
+    const node = single(
+      `<div style="border: 1px solid var(--rule); color: var(--ink); padding: 4px">x</div>`,
+    )
     expect(node.inlineStyles?.border).toBe('1px solid var(--rule)')
     expect(node.inlineStyles?.color).toBe('var(--ink)')
     expect(node.inlineStyles?.paddingTop).toBe('4px')
@@ -1295,16 +1299,18 @@ describe('base.loop — <instatic-loop>', () => {
     const loop = result.nodes[result.rootIds[0]!]!
     expect(loop.moduleId).toBe('base.loop')
     expect(loop.classIds).toEqual(['cards'])
-    expect(loop.props).toEqual(expect.objectContaining({
-      sourceId: 'data.rows',
-      filters: { tableId: 'tbl_posts' },
-      orderBy: 'publishedAt',
-      direction: 'desc',
-      limit: 3,
-      offset: 1,
-      pagination: 'infinite',
-      pageSize: 2,
-    }))
+    expect(loop.props).toEqual(
+      expect.objectContaining({
+        sourceId: 'data.rows',
+        filters: { tableId: 'tbl_posts' },
+        orderBy: 'publishedAt',
+        direction: 'desc',
+        limit: 3,
+        offset: 1,
+        pagination: 'infinite',
+        pageSize: 2,
+      }),
+    )
     expect(loop.children).toHaveLength(1)
     expect(result.nodes[loop.children[0]!]!.moduleId).toBe('base.container')
   })
@@ -1328,13 +1334,17 @@ describe('base.video — <iframe> import mapping', () => {
   })
 
   it('youtube-nocookie.com embed → base.video', () => {
-    const node = single('<iframe src="https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ"></iframe>')
+    const node = single(
+      '<iframe src="https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ"></iframe>',
+    )
     expect(node.moduleId).toBe('base.video')
     expect(node.props.videoUrl).toBe('https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ')
   })
 
   it('iframe with title attr → title prop propagated to base.video', () => {
-    const node = single('<iframe src="https://www.youtube.com/embed/dQw4w9WgXcQ" title="My Demo Video"></iframe>')
+    const node = single(
+      '<iframe src="https://www.youtube.com/embed/dQw4w9WgXcQ" title="My Demo Video"></iframe>',
+    )
     expect(node.moduleId).toBe('base.video')
     expect(node.props.title).toBe('My Demo Video')
   })
@@ -1346,7 +1356,9 @@ describe('base.video — <iframe> import mapping', () => {
   })
 
   it('playsinline=1 in embed URL → playsinline true', () => {
-    const node = single('<iframe src="https://www.youtube.com/embed/dQw4w9WgXcQ?playsinline=1"></iframe>')
+    const node = single(
+      '<iframe src="https://www.youtube.com/embed/dQw4w9WgXcQ?playsinline=1"></iframe>',
+    )
     expect(node.moduleId).toBe('base.video')
     expect(node.props.playsinline).toBe(true)
   })
@@ -1356,7 +1368,9 @@ describe('base.video — <iframe> import mapping', () => {
       '<iframe src="https://www.youtube.com/embed/dQw4w9WgXcQ?rel=0&playsinline=1" title="Full Demo"></iframe>',
     )
     expect(node.moduleId).toBe('base.video')
-    expect(node.props.videoUrl).toBe('https://www.youtube.com/embed/dQw4w9WgXcQ?rel=0&playsinline=1')
+    expect(node.props.videoUrl).toBe(
+      'https://www.youtube.com/embed/dQw4w9WgXcQ?rel=0&playsinline=1',
+    )
     expect(node.props.title).toBe('Full Demo')
     expect(node.props.noRelatedVideos).toBe(true)
     expect(node.props.playsinline).toBe(true)

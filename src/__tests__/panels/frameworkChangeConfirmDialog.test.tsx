@@ -104,7 +104,12 @@ describe('FrameworkChangeConfirmProvider', () => {
 
     render(
       <FrameworkChangeConfirmProvider>
-        <Harness request={request} onMounted={(t) => { triggerChange = t }} />
+        <Harness
+          request={request}
+          onMounted={(t) => {
+            triggerChange = t
+          }}
+        />
       </FrameworkChangeConfirmProvider>,
     )
 
@@ -158,7 +163,12 @@ describe('FrameworkChangeConfirmProvider', () => {
 
     render(
       <FrameworkChangeConfirmProvider>
-        <Harness request={request} onMounted={(t) => { triggerChange = t }} />
+        <Harness
+          request={request}
+          onMounted={(t) => {
+            triggerChange = t
+          }}
+        />
       </FrameworkChangeConfirmProvider>,
     )
 
@@ -189,7 +199,12 @@ describe('FrameworkChangeConfirmProvider', () => {
 
     render(
       <FrameworkChangeConfirmProvider>
-        <Harness request={request} onMounted={(t) => { triggerChange = t }} />
+        <Harness
+          request={request}
+          onMounted={(t) => {
+            triggerChange = t
+          }}
+        />
       </FrameworkChangeConfirmProvider>,
     )
 

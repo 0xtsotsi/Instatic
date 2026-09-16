@@ -42,7 +42,13 @@ export function DataGridEmptyState({
         }
         action={
           !readOnly && !filtered ? (
-            <Button variant="secondary" size="sm" onClick={() => { void onAddRow() }}>
+            <Button
+              variant="secondary"
+              size="sm"
+              onClick={() => {
+                void onAddRow()
+              }}
+            >
               <PlusIcon size={12} aria-hidden="true" />
               Add row
             </Button>

@@ -58,15 +58,13 @@ describe('setBreakpointOverride', () => {
     // resolveProps at mobile: base props + mobile override
     const resolved = resolveProps(page.nodes[nodeId], 'mobile')
     expect(resolved.color).toBe('#000') // unchanged
-    expect(resolved.fontSize).toBe(16)  // overridden
+    expect(resolved.fontSize).toBe(16) // overridden
     expect(resolved.text).toBe('Hello') // unchanged
   })
 
   it('throws for non-existent nodeId', () => {
     const { page } = makeTestPage()
-    expect(() =>
-      setBreakpointOverride(page, 'nonexistent', 'mobile', { fontSize: 16 })
-    ).toThrow()
+    expect(() => setBreakpointOverride(page, 'nonexistent', 'mobile', { fontSize: 16 })).toThrow()
   })
 
   it('is Mutative-safe', () => {

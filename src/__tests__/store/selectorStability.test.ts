@@ -29,9 +29,7 @@ function collectSourceFiles(dir: string): string[] {
 }
 
 function stripComments(src: string): string {
-  return src
-    .replace(/\/\*[\s\S]*?\*\//g, '')
-    .replace(/\/\/[^\n]*/g, '')
+  return src.replace(/\/\*[\s\S]*?\*\//g, '').replace(/\/\/[^\n]*/g, '')
 }
 
 function relPath(filePath: string): string {

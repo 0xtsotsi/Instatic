@@ -45,7 +45,7 @@ const PAGES: Page[] = [
   page('e', 'post', 'Post Template', postsTpl), // template page → templateTableSlug 'posts'
 ]
 
-const site = (pages: Page[]): SiteDocument => ({ id: 's', pages } as unknown as SiteDocument)
+const site = (pages: Page[]): SiteDocument => ({ id: 's', pages }) as unknown as SiteDocument
 
 /**
  * Reproduce exactly what the admin canvas hook (`useLoopPreviewItems`) does
@@ -54,9 +54,7 @@ const site = (pages: Page[]): SiteDocument => ({ id: 's', pages } as unknown as 
  * 'definition' order (the default) is the identity sort.
  */
 function canvasPath(pages: Page[], filters: Record<string, unknown>, limit: number) {
-  return filterPagesForLoop(pages, filters)
-    .slice(0, limit)
-    .map(pageToLoopItem)
+  return filterPagesForLoop(pages, filters).slice(0, limit).map(pageToLoopItem)
 }
 
 describe('site.pages loop-item parity (canvas preview ↔ engine source)', () => {

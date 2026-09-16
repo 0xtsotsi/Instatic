@@ -52,9 +52,7 @@ export function ClassGeneratorRow<C extends GeneratorShape>({
       />
       <Switch
         checked={generator.isDisabled !== true}
-        onCheckedChange={(checked) =>
-          onPatch(generator.id, { isDisabled: !checked } as Partial<C>)
-        }
+        onCheckedChange={(checked) => onPatch(generator.id, { isDisabled: !checked } as Partial<C>)}
         switchSize="sm"
         aria-label="Enabled"
       />

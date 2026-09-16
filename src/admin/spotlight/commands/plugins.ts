@@ -47,36 +47,48 @@ export function getBuiltInPluginCommands(): Command[] {
  * however many plugin commands are registered, which is typically < 50.
  */
 export function getPluginsCommands(): Command[] {
-  return pluginRuntime.getPluginCommands().map(
-    ({ pluginId, id: cmdId, label, subtitle, iconName, keywords, destructive, workspaces, args }): Command => {
-      // Map PluginPaletteArg → CommandArg (subset of types — all compatible)
-      const mappedArgs: CommandArg[] | undefined = args?.map((a): CommandArg => ({
-        id: a.id,
-        label: a.label,
-        type: a.type, // 'text' | 'select' ⊆ 'text' | 'select' | 'pick'
-        placeholder: a.placeholder,
-        options: a.options,
-      }))
-
-      return {
-        id: `plugin:${pluginId}.${cmdId}`,
-        title: label,
-        subtitle: subtitle ?? pluginId,
-        group: 'plugins',
-        iconName: iconName ?? 'plug',
+  return pluginRuntime
+    .getPluginCommands()
+    .map(
+      ({
+        pluginId,
+        id: cmdId,
+        label,
+        subtitle,
+        iconName,
         keywords,
         destructive,
-        workspaces: workspaces as ReadonlyArray<AdminWorkspace | 'any'> | undefined,
-        args: mappedArgs,
-        run: async (ctx) => {
-          ctx.closeSpotlight()
-          try {
-            await pluginRuntime.runCommand(cmdId)
-          } catch (err) {
-            console.error(`[spotlight:plugin:${pluginId}] command "${cmdId}" failed:`, err)
-          }
-        },
-      }
-    },
-  )
+        workspaces,
+        args,
+      }): Command => {
+        // Map PluginPaletteArg → CommandArg (subset of types — all compatible)
+        const mappedArgs: CommandArg[] | undefined = args?.map((a): CommandArg => ({
+          id: a.id,
+          label: a.label,
+          type: a.type, // 'text' | 'select' ⊆ 'text' | 'select' | 'pick'
+          placeholder: a.placeholder,
+          options: a.options,
+        }))
+
+        return {
+          id: `plugin:${pluginId}.${cmdId}`,
+          title: label,
+          subtitle: subtitle ?? pluginId,
+          group: 'plugins',
+          iconName: iconName ?? 'plug',
+          keywords,
+          destructive,
+          workspaces: workspaces as ReadonlyArray<AdminWorkspace | 'any'> | undefined,
+          args: mappedArgs,
+          run: async (ctx) => {
+            ctx.closeSpotlight()
+            try {
+              await pluginRuntime.runCommand(cmdId)
+            } catch (err) {
+              console.error(`[spotlight:plugin:${pluginId}] command "${cmdId}" failed:`, err)
+            }
+          },
+        }
+      },
+    )
 }

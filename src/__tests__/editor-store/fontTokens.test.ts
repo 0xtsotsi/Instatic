@@ -11,7 +11,12 @@ const inter: FontEntry = {
   variants: ['400'],
   subsets: ['latin'],
   files: [
-    { variant: '400', subset: 'latin', path: '/uploads/fonts/inter/400-latin.woff2', format: 'woff2' },
+    {
+      variant: '400',
+      subset: 'latin',
+      path: '/uploads/fonts/inter/400-latin.woff2',
+      format: 'woff2',
+    },
   ],
   category: 'Sans Serif',
   createdAt: 1,
@@ -25,7 +30,11 @@ const mono: FontEntry = {
   category: 'Monospace',
 }
 
-function makeClass(id: string, styles: Record<string, unknown>, contextStyles: StyleRule['contextStyles'] = {}): StyleRule {
+function makeClass(
+  id: string,
+  styles: Record<string, unknown>,
+  contextStyles: StyleRule['contextStyles'] = {},
+): StyleRule {
   return {
     id,
     name: id,
@@ -145,7 +154,9 @@ describe('font token store actions', () => {
 
     expect(token.variable).toBe('font-primary-2')
     expect(token.familyId).toBe(mono.id)
-    expect(useEditorStore.getState().site?.settings.fonts?.tokens?.map((item) => item.id)).toContain(token.id)
+    expect(
+      useEditorStore.getState().site?.settings.fonts?.tokens?.map((item) => item.id),
+    ).toContain(token.id)
   })
 
   it('rejects duplicate variables on update', () => {
@@ -170,7 +181,9 @@ describe('font token store actions', () => {
     expect(site.styleRules.hero.contextStyles.mobile.fontFamily).toBe('var(--font-brand)')
     expect(site.pages[0].nodes['text-1'].inlineStyles?.fontFamily).toBe('var(--font-brand)')
     expect(site.pages[0].nodes['text-1'].inlineStyles?.color).toBe('var(--font-primary-color)')
-    expect(site.visualComponents[0].tree.nodes['vc-root'].inlineStyles?.fontFamily).toBe('var(--font-brand)')
+    expect(site.visualComponents[0].tree.nodes['vc-root'].inlineStyles?.fontFamily).toBe(
+      'var(--font-brand)',
+    )
   })
 
   it('changes the assigned family without rewriting authored declarations', () => {
@@ -193,6 +206,8 @@ describe('font token store actions', () => {
     const removed = useEditorStore.getState().removeFont(inter.id)
 
     expect(removed).toBe(false)
-    expect(useEditorStore.getState().site?.settings.fonts?.items.map((item) => item.id)).toContain(inter.id)
+    expect(useEditorStore.getState().site?.settings.fonts?.items.map((item) => item.id)).toContain(
+      inter.id,
+    )
   })
 })

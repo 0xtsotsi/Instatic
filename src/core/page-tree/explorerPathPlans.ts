@@ -1,8 +1,6 @@
 import { isSafePath, normalizePath } from '@core/files/pathValidation'
 import type { SiteFile } from '@core/files/schemas'
-import {
-  extractRuntimeImportSpecifiers,
-} from '@core/site-runtime'
+import { extractRuntimeImportSpecifiers } from '@core/site-runtime'
 import type { SiteRuntimeConfig } from '@core/site-runtime-schema'
 import type { SiteDocument } from './siteDocument'
 import type { StructuralExplorerSection, StructuralSiteExplorerSectionId } from './siteExplorer'
@@ -103,7 +101,11 @@ export function buildRenameExplorerFolderPlan(
 
 export function buildMoveExplorerFolderPlan(
   site: SiteDocument,
-  input: { sectionId: StructuralSiteExplorerSectionId; folderPath: string; nextParentPath: string | undefined },
+  input: {
+    sectionId: StructuralSiteExplorerSectionId
+    folderPath: string
+    nextParentPath: string | undefined
+  },
 ): ExplorerPathRewritePlan {
   const nextFolderPath = joinPath(input.nextParentPath, basename(input.folderPath))
   const changes = structuralItems(site, input.sectionId)
@@ -135,11 +137,24 @@ export function buildMoveExplorerFolderPlan(
 
 export function buildMoveExplorerItemPlan(
   site: SiteDocument,
-  input: { sectionId: StructuralSiteExplorerSectionId; itemId: string; nextParentPath: string | undefined },
+  input: {
+    sectionId: StructuralSiteExplorerSectionId
+    itemId: string
+    nextParentPath: string | undefined
+  },
 ): ExplorerPathRewritePlan {
-  const item = structuralItems(site, input.sectionId).find((candidate) => candidate.id === input.itemId)
+  const item = structuralItems(site, input.sectionId).find(
+    (candidate) => candidate.id === input.itemId,
+  )
   const changes = item
-    ? [{ id: item.id, label: item.label, from: item.path, to: joinPath(input.nextParentPath, basename(item.path)) }]
+    ? [
+        {
+          id: item.id,
+          label: item.label,
+          from: item.path,
+          to: joinPath(input.nextParentPath, basename(item.path)),
+        },
+      ]
     : []
   return rewritePlan(
     site,
@@ -164,7 +179,9 @@ export function buildDeleteExplorerPathPlan(
     operationLabel: `Delete ${input.folderPath}`,
     deletedItems,
     blockers,
-    warnings: [{ code: 'raw-url-not-rewritten', message: 'Raw URLs in authored content are not rewritten.' }],
+    warnings: [
+      { code: 'raw-url-not-rewritten', message: 'Raw URLs in authored content are not rewritten.' },
+    ],
     folderPath: input.folderPath,
   }
 }
@@ -253,11 +270,12 @@ function addPageRewriteBlockers(
     })
   }
 
-  if (site.pages.some((candidate) =>
-    candidate.id !== change.id
-    && !changedIds.has(candidate.id)
-    && candidate.slug === change.to
-  )) {
+  if (
+    site.pages.some(
+      (candidate) =>
+        candidate.id !== change.id && !changedIds.has(candidate.id) && candidate.slug === change.to,
+    )
+  ) {
     blockers.push({
       code: 'duplicate-page-slug',
       message: `Page slug "/${change.to}" already exists.`,
@@ -281,11 +299,12 @@ function addFileRewriteBlockers(
     })
   }
 
-  if (site.files.some((candidate) =>
-    candidate.id !== change.id
-    && !changedIds.has(candidate.id)
-    && candidate.path === change.to
-  )) {
+  if (
+    site.files.some(
+      (candidate) =>
+        candidate.id !== change.id && !changedIds.has(candidate.id) && candidate.path === change.to,
+    )
+  ) {
     blockers.push({
       code: 'duplicate-file-path',
       message: `File path "${change.to}" already exists.`,
@@ -329,21 +348,26 @@ function warningsForRewrite(
   if (sectionId === 'scripts') {
     const changedIds = new Set(changes.map((change) => change.id))
     for (const file of site.files) {
-      if (file.type !== 'script' || !changedIds.has(file.id) || typeof file.content !== 'string') continue
-      const relativeImports = extractRuntimeImportSpecifiers(file.content)
-        .filter((entry) => entry.specifier.startsWith('.'))
+      if (file.type !== 'script' || !changedIds.has(file.id) || typeof file.content !== 'string')
+        continue
+      const relativeImports = extractRuntimeImportSpecifiers(file.content).filter((entry) =>
+        entry.specifier.startsWith('.'),
+      )
       if (relativeImports.length === 0) continue
       warnings.push({
         code: 'relative-script-import',
         sourcePath: file.path,
-        message: `Moving "${file.path}" can affect relative imports: ${
-          relativeImports.map((entry) => entry.specifier).join(', ')
-        }`,
+        message: `Moving "${file.path}" can affect relative imports: ${relativeImports
+          .map((entry) => entry.specifier)
+          .join(', ')}`,
       })
     }
   }
 
-  warnings.push({ code: 'raw-url-not-rewritten', message: 'Raw URLs in authored content are not rewritten.' })
+  warnings.push({
+    code: 'raw-url-not-rewritten',
+    message: 'Raw URLs in authored content are not rewritten.',
+  })
   return warnings
 }
 
@@ -367,7 +391,11 @@ function commitRewritePlan(site: SiteDocument, plan: ExplorerPathRewritePlan): v
   // which keeps their expansion + ordering intact instead of losing it to the
   // stale-entry pruning in reconcileSiteExplorerInPlace.
   if (plan.folderPathChange) {
-    rewriteStructuralFolderPaths(site.explorer[plan.sectionId], plan.folderPathChange.from, plan.folderPathChange.to)
+    rewriteStructuralFolderPaths(
+      site.explorer[plan.sectionId],
+      plan.folderPathChange.from,
+      plan.folderPathChange.to,
+    )
   }
 
   if (plan.changes.length > 0 || plan.folderPathChange) site.updatedAt = now
@@ -406,27 +434,42 @@ function commitDeletePlan(
 }
 
 /** Move every bookkeeping reference to `from` (and its descendants) onto `to`. */
-function rewriteStructuralFolderPaths(section: StructuralExplorerSection, from: string, to: string): void {
-  section.emptyFolders = dedupePaths(section.emptyFolders.map((path) => rewriteFolderPath(path, from, to)))
-  section.expandedFolders = dedupePaths(section.expandedFolders.map((path) => rewriteFolderPath(path, from, to)))
+function rewriteStructuralFolderPaths(
+  section: StructuralExplorerSection,
+  from: string,
+  to: string,
+): void {
+  section.emptyFolders = dedupePaths(
+    section.emptyFolders.map((path) => rewriteFolderPath(path, from, to)),
+  )
+  section.expandedFolders = dedupePaths(
+    section.expandedFolders.map((path) => rewriteFolderPath(path, from, to)),
+  )
   section.rowOrder = section.rowOrder.map((entry) => ({
     ...entry,
     ...(entry.kind === 'folder' ? { id: rewriteFolderPath(entry.id, from, to) } : {}),
-    ...(entry.parentPath !== undefined ? { parentPath: rewriteFolderPath(entry.parentPath, from, to) } : {}),
+    ...(entry.parentPath !== undefined
+      ? { parentPath: rewriteFolderPath(entry.parentPath, from, to) }
+      : {}),
   }))
 }
 
 /** Drop every bookkeeping reference at or under `folderPath`. Returns whether anything changed. */
-function removeStructuralFolderPaths(section: StructuralExplorerSection, folderPath: string): boolean {
+function removeStructuralFolderPaths(
+  section: StructuralExplorerSection,
+  folderPath: string,
+): boolean {
   const emptyFolders = section.emptyFolders.filter((path) => !isDescendantPath(path, folderPath))
-  const expandedFolders = section.expandedFolders.filter((path) => !isDescendantPath(path, folderPath))
+  const expandedFolders = section.expandedFolders.filter(
+    (path) => !isDescendantPath(path, folderPath),
+  )
   const rowOrder = section.rowOrder.filter(
     (entry) => !(entry.kind === 'folder' && isDescendantPath(entry.id, folderPath)),
   )
   const changed =
-    emptyFolders.length !== section.emptyFolders.length
-    || expandedFolders.length !== section.expandedFolders.length
-    || rowOrder.length !== section.rowOrder.length
+    emptyFolders.length !== section.emptyFolders.length ||
+    expandedFolders.length !== section.expandedFolders.length ||
+    rowOrder.length !== section.rowOrder.length
   section.emptyFolders = emptyFolders
   section.expandedFolders = expandedFolders
   section.rowOrder = rowOrder
@@ -443,7 +486,10 @@ function dedupePaths(paths: readonly string[]): string[] {
   return [...new Set(paths)]
 }
 
-function structuralItems(site: SiteDocument, sectionId: StructuralSiteExplorerSectionId): StructuralItem[] {
+function structuralItems(
+  site: SiteDocument,
+  sectionId: StructuralSiteExplorerSectionId,
+): StructuralItem[] {
   if (sectionId === 'pages') {
     return site.pages
       .filter((page) => !page.template)
@@ -467,11 +513,12 @@ function hiddenGeneratedFiles(
   folderPath: string,
 ): SiteFile[] {
   const type = sectionId === 'styles' ? 'style' : 'script'
-  return site.files.filter((file) =>
-    file.type === type
-    && file.generated
-    && !file.ejected
-    && isDescendantPath(file.path, folderPath)
+  return site.files.filter(
+    (file) =>
+      file.type === type &&
+      file.generated &&
+      !file.ejected &&
+      isDescendantPath(file.path, folderPath),
   )
 }
 

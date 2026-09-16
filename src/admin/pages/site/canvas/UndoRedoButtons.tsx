@@ -34,11 +34,8 @@ export function UndoRedoButtons() {
   useEffect(() => {
     function onKeyDown(e: KeyboardEvent) {
       const target = e.target as HTMLElement
-      if (
-        target.tagName === 'INPUT' ||
-        target.tagName === 'TEXTAREA' ||
-        target.isContentEditable
-      ) return
+      if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable)
+        return
 
       if (kbUndo?.match(e)) {
         e.preventDefault()
@@ -62,11 +59,7 @@ export function UndoRedoButtons() {
   const redoHint = kbRedo ? formatShortcut(kbRedo.shortcut) : ''
 
   return (
-    <div
-      role="group"
-      aria-label="Undo and redo"
-      className={styles.historyGroup}
-    >
+    <div role="group" aria-label="Undo and redo" className={styles.historyGroup}>
       <Button
         variant="ghost"
         size="sm"

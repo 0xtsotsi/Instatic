@@ -40,27 +40,27 @@
 /* Categorical identity tints — mirror the Module Inserter rail. The attribute
    lives on the panel (drives the section header) and on each nav button
    (drives its own icon chip). */
-.panel[data-accent="lilac"],
-.navItem[data-accent="lilac"],
-.sectionHeader[data-accent="lilac"] {
+.panel[data-accent='lilac'],
+.navItem[data-accent='lilac'],
+.sectionHeader[data-accent='lilac'] {
   --settingsAccent: var(--accent-2);
 }
 
-.panel[data-accent="sky"],
-.navItem[data-accent="sky"],
-.sectionHeader[data-accent="sky"] {
+.panel[data-accent='sky'],
+.navItem[data-accent='sky'],
+.sectionHeader[data-accent='sky'] {
   --settingsAccent: var(--accent-3);
 }
 
-.panel[data-accent="mint"],
-.navItem[data-accent="mint"],
-.sectionHeader[data-accent="mint"] {
+.panel[data-accent='mint'],
+.navItem[data-accent='mint'],
+.sectionHeader[data-accent='mint'] {
   --settingsAccent: var(--accent-1);
 }
 
-.panel[data-accent="peach"],
-.navItem[data-accent="peach"],
-.sectionHeader[data-accent="peach"] {
+.panel[data-accent='peach'],
+.navItem[data-accent='peach'],
+.sectionHeader[data-accent='peach'] {
   --settingsAccent: var(--accent-4);
 }
 
@@ -490,7 +490,7 @@
     padding: var(--space-l);
   }
 
-  .toggleRow :global([role="switch"]) {
+  .toggleRow :global([role='switch']) {
     align-self: flex-start;
   }
 

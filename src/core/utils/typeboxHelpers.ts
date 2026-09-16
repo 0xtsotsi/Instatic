@@ -28,11 +28,7 @@
 import { Type } from '@sinclair/typebox'
 import type { TSchema, Static as TBStatic } from '@sinclair/typebox'
 import { Value } from '@sinclair/typebox/value'
-import {
-  compiled,
-  compiledFormatValueErrors,
-  compiledSafeParseValue,
-} from './typeboxCompiler'
+import { compiled, compiledFormatValueErrors, compiledSafeParseValue } from './typeboxCompiler'
 
 export { Type, Value }
 export type { TSchema }
@@ -83,10 +79,7 @@ export function parseValue<T extends TSchema>(schema: T, value: unknown): TBStat
 /**
  * Discriminated-union result, equivalent to Zod's `safeParse()` shape.
  */
-export function safeParseValue<T extends TSchema>(
-  schema: T,
-  value: unknown,
-): SchemaResult<T> {
+export function safeParseValue<T extends TSchema>(schema: T, value: unknown): SchemaResult<T> {
   return compiledSafeParseValue(schema, value)
 }
 
@@ -104,10 +97,7 @@ export function safeParseValue<T extends TSchema>(
  * Used for tolerant parsing of stored arrays (font files, page-tree items)
  * where one bad entry should not invalidate the whole site document.
  */
-export function filterArray<T extends TSchema>(
-  itemSchema: T,
-  values: unknown,
-): TBStatic<T>[] {
+export function filterArray<T extends TSchema>(itemSchema: T, values: unknown): TBStatic<T>[] {
   if (!Array.isArray(values)) return []
   const validator = compiled(itemSchema)
   const out: TBStatic<T>[] = []

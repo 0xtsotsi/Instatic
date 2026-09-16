@@ -148,8 +148,7 @@ export const KEYBINDINGS: ReadonlyArray<KeybindingDefinition> = [
     commandId: 'editor.redo',
     shortcut: { mac: '⌘⇧Z', win: 'Ctrl+Shift+Z' },
     ariaKeyshortcuts: isPlatformMac() ? 'Meta+Shift+Z' : 'Control+Shift+Z',
-    match: (e) =>
-      (e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'z' && e.shiftKey,
+    match: (e) => (e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'z' && e.shiftKey,
     scope: 'editor',
     ignoreInEditableField: true,
   },
@@ -168,10 +167,7 @@ export const KEYBINDINGS: ReadonlyArray<KeybindingDefinition> = [
     shortcut: { mac: '⌘I', win: 'Ctrl+I' },
     ariaKeyshortcuts: isPlatformMac() ? 'Meta+I' : 'Control+I',
     match: (e) =>
-      (e.metaKey || e.ctrlKey) &&
-      !e.shiftKey &&
-      !e.altKey &&
-      e.key.toLowerCase() === 'i',
+      (e.metaKey || e.ctrlKey) && !e.shiftKey && !e.altKey && e.key.toLowerCase() === 'i',
     scope: 'panels',
     ignoreInEditableField: true,
     capability: 'ai.chat',
@@ -217,7 +213,10 @@ export const KEYBINDINGS: ReadonlyArray<KeybindingDefinition> = [
     ariaKeyshortcuts: isPlatformMac() ? 'Meta+Backspace' : 'Control+Backspace',
     match: (e) =>
       ((e.metaKey || e.ctrlKey) && !e.shiftKey && !e.altKey && e.key === 'Backspace') ||
-      (!e.metaKey && !e.ctrlKey && !e.shiftKey && !e.altKey &&
+      (!e.metaKey &&
+        !e.ctrlKey &&
+        !e.shiftKey &&
+        !e.altKey &&
         (e.key === 'Delete' || e.key === 'Backspace')),
     scope: 'canvas',
     ignoreInEditableField: true,

@@ -121,7 +121,8 @@ describe('Keybindings registry — single source of truth', () => {
         const trimmed = line.trimStart()
 
         // Skip comment-only lines
-        if (trimmed.startsWith('//') || trimmed.startsWith('*') || trimmed.startsWith('/*')) continue
+        if (trimmed.startsWith('//') || trimmed.startsWith('*') || trimmed.startsWith('/*'))
+          continue
 
         if (INLINE_MATCHER_PATTERN.test(line) || INLINE_MATCHER_PATTERN_REVERSED.test(line)) {
           violations.push(`${rel}:${i + 1}: ${line.trim()}`)
@@ -169,7 +170,8 @@ describe('Keybindings registry — single source of truth', () => {
         const trimmed = line.trimStart()
 
         // Skip comment-only lines
-        if (trimmed.startsWith('//') || trimmed.startsWith('*') || trimmed.startsWith('/*')) continue
+        if (trimmed.startsWith('//') || trimmed.startsWith('*') || trimmed.startsWith('/*'))
+          continue
 
         if (SHORTCUT_SYMBOL_RE.test(line)) {
           violations.push(`${rel}:${i + 1}: ${line.trim()}`)

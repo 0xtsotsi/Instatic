@@ -93,7 +93,10 @@ export function DataCanvas({
   // genuinely has no tables.
   if (!table && loadingTables) {
     return (
-      <section className={`${canvasStyles.canvas} ${styles.canvas}`} aria-label="Loading data tables">
+      <section
+        className={`${canvasStyles.canvas} ${styles.canvas}`}
+        aria-label="Loading data tables"
+      >
         <DataGridSkeleton />
       </section>
     )
@@ -113,7 +116,10 @@ export function DataCanvas({
   }
 
   return (
-    <section className={`${canvasStyles.canvas} ${styles.canvas}`} aria-label={`${table.pluralLabel} data grid`}>
+    <section
+      className={`${canvasStyles.canvas} ${styles.canvas}`}
+      aria-label={`${table.pluralLabel} data grid`}
+    >
       <DataGrid
         table={table}
         rows={rows}

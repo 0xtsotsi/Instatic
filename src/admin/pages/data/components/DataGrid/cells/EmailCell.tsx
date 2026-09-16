@@ -15,7 +15,8 @@ export function EmailCell({
   readOnly,
   ariaLabel,
 }: CellEditorProps<EmailField>): ReactElement {
-  const strValue = typeof value === 'string' ? value : readStringCell({ [field.id]: value }, field.id)
+  const strValue =
+    typeof value === 'string' ? value : readStringCell({ [field.id]: value }, field.id)
 
   return (
     <Input
@@ -26,7 +27,9 @@ export function EmailCell({
       aria-label={ariaLabel ?? field.label}
       onChange={(e) => onChange(e.target.value)}
       onBlur={() => onCommit?.()}
-      onKeyDown={(e) => { if (e.key === 'Enter') onCommit?.() }}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter') onCommit?.()
+      }}
     />
   )
 }

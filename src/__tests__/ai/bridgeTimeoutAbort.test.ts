@@ -49,12 +49,18 @@ describe('bridge tool-call settlement', () => {
 
   test('a delivered tool result settles the call and clears the timeout', async () => {
     let requestId = ''
-    const { bridgeId, bridge, destroy } = createBridge((ev: AiStreamEvent) => {
-      if (ev.type === 'toolRequest') requestId = ev.requestId
-    }, undefined, 1000)
+    const { bridgeId, bridge, destroy } = createBridge(
+      (ev: AiStreamEvent) => {
+        if (ev.type === 'toolRequest') requestId = ev.requestId
+      },
+      undefined,
+      1000,
+    )
     const pending = bridge.callBrowser('cms.write', { x: 1 })
     expect(requestId).not.toBe('')
-    expect(resolveBridgeToolResult(bridgeId, requestId, { ok: true, data: { done: true } })).toBe(true)
+    expect(resolveBridgeToolResult(bridgeId, requestId, { ok: true, data: { done: true } })).toBe(
+      true,
+    )
     await expect(pending).resolves.toMatchObject({ ok: true })
     destroy()
     expect(__listActiveBridgesForTesting()).not.toContain(bridgeId)
@@ -77,7 +83,9 @@ describe('bridge snapshot refresh', () => {
       },
       undefined,
       1000,
-      (snapshot) => { seen.push(snapshot) },
+      (snapshot) => {
+        seen.push(snapshot)
+      },
     )
     const pending = bridge.callBrowser('site_add_page', { title: 'X' })
     const fresh = { pages: ['home', 'x'] }
@@ -99,7 +107,9 @@ describe('bridge snapshot refresh', () => {
       },
       undefined,
       1000,
-      () => { calls += 1 },
+      () => {
+        calls += 1
+      },
     )
     const pending = bridge.callBrowser('site_render_snapshot', {})
     expect(resolveBridgeToolResult(bridgeId, requestId, { ok: true })).toBe(true)

@@ -37,8 +37,10 @@ describe('Migration parity — migrations-pg.ts ↔ migrations-sqlite.ts', () =>
       return
     }
 
-    const more = pgMigrations.length > sqliteMigrations.length ? 'migrations-pg.ts' : 'migrations-sqlite.ts'
-    const fewer = pgMigrations.length > sqliteMigrations.length ? 'migrations-sqlite.ts' : 'migrations-pg.ts'
+    const more =
+      pgMigrations.length > sqliteMigrations.length ? 'migrations-pg.ts' : 'migrations-sqlite.ts'
+    const fewer =
+      pgMigrations.length > sqliteMigrations.length ? 'migrations-sqlite.ts' : 'migrations-pg.ts'
     const diff = Math.abs(pgMigrations.length - sqliteMigrations.length)
 
     throw new Error(
@@ -75,8 +77,7 @@ describe('Migration parity — migrations-pg.ts ↔ migrations-sqlite.ts', () =>
 
     const rows = mismatches.map(
       ({ index, pgId, sqliteId }) =>
-        `  [${String(index).padStart(2)}]  pg:     ${pgId}\n` +
-        `         sqlite: ${sqliteId}`,
+        `  [${String(index).padStart(2)}]  pg:     ${pgId}\n` + `         sqlite: ${sqliteId}`,
     )
 
     throw new Error(

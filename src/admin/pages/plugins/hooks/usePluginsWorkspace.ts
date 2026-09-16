@@ -12,10 +12,7 @@ import {
   restartCmsPlugin,
   setCmsPluginEnabled,
 } from '@core/persistence'
-import {
-  collectEnabledAdminPages,
-  parsePluginManifest,
-} from '@core/plugins/manifest'
+import { collectEnabledAdminPages, parsePluginManifest } from '@core/plugins/manifest'
 import type {
   CmsPluginsPayload,
   InstalledPlugin,
@@ -148,15 +145,11 @@ function updatePluginInPayload(
   payload: CmsPluginsPayload,
   plugin: InstalledPlugin,
 ): CmsPluginsPayload {
-  const existing = payload.plugins.findIndex(
-    (candidate) => candidate.id === plugin.id,
-  )
+  const existing = payload.plugins.findIndex((candidate) => candidate.id === plugin.id)
   const plugins =
     existing === -1
       ? [plugin, ...payload.plugins]
-      : payload.plugins.map((candidate) =>
-          candidate.id === plugin.id ? plugin : candidate,
-        )
+      : payload.plugins.map((candidate) => (candidate.id === plugin.id ? plugin : candidate))
   return { plugins, adminPages: collectEnabledAdminPages(plugins) }
 }
 
@@ -250,8 +243,7 @@ export function usePluginsWorkspace(): PluginsWorkspaceVM {
     try {
       const pendingFile = pending.file
       const pendingManifest = pending.manifest
-      const resolvedGrantedPermissions =
-        grantedPermissions ?? pendingManifest.permissions
+      const resolvedGrantedPermissions = grantedPermissions ?? pendingManifest.permissions
       // Installing / upgrading a plugin is a sensitive action — the server
       // requires a fresh `step_up` auth window. `runStepUp` runs the action
       // optimistically first; if the server replies `step_up_required`, it
@@ -308,9 +300,7 @@ export function usePluginsWorkspace(): PluginsWorkspaceVM {
       const existing = payload.plugins.find((p) => p.id === manifest.id)
       const upgradeFromVersion =
         existing && existing.version !== manifest.version ? existing.version : undefined
-      const previouslyGrantedPermissions = existing
-        ? existing.grantedPermissions
-        : undefined
+      const previouslyGrantedPermissions = existing ? existing.grantedPermissions : undefined
       const previousNetworkAllowedHosts = existing?.manifest.networkAllowedHosts
 
       // EVERY install and upgrade goes through the review dialog — including
@@ -322,9 +312,7 @@ export function usePluginsWorkspace(): PluginsWorkspaceVM {
         file: isZip ? file : undefined,
         upgradeFromVersion,
         previouslyGrantedPermissions,
-        ...(previousNetworkAllowedHosts !== undefined
-          ? { previousNetworkAllowedHosts }
-          : {}),
+        ...(previousNetworkAllowedHosts !== undefined ? { previousNetworkAllowedHosts } : {}),
       })
     } catch (err) {
       setError(getErrorMessage(err, 'Could not install plugin'))
@@ -347,11 +335,7 @@ export function usePluginsWorkspace(): PluginsWorkspaceVM {
    * card.
    */
   async function restartPlugin(plugin: InstalledPlugin): Promise<void> {
-    await runPluginAction(
-      plugin.id,
-      () => restartCmsPlugin(plugin.id),
-      'Could not restart plugin',
-    )
+    await runPluginAction(plugin.id, () => restartCmsPlugin(plugin.id), 'Could not restart plugin')
   }
 
   async function installPluginPack(plugin: InstalledPlugin): Promise<void> {

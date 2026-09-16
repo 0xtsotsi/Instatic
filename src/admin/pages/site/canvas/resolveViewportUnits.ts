@@ -97,11 +97,14 @@ function unitBasisPx(unit: string, viewport: CanvasViewport): number {
  */
 export function resolveViewportUnitsForCanvas(css: string, viewport: CanvasViewport): string {
   if (!css) return css
-  return css.replace(VIEWPORT_UNIT_SCAN, (match, num: string | undefined, unit: string | undefined) => {
-    // Protected region (comment / string / url) — group captures are undefined.
-    if (num === undefined || unit === undefined) return match
-    const px = (parseFloat(num) / 100) * unitBasisPx(unit, viewport)
-    // Trim float noise: keep up to 3 decimals, drop trailing zeros.
-    return `${parseFloat(px.toFixed(3))}px`
-  })
+  return css.replace(
+    VIEWPORT_UNIT_SCAN,
+    (match, num: string | undefined, unit: string | undefined) => {
+      // Protected region (comment / string / url) — group captures are undefined.
+      if (num === undefined || unit === undefined) return match
+      const px = (parseFloat(num) / 100) * unitBasisPx(unit, viewport)
+      // Trim float noise: keep up to 3 decimals, drop trailing zeros.
+      return `${parseFloat(px.toFixed(3))}px`
+    },
+  )
 }

@@ -30,11 +30,7 @@
 import { Type, type Static } from '@core/utils/typeboxHelpers'
 import { compiledCheck } from '@core/utils/typeboxCompiler'
 import { BreakpointSchema, type Breakpoint, parseBreakpoint } from './breakpoint'
-import {
-  ConditionDefSchema,
-  type ConditionDef,
-  parseConditions,
-} from './condition'
+import { ConditionDefSchema, type ConditionDef, parseConditions } from './condition'
 import { StyleRuleSchema, parseStyleRuleRegistry } from './styleRule'
 import { SiteSettingsSchema, parseSiteSettings } from './siteSettings'
 import { SiteFileSchema, type SiteFile, type SiteFileType } from '@core/files/schemas'
@@ -109,7 +105,14 @@ export type SiteDocument = SiteShell & {
 // Tolerant parsing
 // ---------------------------------------------------------------------------
 
-const VALID_SITE_FILE_TYPES: SiteFileType[] = ['component', 'script', 'style', 'asset', 'config', 'doc']
+const VALID_SITE_FILE_TYPES: SiteFileType[] = [
+  'component',
+  'script',
+  'style',
+  'asset',
+  'config',
+  'doc',
+]
 
 /**
  * Parse a SiteFile. Keeps the file with blob=undefined when the blob is

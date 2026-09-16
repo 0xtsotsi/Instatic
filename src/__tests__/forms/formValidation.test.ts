@@ -19,10 +19,15 @@ const table: DataTable = {
   fields: [
     { id: 'email', label: 'Email', type: 'email', required: true },
     { id: 'name', label: 'Name', type: 'text', maxLength: 12 },
-    { id: 'plan', label: 'Plan', type: 'select', options: [
-      { id: 'free', label: 'Free', value: 'free' },
-      { id: 'pro', label: 'Pro', value: 'pro' },
-    ] },
+    {
+      id: 'plan',
+      label: 'Plan',
+      type: 'select',
+      options: [
+        { id: 'free', label: 'Free', value: 'free' },
+        { id: 'pro', label: 'Pro', value: 'pro' },
+      ],
+    },
     { id: 'subscribed', label: 'Subscribed', type: 'boolean' },
   ],
 }
@@ -149,9 +154,7 @@ describe('validateFormSubmission', () => {
   it('reports invalid author-supplied regex patterns instead of throwing', () => {
     const result = validateFormSubmission({
       table,
-      controls: [
-        { nodeId: 'name-input', fieldId: 'name', pattern: '[' },
-      ],
+      controls: [{ nodeId: 'name-input', fieldId: 'name', pattern: '[' }],
       values: {
         name: 'Ada',
       },

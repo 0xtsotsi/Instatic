@@ -19,11 +19,7 @@
  */
 
 import { type MouseEvent, useState } from 'react'
-import {
-  ContextMenu,
-  ContextMenuItem,
-  ContextMenuSeparator,
-} from '@ui/components/ContextMenu'
+import { ContextMenu, ContextMenuItem, ContextMenuSeparator } from '@ui/components/ContextMenu'
 import { Copy2SharpIcon } from 'pixel-art-icons/icons/copy-2-sharp'
 import { TrashSolidIcon } from 'pixel-art-icons/icons/trash-solid'
 import { ReloadIcon } from 'pixel-art-icons/icons/reload'
@@ -52,7 +48,7 @@ export function FrameworkScalePanel<G extends GroupShape, C extends GeneratorSha
   const sortedGroups = [...groups].sort((a, b) => a.order - b.order)
   const [activeTabId, setActiveTabId] = useState<string | null>(null)
   const activeGroup = sortedGroups.length
-    ? sortedGroups.find((g) => g.id === activeTabId) ?? sortedGroups[0]
+    ? (sortedGroups.find((g) => g.id === activeTabId) ?? sortedGroups[0])
     : null
 
   const [contextMenu, setContextMenu] = useState<{
@@ -129,10 +125,7 @@ export function FrameworkScalePanel<G extends GroupShape, C extends GeneratorSha
             Reset to defaults
           </ContextMenuItem>
           <ContextMenuSeparator />
-          <ContextMenuItem
-            danger
-            onClick={() => handleDelete(contextMenu.groupId)}
-          >
+          <ContextMenuItem danger onClick={() => handleDelete(contextMenu.groupId)}>
             <span aria-hidden="true">
               <TrashSolidIcon size={13} />
             </span>

@@ -102,8 +102,14 @@ describe('loopPrefetch', () => {
   })
 
   it('collectLoopNodes descends into VC definition trees (ISS-022)', () => {
-    const vcNode = (id: string, moduleId: string, children: string[] = [], props = {}) =>
-      ({ id, moduleId, props, children, breakpointOverrides: {}, classIds: [] })
+    const vcNode = (id: string, moduleId: string, children: string[] = [], props = {}) => ({
+      id,
+      moduleId,
+      props,
+      children,
+      breakpointOverrides: {},
+      classIds: [],
+    })
     const site = makeSite({
       visualComponents: [
         {
@@ -189,8 +195,38 @@ describe('loopPrefetch', () => {
     })
     const site = makeSite({
       pages: [
-        { id: 'p1', slug: 'about', title: 'About', nodes: { r: { id: 'r', moduleId: 'base.body', props: {}, children: [], breakpointOverrides: {}, classIds: [] } }, rootNodeId: 'r' },
-        { id: 'p2', slug: 'contact', title: 'Contact', nodes: { r: { id: 'r', moduleId: 'base.body', props: {}, children: [], breakpointOverrides: {}, classIds: [] } }, rootNodeId: 'r' },
+        {
+          id: 'p1',
+          slug: 'about',
+          title: 'About',
+          nodes: {
+            r: {
+              id: 'r',
+              moduleId: 'base.body',
+              props: {},
+              children: [],
+              breakpointOverrides: {},
+              classIds: [],
+            },
+          },
+          rootNodeId: 'r',
+        },
+        {
+          id: 'p2',
+          slug: 'contact',
+          title: 'Contact',
+          nodes: {
+            r: {
+              id: 'r',
+              moduleId: 'base.body',
+              props: {},
+              children: [],
+              breakpointOverrides: {},
+              classIds: [],
+            },
+          },
+          rootNodeId: 'r',
+        },
       ],
     })
     const db = createFakeDb(async () => ({ rows: [], rowCount: 0 }))

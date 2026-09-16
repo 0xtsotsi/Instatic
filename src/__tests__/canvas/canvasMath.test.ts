@@ -339,7 +339,11 @@ describe('applyZoom — zoom-to-cursor formula (Architecture Spec #435, Decision
     const newZoom = 1.5
 
     const before = screenToCanvas(originX, originY, currentZoom, panX, panY)
-    const { zoom, panX: newPanX, panY: newPanY } = applyZoom(currentZoom, newZoom, originX, originY, panX, panY)
+    const {
+      zoom,
+      panX: newPanX,
+      panY: newPanY,
+    } = applyZoom(currentZoom, newZoom, originX, originY, panX, panY)
     const after = screenToCanvas(originX, originY, zoom, newPanX, newPanY)
 
     expect(after.x).toBeCloseTo(before.x, 6)
@@ -355,7 +359,11 @@ describe('applyZoom — zoom-to-cursor formula (Architecture Spec #435, Decision
     const newZoom = 1
 
     const before = screenToCanvas(originX, originY, currentZoom, panX, panY)
-    const { zoom, panX: newPanX, panY: newPanY } = applyZoom(currentZoom, newZoom, originX, originY, panX, panY)
+    const {
+      zoom,
+      panX: newPanX,
+      panY: newPanY,
+    } = applyZoom(currentZoom, newZoom, originX, originY, panX, panY)
     const after = screenToCanvas(originX, originY, zoom, newPanX, newPanY)
 
     expect(after.x).toBeCloseTo(before.x, 6)
@@ -371,7 +379,11 @@ describe('applyZoom — zoom-to-cursor formula (Architecture Spec #435, Decision
     const newZoom = 2.5
 
     const before = screenToCanvas(originX, originY, currentZoom, panX, panY)
-    const { zoom, panX: newPanX, panY: newPanY } = applyZoom(currentZoom, newZoom, originX, originY, panX, panY)
+    const {
+      zoom,
+      panX: newPanX,
+      panY: newPanY,
+    } = applyZoom(currentZoom, newZoom, originX, originY, panX, panY)
     const after = screenToCanvas(originX, originY, zoom, newPanX, newPanY)
 
     expect(after.x).toBeCloseTo(before.x, 5)
@@ -538,7 +550,10 @@ describe('zoomFromWheelDelta', () => {
 describe('incrementalScaleFromPinchMovement', () => {
   function getHelper() {
     const { incrementalScaleFromPinchMovement } = canvasMath as typeof canvasMath & {
-      incrementalScaleFromPinchMovement?: (currentMovement: number, previousMovement: number) => number
+      incrementalScaleFromPinchMovement?: (
+        currentMovement: number,
+        previousMovement: number,
+      ) => number
     }
     expect(typeof incrementalScaleFromPinchMovement).toBe('function')
     return incrementalScaleFromPinchMovement!
@@ -550,7 +565,7 @@ describe('incrementalScaleFromPinchMovement', () => {
     // @use-gesture pinch movement[0] is the scale accumulated since gesture
     // start. Consecutive movement values 1.05 -> 1.10 should apply only the
     // ratio between them, not another full 1.10x zoom step.
-    expect(incrementalScaleFromPinchMovement(1.10, 1.05)).toBeCloseTo(1.10 / 1.05, 6)
+    expect(incrementalScaleFromPinchMovement(1.1, 1.05)).toBeCloseTo(1.1 / 1.05, 6)
   })
 
   it('treats the first pinch frame as a neutral multiplier', () => {

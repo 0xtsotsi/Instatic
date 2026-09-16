@@ -44,7 +44,7 @@ export function AiPage() {
   if (canReadAudit) availableTabs.push('audit')
 
   const [tab, setTab] = useState<Tab>('providers')
-  const activeTab = availableTabs.includes(tab) ? tab : availableTabs[0] ?? 'providers'
+  const activeTab = availableTabs.includes(tab) ? tab : (availableTabs[0] ?? 'providers')
 
   const tabs = (
     <div role="tablist" aria-label="AI sections" className={styles.tabsRow}>

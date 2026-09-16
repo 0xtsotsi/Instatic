@@ -13,8 +13,7 @@ const MediaFolderDragPayloadSchema = Type.Object({
 })
 
 export type MediaDropPayload =
-  | { kind: 'assets'; assetIds: string[] }
-  | { kind: 'folder'; folderId: string }
+  { kind: 'assets'; assetIds: string[] } | { kind: 'folder'; folderId: string }
 
 function hasType(dataTransfer: DataTransfer, type: string): boolean {
   return Array.from(dataTransfer.types).includes(type)
@@ -33,7 +32,9 @@ function uniqueNonEmpty(values: string[]): string[] {
 }
 
 export function hasMediaDropData(dataTransfer: DataTransfer): boolean {
-  return hasType(dataTransfer, MEDIA_ASSET_DRAG_TYPE) || hasType(dataTransfer, MEDIA_FOLDER_DRAG_TYPE)
+  return (
+    hasType(dataTransfer, MEDIA_ASSET_DRAG_TYPE) || hasType(dataTransfer, MEDIA_FOLDER_DRAG_TYPE)
+  )
 }
 
 export function writeMediaAssetDragData(dataTransfer: DataTransfer, assetIds: string[]) {

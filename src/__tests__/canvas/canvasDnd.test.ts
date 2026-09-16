@@ -127,9 +127,7 @@ describe('canvasDnd', () => {
 
     const intoContainer = resolveCanvasInsertionTarget({
       tree,
-      candidates: [
-        candidate('container', 1, { left: 0, top: 0, width: 200, height: 120 }),
-      ],
+      candidates: [candidate('container', 1, { left: 0, top: 0, width: 200, height: 120 })],
       point: { x: 100, y: 60 },
       canHaveChildren,
     })
@@ -139,9 +137,7 @@ describe('canvasDnd', () => {
 
     const afterLeaf = resolveCanvasInsertionTarget({
       tree,
-      candidates: [
-        candidate('leaf', 1, { left: 0, top: 140, width: 200, height: 80 }),
-      ],
+      candidates: [candidate('leaf', 1, { left: 0, top: 140, width: 200, height: 80 })],
       point: { x: 100, y: 180 },
       canHaveChildren,
     })

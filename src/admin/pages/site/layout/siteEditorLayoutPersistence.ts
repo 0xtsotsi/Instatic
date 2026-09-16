@@ -8,10 +8,7 @@ import {
   type PropertiesPanelMode,
   type StoredWorkspaceLayout,
 } from '@admin/state/workspaceLayoutStorage'
-import {
-  LEFT_SIDEBAR_DEFAULT_WIDTH,
-  clampSidebarWidth,
-} from '@admin/state/workspaceLayout'
+import { LEFT_SIDEBAR_DEFAULT_WIDTH, clampSidebarWidth } from '@admin/state/workspaceLayout'
 
 type EditorStoreApi = UseBoundStore<StoreApi<EditorStore>>
 
@@ -38,10 +35,7 @@ function finiteNumberOrCurrent(value: unknown, current: number): number {
   return typeof value === 'number' && Number.isFinite(value) ? value : current
 }
 
-function explorerTab(
-  value: unknown,
-  current: ExplorerPanelTab,
-): ExplorerPanelTab {
+function explorerTab(value: unknown, current: ExplorerPanelTab): ExplorerPanelTab {
   return value === 'layers' || value === 'site' || value === 'code' || value === 'media'
     ? value
     : current
@@ -56,10 +50,9 @@ function propertiesMode(
 }
 
 function leftSidebarWidth(layout: StoredWorkspaceLayout, currentWidth: number): number {
-  return clampSidebarWidth(finiteNumberOrCurrent(
-    layout.leftWidth,
-    currentWidth || LEFT_SIDEBAR_DEFAULT_WIDTH,
-  ))
+  return clampSidebarWidth(
+    finiteNumberOrCurrent(layout.leftWidth, currentWidth || LEFT_SIDEBAR_DEFAULT_WIDTH),
+  )
 }
 
 export function selectSiteLayoutState(s: EditorStore): SiteLayoutSelection {
@@ -84,15 +77,7 @@ export function sameLayoutSelection<T extends readonly unknown[]>(a: T, b: T): b
 }
 
 function deriveSiteActiveLeftPanel(selection: SiteLayoutSelection): string | null {
-  const [
-    explorerOpen,
-    ,
-    selectorsOpen,
-    frameworkOpen,
-    dependenciesOpen,
-    ,
-    agentOpen,
-  ] = selection
+  const [explorerOpen, , selectorsOpen, frameworkOpen, dependenciesOpen, , agentOpen] = selection
 
   if (explorerOpen) return 'explorer'
   if (selectorsOpen) return 'selectors'
@@ -102,9 +87,7 @@ function deriveSiteActiveLeftPanel(selection: SiteLayoutSelection): string | nul
   return null
 }
 
-export function siteLayoutFromSelection(
-  selection: SiteLayoutSelection,
-): StoredWorkspaceLayout {
+export function siteLayoutFromSelection(selection: SiteLayoutSelection): StoredWorkspaceLayout {
   const [
     ,
     propertiesOpen,
@@ -162,9 +145,10 @@ export function restoreStoredSiteEditorLayout(
       leftSidebarWidth: leftSidebarWidth(layout, state.leftSidebarWidth),
       explorerPanelTab: explorerTab(layout.explorerPanelTab, state.explorerPanelTab),
       codeEditorPanelOpen: boolOrCurrent(layout.codeEditorPanelOpen, state.codeEditorPanelOpen),
-      activeEditorFileId: layout.activeEditorFileId !== undefined
-        ? layout.activeEditorFileId
-        : state.activeEditorFileId,
+      activeEditorFileId:
+        layout.activeEditorFileId !== undefined
+          ? layout.activeEditorFileId
+          : state.activeEditorFileId,
       ...leftPanelPatch,
     } satisfies Partial<EditorStore>)
   })

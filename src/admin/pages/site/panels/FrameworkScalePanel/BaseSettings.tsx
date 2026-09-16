@@ -59,7 +59,9 @@ export function BaseSettings<G extends GroupShape, C extends GeneratorShape>({
               inputId={fieldId('min-base-size')}
               value={adapter.readBaseSize(group, 'min')}
               ariaLabel={`Min ${baseSizeLabel}`}
-              onChange={(next) => adapter.onUpdateGroup(group.id, adapter.patchBaseSize('min', next))}
+              onChange={(next) =>
+                adapter.onUpdateGroup(group.id, adapter.patchBaseSize('min', next))
+              }
               unit="px"
             />
             <span className={styles.sizeAtSep}>at</span>
@@ -84,7 +86,9 @@ export function BaseSettings<G extends GroupShape, C extends GeneratorShape>({
               inputId={fieldId('max-base-size')}
               value={adapter.readBaseSize(group, 'max')}
               ariaLabel={`Max ${baseSizeLabel}`}
-              onChange={(next) => adapter.onUpdateGroup(group.id, adapter.patchBaseSize('max', next))}
+              onChange={(next) =>
+                adapter.onUpdateGroup(group.id, adapter.patchBaseSize('max', next))
+              }
               unit="px"
             />
             <span className={styles.sizeAtSep}>at</span>
@@ -128,9 +132,7 @@ export function BaseSettings<G extends GroupShape, C extends GeneratorShape>({
           options={adapter.ratioOptions}
           ariaLabel="Min scale ratio"
           menuAnchorRef={baseSettingsRef}
-          onChange={(patch) =>
-            adapter.onUpdateGroup(group.id, { min: { ...group.min, ...patch } })
-          }
+          onChange={(patch) => adapter.onUpdateGroup(group.id, { min: { ...group.min, ...patch } })}
         />
       </ControlRow>
       <ControlRow
@@ -163,9 +165,7 @@ export function BaseSettings<G extends GroupShape, C extends GeneratorShape>({
           options={adapter.ratioOptions}
           ariaLabel="Max scale ratio"
           menuAnchorRef={baseSettingsRef}
-          onChange={(patch) =>
-            adapter.onUpdateGroup(group.id, { max: { ...group.max, ...patch } })
-          }
+          onChange={(patch) => adapter.onUpdateGroup(group.id, { max: { ...group.max, ...patch } })}
         />
       </ControlRow>
 
@@ -187,12 +187,7 @@ export function BaseSettings<G extends GroupShape, C extends GeneratorShape>({
             }
           />
         </ControlRow>
-        <ControlRow
-          propKey="steps"
-          inputId={fieldId('steps')}
-          label="Steps"
-          layout="stacked"
-        >
+        <ControlRow propKey="steps" inputId={fieldId('steps')} label="Steps" layout="stacked">
           <Input
             id={fieldId('steps')}
             fieldSize="sm"

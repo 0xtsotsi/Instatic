@@ -85,9 +85,12 @@ interface ExportCategory {
 
 function kindNoun(count: number, kind: DataTableKind): string {
   switch (kind) {
-    case 'page':      return count === 1 ? 'page'      : 'pages'
-    case 'component': return count === 1 ? 'component' : 'components'
-    default:          return count === 1 ? 'entry'     : 'entries'
+    case 'page':
+      return count === 1 ? 'page' : 'pages'
+    case 'component':
+      return count === 1 ? 'component' : 'components'
+    default:
+      return count === 1 ? 'entry' : 'entries'
   }
 }
 
@@ -178,11 +181,11 @@ export function ExportDialog({
   const [includeMedia, setIncludeMedia] = useState(true)
   const [includeMediaFolders, setIncludeMediaFolders] = useState(true)
   const [includeRedirects, setIncludeRedirects] = useState(true)
-  const [picks, setPicks] = useState<Map<string, TablePick>>(
-    () => initialPicks(tables, initialScope, activeTableId, selectedRowIds),
+  const [picks, setPicks] = useState<Map<string, TablePick>>(() =>
+    initialPicks(tables, initialScope, activeTableId, selectedRowIds),
   )
-  const [activeCategory, setActiveCategory] = useState<string>(
-    () => (initialScope === 'selected' && activeTableId ? `table:${activeTableId}` : 'shell'),
+  const [activeCategory, setActiveCategory] = useState<string>(() =>
+    initialScope === 'selected' && activeTableId ? `table:${activeTableId}` : 'shell',
   )
 
   // Lazy-loaded rows per table (only fetched when a table detail is opened).
@@ -207,7 +210,9 @@ export function ExportDialog({
       setIncludeMediaFolders(true)
       setIncludeRedirects(true)
       setPicks(initialPicks(tables, initialScope, activeTableId, selectedRowIds))
-      setActiveCategory(initialScope === 'selected' && activeTableId ? `table:${activeTableId}` : 'shell')
+      setActiveCategory(
+        initialScope === 'selected' && activeTableId ? `table:${activeTableId}` : 'shell',
+      )
       setTableRows(new Map())
       setLoadingTables(new Set())
       setSummary(null)
@@ -280,7 +285,14 @@ export function ExportDialog({
 
   // ── Category list (left navigator) ─────────────────────────────────────────
   const baseCategories: ExportCategory[] = [
-    { id: 'shell', kind: 'shell', label: 'Theme & settings', count: null, available: true, included: siteShell },
+    {
+      id: 'shell',
+      kind: 'shell',
+      label: 'Theme & settings',
+      count: null,
+      available: true,
+      included: siteShell,
+    },
     ...tables.map<ExportCategory>((table) => {
       const pick = picks.get(table.id) ?? 'all'
       return {
@@ -320,7 +332,10 @@ export function ExportDialog({
   ]
 
   const accents = assignRailAccents(baseCategories, (c) => `export:${c.id}:${c.label}`)
-  const categories = baseCategories.map((c, i) => ({ ...c, tint: railTintVar(accents[i] ?? 'mint') }))
+  const categories = baseCategories.map((c, i) => ({
+    ...c,
+    tint: railTintVar(accents[i] ?? 'mint'),
+  }))
   const active = categories.find((c) => c.id === activeCategory) ?? categories[0]
 
   const includedCount = categories.filter((c) => c.included).length
@@ -391,12 +406,18 @@ export function ExportDialog({
         <>
           <span className={styles.footerNote}>
             {isFullExport ? (
-              <><strong>Full export</strong> · re-imports into a fresh instance identically</>
+              <>
+                <strong>Full export</strong> · re-imports into a fresh instance identically
+              </>
             ) : (
-              <>{includedCount} of {selectableCount} categories selected</>
+              <>
+                {includedCount} of {selectableCount} categories selected
+              </>
             )}
           </span>
-          <Button variant="ghost" type="button" onClick={onClose}>Cancel</Button>
+          <Button variant="ghost" type="button" onClick={onClose}>
+            Cancel
+          </Button>
           <Button
             variant="primary"
             type="button"
@@ -413,7 +434,8 @@ export function ExportDialog({
         {/* ── Left: category navigator ──────────────────────────────── */}
         <nav className={styles.nav} aria-label="Export categories">
           <p className={styles.navLead}>
-            Everything is selected for a <strong>full export</strong>. Untick anything you want to leave out.
+            Everything is selected for a <strong>full export</strong>. Untick anything you want to
+            leave out.
           </p>
 
           <div className={styles.navList}>
@@ -425,9 +447,14 @@ export function ExportDialog({
                 data-active={category.id === active?.id || undefined}
                 onClick={() => setActiveCategory(category.id)}
               >
-                <span className={styles.navDot} style={{ '--tint': category.tint } as CSSProperties} />
+                <span
+                  className={styles.navDot}
+                  style={{ '--tint': category.tint } as CSSProperties}
+                />
                 <span className={styles.navLabel}>{category.label}</span>
-                <span className={styles.navCount}>{category.count === null ? '' : category.count}</span>
+                <span className={styles.navCount}>
+                  {category.count === null ? '' : category.count}
+                </span>
                 <span className={styles.navState} data-on={category.included || undefined} />
               </button>
             ))}
@@ -435,9 +462,13 @@ export function ExportDialog({
 
           <div className={styles.navBottom}>
             <div className={styles.bulkRow}>
-              <button type="button" className={styles.link} onClick={selectAll}>Select all</button>
+              <button type="button" className={styles.link} onClick={selectAll}>
+                Select all
+              </button>
               <span className={styles.bulkSep}>·</span>
-              <button type="button" className={styles.link} onClick={selectNone}>Select none</button>
+              <button type="button" className={styles.link} onClick={selectNone}>
+                Select none
+              </button>
             </div>
             <p className={styles.estimate}>
               Estimated size&nbsp;·&nbsp;
@@ -469,7 +500,9 @@ export function ExportDialog({
           ) : null}
 
           {error && (
-            <p id={errorId} role="alert" className={styles.errorText}>{error}</p>
+            <p id={errorId} role="alert" className={styles.errorText}>
+              {error}
+            </p>
           )}
         </div>
       </div>
@@ -492,7 +525,16 @@ interface TableDetailProps {
   onNone: () => void
 }
 
-function TableDetail({ table, tint, pick, rows, loading, onToggleRow, onAll, onNone }: TableDetailProps) {
+function TableDetail({
+  table,
+  tint,
+  pick,
+  rows,
+  loading,
+  onToggleRow,
+  onAll,
+  onNone,
+}: TableDetailProps) {
   const total = rows?.length ?? table.rowCount
   const includedCount = pick === 'all' ? total : pick.size
   const isChecked = (rowId: string) => (pick === 'all' ? true : pick.has(rowId))
@@ -510,9 +552,13 @@ function TableDetail({ table, tint, pick, rows, loading, onToggleRow, onAll, onN
           </p>
         </div>
         <div className={styles.detHeadBulk}>
-          <button type="button" className={styles.link} onClick={onAll}>All</button>
+          <button type="button" className={styles.link} onClick={onAll}>
+            All
+          </button>
           <span className={styles.bulkSep}>·</span>
-          <button type="button" className={styles.link} onClick={onNone}>None</button>
+          <button type="button" className={styles.link} onClick={onNone}>
+            None
+          </button>
         </div>
       </div>
 
@@ -525,7 +571,11 @@ function TableDetail({ table, tint, pick, rows, loading, onToggleRow, onAll, onN
       ) : (
         <div className={styles.rows}>
           {(rows ?? []).map((row) => (
-            <label key={row.id} className={styles.entryRow} data-off={!isChecked(row.id) || undefined}>
+            <label
+              key={row.id}
+              className={styles.entryRow}
+              data-off={!isChecked(row.id) || undefined}
+            >
               <Checkbox
                 checked={isChecked(row.id)}
                 boxSize="sm"
@@ -535,7 +585,8 @@ function TableDetail({ table, tint, pick, rows, loading, onToggleRow, onAll, onN
               <span className={styles.entryInfo}>
                 <span className={styles.entryTitle}>{rowTitle(row, table)}</span>
                 <span className={styles.entryMeta}>
-                  /{row.slug}{row.status !== 'published' ? ` · ${row.status}` : ''}
+                  /{row.slug}
+                  {row.status !== 'published' ? ` · ${row.status}` : ''}
                 </span>
               </span>
             </label>
@@ -582,7 +633,10 @@ function SimpleDetail({ category, onToggle }: SimpleDetailProps) {
         <ul className={styles.factList} data-off={!category.included || undefined}>
           {meta.lines.map((line) => (
             <li key={line} className={styles.factRow}>
-              <span className={styles.factDot} style={{ '--tint': category.tint } as CSSProperties} />
+              <span
+                className={styles.factDot}
+                style={{ '--tint': category.tint } as CSSProperties}
+              />
               {line}
             </li>
           ))}
@@ -614,9 +668,10 @@ function detailMeta(category: ExportCategory): { sub: string; lines: string[]; e
     case 'media': {
       const count = category.count
       return {
-        sub: count === null
-          ? 'Uploaded images, video and files — embedded so they transfer intact.'
-          : `${plural(count, 'file', 'files')} embedded with their bytes — images and video transfer intact.`,
+        sub:
+          count === null
+            ? 'Uploaded images, video and files — embedded so they transfer intact.'
+            : `${plural(count, 'file', 'files')} embedded with their bytes — images and video transfer intact.`,
         lines: ['Image & video variants regenerate automatically after import.'],
         empty: 'No media uploaded yet — nothing to export here.',
       }
@@ -624,9 +679,10 @@ function detailMeta(category: ExportCategory): { sub: string; lines: string[]; e
     case 'mediaFolders': {
       const count = category.count
       return {
-        sub: count === null
-          ? 'The media library folder tree and each asset’s folder.'
-          : `${plural(count, 'folder', 'folders')} — the library tree and where each asset lives.`,
+        sub:
+          count === null
+            ? 'The media library folder tree and each asset’s folder.'
+            : `${plural(count, 'folder', 'folders')} — the library tree and where each asset lives.`,
         lines: [],
         empty: 'No folders yet — the library is flat.',
       }
@@ -634,9 +690,10 @@ function detailMeta(category: ExportCategory): { sub: string; lines: string[]; e
     case 'redirects': {
       const count = category.count
       return {
-        sub: count === null
-          ? 'Old published URLs keep pointing at the right page after import.'
-          : `${plural(count, 'redirect', 'redirects')} — old URLs keep resolving to the right page.`,
+        sub:
+          count === null
+            ? 'Old published URLs keep pointing at the right page after import.'
+            : `${plural(count, 'redirect', 'redirects')} — old URLs keep resolving to the right page.`,
         lines: [],
         empty: 'No redirects yet — none have been created.',
       }

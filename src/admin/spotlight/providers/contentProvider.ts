@@ -38,7 +38,9 @@ export const contentProvider = makeServerProvider({
       keywords: ['content', 'document', entry.tableSlug, entry.slug],
       run: (ctx) => {
         ctx.closeSpotlight()
-        ctx.navigate(`/admin/content?table=${encodeURIComponent(entry.tableSlug)}&row=${encodeURIComponent(entry.id)}`)
+        ctx.navigate(
+          `/admin/content?table=${encodeURIComponent(entry.tableSlug)}&row=${encodeURIComponent(entry.id)}`,
+        )
       },
     }
   },

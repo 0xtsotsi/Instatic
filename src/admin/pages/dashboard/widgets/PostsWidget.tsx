@@ -32,11 +32,15 @@ export function PostsWidget({ span, editing }: DashboardWidgetRendererProps) {
         <>
           <StatValue
             value={stats.total.toLocaleString()}
-            sub={(
-              stats.categories === 0
-                ? <span>Total · no categories yet</span>
-                : <span>Total · {stats.categories} categor{stats.categories === 1 ? 'y' : 'ies'}</span>
-            )}
+            sub={
+              stats.categories === 0 ? (
+                <span>Total · no categories yet</span>
+              ) : (
+                <span>
+                  Total · {stats.categories} categor{stats.categories === 1 ? 'y' : 'ies'}
+                </span>
+              )
+            }
           />
           <Bars data={stats.daily28} accentIndexes={ACCENT_INDEXES} />
         </>

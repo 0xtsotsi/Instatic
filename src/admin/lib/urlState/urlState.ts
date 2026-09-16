@@ -29,10 +29,7 @@ import { useEffect, useState } from 'react'
  */
 export function useInitialQueryParams(): URLSearchParams {
   const [params] = useState(
-    () =>
-      new URLSearchParams(
-        typeof window === 'undefined' ? '' : window.location.search,
-      ),
+    () => new URLSearchParams(typeof window === 'undefined' ? '' : window.location.search),
   )
   return params
 }
@@ -69,8 +66,7 @@ export function useUrlQuerySync(
     }
 
     const nextHref = url.pathname + url.search + url.hash
-    const currentHref =
-      window.location.pathname + window.location.search + window.location.hash
+    const currentHref = window.location.pathname + window.location.search + window.location.hash
     if (nextHref !== currentHref) {
       window.history.replaceState({}, '', nextHref)
     }

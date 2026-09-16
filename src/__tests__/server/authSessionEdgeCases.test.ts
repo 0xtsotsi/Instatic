@@ -20,7 +20,9 @@ async function listSessions(
   return body.sessions
 }
 
-async function createAccount(harness: CapabilityTestHarness): Promise<{ cookie: string; email: string }> {
+async function createAccount(
+  harness: CapabilityTestHarness,
+): Promise<{ cookie: string; email: string }> {
   await harness.setupOwner()
   return harness.createRoleUser({
     name: 'Session Edge User',

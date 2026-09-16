@@ -145,7 +145,11 @@ export async function uploadCmsMediaAsset(
     credentials: 'include',
     body,
   })
-  const payload = await readEnvelope(res, CmsMediaAssetEnvelopeSchema, `CMS media upload failed with ${res.status}`)
+  const payload = await readEnvelope(
+    res,
+    CmsMediaAssetEnvelopeSchema,
+    `CMS media upload failed with ${res.status}`,
+  )
   return normalizeCmsMediaAsset(payload.asset)
 }
 
@@ -173,7 +177,11 @@ export async function updateCmsMediaAsset(
     headers: { 'content-type': 'application/json' },
     body: JSON.stringify(input),
   })
-  const payload = await readEnvelope(res, CmsMediaAssetEnvelopeSchema, `CMS media update failed with ${res.status}`)
+  const payload = await readEnvelope(
+    res,
+    CmsMediaAssetEnvelopeSchema,
+    `CMS media update failed with ${res.status}`,
+  )
   return normalizeCmsMediaAsset(payload.asset)
 }
 
@@ -211,7 +219,11 @@ export async function restoreCmsMediaAsset(
     method: 'POST',
     credentials: 'include',
   })
-  const payload = await readEnvelope(res, CmsMediaAssetEnvelopeSchema, `CMS media restore failed with ${res.status}`)
+  const payload = await readEnvelope(
+    res,
+    CmsMediaAssetEnvelopeSchema,
+    `CMS media restore failed with ${res.status}`,
+  )
   return normalizeCmsMediaAsset(payload.asset)
 }
 
@@ -233,7 +245,11 @@ export async function replaceCmsMediaAssetFile(
     credentials: 'include',
     body,
   })
-  const payload = await readEnvelope(res, CmsMediaAssetEnvelopeSchema, `CMS media replace failed with ${res.status}`)
+  const payload = await readEnvelope(
+    res,
+    CmsMediaAssetEnvelopeSchema,
+    `CMS media replace failed with ${res.status}`,
+  )
   return normalizeCmsMediaAsset(payload.asset)
 }
 
@@ -242,10 +258,7 @@ export async function replaceCmsMediaAssetFile(
  * asset is already soft-deleted, so the trash safety net can't be bypassed
  * by a single API call.
  */
-export async function purgeCmsMediaAsset(
-  assetId: string,
-  options: ClientBase = {},
-): Promise<void> {
+export async function purgeCmsMediaAsset(assetId: string, options: ClientBase = {}): Promise<void> {
   const { fetchImpl, basePath } = resolveClient(options)
   const res = await fetchImpl(`${basePath}/media/${encodeURIComponent(assetId)}?purge=1`, {
     method: 'DELETE',
@@ -266,7 +279,11 @@ export async function setCmsMediaAssetFolders(
     headers: { 'content-type': 'application/json' },
     body: JSON.stringify(input),
   })
-  const payload = await readEnvelope(res, CmsMediaAssetEnvelopeSchema, `CMS media folder assignment failed with ${res.status}`)
+  const payload = await readEnvelope(
+    res,
+    CmsMediaAssetEnvelopeSchema,
+    `CMS media folder assignment failed with ${res.status}`,
+  )
   return normalizeCmsMediaAsset(payload.asset)
 }
 
@@ -280,7 +297,11 @@ export async function listCmsMediaFolders(options: ClientBase = {}): Promise<Cms
     method: 'GET',
     credentials: 'include',
   })
-  const payload = await readEnvelope(res, CmsMediaFolderListResponseSchema, `CMS folder listing failed with ${res.status}`)
+  const payload = await readEnvelope(
+    res,
+    CmsMediaFolderListResponseSchema,
+    `CMS folder listing failed with ${res.status}`,
+  )
   return payload.folders
 }
 
@@ -295,7 +316,11 @@ export async function createCmsMediaFolder(
     headers: { 'content-type': 'application/json' },
     body: JSON.stringify(input),
   })
-  const payload = await readEnvelope(res, CmsMediaFolderEnvelopeSchema, `CMS folder create failed with ${res.status}`)
+  const payload = await readEnvelope(
+    res,
+    CmsMediaFolderEnvelopeSchema,
+    `CMS folder create failed with ${res.status}`,
+  )
   return payload.folder
 }
 
@@ -311,7 +336,11 @@ export async function updateCmsMediaFolder(
     headers: { 'content-type': 'application/json' },
     body: JSON.stringify(input),
   })
-  const payload = await readEnvelope(res, CmsMediaFolderEnvelopeSchema, `CMS folder update failed with ${res.status}`)
+  const payload = await readEnvelope(
+    res,
+    CmsMediaFolderEnvelopeSchema,
+    `CMS folder update failed with ${res.status}`,
+  )
   return payload.folder
 }
 

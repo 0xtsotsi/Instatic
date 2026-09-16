@@ -128,7 +128,9 @@ function setVCNodeBindings(
 // ---------------------------------------------------------------------------
 
 describe('Gate RP-1 — bindings cleared from VC tree', () => {
-  beforeEach(() => { setupSite() })
+  beforeEach(() => {
+    setupSite()
+  })
 
   it('removes propBindings entry from every node in the VC tree that references the param', () => {
     const vcId = callAction<string>('createVisualComponent', 'Card')
@@ -157,7 +159,9 @@ describe('Gate RP-1 — bindings cleared from VC tree', () => {
 // ---------------------------------------------------------------------------
 
 describe('Gate RP-2 — overrides cleared from all ref instances on all pages', () => {
-  beforeEach(() => { setupSite() })
+  beforeEach(() => {
+    setupSite()
+  })
 
   it('removes propOverrides[paramId] from all ref nodes on all pages', () => {
     const vcId = callAction<string>('createVisualComponent', 'Banner')
@@ -216,7 +220,9 @@ describe('Gate RP-2 — overrides cleared from all ref instances on all pages', 
 // ---------------------------------------------------------------------------
 
 describe('Gate RP-3 — slot content cleared for slot params', () => {
-  beforeEach(() => { setupSite() })
+  beforeEach(() => {
+    setupSite()
+  })
 
   it('removes the slot-instance child node (and its subtree) from all ref instances when param.type === "slot"', () => {
     const vcId = callAction<string>('createVisualComponent', 'Layout')
@@ -285,7 +291,9 @@ describe('Gate RP-3 — slot content cleared for slot params', () => {
 // ---------------------------------------------------------------------------
 
 describe('Gate RP-4 — slot content NOT touched when param type is not slot', () => {
-  beforeEach(() => { setupSite() })
+  beforeEach(() => {
+    setupSite()
+  })
 
   it('slot-instance children remain untouched when a string param is removed', () => {
     const vcId = callAction<string>('createVisualComponent', 'Card')
@@ -341,7 +349,9 @@ describe('Gate RP-4 — slot content NOT touched when param type is not slot', (
 // ---------------------------------------------------------------------------
 
 describe('Gate RP-5 — param removed from vc.params', () => {
-  beforeEach(() => { setupSite() })
+  beforeEach(() => {
+    setupSite()
+  })
 
   it('vc.params does not contain the param after removeParamWithCleanup', () => {
     const vcId = callAction<string>('createVisualComponent', 'ActionBtn')
@@ -361,7 +371,9 @@ describe('Gate RP-5 — param removed from vc.params', () => {
 // ---------------------------------------------------------------------------
 
 describe('Gate RP-6 — no-op when paramId does not exist', () => {
-  beforeEach(() => { setupSite() })
+  beforeEach(() => {
+    setupSite()
+  })
 
   it('does not throw and does not change state when paramId is bogus', () => {
     const vcId = callAction<string>('createVisualComponent', 'Ghost')

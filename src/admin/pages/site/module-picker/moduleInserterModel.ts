@@ -6,18 +6,10 @@ import {
 } from '@core/persistence/userPreferences'
 import { wouldCreateCycle, type VisualComponent } from '@core/visualComponents'
 import { firstOutletId } from '@core/templates'
-import {
-  moduleWireForId,
-  wireFromTree,
-  type WireNode,
-} from './moduleWireframes'
+import { moduleWireForId, wireFromTree, type WireNode } from './moduleWireframes'
 
 export type ModuleInserterAccent = 'mint' | 'lilac' | 'sky' | 'peach' | 'rose'
-export type ModuleInserterSectionId =
-  | 'modules'
-  | 'layouts'
-  | 'components'
-  | 'recent'
+export type ModuleInserterSectionId = 'modules' | 'layouts' | 'components' | 'recent'
 type ModuleInserterItemKind = 'module' | 'savedLayout' | 'component'
 type ModuleInserterRecentRef = ModuleInserterItemRef
 
@@ -73,18 +65,11 @@ interface ModuleInserterComponentItem extends BaseInserterItem {
 }
 
 export type ModuleInserterItem =
-  | ModuleInserterModuleItem
-  | ModuleInserterSavedLayoutItem
-  | ModuleInserterComponentItem
+  ModuleInserterModuleItem | ModuleInserterSavedLayoutItem | ModuleInserterComponentItem
 
-const HIDDEN_MODULE_IDS = new Set([
-  'base.body',
-  'base.visual-component-ref',
-  'base.slot-instance',
-])
+const HIDDEN_MODULE_IDS = new Set(['base.body', 'base.visual-component-ref', 'base.slot-instance'])
 
-export const DEFAULT_MODULE_INSERTER_FAVORITES =
-  DEFAULT_MODULE_INSERTER_PREFERENCE.favorites
+export const DEFAULT_MODULE_INSERTER_FAVORITES = DEFAULT_MODULE_INSERTER_PREFERENCE.favorites
 
 export function moduleAccentForCategory(category: string): ModuleInserterAccent {
   if (category === 'Forms') return 'mint'
@@ -110,9 +95,7 @@ export interface ModuleInsertionContext {
 }
 
 type ModuleAvailability =
-  | { kind: 'insertable' }
-  | { kind: 'hidden' }
-  | { kind: 'disabled'; reason: string }
+  { kind: 'insertable' } | { kind: 'hidden' } | { kind: 'disabled'; reason: string }
 
 /**
  * Editor insertion rules for a registry module in the given context.
@@ -293,10 +276,7 @@ export function composeLayoutsSection(
 
   const groupCount = (userItems.length > 0 ? 1 : 0) + pluginGroups.length
 
-  const items = [
-    ...userItems,
-    ...pluginGroups.flatMap((group) => group.items),
-  ]
+  const items = [...userItems, ...pluginGroups.flatMap((group) => group.items)]
   const labelByKey = new Map<string, string>()
   if (groupCount > 1) {
     if (userItems.length > 0) labelByKey.set(userItems[0].key, 'Saved')
@@ -305,9 +285,7 @@ export function composeLayoutsSection(
   return { items, labelByKey }
 }
 
-function getComponentItems(
-  components: readonly VisualComponent[],
-): ModuleInserterComponentItem[] {
+function getComponentItems(components: readonly VisualComponent[]): ModuleInserterComponentItem[] {
   return components.map((component) => ({
     key: recentKey({ kind: 'component', id: component.id }),
     id: component.id,
@@ -349,11 +327,7 @@ export function buildModuleInserterItems({
     moduleItems,
     savedLayoutItems,
     componentItems,
-    allItems: [
-      ...moduleItems,
-      ...savedLayoutItems,
-      ...componentItems,
-    ],
+    allItems: [...moduleItems, ...savedLayoutItems, ...componentItems],
   }
 }
 
@@ -413,7 +387,9 @@ export function itemDescription(item: ModuleInserterItem): string {
   // A disabled item's most useful description is WHY it can't be inserted here.
   if (item.disabledReason) return item.disabledReason
   if (item.kind === 'savedLayout') {
-    return item.blocks === 1 ? `1 block · ${item.description}` : `${item.blocks} blocks · ${item.description}`
+    return item.blocks === 1
+      ? `1 block · ${item.description}`
+      : `${item.blocks} blocks · ${item.description}`
   }
   if (item.kind === 'component') {
     const count = item.component.params.length

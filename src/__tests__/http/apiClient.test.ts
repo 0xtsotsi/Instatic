@@ -88,7 +88,9 @@ describe('apiRequest', () => {
   })
 
   it('returns void when no schema is supplied', async () => {
-    const result = await apiRequest('/x', { fetchImpl: async () => new Response(null, { status: 204 }) })
+    const result = await apiRequest('/x', {
+      fetchImpl: async () => new Response(null, { status: 204 }),
+    })
     expect(result).toBeUndefined()
   })
 
@@ -132,7 +134,11 @@ describe('apiBlobRequest', () => {
 
 describe('readEnvelope', () => {
   it('throws ApiError on a non-OK response', async () => {
-    const err = await readEnvelope(jsonResponse({ error: 'bad' }, 400), BodySchema, 'fallback').catch((e) => e)
+    const err = await readEnvelope(
+      jsonResponse({ error: 'bad' }, 400),
+      BodySchema,
+      'fallback',
+    ).catch((e) => e)
     expect(err).toBeInstanceOf(ApiError)
     expect((err as ApiError).status).toBe(400)
     expect((err as ApiError).message).toBe('bad')
@@ -160,7 +166,9 @@ describe('responseErrorMessage', () => {
   })
 
   it('falls back to raw text, then to the fallback', async () => {
-    expect(await responseErrorMessage(new Response('plain text', { status: 500 }), 'fb')).toBe('plain text')
+    expect(await responseErrorMessage(new Response('plain text', { status: 500 }), 'fb')).toBe(
+      'plain text',
+    )
     expect(await responseErrorMessage(new Response('', { status: 500 }), 'fb')).toBe('fb')
   })
 })

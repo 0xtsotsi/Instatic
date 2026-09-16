@@ -50,9 +50,7 @@ export type PluginAdminAppComponent = ComponentType<PluginAdminAppProps>
  * their default export without any runtime cost. The host's admin
  * loader expects `mod.default` to be a `PluginAdminAppComponent`.
  */
-export function definePluginAdminApp(
-  Component: PluginAdminAppComponent,
-): PluginAdminAppComponent {
+export function definePluginAdminApp(Component: PluginAdminAppComponent): PluginAdminAppComponent {
   return Component
 }
 

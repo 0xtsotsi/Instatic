@@ -29,7 +29,13 @@
  *     6. Richtext prop sanitization in page node trees
  */
 
-import { assertValidNodeTree, parseSiteDocument, parsePage, removeNodeSubtrees, type SiteShell } from '@core/page-tree'
+import {
+  assertValidNodeTree,
+  parseSiteDocument,
+  parsePage,
+  removeNodeSubtrees,
+  type SiteShell,
+} from '@core/page-tree'
 import type { SiteDocument, Page } from '@core/page-tree'
 import type { VisualComponent } from '@core/visualComponents'
 import { isSafePath, normalizePath } from '@core/files/pathValidation'
@@ -161,7 +167,10 @@ export function validatePages(
   }
   validatePageSlugList(pages)
   pages = validatePageNodeTreesList(pages, tolerant)
-  syncVCSlotInstancesInTrees(pages.map((p) => p.nodes as Record<string, BaseNode>), visualComponents)
+  syncVCSlotInstancesInTrees(
+    pages.map((p) => p.nodes as Record<string, BaseNode>),
+    visualComponents,
+  )
   const knownVcIds = storedVcIds ?? new Set(visualComponents.map((vc) => vc.id))
   stripDanglingVCRefsInPages(pages, knownVcIds)
   sanitizePageNodeRichtextProps(pages)
@@ -205,12 +214,18 @@ export function validatePagesForPartialSave(
     if (slugErr) throw new SiteValidationError(slugErr, `site.pages[${i}].slug`)
     const owner = takenSlugs.get(slug)
     if (owner !== undefined && owner !== id) {
-      throw new SiteValidationError(`duplicate slug: Duplicate page slug "/${slug}".`, `site.pages[${i}].slug`)
+      throw new SiteValidationError(
+        `duplicate slug: Duplicate page slug "/${slug}".`,
+        `site.pages[${i}].slug`,
+      )
     }
     takenSlugs.set(slug, id)
   }
   pages = validatePageNodeTreesList(pages, false)
-  syncVCSlotInstancesInTrees(pages.map((p) => p.nodes as Record<string, BaseNode>), visualComponents)
+  syncVCSlotInstancesInTrees(
+    pages.map((p) => p.nodes as Record<string, BaseNode>),
+    visualComponents,
+  )
   stripDanglingVCRefsInPages(pages, new Set(visualComponents.map((vc) => vc.id)))
   sanitizePageNodeRichtextProps(pages)
   return pages
@@ -292,7 +307,10 @@ export function validateVisualComponents(rawVCs: unknown[]): VisualComponent[] {
   stripDanglingVCRefsInVCs(acyclic)
   // Heal slot-instances for VC refs nested inside other VC trees (ISS-026) —
   // refs are resolved against the surviving VC roster.
-  syncVCSlotInstancesInTrees(acyclic.map((vc) => vc.tree.nodes as Record<string, BaseNode>), acyclic)
+  syncVCSlotInstancesInTrees(
+    acyclic.map((vc) => vc.tree.nodes as Record<string, BaseNode>),
+    acyclic,
+  )
   sanitizeVCNodeRichtextProps(acyclic)
   return acyclic
 }
@@ -338,7 +356,10 @@ export function stripDanglingVCRefs(site: SiteDocument): void {
 
 /** Strip dangling VC refs from page node maps only. */
 function stripDanglingVCRefsInPages(pages: Page[], knownVcIds: ReadonlySet<string>): void {
-  stripDanglingRefsFromNodeMaps(pages.map((p) => p.nodes as Record<string, BaseNode>), knownVcIds)
+  stripDanglingRefsFromNodeMaps(
+    pages.map((p) => p.nodes as Record<string, BaseNode>),
+    knownVcIds,
+  )
 }
 
 /** Strip dangling VC refs from VC tree node maps only. */
@@ -350,7 +371,10 @@ function stripDanglingVCRefsInVCs(vcs: VisualComponent[]): void {
   )
 }
 
-function stripDanglingRefsFromNodeMaps(nodeMaps: Array<Record<string, BaseNode>>, knownVcIds: ReadonlySet<string>): void {
+function stripDanglingRefsFromNodeMaps(
+  nodeMaps: Array<Record<string, BaseNode>>,
+  knownVcIds: ReadonlySet<string>,
+): void {
   for (const nodes of nodeMaps) {
     stripOneNodeMap(nodes, knownVcIds)
   }
@@ -380,7 +404,10 @@ function filterCyclicVCs(vcs: VisualComponent[]): VisualComponent[] {
   const inStack = new Set<string>()
 
   function dfs(id: string): boolean {
-    if (inStack.has(id)) { cyclic.add(id); return true }
+    if (inStack.has(id)) {
+      cyclic.add(id)
+      return true
+    }
     if (visited.has(id)) return cyclic.has(id)
     visited.add(id)
     inStack.add(id)
@@ -579,7 +606,11 @@ function validatePageNodeTreesList(pages: Page[], tolerant: boolean): Page[] {
     } catch (err) {
       if (tolerant) {
         const message = err instanceof Error ? err.message : `page ${i} has an invalid tree`
-        console.error('[persistence/validate] dropping page with invalid tree', pages[i]?.id, message)
+        console.error(
+          '[persistence/validate] dropping page with invalid tree',
+          pages[i]?.id,
+          message,
+        )
         continue
       }
       throw siteValidationErrorFromTreeInvariant(err, `site.pages[${i}]`)

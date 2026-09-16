@@ -453,7 +453,9 @@ describe('framework color store actions', () => {
 
     useEditorStore.getState().loadSite(site)
 
-    expect(useEditorStore.getState().site!.styleRules[frameworkColorClassId(token.id, 'base', 'text')]).toMatchObject({
+    expect(
+      useEditorStore.getState().site!.styleRules[frameworkColorClassId(token.id, 'base', 'text')],
+    ).toMatchObject({
       name: 'text-primary',
       styles: { color: 'var(--primary)' },
       generated: { locked: true, sourceId: token.id },
@@ -485,15 +487,18 @@ describe('framework color store actions', () => {
       lightValue: first.lightValue,
       generateUtilities: first.generateUtilities,
     })
-    expect(useEditorStore.getState().site!.styleRules[frameworkColorClassId(copy!.id, 'base', 'text')]).toMatchObject({
+    expect(
+      useEditorStore.getState().site!.styleRules[frameworkColorClassId(copy!.id, 'base', 'text')],
+    ).toMatchObject({
       name: 'text-primary-copy',
       generated: { locked: true, sourceId: copy!.id },
     })
 
     useEditorStore.getState().reorderFrameworkColorToken(second.id, 'up')
 
-    const orderedSlugs = useEditorStore.getState().site!.settings.framework!.colors.tokens
-      .slice()
+    const orderedSlugs = useEditorStore
+      .getState()
+      .site!.settings.framework!.colors.tokens.slice()
       .sort((a, b) => a.order - b.order)
       .map((token) => token.slug)
     expect(orderedSlugs).toEqual(['secondary', 'primary', 'primary-copy'])
@@ -527,9 +532,9 @@ describe('framework color store actions', () => {
 
     useEditorStore.getState().updateFrameworkColorToken(second.id, { category: 'BRAND' })
 
-    const updated = useEditorStore.getState().site!.settings.framework!.colors.tokens.find(
-      (token) => token.id === second.id,
-    )
+    const updated = useEditorStore
+      .getState()
+      .site!.settings.framework!.colors.tokens.find((token) => token.id === second.id)
     expect(updated?.category).toBe('Brand')
   })
 })

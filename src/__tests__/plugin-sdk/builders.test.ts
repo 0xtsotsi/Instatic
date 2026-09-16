@@ -33,8 +33,11 @@ describe('html tag', () => {
 
   it('joins arrays of values', () => {
     const items = ['a', 'b', 'c']
-    expect(html`<ul>${items.map((i) => raw(`<li>${escapeHtml(i)}</li>`))}</ul>`)
-      .toBe('<ul><li>a</li><li>b</li><li>c</li></ul>')
+    expect(
+      html`<ul>
+        ${items.map((i) => raw(`<li>${escapeHtml(i)}</li>`))}
+      </ul>`,
+    ).toBe('<ul><li>a</li><li>b</li><li>c</li></ul>')
   })
 
   it('renders null and undefined as empty string', () => {
@@ -59,10 +62,16 @@ describe('safeUrl', () => {
 describe('control factories', () => {
   it('produces typed PluginPropertyControl entries', () => {
     expect(control.text('Title')).toEqual({ type: 'text', label: 'Title' })
-    expect(control.textarea('Body', { rows: 4 }))
-      .toEqual({ type: 'textarea', label: 'Body', rows: 4 })
-    expect(control.select('Tone', [{ label: 'Info', value: 'info' }]))
-      .toEqual({ type: 'select', label: 'Tone', options: [{ label: 'Info', value: 'info' }] })
+    expect(control.textarea('Body', { rows: 4 })).toEqual({
+      type: 'textarea',
+      label: 'Body',
+      rows: 4,
+    })
+    expect(control.select('Tone', [{ label: 'Info', value: 'info' }])).toEqual({
+      type: 'select',
+      label: 'Tone',
+      options: [{ label: 'Info', value: 'info' }],
+    })
     expect(control.toggle('Featured')).toEqual({ type: 'toggle', label: 'Featured' })
   })
 })
@@ -119,14 +128,16 @@ describe('defineModule', () => {
   })
 
   it('rejects non-namespaced module ids at definition time', () => {
-    expect(() => defineModule({
-      id: 'no-dot',
-      name: 'Bad',
-      category: 'X',
-      defaults: {},
-      schema: {},
-      render: () => ({ html: '' }),
-    })).toThrow(/namespaced/)
+    expect(() =>
+      defineModule({
+        id: 'no-dot',
+        name: 'Bad',
+        category: 'X',
+        defaults: {},
+        schema: {},
+        render: () => ({ html: '' }),
+      }),
+    ).toThrow(/namespaced/)
   })
 })
 
@@ -149,12 +160,8 @@ describe('h.* tree builder + defineComponent', () => {
   })
 
   it('produces stable ids across rebuilds (idempotent install)', () => {
-    const a = defineComponent('a/x', 'Same', () =>
-      h.container({}, [h.text({ text: 'Hi' })]),
-    )
-    const b = defineComponent('a/x', 'Same', () =>
-      h.container({}, [h.text({ text: 'Hi' })]),
-    )
+    const a = defineComponent('a/x', 'Same', () => h.container({}, [h.text({ text: 'Hi' })]))
+    const b = defineComponent('a/x', 'Same', () => h.container({}, [h.text({ text: 'Hi' })]))
     expect(a.tree.rootNodeId).toBe(b.tree.rootNodeId)
     expect(Object.keys(a.tree.nodes)).toEqual(Object.keys(b.tree.nodes))
   })
@@ -165,10 +172,7 @@ describe('h.* tree builder + defineComponent', () => {
         h.text({ text: 'X', classIds: ['acme.ui-kit/heading-xl'] }),
       ]),
     )
-    expect(component.classIds.sort()).toEqual([
-      'acme.ui-kit/heading-xl',
-      'acme.ui-kit/section',
-    ])
+    expect(component.classIds.sort()).toEqual(['acme.ui-kit/heading-xl', 'acme.ui-kit/section'])
   })
 
   it('h.custom passes through arbitrary plugin-module ids', () => {
@@ -204,23 +208,27 @@ describe('definePack', () => {
   })
 
   it('rejects explicit names that contain whitespace', () => {
-    expect(() => definePack({
-      pluginId: 'acme.ui-kit',
-      classes: {
-        x: { name: 'my class', styles: {} },
-      },
-    })).toThrow(/CSS name/)
+    expect(() =>
+      definePack({
+        pluginId: 'acme.ui-kit',
+        classes: {
+          x: { name: 'my class', styles: {} },
+        },
+      }),
+    ).toThrow(/CSS name/)
   })
 
   it('compiles HTML layout entries into namespaced SavedLayout snapshots', () => {
     const pack = definePack({
       pluginId: 'acme.ui-kit',
-      layouts: [{
-        id: 'hero-section',
-        name: 'Hero section',
-        html: '<section class="hero missing-rule"><h2>Big claim</h2></section>',
-        css: '.hero { padding: 96px; text-align: center; }',
-      }],
+      layouts: [
+        {
+          id: 'hero-section',
+          name: 'Hero section',
+          html: '<section class="hero missing-rule"><h2>Big claim</h2></section>',
+          css: '.hero { padding: 96px; text-align: center; }',
+        },
+      ],
     })
 
     expect(pack.layouts).toHaveLength(1)
@@ -247,11 +255,13 @@ describe('definePack', () => {
   it('harvests <style> blocks from the layout HTML as CSS', () => {
     const pack = definePack({
       pluginId: 'acme.ui-kit',
-      layouts: [{
-        id: 'styled',
-        name: 'Styled',
-        html: '<style>.card { border-radius: 16px; }</style><div class="card">Hi</div>',
-      }],
+      layouts: [
+        {
+          id: 'styled',
+          name: 'Styled',
+          html: '<style>.card { border-radius: 16px; }</style><div class="card">Hi</div>',
+        },
+      ],
     })
     const layout = pack.layouts[0]
     expect(layout.classes['acme.ui-kit/styled/card']?.styles.borderTopLeftRadius).toBe('16px')
@@ -261,11 +271,13 @@ describe('definePack', () => {
   it('wraps multi-root layout HTML in a single container root', () => {
     const pack = definePack({
       pluginId: 'acme.ui-kit',
-      layouts: [{
-        id: 'two-parts',
-        name: 'Two parts',
-        html: '<header>Top</header><footer>Bottom</footer>',
-      }],
+      layouts: [
+        {
+          id: 'two-parts',
+          name: 'Two parts',
+          html: '<header>Top</header><footer>Bottom</footer>',
+        },
+      ],
     })
     const layout = pack.layouts[0]
     const root = layout.nodes[layout.rootNodeId]
@@ -286,10 +298,12 @@ describe('definePack', () => {
   })
 
   it('rejects layout HTML that produces no elements', () => {
-    expect(() => definePack({
-      pluginId: 'acme.ui-kit',
-      layouts: [{ id: 'empty', name: 'Empty', html: '   ' }],
-    })).toThrow(/no elements/)
+    expect(() =>
+      definePack({
+        pluginId: 'acme.ui-kit',
+        layouts: [{ id: 'empty', name: 'Empty', html: '   ' }],
+      }),
+    ).toThrow(/no elements/)
   })
 })
 
@@ -317,39 +331,42 @@ describe('definePlugin', () => {
     })
 
     expect(definition.manifest.id).toBe('acme.ui-kit')
-    expect(definition.manifest.permissions.sort()).toEqual([
-      'modules.register',
-      'visualComponents.register',
-    ].sort())
+    expect(definition.manifest.permissions.sort()).toEqual(
+      ['modules.register', 'visualComponents.register'].sort(),
+    )
     expect(definition.modules).toHaveLength(1)
     expect(definition.pack?.classes[0].id).toBe('acme.ui-kit/section')
   })
 
   it('rejects plugin ids without a vendor namespace', () => {
-    expect(() => definePlugin({
-      id: 'just-name',
-      name: 'X',
-      version: '1.0.0',
-      permissions: [],
-    })).toThrow(/namespaced/)
+    expect(() =>
+      definePlugin({
+        id: 'just-name',
+        name: 'X',
+        version: '1.0.0',
+        permissions: [],
+      }),
+    ).toThrow(/namespaced/)
   })
 
   it('rejects modules whose id does not start with the plugin id', () => {
-    expect(() => definePlugin({
-      id: 'acme.ui-kit',
-      name: 'UI Kit',
-      version: '1.0.0',
-      permissions: [],
-      modules: [
-        defineModule({
-          id: 'other.ns.callout',
-          name: 'Wrong',
-          category: 'X',
-          defaults: {},
-          schema: {},
-          render: () => ({ html: '' }),
-        }),
-      ],
-    })).toThrow(/must start with the plugin id/)
+    expect(() =>
+      definePlugin({
+        id: 'acme.ui-kit',
+        name: 'UI Kit',
+        version: '1.0.0',
+        permissions: [],
+        modules: [
+          defineModule({
+            id: 'other.ns.callout',
+            name: 'Wrong',
+            category: 'X',
+            defaults: {},
+            schema: {},
+            render: () => ({ html: '' }),
+          }),
+        ],
+      }),
+    ).toThrow(/must start with the plugin id/)
   })
 })

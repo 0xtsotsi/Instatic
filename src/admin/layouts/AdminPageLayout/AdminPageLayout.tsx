@@ -132,12 +132,9 @@ export function AdminPageLayout({
         siteName={siteName}
         faviconUrl={faviconUrl}
         section={workspace}
-        adminNavigationSlot={(
-          <AdminSectionNavigation
-            section={workspace}
-            currentUser={currentUser}
-          />
-        )}
+        adminNavigationSlot={
+          <AdminSectionNavigation section={workspace} currentUser={currentUser} />
+        }
         rightSlot={toolbarRightSlot}
       />
 
@@ -150,12 +147,8 @@ export function AdminPageLayout({
             </div>
             {(tabs || actions) && (
               <div className={styles.headerEnd}>
-                {tabs && (
-                  <div className={styles.tabs}>{tabs}</div>
-                )}
-                {actions && (
-                  <div className={styles.actions}>{actions}</div>
-                )}
+                {tabs && <div className={styles.tabs}>{tabs}</div>}
+                {actions && <div className={styles.actions}>{actions}</div>}
               </div>
             )}
           </header>

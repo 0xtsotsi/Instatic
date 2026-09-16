@@ -102,5 +102,4 @@ describe('module dependency metadata', () => {
       placements: 2,
     })
   })
-
 })

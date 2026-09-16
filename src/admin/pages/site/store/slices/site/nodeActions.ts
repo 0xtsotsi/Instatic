@@ -37,7 +37,11 @@ import { wouldCreateCycle, syncSlotInstances, applySlotSyncResult } from '@core/
 import { pushToast } from '@ui/components/Toast'
 import { depthInTree, resolveActiveTreeTarget } from './helpers'
 import { pruneCanvasSelectionDraft } from '../selectionSlice'
-import { indexStyleRulesByName, linkImportedClassNames, mergeImportedStyleRules } from './importLinking'
+import {
+  indexStyleRulesByName,
+  linkImportedClassNames,
+  mergeImportedStyleRules,
+} from './importLinking'
 import type { SiteSlice, SiteSliceHelpers } from './types'
 
 type NodeActions = Pick<
@@ -72,10 +76,7 @@ type NodeActions = Pick<
  * `scope.nodeId`) against the same id remap that the duplicate mutation will
  * apply to the nodes themselves.
  */
-function buildSubtreeIdMap(
-  tree: NodeTree<PageNode>,
-  nodeId: string,
-): Map<string, string> {
+function buildSubtreeIdMap(tree: NodeTree<PageNode>, nodeId: string): Map<string, string> {
   const idMap = new Map<string, string>()
   const stack = [nodeId]
   while (stack.length > 0) {
@@ -308,7 +309,9 @@ export function createNodeActions(helpers: SiteSliceHelpers): NodeActions {
       // canvas selection so no phantom selection ring survives. Pruning by
       // tree-membership also clears `selectedNodeIds`, not just the anchor.
       if (deleted) {
-        set((state) => { pruneCanvasSelectionDraft(state) })
+        set((state) => {
+          pruneCanvasSelectionDraft(state)
+        })
       }
     },
 
@@ -494,9 +497,7 @@ export function createNodeActions(helpers: SiteSliceHelpers): NodeActions {
       // Sort by depth-DESC so leaves go first — descendants of an
       // already-deleted id are gone, and the "node not found" guard handles
       // the redundant case cleanly.
-      const ordered = [...nodeIds].sort(
-        (a, b) => depthById.get(b)! - depthById.get(a)!,
-      )
+      const ordered = [...nodeIds].sort((a, b) => depthById.get(b)! - depthById.get(a)!)
       const deleted = mutateActiveTree((tree) => {
         let changed = false
         for (const id of ordered) {
@@ -510,7 +511,9 @@ export function createNodeActions(helpers: SiteSliceHelpers): NodeActions {
       // Same selection cleanup as `deleteNode`: drop every deleted id (and any
       // descendants) so the multi-selection array doesn't keep phantom ids.
       if (deleted) {
-        set((state) => { pruneCanvasSelectionDraft(state) })
+        set((state) => {
+          pruneCanvasSelectionDraft(state)
+        })
       }
     },
 

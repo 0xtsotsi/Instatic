@@ -71,7 +71,9 @@ interface ProseMirrorNode {
   attrs: Record<string, unknown>
 }
 
-export function useEditorMediaDrop(editorRef: { current: Editor | null }): UseEditorMediaDropResult {
+export function useEditorMediaDrop(editorRef: {
+  current: Editor | null
+}): UseEditorMediaDropResult {
   const pendingRef = useRef(new Map<string, PendingUpload>())
 
   // Abort + clean up all in-flight uploads if the editor unmounts (e.g.

@@ -37,10 +37,8 @@ export function useIframeFrameAutoHeight({
     const MAX_SELF_RESIZES = 60
     let selfResizes = 0
     let rafId: number | null = null
-    const {
-      ResizeObserver: FrameResizeObserver,
-      MutationObserver: FrameMutationObserver,
-    } = getIframeObserverConstructors(iframe)
+    const { ResizeObserver: FrameResizeObserver, MutationObserver: FrameMutationObserver } =
+      getIframeObserverConstructors(iframe)
 
     const measure = () => {
       rafId = null

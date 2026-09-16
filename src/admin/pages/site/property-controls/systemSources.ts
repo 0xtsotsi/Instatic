@@ -49,9 +49,7 @@ const SITE_SOURCE: SystemSource = {
   id: 'site',
   label: 'Site',
   description: 'Site-wide author-facing fields.',
-  fields: [
-    { id: 'name', label: 'Site name' },
-  ],
+  fields: [{ id: 'name', label: 'Site name' }],
 }
 
 // ---------------------------------------------------------------------------
@@ -72,8 +70,4 @@ const ROUTE_SOURCE: SystemSource = {
 // Registry
 // ---------------------------------------------------------------------------
 
-export const SYSTEM_SOURCES: readonly SystemSource[] = [
-  PAGE_SOURCE,
-  SITE_SOURCE,
-  ROUTE_SOURCE,
-]
+export const SYSTEM_SOURCES: readonly SystemSource[] = [PAGE_SOURCE, SITE_SOURCE, ROUTE_SOURCE]

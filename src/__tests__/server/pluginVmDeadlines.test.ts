@@ -29,7 +29,9 @@ function makeEnv(pluginId: string): PluginVmEnv {
     assetBasePath: `/uploads/plugins/${pluginId}/1.0.0`,
     settings: {},
     hostCall: async () => null,
-    log: () => { /* swallow */ },
+    log: () => {
+      /* swallow */
+    },
   }
 }
 
@@ -149,7 +151,7 @@ describe('plugin sandbox: VM stack preservation', () => {
     // vmStackOf must read the frames from there too.
     const err = await createPluginVm({
       env: makeEnv('acme.boom'),
-      pluginSource: 'globalThis.__plugin_exports = {};\nthrow new Error(\'top-level boom\');',
+      pluginSource: "globalThis.__plugin_exports = {};\nthrow new Error('top-level boom');",
     }).then(
       () => null,
       (e: unknown) => e,

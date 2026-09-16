@@ -87,13 +87,10 @@ export function PropertiesPanel({ variant = 'floating' }: PropertiesPanelProps) 
     setPanelRef: setDragPanelElementRef,
     headerDragProps,
     panelPositionStyle,
-  } = useDraggablePanel(
-    'properties',
-    () => ({
-      x: typeof window !== 'undefined' ? window.innerWidth - DEFAULT_WIDTH - 16 : 16,
-      y: 16,
-    }),
-  )
+  } = useDraggablePanel('properties', () => ({
+    x: typeof window !== 'undefined' ? window.innerWidth - DEFAULT_WIDTH - 16 : 16,
+    y: 16,
+  }))
 
   // ─── Focus management: F6 moves focus into panel ──────────────────────────
   useEffect(() => {
@@ -145,7 +142,7 @@ export function PropertiesPanel({ variant = 'floating' }: PropertiesPanelProps) 
       onClick={(e) => e.stopPropagation()}
       style={
         variant === 'floating'
-          ? { '--panel-w': `${data.width}px`, ...panelPositionStyle } as React.CSSProperties
+          ? ({ '--panel-w': `${data.width}px`, ...panelPositionStyle } as React.CSSProperties)
           : undefined
       }
       className={cn(styles.panel, variant === 'docked' && styles.panelDocked)}
@@ -159,7 +156,7 @@ export function PropertiesPanel({ variant = 'floating' }: PropertiesPanelProps) 
       <PanelHeader
         panelId="properties"
         title="Properties"
-        titleContent={(
+        titleContent={
           <HeaderTitleContent
             selectedSelectorClass={data.selectedSelectorClass}
             isSelectorMultiSelect={data.isSelectorMultiSelect}
@@ -174,7 +171,7 @@ export function PropertiesPanel({ variant = 'floating' }: PropertiesPanelProps) 
             selectedSelectorUsage={data.selectedSelectorUsage}
             renameNode={data.renameNode}
           />
-        )}
+        }
         onClose={data.togglePropertiesPanel}
         dragHandleProps={variant === 'floating' ? headerDragProps : undefined}
       >
@@ -185,10 +182,7 @@ export function PropertiesPanel({ variant = 'floating' }: PropertiesPanelProps) 
       </PanelHeader>
 
       {/* ─── Properties content (independent panel — Guideline #410) ─────── */}
-      <div
-        aria-label="Properties editor"
-        className={styles.propertiesPanel}
-      >
+      <div aria-label="Properties editor" className={styles.propertiesPanel}>
         <PropertiesPanelBody
           selectedSelectorClass={data.selectedSelectorClass}
           selectedSelectorClassId={data.selectedSelectorClassId}
@@ -209,7 +203,6 @@ export function PropertiesPanel({ variant = 'floating' }: PropertiesPanelProps) 
           onFocusClassPicker={handleFocusClassPicker}
         />
       </div>
-
     </aside>
   )
 }

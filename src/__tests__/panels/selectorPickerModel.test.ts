@@ -1,5 +1,10 @@
 import { describe, expect, it } from 'bun:test'
-import { classKindSelector, classifySelectorCreateInput, type PageNode, type StyleRule } from '@core/page-tree'
+import {
+  classKindSelector,
+  classifySelectorCreateInput,
+  type PageNode,
+  type StyleRule,
+} from '@core/page-tree'
 import { deriveSelectorPickerModel } from '@site/panels/PropertiesPanel/selectorPickerModel'
 
 function rule(overrides: Partial<StyleRule> & { id: string; name: string }): StyleRule {
@@ -30,7 +35,8 @@ function node(classIds: string[] = []): PageNode {
 
 describe('selectorPickerModel', () => {
   it('matches a descendant selector on the selected element subject only', () => {
-    document.body.innerHTML = '<section class="hero"><h1 data-node-id="title" class="title"></h1></section>'
+    document.body.innerHTML =
+      '<section class="hero"><h1 data-node-id="title" class="title"></h1></section>'
     const selected = document.querySelector<HTMLElement>('[data-node-id="title"]')!
     const ancestor = document.querySelector<HTMLElement>('.hero')!
     const heroTitle = rule({
@@ -251,7 +257,13 @@ describe('selectorPickerModel', () => {
     document.body.innerHTML = '<a data-node-id="btn" class="btn-primary" href="#">Buy</a>'
     const selected = document.querySelector<HTMLElement>('[data-node-id="btn"]')!
     const anchor = rule({ id: 'anchor', name: 'a', kind: 'ambient', selector: 'a' })
-    const base = rule({ id: 'base', name: 'btn-primary', kind: 'class', selector: '.btn-primary', order: 5 })
+    const base = rule({
+      id: 'base',
+      name: 'btn-primary',
+      kind: 'class',
+      selector: '.btn-primary',
+      order: 5,
+    })
     const hover = rule({
       id: 'hover',
       name: '.btn-primary:hover',
@@ -295,8 +307,7 @@ describe('selectorPickerModel', () => {
       name: 'box',
       kind: 'ambient',
       order: 1,
-      selector:
-        'body.theme-dark *, body.theme-dark *::before, body.theme-dark *::after',
+      selector: 'body.theme-dark *, body.theme-dark *::before, body.theme-dark *::after',
     })
     const hover = rule({
       id: 'hover',
@@ -386,7 +397,10 @@ describe('selectorPickerModel', () => {
   it('infers class creation for class-like input and ambient creation for selector-shaped input', () => {
     expect(classifySelectorCreateInput('display')).toEqual({ kind: 'class', name: 'display' })
     expect(classifySelectorCreateInput('.display')).toEqual({ kind: 'class', name: 'display' })
-    expect(classifySelectorCreateInput('.hero .title')).toEqual({ kind: 'ambient', selector: '.hero .title' })
+    expect(classifySelectorCreateInput('.hero .title')).toEqual({
+      kind: 'ambient',
+      selector: '.hero .title',
+    })
     expect(classifySelectorCreateInput('a:hover')).toEqual({ kind: 'ambient', selector: 'a:hover' })
   })
 })

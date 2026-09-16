@@ -10,21 +10,13 @@ interface VariantCountStepperProps {
   onCountChange: (count: number) => void
 }
 
-export function VariantCountStepper({
-  label,
-  count,
-  onCountChange,
-}: VariantCountStepperProps) {
+export function VariantCountStepper({ label, count, onCountChange }: VariantCountStepperProps) {
   const min = 0
   const max = MAX_VARIANT_COUNT
   const lowerLabel = label.toLowerCase()
 
   return (
-    <div
-      className={styles.stepperRow}
-      role="group"
-      aria-label={`${label} variants`}
-    >
+    <div className={styles.stepperRow} role="group" aria-label={`${label} variants`}>
       <span>{label} variants</span>
       <div className={styles.stepperControl}>
         <Button

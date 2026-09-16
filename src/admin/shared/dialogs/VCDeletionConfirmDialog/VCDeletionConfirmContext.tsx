@@ -38,8 +38,8 @@ export function VCDeletionConfirmProvider({ children }: { children: ReactNode })
   const site = useEditorStore((s) => s.site)
   const confirmDelete = useConfirmDelete()
 
-  const { confirm, pending, handleCancel, handleConfirm } =
-    useVCDeletionConfirmController((request: ConfirmVCDeletionRequest) => {
+  const { confirm, pending, handleCancel, handleConfirm } = useVCDeletionConfirmController(
+    (request: ConfirmVCDeletionRequest) => {
       if (!site) {
         // No site loaded — commit immediately.
         request.commit()
@@ -61,7 +61,8 @@ export function VCDeletionConfirmProvider({ children }: { children: ReactNode })
 
       // Usages found — show the impact dialog.
       return { status: 'confirm', impact }
-    })
+    },
+  )
 
   return (
     <VCDeletionConfirmContext.Provider value={{ confirm }}>

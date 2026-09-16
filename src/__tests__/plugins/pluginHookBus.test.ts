@@ -22,7 +22,7 @@ describe('hookBus', () => {
     ])
   })
 
-  it('runs filters in order, threading the previous handler\'s output', async () => {
+  it("runs filters in order, threading the previous handler's output", async () => {
     hookBus.filter('plugin.a', 'publish.html', (value) => `${value}-a`)
     hookBus.filter('plugin.b', 'publish.html', (value) => `${value}-b`)
     expect(await hookBus.applyFilter('publish.html', 'base')).toBe('base-a-b')
@@ -90,11 +90,13 @@ describe('canonicalPluginEventName', () => {
     expect(namespacedSeen).toEqual([{ forged: true }])
   })
 
-  it('does not double-prefix a name already in the plugin\'s own namespace', () => {
-    expect(canonicalPluginEventName('acme.x', 'plugin.acme.x.sync.done')).toBe('plugin.acme.x.sync.done')
+  it("does not double-prefix a name already in the plugin's own namespace", () => {
+    expect(canonicalPluginEventName('acme.x', 'plugin.acme.x.sync.done')).toBe(
+      'plugin.acme.x.sync.done',
+    )
   })
 
-  it('rejects a name in another plugin\'s namespace (impersonation)', () => {
+  it("rejects a name in another plugin's namespace (impersonation)", () => {
     expect(() => canonicalPluginEventName('acme.x', 'plugin.zeta.y.sync.done')).toThrow(
       /Plugin "acme\.x" cannot emit "plugin\.zeta\.y\.sync\.done"/,
     )

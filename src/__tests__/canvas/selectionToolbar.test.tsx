@@ -30,11 +30,9 @@ function resetStore() {
 function createSelectedTextPage(): { page: Page; textId: string } {
   const site = useEditorStore.getState().createSite('Toolbar Test')
   const rootId = site.pages[0].rootNodeId
-  const textId = useEditorStore.getState().insertNode(
-    'base.text',
-    { text: 'Selected text', tag: 'p' },
-    rootId,
-  )
+  const textId = useEditorStore
+    .getState()
+    .insertNode('base.text', { text: 'Selected text', tag: 'p' }, rootId)
   const page = useEditorStore.getState().site!.pages[0]
   useEditorStore.setState({
     selectedNodeId: textId,
@@ -53,21 +51,15 @@ function createSortableTextPage(): {
 } {
   const site = useEditorStore.getState().createSite('Canvas Drag Test')
   const rootId = site.pages[0].rootNodeId
-  const firstId = useEditorStore.getState().insertNode(
-    'base.text',
-    { text: 'First', tag: 'p' },
-    rootId,
-  )
-  const secondId = useEditorStore.getState().insertNode(
-    'base.text',
-    { text: 'Second', tag: 'p' },
-    rootId,
-  )
-  const thirdId = useEditorStore.getState().insertNode(
-    'base.text',
-    { text: 'Third', tag: 'p' },
-    rootId,
-  )
+  const firstId = useEditorStore
+    .getState()
+    .insertNode('base.text', { text: 'First', tag: 'p' }, rootId)
+  const secondId = useEditorStore
+    .getState()
+    .insertNode('base.text', { text: 'Second', tag: 'p' }, rootId)
+  const thirdId = useEditorStore
+    .getState()
+    .insertNode('base.text', { text: 'Third', tag: 'p' }, rootId)
   const page = useEditorStore.getState().site!.pages[0]
   useEditorStore.setState({
     selectedNodeId: secondId,
@@ -87,10 +79,18 @@ function createMultiSortableTextPage(): {
 } {
   const site = useEditorStore.getState().createSite('Canvas Multi Drag Test')
   const rootId = site.pages[0].rootNodeId
-  const firstId = useEditorStore.getState().insertNode('base.text', { text: 'First', tag: 'p' }, rootId)
-  const secondId = useEditorStore.getState().insertNode('base.text', { text: 'Second', tag: 'p' }, rootId)
-  const thirdId = useEditorStore.getState().insertNode('base.text', { text: 'Third', tag: 'p' }, rootId)
-  const fourthId = useEditorStore.getState().insertNode('base.text', { text: 'Fourth', tag: 'p' }, rootId)
+  const firstId = useEditorStore
+    .getState()
+    .insertNode('base.text', { text: 'First', tag: 'p' }, rootId)
+  const secondId = useEditorStore
+    .getState()
+    .insertNode('base.text', { text: 'Second', tag: 'p' }, rootId)
+  const thirdId = useEditorStore
+    .getState()
+    .insertNode('base.text', { text: 'Third', tag: 'p' }, rootId)
+  const fourthId = useEditorStore
+    .getState()
+    .insertNode('base.text', { text: 'Fourth', tag: 'p' }, rootId)
   const page = useEditorStore.getState().site!.pages[0]
   useEditorStore.setState({
     selectedNodeId: thirdId,
@@ -149,7 +149,9 @@ function installCanvasRects(rects: Record<string, DOMRectInit>) {
   // Patch the iframe documents that exist right now…
   const patchExistingIframes = () => {
     for (const iframe of Array.from(document.querySelectorAll<HTMLIFrameElement>('iframe'))) {
-      const win = iframe.contentWindow as unknown as { HTMLElement?: { prototype: { getBoundingClientRect: () => DOMRect } } } | null
+      const win = iframe.contentWindow as unknown as {
+        HTMLElement?: { prototype: { getBoundingClientRect: () => DOMRect } }
+      } | null
       const iframeProto = win?.HTMLElement?.prototype
       // Skip if the iframe shares the parent prototype (same window) — already patched.
       if (iframeProto && iframeProto !== (HTMLElement.prototype as unknown as object)) {
@@ -279,7 +281,9 @@ describe('canvas selection toolbar', () => {
       })
 
       const iframes = Array.from(document.querySelectorAll<HTMLIFrameElement>('iframe'))
-      const hasNode = iframes.some((i) => i.contentDocument?.querySelector('[data-node-id]') !== null)
+      const hasNode = iframes.some(
+        (i) => i.contentDocument?.querySelector('[data-node-id]') !== null,
+      )
 
       const toolbar = screen.getByRole('group', { name: 'Selection actions' })
       expect(toolbar.parentElement).toBe(document.body)
@@ -386,7 +390,9 @@ describe('canvas selection toolbar', () => {
             backgroundClicks += 1
           }}
         >
-          <CanvasViewportActionsContext.Provider value={{ canvasRootRef: rootRef, panBy: () => {} }}>
+          <CanvasViewportActionsContext.Provider
+            value={{ canvasRootRef: rootRef, panBy: () => {} }}
+          >
             <BreakpointFrame
               page={page}
               breakpoint={{ id: 'desktop', label: 'Desktop', width: 1440, icon: 'monitor' }}

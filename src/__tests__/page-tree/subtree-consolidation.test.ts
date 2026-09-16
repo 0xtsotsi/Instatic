@@ -170,7 +170,13 @@ describe('deletion paths unlink the parent child reference', () => {
   function makeLinearTree(): Page {
     const root = createNode('base.body')
     const a = createNode('base.div')
-    const page: Page = { id: 'p', slug: 'index', title: 'Home', rootNodeId: root.id, nodes: { [root.id]: root } }
+    const page: Page = {
+      id: 'p',
+      slug: 'index',
+      title: 'Home',
+      rootNodeId: root.id,
+      nodes: { [root.id]: root },
+    }
     insertNode(page, a, root.id)
     const grandchild = createNode('base.text')
     insertNode(page, grandchild, a.id)

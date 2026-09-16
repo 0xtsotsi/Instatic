@@ -145,7 +145,9 @@ async function handleSetDocumentStatus(
   handle: ReturnType<typeof getContentBridgeHandle>,
   rawInput: unknown,
 ): Promise<AiToolOutput> {
-  const input = parseInput(SetDocumentStatusSchema, rawInput) as Static<typeof SetDocumentStatusSchema>
+  const input = parseInput(SetDocumentStatusSchema, rawInput) as Static<
+    typeof SetDocumentStatusSchema
+  >
   if (input.status === 'scheduled' && !input.scheduledAt) {
     return aiToolError("scheduledAt is required when status='scheduled'.")
   }
@@ -161,7 +163,9 @@ async function handleSetDocumentField(
   handle: ReturnType<typeof getContentBridgeHandle>,
   rawInput: unknown,
 ): Promise<AiToolOutput> {
-  const input = parseInput(SetDocumentFieldSchema, rawInput) as Static<typeof SetDocumentFieldSchema>
+  const input = parseInput(SetDocumentFieldSchema, rawInput) as Static<
+    typeof SetDocumentFieldSchema
+  >
   await handle.setDocumentField({
     documentId: input.documentId,
     fieldId: input.fieldId,
@@ -174,7 +178,9 @@ async function handleSetDocumentFields(
   handle: ReturnType<typeof getContentBridgeHandle>,
   rawInput: unknown,
 ): Promise<AiToolOutput> {
-  const input = parseInput(SetDocumentFieldsSchema, rawInput) as Static<typeof SetDocumentFieldsSchema>
+  const input = parseInput(SetDocumentFieldsSchema, rawInput) as Static<
+    typeof SetDocumentFieldsSchema
+  >
   await handle.setDocumentFields({
     documentId: input.documentId,
     fields: input.fields,
@@ -186,7 +192,9 @@ async function handleSetDocumentAuthor(
   handle: ReturnType<typeof getContentBridgeHandle>,
   rawInput: unknown,
 ): Promise<AiToolOutput> {
-  const input = parseInput(SetDocumentAuthorSchema, rawInput) as Static<typeof SetDocumentAuthorSchema>
+  const input = parseInput(SetDocumentAuthorSchema, rawInput) as Static<
+    typeof SetDocumentAuthorSchema
+  >
   await handle.setDocumentAuthor({
     documentId: input.documentId,
     userId: input.userId,
@@ -198,7 +206,9 @@ async function handleSetActiveDocument(
   handle: ReturnType<typeof getContentBridgeHandle>,
   rawInput: unknown,
 ): Promise<AiToolOutput> {
-  const input = parseInput(SetActiveDocumentSchema, rawInput) as Static<typeof SetActiveDocumentSchema>
+  const input = parseInput(SetActiveDocumentSchema, rawInput) as Static<
+    typeof SetActiveDocumentSchema
+  >
   const ok = await handle.selectDocument(input.documentId)
   if (!ok) {
     return aiToolError(`Document ${input.documentId} not found (or not in a content collection).`)
@@ -210,7 +220,9 @@ async function handleSetActiveCollection(
   handle: ReturnType<typeof getContentBridgeHandle>,
   rawInput: unknown,
 ): Promise<AiToolOutput> {
-  const input = parseInput(SetActiveCollectionSchema, rawInput) as Static<typeof SetActiveCollectionSchema>
+  const input = parseInput(SetActiveCollectionSchema, rawInput) as Static<
+    typeof SetActiveCollectionSchema
+  >
   const ok = await handle.selectCollection(input.tableId)
   if (!ok) {
     return aiToolError(`Collection ${input.tableId} not found.`)

@@ -50,12 +50,12 @@ interface SiteExplorerStructuralFolder extends SiteExplorerTreeFolder {
 
 export type SiteExplorerStructuralEntry<TTarget> =
   | {
-    kind: 'folder'
-    folder: SiteExplorerStructuralFolder
-    landingItem?: SiteExplorerStructuralItem<TTarget>
-    children: SiteExplorerStructuralEntry<TTarget>[]
-    empty: boolean
-  }
+      kind: 'folder'
+      folder: SiteExplorerStructuralFolder
+      landingItem?: SiteExplorerStructuralItem<TTarget>
+      children: SiteExplorerStructuralEntry<TTarget>[]
+      empty: boolean
+    }
   | { kind: 'item'; item: SiteExplorerStructuralItem<TTarget> }
 
 export interface SiteExplorerStructuralSectionModel<TTarget> {
@@ -153,10 +153,15 @@ export function buildStructuralExplorerTreeSection<TTarget>(
   const pinnedItems = items.filter((item) => item.pinned)
   const pinnedIds = new Set(pinnedItems.map((item) => item.id))
   const unpinnedItems = items.filter((item) => !pinnedIds.has(item.id))
-  const folderByPath = new Map<string, Extract<SiteExplorerStructuralEntry<TTarget>, { kind: 'folder' }>>()
+  const folderByPath = new Map<
+    string,
+    Extract<SiteExplorerStructuralEntry<TTarget>, { kind: 'folder' }>
+  >()
   const rootEntries: SiteExplorerStructuralEntry<TTarget>[] = []
 
-  function ensureFolder(path: string): Extract<SiteExplorerStructuralEntry<TTarget>, { kind: 'folder' }> {
+  function ensureFolder(
+    path: string,
+  ): Extract<SiteExplorerStructuralEntry<TTarget>, { kind: 'folder' }> {
     const existing = folderByPath.get(path)
     if (existing) return existing
     const parent = parentPathForPath(path)
@@ -225,9 +230,10 @@ function orderStructuralEntries<TTarget>(
         children: orderStructuralEntries(entry.children, rowOrder, entry.folder.path),
       }
     })
-    .sort((left, right) =>
-      structuralEntryOrder(left, orderByKey) - structuralEntryOrder(right, orderByKey)
-      || structuralEntryLabel(left).localeCompare(structuralEntryLabel(right))
+    .sort(
+      (left, right) =>
+        structuralEntryOrder(left, orderByKey) - structuralEntryOrder(right, orderByKey) ||
+        structuralEntryLabel(left).localeCompare(structuralEntryLabel(right)),
     )
 }
 
@@ -235,9 +241,7 @@ function structuralEntryOrder<TTarget>(
   entry: SiteExplorerStructuralEntry<TTarget>,
   orderByKey: ReadonlyMap<string, number>,
 ): number {
-  const key = entry.kind === 'folder'
-    ? `folder:${entry.folder.path}`
-    : `item:${entry.item.id}`
+  const key = entry.kind === 'folder' ? `folder:${entry.folder.path}` : `item:${entry.item.id}`
   return orderByKey.get(key) ?? Number.POSITIVE_INFINITY
 }
 

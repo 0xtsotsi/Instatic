@@ -65,7 +65,9 @@ export function ClassRenameDialog({
     >
       <form id={CLASS_RENAME_FORM_ID} className={dialogStyles.form} onSubmit={handleSubmit}>
         <div className={dialogStyles.field}>
-          <label htmlFor={nameInputId} className={dialogStyles.label}>Name</label>
+          <label htmlFor={nameInputId} className={dialogStyles.label}>
+            Name
+          </label>
           <Input
             id={nameInputId}
             ref={inputRef}
@@ -80,7 +82,11 @@ export function ClassRenameDialog({
             spellCheck={false}
           />
         </div>
-        {error && <p role="alert" className={dialogStyles.errorText}>{error}</p>}
+        {error && (
+          <p role="alert" className={dialogStyles.errorText}>
+            {error}
+          </p>
+        )}
       </form>
     </Dialog>
   )

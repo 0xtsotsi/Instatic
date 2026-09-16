@@ -41,13 +41,7 @@ export interface BarsProps {
   gap?: number
 }
 
-export function Bars({
-  data,
-  tint,
-  height = 76,
-  accentIndexes,
-  gap = 3,
-}: BarsProps) {
+export function Bars({ data, tint, height = 76, accentIndexes, gap = 3 }: BarsProps) {
   const max = Math.max(1, ...data)
   const accentSet = accentIndexes ? new Set(accentIndexes) : null
 
@@ -72,11 +66,7 @@ export function Bars({
         const px = Math.max(2, Math.round((v / max) * height))
         const active = accentSet?.has(i) ?? false
         return (
-          <span
-            key={i}
-            className={active ? styles.barActive : undefined}
-            style={{ height: px }}
-          />
+          <span key={i} className={active ? styles.barActive : undefined} style={{ height: px }} />
         )
       })}
     </div>

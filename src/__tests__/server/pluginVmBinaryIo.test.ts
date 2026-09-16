@@ -22,11 +22,13 @@ interface RecorderEntry {
   args: unknown[]
 }
 
-function makeRecorderEnv(overrides: {
-  recorder?: RecorderEntry[]
-  onCall?: (target: string, args: unknown[]) => Promise<unknown> | unknown
-  grantedPermissions?: string[]
-} = {}): { env: PluginVmEnv; recorder: RecorderEntry[] } {
+function makeRecorderEnv(
+  overrides: {
+    recorder?: RecorderEntry[]
+    onCall?: (target: string, args: unknown[]) => Promise<unknown> | unknown
+    grantedPermissions?: string[]
+  } = {},
+): { env: PluginVmEnv; recorder: RecorderEntry[] } {
   const recorder = overrides.recorder ?? []
   const env: PluginVmEnv = {
     pluginId: 'acme.binary',
@@ -39,13 +41,17 @@ function makeRecorderEnv(overrides: {
       if (overrides.onCall) return await overrides.onCall(target, args)
       return null
     },
-    log: () => { /* swallow */ },
+    log: () => {
+      /* swallow */
+    },
   }
   return { env, recorder }
 }
 
 /** PNG signature + a NUL and >0x7f bytes — NOT valid UTF-8. */
-const PNG_BYTES = new Uint8Array([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 0x00, 0xff, 0xfe, 0x7f])
+const PNG_BYTES = new Uint8Array([
+  0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 0x00, 0xff, 0xfe, 0x7f,
+])
 
 const MULTIBYTE_TEXT = 'řeřicha 🌱 — ユニコード'
 
@@ -95,7 +101,13 @@ describe('plugin sandbox: fetch — binary bodies', () => {
           const url = String(args[0])
           // /base64 carries the SAME text base64-encoded; /utf8 carries it verbatim.
           return url.endsWith('/base64')
-            ? { status: 200, ok: true, headers: {}, body: bytesToBase64(new TextEncoder().encode(jsonPayload)), bodyEncoding: 'base64' }
+            ? {
+                status: 200,
+                ok: true,
+                headers: {},
+                body: bytesToBase64(new TextEncoder().encode(jsonPayload)),
+                bodyEncoding: 'base64',
+              }
             : { status: 200, ok: true, headers: {}, body: jsonPayload, bodyEncoding: 'utf8' }
         }
         return null
@@ -183,8 +195,10 @@ describe('plugin sandbox: fetch — binary bodies', () => {
     })
     try {
       await vm.runLifecycle('activate')
-      const init = recorder.find((e) => e.target === 'network.fetch')?.args[1] as
-        { body?: string; bodyEncoding?: string }
+      const init = recorder.find((e) => e.target === 'network.fetch')?.args[1] as {
+        body?: string
+        bodyEncoding?: string
+      }
       expect(init.bodyEncoding).toBe('utf8')
       expect(init.body).toBe(MULTIBYTE_TEXT)
     } finally {
@@ -219,8 +233,10 @@ describe('plugin sandbox: fetch — binary bodies', () => {
       await vm.runLifecycle('activate')
       // The host-side network.fetch must never have been invoked.
       expect(recorder.filter((e) => e.target === 'network.fetch')).toHaveLength(0)
-      const caught = recorder.find((e) => e.target === 'test.record')?.args[0] as
-        { name: string; message: string }
+      const caught = recorder.find((e) => e.target === 'test.record')?.args[0] as {
+        name: string
+        message: string
+      }
       expect(caught.name).toBe('TypeError')
       expect(caught.message).toContain('string, ArrayBuffer, or TypedArray/DataView')
       expect(caught.message).toContain('FormData')
@@ -261,7 +277,7 @@ describe('plugin sandbox: routes — binary bodies', () => {
       return { __response: true, status: 200, headers: { 'content-type': 'image/png' }, body: bytes };
     `)
     try {
-      const result = await vm.runRoute('POST:/echo', {
+      const result = (await vm.runRoute('POST:/echo', {
         request: {
           url: 'http://localhost/admin/api/cms/plugins/acme.binary/runtime/echo',
           method: 'POST',
@@ -271,7 +287,7 @@ describe('plugin sandbox: routes — binary bodies', () => {
         },
         body: {},
         user: null,
-      }) as { __response: boolean; status: number; body: string; bodyEncoding: string }
+      })) as { __response: boolean; status: number; body: string; bodyEncoding: string }
 
       const observed = recorder.find((e) => e.target === 'test.record')?.args[0]
       expect(observed).toEqual(Array.from(PNG_BYTES))
@@ -318,7 +334,7 @@ describe('plugin sandbox: routes — binary bodies', () => {
       return { __response: true, status: 201, headers: { 'content-type': file.type }, body: bytes.buffer };
     `)
     try {
-      const result = await vm.runRoute('POST:/echo', {
+      const result = (await vm.runRoute('POST:/echo', {
         request: {
           url: 'http://localhost/x',
           method: 'POST',
@@ -337,10 +353,16 @@ describe('plugin sandbox: routes — binary bodies', () => {
           label: 'tiny png',
         },
         user: null,
-      }) as { status: number; body: string; bodyEncoding: string }
+      })) as { status: number; body: string; bodyEncoding: string }
 
       const observed = recorder.find((e) => e.target === 'test.record')?.args
-      expect(observed).toEqual(['pixel.png', 'image/png', PNG_BYTES.byteLength, Array.from(PNG_BYTES), 'tiny png'])
+      expect(observed).toEqual([
+        'pixel.png',
+        'image/png',
+        PNG_BYTES.byteLength,
+        Array.from(PNG_BYTES),
+        'tiny png',
+      ])
       expect(result.status).toBe(201)
       expect(result.bodyEncoding).toBe('base64')
       expect(base64ToBytes(result.body)).toEqual(PNG_BYTES)
@@ -357,19 +379,20 @@ describe('plugin sandbox: routes — binary bodies', () => {
       }
       return { ok: true, mode: mode };
     `)
-    const post = (mode: string) => vm.runRoute('POST:/echo', {
-      request: {
-        url: 'http://localhost/x',
-        method: 'POST',
-        headers: { 'content-type': 'application/json' },
-        body: JSON.stringify({ mode }),
-        bodyEncoding: 'utf8',
-      },
-      body: { mode },
-      user: null,
-    })
+    const post = (mode: string) =>
+      vm.runRoute('POST:/echo', {
+        request: {
+          url: 'http://localhost/x',
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({ mode }),
+          bodyEncoding: 'utf8',
+        },
+        body: { mode },
+        user: null,
+      })
     try {
-      const raw = await post('raw') as { body: string; bodyEncoding: string }
+      const raw = (await post('raw')) as { body: string; bodyEncoding: string }
       expect(raw.bodyEncoding).toBe('utf8')
       expect(raw.body).toBe(MULTIBYTE_TEXT)
       expect(await post('json')).toEqual({ ok: true, mode: 'json' })

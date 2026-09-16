@@ -46,7 +46,10 @@ interface UserStylesheetInjectorProps {
   viewport?: CanvasViewport
 }
 
-export function UserStylesheetInjector({ targetDocument, viewport }: UserStylesheetInjectorProps = {}) {
+export function UserStylesheetInjector({
+  targetDocument,
+  viewport,
+}: UserStylesheetInjectorProps = {}) {
   const site = useEditorStore((s) => s.site)
   const activePageId = useEditorStore((s) => s.activePageId)
 
@@ -56,7 +59,9 @@ export function UserStylesheetInjector({ targetDocument, viewport }: UserStylesh
   // state all honoured. Viewport units are then pinned to the frame viewport
   // (canvas-only) so authored `vh`/`vmax`/… can't make the grow-to-content
   // iframe height explode.
-  const activePage = site ? site.pages.find((page) => page.id === activePageId) ?? site.pages[0] : undefined
+  const activePage = site
+    ? (site.pages.find((page) => page.id === activePageId) ?? site.pages[0])
+    : undefined
   const collected = site && activePage ? collectUserStylesheetCss(site, activePage) : ''
   const css = viewport ? resolveViewportUnitsForCanvas(collected, viewport) : collected
 
@@ -73,9 +78,7 @@ export function UserStylesheetInjector({ targetDocument, viewport }: UserStylesh
     // EditorChromeInjector) always wins over user-authored stylesheets regardless
     // of specificity. User styles still cascade among themselves normally inside
     // the layer (source order + specificity preserved).
-    styleEl.textContent = css
-      ? `@layer user-authored {\n${css}\n}`
-      : '/* no user stylesheets */'
+    styleEl.textContent = css ? `@layer user-authored {\n${css}\n}` : '/* no user stylesheets */'
   }, [targetDocument, css])
 
   useEffect(() => {

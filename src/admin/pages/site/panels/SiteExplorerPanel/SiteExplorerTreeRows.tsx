@@ -15,7 +15,11 @@ import {
 } from '@site/ui/Tree'
 import type { SiteExplorerSectionId } from '@core/page-tree'
 import type { SiteExplorerTreeFolder, SiteExplorerTreeItem } from './siteExplorerModel'
-import type { SiteExplorerDragData, SiteExplorerDropData, SiteExplorerDropPosition } from './useSiteExplorerDnd'
+import type {
+  SiteExplorerDragData,
+  SiteExplorerDropData,
+  SiteExplorerDropPosition,
+} from './useSiteExplorerDnd'
 import styles from './SiteExplorerPanel.module.css'
 
 interface ExplorerFolderRowProps {
@@ -287,12 +291,7 @@ interface InlineRenameInputProps {
   onCancel: () => void
 }
 
-function InlineRenameInput({
-  value,
-  ariaLabel,
-  onCommit,
-  onCancel,
-}: InlineRenameInputProps) {
+function InlineRenameInput({ value, ariaLabel, onCommit, onCancel }: InlineRenameInputProps) {
   const inputRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {

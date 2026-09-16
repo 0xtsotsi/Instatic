@@ -193,7 +193,9 @@ function ReadOnlyNodeRenderer({
             nodes={nodes}
             classes={classes}
             extraClassName={childId === firstRenderableChildId ? extraClassName : undefined}
-            extraNodeWrapperProps={childId === firstRenderableChildId ? extraNodeWrapperProps : undefined}
+            extraNodeWrapperProps={
+              childId === firstRenderableChildId ? extraNodeWrapperProps : undefined
+            }
             outletNodeId={outletNodeId}
             outletSlot={outletSlot}
             readonlyMarkers={readonlyMarkers}
@@ -214,21 +216,10 @@ function ReadOnlyNodeRenderer({
     templateContext,
   )
 
-  const children = node.moduleId === 'base.loop' && node.children.length > 0 ? (
-    <ReadOnlyLoopIterationsPreview
-      node={node as PageNode}
-      nodes={nodes}
-      classes={classes}
-      outletNodeId={outletNodeId}
-      outletSlot={outletSlot}
-      readonlyMarkers={readonlyMarkers}
-      templateContext={templateContext}
-    />
-  ) : (
-    node.children.map((childId) => (
-      <ReadOnlyNodeRenderer
-        key={childId}
-        nodeId={childId}
+  const children =
+    node.moduleId === 'base.loop' && node.children.length > 0 ? (
+      <ReadOnlyLoopIterationsPreview
+        node={node as PageNode}
         nodes={nodes}
         classes={classes}
         outletNodeId={outletNodeId}
@@ -236,8 +227,20 @@ function ReadOnlyNodeRenderer({
         readonlyMarkers={readonlyMarkers}
         templateContext={templateContext}
       />
-    ))
-  )
+    ) : (
+      node.children.map((childId) => (
+        <ReadOnlyNodeRenderer
+          key={childId}
+          nodeId={childId}
+          nodes={nodes}
+          classes={classes}
+          outletNodeId={outletNodeId}
+          outletSlot={outletSlot}
+          readonlyMarkers={readonlyMarkers}
+          templateContext={templateContext}
+        />
+      ))
+    )
 
   const ownClassNames = classNamesForClassIds(classes, node.classIds)
   const merged = [extraClassName, ...ownClassNames].filter(Boolean).join(' ')
@@ -254,9 +257,8 @@ function ReadOnlyNodeRenderer({
   // A forwarded root bag's style is appended AFTER the node's own declarations
   // (so the owning node wins per property), mirroring the publisher's
   // append-order in `renderVisualComponentRef`.
-  const style = ownStyle || baseWrapperProps?.style
-    ? { ...ownStyle, ...baseWrapperProps?.style }
-    : undefined
+  const style =
+    ownStyle || baseWrapperProps?.style ? { ...ownStyle, ...baseWrapperProps?.style } : undefined
   const nodeWrapperProps = style ? { ...baseWrapperProps, style } : baseWrapperProps
 
   return (

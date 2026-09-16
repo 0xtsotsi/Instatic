@@ -17,12 +17,7 @@ import {
   type SiteCssBundle,
 } from '@core/publisher'
 import { generateFontTokenVariablesCss } from '@core/fonts'
-import {
-  isGeneratedClass,
-  type Page,
-  type SiteDocument,
-  type StyleRule,
-} from '@core/page-tree'
+import { isGeneratedClass, type Page, type SiteDocument, type StyleRule } from '@core/page-tree'
 
 export interface AgentDocumentRender {
   /** Annotated inner <body> HTML (uid="<nodeId>" on each element). */
@@ -81,7 +76,12 @@ const EMPTY_AGENT_CSS_BUNDLE: SiteCssBundle = {
   reset: { bundle: 'reset', filename: 'reset-empty.css', hash: 'empty', content: '' },
   framework: { bundle: 'framework', filename: 'framework-empty.css', hash: 'empty', content: '' },
   style: { bundle: 'style', filename: 'style-empty.css', hash: 'empty', content: '' },
-  userStyles: { bundle: 'userStyles', filename: 'userStyles-empty.css', hash: 'empty', content: '' },
+  userStyles: {
+    bundle: 'userStyles',
+    filename: 'userStyles-empty.css',
+    hash: 'empty',
+    content: '',
+  },
 }
 
 export function renderAgentDocument(
@@ -102,7 +102,9 @@ export function renderAgentDocument(
     collectPageModuleCss(page, site, registry),
     collectAgentDocumentClassCss(page, site),
     collectUserStylesheetCss(site, page),
-  ].filter(Boolean).join('\n\n')
+  ]
+    .filter(Boolean)
+    .join('\n\n')
   const css = cssBody ? cleanAgentReadSurface(`<style>\n${cssBody}\n</style>`, cleanedStrings) : ''
 
   return paginateAgentDocument({ html, css, cleanedStrings }, options)
@@ -115,10 +117,9 @@ function extractBody(html: string): string {
 }
 
 function buildAgentFrameworkCss(site: SiteDocument): string {
-  return [
-    generateFontTokenVariablesCss(site.settings.fonts),
-    generateFrameworkCss(site),
-  ].filter(Boolean).join('\n')
+  return [generateFontTokenVariablesCss(site.settings.fonts), generateFrameworkCss(site)]
+    .filter(Boolean)
+    .join('\n')
 }
 
 function paginateAgentDocument(
@@ -173,13 +174,17 @@ function buildDocumentChunks(
 
     while (low <= high) {
       const size = Math.floor((low + high) / 2)
-      const candidate = buildAgentDocumentPart(payload, { start, end: start + size }, {
-        part: PLACEHOLDER_TOTAL_PARTS,
-        totalParts: PLACEHOLDER_TOTAL_PARTS,
-        nextPart: PLACEHOLDER_TOTAL_PARTS,
-        maxChars,
-        totalChars,
-      })
+      const candidate = buildAgentDocumentPart(
+        payload,
+        { start, end: start + size },
+        {
+          part: PLACEHOLDER_TOTAL_PARTS,
+          totalParts: PLACEHOLDER_TOTAL_PARTS,
+          nextPart: PLACEHOLDER_TOTAL_PARTS,
+          maxChars,
+          totalChars,
+        },
+      )
       if (candidate.pageInfo.serializedChars <= maxChars) {
         best = size
         low = size + 1

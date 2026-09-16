@@ -25,10 +25,10 @@ type Scope = KeybindingDefinition['scope']
 const SCOPE_ORDER: ReadonlyArray<Scope> = ['global', 'editor', 'canvas', 'panels']
 
 const SCOPE_LABELS: Record<Scope, string> = {
-  global:  'Global',
-  editor:  'Editor',
-  canvas:  'Canvas & Layers',
-  panels:  'Panels',
+  global: 'Global',
+  editor: 'Editor',
+  canvas: 'Canvas & Layers',
+  panels: 'Panels',
 }
 
 // ─── HelpKeybindingsList ──────────────────────────────────────────────────────
@@ -66,10 +66,7 @@ export function HelpKeybindingsList(): ReactNode {
                 // Prefer the command title from the registry; fall back to
                 // displayName (for virtual bindings like 'spotlight.open'), then
                 // the raw commandId.
-                const title =
-                  commandTitleMap.get(kb.commandId) ??
-                  kb.displayName ??
-                  kb.commandId
+                const title = commandTitleMap.get(kb.commandId) ?? kb.displayName ?? kb.commandId
 
                 const shortcutLabel = isMac ? kb.shortcut.mac : kb.shortcut.win
 

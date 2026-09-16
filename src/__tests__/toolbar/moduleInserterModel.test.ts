@@ -26,9 +26,24 @@ function mod(id: string, category: string, name = id): RegistryModuleForInserter
   return { id, category, name, description: `${name} description` }
 }
 
-const PAGE_CTX: ModuleInsertionContext = { isVCMode: false, activeVcId: null, isTemplate: false, hasOutlet: false }
-const TEMPLATE_CTX: ModuleInsertionContext = { isVCMode: false, activeVcId: null, isTemplate: true, hasOutlet: false }
-const VC_CTX: ModuleInsertionContext = { isVCMode: true, activeVcId: 'vc-1', isTemplate: false, hasOutlet: false }
+const PAGE_CTX: ModuleInsertionContext = {
+  isVCMode: false,
+  activeVcId: null,
+  isTemplate: false,
+  hasOutlet: false,
+}
+const TEMPLATE_CTX: ModuleInsertionContext = {
+  isVCMode: false,
+  activeVcId: null,
+  isTemplate: true,
+  hasOutlet: false,
+}
+const VC_CTX: ModuleInsertionContext = {
+  isVCMode: true,
+  activeVcId: 'vc-1',
+  isTemplate: false,
+  hasOutlet: false,
+}
 
 beforeEach(() => {
   localStorage.clear()
@@ -90,13 +105,15 @@ describe('module inserter model', () => {
   })
 
   it('deduplicates inserter refs by kind and id while preserving first order', () => {
-    expect(dedupeModuleInserterRefs([
-      { kind: 'module', id: 'base.text' },
-      { kind: 'module', id: 'base.text' },
-      { kind: 'savedLayout', id: 'user-layout-1' },
-      { kind: 'module', id: 'base.image' },
-      { kind: 'savedLayout', id: 'user-layout-1' },
-    ])).toEqual([
+    expect(
+      dedupeModuleInserterRefs([
+        { kind: 'module', id: 'base.text' },
+        { kind: 'module', id: 'base.text' },
+        { kind: 'savedLayout', id: 'user-layout-1' },
+        { kind: 'module', id: 'base.image' },
+        { kind: 'savedLayout', id: 'user-layout-1' },
+      ]),
+    ).toEqual([
       { kind: 'module', id: 'base.text' },
       { kind: 'savedLayout', id: 'user-layout-1' },
       { kind: 'module', id: 'base.image' },
@@ -104,22 +121,21 @@ describe('module inserter model', () => {
   })
 
   it('resolves favorite refs against insertable items and skips missing refs', () => {
-    const items = getVisibleModuleItems([
-      mod('base.container', 'Layout', 'Container'),
-      mod('base.text', 'Typography', 'Text'),
-      mod('base.image', 'Media', 'Image'),
-    ], PAGE_CTX)
+    const items = getVisibleModuleItems(
+      [
+        mod('base.container', 'Layout', 'Container'),
+        mod('base.text', 'Typography', 'Text'),
+        mod('base.image', 'Media', 'Image'),
+      ],
+      PAGE_CTX,
+    )
 
-    const resolved = resolveInserterRefs([
-      ...DEFAULT_MODULE_INSERTER_FAVORITES,
-      { kind: 'module', id: 'base.missing' },
-    ], items)
+    const resolved = resolveInserterRefs(
+      [...DEFAULT_MODULE_INSERTER_FAVORITES, { kind: 'module', id: 'base.missing' }],
+      items,
+    )
 
-    expect(resolved.map((item) => item.id)).toEqual([
-      'base.container',
-      'base.text',
-      'base.image',
-    ])
+    expect(resolved.map((item) => item.id)).toEqual(['base.container', 'base.text', 'base.image'])
   })
 })
 

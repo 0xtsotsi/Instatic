@@ -124,19 +124,15 @@ function extractFeaturedMediaIds(rows: Array<{ cells_json: Record<string, unknow
 // Row → LoopItem projection
 // ---------------------------------------------------------------------------
 
-function rowToLoopItem(
-  row: PublishedDataRowSqlRow,
-  mediaPathMap: Map<string, string>,
-): LoopItem {
+function rowToLoopItem(row: PublishedDataRowSqlRow, mediaPathMap: Map<string, string>): LoopItem {
   const cells = row.cells_json as DataRowCells
   const tableRouteBase = normalizeRouteBase(row.table_route_base || `/${row.table_slug}`)
   const permalink = `${tableRouteBase === '/' ? '' : tableRouteBase}/${row.slug}`
 
   // Extract first inline image from the `body` cell (post-type rows only).
   const bodyValue = cells['body']
-  const firstImagePath = typeof bodyValue === 'string'
-    ? firstImagePathFromMarkdown(bodyValue)
-    : null
+  const firstImagePath =
+    typeof bodyValue === 'string' ? firstImagePathFromMarkdown(bodyValue) : null
 
   const featuredMediaId = readFeaturedMediaCell(cells)
   const featuredMediaPath = featuredMediaId ? (mediaPathMap.get(featuredMediaId) ?? null) : null
@@ -285,7 +281,6 @@ interface DataKindRowSqlRow {
   created_at: Date | string
   updated_at: Date | string
 }
-
 
 function dataKindRowToLoopItem(
   row: DataKindRowSqlRow,
@@ -443,7 +438,12 @@ export async function fetchPublishedDataRowItems(
     if (totalItems === 0) return { items: [], totalItems: 0 }
 
     const sqlRows = await fetchDataKindPage(
-      db, opts.tableId, orderBy, direction, opts.limit, opts.offset,
+      db,
+      opts.tableId,
+      orderBy,
+      direction,
+      opts.limit,
+      opts.offset,
     )
     const mediaPathMap = await resolveMediaIdsToPaths(db, extractFeaturedMediaIds(sqlRows))
     return {

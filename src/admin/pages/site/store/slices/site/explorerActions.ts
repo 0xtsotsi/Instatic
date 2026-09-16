@@ -74,7 +74,9 @@ export function createExplorerActions({
 
     renameExplorerFolder: (sectionId, folderId, name) => {
       mutateSite((site) => {
-        const folder = site.explorer[sectionId].folders.find((candidate) => candidate.id === folderId)
+        const folder = site.explorer[sectionId].folders.find(
+          (candidate) => candidate.id === folderId,
+        )
         if (!folder) return false
         const nextName = name.trim() || 'Folder'
         if (folder.name === nextName) return false
@@ -115,7 +117,13 @@ export function createExplorerActions({
     moveExplorerItems: (sectionId, itemIds, parentFolderId, nextIndex) => {
       mutateSite((site) => {
         reconcileSiteExplorerInPlace(site)
-        moveExplorerItemsInOrganization(site.explorer, sectionId, itemIds, parentFolderId, nextIndex)
+        moveExplorerItemsInOrganization(
+          site.explorer,
+          sectionId,
+          itemIds,
+          parentFolderId,
+          nextIndex,
+        )
         reconcileSiteExplorerInPlace(site)
         return true
       })
@@ -134,10 +142,18 @@ export function createExplorerActions({
     },
 
     previewRenameExplorerFolder: (sectionId, folderPath, nextFolderPath) =>
-      buildRenameExplorerFolderPlan(requireSite(get().site), { sectionId, folderPath, nextFolderPath }),
+      buildRenameExplorerFolderPlan(requireSite(get().site), {
+        sectionId,
+        folderPath,
+        nextFolderPath,
+      }),
 
     previewMoveExplorerFolder: (sectionId, folderPath, nextParentPath) =>
-      buildMoveExplorerFolderPlan(requireSite(get().site), { sectionId, folderPath, nextParentPath }),
+      buildMoveExplorerFolderPlan(requireSite(get().site), {
+        sectionId,
+        folderPath,
+        nextParentPath,
+      }),
 
     previewMoveExplorerItem: (sectionId, itemId, nextParentPath) =>
       buildMoveExplorerItemPlan(requireSite(get().site), { sectionId, itemId, nextParentPath }),
@@ -151,14 +167,18 @@ export function createExplorerActions({
         reconcileSiteExplorerInPlace(site)
         if (plan.kind === 'delete') {
           const deletedIds = new Set(plan.deletedItems.map((item) => item.id))
-          if (plan.sectionId === 'pages' && state.activePageId && deletedIds.has(state.activePageId)) {
+          if (
+            plan.sectionId === 'pages' &&
+            state.activePageId &&
+            deletedIds.has(state.activePageId)
+          ) {
             state.activePageId = site.pages[0]?.id ?? null
             state.activeDocument = null
           }
           if (
-            (plan.sectionId === 'styles' || plan.sectionId === 'scripts')
-            && state.activeEditorFileId
-            && deletedIds.has(state.activeEditorFileId)
+            (plan.sectionId === 'styles' || plan.sectionId === 'scripts') &&
+            state.activeEditorFileId &&
+            deletedIds.has(state.activeEditorFileId)
           ) {
             state.activeEditorFileId = null
           }
@@ -188,14 +208,18 @@ export function createExplorerActions({
         const siblings = structuralRowsForSection(site, sectionId)
           .filter((entry) => sameStructuralParent(entry.parentPath, row.parentPath))
           .sort(compareStructuralRows)
-        const currentIndex = siblings.findIndex((entry) => entry.kind === row.kind && entry.id === row.id)
+        const currentIndex = siblings.findIndex(
+          (entry) => entry.kind === row.kind && entry.id === row.id,
+        )
         if (currentIndex === -1) return false
         const [target] = siblings.splice(currentIndex, 1)
         if (!target) return false
         siblings.splice(clampIndex(nextIndex, siblings.length), 0, target)
         const parentPath = row.parentPath
         site.explorer[sectionId].rowOrder = [
-          ...site.explorer[sectionId].rowOrder.filter((entry) => !sameStructuralParent(entry.parentPath, parentPath)),
+          ...site.explorer[sectionId].rowOrder.filter(
+            (entry) => !sameStructuralParent(entry.parentPath, parentPath),
+          ),
           ...siblings.map((entry, order) => ({
             kind: entry.kind,
             id: entry.id,
@@ -215,7 +239,9 @@ export function createExplorerActions({
         if (currentHome?.id === target.id) return false
 
         if (currentHome) {
-          const slugSource = site.pages.filter((page) => page.id !== currentHome.id && page.id !== target.id)
+          const slugSource = site.pages.filter(
+            (page) => page.id !== currentHome.id && page.id !== target.id,
+          )
           currentHome.slug = createUniquePageSlug(currentHome.title, slugSource)
         }
         renamePageInSite(site, target.id, target.title, 'index')
@@ -231,7 +257,9 @@ function requireSite(site: SiteDocument | null): SiteDocument {
   return site
 }
 
-function isStructuralSection(sectionId: SiteExplorerSectionId): sectionId is StructuralSiteExplorerSectionId {
+function isStructuralSection(
+  sectionId: SiteExplorerSectionId,
+): sectionId is StructuralSiteExplorerSectionId {
   return sectionId === 'pages' || sectionId === 'styles' || sectionId === 'scripts'
 }
 
@@ -256,12 +284,13 @@ function structuralFolderPath(
   name: string,
   parentPath: string | undefined,
 ): string {
-  const segment = name
-    .trim()
-    .toLowerCase()
-    .replace(sectionId === 'pages' ? /[^a-z0-9-]+/g : /[^a-z0-9._-]+/g, '-')
-    .replace(/-+/g, '-')
-    .replace(/^-+|-+$/g, '') || 'new-folder'
+  const segment =
+    name
+      .trim()
+      .toLowerCase()
+      .replace(sectionId === 'pages' ? /[^a-z0-9-]+/g : /[^a-z0-9._-]+/g, '-')
+      .replace(/-+/g, '-')
+      .replace(/^-+|-+$/g, '') || 'new-folder'
   const parent = parentPath ? normalizeStructuralPath(parentPath) : ''
   return parent ? `${parent}/${segment}` : segment
 }
@@ -273,26 +302,28 @@ function structuralPathInUse(
 ): boolean {
   const section = site.explorer[sectionId]
   if (
-    section.emptyFolders.includes(path)
-    || section.expandedFolders.includes(path)
-    || section.rowOrder.some((entry) => entry.kind === 'folder' && entry.id === path)
+    section.emptyFolders.includes(path) ||
+    section.expandedFolders.includes(path) ||
+    section.rowOrder.some((entry) => entry.kind === 'folder' && entry.id === path)
   ) {
     return true
   }
 
   if (sectionId === 'pages') {
-    return site.pages.some((page) =>
-      !page.template
-      && page.slug !== 'index'
-      && (page.slug === path || page.slug.startsWith(`${path}/`))
+    return site.pages.some(
+      (page) =>
+        !page.template &&
+        page.slug !== 'index' &&
+        (page.slug === path || page.slug.startsWith(`${path}/`)),
     )
   }
 
   const type = sectionId === 'styles' ? 'style' : 'script'
-  return site.files.some((file) =>
-    file.type === type
-    && (!file.generated || file.ejected)
-    && (file.path === path || file.path.startsWith(`${path}/`))
+  return site.files.some(
+    (file) =>
+      file.type === type &&
+      (!file.generated || file.ejected) &&
+      (file.path === path || file.path.startsWith(`${path}/`)),
   )
 }
 

@@ -74,9 +74,9 @@ describe('siteImport Gate 1 — no admin imports', () => {
     if (violations.length > 0) {
       throw new Error(
         '[siteImport Gate 1] Admin imports found in src/core/siteImport/.\n' +
-        'The import pipeline must stay headless — no admin-side code.\n' +
-        'Violations:\n' +
-        violations.map((v) => `  src/${v}`).join('\n'),
+          'The import pipeline must stay headless — no admin-side code.\n' +
+          'Violations:\n' +
+          violations.map((v) => `  src/${v}`).join('\n'),
       )
     }
     expect(violations).toHaveLength(0)
@@ -96,7 +96,8 @@ describe('siteImport Gate 2 — no server imports', () => {
     }
 
     // Matches: server/, @server/
-    const SERVER_IMPORT_RE = /from\s+['"](?:@server\/|server\/|\.\.\/\.\.\/\.\.\/server\/)[^'"]*['"]/
+    const SERVER_IMPORT_RE =
+      /from\s+['"](?:@server\/|server\/|\.\.\/\.\.\/\.\.\/server\/)[^'"]*['"]/
 
     const violations: string[] = []
     for (const file of files) {
@@ -109,9 +110,9 @@ describe('siteImport Gate 2 — no server imports', () => {
     if (violations.length > 0) {
       throw new Error(
         '[siteImport Gate 2] Server imports found in src/core/siteImport/.\n' +
-        'The import pipeline must be server-agnostic to run in the browser bundle.\n' +
-        'Violations:\n' +
-        violations.map((v) => `  src/${v}`).join('\n'),
+          'The import pipeline must be server-agnostic to run in the browser bundle.\n' +
+          'Violations:\n' +
+          violations.map((v) => `  src/${v}`).join('\n'),
       )
     }
     expect(violations).toHaveLength(0)
@@ -142,7 +143,9 @@ describe('siteImport Gate 3 — no runtime React imports', () => {
         if (/^\s*import\s+type\b/.test(line)) continue
         // Flag any remaining `from 'react'` or `from 'react-dom'`
         if (/from\s+['"]react(?:-dom)?['"]/.test(line)) {
-          violations.push(`src/${relative(SRC_ROOT, file)}:${i + 1} — runtime React import in siteImport/`)
+          violations.push(
+            `src/${relative(SRC_ROOT, file)}:${i + 1} — runtime React import in siteImport/`,
+          )
         }
       }
     }
@@ -150,10 +153,10 @@ describe('siteImport Gate 3 — no runtime React imports', () => {
     if (violations.length > 0) {
       throw new Error(
         '[siteImport Gate 3] Runtime React imports found in src/core/siteImport/.\n' +
-        'The pipeline must be framework-agnostic. Move React usage to src/admin/.\n' +
-        'Type-only imports are allowed.\n' +
-        'Violations:\n' +
-        violations.map((v) => `  ${v}`).join('\n'),
+          'The pipeline must be framework-agnostic. Move React usage to src/admin/.\n' +
+          'Type-only imports are allowed.\n' +
+          'Violations:\n' +
+          violations.map((v) => `  ${v}`).join('\n'),
       )
     }
     expect(violations).toHaveLength(0)
@@ -173,10 +176,10 @@ describe('siteImport Gate 4 — no .tsx files', () => {
       const rel = tsxFiles.map((f) => `  src/${relative(SRC_ROOT, f)}`)
       throw new Error(
         '[siteImport Gate 4] .tsx files found in src/core/siteImport/.\n' +
-        '.tsx files embed JSX which implies React coupling — all siteImport/ files\n' +
-        'must be plain .ts (headless).\n' +
-        'Files:\n' +
-        rel.join('\n'),
+          '.tsx files embed JSX which implies React coupling — all siteImport/ files\n' +
+          'must be plain .ts (headless).\n' +
+          'Files:\n' +
+          rel.join('\n'),
       )
     }
     expect(tsxFiles).toHaveLength(0)

@@ -87,10 +87,7 @@ interface ErrorBoundaryState {
   resetSnapshot: ReadonlyArray<unknown>
 }
 
-function shallowEqualKeys(
-  a: ReadonlyArray<unknown>,
-  b: ReadonlyArray<unknown>,
-): boolean {
+function shallowEqualKeys(a: ReadonlyArray<unknown>, b: ReadonlyArray<unknown>): boolean {
   if (a.length !== b.length) return false
   for (let i = 0; i < a.length; i++) {
     if (!Object.is(a[i], b[i])) return false

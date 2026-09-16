@@ -57,8 +57,14 @@ export function useCanvasFormControlSuppression(
       if (isFocusableElement(event.target)) event.target.blur()
     }
 
-    iframeDoc.addEventListener('pointerdown', suppressPointerActivation, { capture: true, passive: false })
-    iframeDoc.addEventListener('mousedown', suppressPointerActivation, { capture: true, passive: false })
+    iframeDoc.addEventListener('pointerdown', suppressPointerActivation, {
+      capture: true,
+      passive: false,
+    })
+    iframeDoc.addEventListener('mousedown', suppressPointerActivation, {
+      capture: true,
+      passive: false,
+    })
     iframeDoc.addEventListener('click', suppressClickActivation, { capture: true })
     iframeDoc.addEventListener('focusin', suppressFocus, { capture: true })
     return () => {

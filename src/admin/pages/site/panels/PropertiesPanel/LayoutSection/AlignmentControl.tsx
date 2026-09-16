@@ -39,8 +39,7 @@ export function AlignmentControl({
   //   - direction: column | column-reverse  → main is vertical,   cross is horizontal
   // Both MAIN and CROSS arrays are named after the direction items flow
   // (i.e. the main axis), so we just pick the matching pair.
-  const isMainHorizontal =
-    flexDirection === 'row' || flexDirection === 'row-reverse'
+  const isMainHorizontal = flexDirection === 'row' || flexDirection === 'row-reverse'
 
   const options = isMainHorizontal
     ? axis === 'main'

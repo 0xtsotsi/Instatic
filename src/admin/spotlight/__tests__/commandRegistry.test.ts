@@ -50,7 +50,10 @@ function makeUser(capabilities: string[]): CmsCurrentUser {
   } as unknown as CmsCurrentUser
 }
 
-function makeCtx(capabilities: string[], workspace: CommandContext['workspace'] = 'site'): CommandContext {
+function makeCtx(
+  capabilities: string[],
+  workspace: CommandContext['workspace'] = 'site',
+): CommandContext {
   return {
     workspace,
     pathname: '/admin/site',
@@ -153,7 +156,11 @@ describe('filterCommands — when() predicate', () => {
   })
 
   it('treats a thrown when() as "hide" — never crashes the palette', () => {
-    const cmd = makeCmd({ when: () => { throw new Error('boom') } })
+    const cmd = makeCmd({
+      when: () => {
+        throw new Error('boom')
+      },
+    })
     const result = filterCommands([cmd], makeCtx([]))
     expect(result).toEqual([])
   })

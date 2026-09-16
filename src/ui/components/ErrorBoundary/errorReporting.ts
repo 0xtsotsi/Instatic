@@ -110,11 +110,7 @@ export function logErrorChain(
     console.error(`[${prefix}]`, `${head.name}: ${head.message}`, head.stack ?? '')
     for (let i = 1; i < chain.length; i++) {
       const entry = chain[i]
-      console.error(
-        `[${prefix}] caused by`,
-        `${entry.name}: ${entry.message}`,
-        entry.stack ?? '',
-      )
+      console.error(`[${prefix}] caused by`, `${entry.name}: ${entry.message}`, entry.stack ?? '')
     }
   }
   if (componentStack) {

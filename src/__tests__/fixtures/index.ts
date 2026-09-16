@@ -12,7 +12,12 @@
 
 import { nanoid } from 'nanoid'
 import type { Page, PageNode, SiteDocument } from '@core/page-tree'
-import { DEFAULT_BREAKPOINTS, DEFAULT_SITE_SETTINGS, createDefaultSiteExplorerOrganization, reindexNodeParents } from '@core/page-tree'
+import {
+  DEFAULT_BREAKPOINTS,
+  DEFAULT_SITE_SETTINGS,
+  createDefaultSiteExplorerOrganization,
+  reindexNodeParents,
+} from '@core/page-tree'
 import type { AnyModuleDefinition } from '@core/module-engine'
 import type { VisualComponent, VCNode } from '@core/visualComponents'
 import { SquareSolidIcon } from 'pixel-art-icons/icons/square-solid'
@@ -29,7 +34,7 @@ import { normalizeSiteRuntimeConfig } from '@core/site-runtime'
  */
 function makeModule(
   id = 'test.stub',
-  overrides: Partial<AnyModuleDefinition> = {}
+  overrides: Partial<AnyModuleDefinition> = {},
 ): AnyModuleDefinition {
   return {
     id,
@@ -99,7 +104,9 @@ export function makeVCTree(
 }
 
 /** Creates a minimal valid VisualComponent with a flat tree. */
-export function makeVC(overrides: Partial<VisualComponent> & { id: string; name: string }): VisualComponent {
+export function makeVC(
+  overrides: Partial<VisualComponent> & { id: string; name: string },
+): VisualComponent {
   const defaultRootId = 'vc-root'
   const defaultRoot = makeVCNode({ id: defaultRootId, moduleId: 'base.container' })
   return {

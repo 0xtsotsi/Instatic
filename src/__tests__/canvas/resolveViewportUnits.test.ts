@@ -25,7 +25,10 @@ describe('resolveViewportUnitsForCanvas', () => {
 
   it('resolves small/large/dynamic viewport variants', () => {
     expect(
-      resolveViewportUnitsForCanvas('.a{height:100svh;min-height:100lvh;max-height:100dvh}', viewport),
+      resolveViewportUnitsForCanvas(
+        '.a{height:100svh;min-height:100lvh;max-height:100dvh}',
+        viewport,
+      ),
     ).toBe('.a{height:800px;min-height:800px;max-height:800px}')
   })
 

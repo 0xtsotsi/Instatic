@@ -21,12 +21,8 @@
  * call returns a fresh anonymous component class — those don't enter
  * Fast Refresh boundaries because they're not module-level exports.
  */
-import type {
-  ModuleComponentProps,
-} from '@core/module-engine'
-import type {
-  PluginModuleDefinition,
-} from '@core/plugin-sdk'
+import type { ModuleComponentProps } from '@core/module-engine'
+import type { PluginModuleDefinition } from '@core/plugin-sdk'
 import type { PluginModuleComponentFactory } from '@core/plugins/moduleAdapter'
 
 /**
@@ -61,9 +57,11 @@ function injectModuleCss(moduleId: string, css: string): void {
   // Defensive — another instance may have injected the same hash before
   // this one ran (e.g. during concurrent first renders of two instances
   // of the same module).
-  if (document.querySelector(
-    `style[data-plugin-module="${CSS.escape(moduleId)}"][data-css-hash="${CSS.escape(hash)}"]`,
-  )) {
+  if (
+    document.querySelector(
+      `style[data-plugin-module="${CSS.escape(moduleId)}"][data-css-hash="${CSS.escape(hash)}"]`,
+    )
+  ) {
     injectedCssHashes.add(key)
     return
   }
@@ -75,7 +73,9 @@ function injectModuleCss(moduleId: string, css: string): void {
   injectedCssHashes.add(key)
 }
 
-export const editorPluginModuleComponentFactory: PluginModuleComponentFactory = (definition: PluginModuleDefinition) => {
+export const editorPluginModuleComponentFactory: PluginModuleComponentFactory = (
+  definition: PluginModuleDefinition,
+) => {
   const renderForEditor = definition.preview ?? definition.render
   const canHaveChildren = Boolean(definition.canHaveChildren)
   return function PluginCanvasModule(props: ModuleComponentProps) {

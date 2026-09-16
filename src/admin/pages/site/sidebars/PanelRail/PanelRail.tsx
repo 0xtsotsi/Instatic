@@ -162,21 +162,19 @@ export function PanelRail({
   // to resolve to (identity hash of 'site:layers:Layers', first item, no
   // collision shift) — consolidating Layers/Site/Media into one rail button
   // shouldn't change its established color.
-  const primaryAccents = assignRailAccents(
-    visiblePrimaryItems,
-    railIdentity,
-    (item) => (item.id === 'explorer' ? 'gold' : null),
+  const primaryAccents = assignRailAccents(visiblePrimaryItems, railIdentity, (item) =>
+    item.id === 'explorer' ? 'gold' : null,
   )
   const globalAccents = assignRailAccents(
     visibleGlobalItems,
     (item) => `global:${item.id}:${item.label}`,
   )
-  const primaryItems: RailItem[] = visiblePrimaryItems.map((item, index) => (
-    toRailItem(item, primaryAccents[index] ?? 'mint')
-  ))
-  const globalItems: RailItem[] = visibleGlobalItems.map((item, index) => (
-    toRailItem(item, globalAccents[index] ?? 'mint')
-  ))
+  const primaryItems: RailItem[] = visiblePrimaryItems.map((item, index) =>
+    toRailItem(item, primaryAccents[index] ?? 'mint'),
+  )
+  const globalItems: RailItem[] = visibleGlobalItems.map((item, index) =>
+    toRailItem(item, globalAccents[index] ?? 'mint'),
+  )
 
   // Plugin panels show up after the primary group when editing. Panels with an
   // explicit accent keep it; the rest get deterministic identity colors with
@@ -206,11 +204,7 @@ export function PanelRail({
     : []
 
   return (
-    <nav
-      aria-label="Panel dock"
-      className={styles.rail}
-      data-testid="panel-rail"
-    >
+    <nav aria-label="Panel dock" className={styles.rail} data-testid="panel-rail">
       <div className={styles.primaryStack}>
         <div className={styles.itemGroup} data-testid="panel-rail-primary">
           {primaryItems.map((item) => (

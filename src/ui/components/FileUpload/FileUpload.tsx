@@ -1,10 +1,4 @@
-import {
-  useRef,
-  type InputHTMLAttributes,
-  type MouseEvent,
-  type ReactNode,
-  type Ref,
-} from 'react'
+import { useRef, type InputHTMLAttributes, type MouseEvent, type ReactNode, type Ref } from 'react'
 import { Button, type ButtonProps } from '@ui/components/Button'
 import { cn } from '@ui/cn'
 import styles from './FileUpload.module.css'
@@ -56,11 +50,7 @@ export function FileUpload({
 
   return (
     <span className={cn(styles.fileUpload, className)}>
-      <Button
-        {...buttonRest}
-        type="button"
-        onClick={handleButtonClick}
-      >
+      <Button {...buttonRest} type="button" onClick={handleButtonClick}>
         {children}
       </Button>
       <input

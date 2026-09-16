@@ -42,7 +42,10 @@ const AuthenticatedAdmin = prewarmedLazy<{ section: AdminWorkspace; currentUser:
 // promise instantly — no penalty. main.tsx ALSO `await`s the import for
 // the same cookie-bearing path, which forces the post-Suspense render to
 // be flushSync-able and eliminates the concurrent-mode commit delay.
-if (typeof window !== 'undefined' && (window as unknown as { __instaticAuthed?: number }).__instaticAuthed === 1) {
+if (
+  typeof window !== 'undefined' &&
+  (window as unknown as { __instaticAuthed?: number }).__instaticAuthed === 1
+) {
   void AuthenticatedAdmin.preload().catch(() => {
     // Best-effort. If the preload fails the cold-path render will retry
     // when React actually requests AuthenticatedAdmin via Suspense.
@@ -54,9 +57,7 @@ type AdminSection = AdminWorkspace
 // After boot, the pre-auth form can lift us into MFA or into the editor.
 // `null` means "follow whatever the boot hook resolved to" — the form has
 // not produced a transition yet.
-type PreAuthOverride =
-  | { phase: PreAuthPhase }
-  | { phase: 'editor'; user: CmsCurrentUser }
+type PreAuthOverride = { phase: PreAuthPhase } | { phase: 'editor'; user: CmsCurrentUser }
 
 interface AdminEntryProps {
   section?: AdminSection
@@ -70,8 +71,7 @@ export default function AdminEntry({ section = 'dashboard' }: AdminEntryProps) {
   if (boot.status === 'loading') return <AppLoadingScreen />
 
   const livePhase = override?.phase ?? boot.phase
-  const liveUser =
-    override?.phase === 'editor' ? override.user : boot.currentUser
+  const liveUser = override?.phase === 'editor' ? override.user : boot.currentUser
 
   if (livePhase === 'editor') {
     if (!liveUser) return <AppLoadingScreen />

@@ -1,11 +1,13 @@
 export type SiteCreateKind = 'page' | 'component' | 'style' | 'script'
 
 export function slugifySiteItemName(value: string, fallback = 'page') {
-  return value
-    .trim()
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/^-|-$/g, '') || fallback
+  return (
+    value
+      .trim()
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-|-$/g, '') || fallback
+  )
 }
 
 function stripSitePrefix(value: string, prefix: string) {

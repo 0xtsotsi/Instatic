@@ -102,11 +102,7 @@ export function PluginCard(props: PluginCardProps) {
     //   - description line below the header
     //   - right-aligned action button placeholders
     return (
-      <article
-        className={styles.pluginCard}
-        aria-busy="true"
-        aria-label="Loading plugin"
-      >
+      <article className={styles.pluginCard} aria-busy="true" aria-label="Loading plugin">
         <header className={styles.pluginHeader}>
           <div className={styles.pluginHeaderInfo}>
             <Skeleton width={36} height={36} radius={8} />
@@ -149,8 +145,7 @@ export function PluginCard(props: PluginCardProps) {
       : null
   const { author, homepage, repository, license } = plugin.manifest
   const hasLinksRow =
-    Boolean(author || homepage || repository || license) ||
-    plugin.manifest.adminPages.length > 0
+    Boolean(author || homepage || repository || license) || plugin.manifest.adminPages.length > 0
 
   return (
     <article className={styles.pluginCard}>
@@ -168,10 +163,7 @@ export function PluginCard(props: PluginCardProps) {
           )}
           <div className={styles.pluginHeaderTitle}>
             <h2>{plugin.name}</h2>
-            <span
-              className={styles.pluginVersionPill}
-              aria-label={`Version ${plugin.version}`}
-            >
+            <span className={styles.pluginVersionPill} aria-label={`Version ${plugin.version}`}>
               v{plugin.version}
             </span>
             <span className={styles.pluginStatusPill} data-status={status.status}>
@@ -181,17 +173,20 @@ export function PluginCard(props: PluginCardProps) {
         </div>
 
         <div className={styles.pluginActions}>
-          {canConfigure && status.status !== 'error' && plugin.manifest.settings && plugin.manifest.settings.length > 0 && (
-            <Button
-              variant="secondary"
-              size="sm"
-              disabled={busy}
-              onClick={() => onOpenSettings(plugin)}
-              aria-label={`Edit settings for ${plugin.name}`}
-            >
-              <span>Settings</span>
-            </Button>
-          )}
+          {canConfigure &&
+            status.status !== 'error' &&
+            plugin.manifest.settings &&
+            plugin.manifest.settings.length > 0 && (
+              <Button
+                variant="secondary"
+                size="sm"
+                disabled={busy}
+                onClick={() => onOpenSettings(plugin)}
+                aria-label={`Edit settings for ${plugin.name}`}
+              >
+                <span>Settings</span>
+              </Button>
+            )}
           {status.status !== 'error' && plugin.grantedPermissions.includes('cms.schedule') && (
             <Button
               variant="secondary"
@@ -325,11 +320,7 @@ export function PluginCard(props: PluginCardProps) {
               <span className={styles.pluginAuthor}>
                 by{' '}
                 {author.url ? (
-                  <a
-                    href={safeUrl(author.url)}
-                    target="_blank"
-                    rel="noreferrer noopener"
-                  >
+                  <a href={safeUrl(author.url)} target="_blank" rel="noreferrer noopener">
                     {author.name}
                   </a>
                 ) : (

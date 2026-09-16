@@ -182,23 +182,14 @@ export const SiteMediaSource: LoopEntitySource = {
   ],
 
   async fetch(ctx): Promise<LoopFetchResult> {
-    const mimePrefix =
-      typeof ctx.filters.mimePrefix === 'string' ? ctx.filters.mimePrefix : ''
-    const orderBy: 'createdAt' | 'filename' =
-      ctx.orderBy === 'filename' ? 'filename' : 'createdAt'
+    const mimePrefix = typeof ctx.filters.mimePrefix === 'string' ? ctx.filters.mimePrefix : ''
+    const orderBy: 'createdAt' | 'filename' = ctx.orderBy === 'filename' ? 'filename' : 'createdAt'
     const direction: 'asc' | 'desc' = ctx.direction === 'asc' ? 'asc' : 'desc'
 
     const totalItems = await countMedia(ctx.db, mimePrefix)
     if (totalItems === 0) return { items: [], totalItems: 0 }
 
-    const rows = await fetchMediaPage(
-      ctx.db,
-      mimePrefix,
-      orderBy,
-      direction,
-      ctx.limit,
-      ctx.offset,
-    )
+    const rows = await fetchMediaPage(ctx.db, mimePrefix, orderBy, direction, ctx.limit, ctx.offset)
     return {
       items: rows.map(rowToLoopItem),
       totalItems,

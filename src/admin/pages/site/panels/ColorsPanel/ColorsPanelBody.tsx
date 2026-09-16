@@ -184,9 +184,7 @@ export function ColorsPanelBody() {
               token={token}
               categories={categories}
               expanded={expandedTokenId === token.id}
-              onToggle={() =>
-                setExpandedTokenId(expandedTokenId === token.id ? null : token.id)
-              }
+              onToggle={() => setExpandedTokenId(expandedTokenId === token.id ? null : token.id)}
               onPatch={(patch) => handlePatchToken(token, patch)}
               onContextMenu={(event) => openTokenContextMenu(token.id, event)}
             />

@@ -81,7 +81,10 @@ function builtInFieldsById(fields: readonly DataField[]): Map<string, DataField>
  * the primary field, and idempotent no-op writes of identity fields.
  */
 export function assertSystemTableUpdateAllowed(
-  existing: Pick<DataTable, 'system' | 'name' | 'slug' | 'routeBase' | 'singularLabel' | 'pluralLabel' | 'fields'>,
+  existing: Pick<
+    DataTable,
+    'system' | 'name' | 'slug' | 'routeBase' | 'singularLabel' | 'pluralLabel' | 'fields'
+  >,
   update: UpdateDataTableInput,
 ): string | null {
   if (existing.system !== true) return null

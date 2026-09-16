@@ -62,11 +62,7 @@ export function MediaExplorerSection({
             // Grid skeleton — mirrors `.mediaTile` (preview block + body
             // with label + meta) so the populated tile swaps in cleanly.
             Array.from({ length: SKELETON_TILE_COUNT }, (_, i) => (
-              <div
-                key={`skeleton-tile-${i}`}
-                className={styles.mediaTile}
-                aria-hidden="true"
-              >
+              <div key={`skeleton-tile-${i}`} className={styles.mediaTile} aria-hidden="true">
                 <span className={styles.mediaTilePreview}>
                   <Skeleton width="100%" height="100%" />
                 </span>
@@ -102,12 +98,10 @@ export function MediaExplorerSection({
             ))
           )
         ) : count === 0 ? (
-          <EmptyState
-            compact
-            title={emptyLabel}
-            className={styles.sectionEmpty}
-          />
-        ) : children}
+          <EmptyState compact title={emptyLabel} className={styles.sectionEmpty} />
+        ) : (
+          children
+        )}
       </div>
     </section>
   )

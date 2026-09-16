@@ -77,8 +77,7 @@ export function FluidEditor<G extends GroupShape, C extends GeneratorShape>({
       steps: prependStep(group.steps),
       baseScaleIndex: Math.min(baseScaleIndex + 1, stepLabels.length),
     })
-  const onAppendStep = () =>
-    adapter.onUpdateGroup(group.id, { steps: appendStep(group.steps) })
+  const onAppendStep = () => adapter.onUpdateGroup(group.id, { steps: appendStep(group.steps) })
   const onRemoveFirstStep = () => {
     const next = stepLabels.slice(1).join(',')
     adapter.onUpdateGroup(group.id, {

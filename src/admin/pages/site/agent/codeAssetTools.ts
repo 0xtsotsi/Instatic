@@ -128,7 +128,9 @@ function setRuntimeForCodeAsset(
 ): void {
   if (file.type === 'script') {
     const current = store.siteRuntime.scripts[file.id] ?? { ...DEFAULT_SCRIPT_RUNTIME_CONFIG }
-    const next = normalizeScriptRuntimeConfig(runtimePatch ? { ...current, ...runtimePatch } : current)
+    const next = normalizeScriptRuntimeConfig(
+      runtimePatch ? { ...current, ...runtimePatch } : current,
+    )
     store.setScriptRuntimeConfig(file.id, next)
     return
   }
@@ -183,7 +185,8 @@ function runtimeInspectionPage(
   if (input.document.type === 'visualComponent') {
     return {
       ok: false,
-      error: 'Runtime scripts and stylesheets target pages/templates, not visual component documents.',
+      error:
+        'Runtime scripts and stylesheets target pages/templates, not visual component documents.',
     }
   }
 

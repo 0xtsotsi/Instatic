@@ -42,9 +42,7 @@ function snapshot(text: string): PublishedPageSnapshot {
       ],
       files: [],
       visualComponents: [],
-      breakpoints: [
-        { id: 'desktop', label: 'Desktop', width: 1440, icon: 'monitor' },
-      ],
+      breakpoints: [{ id: 'desktop', label: 'Desktop', width: 1440, icon: 'monitor' }],
       settings: {
         metaTitle: 'Public Site',
         shortcuts: {},
@@ -78,13 +76,15 @@ function makeFakeDb(
     if (normalized.includes('site_snapshots.site_json')) {
       return {
         rows: activeSnapshot
-          ? [{
-              row_id: activeSnapshot.pageRowId,
-              site_json: activeSnapshot.site,
-              runtime_assets_json: activeSnapshot.runtimeAssets ?? null,
-              importmap_body: activeSnapshot.runtimePackageImportmap?.body ?? null,
-              importmap_sha256: activeSnapshot.runtimePackageImportmap?.sha256 ?? null,
-            } as unknown as Row]
+          ? [
+              {
+                row_id: activeSnapshot.pageRowId,
+                site_json: activeSnapshot.site,
+                runtime_assets_json: activeSnapshot.runtimeAssets ?? null,
+                importmap_body: activeSnapshot.runtimePackageImportmap?.body ?? null,
+                importmap_sha256: activeSnapshot.runtimePackageImportmap?.sha256 ?? null,
+              } as unknown as Row,
+            ]
           : [],
         rowCount: activeSnapshot ? 1 : 0,
       }
@@ -196,15 +196,18 @@ describe('public rendering', () => {
   })
 
   it('serves immutable published runtime assets by public path', async () => {
-    const res = await handleServerRequest(new Request('http://localhost/_instatic/assets/version_1/entries/entry.js'), {
-      db: makeFakeDb(null, [
-        {
-          public_path: '/_instatic/assets/version_1/entries/entry.js',
-          content_type: 'text/javascript; charset=utf-8',
-          content_bytes: new TextEncoder().encode('console.log("runtime")'),
-        },
-      ]),
-    })
+    const res = await handleServerRequest(
+      new Request('http://localhost/_instatic/assets/version_1/entries/entry.js'),
+      {
+        db: makeFakeDb(null, [
+          {
+            public_path: '/_instatic/assets/version_1/entries/entry.js',
+            content_type: 'text/javascript; charset=utf-8',
+            content_bytes: new TextEncoder().encode('console.log("runtime")'),
+          },
+        ]),
+      },
+    )
 
     expect(res.status).toBe(200)
     expect(res.headers.get('content-type')).toBe('text/javascript; charset=utf-8')
@@ -239,10 +242,9 @@ describe('public rendering', () => {
     expect(resetMatch).not.toBeNull()
 
     // Now fetch the bundle.
-    const cssRes = await handleServerRequest(
-      new Request(`http://localhost${resetMatch![1]}`),
-      { db: makeFakeDb(published) },
-    )
+    const cssRes = await handleServerRequest(new Request(`http://localhost${resetMatch![1]}`), {
+      db: makeFakeDb(published),
+    })
     expect(cssRes.status).toBe(200)
     expect(cssRes.headers.get('content-type')).toContain('text/css')
     expect(cssRes.headers.get('cache-control')).toContain('immutable')

@@ -19,11 +19,7 @@ import { existsSync, readdirSync, readFileSync, statSync } from 'fs'
 import { extname, join, relative } from 'path'
 
 const SRC_ROOT = join(import.meta.dir, '../..')
-const SCAN_ROOTS = [
-  join(SRC_ROOT, 'admin'),
-  join(SRC_ROOT, 'editor'),
-  join(SRC_ROOT, 'ui'),
-]
+const SCAN_ROOTS = [join(SRC_ROOT, 'admin'), join(SRC_ROOT, 'editor'), join(SRC_ROOT, 'ui')]
 
 const HEX_COLOR_RE = /#[0-9a-fA-F]{3,8}\b/g
 const RAW_COLOR_FUNCTION_RE = /\b(?:rgba?|hsla?)\(/g
@@ -45,9 +41,7 @@ function collectModuleCss(dir: string): string[] {
 
 /** Strip `/* ... *\/` block comments and `// ...` line comments from the source. */
 function stripComments(source: string): string {
-  return source
-    .replace(/\/\*[\s\S]*?\*\//g, '')
-    .replace(/^\s*\/\/.*$/gm, '')
+  return source.replace(/\/\*[\s\S]*?\*\//g, '').replace(/^\s*\/\/.*$/gm, '')
 }
 
 describe('CSS token policy — no raw colors in editor/admin/ui CSS modules', () => {

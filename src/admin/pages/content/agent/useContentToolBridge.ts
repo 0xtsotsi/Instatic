@@ -79,14 +79,11 @@ export function useContentToolBridge({
   useEffect(() => {
     const handle: ContentBridgeHandle = {
       buildSnapshot() {
-        return buildSnapshotFromWorkspace(
-          workspaceRef.current,
-          currentUserRef.current,
-        )
+        return buildSnapshotFromWorkspace(workspaceRef.current, currentUserRef.current)
       },
       async selectDocument(documentId) {
         const cached = workspaceRef.current.entries.find((entry) => entry.id === documentId)
-        const row = cached ?? await getCmsDataRow(documentId)
+        const row = cached ?? (await getCmsDataRow(documentId))
         if (!row) return false
 
         // Re-read after the fetch: the user may have navigated while the row
@@ -146,20 +143,12 @@ export function useContentToolBridge({
         await applyStatus(ws, row, status, scheduledAt)
       },
       async setDocumentField({ documentId, fieldId, value }) {
-        await saveDocumentFields(
-          workspaceRef.current,
-          draftRef.current,
-          documentId,
-          { [fieldId]: value },
-        )
+        await saveDocumentFields(workspaceRef.current, draftRef.current, documentId, {
+          [fieldId]: value,
+        })
       },
       async setDocumentFields({ documentId, fields }) {
-        await saveDocumentFields(
-          workspaceRef.current,
-          draftRef.current,
-          documentId,
-          fields,
-        )
+        await saveDocumentFields(workspaceRef.current, draftRef.current, documentId, fields)
       },
       async setDocumentAuthor({ documentId, userId }) {
         const ws = workspaceRef.current
@@ -188,7 +177,7 @@ async function saveDocumentFields(
   if (!row || ws.selectedEntry?.id !== documentId) {
     throw new Error(
       `Document ${documentId} is not the active doc. ` +
-      'Call set_active_document first so the user can see the change.',
+        'Call set_active_document first so the user can see the change.',
     )
   }
 
@@ -213,9 +202,9 @@ function normalizeEditableFields(fields: Record<string, unknown>): Record<string
         continue
       }
       if (
-        typeof value === 'object'
-        && 'id' in value
-        && typeof (value as { id?: unknown }).id === 'string'
+        typeof value === 'object' &&
+        'id' in value &&
+        typeof (value as { id?: unknown }).id === 'string'
       ) {
         normalized[key] = (value as { id: string }).id
         continue
@@ -234,10 +223,7 @@ function normalizeEditableFields(fields: Record<string, unknown>): Record<string
   return normalized
 }
 
-function applyFieldsToDraft(
-  draft: ContentToolDraftSurface,
-  fields: Record<string, unknown>,
-): void {
+function applyFieldsToDraft(draft: ContentToolDraftSurface, fields: Record<string, unknown>): void {
   for (const [key, raw] of Object.entries(fields)) {
     switch (key) {
       case 'title':
@@ -259,9 +245,12 @@ function applyFieldsToDraft(
         if (raw === null) draft.setFeaturedMediaId(null)
         else if (typeof raw === 'string') draft.setFeaturedMediaId(raw)
         else if (
-          raw && typeof raw === 'object'
-          && 'id' in raw && typeof (raw as { id?: unknown }).id === 'string'
-        ) draft.setFeaturedMediaId((raw as { id: string }).id)
+          raw &&
+          typeof raw === 'object' &&
+          'id' in raw &&
+          typeof (raw as { id?: unknown }).id === 'string'
+        )
+          draft.setFeaturedMediaId((raw as { id: string }).id)
         break
       default:
         draft.setCustomCell(key, raw)
@@ -313,10 +302,7 @@ function buildSnapshotFromWorkspace(
   }
 }
 
-function projectActiveDocument(
-  row: DataRow,
-  collections: DataTable[],
-): ContentAgentActiveDocument {
+function projectActiveDocument(row: DataRow, collections: DataTable[]): ContentAgentActiveDocument {
   const table = collections.find((candidate) => candidate.id === row.tableId)
   const tableFields = table ? normalizeDataTableFields(table.fields) : []
   return {

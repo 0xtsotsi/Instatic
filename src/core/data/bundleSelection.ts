@@ -15,7 +15,9 @@ interface BundleSelectionSource {
   redirects?: SiteBundle['redirects']
 }
 
-export function makeFullBundleImportSelection(bundle: BundleSelectionSource): BundleImportSelection {
+export function makeFullBundleImportSelection(
+  bundle: BundleSelectionSource,
+): BundleImportSelection {
   return {
     includeSite: bundle.site !== undefined,
     tables: bundle.tables.map((table) => ({ tableId: table.id })),
@@ -38,7 +40,10 @@ export function isFullBundleImportSelection(
     selection.includeRedirects === full.includeRedirects &&
     selection.rowSlugOverrides === undefined &&
     selection.tables.length === full.tables.length &&
-    selection.tables.every((entry) => entry.rowIds === undefined && full.tables.some((table) => table.tableId === entry.tableId))
+    selection.tables.every(
+      (entry) =>
+        entry.rowIds === undefined && full.tables.some((table) => table.tableId === entry.tableId),
+    )
   )
 }
 
@@ -54,9 +59,10 @@ export function filterSiteBundleForImportSelection(
     .map((row) => applyRowSlugOverride(row, slugOverrides.get(rowOverrideKey(row.tableId, row.id))))
   const selectedRowIds = new Set(rows.map((row) => row.id))
   const media = filterMedia(bundle.media, selection)
-  const redirects = selection.includeRedirects && bundle.redirects
-    ? bundle.redirects.filter((redirect) => selectedRowIds.has(redirect.targetRowId))
-    : undefined
+  const redirects =
+    selection.includeRedirects && bundle.redirects
+      ? bundle.redirects.filter((redirect) => selectedRowIds.has(redirect.targetRowId))
+      : undefined
 
   return parseValue(SiteBundleSchema, {
     schemaVersion: bundle.schemaVersion,
@@ -66,16 +72,20 @@ export function filterSiteBundleForImportSelection(
     tables,
     rows,
     ...(media ? { media } : {}),
-    ...(selection.includeMediaFolders && bundle.mediaFolders ? { mediaFolders: bundle.mediaFolders } : {}),
+    ...(selection.includeMediaFolders && bundle.mediaFolders
+      ? { mediaFolders: bundle.mediaFolders }
+      : {}),
     ...(redirects ? { redirects } : {}),
   })
 }
 
 function rowSlugOverrideMap(selection: BundleImportSelection): Map<string, string> {
-  return new Map((selection.rowSlugOverrides ?? []).map((override) => [
-    rowOverrideKey(override.tableId, override.rowId),
-    override.slug,
-  ]))
+  return new Map(
+    (selection.rowSlugOverrides ?? []).map((override) => [
+      rowOverrideKey(override.tableId, override.rowId),
+      override.slug,
+    ]),
+  )
 }
 
 function rowOverrideKey(tableId: string, rowId: string): string {
@@ -90,9 +100,7 @@ function applyRowSlugOverride(
   return {
     ...row,
     slug,
-    cells: typeof row.cells.slug === 'string'
-      ? { ...row.cells, slug }
-      : row.cells,
+    cells: typeof row.cells.slug === 'string' ? { ...row.cells, slug } : row.cells,
   }
 }
 

@@ -122,7 +122,9 @@ describe('capability route matrix', () => {
         }),
       })
       expect(contentStyleAttempt.status).toBe(403)
-      expect(await readJson<{ kind?: string }>(contentStyleAttempt)).toMatchObject({ kind: 'style' })
+      expect(await readJson<{ kind?: string }>(contentStyleAttempt)).toMatchObject({
+        kind: 'style',
+      })
 
       const styleEdit: SiteShell = {
         ...afterContent,
@@ -150,7 +152,9 @@ describe('capability route matrix', () => {
         }),
       })
       expect(styleContentAttempt.status).toBe(403)
-      expect(await readJson<{ kind?: string }>(styleContentAttempt)).toMatchObject({ kind: 'content' })
+      expect(await readJson<{ kind?: string }>(styleContentAttempt)).toMatchObject({
+        kind: 'content',
+      })
 
       const structureAllowed = await harness.cms('/admin/api/cms/site-document', {
         method: 'PUT',
@@ -171,7 +175,9 @@ describe('capability route matrix', () => {
         }),
       })
       expect(structureContentAttempt.status).toBe(403)
-      expect(await readJson<{ kind?: string }>(structureContentAttempt)).toMatchObject({ kind: 'content' })
+      expect(await readJson<{ kind?: string }>(structureContentAttempt)).toMatchObject({
+        kind: 'content',
+      })
     } finally {
       await harness.cleanup()
     }
@@ -218,7 +224,9 @@ describe('capability route matrix', () => {
         json: siteDocBody({ site: shell, deletedPageIds: existingPageIds }),
       })
       expect(contentCannotDelete.status).toBe(403)
-      expect(await readJson<{ kind?: string }>(contentCannotDelete)).toMatchObject({ kind: 'structure' })
+      expect(await readJson<{ kind?: string }>(contentCannotDelete)).toMatchObject({
+        kind: 'structure',
+      })
 
       // An empty incremental save (no rows changed, nothing deleted, shell
       // byte-identical) is a no-op any site-write capability may perform.
@@ -351,20 +359,28 @@ describe('capability route matrix', () => {
         capabilities: ['storage.migrate'],
       })
 
-      expect((await harness.cms('/admin/api/cms/media', {
-        method: 'GET',
-        cookie: mediaReader.cookie,
-      })).status).toBe(200)
-      await expectForbidden(await harness.cms('/admin/api/cms/media', {
-        method: 'POST',
-        cookie: mediaReader.cookie,
-        body: emptyForm(),
-      }))
+      expect(
+        (
+          await harness.cms('/admin/api/cms/media', {
+            method: 'GET',
+            cookie: mediaReader.cookie,
+          })
+        ).status,
+      ).toBe(200)
+      await expectForbidden(
+        await harness.cms('/admin/api/cms/media', {
+          method: 'POST',
+          cookie: mediaReader.cookie,
+          body: emptyForm(),
+        }),
+      )
 
-      await expectForbidden(await harness.cms('/admin/api/cms/media', {
-        method: 'GET',
-        cookie: mediaWriter.cookie,
-      }))
+      await expectForbidden(
+        await harness.cms('/admin/api/cms/media', {
+          method: 'GET',
+          cookie: mediaWriter.cookie,
+        }),
+      )
       const writerUpload = await harness.cms('/admin/api/cms/media', {
         method: 'POST',
         cookie: mediaWriter.cookie,
@@ -372,11 +388,13 @@ describe('capability route matrix', () => {
       })
       expectPastAuth(writerUpload)
 
-      await expectForbidden(await harness.cms('/admin/api/cms/media/missing/replace', {
-        method: 'POST',
-        cookie: mediaWriter.cookie,
-        body: emptyForm(),
-      }))
+      await expectForbidden(
+        await harness.cms('/admin/api/cms/media/missing/replace', {
+          method: 'POST',
+          cookie: mediaWriter.cookie,
+          body: emptyForm(),
+        }),
+      )
       const replacerReplace = await harness.cms('/admin/api/cms/media/missing/replace', {
         method: 'POST',
         cookie: mediaReplacer.cookie,
@@ -384,41 +402,57 @@ describe('capability route matrix', () => {
       })
       expectPastAuth(replacerReplace)
 
-      await expectForbidden(await harness.cms('/admin/api/cms/media/missing', {
-        method: 'DELETE',
-        cookie: mediaReader.cookie,
-      }))
+      await expectForbidden(
+        await harness.cms('/admin/api/cms/media/missing', {
+          method: 'DELETE',
+          cookie: mediaReader.cookie,
+        }),
+      )
       const deleterDelete = await harness.cms('/admin/api/cms/media/missing', {
         method: 'DELETE',
         cookie: mediaDeleter.cookie,
       })
       expectPastAuth(deleterDelete)
 
-      await expectForbidden(await harness.cms('/admin/api/cms/runtime/dependencies/resolve', {
-        method: 'POST',
-        cookie: storageElector.cookie,
-        json: { packageJson: { dependencies: {} } },
-      }))
-      expect((await harness.cms('/admin/api/cms/runtime/dependencies/resolve', {
-        method: 'POST',
-        cookie: runtimeManager.cookie,
-        json: { packageJson: { dependencies: {} } },
-      })).status).toBe(200)
+      await expectForbidden(
+        await harness.cms('/admin/api/cms/runtime/dependencies/resolve', {
+          method: 'POST',
+          cookie: storageElector.cookie,
+          json: { packageJson: { dependencies: {} } },
+        }),
+      )
+      expect(
+        (
+          await harness.cms('/admin/api/cms/runtime/dependencies/resolve', {
+            method: 'POST',
+            cookie: runtimeManager.cookie,
+            json: { packageJson: { dependencies: {} } },
+          })
+        ).status,
+      ).toBe(200)
 
-      await expectForbidden(await harness.cms('/admin/api/cms/media/storage', {
-        method: 'GET',
-        cookie: runtimeManager.cookie,
-      }))
-      expect((await harness.cms('/admin/api/cms/media/storage', {
-        method: 'GET',
-        cookie: storageElector.cookie,
-      })).status).toBe(200)
+      await expectForbidden(
+        await harness.cms('/admin/api/cms/media/storage', {
+          method: 'GET',
+          cookie: runtimeManager.cookie,
+        }),
+      )
+      expect(
+        (
+          await harness.cms('/admin/api/cms/media/storage', {
+            method: 'GET',
+            cookie: storageElector.cookie,
+          })
+        ).status,
+      ).toBe(200)
 
-      await expectForbidden(await harness.cms('/admin/api/cms/media/storage/migrate', {
-        method: 'POST',
-        cookie: storageElector.cookie,
-        json: { role: 'original', toAdapterId: '' },
-      }))
+      await expectForbidden(
+        await harness.cms('/admin/api/cms/media/storage/migrate', {
+          method: 'POST',
+          cookie: storageElector.cookie,
+          json: { role: 'original', toAdapterId: '' },
+        }),
+      )
       const migratorCanReachMigration = await harness.cms('/admin/api/cms/media/storage/migrate', {
         method: 'POST',
         cookie: storageMigrator.cookie,
@@ -455,36 +489,48 @@ describe('capability route matrix', () => {
         capabilities: ['plugins.lifecycle'],
       })
 
-      expect((await harness.cms('/admin/api/cms/plugins', {
-        method: 'GET',
-        cookie: pluginReader.cookie,
-      })).status).toBe(200)
-      await expectForbidden(await harness.cms('/admin/api/cms/plugins/missing', {
-        method: 'PATCH',
-        cookie: pluginReader.cookie,
-        json: { enabled: false },
-      }))
-      await expectForbidden(await harness.cms('/admin/api/cms/plugins/missing/settings', {
-        method: 'GET',
-        cookie: pluginReader.cookie,
-      }))
+      expect(
+        (
+          await harness.cms('/admin/api/cms/plugins', {
+            method: 'GET',
+            cookie: pluginReader.cookie,
+          })
+        ).status,
+      ).toBe(200)
+      await expectForbidden(
+        await harness.cms('/admin/api/cms/plugins/missing', {
+          method: 'PATCH',
+          cookie: pluginReader.cookie,
+          json: { enabled: false },
+        }),
+      )
+      await expectForbidden(
+        await harness.cms('/admin/api/cms/plugins/missing/settings', {
+          method: 'GET',
+          cookie: pluginReader.cookie,
+        }),
+      )
 
       const settingsRead = await harness.cms('/admin/api/cms/plugins/missing/settings', {
         method: 'GET',
         cookie: pluginConfigurator.cookie,
       })
       expectPastAuth(settingsRead)
-      await expectStepUpRequired(await harness.cms('/admin/api/cms/plugins/missing/settings', {
-        method: 'PUT',
-        cookie: pluginConfigurator.cookie,
-        json: { settings: {} },
-      }))
+      await expectStepUpRequired(
+        await harness.cms('/admin/api/cms/plugins/missing/settings', {
+          method: 'PUT',
+          cookie: pluginConfigurator.cookie,
+          json: { settings: {} },
+        }),
+      )
       const steppedConfigurator = await harness.stepUp(pluginConfigurator.cookie)
-      expectPastAuth(await harness.cms('/admin/api/cms/plugins/missing/settings', {
-        method: 'PUT',
-        cookie: steppedConfigurator,
-        json: { settings: {} },
-      }))
+      expectPastAuth(
+        await harness.cms('/admin/api/cms/plugins/missing/settings', {
+          method: 'PUT',
+          cookie: steppedConfigurator,
+          json: { settings: {} },
+        }),
+      )
 
       const inspectPackage = await harness.cms('/admin/api/cms/plugins/inspect-package', {
         method: 'POST',
@@ -492,27 +538,35 @@ describe('capability route matrix', () => {
         body: emptyForm(),
       })
       expectPastAuth(inspectPackage)
-      await expectStepUpRequired(await harness.cms('/admin/api/cms/plugins', {
-        method: 'POST',
-        cookie: pluginInstaller.cookie,
-        json: { manifest: {} },
-      }))
-      await expectStepUpRequired(await harness.cms('/admin/api/cms/plugins/missing', {
-        method: 'DELETE',
-        cookie: pluginInstaller.cookie,
-      }))
+      await expectStepUpRequired(
+        await harness.cms('/admin/api/cms/plugins', {
+          method: 'POST',
+          cookie: pluginInstaller.cookie,
+          json: { manifest: {} },
+        }),
+      )
+      await expectStepUpRequired(
+        await harness.cms('/admin/api/cms/plugins/missing', {
+          method: 'DELETE',
+          cookie: pluginInstaller.cookie,
+        }),
+      )
 
-      await expectStepUpRequired(await harness.cms('/admin/api/cms/plugins/missing', {
-        method: 'PATCH',
-        cookie: pluginLifecycle.cookie,
-        json: { enabled: false },
-      }))
+      await expectStepUpRequired(
+        await harness.cms('/admin/api/cms/plugins/missing', {
+          method: 'PATCH',
+          cookie: pluginLifecycle.cookie,
+          json: { enabled: false },
+        }),
+      )
       const steppedLifecycle = await harness.stepUp(pluginLifecycle.cookie)
-      expectPastAuth(await harness.cms('/admin/api/cms/plugins/missing', {
-        method: 'PATCH',
-        cookie: steppedLifecycle,
-        json: { enabled: false },
-      }))
+      expectPastAuth(
+        await harness.cms('/admin/api/cms/plugins/missing', {
+          method: 'PATCH',
+          cookie: steppedLifecycle,
+          json: { enabled: false },
+        }),
+      )
     } finally {
       await harness.cleanup()
     }
@@ -543,20 +597,28 @@ describe('capability route matrix', () => {
         capabilities: ['data.import', 'content.manage'],
       })
 
-      await expectForbidden(await harness.cms('/admin/api/cms/export', {
-        method: 'GET',
-        cookie: tableReader.cookie,
-      }))
-      expect((await harness.cms('/admin/api/cms/export', {
-        method: 'GET',
-        cookie: exporter.cookie,
-      })).status).toBe(200)
+      await expectForbidden(
+        await harness.cms('/admin/api/cms/export', {
+          method: 'GET',
+          cookie: tableReader.cookie,
+        }),
+      )
+      expect(
+        (
+          await harness.cms('/admin/api/cms/export', {
+            method: 'GET',
+            cookie: exporter.cookie,
+          })
+        ).status,
+      ).toBe(200)
 
-      await expectForbidden(await harness.cms('/admin/api/cms/import/preview', {
-        method: 'POST',
-        cookie: tableReader.cookie,
-        json: {},
-      }))
+      await expectForbidden(
+        await harness.cms('/admin/api/cms/import/preview', {
+          method: 'POST',
+          cookie: tableReader.cookie,
+          json: {},
+        }),
+      )
       const previewInvalidBundle = await harness.cms('/admin/api/cms/import/preview', {
         method: 'POST',
         cookie: exporter.cookie,
@@ -564,11 +626,13 @@ describe('capability route matrix', () => {
       })
       expectPastAuth(previewInvalidBundle)
 
-      await expectForbidden(await harness.cms('/admin/api/cms/import?strategy=merge-add', {
-        method: 'POST',
-        cookie: exporter.cookie,
-        json: {},
-      }))
+      await expectForbidden(
+        await harness.cms('/admin/api/cms/import?strategy=merge-add', {
+          method: 'POST',
+          cookie: exporter.cookie,
+          json: {},
+        }),
+      )
       const importerInvalidBundle = await harness.cms('/admin/api/cms/import?strategy=merge-add', {
         method: 'POST',
         cookie: importer.cookie,
@@ -576,16 +640,20 @@ describe('capability route matrix', () => {
       })
       expectPastAuth(importerInvalidBundle)
 
-      await expectForbidden(await harness.cms('/admin/api/cms/import', {
-        method: 'POST',
-        cookie: importer.cookie,
-        json: {},
-      }))
-      await expectStepUpRequired(await harness.cms('/admin/api/cms/import', {
-        method: 'POST',
-        cookie: destructiveImporter.cookie,
-        json: {},
-      }))
+      await expectForbidden(
+        await harness.cms('/admin/api/cms/import', {
+          method: 'POST',
+          cookie: importer.cookie,
+          json: {},
+        }),
+      )
+      await expectStepUpRequired(
+        await harness.cms('/admin/api/cms/import', {
+          method: 'POST',
+          cookie: destructiveImporter.cookie,
+          json: {},
+        }),
+      )
     } finally {
       await harness.cleanup()
     }
@@ -616,14 +684,20 @@ describe('capability route matrix', () => {
         capabilities: ['ai.chat'],
       })
 
-      await expectForbidden(await harness.ai('/admin/api/ai/credentials', {
-        method: 'GET',
-        cookie: dashboardOnly.cookie,
-      }))
-      expect((await harness.ai('/admin/api/ai/credentials', {
-        method: 'GET',
-        cookie: providerManager.cookie,
-      })).status).toBe(200)
+      await expectForbidden(
+        await harness.ai('/admin/api/ai/credentials', {
+          method: 'GET',
+          cookie: dashboardOnly.cookie,
+        }),
+      )
+      expect(
+        (
+          await harness.ai('/admin/api/ai/credentials', {
+            method: 'GET',
+            cookie: providerManager.cookie,
+          })
+        ).status,
+      ).toBe(200)
       const invalidCredentialCreate = await harness.ai('/admin/api/ai/credentials', {
         method: 'POST',
         cookie: providerManager.cookie,
@@ -631,23 +705,35 @@ describe('capability route matrix', () => {
       })
       expectPastAuth(invalidCredentialCreate)
 
-      await expectForbidden(await harness.ai('/admin/api/ai/audit', {
-        method: 'GET',
-        cookie: providerManager.cookie,
-      }))
-      expect((await harness.ai('/admin/api/ai/audit', {
-        method: 'GET',
-        cookie: auditReader.cookie,
-      })).status).toBe(200)
+      await expectForbidden(
+        await harness.ai('/admin/api/ai/audit', {
+          method: 'GET',
+          cookie: providerManager.cookie,
+        }),
+      )
+      expect(
+        (
+          await harness.ai('/admin/api/ai/audit', {
+            method: 'GET',
+            cookie: auditReader.cookie,
+          })
+        ).status,
+      ).toBe(200)
 
-      await expectForbidden(await harness.ai('/admin/api/ai/conversations?scope=site', {
-        method: 'GET',
-        cookie: dashboardOnly.cookie,
-      }))
-      expect((await harness.ai('/admin/api/ai/conversations?scope=site', {
-        method: 'GET',
-        cookie: chatUser.cookie,
-      })).status).toBe(200)
+      await expectForbidden(
+        await harness.ai('/admin/api/ai/conversations?scope=site', {
+          method: 'GET',
+          cookie: dashboardOnly.cookie,
+        }),
+      )
+      expect(
+        (
+          await harness.ai('/admin/api/ai/conversations?scope=site', {
+            method: 'GET',
+            cookie: chatUser.cookie,
+          })
+        ).status,
+      ).toBe(200)
       const invalidChat = await harness.ai('/admin/api/ai/chat/site', {
         method: 'POST',
         cookie: chatUser.cookie,

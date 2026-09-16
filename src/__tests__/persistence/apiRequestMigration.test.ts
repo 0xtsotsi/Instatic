@@ -73,8 +73,9 @@ describe('persistence → apiRequest migration invariants', () => {
 
   it('rejects a schema-invalid success body at the boundary', async () => {
     await expect(
-      listCmsDataTables(async () =>
-        new Response(JSON.stringify({ tables: [{ id: 'bad', slug: 'bad' }] }), { status: 200 }),
+      listCmsDataTables(
+        async () =>
+          new Response(JSON.stringify({ tables: [{ id: 'bad', slug: 'bad' }] }), { status: 200 }),
       ),
     ).rejects.toThrow('/tables/0')
   })
@@ -82,8 +83,8 @@ describe('persistence → apiRequest migration invariants', () => {
   it('surfaces a non-OK response as ApiError carrying the HTTP status', async () => {
     let caught: unknown
     try {
-      await listCmsDataTables(async () =>
-        new Response(JSON.stringify({ error: 'step_up_required' }), { status: 401 }),
+      await listCmsDataTables(
+        async () => new Response(JSON.stringify({ error: 'step_up_required' }), { status: 401 }),
       )
     } catch (err) {
       caught = err

@@ -200,15 +200,17 @@ export function generateForcedStateCSS(
   const rawSelector = `[data-node-id="${escapeCssAttribute(nodeId)}"]`
   const selector = `${rawSelector}${rawSelector}`
 
-  const baseStyles = inflight && inflight.contextId === null
-    ? { ...rule.styles, ...inflight.styles }
-    : rule.styles
+  const baseStyles =
+    inflight && inflight.contextId === null ? { ...rule.styles, ...inflight.styles } : rule.styles
 
   // Merge any in-flight edit into the context it targets so a brand-new
   // context override previews live too.
   const contextStyles: Record<string, Record<string, unknown>> = { ...(rule.contextStyles ?? {}) }
   if (inflight && inflight.contextId !== null) {
-    contextStyles[inflight.contextId] = { ...(contextStyles[inflight.contextId] ?? {}), ...inflight.styles }
+    contextStyles[inflight.contextId] = {
+      ...(contextStyles[inflight.contextId] ?? {}),
+      ...inflight.styles,
+    }
   }
 
   const emitRule = createStyleRuleCssEmitter(breakpoints, conditions, responsiveOptions)

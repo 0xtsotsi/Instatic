@@ -96,7 +96,9 @@ export function NodeHeader({ nodeId, label, moduleName, onRename }: NodeHeaderPr
       >
         <CornerDownLeftIcon size={12} className={styles.headerLayerMenuIcon} aria-hidden="true" />
       </Button>
-      <span className={styles.headerNodeLabel} title={displayName}>{displayName}</span>
+      <span className={styles.headerNodeLabel} title={displayName}>
+        {displayName}
+      </span>
       {canRename && (
         <Button
           variant="ghost"

@@ -1,9 +1,4 @@
-import {
-  type CSSProperties,
-  type HTMLAttributes,
-  type ReactNode,
-  type Ref,
-} from 'react'
+import { type CSSProperties, type HTMLAttributes, type ReactNode, type Ref } from 'react'
 import type { IconComponent } from 'pixel-art-icons/types'
 import { ChevronRightIcon } from 'pixel-art-icons/icons/chevron-right'
 import { cn } from '@ui/cn'
@@ -47,10 +42,12 @@ export function TreeRow({
   return (
     <div
       ref={ref}
-      style={{
-        '--tree-row-pl': `${paddingLeft}px`,
-        ...style,
-      } as CSSProperties}
+      style={
+        {
+          '--tree-row-pl': `${paddingLeft}px`,
+          ...style,
+        } as CSSProperties
+      }
       className={cn(
         styles.row,
         selected && styles.rowSelected,
@@ -113,33 +110,20 @@ export function TreeIconSlot({
   ...props
 }: TreeIconSlotProps) {
   return (
-    <span
-      aria-hidden="true"
-      className={cn(styles.iconSlot, className)}
-      {...props}
-    >
+    <span aria-hidden="true" className={cn(styles.iconSlot, className)} {...props}>
       {children ?? (SlotIcon ? <SlotIcon size={iconSize} color={iconColor} /> : null)}
     </span>
   )
 }
 
-export function TreeLabelGroup({
-  className,
-  ...props
-}: HTMLAttributes<HTMLSpanElement>) {
+export function TreeLabelGroup({ className, ...props }: HTMLAttributes<HTMLSpanElement>) {
   return <span className={cn(styles.labelGroup, className)} {...props} />
 }
 
-export function TreeLabel({
-  className,
-  ...props
-}: HTMLAttributes<HTMLSpanElement>) {
+export function TreeLabel({ className, ...props }: HTMLAttributes<HTMLSpanElement>) {
   return <span className={cn(styles.label, className)} {...props} />
 }
 
-export function TreeMeta({
-  className,
-  ...props
-}: HTMLAttributes<HTMLSpanElement>) {
+export function TreeMeta({ className, ...props }: HTMLAttributes<HTMLSpanElement>) {
   return <span className={cn(styles.meta, className)} {...props} />
 }

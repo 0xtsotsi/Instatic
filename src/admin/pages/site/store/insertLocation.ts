@@ -39,9 +39,7 @@ export interface InsertLocation {
  * the genuine dead-end case where the caller has nowhere to place content.
  */
 function siblingAfter(page: NodeTree<PageNode>, targetNodeId: string): InsertLocation | null {
-  const parent = Object.values(page.nodes).find((n) =>
-    n.children.includes(targetNodeId),
-  )
+  const parent = Object.values(page.nodes).find((n) => n.children.includes(targetNodeId))
   if (!parent) return null
   const idx = parent.children.indexOf(targetNodeId)
   return { parentId: parent.id, index: idx >= 0 ? idx + 1 : undefined }

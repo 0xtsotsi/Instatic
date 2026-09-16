@@ -555,7 +555,12 @@ describe('findDynamicNodeIds — pre-pass / main-pass rule agreement', () => {
   // should be classified request-dependent.
   type RuleCase = {
     name: string
-    dynamicNode: { moduleId: string; props?: Record<string, unknown>; children?: string[]; dynamicBindings?: Record<string, { source: string; field: string }> }
+    dynamicNode: {
+      moduleId: string
+      props?: Record<string, unknown>
+      children?: string[]
+      dynamicBindings?: Record<string, { source: string; field: string }>
+    }
     setup?: () => void
     visualComponents?: VisualComponent[]
   }

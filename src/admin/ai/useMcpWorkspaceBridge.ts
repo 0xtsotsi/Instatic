@@ -28,10 +28,7 @@ const BridgeEventSchema = Type.Union([
 ])
 
 export type McpWorkspaceScope = 'site' | 'content'
-export type McpToolDispatcher = (
-  toolName: string,
-  input: unknown,
-) => Promise<AiToolOutput>
+export type McpToolDispatcher = (toolName: string, input: unknown) => Promise<AiToolOutput>
 export type McpAfterSuccessfulTool = () => Promise<void>
 
 /**

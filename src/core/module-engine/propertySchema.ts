@@ -1,36 +1,29 @@
 import { Type, type Static } from '@core/utils/typeboxHelpers'
 
-const PropertyConditionSchema = Type.Recursive((Self) => Type.Union([
-  Type.Object(
-    { field: Type.String({ minLength: 1 }), eq: Type.Unknown() },
-    { additionalProperties: false },
-  ),
-  Type.Object(
-    { field: Type.String({ minLength: 1 }), notEq: Type.Unknown() },
-    { additionalProperties: false },
-  ),
-  Type.Object(
-    { field: Type.String({ minLength: 1 }), in: Type.Array(Type.Unknown()) },
-    { additionalProperties: false },
-  ),
-  Type.Object(
-    { field: Type.String({ minLength: 1 }), notIn: Type.Array(Type.Unknown()) },
-    { additionalProperties: false },
-  ),
-  Type.Object(
-    { and: Type.Array(Self) },
-    { additionalProperties: false },
-  ),
-  Type.Object(
-    { or: Type.Array(Self) },
-    { additionalProperties: false },
-  ),
-]))
+const PropertyConditionSchema = Type.Recursive((Self) =>
+  Type.Union([
+    Type.Object(
+      { field: Type.String({ minLength: 1 }), eq: Type.Unknown() },
+      { additionalProperties: false },
+    ),
+    Type.Object(
+      { field: Type.String({ minLength: 1 }), notEq: Type.Unknown() },
+      { additionalProperties: false },
+    ),
+    Type.Object(
+      { field: Type.String({ minLength: 1 }), in: Type.Array(Type.Unknown()) },
+      { additionalProperties: false },
+    ),
+    Type.Object(
+      { field: Type.String({ minLength: 1 }), notIn: Type.Array(Type.Unknown()) },
+      { additionalProperties: false },
+    ),
+    Type.Object({ and: Type.Array(Self) }, { additionalProperties: false }),
+    Type.Object({ or: Type.Array(Self) }, { additionalProperties: false }),
+  ]),
+)
 
-const PropertyControlLayoutSchema = Type.Union([
-  Type.Literal('inline'),
-  Type.Literal('stacked'),
-])
+const PropertyControlLayoutSchema = Type.Union([Type.Literal('inline'), Type.Literal('stacked')])
 
 const TextControlNormalizeSchema = Type.Literal('identifier')
 
@@ -52,10 +45,7 @@ const TextControlNormalizeSchema = Type.Literal('identifier')
  * content from a copy-editor's point of view and should be opted into
  * 'content' explicitly).
  */
-const PropertyControlCategorySchema = Type.Union([
-  Type.Literal('content'),
-  Type.Literal('layout'),
-])
+const PropertyControlCategorySchema = Type.Union([Type.Literal('content'), Type.Literal('layout')])
 
 const PropertyControlBaseSchema = {
   label: Type.String({ minLength: 1 }),
@@ -84,98 +74,100 @@ const PropertyControlOptionSchema = Type.Object(
   { additionalProperties: false },
 )
 
-export const PropertyControlSchema = Type.Recursive((Self) => Type.Union([
-  Type.Object(
-    {
-      ...PropertyControlBaseSchema,
-      type: Type.Literal('text'),
-      placeholder: Type.Optional(Type.String()),
-      normalize: Type.Optional(TextControlNormalizeSchema),
-    },
-    { additionalProperties: false },
-  ),
-  Type.Object(
-    {
-      ...PropertyControlBaseSchema,
-      type: Type.Literal('textarea'),
-      rows: Type.Optional(Type.Number()),
-      placeholder: Type.Optional(Type.String()),
-    },
-    { additionalProperties: false },
-  ),
-  Type.Object(
-    {
-      ...PropertyControlBaseSchema,
-      type: Type.Literal('number'),
-      min: Type.Optional(Type.Number()),
-      max: Type.Optional(Type.Number()),
-      step: Type.Optional(Type.Number()),
-      unit: Type.Optional(Type.String()),
-    },
-    { additionalProperties: false },
-  ),
-  Type.Object(
-    {
-      ...PropertyControlBaseSchema,
-      type: Type.Literal('color'),
-      format: Type.Optional(Type.Union([Type.Literal('hex'), Type.Literal('rgba')])),
-    },
-    { additionalProperties: false },
-  ),
-  Type.Object(
-    {
-      ...PropertyControlBaseSchema,
-      type: Type.Literal('select'),
-      options: Type.Array(PropertyControlOptionSchema),
-    },
-    { additionalProperties: false },
-  ),
-  Type.Object(
-    { ...PropertyControlBaseSchema, type: Type.Literal('toggle') },
-    { additionalProperties: false },
-  ),
-  Type.Object(
-    { ...PropertyControlBaseSchema, type: Type.Literal('image') },
-    { additionalProperties: false },
-  ),
-  Type.Object(
-    {
-      ...PropertyControlBaseSchema,
-      type: Type.Literal('media'),
-      mediaKind: Type.Union([Type.Literal('image'), Type.Literal('video')]),
-    },
-    { additionalProperties: false },
-  ),
-  Type.Object(
-    { ...PropertyControlBaseSchema, type: Type.Literal('url') },
-    { additionalProperties: false },
-  ),
-  Type.Object(
-    {
-      ...PropertyControlBaseSchema,
-      type: Type.Literal('dataTable'),
-      includeSystem: Type.Optional(Type.Boolean()),
-    },
-    { additionalProperties: false },
-  ),
-  Type.Object(
-    { ...PropertyControlBaseSchema, type: Type.Literal('richtext') },
-    { additionalProperties: false },
-  ),
-  Type.Object(
-    { ...PropertyControlBaseSchema, type: Type.Literal('svg') },
-    { additionalProperties: false },
-  ),
-  Type.Object(
-    {
-      ...PropertyControlBaseSchema,
-      type: Type.Literal('group'),
-      collapsed: Type.Optional(Type.Boolean()),
-      children: Type.Record(Type.String(), Self),
-    },
-    { additionalProperties: false },
-  ),
-]))
+export const PropertyControlSchema = Type.Recursive((Self) =>
+  Type.Union([
+    Type.Object(
+      {
+        ...PropertyControlBaseSchema,
+        type: Type.Literal('text'),
+        placeholder: Type.Optional(Type.String()),
+        normalize: Type.Optional(TextControlNormalizeSchema),
+      },
+      { additionalProperties: false },
+    ),
+    Type.Object(
+      {
+        ...PropertyControlBaseSchema,
+        type: Type.Literal('textarea'),
+        rows: Type.Optional(Type.Number()),
+        placeholder: Type.Optional(Type.String()),
+      },
+      { additionalProperties: false },
+    ),
+    Type.Object(
+      {
+        ...PropertyControlBaseSchema,
+        type: Type.Literal('number'),
+        min: Type.Optional(Type.Number()),
+        max: Type.Optional(Type.Number()),
+        step: Type.Optional(Type.Number()),
+        unit: Type.Optional(Type.String()),
+      },
+      { additionalProperties: false },
+    ),
+    Type.Object(
+      {
+        ...PropertyControlBaseSchema,
+        type: Type.Literal('color'),
+        format: Type.Optional(Type.Union([Type.Literal('hex'), Type.Literal('rgba')])),
+      },
+      { additionalProperties: false },
+    ),
+    Type.Object(
+      {
+        ...PropertyControlBaseSchema,
+        type: Type.Literal('select'),
+        options: Type.Array(PropertyControlOptionSchema),
+      },
+      { additionalProperties: false },
+    ),
+    Type.Object(
+      { ...PropertyControlBaseSchema, type: Type.Literal('toggle') },
+      { additionalProperties: false },
+    ),
+    Type.Object(
+      { ...PropertyControlBaseSchema, type: Type.Literal('image') },
+      { additionalProperties: false },
+    ),
+    Type.Object(
+      {
+        ...PropertyControlBaseSchema,
+        type: Type.Literal('media'),
+        mediaKind: Type.Union([Type.Literal('image'), Type.Literal('video')]),
+      },
+      { additionalProperties: false },
+    ),
+    Type.Object(
+      { ...PropertyControlBaseSchema, type: Type.Literal('url') },
+      { additionalProperties: false },
+    ),
+    Type.Object(
+      {
+        ...PropertyControlBaseSchema,
+        type: Type.Literal('dataTable'),
+        includeSystem: Type.Optional(Type.Boolean()),
+      },
+      { additionalProperties: false },
+    ),
+    Type.Object(
+      { ...PropertyControlBaseSchema, type: Type.Literal('richtext') },
+      { additionalProperties: false },
+    ),
+    Type.Object(
+      { ...PropertyControlBaseSchema, type: Type.Literal('svg') },
+      { additionalProperties: false },
+    ),
+    Type.Object(
+      {
+        ...PropertyControlBaseSchema,
+        type: Type.Literal('group'),
+        collapsed: Type.Optional(Type.Boolean()),
+        children: Type.Record(Type.String(), Self),
+      },
+      { additionalProperties: false },
+    ),
+  ]),
+)
 
 export type PropertyControl = Static<typeof PropertyControlSchema>
 

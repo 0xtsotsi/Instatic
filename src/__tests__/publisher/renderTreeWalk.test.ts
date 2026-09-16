@@ -9,10 +9,17 @@ import { walkRenderTree } from '../../../server/publish/renderTreeWalk'
  * renders — page nodes AND nodes inside referenced VC trees — with a cycle
  * guard so a self-referencing VC can't loop forever.
  */
-const n = (id: string, moduleId: string, children: string[] = [], props: Record<string, unknown> = {}): BaseNode =>
+const n = (
+  id: string,
+  moduleId: string,
+  children: string[] = [],
+  props: Record<string, unknown> = {},
+): BaseNode =>
   ({ id, moduleId, props, children, breakpointOverrides: {}, classIds: [] }) as unknown as BaseNode
 
-function siteWith(vcs: Array<{ id: string; rootNodeId: string; nodes: Record<string, BaseNode> }>): SiteDocument {
+function siteWith(
+  vcs: Array<{ id: string; rootNodeId: string; nodes: Record<string, BaseNode> }>,
+): SiteDocument {
   return {
     visualComponents: vcs.map((vc) => ({
       id: vc.id,
@@ -48,8 +55,16 @@ describe('walkRenderTree', () => {
 
   test('terminates on a self-referencing VC cycle', () => {
     const site = siteWith([
-      { id: 'vcA', rootNodeId: 'a', nodes: { a: n('a', 'base.visual-component-ref', [], { componentId: 'vcB' }) } },
-      { id: 'vcB', rootNodeId: 'b', nodes: { b: n('b', 'base.visual-component-ref', [], { componentId: 'vcA' }) } },
+      {
+        id: 'vcA',
+        rootNodeId: 'a',
+        nodes: { a: n('a', 'base.visual-component-ref', [], { componentId: 'vcB' }) },
+      },
+      {
+        id: 'vcB',
+        rootNodeId: 'b',
+        nodes: { b: n('b', 'base.visual-component-ref', [], { componentId: 'vcA' }) },
+      },
     ])
     const pageNodes: Record<string, BaseNode> = {
       root: n('root', 'base.visual-component-ref', [], { componentId: 'vcA' }),

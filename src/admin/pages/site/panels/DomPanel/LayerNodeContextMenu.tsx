@@ -152,16 +152,14 @@ export function LayerNodeContextMenu({
   // parallel session before the picker filter was added) is just a regular
   // node the user must be able to delete to recover.
   const lockedSlotInstance = useEditorStore((s) => {
-    if (isMulti) return false  // Multi-select already filters slot-instance per slice rules.
+    if (isMulti) return false // Multi-select already filters slot-instance per slice rules.
     if (!nodeId) return false
     const tree = selectActiveCanvasPage(s)
     if (!tree) return false
     const node = tree.nodes[nodeId]
     if (!node || node.moduleId !== 'base.slot-instance') return false
     // Find the parent. Locked only when parent is a VC ref.
-    const parent = Object.values(tree.nodes).find((n) =>
-      n.children.includes(nodeId),
-    )
+    const parent = Object.values(tree.nodes).find((n) => n.children.includes(nodeId))
     return parent?.moduleId === 'base.visual-component-ref'
   })
 
@@ -206,8 +204,12 @@ export function LayerNodeContextMenu({
   const canToggleHidden = !lockedSlotInstance && hideActionTargetIds.length > 0
   const shouldHideSelection = hideActionTargetIds.some((id) => !activePage?.nodes[id]?.hidden)
   const hideActionLabel = isMulti
-    ? shouldHideSelection ? 'Hide selected' : 'Unhide selected'
-    : shouldHideSelection ? 'Hide' : 'Unhide'
+    ? shouldHideSelection
+      ? 'Hide selected'
+      : 'Unhide selected'
+    : shouldHideSelection
+      ? 'Hide'
+      : 'Unhide'
 
   // "Insert module here" is hidden ONLY for multi-select (the new node has no
   // single anchor in that case) — for single-select every node is a legal
@@ -343,7 +345,9 @@ export function LayerNodeContextMenu({
       {canToggleHidden && (
         <>
           <ContextMenuItem ref={firstItemRef} onClick={dispatchToggleHidden}>
-            <span aria-hidden="true"><EyeSolidIcon size={13} /></span>
+            <span aria-hidden="true">
+              <EyeSolidIcon size={13} />
+            </span>
             {hideActionLabel}
           </ContextMenuItem>
           <ContextMenuSeparator />
@@ -354,7 +358,9 @@ export function LayerNodeContextMenu({
           (rename is single-node only). */}
       {!lockedSlotInstance && !isMulti && (
         <ContextMenuItem ref={canToggleHidden ? undefined : firstItemRef} onClick={onRename}>
-          <span aria-hidden="true"><PenSquareSolidIcon size={13} /></span>
+          <span aria-hidden="true">
+            <PenSquareSolidIcon size={13} />
+          </span>
           Rename
         </ContextMenuItem>
       )}
@@ -365,13 +371,17 @@ export function LayerNodeContextMenu({
             ref={!canToggleHidden && isMulti ? firstItemRef : undefined}
             onClick={dispatchDuplicate}
           >
-            <span aria-hidden="true"><CopyPlusSolidIcon size={13} /></span>
+            <span aria-hidden="true">
+              <CopyPlusSolidIcon size={13} />
+            </span>
             Duplicate
           </ContextMenuItem>
 
           {canComponentize && (
             <ContextMenuItem onClick={dispatchComponentize}>
-              <span aria-hidden="true"><BoxSolidIcon size={13} /></span>
+              <span aria-hidden="true">
+                <BoxSolidIcon size={13} />
+              </span>
               Componentize
             </ContextMenuItem>
           )}
@@ -380,9 +390,15 @@ export function LayerNodeContextMenu({
             <ContextMenuItem
               onClick={dispatchSaveAsLayout}
               disabled={isPageRoot}
-              title={isPageRoot ? 'The page body cannot be saved as a layout — save a section inside it instead.' : undefined}
+              title={
+                isPageRoot
+                  ? 'The page body cannot be saved as a layout — save a section inside it instead.'
+                  : undefined
+              }
             >
-              <span aria-hidden="true"><LayoutSolidIcon size={13} /></span>
+              <span aria-hidden="true">
+                <LayoutSolidIcon size={13} />
+              </span>
               Save as layout…
             </ContextMenuItem>
           )}
@@ -390,25 +406,38 @@ export function LayerNodeContextMenu({
           <ContextMenuSeparator />
 
           <ContextMenuItem onClick={dispatchCopy}>
-            <span aria-hidden="true"><CopySolidIcon size={13} /></span>
+            <span aria-hidden="true">
+              <CopySolidIcon size={13} />
+            </span>
             Copy
           </ContextMenuItem>
 
           <ContextMenuItem onClick={dispatchCut}>
-            <span aria-hidden="true"><CopyXSolidIcon size={13} /></span>
+            <span aria-hidden="true">
+              <CopyXSolidIcon size={13} />
+            </span>
             Cut
           </ContextMenuItem>
 
           {canPaste && (
             <ContextMenuItem onClick={onPaste}>
-              <span aria-hidden="true"><FilesStack2SolidIcon size={13} /></span>
+              <span aria-hidden="true">
+                <FilesStack2SolidIcon size={13} />
+              </span>
               Paste
             </ContextMenuItem>
           )}
 
           {!isMulti && isContainer && onPasteHtml && nodeId && (
-            <ContextMenuItem onClick={() => { onPasteHtml(nodeId); onClose() }}>
-              <span aria-hidden="true"><CodeIcon size={13} /></span>
+            <ContextMenuItem
+              onClick={() => {
+                onPasteHtml(nodeId)
+                onClose()
+              }}
+            >
+              <span aria-hidden="true">
+                <CodeIcon size={13} />
+              </span>
               Paste HTML here…
             </ContextMenuItem>
           )}
@@ -426,11 +455,15 @@ export function LayerNodeContextMenu({
             width={200}
           >
             <ContextMenuItem onClick={dispatchWrapInContainer}>
-              <span aria-hidden="true"><CheckboxSolidIcon size={13} /></span>
+              <span aria-hidden="true">
+                <CheckboxSolidIcon size={13} />
+              </span>
               Container
             </ContextMenuItem>
             <ContextMenuItem onClick={dispatchWrapInLoop}>
-              <span aria-hidden="true"><BoxStackSolidIcon size={13} /></span>
+              <span aria-hidden="true">
+                <BoxStackSolidIcon size={13} />
+              </span>
               Loop
             </ContextMenuItem>
           </ContextMenuSubmenu>
@@ -456,10 +489,7 @@ export function LayerNodeContextMenu({
           // should close.
           closeOnItemClickOnly
         >
-          <ModulePicker
-            onSelectModule={handleSelectModule}
-            onSelectVC={handleSelectVC}
-          />
+          <ModulePicker onSelectModule={handleSelectModule} onSelectVC={handleSelectVC} />
         </ContextMenuSubmenu>
       )}
 
@@ -468,7 +498,9 @@ export function LayerNodeContextMenu({
           <ContextMenuSeparator />
 
           <ContextMenuItem danger onClick={dispatchDelete}>
-            <span aria-hidden="true"><TrashSolidIcon size={13} /></span>
+            <span aria-hidden="true">
+              <TrashSolidIcon size={13} />
+            </span>
             Delete
           </ContextMenuItem>
         </>

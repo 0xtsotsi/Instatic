@@ -36,19 +36,21 @@ function installModelFetch(
     }
     if (url.includes('/admin/api/ai/providers/')) {
       return jsonResponse({
-        models: [{
-          id: 'model-1',
-          label: 'Model 1',
-          capabilities: {
-            toolCalling,
-            visionInput,
-            toolResultImages: false,
-            promptCache: false,
-            streaming: true,
+        models: [
+          {
+            id: 'model-1',
+            label: 'Model 1',
+            capabilities: {
+              toolCalling,
+              visionInput,
+              toolResultImages: false,
+              promptCache: false,
+              streaming: true,
+            },
+            pricing: { inputPerMTok: 3, outputPerMTok: 15 },
+            ...(contextWindow === null ? {} : { contextWindow }),
           },
-          pricing: { inputPerMTok: 3, outputPerMTok: 15 },
-          ...(contextWindow === null ? {} : { contextWindow }),
-        }],
+        ],
       })
     }
     throw new Error(`Unexpected fetch: ${url}`)
@@ -167,18 +169,20 @@ function createAgentStore(overrides: Partial<AgentSlice> = {}) {
     toggleAgent: () => set((state) => ({ isAgentOpen: !state.isAgentOpen })),
     sendAgentMessage: async () => ({ accepted: true }),
     abortAgent: () => {},
-    clearAgentMessages: () => set((state) => ({
-      agentMessages: [],
-      agentError: null,
-      agentComposerEpoch: state.agentComposerEpoch + 1,
-    })),
+    clearAgentMessages: () =>
+      set((state) => ({
+        agentMessages: [],
+        agentError: null,
+        agentComposerEpoch: state.agentComposerEpoch + 1,
+      })),
     loadAgentConversations: async () => {},
     loadAgentConversation: async () => {},
-    startNewAgentConversation: () => set((state) => ({
-      agentMessages: [],
-      agentError: null,
-      agentComposerEpoch: state.agentComposerEpoch + 1,
-    })),
+    startNewAgentConversation: () =>
+      set((state) => ({
+        agentMessages: [],
+        agentError: null,
+        agentComposerEpoch: state.agentComposerEpoch + 1,
+      })),
     deleteAgentConversation: async () => {},
     setAgentProvider: async (credentialId, modelId) => {
       set({ agentActiveCredentialId: credentialId, agentActiveModelId: modelId, agentError: null })
@@ -188,10 +192,7 @@ function createAgentStore(overrides: Partial<AgentSlice> = {}) {
   }))
 }
 
-function renderAgentPanel(
-  overrides: Partial<AgentSlice> = {},
-  user: CmsCurrentUser = testUser(),
-) {
+function renderAgentPanel(overrides: Partial<AgentSlice> = {}, user: CmsCurrentUser = testUser()) {
   const store = createAgentStore(overrides)
   const view = render(
     <AdminSessionProvider user={user}>
@@ -251,8 +252,9 @@ function pasteImages(fileNames: string[]): void {
   const textarea = screen.getByLabelText('Message to AI assistant')
   fireEvent.paste(textarea, {
     clipboardData: {
-      files: fileNames.map((fileName) =>
-        new File([pngHeader(100, 80)], fileName, { type: 'image/png' })),
+      files: fileNames.map(
+        (fileName) => new File([pngHeader(100, 80)], fileName, { type: 'image/png' }),
+      ),
     },
   })
 }
@@ -310,16 +312,18 @@ describe('AgentPanel', () => {
       const url = typeof input === 'string' ? input : input.toString()
       if (url.endsWith('/admin/api/ai/credentials')) {
         return jsonResponse({
-          credentials: [{
-            id: 'cred_1',
-            providerId: 'openai',
-            authMode: 'apiKey',
-            displayLabel: 'OpenAI',
-            baseUrl: null,
-            keyFingerprintCurrent: true,
-            createdAt: '2026-06-01T10:00:00.000Z',
-            lastUsedAt: null,
-          }],
+          credentials: [
+            {
+              id: 'cred_1',
+              providerId: 'openai',
+              authMode: 'apiKey',
+              displayLabel: 'OpenAI',
+              baseUrl: null,
+              keyFingerprintCurrent: true,
+              createdAt: '2026-06-01T10:00:00.000Z',
+              lastUsedAt: null,
+            },
+          ],
         })
       }
       if (url.includes('/admin/api/ai/providers/')) {
@@ -332,7 +336,9 @@ describe('AgentPanel', () => {
     renderAgentPanel({ agentActiveCredentialId: 'cred_1', agentActiveModelId: 'gpt-4o' })
 
     await waitFor(() => {
-      expect(screen.getByText("Describe what you want to build and I'll do it for you.")).toBeTruthy()
+      expect(
+        screen.getByText("Describe what you want to build and I'll do it for you."),
+      ).toBeTruthy()
     })
 
     expect(screen.queryByText('Connect an AI provider')).toBeNull()
@@ -445,16 +451,18 @@ describe('AgentPanel', () => {
       const url = typeof input === 'string' ? input : input.toString()
       if (url.endsWith('/admin/api/ai/credentials')) {
         return jsonResponse({
-          credentials: [{
-            id: 'cred_1',
-            providerId: 'openai',
-            authMode: 'apiKey',
-            displayLabel: 'OpenAI',
-            baseUrl: null,
-            keyFingerprintCurrent: true,
-            createdAt: '2026-06-01T10:00:00.000Z',
-            lastUsedAt: null,
-          }],
+          credentials: [
+            {
+              id: 'cred_1',
+              providerId: 'openai',
+              authMode: 'apiKey',
+              displayLabel: 'OpenAI',
+              baseUrl: null,
+              keyFingerprintCurrent: true,
+              createdAt: '2026-06-01T10:00:00.000Z',
+              lastUsedAt: null,
+            },
+          ],
         })
       }
       if (url.includes('/admin/api/ai/providers/')) {
@@ -489,7 +497,11 @@ describe('AgentPanel', () => {
     }) as typeof fetch
 
     let called = 0
-    renderAgentPanel({ loadScopeDefault: async () => { called += 1 } })
+    renderAgentPanel({
+      loadScopeDefault: async () => {
+        called += 1
+      },
+    })
 
     await waitFor(() => expect(called).toBeGreaterThan(0))
   })
@@ -502,16 +514,18 @@ describe('AgentPanel', () => {
       const url = typeof input === 'string' ? input : input.toString()
       if (url.endsWith('/admin/api/ai/credentials')) {
         return jsonResponse({
-          credentials: [{
-            id: 'cred_1',
-            providerId: 'anthropic',
-            authMode: 'apiKey',
-            displayLabel: 'Anthropic',
-            baseUrl: null,
-            keyFingerprintCurrent: true,
-            createdAt: '2026-06-01T10:00:00.000Z',
-            lastUsedAt: null,
-          }],
+          credentials: [
+            {
+              id: 'cred_1',
+              providerId: 'anthropic',
+              authMode: 'apiKey',
+              displayLabel: 'Anthropic',
+              baseUrl: null,
+              keyFingerprintCurrent: true,
+              createdAt: '2026-06-01T10:00:00.000Z',
+              lastUsedAt: null,
+            },
+          ],
         })
       }
       if (url.includes('/admin/api/ai/providers/')) {
@@ -527,7 +541,9 @@ describe('AgentPanel', () => {
     })
 
     await waitFor(() => {
-      expect(screen.getByText("Describe what you want to build and I'll do it for you.")).toBeTruthy()
+      expect(
+        screen.getByText("Describe what you want to build and I'll do it for you."),
+      ).toBeTruthy()
     })
 
     // The setup empty state must not appear, and the composer textarea must be
@@ -567,11 +583,13 @@ describe('AgentPanel', () => {
 
     fireEvent.keyDown(textarea, { key: 'Enter' })
     await waitFor(() => expect(sendAgentMessage).toHaveBeenCalledTimes(1))
-    expect(sendAgentMessage.mock.calls[0]?.[0]).toEqual([{
-      kind: 'image',
-      mimeType: 'image/jpeg',
-      data: 'AQID',
-    }])
+    expect(sendAgentMessage.mock.calls[0]?.[0]).toEqual([
+      {
+        kind: 'image',
+        mimeType: 'image/jpeg',
+        data: 'AQID',
+      },
+    ])
     await waitFor(() => {
       expect(screen.queryByLabelText('Attached image: clipboard.png')).toBeNull()
     })
@@ -588,7 +606,9 @@ describe('AgentPanel', () => {
       sendAgentMessage,
     })
 
-    const textarea = await screen.findByLabelText('Message to AI assistant') as HTMLTextAreaElement
+    const textarea = (await screen.findByLabelText(
+      'Message to AI assistant',
+    )) as HTMLTextAreaElement
     pasteImage('reference.png')
     await waitFor(() => expect(screen.getByText('Ready')).toBeTruthy())
     await waitFor(() => {
@@ -646,11 +666,13 @@ describe('AgentPanel', () => {
 
     fireEvent.keyDown(textarea, { key: 'Enter' })
     await waitFor(() => expect(sendAgentMessage).toHaveBeenCalledTimes(1))
-    expect(sendAgentMessage.mock.calls[0]?.[0]).toEqual([{
-      kind: 'image',
-      mimeType: 'image/jpeg',
-      data: 'AQID',
-    }])
+    expect(sendAgentMessage.mock.calls[0]?.[0]).toEqual([
+      {
+        kind: 'image',
+        mimeType: 'image/jpeg',
+        data: 'AQID',
+      },
+    ])
   })
 
   it('sends every prepared image in its original paste order', async () => {
@@ -791,15 +813,17 @@ describe('AgentPanel', () => {
     }) as typeof fetch
 
     renderAgentPanel({
-      agentMessages: [{
-        id: 'image-message',
-        role: 'user',
-        blocks: [{ kind: 'image', mimeType: 'image/jpeg', src: '/conversation-image/0' }],
-        timestamp: Date.now(),
-      }],
+      agentMessages: [
+        {
+          id: 'image-message',
+          role: 'user',
+          blocks: [{ kind: 'image', mimeType: 'image/jpeg', src: '/conversation-image/0' }],
+          timestamp: Date.now(),
+        },
+      ],
     })
 
-    const image = await screen.findByAltText('Attachment from you') as HTMLImageElement
+    const image = (await screen.findByAltText('Attachment from you')) as HTMLImageElement
     expect(image.getAttribute('src')).toBe('/conversation-image/0')
   })
 
@@ -810,21 +834,25 @@ describe('AgentPanel', () => {
       throw new Error(`Unexpected fetch: ${url}`)
     }) as typeof fetch
     const { store } = renderAgentPanel({
-      agentMessages: [{
-        id: 'image-message',
-        role: 'user',
-        blocks: [
-          { kind: 'image', mimeType: 'image/jpeg', src: '/conversation-image/0' },
-          { kind: 'image', mimeType: 'image/jpeg', src: '/conversation-image/1' },
-          { kind: 'image', mimeType: 'image/jpeg', src: '/conversation-image/2' },
-        ],
-        timestamp: Date.now(),
-      }],
+      agentMessages: [
+        {
+          id: 'image-message',
+          role: 'user',
+          blocks: [
+            { kind: 'image', mimeType: 'image/jpeg', src: '/conversation-image/0' },
+            { kind: 'image', mimeType: 'image/jpeg', src: '/conversation-image/1' },
+            { kind: 'image', mimeType: 'image/jpeg', src: '/conversation-image/2' },
+          ],
+          timestamp: Date.now(),
+        },
+      ],
     })
 
     const gallery = await screen.findByRole('group', { name: 'Images from you' })
     expect(gallery.querySelectorAll('button')).toHaveLength(3)
-    const trigger = screen.getByRole('button', { name: 'Open image preview: Attachment 1 of 3 from you' })
+    const trigger = screen.getByRole('button', {
+      name: 'Open image preview: Attachment 1 of 3 from you',
+    })
     trigger.focus()
     fireEvent.click(trigger)
 
@@ -862,12 +890,14 @@ describe('AgentPanel', () => {
       throw new Error(`Unexpected fetch: ${url}`)
     }) as typeof fetch
     renderAgentPanel({
-      agentMessages: [{
-        id: 'image-message',
-        role: 'user',
-        blocks: [{ kind: 'image', mimeType: 'image/jpeg', src: '/conversation-image/0' }],
-        timestamp: Date.now(),
-      }],
+      agentMessages: [
+        {
+          id: 'image-message',
+          role: 'user',
+          blocks: [{ kind: 'image', mimeType: 'image/jpeg', src: '/conversation-image/0' }],
+          timestamp: Date.now(),
+        },
+      ],
     })
 
     const trigger = await screen.findByRole('button', {
@@ -877,8 +907,9 @@ describe('AgentPanel', () => {
     let menu = await screen.findByRole('menu', { name: 'Image actions' })
     expect(screen.getByRole('menuitem', { name: 'Copy image' })).toBeTruthy()
     expect(screen.getByRole('menuitem', { name: 'Save to desktop' })).toBeTruthy()
-    expect(screen.getByRole('menuitem', { name: 'Save to Media' }).getAttribute('aria-disabled'))
-      .toBe('true')
+    expect(
+      screen.getByRole('menuitem', { name: 'Save to Media' }).getAttribute('aria-disabled'),
+    ).toBe('true')
 
     fireEvent.keyDown(menu, { key: 'Escape' })
     await waitFor(() => expect(screen.queryByRole('menu', { name: 'Image actions' })).toBeNull())
@@ -913,28 +944,36 @@ describe('AgentPanel', () => {
       }
       if (url === '/admin/api/cms/media' && init?.method === 'POST') {
         uploadedFile = (init.body as FormData).get('file') as File
-        return jsonResponse({
-          asset: {
-            id: 'saved-image',
-            filename: uploadedFile.name,
-            mimeType: uploadedFile.type,
-            sizeBytes: uploadedFile.size,
-            publicPath: '/uploads/saved-image.jpg',
-            uploadedByUserId: 'user-agent-panel',
-            createdAt: '2026-07-11T10:00:00.000Z',
+        return jsonResponse(
+          {
+            asset: {
+              id: 'saved-image',
+              filename: uploadedFile.name,
+              mimeType: uploadedFile.type,
+              sizeBytes: uploadedFile.size,
+              publicPath: '/uploads/saved-image.jpg',
+              uploadedByUserId: 'user-agent-panel',
+              createdAt: '2026-07-11T10:00:00.000Z',
+            },
           },
-        }, 201)
+          201,
+        )
       }
       throw new Error(`Unexpected fetch: ${url}`)
     }) as typeof fetch
-    renderAgentPanel({
-      agentMessages: [{
-        id: 'image-message',
-        role: 'user',
-        blocks: [{ kind: 'image', mimeType: 'image/jpeg', src: '/conversation-image/0' }],
-        timestamp: Date.now(),
-      }],
-    }, testUser(['ai.chat', 'media.write']))
+    renderAgentPanel(
+      {
+        agentMessages: [
+          {
+            id: 'image-message',
+            role: 'user',
+            blocks: [{ kind: 'image', mimeType: 'image/jpeg', src: '/conversation-image/0' }],
+            timestamp: Date.now(),
+          },
+        ],
+      },
+      testUser(['ai.chat', 'media.write']),
+    )
 
     const trigger = await screen.findByRole('button', {
       name: 'Open image preview: Attachment from you',
@@ -956,31 +995,39 @@ describe('AgentPanel', () => {
       throw new Error(`Unexpected fetch: ${url}`)
     }) as typeof fetch
     renderAgentPanel({
-      agentMessages: [{
-        id: 'assistant-images',
-        role: 'assistant',
-        blocks: [
-          { kind: 'image', mimeType: 'image/jpeg', src: '/assistant-image/0' },
-          { kind: 'image', mimeType: 'image/jpeg', src: '/assistant-image/1' },
-          {
-            kind: 'toolCall',
-            toolCall: {
-              id: 'tool-1',
-              actionType: 'site_render_snapshot',
-              params: {},
-              result: { ok: true },
-              status: 'success',
-              previewImages: ['data:image/png;base64,R0hJ', 'data:image/png;base64,SktM'],
+      agentMessages: [
+        {
+          id: 'assistant-images',
+          role: 'assistant',
+          blocks: [
+            { kind: 'image', mimeType: 'image/jpeg', src: '/assistant-image/0' },
+            { kind: 'image', mimeType: 'image/jpeg', src: '/assistant-image/1' },
+            {
+              kind: 'toolCall',
+              toolCall: {
+                id: 'tool-1',
+                actionType: 'site_render_snapshot',
+                params: {},
+                result: { ok: true },
+                status: 'success',
+                previewImages: ['data:image/png;base64,R0hJ', 'data:image/png;base64,SktM'],
+              },
             },
-          },
-        ],
-        timestamp: Date.now(),
-      }],
+          ],
+          timestamp: Date.now(),
+        },
+      ],
     })
 
-    expect((await screen.findByRole('group', { name: 'Images from assistant' }))
-      .querySelectorAll('button')).toHaveLength(2)
-    expect(screen.getByRole('group', { name: 'Images captured by assistant tools' })
-      .querySelectorAll('button')).toHaveLength(2)
+    expect(
+      (await screen.findByRole('group', { name: 'Images from assistant' })).querySelectorAll(
+        'button',
+      ),
+    ).toHaveLength(2)
+    expect(
+      screen
+        .getByRole('group', { name: 'Images captured by assistant tools' })
+        .querySelectorAll('button'),
+    ).toHaveLength(2)
   })
 })

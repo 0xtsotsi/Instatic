@@ -68,11 +68,13 @@ export function TagEditor({
     }
   }
 
-  const suggestions = palette.filter((tag) => {
-    if (value.includes(tag)) return false
-    if (!draft.trim()) return false
-    return tag.includes(normalizeTag(draft))
-  }).slice(0, 6)
+  const suggestions = palette
+    .filter((tag) => {
+      if (value.includes(tag)) return false
+      if (!draft.trim()) return false
+      return tag.includes(normalizeTag(draft))
+    })
+    .slice(0, 6)
 
   return (
     <div className={styles.root} aria-label={ariaLabel}>

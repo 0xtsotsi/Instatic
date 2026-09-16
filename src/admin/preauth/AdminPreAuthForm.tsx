@@ -85,35 +85,50 @@ export function AdminPreAuthForm({
       setError(`Password must be at least ${MIN_PASSWORD_LENGTH} characters`)
       return
     }
-    await runAuthAction(async () => {
-      await setupCms({ siteName, email, password })
-      await loginCms({ email, password })
-      onAuthenticated(await getCurrentCmsUser())
-    }, 'Setup failed', setSubmitting, setError)
+    await runAuthAction(
+      async () => {
+        await setupCms({ siteName, email, password })
+        await loginCms({ email, password })
+        onAuthenticated(await getCurrentCmsUser())
+      },
+      'Setup failed',
+      setSubmitting,
+      setError,
+    )
   }
 
   async function handleLogin(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
-    await runAuthAction(async () => {
-      const result = await loginCms({ email, password })
-      if (result.mfaRequired) {
-        setPassword('')
-        setMfaCode('')
-        onPhaseChange('mfa')
-        return
-      }
-      onAuthenticated(await getCurrentCmsUser())
-    }, 'Login failed', setSubmitting, setError)
+    await runAuthAction(
+      async () => {
+        const result = await loginCms({ email, password })
+        if (result.mfaRequired) {
+          setPassword('')
+          setMfaCode('')
+          onPhaseChange('mfa')
+          return
+        }
+        onAuthenticated(await getCurrentCmsUser())
+      },
+      'Login failed',
+      setSubmitting,
+      setError,
+    )
   }
 
   async function handleMfaVerify(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
-    await runAuthAction(async () => {
-      await verifyCmsMfa({ code: mfaCode })
-      const user = await getCurrentCmsUser()
-      setMfaCode('')
-      onAuthenticated(user)
-    }, 'MFA verification failed', setSubmitting, setError)
+    await runAuthAction(
+      async () => {
+        await verifyCmsMfa({ code: mfaCode })
+        const user = await getCurrentCmsUser()
+        setMfaCode('')
+        onAuthenticated(user)
+      },
+      'MFA verification failed',
+      setSubmitting,
+      setError,
+    )
   }
 
   const copy = PHASE_COPY[phase]
@@ -125,10 +140,7 @@ export function AdminPreAuthForm({
   // default mark + product name so a fresh clone still looks like itself.
   const brandLabel = publicSite.name ?? 'Instatic'
 
-  const onSubmit =
-    phase === 'setup' ? handleSetup :
-    phase === 'mfa' ? handleMfaVerify :
-    handleLogin
+  const onSubmit = phase === 'setup' ? handleSetup : phase === 'mfa' ? handleMfaVerify : handleLogin
 
   return (
     <main className={panelStyles.page}>
@@ -150,7 +162,9 @@ export function AdminPreAuthForm({
           <span>{brandLabel}</span>
         </div>
 
-        <h1 id="admin-entry-title" className={panelStyles.title}>{copy.title}</h1>
+        <h1 id="admin-entry-title" className={panelStyles.title}>
+          {copy.title}
+        </h1>
 
         <form className={styles.form} onSubmit={onSubmit}>
           {phase === 'mfa' ? (
@@ -166,17 +180,19 @@ export function AdminPreAuthForm({
                 data-testid="admin-mfa-code"
               />
             </label>
-          ) : phase === 'setup' && (
-            <label className={styles.field} htmlFor={siteNameId}>
-              <span>Site name</span>
-              <Input
-                id={siteNameId}
-                value={siteName}
-                onChange={(event) => setSiteName(event.target.value)}
-                required
-                autoComplete="organization"
-              />
-            </label>
+          ) : (
+            phase === 'setup' && (
+              <label className={styles.field} htmlFor={siteNameId}>
+                <span>Site name</span>
+                <Input
+                  id={siteNameId}
+                  value={siteName}
+                  onChange={(event) => setSiteName(event.target.value)}
+                  required
+                  autoComplete="organization"
+                />
+              </label>
+            )
           )}
 
           {phase !== 'mfa' && (
@@ -222,9 +238,7 @@ export function AdminPreAuthForm({
             disabled={submitting}
             aria-busy={submitting}
           >
-            {submitting && (
-              <LoaderIcon size={14} className={styles.spinIcon} aria-hidden="true" />
-            )}
+            {submitting && <LoaderIcon size={14} className={styles.spinIcon} aria-hidden="true" />}
             <span>{submitLabel}</span>
           </Button>
         </form>

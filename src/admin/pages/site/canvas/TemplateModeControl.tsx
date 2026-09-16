@@ -68,9 +68,8 @@ function PreviewSourceSelect({ templateId, page }: PreviewSourceSelectProps) {
   // where the React Compiler memoizes it.
   const sitePages = useEditorStore((s) => s.site?.pages ?? null)
   const targetKind = page.template?.target?.kind ?? null
-  const everywherePages = targetKind === 'everywhere' && sitePages
-    ? sitePages.filter((p) => !isTemplatePage(p))
-    : null
+  const everywherePages =
+    targetKind === 'everywhere' && sitePages ? sitePages.filter((p) => !isTemplatePage(p)) : null
 
   const tableSlug = targetKind === 'postTypes' ? primaryTemplateTableSlug(page) : null
 
@@ -112,12 +111,16 @@ function PreviewSourceSelect({ templateId, page }: PreviewSourceSelectProps) {
   // dead space before the chevron in the tight toolbar.
   const selectedOption = options.find((option) => String(option.value) === value)
   const selectedText = typeof selectedOption?.label === 'string' ? selectedOption.label : ''
-  const triggerWidth = Math.min(measureToolbarValueWidth(selectedText), MAX_PREVIEW_PX) + CHEVRON_ALLOWANCE_PX
+  const triggerWidth =
+    Math.min(measureToolbarValueWidth(selectedText), MAX_PREVIEW_PX) + CHEVRON_ALLOWANCE_PX
 
   return (
     // The width custom property is set here (the Select root inherits it) since
     // `Select`'s own `style` prop is forwarded to its hidden native <select>.
-    <span className={styles.previewGroup} style={{ '--tpl-preview-w': `${triggerWidth}px` } as CSSProperties}>
+    <span
+      className={styles.previewGroup}
+      style={{ '--tpl-preview-w': `${triggerWidth}px` } as CSSProperties}
+    >
       <span className={styles.previewLabel}>Previewing</span>
       <Select
         fieldSize="sm"

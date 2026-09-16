@@ -63,7 +63,9 @@
   color: var(--text-muted);
   text-align: left;
   cursor: pointer;
-  transition: background-color 120ms ease, color 120ms ease;
+  transition:
+    background-color 120ms ease,
+    color 120ms ease;
 }
 .navItem:hover {
   background: var(--bg-surface-3);
@@ -136,7 +138,10 @@
   border-radius: var(--radius);
   text-align: left;
   cursor: pointer;
-  transition: background-color 120ms ease, border-color 120ms ease, color 120ms ease;
+  transition:
+    background-color 120ms ease,
+    border-color 120ms ease,
+    color 120ms ease;
 }
 .addFiles:hover:not(:disabled) {
   border-color: var(--overlay-50);
@@ -313,7 +318,9 @@
   cursor: pointer;
   border: 1px solid transparent;
   background: var(--bg-surface-2);
-  transition: background-color 120ms ease, border-color 120ms ease;
+  transition:
+    background-color 120ms ease,
+    border-color 120ms ease;
 }
 .strategyOption:hover {
   background: var(--bg-surface-3);
@@ -396,7 +403,9 @@
   padding: var(--space-l) var(--space-l);
   border-radius: var(--radius);
   background: var(--bg-surface-2);
-  transition: background-color 120ms ease, opacity 120ms ease;
+  transition:
+    background-color 120ms ease,
+    opacity 120ms ease;
 }
 .pageRow:hover {
   background: var(--bg-surface-3);

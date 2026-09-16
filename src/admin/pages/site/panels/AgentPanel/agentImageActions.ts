@@ -1,8 +1,5 @@
 import { apiBlobRequest, type FetchLike } from '@core/http'
-import {
-  uploadCmsMediaAsset,
-  type CmsMediaAsset,
-} from '@core/persistence/cmsMedia'
+import { uploadCmsMediaAsset, type CmsMediaAsset } from '@core/persistence/cmsMedia'
 import { primeCmsMediaAssetCache } from '@admin/pages/media/hooks/useCmsMediaAssetByPath'
 import { publishCmsMediaAssetCreated } from '@admin/pages/media/mediaAssetEvents'
 import type { AgentPreviewImage } from './agentImageTypes'

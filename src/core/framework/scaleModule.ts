@@ -178,8 +178,16 @@ export function createFrameworkScaleModule<
   ): FrameworkScaleVariable[] {
     const min = getMinScaleConfig(group)
     const max = getMaxScaleConfig(group)
-    const minRatio = effectiveScaleRatio(min.scaleRatio, min.isCustomScaleRatio, min.scaleRatioInputValue)
-    const maxRatio = effectiveScaleRatio(max.scaleRatio, max.isCustomScaleRatio, max.scaleRatioInputValue)
+    const minRatio = effectiveScaleRatio(
+      min.scaleRatio,
+      min.isCustomScaleRatio,
+      min.scaleRatioInputValue,
+    )
+    const maxRatio = effectiveScaleRatio(
+      max.scaleRatio,
+      max.isCustomScaleRatio,
+      max.scaleRatioInputValue,
+    )
 
     const fluidSteps = computeFluidScale({
       minBaseSize: Number(getMinBaseSize(group)),
@@ -305,7 +313,11 @@ export function createFrameworkScaleModule<
               )
             : getVariableName(group.namingConvention, step)
 
-        const styles = buildUtilityStyles(propertyKeymap, generator.property, `var(${variableName})`)
+        const styles = buildUtilityStyles(
+          propertyKeymap,
+          generator.property,
+          `var(${variableName})`,
+        )
         const id = `framework:${family}:${group.id}:${generator.id}:${step}`
         // Static-0 contract: generated utility classes must be a pure function of
         // settings. `updatedAt` defaults to 0 in the schema; the reconciler

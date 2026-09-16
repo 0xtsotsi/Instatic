@@ -188,7 +188,10 @@ function classifyNode(
   // Rule 1: module flagged dynamic.
   const def = registry.get(node.moduleId)
   if (def?.dynamic) {
-    return { dynamic: true, reason: `node "${node.id}" (${node.moduleId}): module is flagged dynamic` }
+    return {
+      dynamic: true,
+      reason: `node "${node.id}" (${node.moduleId}): module is flagged dynamic`,
+    }
   }
 
   // Rule 2: structured dynamicBindings.
@@ -314,7 +317,14 @@ function findDynamicNodesWithReasons(
   for (const node of Object.values(nodes)) {
     if (node.moduleId !== 'base.loop' || checkLoopSource(node)) continue
     const bodyIds = new Set<string>()
-    const bodyReasons = collectSubtreeReasons(node.children, nodes, site, registry, rootVcStack, bodyIds)
+    const bodyReasons = collectSubtreeReasons(
+      node.children,
+      nodes,
+      site,
+      registry,
+      rootVcStack,
+      bodyIds,
+    )
     if (bodyReasons.length > 0) {
       promotedLoops.add(node.id)
       for (const id of bodyIds) suppressed.add(id)

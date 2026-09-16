@@ -48,7 +48,15 @@ function page(id: string, template = false): Page {
         children: [],
       },
     },
-    ...(template ? { template: { enabled: true, target: { kind: 'postTypes', tableSlugs: ['posts'] }, priority: 0 } } : {}),
+    ...(template
+      ? {
+          template: {
+            enabled: true,
+            target: { kind: 'postTypes', tableSlugs: ['posts'] },
+            priority: 0,
+          },
+        }
+      : {}),
   }
 }
 
@@ -151,9 +159,19 @@ describe('site runtime config', () => {
     expect(assetScopeAppliesToPage({ type: 'all-pages' }, page('home'))).toBe(true)
     expect(assetScopeAppliesToPage({ type: 'pages', pageIds: ['home'] }, page('home'))).toBe(true)
     expect(assetScopeAppliesToPage({ type: 'pages', pageIds: ['home'] }, page('about'))).toBe(false)
-    expect(assetScopeAppliesToPage({ type: 'templates', templatePageIds: ['template-1'] }, page('template-1', true))).toBe(true)
+    expect(
+      assetScopeAppliesToPage(
+        { type: 'templates', templatePageIds: ['template-1'] },
+        page('template-1', true),
+      ),
+    ).toBe(true)
     // A non-template page never matches a `templates` scope, even by id.
-    expect(assetScopeAppliesToPage({ type: 'templates', templatePageIds: ['template-1'] }, page('template-1'))).toBe(false)
+    expect(
+      assetScopeAppliesToPage(
+        { type: 'templates', templatePageIds: ['template-1'] },
+        page('template-1'),
+      ),
+    ).toBe(false)
   })
 
   it('collects enabled script files for a target page in deterministic priority order', () => {
@@ -190,8 +208,12 @@ describe('site runtime config', () => {
       },
     })
 
-    expect(collectRuntimeScripts({ files, runtime, page: page('home'), target: 'canvas' })).toEqual([])
-    expect(collectRuntimeScripts({ files, runtime, page: page('home'), target: 'publish' })).toHaveLength(1)
+    expect(collectRuntimeScripts({ files, runtime, page: page('home'), target: 'canvas' })).toEqual(
+      [],
+    )
+    expect(
+      collectRuntimeScripts({ files, runtime, page: page('home'), target: 'publish' }),
+    ).toHaveLength(1)
   })
 
   it('collects enabled stylesheets for a page in priority then path order, honouring scope', () => {
@@ -207,7 +229,10 @@ describe('site runtime config', () => {
         late: { ...DEFAULT_STYLE_RUNTIME_CONFIG, priority: 200 },
         early: { ...DEFAULT_STYLE_RUNTIME_CONFIG, priority: 10 },
         disabled: { ...DEFAULT_STYLE_RUNTIME_CONFIG, enabled: false },
-        aboutOnly: { ...DEFAULT_STYLE_RUNTIME_CONFIG, scope: { type: 'pages', pageIds: ['about'] } },
+        aboutOnly: {
+          ...DEFAULT_STYLE_RUNTIME_CONFIG,
+          scope: { type: 'pages', pageIds: ['about'] },
+        },
       },
     })
 

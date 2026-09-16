@@ -16,7 +16,11 @@ describe('pageTemplateConfig target', () => {
   it('round-trips a postTypes template through site serialization', () => {
     const site = makeSite()
     const page = site.pages[0]
-    page.template = { enabled: true, target: { kind: 'postTypes', tableSlugs: ['posts'] }, priority: 0 }
+    page.template = {
+      enabled: true,
+      target: { kind: 'postTypes', tableSlugs: ['posts'] },
+      priority: 0,
+    }
 
     const shell = validateSite(site)
     const pages = validatePages(shell, site.pages)
@@ -45,7 +49,9 @@ describe('pageTemplateConfig target', () => {
     })
     const site = makeSite({ pages: [templatePage] })
 
-    expect(resolveTemplateChain(site, { kind: 'entry', tableSlug: 'my-posts' }).at(-1)?.id).toBe('template-page')
+    expect(resolveTemplateChain(site, { kind: 'entry', tableSlug: 'my-posts' }).at(-1)?.id).toBe(
+      'template-page',
+    )
     expect(resolveTemplateChain(site, { kind: 'entry', tableSlug: '42' })).toEqual([])
   })
 

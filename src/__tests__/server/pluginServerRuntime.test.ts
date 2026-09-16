@@ -42,24 +42,31 @@ function makeFakeDb() {
       const session = sessions.find((s) => String(s.id_hash) === String(values[0]))
       if (!session) return { rows: [], rowCount: 0 }
       return {
-        rows: [{
-          id: 'admin_1',
-          email: 'owner@example.com',
-          email_normalized: 'owner@example.com',
-          display_name: 'Owner',
-          password_hash: 'hash',
-          status: 'active',
-          role_id: 'owner',
-          last_login_at: null,
-          created_at: new Date('2026-05-01').toISOString(),
-          updated_at: new Date('2026-05-01').toISOString(),
-          deleted_at: null,
-          role_slug: 'owner',
-          role_name: 'Owner',
-          role_description: '',
-          role_is_system: true,
-          role_capabilities_json: ['plugins.read', 'plugins.configure', 'plugins.install', 'plugins.lifecycle'],
-        } as Row],
+        rows: [
+          {
+            id: 'admin_1',
+            email: 'owner@example.com',
+            email_normalized: 'owner@example.com',
+            display_name: 'Owner',
+            password_hash: 'hash',
+            status: 'active',
+            role_id: 'owner',
+            last_login_at: null,
+            created_at: new Date('2026-05-01').toISOString(),
+            updated_at: new Date('2026-05-01').toISOString(),
+            deleted_at: null,
+            role_slug: 'owner',
+            role_name: 'Owner',
+            role_description: '',
+            role_is_system: true,
+            role_capabilities_json: [
+              'plugins.read',
+              'plugins.configure',
+              'plugins.install',
+              'plugins.lifecycle',
+            ],
+          } as Row,
+        ],
         rowCount: 1,
       }
     }
@@ -83,7 +90,10 @@ function makeFakeDb() {
     if (normalized.includes('insert into audit_events')) {
       return { rows: [], rowCount: 1 }
     }
-    if (normalized.includes('select id, name, version, enabled') && normalized.includes('where id =')) {
+    if (
+      normalized.includes('select id, name, version, enabled') &&
+      normalized.includes('where id =')
+    ) {
       const row = plugins.find((plugin) => plugin.id === values[0])
       return { rows: row ? [row as Row] : [], rowCount: row ? 1 : 0 }
     }
@@ -112,7 +122,10 @@ function makeFakeDb() {
       else plugins.push(row)
       return { rows: [row as Row], rowCount: 1 }
     }
-    if (normalized.includes('update installed_plugins') && normalized.includes('set settings_json')) {
+    if (
+      normalized.includes('update installed_plugins') &&
+      normalized.includes('set settings_json')
+    ) {
       const row = plugins.find((plugin) => plugin.id === values[1])
       if (!row) return { rows: [], rowCount: 0 }
       row.settings_json = values[0]
@@ -138,8 +151,10 @@ function makeFakeDb() {
       crashEvents.push(row)
       return { rows: [row as Row], rowCount: 1 }
     }
-    if (normalized.includes('select id, plugin_id, occurred_at, reason, stack')
-        && normalized.includes('from plugin_crash_events')) {
+    if (
+      normalized.includes('select id, plugin_id, occurred_at, reason, stack') &&
+      normalized.includes('from plugin_crash_events')
+    ) {
       const rows = crashEvents
         .filter((c) => c.plugin_id === values[0])
         .slice(0, Number(values[1] ?? 10))
@@ -248,9 +263,9 @@ function cmsFormRequest(
 }
 
 function pluginZip(files: Record<string, string>): File {
-  const zipped = zipSync(Object.fromEntries(
-    Object.entries(files).map(([path, content]) => [path, strToU8(content)]),
-  ))
+  const zipped = zipSync(
+    Object.fromEntries(Object.entries(files).map(([path, content]) => [path, strToU8(content)])),
+  )
   return new File([zipped], 'plugin.zip', { type: 'application/zip' })
 }
 
@@ -273,13 +288,18 @@ async function installPlugin(args: {
   cookie: string
 }): Promise<Response> {
   const formData = new FormData()
-  formData.set('file', pluginZip({
-    'plugin.json': JSON.stringify(args.manifest),
-    'server/index.js': args.serverEntrypoint,
-  }))
+  formData.set(
+    'file',
+    pluginZip({
+      'plugin.json': JSON.stringify(args.manifest),
+      'server/index.js': args.serverEntrypoint,
+    }),
+  )
   formData.set('grantedPermissions', JSON.stringify(args.grantedPermissions))
   return await handleCmsRequest(
-    cmsFormRequest('http://localhost/admin/api/cms/plugins/package', formData, { cookie: args.cookie }),
+    cmsFormRequest('http://localhost/admin/api/cms/plugins/package', formData, {
+      cookie: args.cookie,
+    }),
     args.db,
     { uploadsDir: args.uploadsDir },
   )
@@ -355,7 +375,9 @@ describe('server plugin runtime SDK', () => {
       })
 
       expect(install.status).toBe(201)
-      const body = await install.json() as { plugin: { lifecycleStatus: string; lastError: string | null } }
+      const body = (await install.json()) as {
+        plugin: { lifecycleStatus: string; lastError: string | null }
+      }
       expect(body.plugin.lifecycleStatus).toBe('error')
       expect(body.plugin.lastError).toMatch(/requires permission "cms.routes"/)
     } finally {
@@ -391,7 +413,9 @@ describe('server plugin runtime SDK', () => {
       })
 
       expect(install.status).toBe(201)
-      const body = await install.json() as { plugin: { lifecycleStatus: string; lastError: string | null } }
+      const body = (await install.json()) as {
+        plugin: { lifecycleStatus: string; lastError: string | null }
+      }
       expect(body.plugin.lifecycleStatus).toBe('active')
       expect(body.plugin.lastError).toBeNull()
       await waitForLoopSource(sourceId)
@@ -436,11 +460,13 @@ describe('server plugin runtime SDK', () => {
         cookie,
       })
       expect(install.status).toBe(201)
-      expect(captured).toEqual([{
-        id: 'acme.workflow',
-        version: '1.0.0',
-        permissions: 'cms.hooks,cms.routes',
-      }])
+      expect(captured).toEqual([
+        {
+          id: 'acme.workflow',
+          version: '1.0.0',
+          permissions: 'cms.hooks,cms.routes',
+        },
+      ])
     } finally {
       hookBus.unregisterPlugin('test')
       await rm(uploadsDir, { recursive: true, force: true })
@@ -535,7 +561,10 @@ describe('server plugin runtime SDK', () => {
         { uploadsDir },
       )
       expect(put.status).toBe(200)
-      expect(await put.json()).toEqual({ settings: { apiKey: 'rotated' }, secretsNeedingReentry: [] })
+      expect(await put.json()).toEqual({
+        settings: { apiKey: 'rotated' },
+        secretsNeedingReentry: [],
+      })
     } finally {
       await rm(uploadsDir, { recursive: true, force: true })
     }

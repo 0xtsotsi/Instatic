@@ -34,11 +34,23 @@ import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { strToU8, zipSync } from 'fflate'
 import { listDataTables } from '../../../server/repositories/data/tables'
-import { listDataRows, createDataRow, upsertDataRow, getDataRow } from '../../../server/repositories/data/rows'
+import {
+  listDataRows,
+  createDataRow,
+  upsertDataRow,
+  getDataRow,
+} from '../../../server/repositories/data/rows'
 import { saveDraftSite, getDraftSite } from '../../../server/repositories/site'
-import { createMediaAsset, assignAssetToFolders, getMediaAsset } from '../../../server/repositories/media'
+import {
+  createMediaAsset,
+  assignAssetToFolders,
+  getMediaAsset,
+} from '../../../server/repositories/media'
 import { createMediaFolder, listMediaFolders } from '../../../server/repositories/mediaFolders'
-import { importDataRowRedirect, listExportableRedirects } from '../../../server/repositories/data/publish'
+import {
+  importDataRowRedirect,
+  listExportableRedirects,
+} from '../../../server/repositories/data/publish'
 import { createUser } from '../../../server/repositories/users'
 import { createSession } from '../../../server/auth/sessions'
 import {
@@ -51,7 +63,11 @@ import { handleExportRoute } from '../../../server/handlers/cms/export'
 import { handleImportRoute } from '../../../server/handlers/cms/import'
 import { handleImportArchiveRoute } from '../../../server/handlers/cms/importArchive'
 import { parseValue } from '@core/utils/typeboxHelpers'
-import { ImportResultSchema, type BundleImportSelection, type SiteBundle } from '@core/data/bundleSchema'
+import {
+  ImportResultSchema,
+  type BundleImportSelection,
+  type SiteBundle,
+} from '@core/data/bundleSchema'
 import { BUNDLE_ARCHIVE_MANIFEST_PATH } from '@core/data/bundleArchive'
 import { parseSiteBundleArchive } from '@core/persistence/cmsTransfer'
 import type { DataRow, DataTable } from '@core/data/schemas'
@@ -313,10 +329,7 @@ async function seedRoundtripAuth(db: DbClient, email: string): Promise<string> {
  * Build and export a bundle from a seeded source DB.
  * Returns the parsed SiteBundle JSON object.
  */
-async function exportBundle(
-  sourceDb: DbClient,
-  sourceCookie: string,
-): Promise<SiteBundle> {
+async function exportBundle(sourceDb: DbClient, sourceCookie: string): Promise<SiteBundle> {
   const req = new Request('http://localhost/admin/api/cms/export', { method: 'GET' })
   req.headers.set('cookie', sourceCookie)
   const res = await handleExportRoute(req, sourceDb)
@@ -366,7 +379,19 @@ describe('with strategies — handler-level roundtrip', () => {
       cells: {
         name: 'Hero',
         slug: 'hero',
-        body: { nodes: { root: { id: 'root', moduleId: 'base.container', props: {}, breakpointOverrides: {}, children: [], classIds: [] } }, rootNodeId: 'root' },
+        body: {
+          nodes: {
+            root: {
+              id: 'root',
+              moduleId: 'base.container',
+              props: {},
+              breakpointOverrides: {},
+              children: [],
+              classIds: [],
+            },
+          },
+          rootNodeId: 'root',
+        },
         classes: {},
       },
       slug: 'hero',
@@ -656,7 +681,9 @@ describe('full-site round-trip — folders, membership, redirects', () => {
     // the fixture must start with real PNG magic bytes.
     await writeFile(
       join(sourceDir, 'logo.png'),
-      Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00]),
+      Buffer.from([
+        0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+      ]),
     )
     const asset = await createMediaAsset(sourceDb, {
       id: 'asset-logo',
@@ -681,7 +708,9 @@ describe('full-site round-trip — folders, membership, redirects', () => {
     })
 
     // --- Export the full bundle (media included so folderIds travel) ---
-    const exportReq = new Request('http://localhost/admin/api/cms/export?includeMedia=1', { method: 'GET' })
+    const exportReq = new Request('http://localhost/admin/api/cms/export?includeMedia=1', {
+      method: 'GET',
+    })
     exportReq.headers.set('cookie', sourceCookie)
     const exportRes = await handleExportRoute(exportReq, sourceDb, { uploadsDir: sourceDir })
     expect(exportRes!.status).toBe(200)
@@ -699,11 +728,14 @@ describe('full-site round-trip — folders, membership, redirects', () => {
     await runMigrations(targetDb, sqliteMigrations)
     const targetCookie = await seedRoundtripAuth(targetDb, 'fullsite-target@roundtrip.test')
 
-    const importReq = new Request('http://localhost/admin/api/cms/import/archive?strategy=replace', {
-      method: 'POST',
-      headers: { 'content-type': 'application/zip' },
-      body: archiveBytes,
-    })
+    const importReq = new Request(
+      'http://localhost/admin/api/cms/import/archive?strategy=replace',
+      {
+        method: 'POST',
+        headers: { 'content-type': 'application/zip' },
+        body: archiveBytes,
+      },
+    )
     importReq.headers.set('cookie', targetCookie)
     const importRes = await handleImportArchiveRoute(importReq, targetDb, { uploadsDir: targetDir })
     expect(importRes!.status).toBe(200)
@@ -775,9 +807,12 @@ describe('archive import validation', () => {
           },
         ],
       }
-      const archiveBytes = zipSync({
-        [BUNDLE_ARCHIVE_MANIFEST_PATH]: strToU8(JSON.stringify(manifest)),
-      }, { level: 0 })
+      const archiveBytes = zipSync(
+        {
+          [BUNDLE_ARCHIVE_MANIFEST_PATH]: strToU8(JSON.stringify(manifest)),
+        },
+        { level: 0 },
+      )
 
       const req = new Request('http://localhost/admin/api/cms/import/archive?strategy=merge-add', {
         method: 'POST',
@@ -831,9 +866,12 @@ describe('archive import validation', () => {
           },
         ],
       }
-      const archiveBytes = zipSync({
-        [BUNDLE_ARCHIVE_MANIFEST_PATH]: strToU8(JSON.stringify(manifest)),
-      }, { level: 0 })
+      const archiveBytes = zipSync(
+        {
+          [BUNDLE_ARCHIVE_MANIFEST_PATH]: strToU8(JSON.stringify(manifest)),
+        },
+        { level: 0 },
+      )
 
       const req = new Request('http://localhost/admin/api/cms/import/archive?strategy=replace', {
         method: 'POST',
@@ -890,9 +928,12 @@ describe('archive import validation', () => {
           },
         ],
       }
-      const archiveBytes = zipSync({
-        [BUNDLE_ARCHIVE_MANIFEST_PATH]: strToU8(JSON.stringify(manifest)),
-      }, { level: 0 })
+      const archiveBytes = zipSync(
+        {
+          [BUNDLE_ARCHIVE_MANIFEST_PATH]: strToU8(JSON.stringify(manifest)),
+        },
+        { level: 0 },
+      )
 
       const req = new Request('http://localhost/admin/api/cms/import/archive?strategy=merge-add', {
         method: 'POST',
@@ -969,13 +1010,16 @@ describe('archive import validation', () => {
       // every staged entry's bytes before writing to disk, so fixtures must
       // carry real magic bytes for the MIME they declare.
       const pngMagic = new Uint8Array([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a])
-      const archiveBytes = zipSync({
-        [BUNDLE_ARCHIVE_MANIFEST_PATH]: strToU8(JSON.stringify(manifest)),
-        // Unselected entry — bytes are drained without MIME validation; any
-        // content works but sizeBytes must match the manifest declaration.
-        'media/skipped.png': strToU8('skip'),
-        'media/imported.png': pngMagic,
-      }, { level: 0 })
+      const archiveBytes = zipSync(
+        {
+          [BUNDLE_ARCHIVE_MANIFEST_PATH]: strToU8(JSON.stringify(manifest)),
+          // Unselected entry — bytes are drained without MIME validation; any
+          // content works but sizeBytes must match the manifest declaration.
+          'media/skipped.png': strToU8('skip'),
+          'media/imported.png': pngMagic,
+        },
+        { level: 0 },
+      )
       const selection: BundleImportSelection = {
         includeSite: false,
         tables: [],
@@ -989,11 +1033,14 @@ describe('archive import validation', () => {
         selection: JSON.stringify(selection),
       })
 
-      const req = new Request(`http://localhost/admin/api/cms/import/archive?${params.toString()}`, {
-        method: 'POST',
-        headers: { 'content-type': 'application/zip' },
-        body: archiveBytes,
-      })
+      const req = new Request(
+        `http://localhost/admin/api/cms/import/archive?${params.toString()}`,
+        {
+          method: 'POST',
+          headers: { 'content-type': 'application/zip' },
+          body: archiveBytes,
+        },
+      )
       req.headers.set('cookie', cookie)
       const res = await handleImportArchiveRoute(req, db, { uploadsDir })
       expect(res!.status).toBe(200)

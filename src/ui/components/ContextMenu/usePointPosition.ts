@@ -57,9 +57,8 @@ export function usePointPosition({
     const menuEl = menuRef.current
     if (!menuEl) return
     const menuRect = menuEl.getBoundingClientRect()
-    const effectiveHeight = maxHeight != null
-      ? Math.min(menuRect.height, maxHeight)
-      : menuRect.height
+    const effectiveHeight =
+      maxHeight != null ? Math.min(menuRect.height, maxHeight) : menuRect.height
     const vw = window.innerWidth
     const vh = window.innerHeight
     const margin = 8

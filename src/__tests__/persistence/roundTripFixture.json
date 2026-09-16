@@ -11,8 +11,20 @@
     "components": { "folders": [], "items": [] }
   },
   "breakpoints": [
-    { "id": "mobile",  "label": "Mobile",  "width": 375,  "mediaQuery": "(max-width: 375px)",  "icon": "smartphone" },
-    { "id": "desktop", "label": "Desktop", "width": 1440, "mediaQuery": "(max-width: 1440px)", "icon": "monitor"    }
+    {
+      "id": "mobile",
+      "label": "Mobile",
+      "width": 375,
+      "mediaQuery": "(max-width: 375px)",
+      "icon": "smartphone"
+    },
+    {
+      "id": "desktop",
+      "label": "Desktop",
+      "width": 1440,
+      "mediaQuery": "(max-width: 1440px)",
+      "icon": "monitor"
+    }
   ],
   "pages": [
     {
@@ -45,7 +57,7 @@
           "children": [],
           "classIds": ["class-1"],
           "propBindings": {
-            "text":  { "paramId": "param-title" },
+            "text": { "paramId": "param-title" },
             "extra": { "paramId": "param-desc" }
           },
           "parentId": "root"

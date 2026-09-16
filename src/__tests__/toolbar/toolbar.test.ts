@@ -217,12 +217,8 @@ function filterModules(
 }
 
 const MOCK_REGISTRY: Record<string, Array<{ id: string; name: string }>> = {
-  Layout: [
-    { id: 'base.container', name: 'Container' },
-  ],
-  Typography: [
-    { id: 'base.text', name: 'Text' },
-  ],
+  Layout: [{ id: 'base.container', name: 'Container' }],
+  Typography: [{ id: 'base.text', name: 'Text' }],
   Interactive: [
     { id: 'base.button', name: 'Button' },
     { id: 'base.link', name: 'Link' },
@@ -500,21 +496,24 @@ describe('Toolbar — structural requirements', () => {
     const { readFileSync } = require('fs')
     // UndoRedo testids
     const undoSrc = readFileSync(
-      new URL('../../admin/pages/site/canvas/UndoRedoButtons.tsx', import.meta.url), 'utf-8',
+      new URL('../../admin/pages/site/canvas/UndoRedoButtons.tsx', import.meta.url),
+      'utf-8',
     )
     expect(undoSrc).toContain('data-testid="canvas-notch-undo-btn"')
     expect(undoSrc).toContain('data-testid="canvas-notch-redo-btn"')
 
     // ZoomControls testid
     const zoomSrc = readFileSync(
-      new URL('../../admin/pages/site/toolbar/ZoomControls.tsx', import.meta.url), 'utf-8',
+      new URL('../../admin/pages/site/toolbar/ZoomControls.tsx', import.meta.url),
+      'utf-8',
     )
     expect(zoomSrc).toContain('data-testid="toolbar-zoom-controls"')
 
     // Publishing split-button testids — passed to SplitButton, which renders
     // them as data-testid on the chevron trigger and the menu.
     const publishingSrc = readFileSync(
-      new URL('../../admin/pages/site/toolbar/PublishActionGroup.tsx', import.meta.url), 'utf-8',
+      new URL('../../admin/pages/site/toolbar/PublishActionGroup.tsx', import.meta.url),
+      'utf-8',
     )
     expect(publishingSrc).toContain('menuTriggerTestId="toolbar-publish-actions-trigger"')
     expect(publishingSrc).toContain('menuTestId="toolbar-publish-actions-menu"')
@@ -528,12 +527,14 @@ describe('Toolbar — structural requirements', () => {
     // wrapping ContextMenuSubmenu for that — and uses ContextMenuItem for
     // every row, which renders a `role="menuitem"` button.
     const src = readFileSync(
-      new URL('../../admin/pages/site/module-picker/ModulePicker.tsx', import.meta.url), 'utf-8',
+      new URL('../../admin/pages/site/module-picker/ModulePicker.tsx', import.meta.url),
+      'utf-8',
     )
     expect(src).toContain('ContextMenuItem')
     // UX Review #333: role="listbox" without arrow-key nav is incorrect. The
     // picker uses ContextMenuItem (role="menuitem") instead.
-    const codeLines = src.split('\n')
+    const codeLines = src
+      .split('\n')
       .filter((line) => !line.trim().startsWith('*') && !line.trim().startsWith('//'))
       .join('\n')
     expect(codeLines).not.toContain('role="listbox"')
@@ -555,7 +556,8 @@ describe('Toolbar — structural requirements', () => {
   it('PublishButton uses ref to track status timer (no useState leak on unmount)', () => {
     const { readFileSync } = require('fs')
     const src = readFileSync(
-      new URL('../../admin/pages/site/toolbar/PublishButton.tsx', import.meta.url), 'utf-8',
+      new URL('../../admin/pages/site/toolbar/PublishButton.tsx', import.meta.url),
+      'utf-8',
     )
     // Timer must be stored in a ref and cleared in a cleanup effect
     expect(src).toContain('statusTimerRef')
@@ -573,9 +575,9 @@ describe('Toolbar — structural requirements', () => {
     expect(src).toContain('Draft saved')
     expect(src).toContain('Unsaved draft')
     expect(src).toContain("state === 'published' ? 'Published'")
-    expect(src).toContain('state === \'published\' ? CheckIcon')
+    expect(src).toContain("state === 'published' ? CheckIcon")
     expect(src).toContain("statusLabel={state === 'published' ? null : status.label}")
-    expect(src).toContain('publishDisabled={disabled || state === \'published\'}')
+    expect(src).toContain("publishDisabled={disabled || state === 'published'}")
     expect(src).toContain('Save draft')
     expect(src).toContain('Preview page')
     // "Open live page" used to live in this menu — it's now a dedicated
@@ -626,7 +628,7 @@ describe('Toolbar — structural requirements', () => {
       new URL('../../admin/layouts/AdminCanvasLayout/AdminCanvasLayout.tsx', import.meta.url),
       'utf-8',
     )
-    expect(src).toContain("import { Toolbar }")
+    expect(src).toContain('import { Toolbar }')
     expect(src).toContain('const persistence = usePersistence(')
     expect(src).toContain("'default'")
     expect(src).toContain('cmsAdapter')
@@ -716,7 +718,8 @@ describe('ModulePicker — ArrowDown keyboard bridge (WCAG SC 2.1.1)', () => {
   it('ArrowDown on search input forwards focus to first menu item', () => {
     // The bridge must use querySelector('[role="menuitem"]') to find the first
     // item, then call .focus() on it.
-    const codeLines = src.split('\n')
+    const codeLines = src
+      .split('\n')
       .filter((line) => !line.trim().startsWith('//') && !line.trim().startsWith('*'))
       .join('\n')
 

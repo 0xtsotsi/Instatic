@@ -10,8 +10,12 @@ import {
 describe('frameworkUtilityState', () => {
   it('classifies absent / variables-only / full frameworks', () => {
     expect(frameworkUtilityState(undefined)).toBe('none')
-    expect(frameworkUtilityState(buildCoreFrameworkSettings({ includeUtilities: false }))).toBe('variables')
-    expect(frameworkUtilityState(buildCoreFrameworkSettings({ includeUtilities: true }))).toBe('full')
+    expect(frameworkUtilityState(buildCoreFrameworkSettings({ includeUtilities: false }))).toBe(
+      'variables',
+    )
+    expect(frameworkUtilityState(buildCoreFrameworkSettings({ includeUtilities: true }))).toBe(
+      'full',
+    )
   })
 })
 

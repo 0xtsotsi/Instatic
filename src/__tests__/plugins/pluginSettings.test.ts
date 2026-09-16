@@ -72,29 +72,39 @@ describe('validatePluginSettingsRecord', () => {
   })
 
   it('rejects values that violate type expectations', () => {
-    expect(() => validatePluginSettingsRecord(baseSchema, {
-      enabled: 'yes',
-      requiredField: 'x',
-    })).toThrow(/must be a boolean/)
-    expect(() => validatePluginSettingsRecord(baseSchema, {
-      count: 'lots',
-      requiredField: 'x',
-    })).toThrow(/must be a number/)
-    expect(() => validatePluginSettingsRecord(baseSchema, {
-      theme: 'neon',
-      requiredField: 'x',
-    })).toThrow(/must be one of/)
+    expect(() =>
+      validatePluginSettingsRecord(baseSchema, {
+        enabled: 'yes',
+        requiredField: 'x',
+      }),
+    ).toThrow(/must be a boolean/)
+    expect(() =>
+      validatePluginSettingsRecord(baseSchema, {
+        count: 'lots',
+        requiredField: 'x',
+      }),
+    ).toThrow(/must be a number/)
+    expect(() =>
+      validatePluginSettingsRecord(baseSchema, {
+        theme: 'neon',
+        requiredField: 'x',
+      }),
+    ).toThrow(/must be one of/)
   })
 
   it('rejects out-of-range numbers', () => {
-    expect(() => validatePluginSettingsRecord(baseSchema, {
-      count: 200,
-      requiredField: 'x',
-    })).toThrow(/at most 100/)
-    expect(() => validatePluginSettingsRecord(baseSchema, {
-      count: -1,
-      requiredField: 'x',
-    })).toThrow(/at least 0/)
+    expect(() =>
+      validatePluginSettingsRecord(baseSchema, {
+        count: 200,
+        requiredField: 'x',
+      }),
+    ).toThrow(/at most 100/)
+    expect(() =>
+      validatePluginSettingsRecord(baseSchema, {
+        count: -1,
+        requiredField: 'x',
+      }),
+    ).toThrow(/at least 0/)
   })
 
   it('throws when a required field is missing', () => {
@@ -122,9 +132,7 @@ describe('validatePluginSettingsDefinitions', () => {
 
   it('rejects invalid setting ids', () => {
     expect(() =>
-      validatePluginSettingsDefinitions('acme.x', [
-        { id: '1invalid', label: 'X', type: 'text' },
-      ]),
+      validatePluginSettingsDefinitions('acme.x', [{ id: '1invalid', label: 'X', type: 'text' }]),
     ).toThrow(/invalid/)
   })
 

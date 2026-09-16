@@ -98,7 +98,12 @@ describe('makeServerProvider — URL construction', () => {
 describe('makeServerProvider — schema validation and mapping', () => {
   it('validates the body via the schema and maps each item to a Command', async () => {
     spyOn(globalThis, 'fetch').mockImplementation(
-      jsonFetch({ items: [{ id: 'a', name: 'Alpha' }, { id: 'b', name: 'Beta' }] }) as typeof fetch,
+      jsonFetch({
+        items: [
+          { id: 'a', name: 'Alpha' },
+          { id: 'b', name: 'Beta' },
+        ],
+      }) as typeof fetch,
     )
     const result = await makeProvider().search('x', ctx, signal)
     expect(result).toEqual([

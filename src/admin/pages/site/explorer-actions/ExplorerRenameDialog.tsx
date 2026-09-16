@@ -1,10 +1,6 @@
 import { useEffect, useId, useRef, useState, type FormEvent } from 'react'
 import type { Page } from '@core/page-tree'
-import {
-  normalizePageSlug,
-  pageSlugDuplicateError,
-  pageSlugError,
-} from '@core/page-tree'
+import { normalizePageSlug, pageSlugDuplicateError, pageSlugError } from '@core/page-tree'
 import { Button } from '@ui/components/Button'
 import { Dialog } from '@ui/components/Dialog'
 import { Input } from '@ui/components/Input'
@@ -97,7 +93,9 @@ export function ExplorerRenameDialog({
     >
       <form id="explorer-rename-form" className={styles.form} onSubmit={handleSubmit}>
         <div className={styles.field}>
-          <label htmlFor={valueInputId} className={styles.label}>{fieldLabel}</label>
+          <label htmlFor={valueInputId} className={styles.label}>
+            {fieldLabel}
+          </label>
           <Input
             id={valueInputId}
             ref={inputRef}
@@ -114,7 +112,9 @@ export function ExplorerRenameDialog({
 
         {isPage && (
           <div className={styles.field}>
-            <label htmlFor={slugInputId} className={styles.label}>Slug</label>
+            <label htmlFor={slugInputId} className={styles.label}>
+              Slug
+            </label>
             <Input
               id={slugInputId}
               fieldSize="sm"

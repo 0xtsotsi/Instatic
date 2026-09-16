@@ -15,7 +15,8 @@ export function DateTimeCell({
   readOnly,
   ariaLabel,
 }: CellEditorProps<DateTimeField>): ReactElement {
-  const strValue = typeof value === 'string' ? value : readStringCell({ [field.id]: value }, field.id)
+  const strValue =
+    typeof value === 'string' ? value : readStringCell({ [field.id]: value }, field.id)
 
   // The <input type="datetime-local"> expects "YYYY-MM-DDTHH:mm" format.
   // ISO strings from the server include seconds / timezone — trim to minutes.

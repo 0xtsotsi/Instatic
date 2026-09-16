@@ -1,7 +1,12 @@
 import { describe, expect, it } from 'bun:test'
 import type { CoreCapability } from '../../../server/auth/capabilities'
 import { createSession } from '../../../server/auth/sessions'
-import { createSessionToken, hashSessionToken, SESSION_COOKIE_NAME, sessionExpiry } from '../../../server/auth/tokens'
+import {
+  createSessionToken,
+  hashSessionToken,
+  SESSION_COOKIE_NAME,
+  sessionExpiry,
+} from '../../../server/auth/tokens'
 import type { DbClient } from '../../../server/db'
 import { handleCmsRequest } from '../../../server/handlers/cms'
 import { findUserByEmail } from '../../../server/repositories/users'

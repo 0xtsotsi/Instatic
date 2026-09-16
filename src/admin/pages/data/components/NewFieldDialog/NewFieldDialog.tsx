@@ -6,7 +6,13 @@ import { Select } from '@ui/components/Select'
 import { Switch } from '@ui/components/Switch'
 import { PlusIcon } from 'pixel-art-icons/icons/plus'
 import { TrashSolidIcon } from 'pixel-art-icons/icons/trash-solid'
-import { DataFieldSchema, type DataField, type DataFieldType, type DataSelectOption, type DataTable } from '@core/data/schemas'
+import {
+  DataFieldSchema,
+  type DataField,
+  type DataFieldType,
+  type DataSelectOption,
+  type DataTable,
+} from '@core/data/schemas'
 import { buildPostTypeDefaultFields } from '@core/data/fields'
 import { safeParseValue, formatValueErrors } from '@core/utils/typeboxHelpers'
 import { StepUpCancelledMessage } from '@admin/shared/StepUp'
@@ -117,7 +123,8 @@ export function NewFieldDialog({
   const trimmedId = id.trim()
   const trimmedLabel = label.trim()
   const idErr = idTouched ? fieldIdError(trimmedId, existingFieldIds) : null
-  const needsSelectOption = (type === 'select' || type === 'multiSelect') && selectOptions.every((o) => !o.label.trim())
+  const needsSelectOption =
+    (type === 'select' || type === 'multiSelect') && selectOptions.every((o) => !o.label.trim())
 
   const needsRelationTarget = type === 'relation' && !relationTargetTableId
 
@@ -225,7 +232,9 @@ export function NewFieldDialog({
           ...(numberStep !== '' ? { step: Number(numberStep) } : {}),
           ...(numberInteger ? { integer: true } : {}),
           ...(numberFormat !== 'number' ? { format: numberFormat } : {}),
-          ...(numberFormat === 'currency' && numberCurrency.trim() ? { currency: numberCurrency.trim() } : {}),
+          ...(numberFormat === 'currency' && numberCurrency.trim()
+            ? { currency: numberCurrency.trim() }
+            : {}),
         }
         break
       }
@@ -248,14 +257,22 @@ export function NewFieldDialog({
       case 'select': {
         const options: DataSelectOption[] = selectOptions
           .filter((o) => o.label.trim())
-          .map((o) => ({ id: o.id, label: o.label.trim(), value: o.value || slugifyOptionValue(o.label) }))
+          .map((o) => ({
+            id: o.id,
+            label: o.label.trim(),
+            value: o.value || slugifyOptionValue(o.label),
+          }))
         fieldShape = { type: 'select', ...common, options }
         break
       }
       case 'multiSelect': {
         const options: DataSelectOption[] = selectOptions
           .filter((o) => o.label.trim())
-          .map((o) => ({ id: o.id, label: o.label.trim(), value: o.value || slugifyOptionValue(o.label) }))
+          .map((o) => ({
+            id: o.id,
+            label: o.label.trim(),
+            value: o.value || slugifyOptionValue(o.label),
+          }))
         fieldShape = { type: 'multiSelect', ...common, options }
         break
       }
@@ -396,7 +413,9 @@ export function NewFieldDialog({
 
         {/* ID */}
         <div className={styles.field}>
-          <label htmlFor={idInputId} className={styles.label}>ID</label>
+          <label htmlFor={idInputId} className={styles.label}>
+            ID
+          </label>
           <Input
             id={idInputId}
             fieldSize="sm"
@@ -414,16 +433,22 @@ export function NewFieldDialog({
             monospace
           />
           {idErr && (
-            <span className={styles.fieldError} role="alert">{idErr}</span>
+            <span className={styles.fieldError} role="alert">
+              {idErr}
+            </span>
           )}
           {!idErr && (
-            <span className={styles.caption}>Machine name: lowercase letters, numbers, underscores.</span>
+            <span className={styles.caption}>
+              Machine name: lowercase letters, numbers, underscores.
+            </span>
           )}
         </div>
 
         {/* Label */}
         <div className={styles.field}>
-          <label htmlFor={labelInputId} className={styles.label}>Label</label>
+          <label htmlFor={labelInputId} className={styles.label}>
+            Label
+          </label>
           <Input
             id={labelInputId}
             fieldSize="sm"
@@ -446,7 +471,9 @@ export function NewFieldDialog({
 
         {/* Description */}
         <div className={styles.field}>
-          <label htmlFor={descriptionInputId} className={styles.label}>Description <span className={styles.optional}>(optional)</span></label>
+          <label htmlFor={descriptionInputId} className={styles.label}>
+            Description <span className={styles.optional}>(optional)</span>
+          </label>
           <Textarea
             id={descriptionInputId}
             fieldSize="sm"
@@ -462,7 +489,9 @@ export function NewFieldDialog({
         {type === 'text' && (
           <>
             <div className={styles.field}>
-              <label htmlFor={textMaxLengthId} className={styles.label}>Max length <span className={styles.optional}>(optional)</span></label>
+              <label htmlFor={textMaxLengthId} className={styles.label}>
+                Max length <span className={styles.optional}>(optional)</span>
+              </label>
               <Input
                 id={textMaxLengthId}
                 fieldSize="sm"
@@ -474,7 +503,9 @@ export function NewFieldDialog({
               />
             </div>
             <div className={styles.field}>
-              <label htmlFor={textPlaceholderId} className={styles.label}>Placeholder <span className={styles.optional}>(optional)</span></label>
+              <label htmlFor={textPlaceholderId} className={styles.label}>
+                Placeholder <span className={styles.optional}>(optional)</span>
+              </label>
               <Input
                 id={textPlaceholderId}
                 fieldSize="sm"
@@ -502,16 +533,40 @@ export function NewFieldDialog({
           <>
             <div className={styles.fieldRow}>
               <div className={styles.field}>
-                <label htmlFor={numberMinId} className={styles.label}>Min <span className={styles.optional}>(optional)</span></label>
-                <Input id={numberMinId} fieldSize="sm" type="number" value={numberMin} onChange={(event) => setNumberMin(event.target.value)} />
+                <label htmlFor={numberMinId} className={styles.label}>
+                  Min <span className={styles.optional}>(optional)</span>
+                </label>
+                <Input
+                  id={numberMinId}
+                  fieldSize="sm"
+                  type="number"
+                  value={numberMin}
+                  onChange={(event) => setNumberMin(event.target.value)}
+                />
               </div>
               <div className={styles.field}>
-                <label htmlFor={numberMaxId} className={styles.label}>Max <span className={styles.optional}>(optional)</span></label>
-                <Input id={numberMaxId} fieldSize="sm" type="number" value={numberMax} onChange={(event) => setNumberMax(event.target.value)} />
+                <label htmlFor={numberMaxId} className={styles.label}>
+                  Max <span className={styles.optional}>(optional)</span>
+                </label>
+                <Input
+                  id={numberMaxId}
+                  fieldSize="sm"
+                  type="number"
+                  value={numberMax}
+                  onChange={(event) => setNumberMax(event.target.value)}
+                />
               </div>
               <div className={styles.field}>
-                <label htmlFor={numberStepId} className={styles.label}>Step <span className={styles.optional}>(optional)</span></label>
-                <Input id={numberStepId} fieldSize="sm" type="number" value={numberStep} onChange={(event) => setNumberStep(event.target.value)} />
+                <label htmlFor={numberStepId} className={styles.label}>
+                  Step <span className={styles.optional}>(optional)</span>
+                </label>
+                <Input
+                  id={numberStepId}
+                  fieldSize="sm"
+                  type="number"
+                  value={numberStep}
+                  onChange={(event) => setNumberStep(event.target.value)}
+                />
               </div>
             </div>
             <div className={styles.switchRow}>
@@ -524,12 +579,16 @@ export function NewFieldDialog({
                 fieldSize="sm"
                 value={numberFormat}
                 options={NUMBER_FORMAT_OPTIONS}
-                onChange={(event) => setNumberFormat(event.target.value as 'number' | 'currency' | 'percent')}
+                onChange={(event) =>
+                  setNumberFormat(event.target.value as 'number' | 'currency' | 'percent')
+                }
               />
             </div>
             {numberFormat === 'currency' && (
               <div className={styles.field}>
-                <label htmlFor={numberCurrencyId} className={styles.label}>Currency code <span className={styles.optional}>(e.g. USD)</span></label>
+                <label htmlFor={numberCurrencyId} className={styles.label}>
+                  Currency code <span className={styles.optional}>(e.g. USD)</span>
+                </label>
                 <Input
                   id={numberCurrencyId}
                   fieldSize="sm"
@@ -586,15 +645,11 @@ export function NewFieldDialog({
               ))}
             </div>
             {needsSelectOption && (
-              <span className={styles.fieldError} role="alert">At least one option is required.</span>
+              <span className={styles.fieldError} role="alert">
+                At least one option is required.
+              </span>
             )}
-            <Button
-              variant="ghost"
-              size="xs"
-              type="button"
-              align="start"
-              onClick={addSelectOption}
-            >
+            <Button variant="ghost" size="xs" type="button" align="start" onClick={addSelectOption}>
               <PlusIcon size={11} aria-hidden="true" />
               Add option
             </Button>
@@ -638,7 +693,9 @@ export function NewFieldDialog({
                 <span className={styles.caption}>No other tables available yet.</span>
               )}
               {needsRelationTarget && tableOptions.length > 0 && (
-                <span className={styles.fieldError} role="alert">A target table is required.</span>
+                <span className={styles.fieldError} role="alert">
+                  A target table is required.
+                </span>
               )}
             </div>
             <div className={styles.switchRow}>

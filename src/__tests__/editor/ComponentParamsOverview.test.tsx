@@ -255,9 +255,7 @@ describe('CPO-5 — remove button triggers removeParamWithCleanup', () => {
     useEditorStore.setState({ site } as Parameters<typeof useEditorStore.setState>[0])
 
     // Render with the live VC reference from the store
-    const vcFromStore = useEditorStore.getState().site!.visualComponents.find(
-      (v) => v.id === vcId,
-    )!
+    const vcFromStore = useEditorStore.getState().site!.visualComponents.find((v) => v.id === vcId)!
     render(<ComponentParamsOverview vc={vcFromStore} />)
 
     // One param → one remove button

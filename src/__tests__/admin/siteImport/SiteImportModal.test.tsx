@@ -290,10 +290,13 @@ function dropCmsBundleFile(bundle: SiteBundle, name = 'site-bundle.json') {
 }
 
 function makeCmsBundleZip(): Uint8Array {
-  return zipSync({
-    [BUNDLE_ARCHIVE_MANIFEST_PATH]: strToU8(JSON.stringify(CMS_BUNDLE_ARCHIVE_MANIFEST)),
-    'media/logo.png': strToU8('fake-png-bytes'),
-  }, { level: 0 })
+  return zipSync(
+    {
+      [BUNDLE_ARCHIVE_MANIFEST_PATH]: strToU8(JSON.stringify(CMS_BUNDLE_ARCHIVE_MANIFEST)),
+      'media/logo.png': strToU8('fake-png-bytes'),
+    },
+    { level: 0 },
+  )
 }
 
 function makeCmsBundleZipFile(name = 'site-bundle.zip'): File {
@@ -310,7 +313,11 @@ function dropCmsBundleZip(name = 'site-bundle.zip'): File {
   return zipFile
 }
 
-function SiteImportHarness({ onCmsBundleImportComplete }: { onCmsBundleImportComplete?: () => void }) {
+function SiteImportHarness({
+  onCmsBundleImportComplete,
+}: {
+  onCmsBundleImportComplete?: () => void
+}) {
   const open = useAdminUi((s) => s.siteImportOpen)
   return open ? (
     <StepUpHarness>
@@ -684,7 +691,10 @@ describe('SiteImportModal — CMS bundle import', () => {
       expect(importUrl).toContain('/admin/api/cms/import/archive')
     })
     const url = new URL(importUrl!, 'http://localhost')
-    const selection = JSON.parse(url.searchParams.get('selection') ?? '{}') as Record<string, unknown>
+    const selection = JSON.parse(url.searchParams.get('selection') ?? '{}') as Record<
+      string,
+      unknown
+    >
     expect(selection.includeMedia).toBe(false)
     expect(selection.tables).toEqual([{ tableId: 'pages' }, { tableId: 'posts' }])
     expect(importBody).toBe(zipFile)
@@ -914,7 +924,9 @@ describe('SiteImportModal — CMS bundle import', () => {
       return jsonResponse({ error: `Unexpected request: ${url}` }, 500)
     }
     let capturedToasts: Toast[] = []
-    const unsubscribe = subscribeToasts((snapshot) => { capturedToasts = [...snapshot] })
+    const unsubscribe = subscribeToasts((snapshot) => {
+      capturedToasts = [...snapshot]
+    })
 
     try {
       useEditorStore.setState({
@@ -924,7 +936,9 @@ describe('SiteImportModal — CMS bundle import', () => {
 
       render(
         <SiteImportHarness
-          onCmsBundleImportComplete={() => { callbackCalled = true }}
+          onCmsBundleImportComplete={() => {
+            callbackCalled = true
+          }}
         />,
       )
 
@@ -941,7 +955,11 @@ describe('SiteImportModal — CMS bundle import', () => {
       expect(screen.getByText(/1 row added/i)).toBeDefined()
       expect(importUrl).toContain('strategy=merge-add')
       expect((importBody as SiteBundle).schemaVersion).toBe(1)
-      expect(capturedToasts.some((toast) => toast.kind === 'success' && toast.title === 'Import complete')).toBe(true)
+      expect(
+        capturedToasts.some(
+          (toast) => toast.kind === 'success' && toast.title === 'Import complete',
+        ),
+      ).toBe(true)
     } finally {
       unsubscribe()
     }
@@ -994,7 +1012,9 @@ describe('SiteImportModal — CMS bundle import', () => {
     dropCmsBundleFile(emptyBundle, 'empty-site-bundle.json')
 
     expect(await screen.findByText(/no content in this bundle/i)).toBeDefined()
-    expect((screen.getByRole('button', { name: /add rows/i }) as HTMLButtonElement).disabled).toBe(true)
+    expect((screen.getByRole('button', { name: /add rows/i }) as HTMLButtonElement).disabled).toBe(
+      true,
+    )
   })
 })
 
@@ -1010,7 +1030,9 @@ describe('SiteImportModal — global static import', () => {
     renderSiteImportModal()
 
     const htmlFile = new File(
-      ['<!doctype html><html><head><title>Imported page</title></head><body><h1>Imported page</h1></body></html>'],
+      [
+        '<!doctype html><html><head><title>Imported page</title></head><body><h1>Imported page</h1></body></html>',
+      ],
       'imported.html',
       { type: 'text/html' },
     )
@@ -1038,14 +1060,7 @@ describe('DropStep — error message rendering', () => {
   const noop = () => {}
 
   it('renders no role="alert" when errorMessage is null', () => {
-    render(
-      <DropStep
-        busy={false}
-        errorMessage={null}
-        onFilesReady={noop}
-        onZipReady={noop}
-      />,
-    )
+    render(<DropStep busy={false} errorMessage={null} onFilesReady={noop} onZipReady={noop} />)
     expect(document.querySelector('[role="alert"]')).toBeNull()
   })
 
@@ -1064,28 +1079,14 @@ describe('DropStep — error message rendering', () => {
   })
 
   it('renders "Ingesting files and analyzing…" status when busy', () => {
-    render(
-      <DropStep
-        busy={true}
-        errorMessage={null}
-        onFilesReady={noop}
-        onZipReady={noop}
-      />,
-    )
+    render(<DropStep busy={true} errorMessage={null} onFilesReady={noop} onZipReady={noop} />)
     const status = document.querySelector('[aria-live="polite"]')
     expect(status).not.toBeNull()
     expect(status!.textContent).toContain('Ingesting files and analyzing')
   })
 
   it('buttons are disabled when busy', () => {
-    render(
-      <DropStep
-        busy={true}
-        errorMessage={null}
-        onFilesReady={noop}
-        onZipReady={noop}
-      />,
-    )
+    render(<DropStep busy={true} errorMessage={null} onFilesReady={noop} onZipReady={noop} />)
     const buttons = Array.from(document.querySelectorAll('button'))
     // Both "Choose files" and "Choose folder" buttons should be disabled
     const chooseFilesBtn = buttons.find((b) => b.textContent?.includes('Choose files'))
@@ -1100,11 +1101,15 @@ describe('DropStep — error message rendering', () => {
       <DropStep
         busy={false}
         errorMessage={null}
-        onFilesReady={(files) => { receivedFiles = files }}
+        onFilesReady={(files) => {
+          receivedFiles = files
+        }}
         onZipReady={noop}
       />,
     )
-    const htmlFile = new File(['<html><body>hello</body></html>'], 'index.html', { type: 'text/html' })
+    const htmlFile = new File(['<html><body>hello</body></html>'], 'index.html', {
+      type: 'text/html',
+    })
     const fileInput = document.querySelector('input[type="file"]') as HTMLInputElement
     expect(fileInput).not.toBeNull()
 
@@ -1151,8 +1156,20 @@ describe('filterPlanBySelection — page filtering', () => {
     styleRules: [rule0, rule1],
     assets: [assetA, assetB],
     scripts: [
-      { path: 'scripts/a.js', content: '', format: 'classic', pageSources: ['a.html'], priority: 100 },
-      { path: 'scripts/shared.js', content: '', format: 'classic', pageSources: ['a.html', 'b.html'], priority: 101 },
+      {
+        path: 'scripts/a.js',
+        content: '',
+        format: 'classic',
+        pageSources: ['a.html'],
+        priority: 100,
+      },
+      {
+        path: 'scripts/shared.js',
+        content: '',
+        format: 'classic',
+        pageSources: ['a.html', 'b.html'],
+        priority: 101,
+      },
     ],
   })
 
@@ -1200,7 +1217,7 @@ describe('filterPlanBySelection — page filtering', () => {
 
   it('removes deselected page', () => {
     const sel = {
-      pagesIncluded: new Set(['a.html']),       // b.html excluded
+      pagesIncluded: new Set(['a.html']), // b.html excluded
       styleRulesIncluded: new Set([0, 1]),
       assetsIncluded: new Set(['img/a.png', 'img/b.png']),
       fontsIncluded: new Set<string>(),
@@ -1209,7 +1226,9 @@ describe('filterPlanBySelection — page filtering', () => {
     const filtered = filterPlanBySelection(plan, sel)
     expect(filtered.pages).toHaveLength(1)
     expect(filtered.pages[0].source).toBe('a.html')
-    expect(filtered.scripts.map((script) => ({ path: script.path, pageSources: script.pageSources }))).toEqual([
+    expect(
+      filtered.scripts.map((script) => ({ path: script.path, pageSources: script.pageSources })),
+    ).toEqual([
       { path: 'scripts/a.js', pageSources: ['a.html'] },
       { path: 'scripts/shared.js', pageSources: ['a.html'] },
     ])
@@ -1218,7 +1237,7 @@ describe('filterPlanBySelection — page filtering', () => {
   it('removes deselected style rule by index', () => {
     const sel = {
       pagesIncluded: new Set(['a.html', 'b.html']),
-      styleRulesIncluded: new Set([1]),           // rule 0 excluded
+      styleRulesIncluded: new Set([1]), // rule 0 excluded
       assetsIncluded: new Set(['img/a.png', 'img/b.png']),
       fontsIncluded: new Set<string>(),
       scriptsIncluded: new Set(['scripts/a.js', 'scripts/shared.js']),
@@ -1232,7 +1251,7 @@ describe('filterPlanBySelection — page filtering', () => {
     const sel = {
       pagesIncluded: new Set(['a.html', 'b.html']),
       styleRulesIncluded: new Set([0, 1]),
-      assetsIncluded: new Set(['img/a.png']),     // img/b.png excluded
+      assetsIncluded: new Set(['img/a.png']), // img/b.png excluded
       fontsIncluded: new Set<string>(),
       scriptsIncluded: new Set(['scripts/a.js', 'scripts/shared.js']),
     }
@@ -1270,8 +1289,22 @@ describe('makeDefaultSelection — selects all items in the plan', () => {
   it('selects all pages by source path', () => {
     const plan = makeMinimalPlan({
       pages: [
-        { source: 'a.html', title: 'A', slug: 'a', linkedCssPaths: [], scripts: [], nodeFragment: { rootNodeId: 'r', nodes: {} } },
-        { source: 'b.html', title: 'B', slug: 'b', linkedCssPaths: [], scripts: [], nodeFragment: { rootNodeId: 'r', nodes: {} } },
+        {
+          source: 'a.html',
+          title: 'A',
+          slug: 'a',
+          linkedCssPaths: [],
+          scripts: [],
+          nodeFragment: { rootNodeId: 'r', nodes: {} },
+        },
+        {
+          source: 'b.html',
+          title: 'B',
+          slug: 'b',
+          linkedCssPaths: [],
+          scripts: [],
+          nodeFragment: { rootNodeId: 'r', nodes: {} },
+        },
       ],
     })
     const sel = makeDefaultSelection(plan)
@@ -1309,8 +1342,20 @@ describe('makeDefaultSelection — selects all items in the plan', () => {
   it('selects all scripts by source path', () => {
     const plan = makeMinimalPlan({
       scripts: [
-        { path: 'scripts/vendor.js', content: '', format: 'classic', pageSources: ['a.html'], priority: 100 },
-        { path: 'scripts/app.js', content: '', format: 'module', pageSources: ['a.html'], priority: 101 },
+        {
+          path: 'scripts/vendor.js',
+          content: '',
+          format: 'classic',
+          pageSources: ['a.html'],
+          priority: 100,
+        },
+        {
+          path: 'scripts/app.js',
+          content: '',
+          format: 'module',
+          pageSources: ['a.html'],
+          priority: 101,
+        },
       ],
     })
     const sel = makeDefaultSelection(plan)
@@ -1339,12 +1384,23 @@ describe('describeIngestError — human-readable error messages', () => {
   }
 
   function describeIngestError(err: unknown): string {
-    const { EmptyImportError, OversizeImportError, ZipBombError, TooManyFilesError, PathTraversalError } = require('@core/siteImport')
-    if (err instanceof EmptyImportError) return 'No importable files found. Drop at least one HTML or CSS file.'
-    if (err instanceof OversizeImportError) return `Import is too large (${Math.round((err as InstanceType<typeof OversizeImportError>).sizeBytes / 1024 / 1024)} MB). Maximum is ${formatByteLimit((err as InstanceType<typeof OversizeImportError>).limitBytes)}.`
-    if (err instanceof ZipBombError) return 'ZIP archive is too large when uncompressed. Maximum uncompressed size is 5 GB.'
-    if (err instanceof TooManyFilesError) return `Too many files (${(err as InstanceType<typeof TooManyFilesError>).count}). Maximum is ${(err as InstanceType<typeof TooManyFilesError>).limit}.`
-    if (err instanceof PathTraversalError) return `Unsafe path detected: "${(err as InstanceType<typeof PathTraversalError>).path}".`
+    const {
+      EmptyImportError,
+      OversizeImportError,
+      ZipBombError,
+      TooManyFilesError,
+      PathTraversalError,
+    } = require('@core/siteImport')
+    if (err instanceof EmptyImportError)
+      return 'No importable files found. Drop at least one HTML or CSS file.'
+    if (err instanceof OversizeImportError)
+      return `Import is too large (${Math.round((err as InstanceType<typeof OversizeImportError>).sizeBytes / 1024 / 1024)} MB). Maximum is ${formatByteLimit((err as InstanceType<typeof OversizeImportError>).limitBytes)}.`
+    if (err instanceof ZipBombError)
+      return 'ZIP archive is too large when uncompressed. Maximum uncompressed size is 5 GB.'
+    if (err instanceof TooManyFilesError)
+      return `Too many files (${(err as InstanceType<typeof TooManyFilesError>).count}). Maximum is ${(err as InstanceType<typeof TooManyFilesError>).limit}.`
+    if (err instanceof PathTraversalError)
+      return `Unsafe path detected: "${(err as InstanceType<typeof PathTraversalError>).path}".`
     return err instanceof Error ? err.message : 'Unknown import error'
   }
 
@@ -1665,7 +1721,9 @@ describe('ConflictsStep — conflict rendering', () => {
         onRuleResolutionChange={noopResChange}
       />,
     )
-    const rowControls = within(screen.getByRole('group', { name: 'Conflict resolution for home.html' }))
+    const rowControls = within(
+      screen.getByRole('group', { name: 'Conflict resolution for home.html' }),
+    )
     expect(rowControls.getByRole('button', { name: 'Rename' })).toBeDefined()
     expect(rowControls.getByRole('button', { name: 'Skip' })).toBeDefined()
     expect(rowControls.queryByRole('button', { name: 'Overwrite' })).toBeNull()
@@ -1696,7 +1754,9 @@ describe('ConflictsStep — conflict rendering', () => {
         onRuleResolutionChange={noopResChange}
       />,
     )
-    const rowControls = within(screen.getByRole('group', { name: 'Conflict resolution for about.html' }))
+    const rowControls = within(
+      screen.getByRole('group', { name: 'Conflict resolution for about.html' }),
+    )
     expect(rowControls.getByRole('button', { name: 'Overwrite' })).toBeDefined()
     expect(rowControls.getAllByRole('button').map((button) => button.textContent)).toEqual([
       'Rename',
@@ -1732,7 +1792,9 @@ describe('ConflictsStep — conflict rendering', () => {
         onRuleResolutionChange={noopResChange}
       />,
     )
-    const rowControls = within(screen.getByRole('group', { name: 'Conflict resolution for about.html' }))
+    const rowControls = within(
+      screen.getByRole('group', { name: 'Conflict resolution for about.html' }),
+    )
     fireEvent.click(rowControls.getByRole('button', { name: 'Overwrite' }))
     expect(changes.length).toBeGreaterThan(0)
     expect(changes[0][0]).toBe('about.html')
@@ -1755,9 +1817,7 @@ describe('ConflictsStep — conflict rendering', () => {
         ],
       },
     })
-    const ruleRes = new Map<string, ConflictResolution>([
-      ['hero-title', { action: 'skip' }],
-    ])
+    const ruleRes = new Map<string, ConflictResolution>([['hero-title', { action: 'skip' }]])
     render(
       <ConflictsStep
         plan={plan}
@@ -1768,9 +1828,15 @@ describe('ConflictsStep — conflict rendering', () => {
       />,
     )
 
-    const rowControls = within(screen.getByRole('group', { name: 'Conflict resolution for hero-title' }))
-    expect(rowControls.getByRole('button', { name: 'Skip' }).getAttribute('aria-pressed')).toBe('true')
-    expect(rowControls.getByRole('button', { name: 'Rename' }).getAttribute('aria-pressed')).toBe('false')
+    const rowControls = within(
+      screen.getByRole('group', { name: 'Conflict resolution for hero-title' }),
+    )
+    expect(rowControls.getByRole('button', { name: 'Skip' }).getAttribute('aria-pressed')).toBe(
+      'true',
+    )
+    expect(rowControls.getByRole('button', { name: 'Rename' }).getAttribute('aria-pressed')).toBe(
+      'false',
+    )
   })
 
   it('applies one resolution to every class conflict from the section controls', () => {
@@ -1919,24 +1985,26 @@ describe('AnalyzeStep — MEDIA group renders from plan.assets only', () => {
       makeStyleRule({ name: `rule-${i}`, selector: `.rule-${i}`, order: i }),
     ),
     assets: [assetEntry],
-    scripts: [{
-      path: 'scripts/app.js',
-      content: '',
-      format: 'classic',
-      pageSources: ['index.html'],
-      priority: 100,
-    }],
+    scripts: [
+      {
+        path: 'scripts/app.js',
+        content: '',
+        format: 'classic',
+        pageSources: ['index.html'],
+        priority: 100,
+      },
+    ],
   })
 
   const syntheticFileMap: FileMap = {
     files: {
-      'index.html':       { bytes: new Uint8Array(), mimeType: 'text/html' },
-      'about.html':       { bytes: new Uint8Array(), mimeType: 'text/html' },
-      'pricing.html':     { bytes: new Uint8Array(), mimeType: 'text/html' },
-      'styles/main.css':  { bytes: new Uint8Array(), mimeType: 'text/css' },
+      'index.html': { bytes: new Uint8Array(), mimeType: 'text/html' },
+      'about.html': { bytes: new Uint8Array(), mimeType: 'text/html' },
+      'pricing.html': { bytes: new Uint8Array(), mimeType: 'text/html' },
+      'styles/main.css': { bytes: new Uint8Array(), mimeType: 'text/css' },
       'styles/theme.css': { bytes: new Uint8Array(), mimeType: 'text/css' },
-      'assets/logo.png':  { bytes: new Uint8Array(), mimeType: 'image/png' },
-      'scripts/app.js':   { bytes: new Uint8Array(), mimeType: 'application/javascript' },
+      'assets/logo.png': { bytes: new Uint8Array(), mimeType: 'image/png' },
+      'scripts/app.js': { bytes: new Uint8Array(), mimeType: 'application/javascript' },
     },
   }
 
@@ -2052,15 +2120,21 @@ describe('commitImportPlan — uploadAsset called only for entries in plan.asset
       ),
       assets: [
         // Exactly one uploadable asset — the PNG logo.
-        { sourcePath: 'assets/logo.png', mimeType: 'image/png', bytes: new Uint8Array([0x89, 0x50]) },
+        {
+          sourcePath: 'assets/logo.png',
+          mimeType: 'image/png',
+          bytes: new Uint8Array([0x89, 0x50]),
+        },
       ],
-      scripts: [{
-        path: 'scripts/app.js',
-        content: '',
-        format: 'classic',
-        pageSources: ['index.html'],
-        priority: 100,
-      }],
+      scripts: [
+        {
+          path: 'scripts/app.js',
+          content: '',
+          format: 'classic',
+          pageSources: ['index.html'],
+          priority: 100,
+        },
+      ],
     })
 
     const uploadedPaths: string[] = []

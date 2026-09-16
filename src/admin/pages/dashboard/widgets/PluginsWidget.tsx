@@ -46,40 +46,39 @@ export function PluginsWidget({ span, editing }: DashboardWidgetRendererProps) {
     >
       <div>
         {isEmpty && (
-          <p className={cn(styles.feedTime, styles.feedEmpty)}>
-            No plugins installed yet.
-          </p>
+          <p className={cn(styles.feedTime, styles.feedEmpty)}>No plugins installed yet.</p>
         )}
-        {!isLoading && plugins.map((p) => (
-          <div key={p.id} className={styles.pluginRow}>
-            <span className={styles.pluginIcon}>
-              {p.iconUrl ? (
-                // Plugin-declared icon (manifest.icon resolved against
-                // manifest.assetBasePath on the server). Same glyph the
-                // Plugins admin card renders — keeps the dashboard row
-                // visually identifiable with the plugin's brand mark.
-                <img
-                  src={p.iconUrl}
-                  alt=""
-                  className={styles.pluginIconImg}
-                  width={20}
-                  height={20}
-                  loading="lazy"
-                />
-              ) : (
-                <PlugSolidIcon size={12} aria-hidden="true" />
-              )}
-            </span>
-            <span className={styles.pluginName}>
-              {p.name}
-              <small>v{p.version}</small>
-            </span>
-            <span className={styles.wlistMeta}>
-              <span className={`${styles.dot} ${dotClass(p.state)}`} />
-              {stateLabel(p.state)}
-            </span>
-          </div>
-        ))}
+        {!isLoading &&
+          plugins.map((p) => (
+            <div key={p.id} className={styles.pluginRow}>
+              <span className={styles.pluginIcon}>
+                {p.iconUrl ? (
+                  // Plugin-declared icon (manifest.icon resolved against
+                  // manifest.assetBasePath on the server). Same glyph the
+                  // Plugins admin card renders — keeps the dashboard row
+                  // visually identifiable with the plugin's brand mark.
+                  <img
+                    src={p.iconUrl}
+                    alt=""
+                    className={styles.pluginIconImg}
+                    width={20}
+                    height={20}
+                    loading="lazy"
+                  />
+                ) : (
+                  <PlugSolidIcon size={12} aria-hidden="true" />
+                )}
+              </span>
+              <span className={styles.pluginName}>
+                {p.name}
+                <small>v{p.version}</small>
+              </span>
+              <span className={styles.wlistMeta}>
+                <span className={`${styles.dot} ${dotClass(p.state)}`} />
+                {stateLabel(p.state)}
+              </span>
+            </div>
+          ))}
       </div>
     </Widget>
   )

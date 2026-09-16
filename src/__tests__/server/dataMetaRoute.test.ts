@@ -28,7 +28,13 @@ const fakeDataTableRow = {
     { type: 'text', id: 'title', label: 'Title', required: true, builtIn: true },
     { type: 'text', id: 'slug', label: 'Slug', required: true, builtIn: true },
     { type: 'richText', id: 'body', label: 'Body', format: 'markdown', builtIn: true },
-    { type: 'media', id: 'featuredMedia', label: 'Featured media', mediaKind: 'image', builtIn: true },
+    {
+      type: 'media',
+      id: 'featuredMedia',
+      label: 'Featured media',
+      mediaKind: 'image',
+      builtIn: true,
+    },
   ],
   created_by_user_id: null,
   updated_by_user_id: null,
@@ -118,7 +124,9 @@ function makeRequest(path: string, cookie?: string): Request {
         return headerMap.get(name.toLowerCase()) ?? null
       },
     },
-    async json() { return {} },
+    async json() {
+      return {}
+    },
   } as unknown as Request
 }
 
@@ -145,7 +153,7 @@ describe('GET /admin/api/cms/data/_meta', () => {
     const res = await handleCmsRequest(makeRequest('/admin/api/cms/data/_meta', cookie), db)
     expect(res.status).toBe(200)
 
-    const body = await res.json() as { meta: { tables: Array<Record<string, unknown>> } }
+    const body = (await res.json()) as { meta: { tables: Array<Record<string, unknown>> } }
     expect(body).toHaveProperty('meta')
     expect(body.meta).toHaveProperty('tables')
     expect(body.meta.tables).toHaveLength(1)
@@ -170,7 +178,7 @@ describe('GET /admin/api/cms/data/_meta', () => {
     const res = await handleCmsRequest(makeRequest('/admin/api/cms/data/_meta', cookie), db)
     expect(res.status).toBe(200)
 
-    const body = await res.json() as { meta: unknown }
+    const body = (await res.json()) as { meta: unknown }
     expect(Value.Check(DataMetaSchema, body.meta)).toBe(true)
   })
 })

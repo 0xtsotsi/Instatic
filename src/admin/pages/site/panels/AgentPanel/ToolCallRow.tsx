@@ -30,7 +30,12 @@ import { ColorsSwatchSolidIcon } from 'pixel-art-icons/icons/colors-swatch-solid
 import { LayoutSolidIcon } from 'pixel-art-icons/icons/layout-solid'
 import { UsersSolidIcon } from 'pixel-art-icons/icons/users-solid'
 import { ZapSolidIcon } from 'pixel-art-icons/icons/zap-solid'
-import { getToolCallDisplay, extractColorSwatches, type ToolCallIcon, type ToolCallTone } from './toolCallDisplay'
+import {
+  getToolCallDisplay,
+  extractColorSwatches,
+  type ToolCallIcon,
+  type ToolCallTone,
+} from './toolCallDisplay'
 import styles from './AgentPanel.module.css'
 
 export function ToolCallRow({ toolCall }: { toolCall: AgentToolCall }) {
@@ -45,18 +50,21 @@ export function ToolCallRow({ toolCall }: { toolCall: AgentToolCall }) {
   const statusClass = isPending
     ? styles.toolCallStatusPending
     : isSuccess
-    ? styles.toolCallStatusSuccess
-    : styles.toolCallStatusFailed
+      ? styles.toolCallStatusSuccess
+      : styles.toolCallStatusFailed
 
   // Surface the tool's error message directly in the row stream so the user
   // sees WHY a tool failed without digging through devtools. The toolResult
   // handler in the agent store already populates `result.error`.
-  const errorMessage = isError ? toolCall.result?.error ?? 'Tool call failed.' : null
+  const errorMessage = isError ? (toolCall.result?.error ?? 'Tool call failed.') : null
 
   return (
     <>
       <div role="status" aria-label={statusLabel} className={styles.toolCallRow}>
-        <span className={cn(styles.toolCallIcon, toolCallToneClass(display.tone))} aria-hidden="true">
+        <span
+          className={cn(styles.toolCallIcon, toolCallToneClass(display.tone))}
+          aria-hidden="true"
+        >
           <ToolCallLeadingIcon icon={display.icon} />
         </span>
         <span className={styles.toolCallCopy} aria-hidden="true">
@@ -97,27 +105,48 @@ export function ToolCallRow({ toolCall }: { toolCall: AgentToolCall }) {
 // Per-tool category icon — signals what kind of action ran at a glance.
 function ToolCallLeadingIcon({ icon }: { icon: ToolCallIcon }) {
   switch (icon) {
-    case 'add': return <FilePlusSolidIcon size={15} />
-    case 'class': return <LinkIcon size={15} />
-    case 'code': return <CodeIcon size={15} />
-    case 'collection': return <PackageSolidIcon size={15} />
-    case 'copy': return <Copy2SolidIcon size={15} />
-    case 'data': return <DatabaseSolidIcon size={15} />
-    case 'delete': return <TrashSolidIcon size={15} />
-    case 'document': return <FileTextSolidIcon size={15} />
-    case 'edit': return <EditSolidIcon size={15} />
-    case 'media': return <ImageSolidIcon size={15} />
-    case 'move': return <MoveIcon size={15} />
-    case 'node': return <ContainerSolidIcon size={15} />
-    case 'open': return <OpenSolidIcon size={15} />
-    case 'page': return <FileTextSolidIcon size={15} />
-    case 'preview': return <EyeSolidIcon size={15} />
-    case 'runtime': return <RulerDimensionSolidIcon size={15} />
-    case 'style': return <ColorsSwatchSolidIcon size={15} />
-    case 'template': return <LayoutSolidIcon size={15} />
-    case 'tokens': return <ColorsSwatchSolidIcon size={15} />
-    case 'users': return <UsersSolidIcon size={15} />
-    case 'tool': return <ZapSolidIcon size={15} />
+    case 'add':
+      return <FilePlusSolidIcon size={15} />
+    case 'class':
+      return <LinkIcon size={15} />
+    case 'code':
+      return <CodeIcon size={15} />
+    case 'collection':
+      return <PackageSolidIcon size={15} />
+    case 'copy':
+      return <Copy2SolidIcon size={15} />
+    case 'data':
+      return <DatabaseSolidIcon size={15} />
+    case 'delete':
+      return <TrashSolidIcon size={15} />
+    case 'document':
+      return <FileTextSolidIcon size={15} />
+    case 'edit':
+      return <EditSolidIcon size={15} />
+    case 'media':
+      return <ImageSolidIcon size={15} />
+    case 'move':
+      return <MoveIcon size={15} />
+    case 'node':
+      return <ContainerSolidIcon size={15} />
+    case 'open':
+      return <OpenSolidIcon size={15} />
+    case 'page':
+      return <FileTextSolidIcon size={15} />
+    case 'preview':
+      return <EyeSolidIcon size={15} />
+    case 'runtime':
+      return <RulerDimensionSolidIcon size={15} />
+    case 'style':
+      return <ColorsSwatchSolidIcon size={15} />
+    case 'template':
+      return <LayoutSolidIcon size={15} />
+    case 'tokens':
+      return <ColorsSwatchSolidIcon size={15} />
+    case 'users':
+      return <UsersSolidIcon size={15} />
+    case 'tool':
+      return <ZapSolidIcon size={15} />
   }
 }
 
@@ -125,10 +154,15 @@ function ToolCallLeadingIcon({ icon }: { icon: ToolCallIcon }) {
 // style amber, write green); read/neutral stay achromatic.
 function toolCallToneClass(tone: ToolCallTone): string {
   switch (tone) {
-    case 'danger': return styles.toolCallIconDanger
-    case 'read': return styles.toolCallIconRead
-    case 'style': return styles.toolCallIconStyle
-    case 'write': return styles.toolCallIconWrite
-    case 'neutral': return styles.toolCallIconNeutral
+    case 'danger':
+      return styles.toolCallIconDanger
+    case 'read':
+      return styles.toolCallIconRead
+    case 'style':
+      return styles.toolCallIconStyle
+    case 'write':
+      return styles.toolCallIconWrite
+    case 'neutral':
+      return styles.toolCallIconNeutral
   }
 }

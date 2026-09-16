@@ -1,18 +1,10 @@
 import type { EditorStore, EditorStoreSliceCreator } from '@site/store/types'
 import { clearCanvasSelectionDraft } from './selectionSlice'
-import {
-  LEFT_SIDEBAR_DEFAULT_WIDTH,
-  clampSidebarWidth,
-} from '@admin/state/workspaceLayout'
+import { LEFT_SIDEBAR_DEFAULT_WIDTH, clampSidebarWidth } from '@admin/state/workspaceLayout'
 
 export type FocusedPanel = 'canvas' | 'domTree' | 'properties' | null
 type FormPreviewState = 'default' | 'submitting' | 'success' | 'error'
-export type LeftSidebarPanelId =
-  | 'explorer'
-  | 'selectors'
-  | 'framework'
-  | 'dependencies'
-  | 'agent'
+export type LeftSidebarPanelId = 'explorer' | 'selectors' | 'framework' | 'dependencies' | 'agent'
 /** Tabs inside the consolidated Framework panel. */
 export type FrameworkPanelTab = 'home' | 'colors' | 'typography' | 'spacing'
 /**
@@ -33,8 +25,7 @@ const PROPERTIES_PANEL_DEFAULT_WIDTH = 360
  * Architecture source: Contribution #631 §5 (single-active-doc pattern).
  */
 export type ActiveDocument =
-  | { kind: 'page'; pageId: string }
-  | { kind: 'visualComponent'; vcId: string }
+  { kind: 'page'; pageId: string } | { kind: 'visualComponent'; vcId: string }
 
 export interface PanelState {
   collapsed: boolean
@@ -70,9 +61,7 @@ interface ComponentizeEditorRequest {
  *   - `rename` — rename the existing saved layout `layoutId`.
  */
 export type LayoutNameDialogRequest =
-  | { mode: 'create'; nodeId: string }
-  | { mode: 'rename'; layoutId: string }
-
+  { mode: 'create'; nodeId: string } | { mode: 'rename'; layoutId: string }
 
 interface UiSlice {
   // Panel visibility / layout
@@ -148,7 +137,6 @@ interface UiSlice {
   togglePropertiesPanel: () => void
   setFocusedPanel: (panel: FocusedPanel) => void
   cycleFocusedPanel: () => void
-
 
   openPreview: () => void
   closePreview: () => void
@@ -265,7 +253,6 @@ interface UiSlice {
   openImportHtmlModal: (opts?: { parentId?: string; prefillHtml?: string }) => void
   /** Close the Import HTML modal and clear its transient state. */
   closeImportHtmlModal: () => void
-
 }
 
 const PANEL_FOCUS_ORDER: FocusedPanel[] = ['canvas', 'domTree', 'properties']
@@ -391,11 +378,9 @@ export const createUiSlice: EditorStoreSliceCreator<UiSlice> = (set, get) => ({
       state.formPreviewStates[formNodeId] = previewState
     }),
 
-  openInsertPicker: (parentId) =>
-    set({ insertPickerOpen: true, insertPickerParentId: parentId }),
+  openInsertPicker: (parentId) => set({ insertPickerOpen: true, insertPickerParentId: parentId }),
 
-  closeInsertPicker: () =>
-    set({ insertPickerOpen: false, insertPickerParentId: null }),
+  closeInsertPicker: () => set({ insertPickerOpen: false, insertPickerParentId: null }),
 
   openComponentizeEditor: (nodeId) => {
     const current = get()
@@ -454,9 +439,7 @@ export const createUiSlice: EditorStoreSliceCreator<UiSlice> = (set, get) => ({
     // and the user clicks a built-in rail item, that should open the
     // built-in panel (not toggle it closed because it "wasn't active").
     const state = get()
-    const activePanel = state.activePluginPanelId === null
-      ? getActiveLeftSidebarPanel(state)
-      : null
+    const activePanel = state.activePluginPanelId === null ? getActiveLeftSidebarPanel(state) : null
     get().setLeftSidebarPanel(activePanel === panel ? null : panel)
   },
 
@@ -492,45 +475,45 @@ export const createUiSlice: EditorStoreSliceCreator<UiSlice> = (set, get) => ({
 
   setActiveDocument: (doc) =>
     set((state) => {
-        const prevDoc = state.activeDocument
-        state.activeDocument = doc
+      const prevDoc = state.activeDocument
+      state.activeDocument = doc
 
-        if (doc?.kind === 'visualComponent') {
-          // Entering VC mode: capture the page we came from IF the previous
-          // activeDocument was null (the default page canvas). Coming from an
-          // explicit page doc or another VC → leave previousActivePageId as-is.
-          if (prevDoc === null && state.activePageId !== null) {
-            state.previousActivePageId = state.activePageId
-          }
-        } else {
-          // Leaving VC mode (setting to null or a page doc) → clear the captured id.
-          state.previousActivePageId = null
+      if (doc?.kind === 'visualComponent') {
+        // Entering VC mode: capture the page we came from IF the previous
+        // activeDocument was null (the default page canvas). Coming from an
+        // explicit page doc or another VC → leave previousActivePageId as-is.
+        if (prevDoc === null && state.activePageId !== null) {
+          state.previousActivePageId = state.activePageId
         }
+      } else {
+        // Leaving VC mode (setting to null or a page doc) → clear the captured id.
+        state.previousActivePageId = null
+      }
 
-        // Drop stale selection / hover whenever the active document actually
-        // changes. The DOM panel resets to "nothing selected" on a doc switch
-        // anyway, and a node ID from the previous document either no longer
-        // resolves in the new canvas or — worse — accidentally collides with
-        // an unrelated node ID, which makes the selection overlay land in the
-        // wrong place. Clearing here is the single source of truth so every
-        // entry point (page → VC, VC → page, VC → other VC, doc → null) gets
-        // it right.
-        if (!isSameActiveDocument(prevDoc, doc)) {
-          clearCanvasSelectionDraft(state)
-        }
-      }),
+      // Drop stale selection / hover whenever the active document actually
+      // changes. The DOM panel resets to "nothing selected" on a doc switch
+      // anyway, and a node ID from the previous document either no longer
+      // resolves in the new canvas or — worse — accidentally collides with
+      // an unrelated node ID, which makes the selection overlay land in the
+      // wrong place. Clearing here is the single source of truth so every
+      // entry point (page → VC, VC → page, VC → other VC, doc → null) gets
+      // it right.
+      if (!isSameActiveDocument(prevDoc, doc)) {
+        clearCanvasSelectionDraft(state)
+      }
+    }),
 
   exitVisualComponentMode: () =>
     set((state) => {
-        const prevPageId = state.previousActivePageId
-        state.activeDocument = null
-        // Restore the page we came from if it still exists in the site.
-        if (prevPageId !== null && state.site?.pages.some((p) => p.id === prevPageId)) {
-          state.activePageId = prevPageId
-        }
-        clearCanvasSelectionDraft(state)
-        state.previousActivePageId = null
-      }),
+      const prevPageId = state.previousActivePageId
+      state.activeDocument = null
+      // Restore the page we came from if it still exists in the site.
+      if (prevPageId !== null && state.site?.pages.some((p) => p.id === prevPageId)) {
+        state.activePageId = prevPageId
+      }
+      clearCanvasSelectionDraft(state)
+      state.previousActivePageId = null
+    }),
 
   setTemplatePreviewSelection: (templateId, sourceId) =>
     set((state) => {
@@ -547,9 +530,11 @@ export const createUiSlice: EditorStoreSliceCreator<UiSlice> = (set, get) => ({
     // single selector for editing clears any pending checkbox multi-selection.
     const clearMulti = classId !== null && state.selectedSelectorClassIds.length > 0
     if (Object.is(state.selectedSelectorClassId, classId) && !clearMulti) return
-    set(clearMulti
-      ? { selectedSelectorClassId: classId, selectedSelectorClassIds: [] }
-      : { selectedSelectorClassId: classId })
+    set(
+      clearMulti
+        ? { selectedSelectorClassId: classId, selectedSelectorClassIds: [] }
+        : { selectedSelectorClassId: classId },
+    )
   },
 
   setHighlightedSelectorClassId: (classId) => {
@@ -624,10 +609,7 @@ export const createUiSlice: EditorStoreSliceCreator<UiSlice> = (set, get) => ({
  * references. Used by setActiveDocument to decide whether selection / hover
  * needs to be cleared.
  */
-function isSameActiveDocument(
-  a: ActiveDocument | null,
-  b: ActiveDocument | null,
-): boolean {
+function isSameActiveDocument(a: ActiveDocument | null, b: ActiveDocument | null): boolean {
   if (a === b) return true
   if (a === null || b === null) return false
   if (a.kind !== b.kind) return false

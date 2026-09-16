@@ -36,7 +36,9 @@ const URL_PAYLOAD_RE = /url\(\s*(['"]?)([^'")\n]+)\1\s*\)/i
 function normalizeBackgroundImage(style: CSSStyleDeclaration, out: Record<string, string>): void {
   let raw = typeof out.backgroundImage === 'string' ? out.backgroundImage.trim() : ''
   if (!raw || raw.toLowerCase() === 'none') {
-    raw = (typeof out.background === 'string' ? out.background : style.getPropertyValue('background')).trim()
+    raw = (
+      typeof out.background === 'string' ? out.background : style.getPropertyValue('background')
+    ).trim()
   }
   const m = raw.match(URL_PAYLOAD_RE)
   if (m) out.backgroundImage = `url('${m[2].trim()}')`

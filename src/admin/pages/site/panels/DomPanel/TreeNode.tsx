@@ -24,21 +24,14 @@ import { memo, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { useEditorStore, selectActiveCanvasPage } from '@site/store/store'
 import { registry } from '@core/module-engine'
-import {
-  getNodeDisplayName,
-  getNodeHtmlTag,
-  getNodeClassNames,
-} from '@core/page-tree'
+import { getNodeDisplayName, getNodeHtmlTag, getNodeClassNames } from '@core/page-tree'
 import { useDraggable } from '@dnd-kit/core'
 import { useExpansionStore, useIsNodeExpanded } from './DomTreeContext'
 import { useDomPanelDndContext } from './DomPanelDndContext'
 import { LayerNodeContextMenu } from './LayerNodeContextMenu'
 import { Input } from '@ui/components/Input'
 import { cn } from '@ui/cn'
-import {
-  TreeRow,
-  treeDropStyles,
-} from '@site/ui/Tree'
+import { TreeRow, treeDropStyles } from '@site/ui/Tree'
 import { getKeybindingForCommand } from '@admin/spotlight/keybindings'
 import { useEditorPreference } from '@site/preferences/editorPreferences'
 import { useConfirmDelete } from '@admin/shared/dialogs/ConfirmDeleteDialog'
@@ -126,12 +119,7 @@ export const TreeNode = memo(function TreeNode({ nodeId, depth, editable = true 
 
   // ── dnd-kit draggable ─────────────────────────────────────────────────────
   const draggableEnabled = editable && !!node && !isRoot && !node.locked && !isRenaming
-  const {
-    attributes,
-    listeners,
-    setNodeRef,
-    isDragging,
-  } = useDraggable({
+  const { attributes, listeners, setNodeRef, isDragging } = useDraggable({
     id: nodeId,
     disabled: !draggableEnabled,
   })
@@ -157,7 +145,8 @@ export const TreeNode = memo(function TreeNode({ nodeId, depth, editable = true 
   // its chevron — the row is purely a label for "the page body", with no
   // expand/collapse affordance.
   const expanded = isRoot ? true : expandedSelf
-  const isOpenContainerGroup = node.moduleId === 'base.container' && hasChildren && expanded && isSelected
+  const isOpenContainerGroup =
+    node.moduleId === 'base.container' && hasChildren && expanded && isSelected
   const dropPosition =
     target?.overId === nodeId && target.position !== 'inside'
       ? target.position
@@ -181,9 +170,7 @@ export const TreeNode = memo(function TreeNode({ nodeId, depth, editable = true 
     const page = selectActiveCanvasPage(state)
     if (!page) return
 
-    const selection = state.selectedNodeIds.includes(nodeId)
-      ? state.selectedNodeIds
-      : [nodeId]
+    const selection = state.selectedNodeIds.includes(nodeId) ? state.selectedNodeIds : [nodeId]
     const deletableIds = selection.filter((id) => {
       const candidate = page.nodes[id]
       return Boolean(candidate) && id !== page.rootNodeId && !candidate?.locked
@@ -267,8 +254,16 @@ export const TreeNode = memo(function TreeNode({ nodeId, depth, editable = true 
   const handleRenameKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     // stopPropagation prevents bubbling to the parent row's handleKeyDown,
     // which would otherwise intercept Enter/Space and call selectNode().
-    if (e.key === 'Enter') { e.preventDefault(); e.stopPropagation(); commitRename() }
-    if (e.key === 'Escape') { e.preventDefault(); e.stopPropagation(); setIsRenaming(false) }
+    if (e.key === 'Enter') {
+      e.preventDefault()
+      e.stopPropagation()
+      commitRename()
+    }
+    if (e.key === 'Escape') {
+      e.preventDefault()
+      e.stopPropagation()
+      setIsRenaming(false)
+    }
   }
 
   // Joined class chip (e.g. ".header.padding-m") — chained CSS-selector style.
@@ -316,11 +311,9 @@ export const TreeNode = memo(function TreeNode({ nodeId, depth, editable = true 
         // aria-label names the row for AT, including locked/hidden state so screen
         // reader users get the full picture without relying on the emoji indicators
         // (which are aria-hidden and therefore invisible to AT).
-        aria-label={[
-          displayName,
-          node.locked ? 'locked' : null,
-          node.hidden ? 'hidden' : null,
-        ].filter(Boolean).join(', ')}
+        aria-label={[displayName, node.locked ? 'locked' : null, node.hidden ? 'hidden' : null]
+          .filter(Boolean)
+          .join(', ')}
         data-drop-position={dropPosition}
         // Stable agent-addressable handles. `dom-tree-item` is keyed by the
         // node id (matches `data-instatic-node-id` on the canvas) so a single id
@@ -356,7 +349,8 @@ export const TreeNode = memo(function TreeNode({ nodeId, depth, editable = true 
         }}
         onKeyDown={handleKeyDown}
         onContextMenu={(e) => {
-          e.preventDefault(); e.stopPropagation()
+          e.preventDefault()
+          e.stopPropagation()
           if (!editable) return
           // Right-click on a node already in the multi-selection keeps the set;
           // otherwise replace with just this node. Matches the canvas + Figma.
@@ -384,26 +378,31 @@ export const TreeNode = memo(function TreeNode({ nodeId, depth, editable = true 
           isRoot={isRoot}
           locked={node.locked}
           hidden={node.hidden}
-          onToggle={(e) => { e.stopPropagation(); if (!isRoot) store.toggle(nodeId) }}
-          labelSlot={isRenaming ? (
-            <Input
-              ref={renameInputRef}
-              fieldSize="xs"
-              // autoFocus ensures the input receives keyboard focus as soon as it
-              // mounts — more reliable than the requestAnimationFrame fallback.
-              autoFocus
-              value={renameValue}
-              onChange={(e) => setRenameValue(e.target.value)}
-              onKeyDown={handleRenameKeyDown}
-              onBlur={commitRename}
-              // Stop pointer events from bubbling to the row's dnd-kit listeners.
-              // Without this, a click inside the input triggers the PointerSensor
-              // on the row div, which can steal focus away from the input.
-              onPointerDown={(e) => e.stopPropagation()}
-              aria-label={`Rename ${displayName}`}
-              className={styles.renameInput}
-            />
-          ) : undefined}
+          onToggle={(e) => {
+            e.stopPropagation()
+            if (!isRoot) store.toggle(nodeId)
+          }}
+          labelSlot={
+            isRenaming ? (
+              <Input
+                ref={renameInputRef}
+                fieldSize="xs"
+                // autoFocus ensures the input receives keyboard focus as soon as it
+                // mounts — more reliable than the requestAnimationFrame fallback.
+                autoFocus
+                value={renameValue}
+                onChange={(e) => setRenameValue(e.target.value)}
+                onKeyDown={handleRenameKeyDown}
+                onBlur={commitRename}
+                // Stop pointer events from bubbling to the row's dnd-kit listeners.
+                // Without this, a click inside the input triggers the PointerSensor
+                // on the row div, which can steal focus away from the input.
+                onPointerDown={(e) => e.stopPropagation()}
+                aria-label={`Rename ${displayName}`}
+                className={styles.renameInput}
+              />
+            ) : undefined
+          }
         />
       </TreeRow>
 
@@ -417,38 +416,55 @@ export const TreeNode = memo(function TreeNode({ nodeId, depth, editable = true 
           Without the portal, position:fixed inside a transformed ancestor is
           positioned relative to that ancestor, not the viewport, causing the
           menu to appear ~40px below the cursor (Task #413). */}
-      {editable && contextMenu && createPortal(
-        <LayerNodeContextMenu
-          x={contextMenu.x}
-          y={contextMenu.y}
-          nodeId={nodeId}
-          onClose={() => setContextMenu(null)}
-          onDelete={() => {
-            setContextMenu(null)
-            requestDeleteLayer()
-          }}
-          onDuplicate={() => { duplicateNode(nodeId); setContextMenu(null) }}
-          onRename={() => { setContextMenu(null); openRename() }}
-          onWrapInContainer={() => {
-            wrapNode(nodeId, 'base.container')
-            setContextMenu(null)
-          }}
-          onCopy={() => { copyNode(nodeId); setContextMenu(null) }}
-          onCut={() => { cutNode(nodeId); setContextMenu(null) }}
-          onPaste={() => { pasteNode(nodeId); setContextMenu(null) }}
-          onPasteHtml={async (targetNodeId) => {
-            setContextMenu(null)
-            let prefillHtml = ''
-            try {
-              prefillHtml = await navigator.clipboard.readText()
-            } catch (_err) {
-              // Clipboard permission denied or API unavailable — open with an empty editor.
-            }
-            openImportHtmlModal({ parentId: targetNodeId, prefillHtml })
-          }}
-        />,
-        document.body,
-      )}
+      {editable &&
+        contextMenu &&
+        createPortal(
+          <LayerNodeContextMenu
+            x={contextMenu.x}
+            y={contextMenu.y}
+            nodeId={nodeId}
+            onClose={() => setContextMenu(null)}
+            onDelete={() => {
+              setContextMenu(null)
+              requestDeleteLayer()
+            }}
+            onDuplicate={() => {
+              duplicateNode(nodeId)
+              setContextMenu(null)
+            }}
+            onRename={() => {
+              setContextMenu(null)
+              openRename()
+            }}
+            onWrapInContainer={() => {
+              wrapNode(nodeId, 'base.container')
+              setContextMenu(null)
+            }}
+            onCopy={() => {
+              copyNode(nodeId)
+              setContextMenu(null)
+            }}
+            onCut={() => {
+              cutNode(nodeId)
+              setContextMenu(null)
+            }}
+            onPaste={() => {
+              pasteNode(nodeId)
+              setContextMenu(null)
+            }}
+            onPasteHtml={async (targetNodeId) => {
+              setContextMenu(null)
+              let prefillHtml = ''
+              try {
+                prefillHtml = await navigator.clipboard.readText()
+              } catch (_err) {
+                // Clipboard permission denied or API unavailable — open with an empty editor.
+              }
+              openImportHtmlModal({ parentId: targetNodeId, prefillHtml })
+            }}
+          />,
+          document.body,
+        )}
     </div>
   )
 })
@@ -457,10 +473,19 @@ export const TreeNode = memo(function TreeNode({ nodeId, depth, editable = true 
 
 import { useEditorStore as useStore } from '@site/store/store'
 
-function ChildrenGroup({ nodeId, depth, editable }: { nodeId: string; depth: number; editable: boolean }) {
+function ChildrenGroup({
+  nodeId,
+  depth,
+  editable,
+}: {
+  nodeId: string
+  depth: number
+  editable: boolean
+}) {
   // Fall back to a module-level stable empty array: returning a fresh [] from
   // the selector would break referential equality every render (Guideline #239).
-  const children = useStore((s) => selectActiveCanvasPage(s)?.nodes[nodeId]?.children) ?? EMPTY_CHILDREN
+  const children =
+    useStore((s) => selectActiveCanvasPage(s)?.nodes[nodeId]?.children) ?? EMPTY_CHILDREN
 
   return (
     <div role="group">

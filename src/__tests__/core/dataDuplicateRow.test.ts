@@ -58,7 +58,11 @@ describe('buildDuplicateRowCells', () => {
     const source = makeRow()
     const existing = [
       source,
-      makeRow({ id: 'row-copy', slug: 'launch-notes-copy', cells: { title: 'Existing', slug: 'launch-notes-copy' } }),
+      makeRow({
+        id: 'row-copy',
+        slug: 'launch-notes-copy',
+        cells: { title: 'Existing', slug: 'launch-notes-copy' },
+      }),
     ]
 
     expect(buildDuplicateRowCells(table, source, existing)).toEqual({

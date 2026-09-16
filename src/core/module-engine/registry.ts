@@ -82,13 +82,13 @@ class ModuleRegistry implements IModuleRegistry {
     if (!definition.id || !definition.id.includes('.')) {
       throw new Error(
         `[ModuleRegistry] Invalid module ID "${definition.id}". ` +
-          `IDs must be namespaced: "namespace.module-name" (e.g. "base.text").`
+          `IDs must be namespaced: "namespace.module-name" (e.g. "base.text").`,
       )
     }
     if (this._modules.has(definition.id)) {
       throw new Error(
         `[ModuleRegistry] Module "${definition.id}" is already registered. ` +
-          `Use registerOrReplace() to intentionally overwrite.`
+          `Use registerOrReplace() to intentionally overwrite.`,
       )
     }
     this.validatePublishBehavior(definition)
@@ -98,9 +98,7 @@ class ModuleRegistry implements IModuleRegistry {
 
   registerOrReplace<T extends Record<string, unknown>>(definition: ModuleDefinition<T>): void {
     if (!definition.id || !definition.id.includes('.')) {
-      throw new Error(
-        `[ModuleRegistry] Invalid module ID "${definition.id}".`
-      )
+      throw new Error(`[ModuleRegistry] Invalid module ID "${definition.id}".`)
     }
     this.validatePublishBehavior(definition)
     this._modules.set(definition.id, this.erase(definition))
@@ -120,7 +118,7 @@ class ModuleRegistry implements IModuleRegistry {
     if (!mod) {
       throw new Error(
         `[ModuleRegistry] Module "${id}" is not registered. ` +
-          `Ensure the module is imported and registered before use.`
+          `Ensure the module is imported and registered before use.`,
       )
     }
     return mod

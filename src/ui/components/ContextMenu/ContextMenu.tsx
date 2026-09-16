@@ -172,7 +172,11 @@ export function ContextMenu({
   // Item-selection closes go straight through `onClose` (instant), matching
   // the convention that picking an action dismisses the menu immediately.
   // Reopening at a new point/anchor cancels a mid-flight exit.
-  const { closing, beginClose } = useDeferredClose(onClose, animateExit, [pointX, pointY, anchorRef])
+  const { closing, beginClose } = useDeferredClose(onClose, animateExit, [
+    pointX,
+    pointY,
+    anchorRef,
+  ])
 
   // Positioning is delegated to two mutually-exclusive hooks: anchor mode
   // (auto-flip relative to a trigger) and point mode (right-click viewport-fit).
@@ -206,9 +210,7 @@ export function ContextMenu({
   //   - point mode:  use the viewport-clamped position (or hide until measured)
   const resolvedX = anchorRef ? autoPosition?.x : pointPosition?.x
   const resolvedY = anchorRef ? autoPosition?.y : pointPosition?.y
-  const resolvedSide: ResolvedFloatingSide | undefined = anchorRef
-    ? autoPosition?.side
-    : undefined
+  const resolvedSide: ResolvedFloatingSide | undefined = anchorRef ? autoPosition?.side : undefined
 
   // While we measure the menu (either mode), render it off-screen with
   // visibility:hidden so it doesn't flash at (0, 0) before the layout
@@ -222,9 +224,8 @@ export function ContextMenu({
     '--context-menu-y': `${resolvedY ?? 0}px`,
     '--context-menu-min-width': `${minWidth}px`,
     '--context-menu-width': `${effectiveWidth}px`,
-    '--context-menu-max-width': maxWidth != null
-      ? `${Math.max(maxWidth, minWidth)}px`
-      : 'calc(100vw - 16px)',
+    '--context-menu-max-width':
+      maxWidth != null ? `${Math.max(maxWidth, minWidth)}px` : 'calc(100vw - 16px)',
     '--context-menu-z-index': zIndex,
     ...(maxHeight != null ? { '--context-menu-max-height': `${maxHeight}px` } : null),
     ...(measuring ? { visibility: 'hidden' as const } : null),
@@ -292,15 +293,15 @@ export function ContextMenu({
       style={style}
       {...domProps}
       onKeyDown={handleKeyDown}
-      onClick={(event) => { event.stopPropagation(); domProps.onClick?.(event) }}
+      onClick={(event) => {
+        event.stopPropagation()
+        domProps.onClick?.(event)
+      }}
     >
       {header != null ? (
         <>
           <div className={styles.menuHeader}>{header}</div>
-          <div
-            className={styles.menuScroll}
-            data-scrollable={maxHeight != null ? '' : undefined}
-          >
+          <div className={styles.menuScroll} data-scrollable={maxHeight != null ? '' : undefined}>
             {children}
           </div>
         </>

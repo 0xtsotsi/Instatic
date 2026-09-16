@@ -30,10 +30,7 @@
  * stay in lockstep.
  */
 import { useRef, type PointerEvent as ReactPointerEvent } from 'react'
-import {
-  useDraggable,
-  useDroppable,
-} from '@dnd-kit/core'
+import { useDraggable, useDroppable } from '@dnd-kit/core'
 import { PlusIcon } from 'pixel-art-icons/icons/plus'
 import type { DashboardWidgetDefinition } from '@core/dashboard'
 import { Button } from '@ui/components/Button'
@@ -91,18 +88,16 @@ interface DashboardGridProps {
    * drop pill), OR the proposed destination would overlap an existing
    * widget (drops only land in empty space).
    */
-  dropTarget:
-    | {
-        col: number
-        row: number
-        size: number
-        rows: number
-        leftPx: number
-        topPx: number
-        widthPx: number
-        heightPx: number
-      }
-    | null
+  dropTarget: {
+    col: number
+    row: number
+    size: number
+    rows: number
+    leftPx: number
+    topPx: number
+    widthPx: number
+    heightPx: number
+  } | null
 }
 
 export function DashboardGrid({
@@ -120,10 +115,7 @@ export function DashboardGrid({
    * We compute it from the max (row + rows) of the items so dropping a
    * widget further down doesn't leave the Add tile stranded mid-grid.
    */
-  const addBlockRow = items.reduce(
-    (max, item) => Math.max(max, item.row + item.rows),
-    1,
-  )
+  const addBlockRow = items.reduce((max, item) => Math.max(max, item.row + item.rows), 1)
 
   // While editing, force the grid to extend several rows BELOW the
   // lowest widget so the user has actual empty cells to drag library
@@ -305,9 +297,7 @@ function GridSurface({
       // the parent, which mirrors `CUSTOMIZE_DROPZONE_ROWS` extra
       // rows worth of pixels.
       style={
-        minHeight !== undefined
-          ? { ['--grid-min-height' as string]: `${minHeight}px` }
-          : undefined
+        minHeight !== undefined ? { ['--grid-min-height' as string]: `${minHeight}px` } : undefined
       }
     >
       {children}
@@ -330,11 +320,11 @@ interface ResizeSpec {
 }
 
 const RESIZE_SPECS: Record<ResizeKind, ResizeSpec> = {
-  right:  { kind: 'right',  axis: 'x',  xSign:  1, ySign:  0 },
-  left:   { kind: 'left',   axis: 'x',  xSign: -1, ySign:  0 },
-  bottom: { kind: 'bottom', axis: 'y',  xSign:  0, ySign:  1 },
-  top:    { kind: 'top',    axis: 'y',  xSign:  0, ySign: -1 },
-  corner: { kind: 'corner', axis: 'xy', xSign:  1, ySign:  1 },
+  right: { kind: 'right', axis: 'x', xSign: 1, ySign: 0 },
+  left: { kind: 'left', axis: 'x', xSign: -1, ySign: 0 },
+  bottom: { kind: 'bottom', axis: 'y', xSign: 0, ySign: 1 },
+  top: { kind: 'top', axis: 'y', xSign: 0, ySign: -1 },
+  corner: { kind: 'corner', axis: 'xy', xSign: 1, ySign: 1 },
 }
 
 interface DraggableCellProps {
@@ -424,10 +414,7 @@ function DraggableCell({ item, definition, onResize, onResizeRows }: DraggableCe
         containerRef.current = node
         draggable.setNodeRef(node)
       }}
-      className={cn(
-        styles.cell,
-        draggable.isDragging && styles.dragging,
-      )}
+      className={cn(styles.cell, draggable.isDragging && styles.dragging)}
       data-span={item.size}
       data-rows={item.rows}
       data-col={item.col}

@@ -60,7 +60,6 @@ function rangeToSinceIso(range: Range): string {
   return start.toISOString()
 }
 
-
 export function AuditTab() {
   const [range, setRange] = useState<Range>('30d')
   // Pass the viewer's IANA zone so the server buckets the daily rollup into
@@ -90,11 +89,13 @@ export function AuditTab() {
         </div>
       </div>
 
-      {error && <p role="alert" className={styles.errorAlert}>{error}</p>}
-
-      {loading && !data && (
-        <div className={styles.emptyState}>Loading…</div>
+      {error && (
+        <p role="alert" className={styles.errorAlert}>
+          {error}
+        </p>
       )}
+
+      {loading && !data && <div className={styles.emptyState}>Loading…</div>}
 
       {data && (
         <>
@@ -147,9 +148,7 @@ function TotalsRow({ data }: { data: AiAuditResponse }) {
   // cacheReadTokens (cached billed at ~10%) + cacheCreationTokens (write
   // surcharge applied once per cache lifetime).
   const cacheDenom = totals.promptTokens + totals.cacheReadTokens + totals.cacheCreationTokens
-  const cacheHitPct = cacheDenom > 0
-    ? Math.round((totals.cacheReadTokens / cacheDenom) * 100)
-    : 0
+  const cacheHitPct = cacheDenom > 0 ? Math.round((totals.cacheReadTokens / cacheDenom) * 100) : 0
   const showCache = totals.cacheReadTokens > 0 || totals.cacheCreationTokens > 0
 
   return (
@@ -157,9 +156,7 @@ function TotalsRow({ data }: { data: AiAuditResponse }) {
       <div className={styles.auditTotalCard}>
         <span className={styles.auditTotalLabel}>Spend</span>
         <span className={styles.auditTotalValue}>{formatCost(totals.costUsd)}</span>
-        <span className={styles.auditTotalHint}>
-          Best-effort estimate from the price table.
-        </span>
+        <span className={styles.auditTotalHint}>Best-effort estimate from the price table.</span>
       </div>
       <div className={styles.auditTotalCard}>
         <span className={styles.auditTotalLabel}>Chats</span>
@@ -176,9 +173,7 @@ function TotalsRow({ data }: { data: AiAuditResponse }) {
         </span>
       </div>
       <div className={styles.auditTotalCard}>
-        <span className={styles.auditTotalLabel}>
-          {showCache ? 'Cache hit' : 'Output tokens'}
-        </span>
+        <span className={styles.auditTotalLabel}>{showCache ? 'Cache hit' : 'Output tokens'}</span>
         <span className={styles.auditTotalValue}>
           {showCache ? `${cacheHitPct}%` : formatNumber(totals.completionTokens)}
         </span>

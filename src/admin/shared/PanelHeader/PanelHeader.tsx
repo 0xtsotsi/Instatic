@@ -55,7 +55,14 @@ interface PanelHeaderProps {
   children?: React.ReactNode
 }
 
-export function PanelHeader({ title, titleContent, panelId, onClose, dragHandleProps, children }: PanelHeaderProps) {
+export function PanelHeader({
+  title,
+  titleContent,
+  panelId,
+  onClose,
+  dragHandleProps,
+  children,
+}: PanelHeaderProps) {
   return (
     <div
       {...dragHandleProps}
@@ -67,11 +74,7 @@ export function PanelHeader({ title, titleContent, panelId, onClose, dragHandleP
       <div className={styles.title}>{titleContent ?? title}</div>
 
       {/* Optional extra actions slot */}
-      {children && (
-        <div className={styles.actions}>
-          {children}
-        </div>
-      )}
+      {children && <div className={styles.actions}>{children}</div>}
 
       {/* Close button — closes the panel completely (toolbar button reopens) */}
       <Button

@@ -18,10 +18,7 @@ import type {
 import { TextStartTIcon } from 'pixel-art-icons/icons/text-start-t'
 import { TextColumsIcon } from 'pixel-art-icons/icons/text-colums'
 import { Button } from '@ui/components/Button'
-import {
-  FrameworkScalePanel,
-  type ScaleAdapter,
-} from '@site/panels/FrameworkScalePanel'
+import { FrameworkScalePanel, type ScaleAdapter } from '@site/panels/FrameworkScalePanel'
 import { useFrameworkChangeConfirm } from '@admin/shared/dialogs/FrameworkChangeConfirmDialog'
 import { applyTypographyGroupPatchPreview } from '@site/store/slices/site/framework/typography'
 import { FontsSection } from './FontsSection/FontsSection'
@@ -64,10 +61,7 @@ function copyToClipboard(value: string) {
 
 function TypographyScalePreview({ points }: { points: TypographyScalePoint[] }) {
   return (
-    <ol
-      className={styles.scalePreview}
-      aria-label="Typography scale preview"
-    >
+    <ol className={styles.scalePreview} aria-label="Typography scale preview">
       {points.map((point, idx) => {
         const minLabel = formatTypeValue(point.minPx)
         const maxLabel = formatTypeValue(point.maxPx)
@@ -146,10 +140,7 @@ export function TypographyTab() {
       commit: () => onDeleteGroup(groupId),
     })
 
-  const wrappedUpdateGroup = (
-    groupId: string,
-    patch: Parameters<typeof onUpdateGroup>[1],
-  ) =>
+  const wrappedUpdateGroup = (groupId: string, patch: Parameters<typeof onUpdateGroup>[1]) =>
     confirmFrameworkChange({
       actionLabel: groupActionLabel('Update typography scale', groupId),
       applyChange: (draft) => applyTypographyGroupPatchPreview(draft, groupId, patch),
@@ -171,8 +162,7 @@ export function TypographyTab() {
     panelId: 'typography',
     selectGroups: (state) => state.site?.settings.framework?.typography?.groups ?? EMPTY_GROUPS,
     selectClasses: (state) => state.site?.settings.framework?.typography?.classes ?? EMPTY_CLASSES,
-    selectIsDisabled: (state) =>
-      Boolean(state.site?.settings.framework?.typography?.isDisabled),
+    selectIsDisabled: (state) => Boolean(state.site?.settings.framework?.typography?.isDisabled),
     ratioOptions: TYPE_RATIO_OPTIONS,
     classGeneratorProperties: TYPOGRAPHY_CSS_PROPERTIES,
     scalesSectionIcon: TextStartTIcon,

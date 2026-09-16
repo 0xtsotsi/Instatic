@@ -3,16 +3,22 @@ import { assignRailAccents, railAccent, RAIL_ACCENTS } from '@ui/railAccent'
 
 describe('railAccent', () => {
   it('uses the full identity, not just the first letter', () => {
-    const accents = assignRailAccents(
-      ['site', 'selectors', 'spacing'],
-      (id) => `site:${id}`,
-    )
+    const accents = assignRailAccents(['site', 'selectors', 'spacing'], (id) => `site:${id}`)
 
     expect(new Set(accents).size).toBe(3)
   })
 
   it('keeps a visible rail group diverse until the palette is exhausted', () => {
-    const items = ['layers', 'site', 'selectors', 'colors', 'typography', 'spacing', 'media', 'dependencies']
+    const items = [
+      'layers',
+      'site',
+      'selectors',
+      'colors',
+      'typography',
+      'spacing',
+      'media',
+      'dependencies',
+    ]
     const accents = assignRailAccents(items, (id) => `site:${id}`)
 
     expect(new Set(accents).size).toBe(items.length)
@@ -22,7 +28,7 @@ describe('railAccent', () => {
     const accents = assignRailAccents(
       ['plugin-a', 'plugin-b', 'plugin-c'],
       (id) => id,
-      (id) => id === 'plugin-a' ? 'mint' : null,
+      (id) => (id === 'plugin-a' ? 'mint' : null),
     )
 
     expect(accents[0]).toBe('mint')

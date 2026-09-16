@@ -47,8 +47,12 @@ export function useDebouncedSave<T>({
   const equalsRef = useRef(equals)
   const valueRef = useRef<T>(value)
 
-  useEffect(() => { saveRef.current = save }, [save])
-  useEffect(() => { equalsRef.current = equals }, [equals])
+  useEffect(() => {
+    saveRef.current = save
+  }, [save])
+  useEffect(() => {
+    equalsRef.current = equals
+  }, [equals])
 
   // Reset when the external value changes — but only when the change isn't
   // just our own save completing. Otherwise we'd snap the local edit back to

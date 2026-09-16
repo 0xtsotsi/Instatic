@@ -36,16 +36,18 @@ import {
   type UpdateCmsMediaAssetInput,
 } from '@core/persistence/cmsMedia'
 import { buildFolderTree, type MediaFolderNode } from '../utils/folderTree'
-import { collectMediaTags, filterMediaAssets, type MediaFilters, type MediaSort, type MediaType } from '../utils/filters'
+import {
+  collectMediaTags,
+  filterMediaAssets,
+  type MediaFilters,
+  type MediaSort,
+  type MediaType,
+} from '../utils/filters'
 import { useUploadQueue, type UseUploadQueueResult } from './useUploadQueue'
 import { primeCmsMediaAssetCache, refreshCmsMediaAssetCache } from './useCmsMediaAssetByPath'
 import type { WorkspaceLoadState } from '@admin/lib/workspaceLoadState'
 import { getErrorMessage } from '@core/utils/errorMessage'
-import {
-  isSmartFolderId,
-  smartFolderPredicate,
-  type SmartFolderId,
-} from '../utils/smartFolders'
+import { isSmartFolderId, smartFolderPredicate, type SmartFolderId } from '../utils/smartFolders'
 
 /**
  * Sentinel folder ids used in the sidebar selection state. Real folder ids
@@ -54,11 +56,7 @@ import {
 export const FOLDER_ALL = '__all__' as const
 export const FOLDER_TRASH = '__trash__' as const
 
-export type FolderSelection =
-  | string
-  | typeof FOLDER_ALL
-  | typeof FOLDER_TRASH
-  | SmartFolderId
+export type FolderSelection = string | typeof FOLDER_ALL | typeof FOLDER_TRASH | SmartFolderId
 
 export interface UseMediaWorkspaceResult extends WorkspaceLoadState {
   // Async state (loading / error come from WorkspaceLoadState)
@@ -250,7 +248,7 @@ export function useMediaWorkspace(): UseMediaWorkspaceResult {
   const tagPalette = collectMediaTags(assets)
 
   const selectedAsset = selectedAssetId
-    ? assets.find((asset) => asset.id === selectedAssetId) ?? null
+    ? (assets.find((asset) => asset.id === selectedAssetId) ?? null)
     : null
 
   const selectedAssets = assets.filter((asset) => selectedAssetIds.has(asset.id))
@@ -302,12 +300,12 @@ export function useMediaWorkspace(): UseMediaWorkspaceResult {
   }
 
   const replaceAsset = (next: CmsMediaAsset) => {
-    setAssets((current) => current.map((asset) => asset.id === next.id ? next : asset))
+    setAssets((current) => current.map((asset) => (asset.id === next.id ? next : asset)))
   }
 
   const removeAsset = (assetId: string) => {
     setAssets((current) => current.filter((asset) => asset.id !== assetId))
-    setSelectedAssetIdState((current) => current === assetId ? null : current)
+    setSelectedAssetIdState((current) => (current === assetId ? null : current))
     setSelectedAssetIds((current) => {
       if (!current.has(assetId)) return current
       const next = new Set(current)
@@ -400,10 +398,7 @@ export function useMediaWorkspace(): UseMediaWorkspaceResult {
     })
   }
 
-  const setAssetFolders = (
-    assetId: string,
-    input: { add?: string[]; remove?: string[] },
-  ) =>
+  const setAssetFolders = (assetId: string, input: { add?: string[]; remove?: string[] }) =>
     assetMut('Could not update folders', async () => {
       const next = await setCmsMediaAssetFolders(assetId, input)
       replaceAsset(next)
@@ -417,17 +412,18 @@ export function useMediaWorkspace(): UseMediaWorkspaceResult {
     setError(null)
     try {
       const assetById = new Map(assets.map((asset) => [asset.id, asset]))
-      const moved = await Promise.all(uniqueIds.map(async (assetId) => {
-        const existing = assetById.get(assetId) ?? null
-        const currentFolderIds = existing?.folderIds ?? []
-        const remove = currentFolderIds.filter((folderId) => folderId !== targetFolderId)
-        const add = targetFolderId && !currentFolderIds.includes(targetFolderId)
-          ? [targetFolderId]
-          : []
+      const moved = await Promise.all(
+        uniqueIds.map(async (assetId) => {
+          const existing = assetById.get(assetId) ?? null
+          const currentFolderIds = existing?.folderIds ?? []
+          const remove = currentFolderIds.filter((folderId) => folderId !== targetFolderId)
+          const add =
+            targetFolderId && !currentFolderIds.includes(targetFolderId) ? [targetFolderId] : []
 
-        if (remove.length === 0 && add.length === 0) return existing
-        return setCmsMediaAssetFolders(assetId, { add, remove })
-      }))
+          if (remove.length === 0 && add.length === 0) return existing
+          return setCmsMediaAssetFolders(assetId, { add, remove })
+        }),
+      )
       const movedById = new Map(
         moved
           .filter((asset): asset is CmsMediaAsset => asset !== null)
@@ -437,7 +433,9 @@ export function useMediaWorkspace(): UseMediaWorkspaceResult {
         setAssets((current) => current.map((asset) => movedById.get(asset.id) ?? asset))
         refreshCmsMediaAssetCache()
       }
-      setSelectedAssetIdState((current) => (current && uniqueIds.includes(current) ? null : current))
+      setSelectedAssetIdState((current) =>
+        current && uniqueIds.includes(current) ? null : current,
+      )
       setSelectedAssetIds((current) => {
         const next = new Set(current)
         for (const id of uniqueIds) next.delete(id)
@@ -459,7 +457,7 @@ export function useMediaWorkspace(): UseMediaWorkspaceResult {
     })
 
   const replaceFolder = (next: CmsMediaFolder) => {
-    setFolders((current) => current.map((folder) => folder.id === next.id ? next : folder))
+    setFolders((current) => current.map((folder) => (folder.id === next.id ? next : folder)))
   }
 
   const renameFolder = (folderId: string, name: string) =>

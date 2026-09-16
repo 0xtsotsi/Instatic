@@ -42,13 +42,7 @@ export function PluginRemoveDialog({
       title={plugin.name}
       footer={
         <>
-          <Button
-            variant="secondary"
-            size="sm"
-            type="button"
-            onClick={onClose}
-            disabled={busy}
-          >
+          <Button variant="secondary" size="sm" type="button" onClick={onClose} disabled={busy}>
             Cancel
           </Button>
           <Button
@@ -69,25 +63,36 @@ export function PluginRemoveDialog({
             The plugin&rsquo;s own cleanup code will be skipped. Force-removing will:
           </p>
           <ul className={styles.checklist}>
-            <li>Skip its <code>deactivate</code> and <code>uninstall</code> lifecycle hooks.</li>
-            <li>Drop its routes, hooks, settings, schedules, and canvas modules from the runtime.</li>
+            <li>
+              Skip its <code>deactivate</code> and <code>uninstall</code> lifecycle hooks.
+            </li>
+            <li>
+              Drop its routes, hooks, settings, schedules, and canvas modules from the runtime.
+            </li>
             <li>Delete every record stored under the plugin&rsquo;s declared resources.</li>
-            <li>Remove all of the plugin&rsquo;s files under <code>uploads/plugins/{plugin.id}/</code>.</li>
+            <li>
+              Remove all of the plugin&rsquo;s files under <code>uploads/plugins/{plugin.id}/</code>
+              .
+            </li>
           </ul>
           <p className={styles.warning}>
-            External resources the plugin set up — webhooks, third-party
-            registrations, scheduled callbacks — may be left behind, because
-            the plugin&rsquo;s cleanup code does not run.
+            External resources the plugin set up — webhooks, third-party registrations, scheduled
+            callbacks — may be left behind, because the plugin&rsquo;s cleanup code does not run.
           </p>
         </>
       ) : (
         <>
           <p className={styles.lead}>Removing this plugin will:</p>
           <ul className={styles.checklist}>
-            <li>Run its <code>deactivate</code> and <code>uninstall</code> lifecycle hooks.</li>
+            <li>
+              Run its <code>deactivate</code> and <code>uninstall</code> lifecycle hooks.
+            </li>
             <li>Drop its routes, hooks, settings, and canvas modules from the runtime.</li>
             <li>Delete every record stored under the plugin&rsquo;s declared resources.</li>
-            <li>Remove the plugin&rsquo;s files from <code>{plugin.manifest.assetBasePath ?? 'uploads/plugins/…'}</code>.</li>
+            <li>
+              Remove the plugin&rsquo;s files from{' '}
+              <code>{plugin.manifest.assetBasePath ?? 'uploads/plugins/…'}</code>.
+            </li>
           </ul>
           <p className={styles.note}>
             Pack-imported Visual Components, pages, and CSS classes stay on your site.

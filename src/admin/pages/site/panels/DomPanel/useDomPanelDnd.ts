@@ -104,72 +104,76 @@ export function useDomPanelDnd({
   // exception #1: feeds runAutoScroll/resetDragState effect-bound closures (exhaustive-deps)
   const setResolvedTarget = useCallback((next: DomDropTarget | null) => {
     latestTargetRef.current = next
-    setTarget((prev) => areTargetsEqual(prev, next) ? prev : next)
+    setTarget((prev) => (areTargetsEqual(prev, next) ? prev : next))
   }, [])
 
   // exception #1: feeds runAutoScroll's effect-bound closure (exhaustive-deps)
-  const scheduleAutoExpand = useCallback((next: DomDropTarget | null, point: Point) => {
-    if (!next || next.position !== 'inside' || isExpanded(next.parentId)) {
+  const scheduleAutoExpand = useCallback(
+    (next: DomDropTarget | null, point: Point) => {
+      if (!next || next.position !== 'inside' || isExpanded(next.parentId)) {
+        clearAutoExpand()
+        return
+      }
+
+      const targetKey = getTargetKey(next)
+      const pending = autoExpandRef.current
+      if (
+        pending &&
+        pending.targetKey === targetKey &&
+        distance(pending.point, point) <= STILL_MOVEMENT_TOLERANCE_PX
+      ) {
+        return
+      }
+
       clearAutoExpand()
-      return
-    }
+      const timeoutId = window.setTimeout(() => {
+        expandNode(next.parentId)
+        autoExpandRef.current = null
+        requestAnimationFrame(measureRows)
+      }, AUTO_EXPAND_DELAY_MS)
 
-    const targetKey = getTargetKey(next)
-    const pending = autoExpandRef.current
-    if (
-      pending &&
-      pending.targetKey === targetKey &&
-      distance(pending.point, point) <= STILL_MOVEMENT_TOLERANCE_PX
-    ) {
-      return
-    }
-
-    clearAutoExpand()
-    const timeoutId = window.setTimeout(() => {
-      expandNode(next.parentId)
-      autoExpandRef.current = null
-      requestAnimationFrame(measureRows)
-    }, AUTO_EXPAND_DELAY_MS)
-
-    autoExpandRef.current = { targetKey, point, timeoutId }
-  }, [clearAutoExpand, expandNode, isExpanded, measureRows])
+      autoExpandRef.current = { targetKey, point, timeoutId }
+    },
+    [clearAutoExpand, expandNode, isExpanded, measureRows],
+  )
 
   // exception #1: feeds runAutoScroll's effect-bound closure (exhaustive-deps)
-  const resolveTargetAtPoint = useCallback((draggedId: string, point: Point) => {
-    if (!page) {
-      setResolvedTarget(null)
-      setInvalidOverId(null)
-      clearAutoExpand()
-      return
-    }
+  const resolveTargetAtPoint = useCallback(
+    (draggedId: string, point: Point) => {
+      if (!page) {
+        setResolvedTarget(null)
+        setInvalidOverId(null)
+        clearAutoExpand()
+        return
+      }
 
-    const row = findDomDropRow(measuredRowsRef.current, point.y)
-    if (!row) {
-      setResolvedTarget(null)
-      setInvalidOverId(null)
-      clearAutoExpand()
-      return
-    }
+      const row = findDomDropRow(measuredRowsRef.current, point.y)
+      if (!row) {
+        setResolvedTarget(null)
+        setInvalidOverId(null)
+        clearAutoExpand()
+        return
+      }
 
-    const zone = getDomDropZone(row.rect, point.y)
-    // Multi-drag: pass the full drag set so cycle / no-self-drop checks
-    // consider every dragged id, not just the pivot.
-    const draggedIds = activeIdsRef.current.length > 0
-      ? activeIdsRef.current
-      : [draggedId]
-    const next = resolveDomDropTarget({
-      page,
-      draggedId,
-      draggedIds,
-      overId: row.nodeId,
-      zone,
-      canHaveChildren,
-    })
+      const zone = getDomDropZone(row.rect, point.y)
+      // Multi-drag: pass the full drag set so cycle / no-self-drop checks
+      // consider every dragged id, not just the pivot.
+      const draggedIds = activeIdsRef.current.length > 0 ? activeIdsRef.current : [draggedId]
+      const next = resolveDomDropTarget({
+        page,
+        draggedId,
+        draggedIds,
+        overId: row.nodeId,
+        zone,
+        canHaveChildren,
+      })
 
-    setResolvedTarget(next)
-    setInvalidOverId(next ? null : row.nodeId)
-    scheduleAutoExpand(next, point)
-  }, [canHaveChildren, clearAutoExpand, page, scheduleAutoExpand, setResolvedTarget])
+      setResolvedTarget(next)
+      setInvalidOverId(next ? null : row.nodeId)
+      scheduleAutoExpand(next, point)
+    },
+    [canHaveChildren, clearAutoExpand, page, scheduleAutoExpand, setResolvedTarget],
+  )
 
   // exception #1: feeds resetDragState's effect-bound closure (exhaustive-deps)
   const stopAutoScroll = useCallback(() => {
@@ -246,15 +250,15 @@ export function useDomPanelDnd({
     // the WHOLE selection is dragged; otherwise just this row. The selection set
     // is captured at drag start and frozen for the rest of the gesture.
     const selectedIds = useEditorStore.getState().selectedNodeIds
-    const draggedIds = selectedIds.includes(draggedId) && selectedIds.length > 1
-      ? [...selectedIds]
-      : [draggedId]
+    const draggedIds =
+      selectedIds.includes(draggedId) && selectedIds.length > 1 ? [...selectedIds] : [draggedId]
 
     activeIdRef.current = draggedId
     activeIdsRef.current = draggedIds
     measureRows()
 
-    const point = getEventPoint(event.activatorEvent) ?? getRowCenter(rowsRef.current.get(draggedId))
+    const point =
+      getEventPoint(event.activatorEvent) ?? getRowCenter(rowsRef.current.get(draggedId))
     startPointRef.current = point
     latestPointerRef.current = point
     setActiveId(draggedId)
@@ -345,6 +349,7 @@ function distance(a: Point, b: Point): number {
 }
 
 function scrollSpeed(distanceFromEdge: number): number {
-  const ratio = 1 - Math.max(0, Math.min(AUTO_SCROLL_EDGE_PX, distanceFromEdge)) / AUTO_SCROLL_EDGE_PX
+  const ratio =
+    1 - Math.max(0, Math.min(AUTO_SCROLL_EDGE_PX, distanceFromEdge)) / AUTO_SCROLL_EDGE_PX
   return Math.max(1, Math.ceil(ratio * AUTO_SCROLL_MAX_SPEED))
 }

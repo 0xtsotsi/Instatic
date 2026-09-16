@@ -8,7 +8,11 @@ import {
 } from '../../../server/repositories/setup'
 import { createUser, findUserByEmail } from '../../../server/repositories/users'
 import { createCustomRole, listRoles } from '../../../server/repositories/roles'
-import { createSession, findUserBySessionHash, revokeSessionByHash } from '../../../server/auth/sessions'
+import {
+  createSession,
+  findUserBySessionHash,
+  revokeSessionByHash,
+} from '../../../server/auth/sessions'
 import { hashPassword } from '../../../server/auth/tokens'
 
 describe('CMS repositories', () => {

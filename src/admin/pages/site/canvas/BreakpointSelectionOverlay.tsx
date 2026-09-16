@@ -155,8 +155,7 @@ export function BreakpointSelectionOverlay({
   // When the hover originated from the canvas itself, scope it to the owning
   // frame so adjacent breakpoint previews don't all light up at once.
   const hoveredNodeId = useEditorStore((s) =>
-    s.hoveredNodeId &&
-    (s.hoveredBreakpointId === null || s.hoveredBreakpointId === breakpointId)
+    s.hoveredNodeId && (s.hoveredBreakpointId === null || s.hoveredBreakpointId === breakpointId)
       ? s.hoveredNodeId
       : null,
   )
@@ -190,7 +189,8 @@ export function BreakpointSelectionOverlay({
   // nodeId → rendered iframe element, reused across RAF ticks so the
   // steady-state tick never pays a per-frame `querySelector` document scan.
   const nodeElementCacheRef = useRef<CanvasNodeElementCache | null>(null)
-  if (nodeElementCacheRef.current === null) nodeElementCacheRef.current = new CanvasNodeElementCache()
+  if (nodeElementCacheRef.current === null)
+    nodeElementCacheRef.current = new CanvasNodeElementCache()
   const viewportActions = use(CanvasViewportActionsContext)
 
   useEffect(() => {
@@ -293,7 +293,8 @@ export function BreakpointSelectionOverlay({
     const session = createCanvasOverlayMeasureSession(iframe, canvasRoot)
     const trackedIds = new Set<string>()
 
-    const ringPlacements: Array<{ ring: HTMLDivElement | null; rect: CanvasOverlayRect | null }> = []
+    const ringPlacements: Array<{ ring: HTMLDivElement | null; rect: CanvasOverlayRect | null }> =
+      []
     let toolbarUnion: CanvasOverlayRect | null = null
     for (const id of selectedNodeIds) {
       trackedIds.add(id)
@@ -320,12 +321,10 @@ export function BreakpointSelectionOverlay({
     for (const { ring, rect } of ringPlacements) positionOverlayElement(ring, rect)
     positionOverlayElement(hoverRef.current, hoverRect)
     syncSelectorHighlightRings(selectorHighlightRef.current, selectorRects)
-    positionToolbar(
-      toolbarRef.current,
-      showToolbar ? toolbarUnion : null,
-      session.canvasRect,
-      { left: session.scrollLeft, top: session.scrollTop },
-    )
+    positionToolbar(toolbarRef.current, showToolbar ? toolbarUnion : null, session.canvasRect, {
+      left: session.scrollLeft,
+      top: session.scrollTop,
+    })
   })
 
   // The RAF loop exists to re-position overlay chrome as the tracked element
@@ -337,9 +336,7 @@ export function BreakpointSelectionOverlay({
   // sleeping (N frames → N idle loops). The effect re-arms whenever this flag
   // flips, so the loop starts the moment real overlay work appears.
   const hasOverlayWork =
-    showToolbar ||
-    showSelectorHighlight ||
-    (showRings && (selectedNodeIds.length > 0 || showHover))
+    showToolbar || showSelectorHighlight || (showRings && (selectedNodeIds.length > 0 || showHover))
 
   useEffect(() => {
     if (!hasOverlayWork) return
@@ -419,39 +416,41 @@ export function BreakpointSelectionOverlay({
   // transform-scaled), so their 1px border stays exactly 1px at every zoom
   // level. Position alone tracks the selected/hovered element — same
   // pattern as the toolbar.
-  const rings = showRings && (selectedNodeIds.length > 0 || (showHover && hoverRingNodeId) || showSelectorHighlight) ? (
-    <div
-      className={styles.ringLayer}
-      data-canvas-ring-layer-mode={toolbarMode}
-      aria-hidden="true"
-    >
-      {/* Orange affinity rings — populated imperatively by the RAF tick, one
+  const rings =
+    showRings &&
+    (selectedNodeIds.length > 0 || (showHover && hoverRingNodeId) || showSelectorHighlight) ? (
+      <div
+        className={styles.ringLayer}
+        data-canvas-ring-layer-mode={toolbarMode}
+        aria-hidden="true"
+      >
+        {/* Orange affinity rings — populated imperatively by the RAF tick, one
           per element matching the hovered selector. */}
-      {showSelectorHighlight && (
-        <div ref={selectorHighlightRef} data-canvas-selector-highlight-layer="true" />
-      )}
-      {selectedNodeIds.map((id) => (
-        <div
-          key={id}
-          ref={(el) => {
-            if (el) ringRefs.current?.set(id, el)
-            else ringRefs.current?.delete(id)
-          }}
-          className={cn(styles.ring, styles.selection)}
-          data-canvas-selection-ring="true"
-          data-node-id={id}
-        />
-      ))}
-      {showHover && hoverRingNodeId && (
-        <div
-          ref={hoverRef}
-          className={cn(styles.ring, styles.hover)}
-          data-canvas-hover-ring="true"
-          data-node-id={hoverRingNodeId}
-        />
-      )}
-    </div>
-  ) : null
+        {showSelectorHighlight && (
+          <div ref={selectorHighlightRef} data-canvas-selector-highlight-layer="true" />
+        )}
+        {selectedNodeIds.map((id) => (
+          <div
+            key={id}
+            ref={(el) => {
+              if (el) ringRefs.current?.set(id, el)
+              else ringRefs.current?.delete(id)
+            }}
+            className={cn(styles.ring, styles.selection)}
+            data-canvas-selection-ring="true"
+            data-node-id={id}
+          />
+        ))}
+        {showHover && hoverRingNodeId && (
+          <div
+            ref={hoverRef}
+            className={cn(styles.ring, styles.hover)}
+            data-canvas-hover-ring="true"
+            data-node-id={hoverRingNodeId}
+          />
+        )}
+      </div>
+    ) : null
 
   return (
     <>

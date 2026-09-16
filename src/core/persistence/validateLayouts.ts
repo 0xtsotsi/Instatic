@@ -13,7 +13,12 @@
  */
 
 import { assertValidNodeTree } from '@core/page-tree'
-import { layoutNameError, layoutSlugFromName, parseSavedLayout, type SavedLayout } from '@core/layouts'
+import {
+  layoutNameError,
+  layoutSlugFromName,
+  parseSavedLayout,
+  type SavedLayout,
+} from '@core/layouts'
 import {
   SiteValidationError,
   sanitizeNodeProps,
@@ -96,7 +101,10 @@ export function validateSavedLayoutsForPartialWrite(
   for (let i = 0; i < merged.length; i++) {
     const layout = merged[i]
     if (seenIds.has(layout.id)) {
-      throw new SiteValidationError(`duplicate saved layout id "${layout.id}"`, `site.layouts[${i}].id`)
+      throw new SiteValidationError(
+        `duplicate saved layout id "${layout.id}"`,
+        `site.layouts[${i}].id`,
+      )
     }
     seenIds.add(layout.id)
     const nameError = layoutNameError(layout.name, merged, layout.id)

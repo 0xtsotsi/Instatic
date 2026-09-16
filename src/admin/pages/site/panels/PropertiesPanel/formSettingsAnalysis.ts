@@ -1,4 +1,9 @@
-import type { CreateDataTableInput, DataField, DataTable, DataSelectOption } from '@core/data/schemas'
+import type {
+  CreateDataTableInput,
+  DataField,
+  DataTable,
+  DataSelectOption,
+} from '@core/data/schemas'
 import type { ImportFragment } from '@core/htmlImport'
 import { createNode, flattenSubtree, getParent, type Page, type PageNode } from '@core/page-tree'
 import { formDisplayName, humanizeIdentifier, slugifyFormTableName } from './formSettingsNaming'
@@ -36,24 +41,11 @@ const INPUT_FIELD_TYPES = new Set<DataField['type']>([
   'dateTime',
 ])
 
-const TEXTAREA_FIELD_TYPES = new Set<DataField['type']>([
-  'text',
-  'longText',
-  'richText',
-])
+const TEXTAREA_FIELD_TYPES = new Set<DataField['type']>(['text', 'longText', 'richText'])
 
-const SELECT_FIELD_TYPES = new Set<DataField['type']>([
-  'select',
-  'multiSelect',
-])
+const SELECT_FIELD_TYPES = new Set<DataField['type']>(['select', 'multiSelect'])
 
-type FormSettingsKind =
-  | 'form'
-  | 'control'
-  | 'label'
-  | 'submit'
-  | 'message'
-  | 'none'
+type FormSettingsKind = 'form' | 'control' | 'label' | 'submit' | 'message' | 'none'
 
 interface FormSettingsWarning {
   code:
@@ -104,15 +96,16 @@ export function analyzeFormSettings(input: {
   table?: DataTable | null
 }): FormSettingsAnalysis {
   const page = input.page
-  const selectedNode = page && input.nodeId ? page.nodes[input.nodeId] ?? null : null
+  const selectedNode = page && input.nodeId ? (page.nodes[input.nodeId] ?? null) : null
   const table = input.table ?? null
   if (!page || !selectedNode || !isFormSettingsModule(selectedNode.moduleId)) {
     return emptyAnalysis(selectedNode, table)
   }
 
-  const formNode = selectedNode.moduleId === 'base.form'
-    ? selectedNode
-    : nearestAncestorForm(page, selectedNode.id)
+  const formNode =
+    selectedNode.moduleId === 'base.form'
+      ? selectedNode
+      : nearestAncestorForm(page, selectedNode.id)
   const form = formNode ? formSummary(formNode) : null
   const inferredFields = formNode ? inferFieldsFromForm(page, formNode) : []
   const missingFields = table && formNode ? fieldsMissingFromForm(page, formNode, table) : []
@@ -140,8 +133,11 @@ export function analyzeFormSettings(input: {
   }
 
   const fieldId = stringProp(selectedNode, 'fieldId', '')
-  const field = table && fieldId ? table.fields.find((candidate) => candidate.id === fieldId) ?? null : null
-  const compatibleFields = table ? table.fields.filter((candidate) => fieldCompatibleWithNode(candidate, selectedNode.moduleId)) : []
+  const field =
+    table && fieldId ? (table.fields.find((candidate) => candidate.id === fieldId) ?? null) : null
+  const compatibleFields = table
+    ? table.fields.filter((candidate) => fieldCompatibleWithNode(candidate, selectedNode.moduleId))
+    : []
 
   if (kind === 'control' && form?.mode === 'cms' && !fieldId) {
     warnings.push({
@@ -226,7 +222,10 @@ export function suggestDataTableNameFromForm(analysis: FormSettingsAnalysis): st
 export function formFieldFragmentForDataField(field: DataField): ImportFragment {
   const wrapper = createNode('base.container', { tag: 'div' })
   const label = createNode('base.label', { text: field.label, targetMode: 'auto', targetId: '' })
-  const control = createNode(moduleIdForField(field), fieldBindingPatch(field, moduleIdForField(field)))
+  const control = createNode(
+    moduleIdForField(field),
+    fieldBindingPatch(field, moduleIdForField(field)),
+  )
 
   wrapper.children.push(label.id, control.id)
   const nodes: Record<string, PageNode> = {
@@ -264,7 +263,9 @@ export function fieldBindingPatch(field: DataField, moduleId: string): Record<st
         ...base,
         id: `${field.id}-input`,
         inputType: inputTypeForField(field),
-        ...('maxLength' in field && field.maxLength !== undefined ? { maxLength: field.maxLength } : {}),
+        ...('maxLength' in field && field.maxLength !== undefined
+          ? { maxLength: field.maxLength }
+          : {}),
         ...('min' in field && field.min !== undefined ? { min: String(field.min) } : {}),
         ...('max' in field && field.max !== undefined ? { max: String(field.max) } : {}),
       }
@@ -272,7 +273,9 @@ export function fieldBindingPatch(field: DataField, moduleId: string): Record<st
       return {
         ...base,
         id: `${field.id}-textarea`,
-        ...('maxLength' in field && field.maxLength !== undefined ? { maxLength: field.maxLength } : {}),
+        ...('maxLength' in field && field.maxLength !== undefined
+          ? { maxLength: field.maxLength }
+          : {}),
       }
     case 'base.select':
       return {
@@ -368,10 +371,7 @@ function duplicateNameWarnings(page: Page, formNode: PageNode): FormSettingsWarn
   return warnings
 }
 
-function inferFieldsFromForm(
-  page: Page,
-  formNode: PageNode,
-): DataField[] {
+function inferFieldsFromForm(page: Page, formNode: PageNode): DataField[] {
   const fields: DataField[] = []
   const usedIds = new Set<string>()
   for (const nodeId of flattenSubtree(page, formNode.id)) {
@@ -384,16 +384,13 @@ function inferFieldsFromForm(
   return fields
 }
 
-function inferFieldFromControl(
-  page: Page,
-  node: PageNode,
-  usedIds: Set<string>,
-): DataField | null {
+function inferFieldFromControl(page: Page, node: PageNode, usedIds: Set<string>): DataField | null {
   const label = labelForControl(page, node)
-  const rawId = stringProp(node, 'fieldId', '')
-    || stringProp(node, 'name', '')
-    || stringProp(node, 'id', '')
-    || label
+  const rawId =
+    stringProp(node, 'fieldId', '') ||
+    stringProp(node, 'name', '') ||
+    stringProp(node, 'id', '') ||
+    label
   const id = uniqueFieldId(normalizeFieldId(rawId, node.id), usedIds)
   const required = Boolean(node.props.required)
   const common = {
@@ -465,13 +462,12 @@ function fieldsMissingFromForm(page: Page, formNode: PageNode, table: DataTable)
     const representedId = stringProp(node, 'fieldId', '') || stringProp(node, 'name', '')
     if (representedId) representedFieldIds.add(representedId)
   }
-  return table.fields.filter((field) => !representedFieldIds.has(field.id) && Boolean(moduleIdForField(field)))
+  return table.fields.filter(
+    (field) => !representedFieldIds.has(field.id) && Boolean(moduleIdForField(field)),
+  )
 }
 
-function labelForControl(
-  page: Page,
-  node: PageNode,
-): string {
+function labelForControl(page: Page, node: PageNode): string {
   const parent = getParent(page, node.id)
   if (parent) {
     const nodeIndex = parent.children.indexOf(node.id)
@@ -491,7 +487,11 @@ function optionFieldsFromSelect(page: Page, selectNode: PageNode): DataSelectOpt
   for (const childId of selectNode.children) {
     const child = page.nodes[childId]
     if (!child || child.moduleId !== 'base.option') continue
-    const value = stringProp(child, 'value', normalizeFieldId(stringProp(child, 'label', 'option'), 'option'))
+    const value = stringProp(
+      child,
+      'value',
+      normalizeFieldId(stringProp(child, 'label', 'option'), 'option'),
+    )
     options.push({
       id: normalizeFieldId(value, 'option'),
       label: stringProp(child, 'label', value),
@@ -501,13 +501,12 @@ function optionFieldsFromSelect(page: Page, selectNode: PageNode): DataSelectOpt
   return options
 }
 
-function inferLabelTarget(
-  page: Page,
-  labelNode: PageNode,
-): FormTargetSummary | null {
+function inferLabelTarget(page: Page, labelNode: PageNode): FormTargetSummary | null {
   const explicit = stringProp(labelNode, 'targetId', '')
   if (stringProp(labelNode, 'targetMode', 'auto') === 'explicit' && explicit) {
-    const explicitNode = Object.values(page.nodes).find((node) => node.id === explicit || stringProp(node, 'id', '') === explicit)
+    const explicitNode = Object.values(page.nodes).find(
+      (node) => node.id === explicit || stringProp(node, 'id', '') === explicit,
+    )
     return explicitNode
       ? { nodeId: explicitNode.id, label: controlLabel(explicitNode) }
       : { nodeId: explicit, label: explicit }
@@ -542,7 +541,10 @@ function stringProp(node: PageNode, key: string, fallback: string): string {
 }
 
 function controlLabel(node: PageNode): string {
-  return stringProp(node, 'name', stringProp(node, 'fieldId', stringProp(node, 'id', node.id))) || node.id
+  return (
+    stringProp(node, 'name', stringProp(node, 'fieldId', stringProp(node, 'id', node.id))) ||
+    node.id
+  )
 }
 
 function moduleIdForField(field: DataField): string {
@@ -603,7 +605,9 @@ function positiveNumberProp<TName extends string>(
   outKey: TName,
 ): Record<TName, number> | Record<string, never> {
   const value = node.props[propKey]
-  return typeof value === 'number' && value > 0 ? { [outKey]: value } as Record<TName, number> : {}
+  return typeof value === 'number' && value > 0
+    ? ({ [outKey]: value } as Record<TName, number>)
+    : {}
 }
 
 function numberProp<TName extends string>(
@@ -612,7 +616,8 @@ function numberProp<TName extends string>(
   outKey: TName,
 ): Record<TName, number> | Record<string, never> {
   const value = node.props[propKey]
-  if (typeof value === 'number' && Number.isFinite(value)) return { [outKey]: value } as Record<TName, number>
+  if (typeof value === 'number' && Number.isFinite(value))
+    return { [outKey]: value } as Record<TName, number>
   if (typeof value === 'string' && value.trim()) {
     const parsed = Number(value)
     if (Number.isFinite(parsed)) return { [outKey]: parsed } as Record<TName, number>

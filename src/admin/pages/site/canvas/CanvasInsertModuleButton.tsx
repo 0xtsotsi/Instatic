@@ -23,9 +23,7 @@ interface CanvasInsertModuleButtonProps {
   buttonClassName?: string
 }
 
-export function CanvasInsertModuleButton({
-  buttonClassName,
-}: CanvasInsertModuleButtonProps) {
+export function CanvasInsertModuleButton({ buttonClassName }: CanvasInsertModuleButtonProps) {
   const [open, setOpen] = useState(false)
   const triggerRef = useRef<HTMLButtonElement>(null)
   const handleInsertItem = useInsertInserterItem()
@@ -52,12 +50,7 @@ export function CanvasInsertModuleButton({
         <AppGridPlusGlyphIcon size={13} color="var(--text)" />
       </Button>
 
-      {open && (
-        <ModuleInserterDialog
-          onClose={handleClose}
-          onInsertItem={handleInsertItem}
-        />
-      )}
+      {open && <ModuleInserterDialog onClose={handleClose} onInsertItem={handleInsertItem} />}
     </>
   )
 }

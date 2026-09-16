@@ -45,30 +45,28 @@ export function MediaUploadPlaceholderView(props: MediaUploadPlaceholderViewProp
       aria-busy={attrs.status === 'uploading'}
     >
       <div className={styles.preview}>
-        {attrs.previewUrl
-          ? attrs.kind === 'video'
-            ? (
-              <video
-                src={attrs.previewUrl}
-                muted
-                aria-label={`${attrs.filename} upload preview`}
-                className={styles.thumb}
-              />
-            )
-            : <img src={attrs.previewUrl} alt="" className={styles.thumb} />
-          : (
-            <div className={styles.thumbEmpty} aria-hidden="true">
-              {attrs.kind === 'video' ? 'Video' : 'Image'}
-            </div>
-          )}
+        {attrs.previewUrl ? (
+          attrs.kind === 'video' ? (
+            <video
+              src={attrs.previewUrl}
+              muted
+              aria-label={`${attrs.filename} upload preview`}
+              className={styles.thumb}
+            />
+          ) : (
+            <img src={attrs.previewUrl} alt="" className={styles.thumb} />
+          )
+        ) : (
+          <div className={styles.thumbEmpty} aria-hidden="true">
+            {attrs.kind === 'video' ? 'Video' : 'Image'}
+          </div>
+        )}
       </div>
       <div className={styles.bar}>
         <div className={styles.label}>
           <span className={styles.filename}>{attrs.filename}</span>
           <span className={styles.status}>
-            {isFailed
-              ? (attrs.error ?? 'Upload failed')
-              : `Uploading… ${progressPct}%`}
+            {isFailed ? (attrs.error ?? 'Upload failed') : `Uploading… ${progressPct}%`}
           </span>
         </div>
         <Button
@@ -87,11 +85,7 @@ export function MediaUploadPlaceholderView(props: MediaUploadPlaceholderViewProp
           <CloseIcon size={14} aria-hidden="true" />
         </Button>
       </div>
-      <div
-        className={styles.progressTrack}
-        data-state={attrs.status}
-        aria-hidden="true"
-      >
+      <div className={styles.progressTrack} data-state={attrs.status} aria-hidden="true">
         <div className={styles.progressFill} style={{ width: `${progressPct}%` }} />
       </div>
     </NodeViewWrapper>

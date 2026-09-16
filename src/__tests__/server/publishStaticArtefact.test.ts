@@ -108,33 +108,37 @@ function buildFakeDb(
 
     if (s.includes('from site') && s.includes('select id')) {
       return {
-        rows: [{
-          id: 'proj-1',
-          name: 'Test Site',
-          settings_json: {
-            metaTitle: 'Test Site',
-            shortcuts: {},
+        rows: [
+          {
+            id: 'proj-1',
+            name: 'Test Site',
+            settings_json: {
+              metaTitle: 'Test Site',
+              shortcuts: {},
+            },
+            files_json: [],
+            classes_json: {},
+            breakpoints_json: [{ id: 'desktop', label: 'Desktop', width: 1440, icon: 'monitor' }],
+            runtime_json: {
+              dependencyLock: { version: 1, packages: {}, updatedAt: 0 },
+              scripts: {},
+            },
+            version: 1,
+            created_at: rowDate('2026-01-01'),
+            updated_at: rowDate('2026-01-01'),
           },
-          files_json: [],
-          classes_json: {},
-          breakpoints_json: [
-            { id: 'desktop', label: 'Desktop', width: 1440, icon: 'monitor' },
-          ],
-          runtime_json: {
-            dependencyLock: { version: 1, packages: {}, updatedAt: 0 },
-            scripts: {},
-          },
-          version: 1,
-          created_at: rowDate('2026-01-01'),
-          updated_at: rowDate('2026-01-01'),
-        }],
+        ],
         rowCount: 1,
       }
     }
 
     // ── listDataRows (pages + components) ─────────────────────────────────
     // `listDataRows` parameterizes the table_id ($1), so we check params.
-    if (s.includes('select data_rows.id') && s.includes('from data_rows') && s.includes('order by')) {
+    if (
+      s.includes('select data_rows.id') &&
+      s.includes('from data_rows') &&
+      s.includes('order by')
+    ) {
       if (params[0] === 'pages') {
         return {
           rows: [
@@ -302,7 +306,11 @@ describe('publishDraftSite — Layer A static artefacts', () => {
   it('writes a disk artefact for a fully-static page and flips the symlink', async () => {
     const staticPage = makePage({
       root: { moduleId: 'base.body', props: {}, children: ['heading'] },
-      heading: { moduleId: 'base.text', props: { text: 'Hello static world', tag: 'h1' }, children: [] },
+      heading: {
+        moduleId: 'base.text',
+        props: { text: 'Hello static world', tag: 'h1' },
+        children: [],
+      },
     })
     staticPage.id = 'static-page'
     staticPage.slug = 'about'
@@ -347,7 +355,9 @@ describe('publishDraftSite — Layer A static artefacts', () => {
 
     // Complete static publishing: the CSS bundles the page links must be
     // baked to disk so the page never needs the server to regenerate them.
-    const cssHrefs = [...(staticHtml ?? '').matchAll(/href="(\/_instatic\/css\/[^"]+\.css)"/g)].map((m) => m[1])
+    const cssHrefs = [...(staticHtml ?? '').matchAll(/href="(\/_instatic\/css\/[^"]+\.css)"/g)].map(
+      (m) => m[1],
+    )
     expect(cssHrefs.length).toBeGreaterThan(0) // reset + framework at minimum
     for (const href of cssHrefs) {
       const bytes = await readStaticAsset(uploadsDir, href)
@@ -363,10 +373,10 @@ describe('publishDraftSite — Layer A static artefacts', () => {
       if (s.includes('site_snapshots')) snapshotLookupCalled = true
       return { rows: [], rowCount: 0 }
     })
-    const cssRes = await handleServerRequest(
-      new Request(`http://localhost${cssHrefs[0]}`),
-      { db: diskCssDb, uploadsDir },
-    )
+    const cssRes = await handleServerRequest(new Request(`http://localhost${cssHrefs[0]}`), {
+      db: diskCssDb,
+      uploadsDir,
+    })
     expect(cssRes.status).toBe(200)
     expect(cssRes.headers.get('content-type')).toContain('text/css')
     expect(snapshotLookupCalled).toBe(false)
@@ -390,7 +400,7 @@ describe('publishDraftSite — Layer A static artefacts', () => {
 
     const db = buildFakeDb(page, dynamicPage)
     const { publishDraftSite } = await import('../../../server/publish/publishSite')
-    const result = await publishDraftSite(db, 'user-1')  // no uploadsDir
+    const result = await publishDraftSite(db, 'user-1') // no uploadsDir
 
     expect(result.publishedPages).toBe(2)
     // No symlink should exist
@@ -455,7 +465,8 @@ describe('publicRouter — Layer A disk fast-path', () => {
 
   it('serves a baked artefact without DB snapshot lookup when URL has no query string', async () => {
     // Pre-bake an artefact
-    const { prepareInactiveSlot, writeArtefact, swapSlot } = await import('../../../server/publish/staticArtefact')
+    const { prepareInactiveSlot, writeArtefact, swapSlot } =
+      await import('../../../server/publish/staticArtefact')
     const { slot, slotDir } = await prepareInactiveSlot(uploadsDir)
     await writeArtefact(slotDir, '/about', '<html><body><h1>Baked about page</h1></body></html>')
     await swapSlot(uploadsDir, slot)
@@ -476,10 +487,7 @@ describe('publicRouter — Layer A disk fast-path', () => {
       return { rows: [], rowCount: 0 }
     })
 
-    const res = await handleServerRequest(
-      new Request('http://localhost/about'),
-      { db, uploadsDir },
-    )
+    const res = await handleServerRequest(new Request('http://localhost/about'), { db, uploadsDir })
 
     expect(res.status).toBe(200)
     expect(res.headers.get('content-type')).toContain('text/html')
@@ -519,17 +527,26 @@ describe('publicRouter — Layer A disk fast-path', () => {
 
     // No staticDir → the admin static handler is a no-op; the public/asset
     // handlers own these paths.
-    const htmlRes = await handleServerRequest(new Request('http://localhost/about'), { db: throwingDb, uploadsDir })
+    const htmlRes = await handleServerRequest(new Request('http://localhost/about'), {
+      db: throwingDb,
+      uploadsDir,
+    })
     expect(htmlRes.status).toBe(200)
     expect(htmlRes.headers.get('content-type')).toContain('text/html')
     expect(await htmlRes.text()).toContain('<h1>Static</h1>')
 
-    const cssRes = await handleServerRequest(new Request(`http://localhost${cssPath}`), { db: throwingDb, uploadsDir })
+    const cssRes = await handleServerRequest(new Request(`http://localhost${cssPath}`), {
+      db: throwingDb,
+      uploadsDir,
+    })
     expect(cssRes.status).toBe(200)
     expect(cssRes.headers.get('content-type')).toContain('text/css')
     expect(await cssRes.text()).toBe('body{margin:0}')
 
-    const jsRes = await handleServerRequest(new Request(`http://localhost${jsPath}`), { db: throwingDb, uploadsDir })
+    const jsRes = await handleServerRequest(new Request(`http://localhost${jsPath}`), {
+      db: throwingDb,
+      uploadsDir,
+    })
     expect(jsRes.status).toBe(200)
     expect(jsRes.headers.get('content-type')).toContain('javascript')
     expect(await jsRes.text()).toBe('console.log("hi")')
@@ -564,14 +581,20 @@ describe('publicRouter — Layer A disk fast-path', () => {
       throw new Error(`unexpected DB query serving hole-shell: ${sql.slice(0, 80)}`)
     })
 
-    const htmlRes = await handleServerRequest(new Request('http://localhost/blog'), { db: throwingDb, uploadsDir })
+    const htmlRes = await handleServerRequest(new Request('http://localhost/blog'), {
+      db: throwingDb,
+      uploadsDir,
+    })
     expect(htmlRes.status).toBe(200)
     const body = await htmlRes.text()
     expect(body).toContain('<h1>Blog</h1>')
     expect(body).toContain('<instatic-hole') // the dynamic part is deferred to a hole
     expect(body).toContain('/_instatic/hole-runtime.js')
 
-    const cssRes = await handleServerRequest(new Request(`http://localhost${cssPath}`), { db: throwingDb, uploadsDir })
+    const cssRes = await handleServerRequest(new Request(`http://localhost${cssPath}`), {
+      db: throwingDb,
+      uploadsDir,
+    })
     expect(cssRes.status).toBe(200)
     expect(cssRes.headers.get('content-type')).toContain('text/css')
 
@@ -583,7 +606,8 @@ describe('publicRouter — Layer A disk fast-path', () => {
 
   it('falls through to the live renderer when URL has a render-affecting (loop pagination) query', async () => {
     // Pre-bake an artefact for /about
-    const { prepareInactiveSlot, writeArtefact, swapSlot } = await import('../../../server/publish/staticArtefact')
+    const { prepareInactiveSlot, writeArtefact, swapSlot } =
+      await import('../../../server/publish/staticArtefact')
     const { slot, slotDir } = await prepareInactiveSlot(uploadsDir)
     await writeArtefact(slotDir, '/about', '<html><body><h1>Baked about page</h1></body></html>')
     await swapSlot(uploadsDir, slot)
@@ -601,10 +625,10 @@ describe('publicRouter — Layer A disk fast-path', () => {
       return { rows: [], rowCount: 0 }
     })
 
-    const res = await handleServerRequest(
-      new Request('http://localhost/about?loop_x_page=2'),
-      { db, uploadsDir },
-    )
+    const res = await handleServerRequest(new Request('http://localhost/about?loop_x_page=2'), {
+      db,
+      uploadsDir,
+    })
 
     // No snapshot for this URL → falls through to not-found (404)
     // The baked artefact must NOT have been served

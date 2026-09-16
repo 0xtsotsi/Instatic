@@ -26,7 +26,11 @@ interface UploadOptions {
   signal?: AbortSignal
 }
 
-export async function uploadMediaInline({ file, onProgress, signal }: UploadOptions): Promise<CmsMediaAsset> {
+export async function uploadMediaInline({
+  file,
+  onProgress,
+  signal,
+}: UploadOptions): Promise<CmsMediaAsset> {
   if (signal?.aborted) {
     throw new DOMException('Upload aborted before start', 'AbortError')
   }

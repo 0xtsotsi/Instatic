@@ -27,7 +27,9 @@ async function fixturePng(width: number, height: number): Promise<ArrayBuffer> {
       channels: 4,
       background: { r: 200, g: 100, b: 50, alpha: 1 },
     },
-  }).png().toBuffer()
+  })
+    .png()
+    .toBuffer()
   // Slice into a fresh ArrayBuffer so the worker takes a clean transferable.
   const ab = new ArrayBuffer(buf.byteLength)
   new Uint8Array(ab).set(buf)

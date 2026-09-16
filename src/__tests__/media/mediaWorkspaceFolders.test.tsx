@@ -1,5 +1,13 @@
 import { afterEach, describe, expect, it, mock } from 'bun:test'
-import { act, cleanup, fireEvent, render, renderHook, screen, waitFor } from '@testing-library/react'
+import {
+  act,
+  cleanup,
+  fireEvent,
+  render,
+  renderHook,
+  screen,
+  waitFor,
+} from '@testing-library/react'
 import type { ReactElement } from 'react'
 import { MediaCanvas } from '@admin/pages/media/components/MediaCanvas/MediaCanvas'
 import { MediaFolderPanel } from '@admin/pages/media/components/MediaFolderPanel/MediaFolderPanel'
@@ -137,11 +145,7 @@ function currentUser(capabilities: CoreCapability[] = MEDIA_MANAGER_CAPABILITIES
 }
 
 function renderWithMediaSession(ui: ReactElement) {
-  return render(
-    <AdminSessionProvider user={currentUser()}>
-      {ui}
-    </AdminSessionProvider>,
-  )
+  return render(<AdminSessionProvider user={currentUser()}>{ui}</AdminSessionProvider>)
 }
 
 function workspace(overrides: Partial<UseMediaWorkspaceResult> = {}): UseMediaWorkspaceResult {
@@ -203,7 +207,9 @@ function workspace(overrides: Partial<UseMediaWorkspaceResult> = {}): UseMediaWo
 
 describe('Media workspace folder grid', () => {
   it('renders child folders as grid entries and opens them from the canvas', () => {
-    const setFolderSelection = mock((selection: FolderSelection) => { void selection })
+    const setFolderSelection = mock((selection: FolderSelection) => {
+      void selection
+    })
     renderWithMediaSession(
       <MediaCanvas
         workspace={workspace({
@@ -229,7 +235,9 @@ describe('Media workspace folder grid', () => {
       name: 'screenshots',
       slug: 'screenshots',
     })
-    const setFolderSelection = mock((selection: FolderSelection) => { void selection })
+    const setFolderSelection = mock((selection: FolderSelection) => {
+      void selection
+    })
 
     renderWithMediaSession(
       <MediaCanvas
@@ -266,8 +274,12 @@ describe('Media workspace folder grid', () => {
     )
 
     const transfer = createDataTransfer()
-    fireEvent.dragStart(screen.getByRole('button', { name: 'Open logo.png' }), { dataTransfer: transfer })
-    fireEvent.drop(screen.getByRole('button', { name: 'Open folder assets' }), { dataTransfer: transfer })
+    fireEvent.dragStart(screen.getByRole('button', { name: 'Open logo.png' }), {
+      dataTransfer: transfer,
+    })
+    fireEvent.drop(screen.getByRole('button', { name: 'Open folder assets' }), {
+      dataTransfer: transfer,
+    })
 
     await waitFor(() => {
       expect(moveAssetsToFolder).toHaveBeenCalledWith(['asset_1'], 'folder_assets')
@@ -345,21 +357,24 @@ describe('Media workspace folder grid', () => {
         return new Response(JSON.stringify({ folders: [folder()] }), { status: 200 })
       }
       if (url.endsWith('/media')) {
-        return new Response(JSON.stringify({
-          assets: [
-            asset({
-              id: 'foldered_image',
-              filename: 'foldered.png',
-              folderIds: ['folder_assets'],
-            }),
-            asset({
-              id: 'document',
-              filename: 'document.pdf',
-              mimeType: 'application/pdf',
-              publicPath: '/uploads/document.pdf',
-            }),
-          ],
-        }), { status: 200 })
+        return new Response(
+          JSON.stringify({
+            assets: [
+              asset({
+                id: 'foldered_image',
+                filename: 'foldered.png',
+                folderIds: ['folder_assets'],
+              }),
+              asset({
+                id: 'document',
+                filename: 'document.pdf',
+                mimeType: 'application/pdf',
+                publicPath: '/uploads/document.pdf',
+              }),
+            ],
+          }),
+          { status: 200 },
+        )
       }
       return new Response(JSON.stringify({ error: 'Unexpected URL' }), { status: 404 })
     }) as typeof fetch

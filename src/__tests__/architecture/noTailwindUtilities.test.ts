@@ -8,17 +8,15 @@ import { existsSync, readFileSync, readdirSync, statSync } from 'fs'
 import { extname, join, relative } from 'path'
 
 const SRC_ROOT = join(import.meta.dir, '../../')
-const SCAN_DIRS = [
-  join(SRC_ROOT, 'admin'),
-  join(SRC_ROOT, 'modules'),
-  join(SRC_ROOT, 'ui'),
-]
+const SCAN_DIRS = [join(SRC_ROOT, 'admin'), join(SRC_ROOT, 'modules'), join(SRC_ROOT, 'ui')]
 
 // Named Tailwind utility classes (non-arbitrary)
-const UTILITY_CLASS_RE = /\b(?:sr-only|not-sr-only|container|static|fixed|absolute|relative|sticky|isolate|flex|inline-flex|grid|inline-grid|block|inline-block|hidden|contents|flow-root|h-screen|min-h-screen|w-screen|min-w-screen|inset-\d+|inset-\[[^\]]+\]|z-\d+|z-\[[^\]]+\]|items-[a-z-]+|justify-[a-z-]+|content-[a-z-]+|self-[a-z-]+|gap-\d+|p[trblxy]?-\d+|m[trblxy]?-\d+|w-\d+|h-\d+|min-w-\d+|min-h-\d+|max-w-\d+|max-h-\d+|rounded(?:-[a-z0-9]+)?|border(?:-[a-z0-9]+)?|bg-[a-z]+-\d{2,3}|text-[a-z]+-\d{2,3}|font-[a-z0-9]+|leading-[a-z0-9]+|tracking-[a-z0-9]+|shadow(?:-[a-z0-9]+)?|overflow-[a-z]+|animate-[a-z0-9-]+|backdrop-[a-z0-9-]+)\b/
+const UTILITY_CLASS_RE =
+  /\b(?:sr-only|not-sr-only|container|static|fixed|absolute|relative|sticky|isolate|flex|inline-flex|grid|inline-grid|block|inline-block|hidden|contents|flow-root|h-screen|min-h-screen|w-screen|min-w-screen|inset-\d+|inset-\[[^\]]+\]|z-\d+|z-\[[^\]]+\]|items-[a-z-]+|justify-[a-z-]+|content-[a-z-]+|self-[a-z-]+|gap-\d+|p[trblxy]?-\d+|m[trblxy]?-\d+|w-\d+|h-\d+|min-w-\d+|min-h-\d+|max-w-\d+|max-h-\d+|rounded(?:-[a-z0-9]+)?|border(?:-[a-z0-9]+)?|bg-[a-z]+-\d{2,3}|text-[a-z]+-\d{2,3}|font-[a-z0-9]+|leading-[a-z0-9]+|tracking-[a-z0-9]+|shadow(?:-[a-z0-9]+)?|overflow-[a-z]+|animate-[a-z0-9-]+|backdrop-[a-z0-9-]+)\b/
 // Tailwind arbitrary-value syntax: e.g. min-h-[44px], w-[200px], text-[14px], bg-[#fff]
 const ARBITRARY_VALUE_RE = /\b[a-z]+(?:-[a-z]+)*-\[[^\]]+\]/
-const CLASS_ATTR_RE = /className\s*=\s*(?:"([^"]+)"|'([^']+)'|\{`([^`]+)`\}|\{\s*["']([^"']+)["']\s*\})/g
+const CLASS_ATTR_RE =
+  /className\s*=\s*(?:"([^"]+)"|'([^']+)'|\{`([^`]+)`\}|\{\s*["']([^"']+)["']\s*\})/g
 const CLASS_EXPR_RE = /className\s*=\s*\{([\s\S]*?)\}/g
 const RAW_CLASS_CONCAT_RE = /className\s*=\s*\{\s*["']([^"']+)["']\s*\+/g
 const STRING_LITERAL_RE = /["']([^"']+)["']/g
@@ -66,7 +64,9 @@ describe('No Tailwind-style utility class strings in runtime UI code', () => {
           const utilityMatch = classValue.match(UTILITY_CLASS_RE)
 
           if (utilityMatch) {
-            violations.push(`${relPath}:${findLineNumber(source, match.index ?? 0)} -> ${utilityMatch[0]}`)
+            violations.push(
+              `${relPath}:${findLineNumber(source, match.index ?? 0)} -> ${utilityMatch[0]}`,
+            )
           }
         }
 
@@ -80,7 +80,9 @@ describe('No Tailwind-style utility class strings in runtime UI code', () => {
             const utilityMatch = classValue.match(UTILITY_CLASS_RE)
 
             if (utilityMatch) {
-              violations.push(`${relPath}:${findLineNumber(source, match.index ?? 0)} -> ${utilityMatch[0]}`)
+              violations.push(
+                `${relPath}:${findLineNumber(source, match.index ?? 0)} -> ${utilityMatch[0]}`,
+              )
             }
           }
         }
@@ -90,7 +92,9 @@ describe('No Tailwind-style utility class strings in runtime UI code', () => {
           const utilityMatch = classValue.match(UTILITY_CLASS_RE)
 
           if (utilityMatch) {
-            violations.push(`${relPath}:${findLineNumber(source, match.index ?? 0)} -> ${utilityMatch[0]}`)
+            violations.push(
+              `${relPath}:${findLineNumber(source, match.index ?? 0)} -> ${utilityMatch[0]}`,
+            )
           }
         }
       }
@@ -119,7 +123,9 @@ describe('No Tailwind-style utility class strings in runtime UI code', () => {
           const classValue = match[1] ?? match[2] ?? match[3] ?? match[4] ?? ''
           const arbitraryMatch = classValue.match(ARBITRARY_VALUE_RE)
           if (arbitraryMatch) {
-            violations.push(`${relPath}:${findLineNumber(source, match.index ?? 0)} -> ${arbitraryMatch[0]}`)
+            violations.push(
+              `${relPath}:${findLineNumber(source, match.index ?? 0)} -> ${arbitraryMatch[0]}`,
+            )
           }
         }
 
@@ -130,7 +136,9 @@ describe('No Tailwind-style utility class strings in runtime UI code', () => {
             if (isComparisonString(expression, stringMatch.index ?? 0)) continue
             const arbitraryMatch = classValue.match(ARBITRARY_VALUE_RE)
             if (arbitraryMatch) {
-              violations.push(`${relPath}:${findLineNumber(source, match.index ?? 0)} -> ${arbitraryMatch[0]}`)
+              violations.push(
+                `${relPath}:${findLineNumber(source, match.index ?? 0)} -> ${arbitraryMatch[0]}`,
+              )
             }
           }
         }
@@ -139,7 +147,9 @@ describe('No Tailwind-style utility class strings in runtime UI code', () => {
           const classValue = match[1] ?? ''
           const arbitraryMatch = classValue.match(ARBITRARY_VALUE_RE)
           if (arbitraryMatch) {
-            violations.push(`${relPath}:${findLineNumber(source, match.index ?? 0)} -> ${arbitraryMatch[0]}`)
+            violations.push(
+              `${relPath}:${findLineNumber(source, match.index ?? 0)} -> ${arbitraryMatch[0]}`,
+            )
           }
         }
       }

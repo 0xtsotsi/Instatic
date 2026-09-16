@@ -21,11 +21,5 @@ export const rootScope: Scope = {
   id: 'root',
   placeholder: 'Type a command or search…',
   commands: () => getAllCommands(),
-  providers: [
-    pagesProvider,
-    contentProvider,
-    mediaProvider,
-    dataProvider,
-    pluginPagesProvider,
-  ],
+  providers: [pagesProvider, contentProvider, mediaProvider, dataProvider, pluginPagesProvider],
 }

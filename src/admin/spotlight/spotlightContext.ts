@@ -32,5 +32,4 @@ export interface SpotlightInternalContextValue {
   runCommandWithArgs: (command: Command, args: Record<string, string>) => Promise<void>
 }
 
-export const SpotlightInternalContext =
-  createContext<SpotlightInternalContextValue | null>(null)
+export const SpotlightInternalContext = createContext<SpotlightInternalContextValue | null>(null)

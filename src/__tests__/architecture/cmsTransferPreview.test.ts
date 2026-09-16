@@ -87,7 +87,11 @@ async function seedAuth(db: DbClient): Promise<string> {
 // Helpers to construct minimal-valid bundle objects
 // ---------------------------------------------------------------------------
 
-function bundleTableEntry(id: string, name: string, kind: DataTable['kind'] = 'postType'): DataTable {
+function bundleTableEntry(
+  id: string,
+  name: string,
+  kind: DataTable['kind'] = 'postType',
+): DataTable {
   const now = new Date().toISOString()
   return {
     id,
@@ -209,7 +213,9 @@ describe('handleImportPreviewRoute — 2 of 5 local rows overlap with bundle', (
     }
 
     // Suppress TS unused-variable warning — we seeded these rows to build the local state
-    void local1; void local2; void local5
+    void local1
+    void local2
+    void local5
 
     const req = makePreviewRequest(cookie, bundle)
     const res = await handleImportPreviewRoute(req, db)
@@ -231,7 +237,11 @@ describe('handleImportPreviewRoute — row slug conflicts', () => {
     await runMigrations(db, sqliteMigrations)
     const cookie = await seedAuth(db)
 
-    await createDataRow(db, { tableId: 'posts', cells: { title: 'Local', slug: 'shared' }, slug: 'shared' })
+    await createDataRow(db, {
+      tableId: 'posts',
+      cells: { title: 'Local', slug: 'shared' },
+      slug: 'shared',
+    })
 
     const bundle = {
       schemaVersion: 1,
@@ -269,10 +279,7 @@ describe('handleImportPreviewRoute — bundle table not present locally', () => 
       schemaVersion: 1,
       exportedAt: new Date().toISOString(),
       tables: [bundleTableEntry('custom-xyz', 'Custom XYZ', 'data')],
-      rows: [
-        bundleRowEntry('cx-row-1', 'custom-xyz'),
-        bundleRowEntry('cx-row-2', 'custom-xyz'),
-      ],
+      rows: [bundleRowEntry('cx-row-1', 'custom-xyz'), bundleRowEntry('cx-row-2', 'custom-xyz')],
     }
 
     const req = makePreviewRequest(cookie, bundle)

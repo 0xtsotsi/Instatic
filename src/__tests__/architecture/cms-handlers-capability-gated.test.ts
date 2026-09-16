@@ -39,7 +39,7 @@ const ALLOWLIST: ReadonlyMap<string, string> = new Map([
   // one-shot bootstrap (409s after the first run); `public-site` exposes
   // only the two fields already rendered on every published page (site
   // name + favicon URL).
-  ['setup.ts', 'Public bootstrap + site identity — gates aren\'t applicable.'],
+  ['setup.ts', "Public bootstrap + site identity — gates aren't applicable."],
   // Dispatcher / index — composes the per-resource handlers and runs
   // the CSRF Origin check. Per-handler files apply the actual auth gates.
   ['index.ts', 'Top-level dispatcher; per-handler files own the auth gates.'],
@@ -57,12 +57,18 @@ const ALLOWLIST: ReadonlyMap<string, string> = new Map([
   // file-magic sniffing. Always called by an already-gated parent
   // handler (`/me/avatar`, `/media`).
   ['mediaUpload.ts', 'Multipart parse helper called by gated parent handlers.'],
-  ['svgSanitize.ts', 'Pure SVG sanitiser called by mediaUpload (itself gated parents); no handlers.'],
+  [
+    'svgSanitize.ts',
+    'Pure SVG sanitiser called by mediaUpload (itself gated parents); no handlers.',
+  ],
   // Byte-level MIME validation + SVG sanitisation + write-destination policy
   // for imported media. Called by both import.ts and importArchive.ts, which
   // gate their routes via requireCapability; this file contains no request
   // handler itself.
-  ['importMediaValidation.ts', 'Validation/sanitisation helper called by import.ts + importArchive.ts (which gate via requireCapability); no handlers.'],
+  [
+    'importMediaValidation.ts',
+    'Validation/sanitisation helper called by import.ts + importArchive.ts (which gate via requireCapability); no handlers.',
+  ],
   ['mediaUploadDispatch.ts', 'Storage adapter dispatch called by gated parent handlers.'],
   ['mediaUploadExecutor.ts', 'Filesystem write helper called by gated parent handlers.'],
   ['mediaVariants.ts', 'Variant generation helper called by gated parent handlers.'],
@@ -110,7 +116,10 @@ const ALLOWLIST: ReadonlyMap<string, string> = new Map([
   ['dashboard/posts.ts', 'Widget data reader called by gated dashboard/index.ts dispatcher.'],
   ['dashboard/media.ts', 'Widget data reader called by gated dashboard/index.ts dispatcher.'],
   ['dashboard/plugins.ts', 'Widget data reader called by gated dashboard/index.ts dispatcher.'],
-  ['dashboard/publishLineup.ts', 'Widget data reader called by gated dashboard/index.ts dispatcher.'],
+  [
+    'dashboard/publishLineup.ts',
+    'Widget data reader called by gated dashboard/index.ts dispatcher.',
+  ],
   ['dashboard/activity.ts', 'Widget data reader called by gated dashboard/index.ts dispatcher.'],
   ['dashboard/storage.ts', 'Widget data reader called by gated dashboard/index.ts dispatcher.'],
 ])
@@ -151,12 +160,12 @@ describe('cms-handlers-capability-gated gate', () => {
     if (violations.length > 0) {
       throw new Error(
         `[cms-handlers-capability-gated] handler files don't call any auth gate:\n` +
-        violations.map((v) => `  ${v}`).join('\n') +
-        `\n\nEvery /admin/api/cms/** route must gate access via ` +
-        `requireCapability(), requireAnyCapability(), requireAuthenticatedUser(), ` +
-        `or requireStepUp() so an unauthenticated caller cannot reach the CMS.\n` +
-        `If the file is intentionally not gated (helper / dispatcher / shared ` +
-        `module), add it to ALLOWLIST in this test with a justification.`,
+          violations.map((v) => `  ${v}`).join('\n') +
+          `\n\nEvery /admin/api/cms/** route must gate access via ` +
+          `requireCapability(), requireAnyCapability(), requireAuthenticatedUser(), ` +
+          `or requireStepUp() so an unauthenticated caller cannot reach the CMS.\n` +
+          `If the file is intentionally not gated (helper / dispatcher / shared ` +
+          `module), add it to ALLOWLIST in this test with a justification.`,
       )
     }
     expect(violations).toHaveLength(0)

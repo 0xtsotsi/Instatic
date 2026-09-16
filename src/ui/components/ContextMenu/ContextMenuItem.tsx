@@ -4,7 +4,10 @@ import { Separator } from '@ui/components/Separator'
 import { cn } from '@ui/cn'
 import styles from './ContextMenu.module.css'
 
-interface ContextMenuItemProps extends Omit<ButtonProps, 'variant' | 'size' | 'menuItem' | 'tone' | 'ref'> {
+interface ContextMenuItemProps extends Omit<
+  ButtonProps,
+  'variant' | 'size' | 'menuItem' | 'tone' | 'ref'
+> {
   danger?: boolean
   /** React 19: ref is a regular prop on function components. */
   ref?: Ref<HTMLButtonElement>

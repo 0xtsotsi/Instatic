@@ -12,12 +12,7 @@ import { ArrowDownIcon } from 'pixel-art-icons/icons/arrow-down'
 import { PlusIcon } from 'pixel-art-icons/icons/plus'
 import type { DataTable } from '@core/data/schemas'
 import { DataGridViewChips } from './DataGridViewChips'
-import type {
-  SortState,
-  StatusCounts,
-  StatusFilter,
-  StatusViewChip,
-} from './dataGridRows'
+import type { SortState, StatusCounts, StatusFilter, StatusViewChip } from './dataGridRows'
 import styles from './DataGrid.module.css'
 
 interface DataGridToolbarProps {
@@ -89,7 +84,13 @@ export function DataGridToolbar({
         </div>
 
         {!readOnly && (
-          <Button variant="primary" size="sm" onClick={() => { void onAddRow() }}>
+          <Button
+            variant="primary"
+            size="sm"
+            onClick={() => {
+              void onAddRow()
+            }}
+          >
             <PlusIcon size={12} aria-hidden="true" />
             Add row
           </Button>

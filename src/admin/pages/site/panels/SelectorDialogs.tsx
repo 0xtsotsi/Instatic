@@ -48,7 +48,9 @@ export function SelectorNameDialog({
   mode?: SelectorDialogMode
 }) {
   const isClassNameMode = mode === 'class'
-  const [name, setName] = useState(isClassNameMode ? selectorInputValue(initialValue) : initialValue)
+  const [name, setName] = useState(
+    isClassNameMode ? selectorInputValue(initialValue) : initialValue,
+  )
   const [error, setError] = useState<string | null>(null)
   const trimmedValue = isClassNameMode ? normalizeClassNameInput(name) : name.trim()
   const nameInputId = useId()
@@ -90,7 +92,9 @@ export function SelectorNameDialog({
     >
       <form id={SELECTOR_NAME_FORM_ID} className={dialogStyles.form} onSubmit={handleSubmit}>
         <div className={dialogStyles.field}>
-          <label htmlFor={nameInputId} className={dialogStyles.label}>{fieldLabel}</label>
+          <label htmlFor={nameInputId} className={dialogStyles.label}>
+            {fieldLabel}
+          </label>
           <Input
             id={nameInputId}
             fieldSize="sm"
@@ -105,7 +109,11 @@ export function SelectorNameDialog({
             spellCheck={false}
           />
         </div>
-        {error && <p role="alert" className={dialogStyles.errorText}>{error}</p>}
+        {error && (
+          <p role="alert" className={dialogStyles.errorText}>
+            {error}
+          </p>
+        )}
       </form>
     </Dialog>
   )

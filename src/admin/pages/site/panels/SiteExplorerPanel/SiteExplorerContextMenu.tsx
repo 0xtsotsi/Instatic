@@ -37,13 +37,17 @@ export function SiteExplorerContextMenu<TTarget extends SiteExplorerContextMenuT
       x={menu.x}
       y={menu.y}
       ariaLabel="Site item options"
-      headerLabel={menu.selection && isBulk
-        ? bulkSelectionLabel(menu.selection.sectionId, menu.selection.itemIds.length)
-        : undefined}
+      headerLabel={
+        menu.selection && isBulk
+          ? bulkSelectionLabel(menu.selection.sectionId, menu.selection.itemIds.length)
+          : undefined
+      }
       showRename={!isBulk}
-      deleteLabel={menu.selection && isBulk
-        ? bulkDeleteLabel(menu.selection.sectionId, menu.selection.itemIds.length)
-        : undefined}
+      deleteLabel={
+        menu.selection && isBulk
+          ? bulkDeleteLabel(menu.selection.sectionId, menu.selection.itemIds.length)
+          : undefined
+      }
       deleteDisabled={!isBulk && menu.target.kind === 'page' && pageCount <= 1}
       extraItems={extraItems}
       onClose={onClose}

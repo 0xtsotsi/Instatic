@@ -57,7 +57,8 @@ interface PackageRule {
 const RULES: PackageRule[] = [
   {
     label: '@anthropic-ai/claude-agent-sdk',
-    importRe: /from\s+['"]@anthropic-ai\/claude-agent-sdk['"]|require\s*\(\s*['"]@anthropic-ai\/claude-agent-sdk['"]\s*\)/,
+    importRe:
+      /from\s+['"]@anthropic-ai\/claude-agent-sdk['"]|require\s*\(\s*['"]@anthropic-ai\/claude-agent-sdk['"]\s*\)/,
     // No allowed callers — replaced by the direct /v1/messages HTTP driver.
     allowed: [],
   },
@@ -75,7 +76,8 @@ const RULES: PackageRule[] = [
   },
   {
     label: '@modelcontextprotocol/sdk',
-    importRe: /from\s+['"]@modelcontextprotocol\/sdk['"]|require\s*\(\s*['"]@modelcontextprotocol\/sdk['"]\s*\)|from\s+['"]@modelcontextprotocol\/sdk\/|require\s*\(\s*['"]@modelcontextprotocol\/sdk\//,
+    importRe:
+      /from\s+['"]@modelcontextprotocol\/sdk['"]|require\s*\(\s*['"]@modelcontextprotocol\/sdk['"]\s*\)|from\s+['"]@modelcontextprotocol\/sdk\/|require\s*\(\s*['"]@modelcontextprotocol\/sdk\//,
     // Allowed only inside the MCP server module — banned everywhere else.
     allowed: [],
     allowedPrefixes: ['server/ai/mcp/'],
@@ -129,7 +131,11 @@ describe('ai-driver-isolation gate', () => {
         if (rule.allowed.includes(rel)) continue
         if (rule.allowedPrefixes?.some((p) => rel.startsWith(p))) continue
         let content: string
-        try { content = readFileSync(file, 'utf8') } catch { continue }
+        try {
+          content = readFileSync(file, 'utf8')
+        } catch {
+          continue
+        }
         if (rule.importRe.test(content)) {
           violations.push(rel)
         }
@@ -137,8 +143,8 @@ describe('ai-driver-isolation gate', () => {
       if (violations.length > 0) {
         throw new Error(
           `[ai-driver-isolation] ${rule.label} imported from disallowed locations:\n` +
-          violations.map((v) => `  ${v}`).join('\n') +
-          `\n\nAllowed: ${rule.allowed.length === 0 ? '<none — package is banned repo-wide>' : rule.allowed.join(', ')}`,
+            violations.map((v) => `  ${v}`).join('\n') +
+            `\n\nAllowed: ${rule.allowed.length === 0 ? '<none — package is banned repo-wide>' : rule.allowed.join(', ')}`,
         )
       }
       expect(violations).toHaveLength(0)

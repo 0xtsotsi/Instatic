@@ -29,23 +29,12 @@
 
 import { useState, useRef, useEffect } from 'react'
 import { createPortal } from 'react-dom'
-import {
-  useEditorStore,
-  selectActiveCanvasPage,
-} from '@site/store/store'
+import { useEditorStore, selectActiveCanvasPage } from '@site/store/store'
 import { registry } from '@core/module-engine'
-import {
-  getNodeDisplayName,
-  getNodeHtmlTag,
-  getNodeClassNames,
-} from '@core/page-tree'
+import { getNodeDisplayName, getNodeHtmlTag, getNodeClassNames } from '@core/page-tree'
 import { Button } from '@ui/components/Button'
 import { useConfirmDelete } from '@admin/shared/dialogs/ConfirmDeleteDialog'
-import {
-  TreeRow,
-  TreeLabel,
-  TreeLabelGroup,
-} from '@site/ui/Tree'
+import { TreeRow, TreeLabel, TreeLabelGroup } from '@site/ui/Tree'
 import { TagPill } from '@ui/components/TagPill'
 import { CopySolidIcon } from 'pixel-art-icons/icons/copy-solid'
 import { Copy2SolidIcon } from 'pixel-art-icons/icons/copy-2-solid'
@@ -55,10 +44,7 @@ import { CheckboxSolidIcon } from 'pixel-art-icons/icons/checkbox-solid'
 import { BoxStackSolidIcon } from 'pixel-art-icons/icons/box-stack-solid'
 import { TrashSolidIcon } from 'pixel-art-icons/icons/trash-solid'
 import { CloseIcon } from 'pixel-art-icons/icons/close'
-import {
-  ContextMenu,
-  ContextMenuItem,
-} from '@ui/components/ContextMenu'
+import { ContextMenu, ContextMenuItem } from '@ui/components/ContextMenu'
 import styles from './MultiSelectionInspector.module.css'
 
 interface MultiSelectionInspectorProps {
@@ -66,9 +52,7 @@ interface MultiSelectionInspectorProps {
   selectedNodeIds: string[]
 }
 
-export function MultiSelectionInspector({
-  selectedNodeIds,
-}: MultiSelectionInspectorProps) {
+export function MultiSelectionInspector({ selectedNodeIds }: MultiSelectionInspectorProps) {
   const removeFromSelection = useEditorStore((s) => s.removeFromSelection)
   const duplicateNodes = useEditorStore((s) => s.duplicateNodes)
   const deleteNodes = useEditorStore((s) => s.deleteNodes)
@@ -208,21 +192,14 @@ export function MultiSelectionInspector({
         </div>
       </div>
 
-      <div className={styles.layerListHeader}>
-        Selected layers ({selectedNodeIds.length})
-      </div>
+      <div className={styles.layerListHeader}>Selected layers ({selectedNodeIds.length})</div>
       <div className={styles.layerList} role="list">
         {/*
           Each row uses the same primitives as the DOM panel: TreeRow for the
           row contract and TagPill for the tinted tag/class summaries.
         */}
         {layers.map((layer) => (
-          <TreeRow
-            key={layer.id}
-            depth={0}
-            role="listitem"
-            className={styles.layerRow}
-          >
+          <TreeRow key={layer.id} depth={0} role="listitem" className={styles.layerRow}>
             <TreeLabelGroup>
               {layer.tag && (
                 <TagPill

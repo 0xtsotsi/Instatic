@@ -1,4 +1,10 @@
-import { useEffect, useRef, useState, type CSSProperties, type PointerEvent as ReactPointerEvent } from 'react'
+import {
+  useEffect,
+  useRef,
+  useState,
+  type CSSProperties,
+  type PointerEvent as ReactPointerEvent,
+} from 'react'
 import { registry } from '@core/module-engine'
 import type { CmsMediaAsset } from '@core/persistence/cmsMedia'
 import {
@@ -39,10 +45,7 @@ export function useMediaCanvasInsertionDrag() {
     }
   }, [])
 
-  const handlePointerDown = (
-    asset: CmsMediaAsset,
-    event: ReactPointerEvent<HTMLButtonElement>,
-  ) => {
+  const handlePointerDown = (asset: CmsMediaAsset, event: ReactPointerEvent<HTMLButtonElement>) => {
     if (event.button !== 0) return
     const insertion = mediaCanvasInsertionForAsset(asset)
     if (!insertion) return
@@ -63,7 +66,8 @@ export function useMediaCanvasInsertionDrag() {
 
     const move = (moveEvent: PointerEvent) => {
       if (!started) {
-        if (Math.hypot(moveEvent.clientX - startX, moveEvent.clientY - startY) < DRAG_THRESHOLD_PX) return
+        if (Math.hypot(moveEvent.clientX - startX, moveEvent.clientY - startY) < DRAG_THRESHOLD_PX)
+          return
         started = true
       }
 

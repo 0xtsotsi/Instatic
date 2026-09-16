@@ -98,4 +98,4 @@ export const PLUGIN_PERMISSION_VALUES = [
   'unstable.internals',
 ] as const
 
-export type PluginPermission = typeof PLUGIN_PERMISSION_VALUES[number]
+export type PluginPermission = (typeof PLUGIN_PERMISSION_VALUES)[number]

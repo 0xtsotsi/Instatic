@@ -101,10 +101,7 @@ beforeEach(() => {
   resetStore()
   globalThis.fetch = (async (input: RequestInfo | URL) => {
     if (String(input).includes('/data/_meta')) {
-      return new Response(
-        JSON.stringify({ meta: { tables: [postsTable] } }),
-        { status: 200 },
-      )
+      return new Response(JSON.stringify({ meta: { tables: [postsTable] } }), { status: 200 })
     }
     return new Response(JSON.stringify({ error: 'not found' }), { status: 404 })
   }) as typeof fetch
@@ -128,7 +125,9 @@ describe('dynamic binding controls', () => {
     // String-typed controls (text) use insert mode — the affordance
     // button's aria-label reads "Insert binding for …".
     fireEvent.click(screen.getByRole('button', { name: /insert binding for text/i }))
-    await waitFor(() => expect(screen.getByRole('menu', { name: /insert binding for text/i })).toBeDefined())
+    await waitFor(() =>
+      expect(screen.getByRole('menu', { name: /insert binding for text/i })).toBeDefined(),
+    )
 
     // Auto-scoped to Posts — fields shown directly.
     await waitFor(() => expect(screen.getByText('Author name')).toBeDefined())
@@ -136,9 +135,9 @@ describe('dynamic binding controls', () => {
     // Click "Author name" — the token is inserted on a single click. The
     // popover stays open so multiple tokens can be inserted in one
     // session (no Confirm step).
-    const authorNameBtn = screen.getAllByRole('button').find((b) =>
-      b.textContent?.includes('Author name'),
-    )
+    const authorNameBtn = screen
+      .getAllByRole('button')
+      .find((b) => b.textContent?.includes('Author name'))
     expect(authorNameBtn).toBeDefined()
     fireEvent.click(authorNameBtn!)
 
@@ -154,20 +153,22 @@ describe('dynamic binding controls', () => {
     render(<PropertiesPanel />)
 
     fireEvent.click(screen.getByRole('button', { name: /insert binding for text/i }))
-    await waitFor(() => expect(screen.getByRole('menu', { name: /insert binding for text/i })).toBeDefined())
+    await waitFor(() =>
+      expect(screen.getByRole('menu', { name: /insert binding for text/i })).toBeDefined(),
+    )
     await waitFor(() => expect(screen.getByText('Title')).toBeDefined())
 
     // Click Title — first token inserted, popover stays open.
-    const titleBtn = screen.getAllByRole('button').find((b) =>
-      b.textContent?.includes('Title') && !b.textContent?.includes('SEO'),
-    )
+    const titleBtn = screen
+      .getAllByRole('button')
+      .find((b) => b.textContent?.includes('Title') && !b.textContent?.includes('SEO'))
     fireEvent.click(titleBtn!)
 
     // Popover is still open — click another field without re-opening.
     expect(screen.getByRole('menu', { name: /insert binding for text/i })).toBeDefined()
-    const slugBtn = screen.getAllByRole('button').find((b) =>
-      b.textContent?.trim() === 'Slug' || b.textContent?.startsWith('Slug'),
-    )
+    const slugBtn = screen
+      .getAllByRole('button')
+      .find((b) => b.textContent?.trim() === 'Slug' || b.textContent?.startsWith('Slug'))
     fireEvent.click(slugBtn!)
 
     // Both tokens were inserted in sequence.
@@ -187,7 +188,9 @@ describe('dynamic binding controls', () => {
         propKey="src"
         label="Image"
         control={{ type: 'image', label: 'Image' }}
-        onSet={(binding) => { selectedBinding = binding }}
+        onSet={(binding) => {
+          selectedBinding = binding
+        }}
         onClear={() => {}}
       >
         <input aria-label="Image" />
@@ -204,9 +207,9 @@ describe('dynamic binding controls', () => {
     expect(screen.queryByText('Title')).toBeNull()
 
     // Featured media (mediaKind: 'image') should be visible and enabled.
-    const featuredBtn = screen.getAllByRole('button').find((b) =>
-      b.textContent?.includes('Featured media'),
-    )
+    const featuredBtn = screen
+      .getAllByRole('button')
+      .find((b) => b.textContent?.includes('Featured media'))
     expect(featuredBtn?.getAttribute('aria-disabled')).not.toBe('true')
 
     // Click featured media — bind mode commits the binding on a single

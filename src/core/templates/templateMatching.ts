@@ -10,9 +10,7 @@ export function normalizeRouteBase(value: string): string {
 }
 
 /** What an inbound public URL resolved to, for template matching. */
-export type RouteResolutionContext =
-  | { kind: 'page' }
-  | { kind: 'entry'; tableSlug: string }
+export type RouteResolutionContext = { kind: 'page' } | { kind: 'entry'; tableSlug: string }
 
 export function isTemplatePage(page: Page): boolean {
   return page.template?.enabled === true
@@ -53,9 +51,11 @@ function matchesLevel(
   if (!target) return false
   if (level === 'everywhere') return target.kind === 'everywhere'
   if (level === 'postTypes') {
-    return target.kind === 'postTypes'
-      && ctx.kind === 'entry'
-      && target.tableSlugs.includes(ctx.tableSlug)
+    return (
+      target.kind === 'postTypes' &&
+      ctx.kind === 'entry' &&
+      target.tableSlugs.includes(ctx.tableSlug)
+    )
   }
   return false
 }
@@ -71,27 +71,31 @@ const LEVELS = ['everywhere', 'postTypes'] as const
  * layout chain). Highest priority wins, document order breaks ties.
  */
 export function resolveNotFoundTemplate(site: SiteDocument): Page | null {
-  return site.pages
-    .map((page, index) => ({ page, index }))
-    .filter(({ page }) => isTemplatePage(page) && page.template?.target.kind === 'notFound')
-    .sort((a, b) => ((b.page.template?.priority ?? 0) - (a.page.template?.priority ?? 0)) || a.index - b.index)[0]
-    ?.page ?? null
+  return (
+    site.pages
+      .map((page, index) => ({ page, index }))
+      .filter(({ page }) => isTemplatePage(page) && page.template?.target.kind === 'notFound')
+      .sort(
+        (a, b) =>
+          (b.page.template?.priority ?? 0) - (a.page.template?.priority ?? 0) || a.index - b.index,
+      )[0]?.page ?? null
+  )
 }
 
 /**
  * Collect every template matching the route, ordered outer → inner. At most
  * one template per breadth level (highest priority, document order breaks ties).
  */
-export function resolveTemplateChain(
-  site: SiteDocument,
-  ctx: RouteResolutionContext,
-): Page[] {
+export function resolveTemplateChain(site: SiteDocument, ctx: RouteResolutionContext): Page[] {
   const indexed = site.pages.map((page, index) => ({ page, index }))
   const chain: Page[] = []
   for (const level of LEVELS) {
     const winner = indexed
       .filter(({ page }) => isTemplatePage(page) && matchesLevel(page, level, ctx))
-      .sort((a, b) => ((b.page.template?.priority ?? 0) - (a.page.template?.priority ?? 0)) || a.index - b.index)[0]
+      .sort(
+        (a, b) =>
+          (b.page.template?.priority ?? 0) - (a.page.template?.priority ?? 0) || a.index - b.index,
+      )[0]
     if (winner) chain.push(winner.page)
   }
   return chain

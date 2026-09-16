@@ -192,7 +192,7 @@ describe('sanitiseCssValue', () => {
 
   it('allows url() with safe https images', () => {
     expect(sanitiseCssValue('url("https://cdn.example.com/img.png")')).toBe(
-      'url("https://cdn.example.com/img.png")'
+      'url("https://cdn.example.com/img.png")',
     )
   })
 
@@ -374,6 +374,6 @@ describe('canonical sanitiseCssValue — import verification', () => {
     // by ClassStyleInjector.sanitiseValue — they were inconsistent.
     // After consolidation, both use the same canonical function → {} is blocked.
     const result = buildStyle({ color: 'red; } a { color: blue' })
-    expect(result).toBe('')  // dangerous value is dropped; empty output
+    expect(result).toBe('') // dangerous value is dropped; empty output
   })
 })

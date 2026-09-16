@@ -92,12 +92,16 @@ export function primeCmsMediaAssetCache(asset: CmsMediaAsset): void {
   cacheAssetList([asset])
 }
 
-export function useCmsMediaAssetByPath(publicPath: string | null | undefined): CmsMediaAsset | null {
+export function useCmsMediaAssetByPath(
+  publicPath: string | null | undefined,
+): CmsMediaAsset | null {
   const assets = useCmsMediaAssetsByPath(publicPath ? [publicPath] : EMPTY_PATHS)
-  return publicPath ? assets.get(publicPath) ?? null : null
+  return publicPath ? (assets.get(publicPath) ?? null) : null
 }
 
-export function useCmsMediaAssetsByPath(publicPaths: readonly string[]): ReadonlyMap<string, CmsMediaAsset> {
+export function useCmsMediaAssetsByPath(
+  publicPaths: readonly string[],
+): ReadonlyMap<string, CmsMediaAsset> {
   const previewReadiness = use(CanvasPreviewReadinessContext)
   const key = publicPathsKey(publicPaths)
   const [snapshot, setSnapshot] = useState<CachedAssetSnapshot>(() => ({
@@ -122,9 +126,9 @@ export function useCmsMediaAssetsByPath(publicPaths: readonly string[]): Readonl
     if (!paths.every((path) => cache.has(path))) {
       const request = ensureList()
       previewReadiness?.track(request)
-      void request
-        .then(updateSnapshot)
-        .catch(() => { /* swallow — editor still renders raw urls */ })
+      void request.then(updateSnapshot).catch(() => {
+        /* swallow — editor still renders raw urls */
+      })
     }
 
     return () => {

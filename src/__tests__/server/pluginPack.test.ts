@@ -9,22 +9,24 @@ import type { SiteDocument } from '@core/page-tree'
 const baselineSite: SiteDocument = {
   id: 'default',
   name: 'Test',
-  pages: [{
-    id: 'home',
-    title: 'Home',
-    slug: 'index',
-    rootNodeId: 'root',
-    nodes: {
-      root: {
-        id: 'root',
-        moduleId: 'base.body',
-        props: {},
-        breakpointOverrides: {},
-        children: [],
-        classIds: [],
+  pages: [
+    {
+      id: 'home',
+      title: 'Home',
+      slug: 'index',
+      rootNodeId: 'root',
+      nodes: {
+        root: {
+          id: 'root',
+          moduleId: 'base.body',
+          props: {},
+          breakpointOverrides: {},
+          children: [],
+          classIds: [],
+        },
       },
     },
-  }],
+  ],
   breakpoints: [],
   settings: {
     framework: { name: 'none' as const },
@@ -46,34 +48,38 @@ describe('parsePluginPack', () => {
   it('rejects classes that are not namespaced under the plugin id', () => {
     expect(() =>
       parsePluginPack('acme.canvas', {
-        classes: [{
-          id: 'foreign-class',
-          name: 'Foreign',
-          kind: 'class',
-          selector: '.Foreign',
-          order: 0,
-          styles: {},
-          contextStyles: {},
-          createdAt: 0,
-          updatedAt: 0,
-        }],
+        classes: [
+          {
+            id: 'foreign-class',
+            name: 'Foreign',
+            kind: 'class',
+            selector: '.Foreign',
+            order: 0,
+            styles: {},
+            contextStyles: {},
+            createdAt: 0,
+            updatedAt: 0,
+          },
+        ],
       }),
     ).toThrow(PluginPackError)
   })
 
   it('accepts classes namespaced with `<pluginId>/`', () => {
     const pack = parsePluginPack('acme.canvas', {
-      classes: [{
-        id: 'acme.canvas/hero',
-        name: 'Hero',
-        kind: 'class',
-        selector: '.Hero',
-        order: 0,
-        styles: { color: 'red' },
-        contextStyles: {},
-        createdAt: 0,
-        updatedAt: 0,
-      }],
+      classes: [
+        {
+          id: 'acme.canvas/hero',
+          name: 'Hero',
+          kind: 'class',
+          selector: '.Hero',
+          order: 0,
+          styles: { color: 'red' },
+          contextStyles: {},
+          createdAt: 0,
+          updatedAt: 0,
+        },
+      ],
     })
     expect(pack.classes.map((c) => c.id)).toEqual(['acme.canvas/hero'])
   })
@@ -81,33 +87,37 @@ describe('parsePluginPack', () => {
   it('rejects classes whose name contains whitespace or invalid CSS chars', () => {
     expect(() =>
       parsePluginPack('acme.canvas', {
-        classes: [{
-          id: 'acme.canvas/hero',
-          name: 'My Hero Class',
-          kind: 'class',
-          selector: '.hero',
-          order: 0,
-          styles: {},
-          contextStyles: {},
-          createdAt: 0,
-          updatedAt: 0,
-        }],
+        classes: [
+          {
+            id: 'acme.canvas/hero',
+            name: 'My Hero Class',
+            kind: 'class',
+            selector: '.hero',
+            order: 0,
+            styles: {},
+            contextStyles: {},
+            createdAt: 0,
+            updatedAt: 0,
+          },
+        ],
       }),
     ).toThrow(/valid CSS class name/)
 
     expect(() =>
       parsePluginPack('acme.canvas', {
-        classes: [{
-          id: 'acme.canvas/hero',
-          name: 'hero/with-slash',
-          kind: 'class',
-          selector: '.hero',
-          order: 0,
-          styles: {},
-          contextStyles: {},
-          createdAt: 0,
-          updatedAt: 0,
-        }],
+        classes: [
+          {
+            id: 'acme.canvas/hero',
+            name: 'hero/with-slash',
+            kind: 'class',
+            selector: '.hero',
+            order: 0,
+            styles: {},
+            contextStyles: {},
+            createdAt: 0,
+            updatedAt: 0,
+          },
+        ],
       }),
     ).toThrow(/valid CSS class name/)
   })
@@ -126,17 +136,19 @@ describe('applyPluginPackToSite', () => {
     const pack = {
       visualComponents: [],
       pages: [],
-      classes: [{
-        id: 'acme.canvas/hero',
-        name: 'Hero',
-        kind: 'class' as const,
-        selector: '.Hero',
-        order: 0,
-        styles: { color: 'red' },
-        contextStyles: {},
-        createdAt: 0,
-        updatedAt: 0,
-      }],
+      classes: [
+        {
+          id: 'acme.canvas/hero',
+          name: 'Hero',
+          kind: 'class' as const,
+          selector: '.Hero',
+          order: 0,
+          styles: { color: 'red' },
+          contextStyles: {},
+          createdAt: 0,
+          updatedAt: 0,
+        },
+      ],
       layouts: [],
     }
 
@@ -149,17 +161,19 @@ describe('applyPluginPackToSite', () => {
     const pack = {
       visualComponents: [],
       pages: [],
-      classes: [{
-        id: 'acme.canvas/hero',
-        name: 'Hero v2',
-        kind: 'class' as const,
-        selector: '.Hero',
-        order: 0,
-        styles: { color: 'blue' },
-        contextStyles: {},
-        createdAt: 0,
-        updatedAt: 0,
-      }],
+      classes: [
+        {
+          id: 'acme.canvas/hero',
+          name: 'Hero v2',
+          kind: 'class' as const,
+          selector: '.Hero',
+          order: 0,
+          styles: { color: 'blue' },
+          contextStyles: {},
+          createdAt: 0,
+          updatedAt: 0,
+        },
+      ],
       layouts: [],
     }
     const seeded: SiteDocument = {
@@ -218,9 +232,9 @@ describe('parsePluginPack — layouts', () => {
   })
 
   it('rejects layouts that are not namespaced under the plugin id', () => {
-    expect(() =>
-      parsePluginPack('acme.canvas', { layouts: [packLayout('hero-section')] }),
-    ).toThrow(PluginPackError)
+    expect(() => parsePluginPack('acme.canvas', { layouts: [packLayout('hero-section')] })).toThrow(
+      PluginPackError,
+    )
   })
 
   it('rejects malformed layout entries', () => {
@@ -232,9 +246,7 @@ describe('parsePluginPack — layouts', () => {
   it('rejects layouts with an incoherent snapshot tree', () => {
     const broken = packLayout('acme.canvas/dangling')
     broken.nodes['l-root'].children = ['ghost']
-    expect(() =>
-      parsePluginPack('acme.canvas', { layouts: [broken] }),
-    ).toThrow(PluginPackError)
+    expect(() => parsePluginPack('acme.canvas', { layouts: [broken] })).toThrow(PluginPackError)
   })
 })
 

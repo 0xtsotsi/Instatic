@@ -53,7 +53,10 @@ describe('ColorsPanel', () => {
 
     const token = useEditorStore.getState().site!.settings.framework!.colors.tokens[0]
     expect(token.slug).toBe('primary')
-    expect(useEditorStore.getState().site!.styleRules[frameworkColorClassId(token.id, 'base', 'text')].name).toBe('text-primary')
+    expect(
+      useEditorStore.getState().site!.styleRules[frameworkColorClassId(token.id, 'base', 'text')]
+        .name,
+    ).toBe('text-primary')
     expect(screen.getByRole('button', { name: /edit color primary/i })).toBeDefined()
   })
 
@@ -88,7 +91,9 @@ describe('ColorsPanel', () => {
     expect(updated.darkValue).toBe('hsla(238, 100%, 32%, 1)')
     expect(updated.darkModeEnabled).toBe(true)
     expect(updated.generateUtilities.fill).toBe(true)
-    expect(useEditorStore.getState().site!.styleRules[frameworkColorClassId(token.id, 'base', 'fill')]).toMatchObject({
+    expect(
+      useEditorStore.getState().site!.styleRules[frameworkColorClassId(token.id, 'base', 'fill')],
+    ).toMatchObject({
       name: 'fill-primary',
       styles: { fill: 'var(--primary)' },
     })
@@ -115,7 +120,9 @@ describe('ColorsPanel', () => {
     fireEvent.change(screen.getByLabelText('Default color swatch primary'), {
       target: { value: '#ff0000' },
     })
-    expect(useEditorStore.getState().site!.settings.framework!.colors.tokens[0].lightValue).toBe('#ff0000')
+    expect(useEditorStore.getState().site!.settings.framework!.colors.tokens[0].lightValue).toBe(
+      '#ff0000',
+    )
 
     fireEvent.click(screen.getByRole('button', { name: 'Edit color primary' }))
     const panel = screen.getByTestId('colors-panel')
@@ -125,18 +132,24 @@ describe('ColorsPanel', () => {
     expect(within(panel).getByLabelText('Tint preview primary l-1')).toBeDefined()
 
     fireEvent.click(within(panel).getByRole('switch', { name: /transparent variants/i }))
-    expect(useEditorStore.getState().site!.settings.framework!.colors.tokens[0].generateTransparent).toBe(false)
+    expect(
+      useEditorStore.getState().site!.settings.framework!.colors.tokens[0].generateTransparent,
+    ).toBe(false)
 
     expect(within(panel).queryByRole('spinbutton', { name: /shade count/i })).toBeNull()
     const shadeStepper = within(panel).getByRole('group', { name: /shade variants/i })
     expect(within(shadeStepper).getByText('4')).toBeDefined()
 
     fireEvent.click(within(shadeStepper).getByRole('button', { name: /decrease shade variants/i }))
-    expect(useEditorStore.getState().site!.settings.framework!.colors.tokens[0].generateShades.count).toBe(3)
+    expect(
+      useEditorStore.getState().site!.settings.framework!.colors.tokens[0].generateShades.count,
+    ).toBe(3)
     expect(within(shadeStepper).getByText('3')).toBeDefined()
 
     fireEvent.click(within(shadeStepper).getByRole('button', { name: /increase shade variants/i }))
-    expect(useEditorStore.getState().site!.settings.framework!.colors.tokens[0].generateShades.count).toBe(4)
+    expect(
+      useEditorStore.getState().site!.settings.framework!.colors.tokens[0].generateShades.count,
+    ).toBe(4)
     expect(within(shadeStepper).getByText('4')).toBeDefined()
   })
 
@@ -159,7 +172,9 @@ describe('ColorsPanel', () => {
     render(<ColorsPanel />)
 
     fireEvent.click(screen.getByRole('button', { name: 'Edit color secondary' }))
-    fireEvent.focus(within(screen.getByTestId('colors-panel')).getByRole('textbox', { name: /default color/i }))
+    fireEvent.focus(
+      within(screen.getByTestId('colors-panel')).getByRole('textbox', { name: /default color/i }),
+    )
 
     expect(screen.getByRole('listbox', { name: /default color color tokens/i })).toBeDefined()
     expect(screen.getByRole('option', { name: /--primary/i })).toBeDefined()
@@ -167,7 +182,10 @@ describe('ColorsPanel', () => {
 
     fireEvent.click(screen.getByRole('option', { name: /--primary/i }))
     expect(
-      useEditorStore.getState().site!.settings.framework!.colors.tokens.find((token) => token.id === secondary.id)?.lightValue,
+      useEditorStore
+        .getState()
+        .site!.settings.framework!.colors.tokens.find((token) => token.id === secondary.id)
+        ?.lightValue,
     ).toBe('var(--primary)')
   })
 
@@ -186,11 +204,13 @@ describe('ColorsPanel', () => {
     fireEvent.change(categoryInput, { target: { value: 'Brand' } })
     fireEvent.blur(categoryInput)
 
-    const updated = useEditorStore.getState().site!.settings.framework!.colors.tokens.find(
-      (candidate) => candidate.id === token.id,
-    )
+    const updated = useEditorStore
+      .getState()
+      .site!.settings.framework!.colors.tokens.find((candidate) => candidate.id === token.id)
     expect(updated?.category).toBe('Brand')
-    expect(within(screen.getByRole('button', { name: 'Edit color primary' })).getByText('Brand')).toBeDefined()
+    expect(
+      within(screen.getByRole('button', { name: 'Edit color primary' })).getByText('Brand'),
+    ).toBeDefined()
     // The free-form label appears as a chip in the FilterBar derived from tokens.
     expect(screen.getByRole('button', { name: /^brand$/i })).toBeDefined()
   })
@@ -217,9 +237,10 @@ describe('ColorsPanel', () => {
     fireEvent.click(screen.getByRole('option', { name: 'Brand' }))
 
     expect(
-      useEditorStore.getState().site!.settings.framework!.colors.tokens.find(
-        (candidate) => candidate.id === secondary.id,
-      )?.category,
+      useEditorStore
+        .getState()
+        .site!.settings.framework!.colors.tokens.find((candidate) => candidate.id === secondary.id)
+        ?.category,
     ).toBe('Brand')
   })
 
@@ -259,11 +280,13 @@ describe('ColorsPanel', () => {
     fireEvent.click(screen.getByRole('option', { name: 'Brand' }))
     fireEvent.click(screen.getByRole('button', { name: /^create$/i }))
 
-    const created = useEditorStore.getState().site!.settings.framework!.colors.tokens.find(
-      (candidate) => candidate.slug === 'primary',
-    )
+    const created = useEditorStore
+      .getState()
+      .site!.settings.framework!.colors.tokens.find((candidate) => candidate.slug === 'primary')
     expect(created?.category).toBe('Brand')
-    expect(within(screen.getByRole('button', { name: 'Edit color primary' })).getByText('Brand')).toBeDefined()
+    expect(
+      within(screen.getByRole('button', { name: 'Edit color primary' })).getByText('Brand'),
+    ).toBeDefined()
   })
 
   it('opens a token context menu for duplicate reorder and remove actions', () => {
@@ -288,13 +311,18 @@ describe('ColorsPanel', () => {
     expect(screen.getByRole('menu', { name: /color token actions/i })).toBeDefined()
     fireEvent.click(screen.getByRole('menuitem', { name: /duplicate/i }))
 
-    expect(useEditorStore.getState().site!.settings.framework!.colors.tokens.some((token) => token.slug === 'primary-copy')).toBe(true)
+    expect(
+      useEditorStore
+        .getState()
+        .site!.settings.framework!.colors.tokens.some((token) => token.slug === 'primary-copy'),
+    ).toBe(true)
 
     fireEvent.contextMenu(screen.getByRole('button', { name: 'Edit color secondary' }))
     fireEvent.click(screen.getByRole('menuitem', { name: /move up/i }))
     expect(
-      useEditorStore.getState().site!.settings.framework!.colors.tokens
-        .slice()
+      useEditorStore
+        .getState()
+        .site!.settings.framework!.colors.tokens.slice()
         .sort((a, b) => a.order - b.order)
         .map((token) => token.id)
         .slice(0, 2),
@@ -302,6 +330,10 @@ describe('ColorsPanel', () => {
 
     fireEvent.contextMenu(screen.getByRole('button', { name: 'Edit color primary' }))
     fireEvent.click(screen.getByRole('menuitem', { name: /remove/i }))
-    expect(useEditorStore.getState().site!.settings.framework!.colors.tokens.some((token) => token.id === primary.id)).toBe(false)
+    expect(
+      useEditorStore
+        .getState()
+        .site!.settings.framework!.colors.tokens.some((token) => token.id === primary.id),
+    ).toBe(false)
   })
 })

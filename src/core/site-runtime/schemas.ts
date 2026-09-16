@@ -46,10 +46,7 @@ export type SiteDependencyLock = Static<typeof SiteDependencyLockSchema>
 // SiteScriptPlacement
 // ---------------------------------------------------------------------------
 
-const SiteScriptPlacementSchema = Type.Union([
-  Type.Literal('head'),
-  Type.Literal('body-end'),
-])
+const SiteScriptPlacementSchema = Type.Union([Type.Literal('head'), Type.Literal('body-end')])
 
 export type SiteScriptPlacement = Static<typeof SiteScriptPlacementSchema>
 
@@ -69,10 +66,7 @@ export type SiteScriptTiming = Static<typeof SiteScriptTimingSchema>
 // SiteScriptFormat
 // ---------------------------------------------------------------------------
 
-const SiteScriptFormatSchema = Type.Union([
-  Type.Literal('module'),
-  Type.Literal('classic'),
-])
+const SiteScriptFormatSchema = Type.Union([Type.Literal('module'), Type.Literal('classic')])
 
 export type SiteScriptFormat = Static<typeof SiteScriptFormatSchema>
 
@@ -173,10 +167,7 @@ export type SiteRuntimeConfig = Static<typeof SiteRuntimeConfigSchema>
 // SiteRuntimeTarget
 // ---------------------------------------------------------------------------
 
-const SiteRuntimeTargetSchema = Type.Union([
-  Type.Literal('canvas'),
-  Type.Literal('publish'),
-])
+const SiteRuntimeTargetSchema = Type.Union([Type.Literal('canvas'), Type.Literal('publish')])
 
 export type SiteRuntimeTarget = Static<typeof SiteRuntimeTargetSchema>
 
@@ -189,7 +180,6 @@ const SiteRuntimeDiagnosticSeveritySchema = Type.Union([
   Type.Literal('warning'),
   Type.Literal('info'),
 ])
-
 
 // ---------------------------------------------------------------------------
 // SiteRuntimeDiagnostic
@@ -241,7 +231,6 @@ const RuntimePackageUsageFileSchema = Type.Object({
   fileId: Type.String(),
   path: Type.String(),
 })
-
 
 // ---------------------------------------------------------------------------
 // RuntimePackageDependencyUsage

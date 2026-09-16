@@ -42,7 +42,7 @@ export function UsersPage() {
   if (canReadAudit) availableTabs.push('audit')
 
   const [tab, setTab] = useState<Tab>('users')
-  const activeTab = availableTabs.includes(tab) ? tab : availableTabs[0] ?? 'users'
+  const activeTab = availableTabs.includes(tab) ? tab : (availableTabs[0] ?? 'users')
 
   // Cross-workspace spotlight actions can target this page. Peek (don't
   // consume) at the pending action so the appropriate tab is selected before
@@ -54,10 +54,8 @@ export function UsersPage() {
   // making the effect dependent on it (rebinding tabs while the page is
   // already mounted shouldn't re-trigger the pending-action routing).
   const consumePendingTabSelection = useEffectEvent(() => {
-    const newRolePending =
-      peekPendingAction('users.newRole') && availableTabs.includes('roles')
-    const invitePending =
-      peekPendingAction('users.invite') && availableTabs.includes('users')
+    const newRolePending = peekPendingAction('users.newRole') && availableTabs.includes('roles')
+    const invitePending = peekPendingAction('users.invite') && availableTabs.includes('users')
     if (!newRolePending && !invitePending) return
     queueMicrotask(() => {
       if (newRolePending) setTab('roles')
@@ -96,7 +94,11 @@ export function UsersPage() {
           skeleton states, each matching their real (DataTable) layout
           1:1 so the column ladder stays put when the data arrives. */}
       <div className={styles.body}>
-        {data.error && <p className={styles.error} role="alert">{data.error}</p>}
+        {data.error && (
+          <p className={styles.error} role="alert">
+            {data.error}
+          </p>
+        )}
 
         {activeTab === 'users' && <UsersTab data={data} canManageUsers={canManageUsers} />}
         {activeTab === 'roles' && <RolesTab data={data} canManageRoles={canManageRoles} />}

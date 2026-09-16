@@ -84,17 +84,17 @@ export function CanvasModulePlaceholder({
     >
       <div className={styles.content} data-instatic-placeholder-content="">
         {icon ? (
-          <span
-            className={styles.icon}
-            data-instatic-placeholder-icon=""
-            aria-hidden="true"
-          >
+          <span className={styles.icon} data-instatic-placeholder-icon="" aria-hidden="true">
             {icon}
           </span>
         ) : null}
-        <span className={styles.label} data-instatic-placeholder-label="">{label}</span>
+        <span className={styles.label} data-instatic-placeholder-label="">
+          {label}
+        </span>
         {variant === 'block' && description ? (
-          <span className={styles.description} data-instatic-placeholder-description="">{description}</span>
+          <span className={styles.description} data-instatic-placeholder-description="">
+            {description}
+          </span>
         ) : null}
         {variant === 'block' && actions ? (
           // `data-canvas-interactive` opts the action row out of the canvas

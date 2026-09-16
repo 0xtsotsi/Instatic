@@ -43,7 +43,10 @@ const SRC_ROOT = join(import.meta.dir, '../../')
 // File walker (shared pattern from no-anthropic-sdk.test.ts / no-third-party-icons.test.ts)
 // ---------------------------------------------------------------------------
 
-function collectFiles(dir: string, exts = ['.ts', '.tsx', '.js', '.jsx', '.mts', '.mjs']): string[] {
+function collectFiles(
+  dir: string,
+  exts = ['.ts', '.tsx', '.js', '.jsx', '.mts', '.mjs'],
+): string[] {
   const results: string[] = []
   if (!existsSync(dir)) return results
   for (const entry of readdirSync(dir)) {
@@ -62,7 +65,7 @@ function collectFiles(dir: string, exts = ['.ts', '.tsx', '.js', '.jsx', '.mts',
 // — test files may contain the package names as literal patterns (this file
 // is one of them) and would self-match.
 const PROD_DIRS = ['admin', 'core', 'modules', 'ui', 'editor', 'app', 'lib'].map((d) =>
-  join(SRC_ROOT, d)
+  join(SRC_ROOT, d),
 )
 
 function collectProdFiles(): string[] {
@@ -89,7 +92,8 @@ const CODEMIRROR_IMPORT_PATTERNS: { family: string; pattern: RegExp }[] = [
   },
   {
     family: '@codemirror/*',
-    pattern: /(?:from\s+['"]@codemirror\/[^'"]+['"]|require\s*\(\s*['"]@codemirror\/[^'"]+['"]\s*\))/,
+    pattern:
+      /(?:from\s+['"]@codemirror\/[^'"]+['"]|require\s*\(\s*['"]@codemirror\/[^'"]+['"]\s*\))/,
   },
   {
     family: '@lezer/*',
@@ -121,18 +125,16 @@ describe('CodeMirror lazy-load enforcement', () => {
     }
 
     if (violations.length > 0) {
-      const lines = violations.map(
-        (v) => `  src/${v.file}  →  imports ${v.family}`
-      )
+      const lines = violations.map((v) => `  src/${v.file}  →  imports ${v.family}`)
       throw new Error(
         `[codemirror-lazy-only] CodeMirror must stay behind the React.lazy()\n` +
-        `boundary in CodeEditorPanel.tsx. Only src/${ALLOWED_CONSUMER} is\n` +
-        `permitted to statically import CodeMirror packages. A static import\n` +
-        `elsewhere pulls the ~605 kB CodeMirror bundle into the eager admin\n` +
-        `chunk and undoes the code-split.\n\n` +
-        `Move the new code into a lazy module under src/admin/pages/site/code-editor/\n` +
-        `and consume it via React.lazy(() => import('./<your-module>')).\n\n` +
-        `Violations:\n${lines.join('\n')}`
+          `boundary in CodeEditorPanel.tsx. Only src/${ALLOWED_CONSUMER} is\n` +
+          `permitted to statically import CodeMirror packages. A static import\n` +
+          `elsewhere pulls the ~605 kB CodeMirror bundle into the eager admin\n` +
+          `chunk and undoes the code-split.\n\n` +
+          `Move the new code into a lazy module under src/admin/pages/site/code-editor/\n` +
+          `and consume it via React.lazy(() => import('./<your-module>')).\n\n` +
+          `Violations:\n${lines.join('\n')}`,
       )
     }
 

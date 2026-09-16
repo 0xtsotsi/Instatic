@@ -1,7 +1,11 @@
 import { type ReactNode } from 'react'
 import { DragOverlay } from '@dnd-kit/core'
 import { TreeIconSlot, TreeLabel, TreeRow } from '@site/ui/Tree'
-import { useSiteExplorerDnd, type SiteExplorerDragData, type SiteExplorerDropTarget } from './useSiteExplorerDnd'
+import {
+  useSiteExplorerDnd,
+  type SiteExplorerDragData,
+  type SiteExplorerDropTarget,
+} from './useSiteExplorerDnd'
 import type { ExplorerPathChangePlan } from '@core/page-tree'
 import styles from './SiteExplorerPanel.module.css'
 
@@ -18,7 +22,11 @@ interface SiteExplorerDndScopeProps {
   children: (dnd: SiteExplorerDndState) => ReactNode
 }
 
-export function SiteExplorerDndScope({ enabled, onStructuralPathPlan, children }: SiteExplorerDndScopeProps) {
+export function SiteExplorerDndScope({
+  enabled,
+  onStructuralPathPlan,
+  children,
+}: SiteExplorerDndScopeProps) {
   if (!enabled) return <>{children(EMPTY_DND)}</>
   return (
     <SiteExplorerDndEnabled onStructuralPathPlan={onStructuralPathPlan}>
@@ -50,11 +58,7 @@ function SiteExplorerDragOverlay({ active }: { active: SiteExplorerDragData | nu
       {active ? (
         <TreeRow depth={0} className={styles.dragOverlayRow}>
           {ActiveIcon && (
-            <TreeIconSlot
-              icon={ActiveIcon}
-              iconSize={12}
-              iconColor="var(--text-disabled)"
-            />
+            <TreeIconSlot icon={ActiveIcon} iconSize={12} iconColor="var(--text-disabled)" />
           )}
           <TreeLabel>{activeCount > 1 ? `${activeCount} items` : active.label}</TreeLabel>
         </TreeRow>

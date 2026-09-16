@@ -27,9 +27,10 @@ export function PluginPage() {
   })
   const payload: CmsPluginsPayload = data ?? emptyPayload
 
-  const page: PluginAdminPageRoute | null = payload.adminPages.find((candidate) =>
-    candidate.pluginId === pluginId && candidate.id === pageId
-  ) ?? null
+  const page: PluginAdminPageRoute | null =
+    payload.adminPages.find(
+      (candidate) => candidate.pluginId === pluginId && candidate.id === pageId,
+    ) ?? null
 
   if (loading) {
     return (
@@ -45,7 +46,9 @@ export function PluginPage() {
   if (error) {
     return (
       <AdminPageLayout workspace="pluginPage" title="Plugin page" titleId="plugin-page-title">
-        <p className={styles.error} role="alert">{error}</p>
+        <p className={styles.error} role="alert">
+          {error}
+        </p>
       </AdminPageLayout>
     )
   }

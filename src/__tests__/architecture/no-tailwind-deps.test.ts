@@ -68,7 +68,9 @@ const BANNED_IMPORTS: { name: string; pattern: RegExp }[] = [
   },
   {
     name: 'tailwind-merge',
-    pattern: new RegExp(`from\\s+['"]` + `tailwind-merge['"]|require\\s*\\(\\s*['"]` + `tailwind-merge['"]\\s*\\)`),
+    pattern: new RegExp(
+      `from\\s+['"]` + `tailwind-merge['"]|require\\s*\\(\\s*['"]` + `tailwind-merge['"]\\s*\\)`,
+    ),
   },
   {
     name: 'class-variance-authority',
@@ -81,7 +83,9 @@ const BANNED_IMPORTS: { name: string; pattern: RegExp }[] = [
   },
   {
     name: 'tailwindcss',
-    pattern: new RegExp(`from\\s+['"]` + `tailwindcss['"]|require\\s*\\(\\s*['"]` + `tailwindcss['"]\\s*\\)`),
+    pattern: new RegExp(
+      `from\\s+['"]` + `tailwindcss['"]|require\\s*\\(\\s*['"]` + `tailwindcss['"]\\s*\\)`,
+    ),
   },
 ]
 

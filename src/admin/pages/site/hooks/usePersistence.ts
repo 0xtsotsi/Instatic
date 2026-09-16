@@ -100,9 +100,7 @@ function siteMissesEditorDataDeepLink(site: SiteDocument): boolean {
  * a breakpoint the current site doesn't have (e.g. user previously edited a
  * site with a custom 'wide' breakpoint, then opened a site without it).
  */
-function applyDefaultBreakpointPreference(
-  breakpoints: ReadonlyArray<{ id: string }>,
-): void {
+function applyDefaultBreakpointPreference(breakpoints: ReadonlyArray<{ id: string }>): void {
   const preferredId = readEditorSelectPreference('defaultBreakpoint')
   if (!breakpoints.some((bp) => bp.id === preferredId)) return
   useEditorStore.getState().setActiveBreakpoint(preferredId)
@@ -302,7 +300,9 @@ export function usePersistence(
     }
 
     load()
-    return () => { cancelled = true }
+    return () => {
+      cancelled = true
+    }
   }, [enabled, markNewSiteUnsaved, requestedSiteId])
 
   // External "site changed at the server" hook. Non-editor workspaces call
@@ -374,7 +374,9 @@ export function usePersistence(
         if (!dirty) {
           clearTimeout(timer)
           setSaveStatus((status) =>
-            status.state === 'saving' ? status : { state: 'saved', lastSavedAt: status.lastSavedAt }
+            status.state === 'saving'
+              ? status
+              : { state: 'saved', lastSavedAt: status.lastSavedAt },
           )
           return
         }
@@ -393,11 +395,9 @@ export function usePersistence(
       const { site, hasUnsavedChanges, peekDirtySaveSnapshot } = useEditorStore.getState()
       if (!site || !loadedRef.current || !hasUnsavedChanges) return
       clearTimeout(timer)
-      void adapterRef.current
-        .saveSite(site, { dirty: peekDirtySaveSnapshot() })
-        .catch((err) => {
-          console.error('[persistence] flush save failed:', err)
-        })
+      void adapterRef.current.saveSite(site, { dirty: peekDirtySaveSnapshot() }).catch((err) => {
+        console.error('[persistence] flush save failed:', err)
+      })
     }
 
     window.addEventListener('beforeunload', flushBeforeUnload)

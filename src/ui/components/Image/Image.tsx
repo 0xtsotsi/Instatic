@@ -109,9 +109,7 @@ type ImageProps =
 function buildSrcSet(variants: readonly ImageVariantInput[]): string | undefined {
   const preferred = variants.filter((v) => v.format === 'webp' || v.format === 'avif')
   if (preferred.length === 0) return undefined
-  return preferred
-    .map((v) => `${v.path} ${v.width}w`)
-    .join(', ')
+  return preferred.map((v) => `${v.path} ${v.width}w`).join(', ')
 }
 
 export function Image(props: ImageProps) {

@@ -45,10 +45,7 @@ function linkChildrenParents(nodes: Record<string, PageNode>, parentNodeId: stri
 // Node creation helpers
 // ---------------------------------------------------------------------------
 
-export function createNode(
-  moduleId: string,
-  defaults: Record<string, unknown> = {}
-): PageNode {
+export function createNode(moduleId: string, defaults: Record<string, unknown> = {}): PageNode {
   return {
     id: nanoid(),
     moduleId,
@@ -73,7 +70,7 @@ export function insertNode(
   tree: NodeTree<PageNode>,
   node: PageNode,
   parentId: string,
-  index?: number
+  index?: number,
 ): void {
   if (tree.nodes[node.id]) {
     throw new Error(`[PageTree] Node "${node.id}" already exists in the tree`)
@@ -114,7 +111,7 @@ export function deleteNode(tree: NodeTree<PageNode>, nodeId: string): void {
 export function updateNodeProps(
   tree: NodeTree<PageNode>,
   nodeId: string,
-  patch: Partial<Record<string, unknown>>
+  patch: Partial<Record<string, unknown>>,
 ): void {
   const node = tree.nodes[nodeId]
   if (!node) throw new Error(`[PageTree] Node "${nodeId}" not found`)
@@ -126,7 +123,7 @@ export function setBreakpointOverride(
   tree: NodeTree<PageNode>,
   nodeId: string,
   breakpointId: string,
-  patch: Partial<Record<string, unknown>>
+  patch: Partial<Record<string, unknown>>,
 ): void {
   const node = tree.nodes[nodeId]
   if (!node) throw new Error(`[PageTree] Node "${nodeId}" not found`)
@@ -140,7 +137,7 @@ export function setBreakpointOverride(
 export function clearBreakpointOverride(
   tree: NodeTree<PageNode>,
   nodeId: string,
-  breakpointId: string
+  breakpointId: string,
 ): void {
   const node = tree.nodes[nodeId]
   if (!node) return
@@ -183,14 +180,14 @@ export function moveNode(
   tree: NodeTree<PageNode>,
   nodeId: string,
   newParentId: string,
-  newIndex: number
+  newIndex: number,
 ): void {
   if (nodeId === tree.rootNodeId) {
     throw new Error(`[PageTree] Cannot move the root node.`)
   }
   if (isAncestor(tree, nodeId, newParentId)) {
     throw new Error(
-      `[PageTree] Cannot move node "${nodeId}" into its own descendant "${newParentId}".`
+      `[PageTree] Cannot move node "${nodeId}" into its own descendant "${newParentId}".`,
     )
   }
   const newParent = tree.nodes[newParentId]
@@ -253,9 +250,7 @@ export function duplicateNode(
 
   // Same-document duplication keeps unknown classIds (they reference shared
   // site-level classes); the optional map only remaps node-scoped class ids.
-  const remapClassId = classIdRemap
-    ? (cid: string) => classIdRemap.get(cid) ?? cid
-    : undefined
+  const remapClassId = classIdRemap ? (cid: string) => classIdRemap.get(cid) ?? cid : undefined
 
   // Clone all nodes with remapped IDs, children, and (optionally) classIds.
   for (const [oldId, newId] of idMap) {
@@ -337,7 +332,7 @@ export function pasteSubtree(
   options: {
     nodeIdMap?: Map<string, string>
     classIdRemap?: (classId: string) => string | null
-  } = {}
+  } = {},
 ): string {
   const parent = tree.nodes[parentId]
   if (!parent) {
@@ -390,7 +385,7 @@ export function wrapNode(
   tree: NodeTree<PageNode>,
   nodeId: string,
   containerModuleId: string,
-  containerDefaults: Record<string, unknown> = {}
+  containerDefaults: Record<string, unknown> = {},
 ): string {
   if (nodeId === tree.rootNodeId) {
     throw new Error(`[PageTree] Cannot wrap the root node.`)
@@ -492,9 +487,7 @@ export function wrapNodes(
   for (const id of topLevel) {
     const branch = ancestorChildOf(tree, id, cca.id)
     if (!branch) {
-      throw new Error(
-        `[PageTree] Could not resolve branch for "${id}" under "${cca.id}".`,
-      )
+      throw new Error(`[PageTree] Could not resolve branch for "${id}" under "${cca.id}".`)
     }
     branchSet.add(branch)
   }
@@ -608,10 +601,7 @@ export function moveNodes(
  * well-formed tree where root is the universal ancestor — but we guard
  * against orphan nodes anyway).
  */
-function findClosestCommonAncestor(
-  tree: NodeTree<PageNode>,
-  nodeIds: string[],
-): PageNode | null {
+function findClosestCommonAncestor(tree: NodeTree<PageNode>, nodeIds: string[]): PageNode | null {
   if (nodeIds.length === 0) return null
 
   // Build chain for the first id, including itself.
@@ -638,10 +628,7 @@ function findClosestCommonAncestor(
 }
 
 /** Return [root, ..., nodeId] — inclusive ancestor chain. */
-function ancestorChainInclusive(
-  tree: NodeTree<PageNode>,
-  nodeId: string,
-): PageNode[] {
+function ancestorChainInclusive(tree: NodeTree<PageNode>, nodeId: string): PageNode[] {
   const chain: PageNode[] = []
   let current: PageNode | undefined = tree.nodes[nodeId]
   const visited = new Set<string>()

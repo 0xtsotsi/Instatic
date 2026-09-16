@@ -56,10 +56,7 @@ export function cloneContextStyles(
   contextStyles: StyleRule['contextStyles'],
 ): StyleRule['contextStyles'] {
   return Object.fromEntries(
-    Object.entries(contextStyles).map(([contextId, styles]) => [
-      contextId,
-      { ...styles },
-    ]),
+    Object.entries(contextStyles).map(([contextId, styles]) => [contextId, { ...styles }]),
   )
 }
 
@@ -75,10 +72,7 @@ export function cloneContextStyles(
  * VCNode = BaseNode (structurally identical), so a single `BaseNode`-shaped
  * helper covers both tree kinds.
  */
-export function findNodeWithClassIds(
-  site: SiteDocument | null,
-  nodeId: string,
-): BaseNode | null {
+export function findNodeWithClassIds(site: SiteDocument | null, nodeId: string): BaseNode | null {
   if (!site) return null
   for (const page of site.pages) {
     const node = page.nodes[nodeId]
@@ -126,7 +120,10 @@ export function mutateNodeClassIds(
   return false
 }
 
-export function uniqueClassCopyName(classes: Record<string, StyleRule>, originalName: string): string {
+export function uniqueClassCopyName(
+  classes: Record<string, StyleRule>,
+  originalName: string,
+): string {
   const existingNames = new Set(Object.values(classes).map((cls) => cls.name))
   const baseName = `${originalName}-copy`
   if (!existingNames.has(baseName)) return baseName

@@ -20,10 +20,7 @@ export {
   AiChatRequestBodySchema,
   AiUserContentBlockSchema,
 } from './chatRequest'
-export type {
-  AiChatRequestBody,
-  AiUserContentBlock,
-} from './chatRequest'
+export type { AiChatRequestBody, AiUserContentBlock } from './chatRequest'
 export {
   AI_USER_IMAGE_MAX_PER_MESSAGE,
   AI_USER_IMAGE_MAX_BASE64_CHARS,
@@ -37,10 +34,7 @@ export {
   AiUserImageBlockSchema,
   isAiUserImageSourceMimeType,
 } from './userImage'
-export type {
-  AiUserImageBlock,
-  AiUserImageSourceMimeType,
-} from './userImage'
+export type { AiUserImageBlock, AiUserImageSourceMimeType } from './userImage'
 export {
   InsertHtmlInputSchema,
   GetNodeHtmlInputSchema,
@@ -102,15 +96,9 @@ export type {
   SetPageTemplateInput,
   ClearPageTemplateInput,
 } from './toolSchemas'
-export {
-  describeAgentDocuments,
-  documentRefEquals,
-  documentRefForPage,
-} from './documentRefs'
+export { describeAgentDocuments, documentRefEquals, documentRefForPage } from './documentRefs'
 export type { AgentDocumentDescriptor } from './documentRefs'
-export {
-  renderAgentDocument,
-} from './readSurface'
+export { renderAgentDocument } from './readSurface'
 export type {
   AgentDocumentRender,
   AgentDocumentInfo,

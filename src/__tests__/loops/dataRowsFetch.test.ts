@@ -239,18 +239,34 @@ afterAll(async () => {
 
 describe('fetchPublishedDataRowItems — post-type ordering', () => {
   it('orders by publishedAt in both directions (version published_at)', async () => {
-    expect(await fetchSlugs(db, 'posts', 'publishedAt', 'asc')).toEqual(['bravo', 'charlie', 'alpha'])
-    expect(await fetchSlugs(db, 'posts', 'publishedAt', 'desc')).toEqual(['alpha', 'charlie', 'bravo'])
+    expect(await fetchSlugs(db, 'posts', 'publishedAt', 'asc')).toEqual([
+      'bravo',
+      'charlie',
+      'alpha',
+    ])
+    expect(await fetchSlugs(db, 'posts', 'publishedAt', 'desc')).toEqual([
+      'alpha',
+      'charlie',
+      'bravo',
+    ])
   })
 
   it('orders by createdAt in both directions (version created_at)', async () => {
     expect(await fetchSlugs(db, 'posts', 'createdAt', 'asc')).toEqual(['alpha', 'charlie', 'bravo'])
-    expect(await fetchSlugs(db, 'posts', 'createdAt', 'desc')).toEqual(['bravo', 'charlie', 'alpha'])
+    expect(await fetchSlugs(db, 'posts', 'createdAt', 'desc')).toEqual([
+      'bravo',
+      'charlie',
+      'alpha',
+    ])
   })
 
   it('orders by updatedAt in both directions (row updated_at)', async () => {
     expect(await fetchSlugs(db, 'posts', 'updatedAt', 'asc')).toEqual(['bravo', 'alpha', 'charlie'])
-    expect(await fetchSlugs(db, 'posts', 'updatedAt', 'desc')).toEqual(['charlie', 'alpha', 'bravo'])
+    expect(await fetchSlugs(db, 'posts', 'updatedAt', 'desc')).toEqual([
+      'charlie',
+      'alpha',
+      'bravo',
+    ])
   })
 
   it('orders by slug in both directions (version slug)', async () => {

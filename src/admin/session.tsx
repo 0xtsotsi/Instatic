@@ -25,9 +25,5 @@ export function AdminSessionProvider({
 }) {
   const [user, setUser] = useState<CmsCurrentUser>(initialUser)
   const value = { user, setUser }
-  return (
-    <AdminSessionContext.Provider value={value}>
-      {children}
-    </AdminSessionContext.Provider>
-  )
+  return <AdminSessionContext.Provider value={value}>{children}</AdminSessionContext.Provider>
 }

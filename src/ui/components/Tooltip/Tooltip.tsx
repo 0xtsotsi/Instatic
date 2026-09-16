@@ -175,9 +175,8 @@ function TooltipInner({
   const existingFocus = childTyped.props.onFocus
   const existingBlur = childTyped.props.onBlur
   const existingDescribedBy = childTyped.props['aria-describedby']
-  const describedBy = [existingDescribedBy, shown ? id : null]
-    .filter(Boolean)
-    .join(' ') || undefined
+  const describedBy =
+    [existingDescribedBy, shown ? id : null].filter(Boolean).join(' ') || undefined
 
   const cloned = cloneElement(childTyped, {
     'aria-describedby': describedBy,

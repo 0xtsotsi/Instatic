@@ -49,7 +49,11 @@ async function setup(db: DbClient): Promise<void> {
   expect(res.status).toBe(201)
 }
 
-async function login(db: DbClient, ip = '203.0.113.10', ua = 'Mozilla/5.0 Chrome/120 Safari/537.36'): Promise<string> {
+async function login(
+  db: DbClient,
+  ip = '203.0.113.10',
+  ua = 'Mozilla/5.0 Chrome/120 Safari/537.36',
+): Promise<string> {
   const req = new Request('http://localhost/admin/api/cms/login', {
     method: 'POST',
     headers: {
@@ -137,7 +141,7 @@ describe('Account → Sessions endpoints', () => {
     resetLimiters()
   })
 
-  it('GET /sessions returns the current user\'s live sessions with the current one flagged', async () => {
+  it("GET /sessions returns the current user's live sessions with the current one flagged", async () => {
     const { db } = testDb
     const cookie = await login(db)
     const user = await findUserByEmail(db, EMAIL)
@@ -177,13 +181,18 @@ describe('Account → Sessions endpoints', () => {
 
     // Revoking the current session is rejected with 400 — clients must use /logout.
     const currentTokenHash = await hashSessionToken(cookie.split('=')[1] ?? '')
-    const selfReq = new Request(`http://localhost/admin/api/cms/auth/sessions/${currentTokenHash}`, { method: 'DELETE' })
+    const selfReq = new Request(
+      `http://localhost/admin/api/cms/auth/sessions/${currentTokenHash}`,
+      { method: 'DELETE' },
+    )
     selfReq.headers.set('cookie', cookie)
     const selfRes = await handleCmsRequest(selfReq, db)
     expect(selfRes.status).toBe(400)
 
     // Revoking the other session works.
-    const otherReq = new Request(`http://localhost/admin/api/cms/auth/sessions/${other.idHash}`, { method: 'DELETE' })
+    const otherReq = new Request(`http://localhost/admin/api/cms/auth/sessions/${other.idHash}`, {
+      method: 'DELETE',
+    })
     otherReq.headers.set('cookie', cookie)
     const otherRes = await handleCmsRequest(otherReq, db)
     expect(otherRes.status).toBe(200)
@@ -205,16 +214,21 @@ describe('Account → Sessions endpoints', () => {
       values ('user_other', 'other@example.com', 'other@example.com', 'Other', 'x', 'active', 'admin')
       returning id
     `
-    const otherSession = await injectSession(db, otherUser.rows[0]!.id, { deviceLabel: 'Other user device' })
+    const otherSession = await injectSession(db, otherUser.rows[0]!.id, {
+      deviceLabel: 'Other user device',
+    })
 
     // Owner tries to revoke other user's session — must NOT succeed.
-    const req = new Request(`http://localhost/admin/api/cms/auth/sessions/${otherSession.idHash}`, { method: 'DELETE' })
+    const req = new Request(`http://localhost/admin/api/cms/auth/sessions/${otherSession.idHash}`, {
+      method: 'DELETE',
+    })
     req.headers.set('cookie', ownerCookie)
     const res = await handleCmsRequest(req, db)
     expect(res.status).toBe(404)
 
     // Other user's session row remains live.
-    const remaining = await db`select revoked_at from sessions where id_hash = ${otherSession.idHash}`
+    const remaining =
+      await db`select revoked_at from sessions where id_hash = ${otherSession.idHash}`
     expect(remaining.rows[0]?.revoked_at).toBeNull()
 
     // Sanity check: owner can still see own session.
@@ -238,7 +252,7 @@ describe('Account → Sessions endpoints', () => {
     req.headers.set('cookie', cookie)
     const res = await handleCmsRequest(req, db)
     expect(res.status).toBe(200)
-    const body = await res.json() as { ok: boolean; revokedCount: number }
+    const body = (await res.json()) as { ok: boolean; revokedCount: number }
     expect(body.ok).toBe(true)
     expect(body.revokedCount).toBe(2)
 
@@ -258,7 +272,11 @@ describe('Account → Sessions endpoints', () => {
 
   it('records device_label on createSession from the User-Agent', async () => {
     const { db } = testDb
-    const cookie = await login(db, '203.0.113.10', 'Mozilla/5.0 (Macintosh) AppleWebKit Version/17 Safari/605')
+    const cookie = await login(
+      db,
+      '203.0.113.10',
+      'Mozilla/5.0 (Macintosh) AppleWebKit Version/17 Safari/605',
+    )
 
     const { sessions } = await listSessions(db, cookie)
     const current = sessions.find((s) => s.isCurrent)

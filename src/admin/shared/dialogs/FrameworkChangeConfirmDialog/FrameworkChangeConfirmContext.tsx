@@ -33,15 +33,16 @@ import {
 export function FrameworkChangeConfirmProvider({ children }: { children: ReactNode }) {
   const previewFrameworkChange = useEditorStore((s) => s.previewFrameworkChange)
 
-  const { confirm, pending, handleCancel, handleConfirm } =
-    useFrameworkChangeConfirmController((request: ConfirmFrameworkChangeRequest) => {
+  const { confirm, pending, handleCancel, handleConfirm } = useFrameworkChangeConfirmController(
+    (request: ConfirmFrameworkChangeRequest) => {
       const impact = previewFrameworkChange(request.applyChange)
       if (!impact) {
         request.commit()
         return { status: 'handled' }
       }
       return { status: 'confirm', impact }
-    })
+    },
+  )
 
   return (
     <FrameworkChangeConfirmContext.Provider value={{ confirm }}>

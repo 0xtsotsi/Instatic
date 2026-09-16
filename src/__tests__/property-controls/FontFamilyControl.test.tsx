@@ -12,7 +12,12 @@ const inter: FontEntry = {
   variants: ['400'],
   subsets: ['latin'],
   files: [
-    { variant: '400', subset: 'latin', path: '/uploads/fonts/inter/400-latin.woff2', format: 'woff2' },
+    {
+      variant: '400',
+      subset: 'latin',
+      path: '/uploads/fonts/inter/400-latin.woff2',
+      format: 'woff2',
+    },
   ],
   category: 'Sans Serif',
   createdAt: 1,
@@ -68,12 +73,7 @@ describe('FontFamilyControl', () => {
 
   it('opens the rich picker on a normal click-focus interaction', () => {
     render(
-      <FontFamilyControl
-        propKey="fontFamily"
-        label="Font family"
-        value=""
-        onChange={() => {}}
-      />,
+      <FontFamilyControl propKey="fontFamily" label="Font family" value="" onChange={() => {}} />,
     )
 
     fireEvent.click(screen.getByLabelText('Font family'))

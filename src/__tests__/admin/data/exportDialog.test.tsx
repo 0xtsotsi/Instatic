@@ -155,7 +155,9 @@ describe('ExportDialog', () => {
 
     fireEvent.click(screen.getByRole('button', { name: /select none/i }))
 
-    const downloadBtn = screen.getByRole('button', { name: /download bundle/i }) as HTMLButtonElement
+    const downloadBtn = screen.getByRole('button', {
+      name: /download bundle/i,
+    }) as HTMLButtonElement
     expect(downloadBtn.disabled).toBe(true)
     expect(screen.getByText(/0 of \d+ categories selected/i)).toBeTruthy()
   })
@@ -167,7 +169,8 @@ describe('ExportDialog', () => {
 
     globalThis.fetch = async (input: RequestInfo | URL) => {
       const url = typeof input === 'string' ? input : input.toString()
-      if (url.startsWith('/admin/api/cms/export/summary')) return jsonResponse({ media: 2, mediaFolders: 1, redirects: 1 })
+      if (url.startsWith('/admin/api/cms/export/summary'))
+        return jsonResponse({ media: 2, mediaFolders: 1, redirects: 1 })
       if (url === '/admin/api/cms/export/estimate') return jsonResponse({ bytes: 1000 })
       if (url === '/admin/api/cms/export') {
         exportFetchCalled = true
@@ -180,20 +183,26 @@ describe('ExportDialog', () => {
     }
 
     let capturedToasts: Toast[] = []
-    const unsub = subscribeToasts((snapshot) => { capturedToasts = [...snapshot] })
+    const unsub = subscribeToasts((snapshot) => {
+      capturedToasts = [...snapshot]
+    })
 
     try {
       render(
         <ExportDialog
           open={true}
-          onClose={() => { onCloseCalled = true }}
+          onClose={() => {
+            onCloseCalled = true
+          }}
           tables={[POSTS_TABLE, PAGES_TABLE]}
         />,
       )
 
       fireEvent.click(screen.getByRole('button', { name: /download bundle/i }))
 
-      await waitFor(() => { expect(onCloseCalled).toBe(true) })
+      await waitFor(() => {
+        expect(onCloseCalled).toBe(true)
+      })
 
       expect(exportFetchCalled).toBe(false)
       expect(submittedForm).not.toBeNull()
@@ -202,7 +211,9 @@ describe('ExportDialog', () => {
       expect(submittedForm!.target).toBeTruthy()
       expect(document.querySelector(`iframe[name="${submittedForm!.target}"]`)).toBeTruthy()
 
-      const input = submittedForm!.querySelector('input[name="exportRequest"]') as HTMLInputElement | null
+      const input = submittedForm!.querySelector(
+        'input[name="exportRequest"]',
+      ) as HTMLInputElement | null
       expect(input).not.toBeNull()
       const body = JSON.parse(input!.value) as {
         tables: { tableId: string; rowIds?: string[] }[]
@@ -221,7 +232,9 @@ describe('ExportDialog', () => {
       expect(body.includeMediaFolders).toBe(true)
       expect(body.includeRedirects).toBe(true)
 
-      expect(capturedToasts.some((t) => t.kind === 'success' && t.title === 'Export started')).toBe(true)
+      expect(capturedToasts.some((t) => t.kind === 'success' && t.title === 'Export started')).toBe(
+        true,
+      )
     } finally {
       unsub()
     }
@@ -232,7 +245,8 @@ describe('ExportDialog', () => {
 
     globalThis.fetch = async (input: RequestInfo | URL) => {
       const url = typeof input === 'string' ? input : input.toString()
-      if (url.startsWith('/admin/api/cms/export/summary')) return jsonResponse({ media: 0, mediaFolders: 0, redirects: 0 })
+      if (url.startsWith('/admin/api/cms/export/summary'))
+        return jsonResponse({ media: 0, mediaFolders: 0, redirects: 0 })
       if (url === '/admin/api/cms/export/estimate') return jsonResponse({ bytes: 1000 })
       return jsonResponse({ error: `Unexpected: ${url}` }, 500)
     }
@@ -241,16 +255,30 @@ describe('ExportDialog', () => {
     }
 
     let capturedToasts: Toast[] = []
-    const unsub = subscribeToasts((snapshot) => { capturedToasts = [...snapshot] })
+    const unsub = subscribeToasts((snapshot) => {
+      capturedToasts = [...snapshot]
+    })
 
     try {
-      render(<ExportDialog open={true} onClose={() => { onCloseCalled = true }} tables={[POSTS_TABLE]} />)
+      render(
+        <ExportDialog
+          open={true}
+          onClose={() => {
+            onCloseCalled = true
+          }}
+          tables={[POSTS_TABLE]}
+        />,
+      )
 
       fireEvent.click(screen.getByRole('button', { name: /download bundle/i }))
 
-      await waitFor(() => { expect(screen.getByRole('alert')).toBeTruthy() })
+      await waitFor(() => {
+        expect(screen.getByRole('alert')).toBeTruthy()
+      })
       expect(onCloseCalled).toBe(false)
-      expect(capturedToasts.some((t) => t.kind === 'error' && t.title === 'Export failed')).toBe(true)
+      expect(capturedToasts.some((t) => t.kind === 'error' && t.title === 'Export failed')).toBe(
+        true,
+      )
     } finally {
       unsub()
     }
@@ -258,7 +286,15 @@ describe('ExportDialog', () => {
 
   it('Cancel button calls onClose', () => {
     let onCloseCalled = false
-    render(<ExportDialog open={true} onClose={() => { onCloseCalled = true }} tables={[POSTS_TABLE]} />)
+    render(
+      <ExportDialog
+        open={true}
+        onClose={() => {
+          onCloseCalled = true
+        }}
+        tables={[POSTS_TABLE]}
+      />,
+    )
 
     fireEvent.click(screen.getByRole('button', { name: /cancel/i }))
     expect(onCloseCalled).toBe(true)
@@ -269,7 +305,8 @@ describe('ExportDialog', () => {
     // one; turning media off re-requests and the estimate drops.
     globalThis.fetch = async (input: RequestInfo | URL, init?: RequestInit) => {
       const url = typeof input === 'string' ? input : input.toString()
-      if (url.startsWith('/admin/api/cms/export/summary')) return jsonResponse({ media: 2, mediaFolders: 1, redirects: 1 })
+      if (url.startsWith('/admin/api/cms/export/summary'))
+        return jsonResponse({ media: 2, mediaFolders: 1, redirects: 1 })
       if (url === '/admin/api/cms/export/estimate') {
         const body = JSON.parse((init?.body as string) ?? '{}') as { includeMedia?: boolean }
         return jsonResponse({ bytes: body.includeMedia ? 5_000_000 : 12_000 })
@@ -279,11 +316,15 @@ describe('ExportDialog', () => {
 
     render(<ExportDialog open={true} onClose={() => {}} tables={[POSTS_TABLE]} />)
 
-    await waitFor(() => { expect(screen.getByText(/~4\.8 MB/i)).toBeTruthy() })
+    await waitFor(() => {
+      expect(screen.getByText(/~4\.8 MB/i)).toBeTruthy()
+    })
 
     const mediaSwitch = openCategory('Media library')
     fireEvent.click(mediaSwitch)
-    await waitFor(() => { expect(screen.getByText(/~12 KB/i)).toBeTruthy() })
+    await waitFor(() => {
+      expect(screen.getByText(/~12 KB/i)).toBeTruthy()
+    })
   })
 
   it("initialScope='selected' pre-narrows the active table to the grid selection", () => {
@@ -306,17 +347,57 @@ describe('ExportDialog', () => {
     let submittedForm: HTMLFormElement | null = null
     globalThis.fetch = async (input: RequestInfo | URL, init?: RequestInit) => {
       const url = typeof input === 'string' ? input : input.toString()
-      if (url.startsWith('/admin/api/cms/export/summary')) return jsonResponse({ media: 0, mediaFolders: 0, redirects: 0 })
+      if (url.startsWith('/admin/api/cms/export/summary'))
+        return jsonResponse({ media: 0, mediaFolders: 0, redirects: 0 })
       if (url === '/admin/api/cms/export/estimate') return jsonResponse({ bytes: 1000 })
       if (url.includes('/data/tables/posts/rows')) {
         return jsonResponse({
           rows: [
-            { id: 'p1', tableId: 'posts', cells: { title: 'First' }, slug: 'first', status: 'published', createdAt: '2026-01-01T00:00:00.000Z', updatedAt: '2026-01-01T00:00:00.000Z', publishedAt: null, scheduledPublishAt: null, deletedAt: null, authorUserId: null, createdByUserId: null, updatedByUserId: null, publishedByUserId: null, author: null, createdBy: null, updatedBy: null, publishedBy: null },
-            { id: 'p2', tableId: 'posts', cells: { title: 'Second' }, slug: 'second', status: 'draft', createdAt: '2026-01-01T00:00:00.000Z', updatedAt: '2026-01-01T00:00:00.000Z', publishedAt: null, scheduledPublishAt: null, deletedAt: null, authorUserId: null, createdByUserId: null, updatedByUserId: null, publishedByUserId: null, author: null, createdBy: null, updatedBy: null, publishedBy: null },
+            {
+              id: 'p1',
+              tableId: 'posts',
+              cells: { title: 'First' },
+              slug: 'first',
+              status: 'published',
+              createdAt: '2026-01-01T00:00:00.000Z',
+              updatedAt: '2026-01-01T00:00:00.000Z',
+              publishedAt: null,
+              scheduledPublishAt: null,
+              deletedAt: null,
+              authorUserId: null,
+              createdByUserId: null,
+              updatedByUserId: null,
+              publishedByUserId: null,
+              author: null,
+              createdBy: null,
+              updatedBy: null,
+              publishedBy: null,
+            },
+            {
+              id: 'p2',
+              tableId: 'posts',
+              cells: { title: 'Second' },
+              slug: 'second',
+              status: 'draft',
+              createdAt: '2026-01-01T00:00:00.000Z',
+              updatedAt: '2026-01-01T00:00:00.000Z',
+              publishedAt: null,
+              scheduledPublishAt: null,
+              deletedAt: null,
+              authorUserId: null,
+              createdByUserId: null,
+              updatedByUserId: null,
+              publishedByUserId: null,
+              author: null,
+              createdBy: null,
+              updatedBy: null,
+              publishedBy: null,
+            },
           ],
         })
       }
-      if (url === '/admin/api/cms/export') return jsonResponse({ error: 'Export downloads must not go through fetch' }, 500)
+      if (url === '/admin/api/cms/export')
+        return jsonResponse({ error: 'Export downloads must not go through fetch' }, 500)
       return jsonResponse({ error: `Unexpected request: ${url}` }, 500)
     }
     HTMLFormElement.prototype.submit = function (this: HTMLFormElement) {
@@ -333,11 +414,17 @@ describe('ExportDialog', () => {
     // Untick one row → header reflects 1 of 2, and the export request carries
     // an explicit rowIds subset for the posts table.
     fireEvent.click(firstRow)
-    await waitFor(() => { expect(screen.getByText(/1 of 2 entries selected/i)).toBeTruthy() })
+    await waitFor(() => {
+      expect(screen.getByText(/1 of 2 entries selected/i)).toBeTruthy()
+    })
 
     fireEvent.click(screen.getByRole('button', { name: /download bundle/i }))
-    await waitFor(() => { expect(submittedForm).not.toBeNull() })
-    const input = submittedForm!.querySelector('input[name="exportRequest"]') as HTMLInputElement | null
+    await waitFor(() => {
+      expect(submittedForm).not.toBeNull()
+    })
+    const input = submittedForm!.querySelector(
+      'input[name="exportRequest"]',
+    ) as HTMLInputElement | null
     expect(input).not.toBeNull()
     const body = JSON.parse(input!.value) as { tables: { tableId: string; rowIds?: string[] }[] }
     const posts = body.tables.find((t) => t.tableId === 'posts')
@@ -351,9 +438,13 @@ describe('ExportDialog', () => {
 
     // Open the Media category, then wait for the summary to mark it empty.
     fireEvent.click(screen.getByRole('button', { name: /media library/i }))
-    await waitFor(() => { expect(screen.getByText(/no media uploaded yet/i)).toBeTruthy() })
+    await waitFor(() => {
+      expect(screen.getByText(/no media uploaded yet/i)).toBeTruthy()
+    })
 
-    const mediaSwitch = screen.getByRole('switch', { name: /include media library in export/i }) as HTMLButtonElement
+    const mediaSwitch = screen.getByRole('switch', {
+      name: /include media library in export/i,
+    }) as HTMLButtonElement
     expect(mediaSwitch.disabled).toBe(true)
     expect(mediaSwitch.getAttribute('aria-checked')).toBe('false')
   })

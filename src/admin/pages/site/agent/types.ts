@@ -229,7 +229,12 @@ export interface AgentLayoutImageContext {
 }
 
 export interface AgentLayoutWarningContext {
-  type: 'horizontal-overflow' | 'vertical-overflow' | 'hidden-overflow' | 'broken-image' | 'invisible-node'
+  type:
+    | 'horizontal-overflow'
+    | 'vertical-overflow'
+    | 'hidden-overflow'
+    | 'broken-image'
+    | 'invisible-node'
   severity: 'info' | 'warning' | 'error'
   message: string
   nodeId?: string

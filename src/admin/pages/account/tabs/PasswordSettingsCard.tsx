@@ -107,7 +107,13 @@ export function PasswordSettingsCard({
         size="md"
         footer={
           <>
-            <Button type="button" variant="secondary" size="sm" disabled={busy === 'password'} onClick={resetDialog}>
+            <Button
+              type="button"
+              variant="secondary"
+              size="sm"
+              disabled={busy === 'password'}
+              onClick={resetDialog}
+            >
               <span>Cancel</span>
             </Button>
             <Button
@@ -123,9 +129,15 @@ export function PasswordSettingsCard({
           </>
         }
       >
-        <form id="security-password-form" className={styles.dialogFields} onSubmit={(event) => void handleSubmit(event)}>
+        <form
+          id="security-password-form"
+          className={styles.dialogFields}
+          onSubmit={(event) => void handleSubmit(event)}
+        >
           <div className={styles.dialogField}>
-            <label htmlFor={newPasswordId} className={styles.dialogLabel}>New password</label>
+            <label htmlFor={newPasswordId} className={styles.dialogLabel}>
+              New password
+            </label>
             <Input
               id={newPasswordId}
               type="password"
@@ -136,7 +148,9 @@ export function PasswordSettingsCard({
             />
           </div>
           <div className={styles.dialogField}>
-            <label htmlFor={confirmPasswordId} className={styles.dialogLabel}>Confirm new password</label>
+            <label htmlFor={confirmPasswordId} className={styles.dialogLabel}>
+              Confirm new password
+            </label>
             <Input
               id={confirmPasswordId}
               type="password"
@@ -146,7 +160,11 @@ export function PasswordSettingsCard({
               data-testid="security-password-confirm"
             />
           </div>
-          {passwordError && <p className={styles.error} role="alert">{passwordError}</p>}
+          {passwordError && (
+            <p className={styles.error} role="alert">
+              {passwordError}
+            </p>
+          )}
         </form>
       </Dialog>
     </>

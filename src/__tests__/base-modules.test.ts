@@ -16,7 +16,7 @@ import { describe, it, expect } from 'bun:test'
 import { existsSync } from 'fs'
 import React from 'react'
 import { render as renderReact } from '@testing-library/react'
-import './matchers'  // Register toBeCleanHTML
+import './matchers' // Register toBeCleanHTML
 
 import { runModuleConformanceSuite, renderModule, withBannedGlobals } from './helpers'
 import { escapeProps } from '@core/publisher'
@@ -113,7 +113,14 @@ describe('base module registration', () => {
       SlotOutletModule,
     ]) {
       // No module should declare CSS-only props as module schema fields.
-      const cssOnlyPropNames = ['backgroundColor', 'color', 'fontSize', 'padding', 'margin', 'border']
+      const cssOnlyPropNames = [
+        'backgroundColor',
+        'color',
+        'fontSize',
+        'padding',
+        'margin',
+        'border',
+      ]
       for (const propName of cssOnlyPropNames) {
         expect(Object.keys(mod.schema)).not.toContain(propName)
       }
@@ -131,9 +138,13 @@ describe('base.visual-component-ref and slot modules — contract specifics', ()
     expect(VisualComponentRefModule.canHaveChildren).toBe(true)
     expect(VisualComponentRefModule.publishBehavior).toBe('special')
     expect(Object.keys(VisualComponentRefModule.schema)).toEqual([])
-    expect(Object.keys(VisualComponentRefModule.defaults).sort()).toEqual(['componentId', 'propOverrides'])
-    expect(VisualComponentRefModule.render(VisualComponentRefModule.defaults, ['<p>slot</p>']).html)
-      .toBe('<p>slot</p>')
+    expect(Object.keys(VisualComponentRefModule.defaults).sort()).toEqual([
+      'componentId',
+      'propOverrides',
+    ])
+    expect(
+      VisualComponentRefModule.render(VisualComponentRefModule.defaults, ['<p>slot</p>']).html,
+    ).toBe('<p>slot</p>')
   })
 
   it('keeps slot placeholders transparent in published output', () => {
@@ -147,7 +158,9 @@ describe('base.visual-component-ref and slot modules — contract specifics', ()
     expect(SlotInstanceModule.publishBehavior).toBe('transparent')
     expect(SlotInstanceModule.canHaveChildren).toBe(true)
     expect(SlotInstanceModule.defaults).toEqual({ slotName: 'children' })
-    expect(SlotInstanceModule.render(SlotInstanceModule.defaults, ['<p>consumer content</p>']).html).toBe('')
+    expect(
+      SlotInstanceModule.render(SlotInstanceModule.defaults, ['<p>consumer content</p>']).html,
+    ).toBe('')
   })
 
   it('keeps slot metadata structural rather than visual', () => {
@@ -201,8 +214,12 @@ describe('base.loop — module contract specifics', () => {
     }
 
     expect(resolveLoopTag({ ...LoopModule.defaults, tag: 'section' })).toBe('section')
-    expect(resolveLoopTag({ ...LoopModule.defaults, tag: 'custom', customTag: 'Article-Card' })).toBe('article-card')
-    expect(resolveLoopTag({ ...LoopModule.defaults, tag: 'custom', customTag: '1-invalid' })).toBe('div')
+    expect(
+      resolveLoopTag({ ...LoopModule.defaults, tag: 'custom', customTag: 'Article-Card' }),
+    ).toBe('article-card')
+    expect(resolveLoopTag({ ...LoopModule.defaults, tag: 'custom', customTag: '1-invalid' })).toBe(
+      'div',
+    )
     expect(resolveLoopTag({ ...LoopModule.defaults, tag: 'script' })).toBe('div')
   })
 
@@ -271,7 +288,10 @@ describe('base.text — unified text module', () => {
   })
 
   it('escapes text content through the publisher pipeline', async () => {
-    const safeProps = escapeProps({ ...TextModule.defaults, text: '<script>xss()</script>' }, TextModule.schema)
+    const safeProps = escapeProps(
+      { ...TextModule.defaults, text: '<script>xss()</script>' },
+      TextModule.schema,
+    )
     const { html } = TextModule.render(safeProps, [])
 
     expect(html).toBeCleanHTML()
@@ -341,7 +361,13 @@ describe('base.text — unified text module', () => {
 
 describe('base.button — render() specifics', () => {
   it('has only content and behavior module settings', () => {
-    expect(Object.keys(ButtonModule.schema).sort()).toEqual(['disabled', 'href', 'htmlAttributes', 'label', 'target'])
+    expect(Object.keys(ButtonModule.schema).sort()).toEqual([
+      'disabled',
+      'href',
+      'htmlAttributes',
+      'label',
+      'target',
+    ])
   })
 
   it('renders an <a> element when href is set', () => {
@@ -356,23 +382,27 @@ describe('base.button — render() specifics', () => {
   })
 
   it('renders an authored HTML id on button and anchor output', () => {
-    expect(renderModule(ButtonModule, { href: '', htmlAttributes: { id: 'back-top' } }).html).toContain(
-      '<button id="back-top"',
-    )
-    expect(renderModule(ButtonModule, { href: '/start', htmlAttributes: { id: 'cta' } }).html).toContain(
-      '<a id="cta"',
-    )
+    expect(
+      renderModule(ButtonModule, { href: '', htmlAttributes: { id: 'back-top' } }).html,
+    ).toContain('<button id="back-top"')
+    expect(
+      renderModule(ButtonModule, { href: '/start', htmlAttributes: { id: 'cta' } }).html,
+    ).toContain('<a id="cta"')
   })
 
   it('renders authored HTML attributes on button and anchor output', () => {
-    expect(renderModule(ButtonModule, {
-      href: '',
-      htmlAttributes: { 'aria-label': 'Open modal', 'data-bs-toggle': 'modal' },
-    }).html).toContain(' data-bs-toggle="modal"')
-    expect(renderModule(ButtonModule, {
-      href: '/start',
-      htmlAttributes: { 'data-canvas-empty-container': 'true', 'data-track': 'cta' },
-    }).html).toContain(' data-track="cta"')
+    expect(
+      renderModule(ButtonModule, {
+        href: '',
+        htmlAttributes: { 'aria-label': 'Open modal', 'data-bs-toggle': 'modal' },
+      }).html,
+    ).toContain(' data-bs-toggle="modal"')
+    expect(
+      renderModule(ButtonModule, {
+        href: '/start',
+        htmlAttributes: { 'data-canvas-empty-container': 'true', 'data-track': 'cta' },
+      }).html,
+    ).toContain(' data-track="cta"')
   })
 
   it('XSS: strips javascript: href', () => {
@@ -383,7 +413,10 @@ describe('base.button — render() specifics', () => {
 
   it('XSS: escapes label text', () => {
     // Simulate the publisher pipeline (Constraint #211)
-    const safeProps = escapeProps({ ...ButtonModule.defaults, label: '<script>alert(1)</script>', href: '' }, ButtonModule.schema)
+    const safeProps = escapeProps(
+      { ...ButtonModule.defaults, label: '<script>alert(1)</script>', href: '' },
+      ButtonModule.schema,
+    )
     const { html } = ButtonModule.render(safeProps, [])
     expect(html).toBeCleanHTML()
     expect(html).toContain('&lt;script&gt;')
@@ -399,7 +432,7 @@ describe('base.button — render() specifics', () => {
 
   it('does not access DOM globals', () => {
     expect(() =>
-      withBannedGlobals(() => ButtonModule.render(ButtonModule.defaults, []))
+      withBannedGlobals(() => ButtonModule.render(ButtonModule.defaults, [])),
     ).not.toThrow()
   })
 })
@@ -503,9 +536,7 @@ describe('base.body — render() specifics', () => {
 
   it('does not access DOM globals during publish render', () => {
     expect(() =>
-      withBannedGlobals(() =>
-        BodyModule.render(BodyModule.defaults, ['<main>child</main>'])
-      )
+      withBannedGlobals(() => BodyModule.render(BodyModule.defaults, ['<main>child</main>'])),
     ).not.toThrow()
   })
 })
@@ -520,7 +551,11 @@ describe('base.container — render() specifics', () => {
   })
 
   it('exposes HTML tag selection (built-in tag + custom override)', () => {
-    expect(Object.keys(ContainerModule.schema).sort()).toEqual(['customTag', 'htmlAttributes', 'tag'])
+    expect(Object.keys(ContainerModule.schema).sort()).toEqual([
+      'customTag',
+      'htmlAttributes',
+      'tag',
+    ])
   })
 
   it('renders children HTML inside the container', () => {
@@ -532,20 +567,26 @@ describe('base.container — render() specifics', () => {
   })
 
   it('renders an authored HTML id', () => {
-    const { html } = renderModule(ContainerModule, { htmlAttributes: { id: 'smooth-wrapper' } }, ['<p>child</p>'])
+    const { html } = renderModule(ContainerModule, { htmlAttributes: { id: 'smooth-wrapper' } }, [
+      '<p>child</p>',
+    ])
     expect(html).toBe('<div id="smooth-wrapper"><p>child</p></div>')
   })
 
   it('renders authored HTML attributes and escapes their values', () => {
-    const { html } = renderModule(ContainerModule, {
-      htmlAttributes: {
-        'aria-label': 'Hero',
-        'data-bg-src': '/uploads/hero.png',
-        'data-title': 'Cats & "Dogs"',
-        'data-node-id': 'reserved',
-        role: 'region',
+    const { html } = renderModule(
+      ContainerModule,
+      {
+        htmlAttributes: {
+          'aria-label': 'Hero',
+          'data-bg-src': '/uploads/hero.png',
+          'data-title': 'Cats & "Dogs"',
+          'data-node-id': 'reserved',
+          role: 'region',
+        },
       },
-    }, ['<p>child</p>'])
+      ['<p>child</p>'],
+    )
     expect(html).toBe(
       '<div aria-label="Hero" data-bg-src="/uploads/hero.png" data-title="Cats &amp; &quot;Dogs&quot;" role="region"><p>child</p></div>',
     )
@@ -567,7 +608,11 @@ describe('base.container — render() specifics', () => {
   })
 
   it('renders an authored HTML id on void custom tags', () => {
-    const { html } = renderModule(ContainerModule, { tag: 'custom', customTag: 'hr', htmlAttributes: { id: 'rule' } }, [])
+    const { html } = renderModule(
+      ContainerModule,
+      { tag: 'custom', customTag: 'hr', htmlAttributes: { id: 'rule' } },
+      [],
+    )
     expect(html).toBe('<hr id="rule">')
   })
 
@@ -580,33 +625,39 @@ describe('base.container — render() specifics', () => {
     const Component = ContainerModule.component
 
     expect(() => {
-      renderReact(React.createElement(Component, {
-        props: {},
-        nodeId: 'container-with-missing-tag',
-        isSelected: false,
-      }))
+      renderReact(
+        React.createElement(Component, {
+          props: {},
+          nodeId: 'container-with-missing-tag',
+          isSelected: false,
+        }),
+      )
     }).not.toThrow()
   })
 
   it('marks empty editor containers with a canvas-only pickable affordance', () => {
     const Component = ContainerModule.component
-    const { container } = renderReact(React.createElement(Component, {
-      props: {},
-      nodeId: 'empty-container',
-      isSelected: false,
-    }))
+    const { container } = renderReact(
+      React.createElement(Component, {
+        props: {},
+        nodeId: 'empty-container',
+        isSelected: false,
+      }),
+    )
 
     expect(container.firstElementChild?.getAttribute('data-canvas-empty-container')).toBe('true')
   })
 
   it('does not mark editor containers with children as empty', () => {
     const Component = ContainerModule.component
-    const { container } = renderReact(React.createElement(Component, {
-      props: {},
-      nodeId: 'filled-container',
-      isSelected: false,
-      children: React.createElement('p', null, 'Child'),
-    }))
+    const { container } = renderReact(
+      React.createElement(Component, {
+        props: {},
+        nodeId: 'filled-container',
+        isSelected: false,
+        children: React.createElement('p', null, 'Child'),
+      }),
+    )
 
     expect(container.firstElementChild?.hasAttribute('data-canvas-empty-container')).toBe(false)
   })
@@ -619,11 +670,13 @@ describe('base.container — render() specifics', () => {
     // language across the canvas. The legacy `.emptyCanvasContainer` CSS rule
     // (dashed outline + 72×48 min bounds) has been retired.
     const Component = ContainerModule.component
-    const { container } = renderReact(React.createElement(Component, {
-      props: {},
-      nodeId: 'empty-container',
-      isSelected: false,
-    }))
+    const { container } = renderReact(
+      React.createElement(Component, {
+        props: {},
+        nodeId: 'empty-container',
+        isSelected: false,
+      }),
+    )
 
     // The user's resolved tag still wraps the placeholder so the semantic
     // element is preserved on canvas (matches what the publisher emits).
@@ -643,12 +696,14 @@ describe('base.container — render() specifics', () => {
     // fights that styling, so a class-bearing empty container renders bare —
     // no placeholder and no data-canvas-empty-container marker.
     const Component = ContainerModule.component
-    const { container } = renderReact(React.createElement(Component, {
-      props: {},
-      nodeId: 'decorative-container',
-      isSelected: false,
-      mcClassName: 'hero-bg',
-    }))
+    const { container } = renderReact(
+      React.createElement(Component, {
+        props: {},
+        nodeId: 'decorative-container',
+        isSelected: false,
+        mcClassName: 'hero-bg',
+      }),
+    )
 
     const outer = container.firstElementChild
     expect(outer?.classList.contains('hero-bg')).toBe(true)
@@ -666,9 +721,7 @@ describe('base.container — render() specifics', () => {
 
   it('does not access DOM globals', () => {
     expect(() =>
-      withBannedGlobals(() =>
-        ContainerModule.render(ContainerModule.defaults, ['<p>child</p>'])
-      )
+      withBannedGlobals(() => ContainerModule.render(ContainerModule.defaults, ['<p>child</p>'])),
     ).not.toThrow()
   })
 })
@@ -687,9 +740,13 @@ describe('base.image — render() specifics', () => {
     // the publisher derives it from the layout (sizesResolver.ts). Alt text
     // is sourced from the library asset row (single source of truth) — no
     // per-instance `alt` prop exists on the module.
-    expect(Object.keys(ImageModule.schema).sort()).toEqual(
-      ['decoding', 'fetchPriority', 'htmlAttributes', 'loading', 'src'],
-    )
+    expect(Object.keys(ImageModule.schema).sort()).toEqual([
+      'decoding',
+      'fetchPriority',
+      'htmlAttributes',
+      'loading',
+      'src',
+    ])
   })
 
   it('returns empty html when src is empty (Guideline #226)', () => {
@@ -841,7 +898,7 @@ describe('base.image — render() specifics', () => {
 
   it('does not access DOM globals', () => {
     expect(() =>
-      withBannedGlobals(() => ImageModule.render(ImageModule.defaults, []))
+      withBannedGlobals(() => ImageModule.render(ImageModule.defaults, [])),
     ).not.toThrow()
   })
 })
@@ -863,10 +920,13 @@ describe('base.svg — render() specifics', () => {
   })
 
   it('renders sanitized inline SVG from the publisher escape boundary', () => {
-    const preservedProps = escapeProps({
-      ...SvgModule.defaults,
-      svg: '<svg viewBox="0 0 24 24"><path d="M1 1h22"/></svg>',
-    }, SvgModule.schema)
+    const preservedProps = escapeProps(
+      {
+        ...SvgModule.defaults,
+        svg: '<svg viewBox="0 0 24 24"><path d="M1 1h22"/></svg>',
+      },
+      SvgModule.schema,
+    )
 
     const { html: preservedHtml } = SvgModule.render(preservedProps, [])
 
@@ -874,10 +934,13 @@ describe('base.svg — render() specifics', () => {
     expect(preservedHtml).toContain('viewBox="0 0 24 24"')
     expect(preservedHtml).toContain('<path')
 
-    const unsafeProps = escapeProps({
-      ...SvgModule.defaults,
-      svg: '<svg onload="alert(1)"><script>alert(1)</script><foreignObject><p>x</p></foreignObject></svg>',
-    }, SvgModule.schema)
+    const unsafeProps = escapeProps(
+      {
+        ...SvgModule.defaults,
+        svg: '<svg onload="alert(1)"><script>alert(1)</script><foreignObject><p>x</p></foreignObject></svg>',
+      },
+      SvgModule.schema,
+    )
 
     const { html: unsafeHtml } = SvgModule.render(unsafeProps, [])
 
@@ -888,11 +951,14 @@ describe('base.svg — render() specifics', () => {
   })
 
   it('adds an escaped accessible label to the root svg when title is set', () => {
-    const safeProps = escapeProps({
-      ...SvgModule.defaults,
-      svg: '<svg viewBox="0 0 10 10"><path d="M0 0"/></svg>',
-      title: 'Logo "mark"',
-    }, SvgModule.schema)
+    const safeProps = escapeProps(
+      {
+        ...SvgModule.defaults,
+        svg: '<svg viewBox="0 0 10 10"><path d="M0 0"/></svg>',
+        title: 'Logo "mark"',
+      },
+      SvgModule.schema,
+    )
 
     const { html } = SvgModule.render(safeProps, [])
 
@@ -923,11 +989,7 @@ describe('base.svg — render() specifics', () => {
   })
 
   it('does not access DOM globals during publish render', () => {
-    expect(() =>
-      withBannedGlobals(() =>
-        SvgModule.render(SvgModule.defaults, [])
-      )
-    ).not.toThrow()
+    expect(() => withBannedGlobals(() => SvgModule.render(SvgModule.defaults, []))).not.toThrow()
   })
 })
 
@@ -1049,7 +1111,7 @@ describe('base.video — render() specifics', () => {
 
   it('does not access DOM globals', () => {
     expect(() =>
-      withBannedGlobals(() => VideoModule.render(VideoModule.defaults, []))
+      withBannedGlobals(() => VideoModule.render(VideoModule.defaults, [])),
     ).not.toThrow()
   })
 
@@ -1075,7 +1137,9 @@ describe('base.video — render() specifics', () => {
 
   it('returns cspSources with frame-src YouTube origins for a shorts URL', () => {
     // Shorts ID must be exactly 11 base64-url chars (same as regular YouTube IDs)
-    const out = renderModule(VideoModule, { videoUrl: 'https://www.youtube.com/shorts/dQw4w9WgXcQ' })
+    const out = renderModule(VideoModule, {
+      videoUrl: 'https://www.youtube.com/shorts/dQw4w9WgXcQ',
+    })
     const frameSrc = out.cspSources?.find((r) => r.directive === 'frame-src')
     expect(frameSrc?.sources).toContain('https://www.youtube.com')
   })
@@ -1183,7 +1247,10 @@ describe('base.list — render() specifics', () => {
   it('XSS: HTML-escapes items via publisher pipeline (Constraint #211)', () => {
     // Publisher's escapeProps() is the sole escaping layer (Option A fix).
     // Items are pre-escaped before render() is called.
-    const safeProps = escapeProps({ ...ListModule.defaults, items: '<script>alert(1)</script>\nSafe item' }, ListModule.schema)
+    const safeProps = escapeProps(
+      { ...ListModule.defaults, items: '<script>alert(1)</script>\nSafe item' },
+      ListModule.schema,
+    )
     const { html } = ListModule.render(safeProps, [])
     expect(html).toBeCleanHTML()
     expect(html).not.toContain('<script>')
@@ -1191,7 +1258,10 @@ describe('base.list — render() specifics', () => {
   })
 
   it('XSS: escapes & in item text without double-escaping', () => {
-    const safeProps = escapeProps({ ...ListModule.defaults, items: 'Cats & Dogs\nBread & Butter' }, ListModule.schema)
+    const safeProps = escapeProps(
+      { ...ListModule.defaults, items: 'Cats & Dogs\nBread & Butter' },
+      ListModule.schema,
+    )
     const { html } = ListModule.render(safeProps, [])
     expect(html).toContain('&amp;')
     expect(html).not.toContain('&amp;amp;')
@@ -1209,9 +1279,7 @@ describe('base.list — render() specifics', () => {
   })
 
   it('does not access DOM globals', () => {
-    expect(() =>
-      withBannedGlobals(() => ListModule.render(ListModule.defaults, []))
-    ).not.toThrow()
+    expect(() => withBannedGlobals(() => ListModule.render(ListModule.defaults, []))).not.toThrow()
   })
 })
 
@@ -1221,7 +1289,12 @@ describe('base.list — render() specifics', () => {
 
 describe('base.link — render() specifics', () => {
   it('has URL, text, and target module settings', () => {
-    expect(Object.keys(LinkModule.schema).sort()).toEqual(['href', 'htmlAttributes', 'target', 'text'])
+    expect(Object.keys(LinkModule.schema).sort()).toEqual([
+      'href',
+      'htmlAttributes',
+      'target',
+      'text',
+    ])
   })
 
   it('renders target and rel for new-tab links', () => {
@@ -1258,9 +1331,7 @@ describe('base.link — render() specifics', () => {
   })
 
   it('does not access DOM globals', () => {
-    expect(() =>
-      withBannedGlobals(() => LinkModule.render(LinkModule.defaults, []))
-    ).not.toThrow()
+    expect(() => withBannedGlobals(() => LinkModule.render(LinkModule.defaults, []))).not.toThrow()
   })
 })
 

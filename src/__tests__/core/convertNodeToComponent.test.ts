@@ -111,10 +111,7 @@ function makePageNode(
  * as a child of the existing page root.
  * Returns the pageId used.
  */
-function injectNodesIntoPage(
-  rootContainerId: string,
-  extraNodes: PageNode[],
-): string {
+function injectNodesIntoPage(rootContainerId: string, extraNodes: PageNode[]): string {
   const state = useEditorStore.getState()
   const pageId = state.activePageId!
   const site = state.site!
@@ -141,7 +138,9 @@ function injectNodesIntoPage(
 // ---------------------------------------------------------------------------
 
 describe('Gate CNC-1 — subtree cloned with fresh IDs', () => {
-  beforeEach(() => { setupSite() })
+  beforeEach(() => {
+    setupSite()
+  })
 
   it('page no longer contains original nodes; VC root has new IDs', () => {
     const containerId = 'ctr-1'
@@ -199,7 +198,9 @@ describe('Gate CNC-1 — subtree cloned with fresh IDs', () => {
 // ---------------------------------------------------------------------------
 
 describe('Gate CNC-2 — original location replaced with VC-ref', () => {
-  beforeEach(() => { setupSite() })
+  beforeEach(() => {
+    setupSite()
+  })
 
   it('parent children list has the ref node; ref props.componentId equals new VC id', () => {
     const containerId = 'ctr-2'
@@ -233,7 +234,9 @@ describe('Gate CNC-2 — original location replaced with VC-ref', () => {
 // ---------------------------------------------------------------------------
 
 describe('Gate CNC-3 — activeDocument switches to new VC', () => {
-  beforeEach(() => { setupSite() })
+  beforeEach(() => {
+    setupSite()
+  })
 
   it('activeDocument becomes the new VC and selectedNodeId is null', () => {
     const containerId = 'ctr-3'
@@ -243,7 +246,9 @@ describe('Gate CNC-3 — activeDocument switches to new VC', () => {
     activatePage()
 
     // Pre-select the container node to prove it gets cleared
-    useEditorStore.setState({ selectedNodeId: containerId } as Parameters<typeof useEditorStore.setState>[0])
+    useEditorStore.setState({ selectedNodeId: containerId } as Parameters<
+      typeof useEditorStore.setState
+    >[0])
 
     const newVcId = callAction<string>('convertNodeToComponent', containerId, 'CardBlock')
 
@@ -258,7 +263,9 @@ describe('Gate CNC-3 — activeDocument switches to new VC', () => {
 // ---------------------------------------------------------------------------
 
 describe('Gate CNC-4 — node-scoped classes hoisted and scope rewritten', () => {
-  beforeEach(() => { setupSite() })
+  beforeEach(() => {
+    setupSite()
+  })
 
   it('hoists node-scoped class to VC.classIds and rewrites scope.nodeId to cloned root id', () => {
     const containerId = 'ctr-4'
@@ -316,7 +323,9 @@ describe('Gate CNC-4 — node-scoped classes hoisted and scope rewritten', () =>
 // ---------------------------------------------------------------------------
 
 describe('Gate CNC-5 — generic classes stay shared, not duplicated', () => {
-  beforeEach(() => { setupSite() })
+  beforeEach(() => {
+    setupSite()
+  })
 
   it('generic class appears on cloned child node classIds but NOT in VC.classIds, and is not duplicated', () => {
     const containerId = 'ctr-5'
@@ -378,7 +387,9 @@ describe('Gate CNC-5 — generic classes stay shared, not duplicated', () => {
 // ---------------------------------------------------------------------------
 
 describe('Gate CNC-6 — throws VisualComponentNameError on invalid name', () => {
-  beforeEach(() => { setupSite() })
+  beforeEach(() => {
+    setupSite()
+  })
 
   it('throws with name VisualComponentNameError; does not mutate state', () => {
     const containerId = 'ctr-6'
@@ -419,7 +430,9 @@ describe('Gate CNC-6 — throws VisualComponentNameError on invalid name', () =>
 // ---------------------------------------------------------------------------
 
 describe('Gate CNC-7 — throws plain Error on base.visual-component-ref', () => {
-  beforeEach(() => { setupSite() })
+  beforeEach(() => {
+    setupSite()
+  })
 
   it('throws when nodeId refers to a base.visual-component-ref node', () => {
     // We need an existing VC to point at
@@ -432,9 +445,7 @@ describe('Gate CNC-7 — throws plain Error on base.visual-component-ref', () =>
     injectNodesIntoPage(refNodeId, [refNode])
     activatePage()
 
-    expect(() =>
-      callAction<string>('convertNodeToComponent', refNodeId, 'NewVc'),
-    ).toThrow()
+    expect(() => callAction<string>('convertNodeToComponent', refNodeId, 'NewVc')).toThrow()
   })
 })
 
@@ -443,15 +454,15 @@ describe('Gate CNC-7 — throws plain Error on base.visual-component-ref', () =>
 // ---------------------------------------------------------------------------
 
 describe('Gate CNC-8 — throws plain Error on base.body', () => {
-  beforeEach(() => { setupSite() })
+  beforeEach(() => {
+    setupSite()
+  })
 
   it('throws when nodeId is the page rootNodeId (base.body)', () => {
     activatePage()
     const page = getPage()
 
-    expect(() =>
-      callAction<string>('convertNodeToComponent', page.rootNodeId, 'RootVc'),
-    ).toThrow()
+    expect(() => callAction<string>('convertNodeToComponent', page.rootNodeId, 'RootVc')).toThrow()
   })
 })
 
@@ -460,7 +471,9 @@ describe('Gate CNC-8 — throws plain Error on base.body', () => {
 // ---------------------------------------------------------------------------
 
 describe('Gate CNC-9 — site.updatedAt advances on success; no-op on failure', () => {
-  beforeEach(() => { setupSite() })
+  beforeEach(() => {
+    setupSite()
+  })
 
   it('updatedAt after successful conversion is >= updatedAt before', () => {
     const containerId = 'ctr-9'
@@ -500,7 +513,9 @@ describe('Gate CNC-9 — site.updatedAt advances on success; no-op on failure', 
 // ---------------------------------------------------------------------------
 
 describe('Gate CNC-A — succeeds when activeDocument is null (default page canvas)', () => {
-  beforeEach(() => { setupSite() })
+  beforeEach(() => {
+    setupSite()
+  })
 
   it('converts a node when activeDocument === null and activePageId is set', () => {
     const containerId = 'ctr-a'
@@ -535,7 +550,9 @@ describe('Gate CNC-A — succeeds when activeDocument is null (default page canv
 // ---------------------------------------------------------------------------
 
 describe('Gate CNC-B — throws when called from inside a visual component', () => {
-  beforeEach(() => { setupSite() })
+  beforeEach(() => {
+    setupSite()
+  })
 
   it('throws the expected error message when activeDocument is a VC', () => {
     const vcId = callAction<string>('createVisualComponent', 'Existing')
@@ -577,7 +594,9 @@ describe('Gate CNC-B — throws when called from inside a visual component', () 
 // whether the source happens to be a container.
 
 describe('Gate CNC-C — VC root is always base.body', () => {
-  beforeEach(() => { setupSite() })
+  beforeEach(() => {
+    setupSite()
+  })
 
   it('componentizing a base.text yields a VC root of base.body wrapping the cloned text', () => {
     const textId = 'txt-solo'

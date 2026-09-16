@@ -64,7 +64,9 @@ describe('executeAgentTool — set_color_tokens', () => {
       ],
     })
 
-    const { tokens } = expectData<{ tokens: Array<{ slug: string; ref: string; action: string }> }>(result)
+    const { tokens } = expectData<{ tokens: Array<{ slug: string; ref: string; action: string }> }>(
+      result,
+    )
     expect(tokens.map((t) => t.action)).toEqual(['created', 'created'])
     expect(tokens.find((t) => t.slug === 'primary')!.ref).toBe('var(--primary)')
 
@@ -75,7 +77,9 @@ describe('executeAgentTool — set_color_tokens', () => {
 
   it('updates an existing token by slug instead of duplicating it', async () => {
     freshStore()
-    await executeAgentTool('site_set_color_tokens', { tokens: [{ slug: 'primary', lightValue: '#3b82f6' }] })
+    await executeAgentTool('site_set_color_tokens', {
+      tokens: [{ slug: 'primary', lightValue: '#3b82f6' }],
+    })
 
     const result = await executeAgentTool('site_set_color_tokens', {
       tokens: [{ slug: 'primary', lightValue: '#ef4444' }],
@@ -109,7 +113,9 @@ describe('executeAgentTool — set_type_scale', () => {
       max: { fontSize: 18, scaleRatio: 1.333 },
     })
 
-    const data = expectData<{ action: string; namingConvention: string; generatedVars: string[] }>(result)
+    const data = expectData<{ action: string; namingConvention: string; generatedVars: string[] }>(
+      result,
+    )
     expect(data.action).toBe('created')
     expect(data.namingConvention).toBe('text')
     expect(data.generatedVars).toEqual(['--text-s', '--text-m', '--text-l', '--text-xl'])
@@ -137,8 +143,13 @@ describe('executeAgentTool — set_type_scale', () => {
 
   it('accepts common model-authored group aliases for typography', async () => {
     freshStore()
-    const result = await executeAgentTool('site_set_type_scale', { groupId: 'text', steps: 's,m,l' })
-    const data = expectData<{ action: string; namingConvention: string; generatedVars: string[] }>(result)
+    const result = await executeAgentTool('site_set_type_scale', {
+      groupId: 'text',
+      steps: 's,m,l',
+    })
+    const data = expectData<{ action: string; namingConvention: string; generatedVars: string[] }>(
+      result,
+    )
     expect(data.action).toBe('created')
     expect(data.namingConvention).toBe('text')
     expect(data.generatedVars).toEqual(['--text-s', '--text-m', '--text-l'])
@@ -150,9 +161,14 @@ describe('executeAgentTool — set_type_scale', () => {
     await executeAgentTool('site_set_type_scale', { namingConvention: 'typography', steps: 's,m' })
 
     // The model targets it by that prefix and updates only the steps.
-    const result = await executeAgentTool('site_set_type_scale', { groupId: 'typography', steps: 's,m,l' })
+    const result = await executeAgentTool('site_set_type_scale', {
+      groupId: 'typography',
+      steps: 's,m,l',
+    })
 
-    const data = expectData<{ action: string; namingConvention: string; generatedVars: string[] }>(result)
+    const data = expectData<{ action: string; namingConvention: string; generatedVars: string[] }>(
+      result,
+    )
     expect(data.action).toBe('updated')
     // The prefix must stay 'typography' — the alias must not rewrite it to 'text'.
     expect(data.namingConvention).toBe('typography')
@@ -194,8 +210,13 @@ describe('executeAgentTool — set_spacing_scale', () => {
 
   it('accepts common model-authored group aliases for spacing', async () => {
     freshStore()
-    const result = await executeAgentTool('site_set_spacing_scale', { groupId: 'root', steps: 'xs,s,m' })
-    const data = expectData<{ action: string; namingConvention: string; generatedVars: string[] }>(result)
+    const result = await executeAgentTool('site_set_spacing_scale', {
+      groupId: 'root',
+      steps: 'xs,s,m',
+    })
+    const data = expectData<{ action: string; namingConvention: string; generatedVars: string[] }>(
+      result,
+    )
     expect(data.action).toBe('created')
     expect(data.namingConvention).toBe('space')
     expect(data.generatedVars).toEqual(['--space-xs', '--space-s', '--space-m'])
@@ -237,7 +258,9 @@ describe('executeAgentTool — set_font_tokens', () => {
       tokens: [{ name: 'Body', variable: 'font-body', fallback: 'sans-serif' }],
     })
 
-    const { tokens } = expectData<{ tokens: Array<{ variable: string; ref: string; action: string }> }>(result)
+    const { tokens } = expectData<{
+      tokens: Array<{ variable: string; ref: string; action: string }>
+    }>(result)
     expect(tokens[0].variable).toBe('font-body')
     expect(tokens[0].ref).toBe('var(--font-body)')
     expect(tokens[0].action).toBe('created')
@@ -256,7 +279,12 @@ describe('executeAgentTool — set_font_tokens', () => {
       variants: ['400', '700'],
       subsets: ['latin'],
       files: [
-        { variant: '400', subset: 'latin', path: 'https://fonts.example/inter-400.woff2', format: 'woff2' },
+        {
+          variant: '400',
+          subset: 'latin',
+          path: 'https://fonts.example/inter-400.woff2',
+          format: 'woff2',
+        },
       ],
       createdAt: 1,
       updatedAt: 1,
@@ -285,7 +313,12 @@ describe('executeAgentTool — set_font_tokens', () => {
       variants: ['400', '700'],
       subsets: ['latin'],
       files: [
-        { variant: '400', subset: 'latin', path: 'https://fonts.example/playfair-400.woff2', format: 'woff2' },
+        {
+          variant: '400',
+          subset: 'latin',
+          path: 'https://fonts.example/playfair-400.woff2',
+          format: 'woff2',
+        },
       ],
       createdAt: 1,
       updatedAt: 1,

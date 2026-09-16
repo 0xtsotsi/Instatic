@@ -57,7 +57,11 @@ describe('collectDirtyFromSitePatches', () => {
   it('attributes a VC tree edit to that component id', () => {
     const site = twoPageTwoVcSite()
     const patches: Patches = [
-      { op: 'replace', path: ['visualComponents', 0, 'tree', 'nodes', 'vc-root', 'props', 'x'], value: 1 },
+      {
+        op: 'replace',
+        path: ['visualComponents', 0, 'tree', 'nodes', 'vc-root', 'props', 'x'],
+        value: 1,
+      },
     ]
     const marks = collectDirtyFromSitePatches(patches, site, site)
     expect(marks.all).toBe(false)

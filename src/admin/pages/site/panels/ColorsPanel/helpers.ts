@@ -55,9 +55,7 @@ export function canMoveToken(
     .filter((candidate) => candidate.category === token.category)
     .sort((a, b) => a.order - b.order || a.slug.localeCompare(b.slug))
   const index = group.findIndex((candidate) => candidate.id === token.id)
-  return direction === 'up'
-    ? index > 0
-    : index >= 0 && index < group.length - 1
+  return direction === 'up' ? index > 0 : index >= 0 && index < group.length - 1
 }
 
 /**
@@ -79,22 +77,16 @@ export function deriveColorPatchActionLabel(
   patch: UpdateFrameworkColorTokenPatch,
   token: FrameworkColorToken,
 ): string {
-  if (patch.generateTints?.enabled === false)
-    return `Disable "${token.slug}" tints`
-  if (patch.generateShades?.enabled === false)
-    return `Disable "${token.slug}" shades`
-  if (patch.generateTransparent === false)
-    return `Disable "${token.slug}" transparent steps`
-  if (patch.generateTints?.count !== undefined)
-    return `Update "${token.slug}" tint count`
-  if (patch.generateShades?.count !== undefined)
-    return `Update "${token.slug}" shade count`
+  if (patch.generateTints?.enabled === false) return `Disable "${token.slug}" tints`
+  if (patch.generateShades?.enabled === false) return `Disable "${token.slug}" shades`
+  if (patch.generateTransparent === false) return `Disable "${token.slug}" transparent steps`
+  if (patch.generateTints?.count !== undefined) return `Update "${token.slug}" tint count`
+  if (patch.generateShades?.count !== undefined) return `Update "${token.slug}" shade count`
   if (patch.generateUtilities) {
     const disabled = UTILITY_OPTIONS.filter(
       ({ key }) => patch.generateUtilities![key] === false,
     ).map(({ key }) => key)
-    if (disabled.length === 1)
-      return `Disable "${token.slug}" ${disabled[0]} utility`
+    if (disabled.length === 1) return `Disable "${token.slug}" ${disabled[0]} utility`
     if (disabled.length > 1) return `Disable "${token.slug}" utilities`
   }
   if (patch.slug !== undefined) return `Rename token to "${patch.slug}"`

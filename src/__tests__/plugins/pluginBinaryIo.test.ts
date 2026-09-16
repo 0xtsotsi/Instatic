@@ -21,7 +21,9 @@ import type { HostPluginRecord } from '../../../server/plugins/host/types'
  */
 
 /** PNG signature + a NUL and some >0x7f bytes — NOT valid UTF-8. */
-const PNG_BYTES = new Uint8Array([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 0x00, 0xff, 0xfe, 0x7f])
+const PNG_BYTES = new Uint8Array([
+  0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 0x00, 0xff, 0xfe, 0x7f,
+])
 
 const MULTIBYTE_TEXT = 'řeřicha 🌱 — ユニコード'
 
@@ -110,8 +112,10 @@ describe('performGatedFetch — binary bodies', () => {
       {},
       {
         fetchImpl: (async () =>
-          new Response(PNG_BYTES, { status: 200, headers: { 'content-type': 'image/png' } })
-        ) as unknown as typeof fetch,
+          new Response(PNG_BYTES, {
+            status: 200,
+            headers: { 'content-type': 'image/png' },
+          })) as unknown as typeof fetch,
         resolveHostAddresses: resolvePublic,
       },
     )
@@ -125,7 +129,8 @@ describe('performGatedFetch — binary bodies', () => {
       'https://api.example.com/data',
       {},
       {
-        fetchImpl: (async () => new Response(MULTIBYTE_TEXT, { status: 200 })) as unknown as typeof fetch,
+        fetchImpl: (async () =>
+          new Response(MULTIBYTE_TEXT, { status: 200 })) as unknown as typeof fetch,
         resolveHostAddresses: resolvePublic,
       },
     )
@@ -183,7 +188,13 @@ describe('serializeRouteRequest — byte-safe route bodies', () => {
     // Raw body: multipart with binary content is not valid UTF-8 → base64,
     // and decoding restores the exact original payload bytes.
     expect(request.bodyEncoding).toBe('base64')
-    const file = body.file as { __file: boolean; name: string; type: string; size: number; dataBase64: string }
+    const file = body.file as {
+      __file: boolean
+      name: string
+      type: string
+      size: number
+      dataBase64: string
+    }
     expect(file.__file).toBe(true)
     expect(file.name).toBe('pixel.png')
     expect(file.type).toBe('image/png')

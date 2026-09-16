@@ -39,9 +39,7 @@ export type FrameworkPreset = 'full' | 'variables' | 'none'
  * 'full'; one that emits only `:root` variables is 'variables'; absent is
  * 'none'.
  */
-export function frameworkUtilityState(
-  settings: FrameworkSettings | undefined,
-): FrameworkPreset {
+export function frameworkUtilityState(settings: FrameworkSettings | undefined): FrameworkPreset {
   if (!settings) return 'none'
   const hasClasses = Object.keys(generateFrameworkUtilityClasses(settings)).length > 0
   return hasClasses ? 'full' : 'variables'

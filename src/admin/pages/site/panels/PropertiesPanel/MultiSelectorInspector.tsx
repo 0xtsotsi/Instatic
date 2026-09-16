@@ -21,11 +21,7 @@ import { isGeneratedClassLocked } from '@core/page-tree'
 import type { StyleRule } from '@core/page-tree'
 import { Button } from '@ui/components/Button'
 import { useConfirmDelete } from '@admin/shared/dialogs/ConfirmDeleteDialog'
-import {
-  TreeRow,
-  TreeLabel,
-  TreeLabelGroup,
-} from '@site/ui/Tree'
+import { TreeRow, TreeLabel, TreeLabelGroup } from '@site/ui/Tree'
 import { CopySolidIcon } from 'pixel-art-icons/icons/copy-solid'
 import { PaintBucketSolidIcon } from 'pixel-art-icons/icons/paint-bucket-solid'
 import { TrashSolidIcon } from 'pixel-art-icons/icons/trash-solid'
@@ -37,9 +33,7 @@ interface MultiSelectorInspectorProps {
   selectedSelectorClassIds: string[]
 }
 
-export function MultiSelectorInspector({
-  selectedSelectorClassIds,
-}: MultiSelectorInspectorProps) {
+export function MultiSelectorInspector({ selectedSelectorClassIds }: MultiSelectorInspectorProps) {
   const styleRules = useEditorStore((s) => s.site?.styleRules)
   const selectedNode = useEditorStore(selectSelectedNode)
   const selectedNodeId = useEditorStore((s) => s.selectedNodeId)
@@ -60,9 +54,7 @@ export function MultiSelectorInspector({
     }
   })
 
-  const resolved = rows
-    .map((row) => row.cls)
-    .filter((cls): cls is StyleRule => cls !== null)
+  const resolved = rows.map((row) => row.cls).filter((cls): cls is StyleRule => cls !== null)
 
   // Class-kind rules the selected element doesn't already have are what "Apply"
   // can attach. Locked generated utilities (e.g. `text-primary-5`) ARE
@@ -96,7 +88,10 @@ export function MultiSelectorInspector({
   const handleApplyToNode = () => {
     if (!selectedNodeId) return
     // One batched mutation → a single undo step removes the whole apply.
-    addNodeClasses(selectedNodeId, applicableToNode.map((cls) => cls.id))
+    addNodeClasses(
+      selectedNodeId,
+      applicableToNode.map((cls) => cls.id),
+    )
   }
 
   const handleDelete = () => {
@@ -195,5 +190,9 @@ interface MultiSelectorHeaderProps {
 }
 
 export function MultiSelectorHeader({ count }: MultiSelectorHeaderProps) {
-  return <span>{count} {count === 1 ? 'selector' : 'selectors'} selected</span>
+  return (
+    <span>
+      {count} {count === 1 ? 'selector' : 'selectors'} selected
+    </span>
+  )
 }

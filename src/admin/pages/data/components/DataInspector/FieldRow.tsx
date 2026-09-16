@@ -98,14 +98,10 @@ export function FieldRow({
       )}
 
       {/* Optional built-in badge */}
-      {!mandatory && optionalBuiltIn && (
-        <span className={styles.typeBadge}>built-in</span>
-      )}
+      {!mandatory && optionalBuiltIn && <span className={styles.typeBadge}>built-in</span>}
 
       {/* Type badge */}
-      {!mandatory && (
-        <span className={styles.typeBadge}>{FIELD_TYPE_LABELS[field.type]}</span>
-      )}
+      {!mandatory && <span className={styles.typeBadge}>{FIELD_TYPE_LABELS[field.type]}</span>}
 
       {/* Actions — not shown for mandatory built-ins */}
       {!mandatory && canEdit && (

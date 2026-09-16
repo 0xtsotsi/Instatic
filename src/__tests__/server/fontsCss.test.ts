@@ -8,10 +8,7 @@
  */
 
 import { describe, expect, it } from 'bun:test'
-import {
-  computePrimarySubset,
-  parseCss2Faces,
-} from '../../../server/fonts/googleFontsInstaller'
+import { computePrimarySubset, parseCss2Faces } from '../../../server/fonts/googleFontsInstaller'
 
 const ROBOTO_CSS = `
 /* cyrillic */
@@ -236,12 +233,7 @@ describe('parseCss2Faces — security', () => {
 describe('computePrimarySubset', () => {
   it('returns the family subset that has no named /* */ comment in the CSS', () => {
     // Roboto names every subset in the CSS, so the primary is empty.
-    expect(
-      computePrimarySubset(
-        ['latin', 'latin-ext', 'cyrillic'],
-        ROBOTO_CSS,
-      ),
-    ).toBe('')
+    expect(computePrimarySubset(['latin', 'latin-ext', 'cyrillic'], ROBOTO_CSS)).toBe('')
   })
 
   it('detects the CJK primary subset (japanese for Noto Sans JP)', () => {

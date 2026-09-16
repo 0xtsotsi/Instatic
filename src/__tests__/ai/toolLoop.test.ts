@@ -3,7 +3,12 @@ import { Type } from '@core/utils/typeboxHelpers'
 import { anthropicDriver } from '../../../server/ai/drivers/anthropic'
 import { PROVIDER_RETRY_IMAGE_OMITTED } from '../../../server/ai/drivers/http/toolLoop'
 import type { AiStreamRequest } from '../../../server/ai/drivers/types'
-import type { AiBrowserBridge, AiStreamEvent, AiTool, AiToolOutput } from '../../../server/ai/runtime/types'
+import type {
+  AiBrowserBridge,
+  AiStreamEvent,
+  AiTool,
+  AiToolOutput,
+} from '../../../server/ai/runtime/types'
 
 /**
  * Exercises the provider-agnostic tool loop end-to-end through the Anthropic
@@ -19,7 +24,9 @@ afterEach(() => {
 })
 
 function sse(...events: unknown[]): string {
-  return events.map((e) => `event: ${(e as { type: string }).type}\ndata: ${JSON.stringify(e)}\n\n`).join('')
+  return events
+    .map((e) => `event: ${(e as { type: string }).type}\ndata: ${JSON.stringify(e)}\n\n`)
+    .join('')
 }
 
 function sseResponse(body: string): Response {
@@ -36,11 +43,27 @@ function sseResponse(body: string): Response {
 // Turn 1: model calls a server tool (echo) and a browser tool (paint).
 const TURN1 = sse(
   { type: 'message_start', message: { usage: { input_tokens: 20 } } },
-  { type: 'content_block_start', index: 0, content_block: { type: 'tool_use', id: 't_echo', name: 'echo', input: {} } },
-  { type: 'content_block_delta', index: 0, delta: { type: 'input_json_delta', partial_json: '{"v":42}' } },
+  {
+    type: 'content_block_start',
+    index: 0,
+    content_block: { type: 'tool_use', id: 't_echo', name: 'echo', input: {} },
+  },
+  {
+    type: 'content_block_delta',
+    index: 0,
+    delta: { type: 'input_json_delta', partial_json: '{"v":42}' },
+  },
   { type: 'content_block_stop', index: 0 },
-  { type: 'content_block_start', index: 1, content_block: { type: 'tool_use', id: 't_paint', name: 'paint', input: {} } },
-  { type: 'content_block_delta', index: 1, delta: { type: 'input_json_delta', partial_json: '{}' } },
+  {
+    type: 'content_block_start',
+    index: 1,
+    content_block: { type: 'tool_use', id: 't_paint', name: 'paint', input: {} },
+  },
+  {
+    type: 'content_block_delta',
+    index: 1,
+    delta: { type: 'input_json_delta', partial_json: '{}' },
+  },
   { type: 'content_block_stop', index: 1 },
   { type: 'message_delta', delta: { stop_reason: 'tool_use' }, usage: { output_tokens: 15 } },
   { type: 'message_stop' },
@@ -80,8 +103,20 @@ function makeRequest(bridge: AiBrowserBridge, serverCalls: unknown[]): AiStreamR
     messages: [{ role: 'user', content: [{ kind: 'text', text: 'go' }] }],
     tools: [echoTool, paintTool],
     modelId: 'claude-sonnet-4-6',
-    modelCapabilities: { toolCalling: true, visionInput: true, toolResultImages: true, promptCache: true, streaming: true },
-    credentials: { id: 'cr', providerId: 'anthropic', authMode: 'apiKey', apiKey: 'sk-test', baseUrl: null },
+    modelCapabilities: {
+      toolCalling: true,
+      visionInput: true,
+      toolResultImages: true,
+      promptCache: true,
+      streaming: true,
+    },
+    credentials: {
+      id: 'cr',
+      providerId: 'anthropic',
+      authMode: 'apiKey',
+      apiKey: 'sk-test',
+      baseUrl: null,
+    },
     signal: new AbortController().signal,
     bridge,
     toolContextBase: {
@@ -125,10 +160,17 @@ describe('runToolLoop via anthropicDriver', () => {
 
     // The 2nd request body must carry the assistant tool_use turn + the
     // tool_result user turn.
-    const secondMessages = requestBodies[1]!.messages as Array<{ role: string; content: Array<{ type: string; tool_use_id?: string }> }>
-    const toolResultTurn = secondMessages.find((m) => m.role === 'user' && m.content.some((b) => b.type === 'tool_result'))
+    const secondMessages = requestBodies[1]!.messages as Array<{
+      role: string
+      content: Array<{ type: string; tool_use_id?: string }>
+    }>
+    const toolResultTurn = secondMessages.find(
+      (m) => m.role === 'user' && m.content.some((b) => b.type === 'tool_result'),
+    )
     expect(toolResultTurn).toBeDefined()
-    const toolUseIds = toolResultTurn!.content.filter((b) => b.type === 'tool_result').map((b) => b.tool_use_id)
+    const toolUseIds = toolResultTurn!.content
+      .filter((b) => b.type === 'tool_result')
+      .map((b) => b.tool_use_id)
     expect(toolUseIds).toEqual(['t_echo', 't_paint'])
 
     // Canonical events: two toolCalls, two toolResults, the final text, usage.
@@ -136,11 +178,15 @@ describe('runToolLoop via anthropicDriver', () => {
     expect(toolCalls.map((e) => (e as { toolName: string }).toolName)).toEqual(['echo', 'paint'])
     const toolResults = events.filter((e) => e.type === 'toolResult')
     expect(toolResults.map((e) => (e as { ok: boolean }).ok)).toEqual([true, true])
-    const text = events.filter((e) => e.type === 'text').map((e) => (e as { text: string }).text).join('')
+    const text = events
+      .filter((e) => e.type === 'text')
+      .map((e) => (e as { text: string }).text)
+      .join('')
     expect(text).toBe('all done')
 
     // Usage aggregates across both turns for BILLING: input 20+30=50, output 15+5=20.
-    const usage = events.find((e) => e.type === 'usage') as { promptTokens: number; completionTokens: number } | undefined
+    const usage = events.find((e) => e.type === 'usage') as
+      { promptTokens: number; completionTokens: number } | undefined
     expect(usage).toBeDefined()
     expect(usage!.promptTokens).toBe(50)
     expect(usage!.completionTokens).toBe(20)
@@ -149,7 +195,9 @@ describe('runToolLoop via anthropicDriver', () => {
     // round, each carrying THAT round's input (20, then 30) — NOT the running
     // sum. The meter reads the latest (30 = current context size), so it climbs
     // mid-turn and never over-counts by summing rounds.
-    const contextEvents = events.filter((e) => e.type === 'context') as Array<{ promptTokens: number }>
+    const contextEvents = events.filter((e) => e.type === 'context') as Array<{
+      promptTokens: number
+    }>
     expect(contextEvents.map((e) => e.promptTokens)).toEqual([20, 30])
   })
 
@@ -159,11 +207,14 @@ describe('runToolLoop via anthropicDriver', () => {
       requestBodies.push(JSON.parse(init.body as string))
       return sseResponse(requestBodies.length === 1 ? TURN1 : TURN2)
     }) as typeof fetch
-    const req = makeRequest({
-      async callBrowser() {
-        return { ok: false, error: 'Canvas node no longer exists.' }
+    const req = makeRequest(
+      {
+        async callBrowser() {
+          return { ok: false, error: 'Canvas node no longer exists.' }
+        },
       },
-    }, [])
+      [],
+    )
 
     const events: AiStreamEvent[] = []
     for await (const event of anthropicDriver.stream(req)) events.push(event)
@@ -195,13 +246,16 @@ describe('runToolLoop via anthropicDriver', () => {
       requestBodies.push(JSON.parse(init.body as string))
       return sseResponse(TURN1)
     }) as typeof fetch
-    const req = makeRequest({
-      async callBrowser() {
-        const error = new Error('Browser tool "paint" result timed out.')
-        error.name = 'AbortError'
-        throw error
+    const req = makeRequest(
+      {
+        async callBrowser() {
+          const error = new Error('Browser tool "paint" result timed out.')
+          error.name = 'AbortError'
+          throw error
+        },
       },
-    }, [])
+      [],
+    )
 
     const events: AiStreamEvent[] = []
     for await (const event of anthropicDriver.stream(req)) events.push(event)
@@ -229,19 +283,29 @@ describe('runToolLoop via anthropicDriver', () => {
       type: 'error',
       message: 'Browser tool transport failed: Browser tool "paint" result timed out.',
     })
-    expect(events.filter((event) => event.type === 'usage')).toEqual([{
-      type: 'usage',
-      promptTokens: 20,
-      completionTokens: 15,
-      costUsd: undefined,
-      cacheReadTokens: undefined,
-      cacheCreationTokens: undefined,
-    }])
+    expect(events.filter((event) => event.type === 'usage')).toEqual([
+      {
+        type: 'usage',
+        promptTokens: 20,
+        completionTokens: 15,
+        costUsd: undefined,
+        cacheReadTokens: undefined,
+        cacheCreationTokens: undefined,
+      },
+    ])
   })
 
   test('returns an error event (not a throw) on a non-OK HTTP status', async () => {
-    globalThis.fetch = (async () => new Response('{"error":{"message":"bad key"}}', { status: 401 })) as typeof fetch
-    const req = makeRequest({ async callBrowser() { return { ok: true } } }, [])
+    globalThis.fetch = (async () =>
+      new Response('{"error":{"message":"bad key"}}', { status: 401 })) as typeof fetch
+    const req = makeRequest(
+      {
+        async callBrowser() {
+          return { ok: true }
+        },
+      },
+      [],
+    )
 
     const events: AiStreamEvent[] = []
     for await (const ev of anthropicDriver.stream(req)) events.push(ev)
@@ -256,16 +320,28 @@ describe('runToolLoop via anthropicDriver', () => {
     globalThis.fetch = (async (_url: string, init: RequestInit) => {
       requestBodies.push(JSON.parse(init.body as string))
       if (requestBodies.length === 1) {
-        return new Response(JSON.stringify({
-          error: { type: 'request_too_large', message: 'Request exceeds the context limit' },
-        }), { status: 413 })
+        return new Response(
+          JSON.stringify({
+            error: { type: 'request_too_large', message: 'Request exceeds the context limit' },
+          }),
+          { status: 413 },
+        )
       }
       return sseResponse(TURN2)
     }) as typeof fetch
 
-    const req = makeRequest({ async callBrowser() { return { ok: true } } }, [])
+    const req = makeRequest(
+      {
+        async callBrowser() {
+          return { ok: true }
+        },
+      },
+      [],
+    )
     const image = { kind: 'image' as const, mimeType: 'image/jpeg', data: '/9j/' }
-    req.messages.splice(0, req.messages.length,
+    req.messages.splice(
+      0,
+      req.messages.length,
       { role: 'user', content: [{ kind: 'text', text: 'Earlier turn' }, image] },
       { role: 'assistant', content: [{ kind: 'text', text: 'Earlier reply' }] },
       { role: 'user', content: [{ kind: 'text', text: 'Current turn' }, image] },
@@ -288,7 +364,14 @@ describe('runToolLoop via anthropicDriver', () => {
       requests += 1
       return new Response('', { status: 413 })
     }) as typeof fetch
-    const req = makeRequest({ async callBrowser() { return { ok: true } } }, [])
+    const req = makeRequest(
+      {
+        async callBrowser() {
+          return { ok: true }
+        },
+      },
+      [],
+    )
     req.messages[0] = {
       role: 'user',
       content: [{ kind: 'image', mimeType: 'image/jpeg', data: '/9j/' }],

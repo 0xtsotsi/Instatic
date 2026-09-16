@@ -29,23 +29,33 @@ function makeFakeDb() {
       if (!session) return { rows: [], rowCount: 0 }
       const admin = admins.find((a) => a.id === session.user_id)
       return {
-        rows: admin ? [{
-          ...admin,
-          email_normalized: admin.email,
-          display_name: 'Owner',
-          status: 'active',
-          role_id: 'owner',
-          last_login_at: null,
-          updated_at: admin.created_at,
-          deleted_at: null,
-          role_slug: 'owner',
-          role_name: 'Owner',
-          role_description: '',
-          role_is_system: true,
-          role_capabilities_json: ['site.read', 'site.structure.edit','site.content.edit','site.style.edit', 'pages.edit'],
-          session_mfa_passed_at: null,
-          avatar_public_path: null,
-        } as Row] : [],
+        rows: admin
+          ? [
+              {
+                ...admin,
+                email_normalized: admin.email,
+                display_name: 'Owner',
+                status: 'active',
+                role_id: 'owner',
+                last_login_at: null,
+                updated_at: admin.created_at,
+                deleted_at: null,
+                role_slug: 'owner',
+                role_name: 'Owner',
+                role_description: '',
+                role_is_system: true,
+                role_capabilities_json: [
+                  'site.read',
+                  'site.structure.edit',
+                  'site.content.edit',
+                  'site.style.edit',
+                  'pages.edit',
+                ],
+                session_mfa_passed_at: null,
+                avatar_public_path: null,
+              } as Row,
+            ]
+          : [],
         rowCount: admin ? 1 : 0,
       }
     }
@@ -95,7 +105,9 @@ function makeFakeDb() {
   }
 
   return Object.assign(handle as DbClient, {
-    get site() { return siteRow },
+    get site() {
+      return siteRow
+    },
     admins,
     sessions,
   })
@@ -107,9 +119,7 @@ function shell(): SiteShell {
     name: 'CMS Site',
     files: [],
     visualComponents: [],
-    breakpoints: [
-      { id: 'desktop', label: 'Desktop', width: 1440, icon: 'monitor' },
-    ],
+    breakpoints: [{ id: 'desktop', label: 'Desktop', width: 1440, icon: 'monitor' }],
     settings: {
       shortcuts: {},
     },
@@ -164,31 +174,37 @@ describe('cms site handlers', () => {
     const db = makeFakeDb()
     const cookie = await createCookie(db)
 
-    const save = await handleCmsRequest(cmsRequest('http://localhost/admin/api/cms/site-document', {
-      method: 'PUT',
-      body: JSON.stringify({
-        mode: 'incremental',
-        site: shell(),
-        changedPages: [],
-        deletedPageIds: [],
-        changedComponents: [],
-        deletedComponentIds: [],
-        changedLayouts: [],
-        deletedLayoutIds: [],
+    const save = await handleCmsRequest(
+      cmsRequest('http://localhost/admin/api/cms/site-document', {
+        method: 'PUT',
+        body: JSON.stringify({
+          mode: 'incremental',
+          site: shell(),
+          changedPages: [],
+          deletedPageIds: [],
+          changedComponents: [],
+          deletedComponentIds: [],
+          changedLayouts: [],
+          deletedLayoutIds: [],
+        }),
+        headers: {
+          'content-type': 'application/json',
+          cookie,
+        },
       }),
-      headers: {
-        'content-type': 'application/json',
-        cookie,
-      },
-    }), db)
+      db,
+    )
     expect(save.status).toBe(200)
 
-    const load = await handleCmsRequest(cmsRequest('http://localhost/admin/api/cms/site', {
-      headers: { cookie },
-    }), db)
+    const load = await handleCmsRequest(
+      cmsRequest('http://localhost/admin/api/cms/site', {
+        headers: { cookie },
+      }),
+      db,
+    )
     expect(load.status).toBe(200)
     // The site endpoint returns the shell (without pages — pages are in data_rows)
-    const body = await load.json() as { site: Record<string, unknown> }
+    const body = (await load.json()) as { site: Record<string, unknown> }
     expect(body.site).toMatchObject({
       id: 'project_1',
       name: 'CMS Site',

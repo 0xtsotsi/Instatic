@@ -138,7 +138,9 @@ function pickedFromEntry(entry: FontEntry | undefined): Record<string, PickedVar
  */
 function toggleFontAsset(
   asset: CmsMediaAsset,
-  setPicked: (updater: (prev: Record<string, PickedVariant>) => Record<string, PickedVariant>) => void,
+  setPicked: (
+    updater: (prev: Record<string, PickedVariant>) => Record<string, PickedVariant>,
+  ) => void,
 ): void {
   setPicked((prev) => {
     if (prev[asset.id]) {
@@ -160,7 +162,9 @@ async function uploadPickedFontFiles(
   setUploading: (v: boolean) => void,
   setUploadError: (v: string | null) => void,
   setAssets: (updater: (prev: CmsMediaAsset[] | null) => CmsMediaAsset[]) => void,
-  setPicked: (updater: (prev: Record<string, PickedVariant>) => Record<string, PickedVariant>) => void,
+  setPicked: (
+    updater: (prev: Record<string, PickedVariant>) => Record<string, PickedVariant>,
+  ) => void,
 ): Promise<void> {
   setUploading(true)
   setUploadError(null)
@@ -216,7 +220,9 @@ export function AddCustomFontDialog({
   const [assets, setAssets] = useState<CmsMediaAsset[] | null>(null)
   const [loadError, setLoadError] = useState<string | null>(null)
   // mediaAssetId → chosen variant. Presence in the map = selected.
-  const [picked, setPicked] = useState<Record<string, PickedVariant>>(() => pickedFromEntry(editEntry))
+  const [picked, setPicked] = useState<Record<string, PickedVariant>>(() =>
+    pickedFromEntry(editEntry),
+  )
   const [uploading, setUploading] = useState(false)
   const [uploadError, setUploadError] = useState<string | null>(null)
   const [installing, setInstalling] = useState(false)
@@ -224,8 +230,7 @@ export function AddCustomFontDialog({
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   const trimmedFamily = family.trim()
-  const familyTaken =
-    trimmedFamily.length > 0 && installedFamilies.has(trimmedFamily.toLowerCase())
+  const familyTaken = trimmedFamily.length > 0 && installedFamilies.has(trimmedFamily.toLowerCase())
 
   // Stable, session-unique preview family so the transient @font-face can't
   // collide with a real installed family or another open dialog. `useId` is a
@@ -255,18 +260,21 @@ export function AddCustomFontDialog({
   //   - every picked asset as a face in the composed family preview.
   // Removed on unmount / change — never persisted, never published.
   useEffect(() => {
-    const fontAssetsForPreview = (assets ?? []).filter((asset) => asset.mimeType.startsWith('font/'))
+    const fontAssetsForPreview = (assets ?? []).filter((asset) =>
+      asset.mimeType.startsWith('font/'),
+    )
     const byId = new Map(fontAssetsForPreview.map((asset) => [asset.id, asset]))
     const assetFaces = fontAssetsForPreview.map((asset) => {
       const guessedVariant = guessVariantFromName(asset.filename)
       return `@font-face { font-family: ${cssString(assetPreviewFamily(previewFamily, asset.id))}; font-weight: 400; font-style: normal; font-display: swap; src: url(${cssString(asset.publicPath)}); }\n@font-face { font-family: ${cssString(assetPreviewFamily(previewFamily, asset.id))}; font-weight: ${guessedVariant.weight}; font-style: ${guessedVariant.italic ? 'italic' : 'normal'}; font-display: swap; src: url(${cssString(asset.publicPath)}); }`
     })
-    const pickedFaces = Object.entries(picked)
-      .flatMap(([id, variant]) => {
-        const asset = byId.get(id)
-        if (!asset) return []
-        return [`@font-face { font-family: ${cssString(previewFamily)}; font-weight: ${variant.weight}; font-style: ${variant.italic ? 'italic' : 'normal'}; font-display: swap; src: url(${cssString(asset.publicPath)}); }`]
-      })
+    const pickedFaces = Object.entries(picked).flatMap(([id, variant]) => {
+      const asset = byId.get(id)
+      if (!asset) return []
+      return [
+        `@font-face { font-family: ${cssString(previewFamily)}; font-weight: ${variant.weight}; font-style: ${variant.italic ? 'italic' : 'normal'}; font-display: swap; src: url(${cssString(asset.publicPath)}); }`,
+      ]
+    })
     const faces = [...assetFaces, ...pickedFaces].join('\n')
 
     if (!faces) return
@@ -292,7 +300,14 @@ export function AddCustomFontDialog({
   async function handleInstall() {
     if (installing) return
     if (!trimmedFamily || familyTaken || pickedIds.length === 0) return
-    await installCustomFont(trimmedFamily, pickedIds, picked, setInstalling, setInstallError, onInstalled)
+    await installCustomFont(
+      trimmedFamily,
+      pickedIds,
+      picked,
+      setInstalling,
+      setInstallError,
+      onInstalled,
+    )
   }
 
   const canInstall =
@@ -312,22 +327,32 @@ export function AddCustomFontDialog({
       bodyClassName={styles.dialogBody}
       footer={
         <>
-          <Button variant="secondary" size="sm" type="button" onClick={onCancel} disabled={installing}>
+          <Button
+            variant="secondary"
+            size="sm"
+            type="button"
+            onClick={onCancel}
+            disabled={installing}
+          >
             Cancel
           </Button>
           <Button
             variant="primary"
             size="sm"
             type="button"
-            onClick={() => { void handleInstall() }}
+            onClick={() => {
+              void handleInstall()
+            }}
             disabled={!canInstall}
           >
             {installing ? (
               <>
                 <LoaderIcon size={12} aria-hidden="true" /> {editEntry ? 'Saving…' : 'Installing…'}
               </>
+            ) : editEntry ? (
+              'Save changes'
             ) : (
-              editEntry ? 'Save changes' : 'Install font'
+              'Install font'
             )}
           </Button>
         </>
@@ -401,16 +426,22 @@ export function AddCustomFontDialog({
           onChange={(e) => handleUploadPicked(e.target.files)}
         />
 
-        {uploadError && <p role="alert" className={styles.errorAlert}>{uploadError}</p>}
+        {uploadError && (
+          <p role="alert" className={styles.errorAlert}>
+            {uploadError}
+          </p>
+        )}
 
         {loadError ? (
-          <p role="alert" className={styles.errorAlert}>{loadError}</p>
+          <p role="alert" className={styles.errorAlert}>
+            {loadError}
+          </p>
         ) : assets === null ? (
           <SkeletonBlock minHeight={120} ariaLabel="Loading media library" />
         ) : fontAssets.length === 0 ? (
           <p className={styles.pickerInfo}>
-            No font files in your media library yet. Upload a .woff2, .woff, .ttf or .otf
-            file to get started.
+            No font files in your media library yet. Upload a .woff2, .woff, .ttf or .otf file to
+            get started.
           </p>
         ) : (
           <ul className={styles.customFontList} aria-label="Font files in media library">
@@ -451,7 +482,9 @@ export function AddCustomFontDialog({
                         fieldSize="sm"
                         options={WEIGHT_OPTIONS}
                         value={String(variant.weight)}
-                        onChange={(e) => updateVariant(asset.id, { weight: Number(e.target.value) })}
+                        onChange={(e) =>
+                          updateVariant(asset.id, { weight: Number(e.target.value) })
+                        }
                         aria-label={`Weight for ${asset.filename}`}
                       />
                       <label className={styles.customItalicToggle} htmlFor={italicInputId}>
@@ -473,7 +506,9 @@ export function AddCustomFontDialog({
       </div>
 
       {installError && (
-        <p role="alert" className={styles.errorAlert}>{installError}</p>
+        <p role="alert" className={styles.errorAlert}>
+          {installError}
+        </p>
       )}
     </Dialog>
   )

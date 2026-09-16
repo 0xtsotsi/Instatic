@@ -54,11 +54,7 @@ const FORM_ID = 'new-table-dialog-form'
 // Component
 // ---------------------------------------------------------------------------
 
-export function NewTableDialog({
-  open,
-  onClose,
-  onCreate,
-}: NewTableDialogProps) {
+export function NewTableDialog({ open, onClose, onCreate }: NewTableDialogProps) {
   const [name, setName] = useState('')
   const [slug, setSlug] = useState('')
   const [slugTouched, setSlugTouched] = useState(false)
@@ -78,11 +74,11 @@ export function NewTableDialog({
 
   // Derived values
   const trimmedName = name.trim()
-  const displayedSlug = slugTouched ? slug : (trimmedName ? slugify(trimmedName) : '')
+  const displayedSlug = slugTouched ? slug : trimmedName ? slugify(trimmedName) : ''
   const effectiveSlug = slugify(displayedSlug || trimmedName)
 
   const displayedSingular = singularTouched ? singularLabel : trimmedName
-  const displayedPlural = pluralTouched ? pluralLabel : (trimmedName ? `${trimmedName}s` : '')
+  const displayedPlural = pluralTouched ? pluralLabel : trimmedName ? `${trimmedName}s` : ''
 
   const canCreate = Boolean(trimmedName && effectiveSlug && !saving)
 
@@ -154,13 +150,7 @@ export function NewTableDialog({
           <Button variant="ghost" size="sm" type="button" onClick={handleClose}>
             Cancel
           </Button>
-          <Button
-            variant="primary"
-            size="sm"
-            type="submit"
-            form={FORM_ID}
-            disabled={!canCreate}
-          >
+          <Button variant="primary" size="sm" type="submit" form={FORM_ID} disabled={!canCreate}>
             {saving ? 'Creating…' : 'Create'}
           </Button>
         </>
@@ -169,7 +159,9 @@ export function NewTableDialog({
       <form id={FORM_ID} className={styles.form} onSubmit={handleSubmit}>
         {/* Name */}
         <div className={styles.field}>
-          <label htmlFor={nameId} className={styles.label}>Name</label>
+          <label htmlFor={nameId} className={styles.label}>
+            Name
+          </label>
           <Input
             id={nameId}
             ref={inputRef}
@@ -187,7 +179,9 @@ export function NewTableDialog({
 
         {/* Slug */}
         <div className={styles.field}>
-          <label htmlFor={slugId} className={styles.label}>Slug</label>
+          <label htmlFor={slugId} className={styles.label}>
+            Slug
+          </label>
           <Input
             id={slugId}
             fieldSize="sm"
@@ -201,26 +195,21 @@ export function NewTableDialog({
             autoComplete="off"
             spellCheck={false}
           />
-          {!slugTouched && (
-            <span className={styles.caption}>Auto-generated from name</span>
-          )}
+          {!slugTouched && <span className={styles.caption}>Auto-generated from name</span>}
         </div>
 
         {/* Kind */}
         <div className={styles.field}>
           <span className={styles.label}>Kind</span>
-          <SegmentedControl
-            value={kind}
-            options={KIND_OPTIONS}
-            onChange={setKind}
-            fullWidth
-          />
+          <SegmentedControl value={kind} options={KIND_OPTIONS} onChange={setKind} fullWidth />
           <span className={styles.caption}>{KIND_DESCRIPTIONS[kind]}</span>
         </div>
 
         {/* Singular label */}
         <div className={styles.field}>
-          <label htmlFor={singularId} className={styles.label}>Singular label</label>
+          <label htmlFor={singularId} className={styles.label}>
+            Singular label
+          </label>
           <Input
             id={singularId}
             fieldSize="sm"
@@ -238,7 +227,9 @@ export function NewTableDialog({
 
         {/* Plural label */}
         <div className={styles.field}>
-          <label htmlFor={pluralId} className={styles.label}>Plural label</label>
+          <label htmlFor={pluralId} className={styles.label}>
+            Plural label
+          </label>
           <Input
             id={pluralId}
             fieldSize="sm"

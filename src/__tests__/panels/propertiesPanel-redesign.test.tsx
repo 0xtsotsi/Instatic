@@ -77,9 +77,15 @@ function loadSiteWithHeading(): { nodeId: string; rootId: string } {
     props: { text: 'Hello', tag: 'h2' },
     children: [],
   })
-  const page = makePage({ id: 'page-1', rootNodeId: rootId, nodes: { [rootId]: rootNode, [nodeId]: textNode } })
+  const page = makePage({
+    id: 'page-1',
+    rootNodeId: rootId,
+    nodes: { [rootId]: rootNode, [nodeId]: textNode },
+  })
   const site = makeSite({ pages: [page] })
-  useEditorStore.setState({ site, activePageId: 'page-1' } as Parameters<typeof useEditorStore.setState>[0])
+  useEditorStore.setState({ site, activePageId: 'page-1' } as Parameters<
+    typeof useEditorStore.setState
+  >[0])
   return { nodeId, rootId }
 }
 
@@ -93,14 +99,22 @@ function loadSiteWithImage(): { nodeId: string; rootId: string } {
     props: { src: '', loading: 'lazy' },
     children: [],
   })
-  const page = makePage({ id: 'page-1', rootNodeId: rootId, nodes: { [rootId]: rootNode, [nodeId]: imageNode } })
+  const page = makePage({
+    id: 'page-1',
+    rootNodeId: rootId,
+    nodes: { [rootId]: rootNode, [nodeId]: imageNode },
+  })
   const site = makeSite({ pages: [page] })
-  useEditorStore.setState({ site, activePageId: 'page-1' } as Parameters<typeof useEditorStore.setState>[0])
+  useEditorStore.setState({ site, activePageId: 'page-1' } as Parameters<
+    typeof useEditorStore.setState
+  >[0])
   return { nodeId, rootId }
 }
 
 function selectNode(nodeId: string) {
-  useEditorStore.setState({ selectedNodeId: nodeId } as Parameters<typeof useEditorStore.setState>[0])
+  useEditorStore.setState({ selectedNodeId: nodeId } as Parameters<
+    typeof useEditorStore.setState
+  >[0])
 }
 
 /** Set up site with a node that has N classes pre-assigned. Returns nodeId + classIds. */
@@ -140,7 +154,9 @@ describe('PP-2 — ClassPicker visible immediately on element selection', () => 
     const classInput = screen.getByRole('textbox', { name: /add or create a css selector/i })
 
     expect(classInput).toBeDefined()
-    expect(renameButton.compareDocumentPosition(classInput) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
+    expect(
+      renameButton.compareDocumentPosition(classInput) & Node.DOCUMENT_POSITION_FOLLOWING,
+    ).toBeTruthy()
     expect(screen.queryByRole('button', { name: /^classes$/i })).toBeNull()
   })
 })
@@ -159,7 +175,9 @@ describe('PP-3 — Pill click toggles CSS editor; locked preview shown with no a
     // The style search bar is bound to the active class, so it's hidden in
     // the no-class state (nothing to search).
     expect(screen.getByRole('button', { name: /^add class$/i })).toBeDefined()
-    expect(screen.queryByRole('searchbox', { name: /search class style properties to add/i })).toBeNull()
+    expect(
+      screen.queryByRole('searchbox', { name: /search class style properties to add/i }),
+    ).toBeNull()
 
     // Click the pill to activate the class CSS editor.
     const pill = screen.getByRole('button', { name: /edit class \.class-1/i })
@@ -168,13 +186,17 @@ describe('PP-3 — Pill click toggles CSS editor; locked preview shown with no a
     // CSS editor active — locked preview CTA gone, CSS property rows accessible,
     // and the style search bar is now visible (scoped to the active class).
     expect(screen.queryByRole('button', { name: /^add class$/i })).toBeNull()
-    expect(screen.getByRole('searchbox', { name: /search class style properties to add/i })).toBeDefined()
+    expect(
+      screen.getByRole('searchbox', { name: /search class style properties to add/i }),
+    ).toBeDefined()
 
     // Click again to deselect — locked preview returns and the search bar
     // disappears with it.
     fireEvent.click(pill)
     expect(screen.getByRole('button', { name: /^add class$/i })).toBeDefined()
-    expect(screen.queryByRole('searchbox', { name: /search class style properties to add/i })).toBeNull()
+    expect(
+      screen.queryByRole('searchbox', { name: /search class style properties to add/i }),
+    ).toBeNull()
   })
 })
 
@@ -213,12 +235,17 @@ describe('StyleRuleComposer inline style filtering', () => {
     render(<PropertiesPanel />)
 
     fireEvent.click(screen.getByRole('button', { name: /edit class \.class-1/i }))
-    fireEvent.change(screen.getByRole('searchbox', { name: /search class style properties to add/i }), {
-      target: { value: 'color' },
-    })
+    fireEvent.change(
+      screen.getByRole('searchbox', { name: /search class style properties to add/i }),
+      {
+        target: { value: 'color' },
+      },
+    )
 
     expect(document.querySelector('[data-testid="css-property-row-color"]')).not.toBeNull()
-    expect(document.querySelector('[data-testid="css-property-row-backgroundColor"]')).not.toBeNull()
+    expect(
+      document.querySelector('[data-testid="css-property-row-backgroundColor"]'),
+    ).not.toBeNull()
     expect(document.querySelector('[data-testid="css-property-row-display"]')).toBeNull()
     expect(screen.queryByRole('menu', { name: /available style properties/i })).toBeNull()
     expect(screen.queryByRole('listbox', { name: /available style properties/i })).toBeNull()
@@ -272,9 +299,12 @@ describe('StyleRuleComposer inline style filtering', () => {
     // Search for 'fontFamily' — only typography rows match. The layout
     // section, which is not specially filtered by query inside LayoutSection,
     // collapses to nothing because none of its property keys match.
-    fireEvent.change(screen.getByRole('searchbox', { name: /search class style properties to add/i }), {
-      target: { value: 'fontFamily' },
-    })
+    fireEvent.change(
+      screen.getByRole('searchbox', { name: /search class style properties to add/i }),
+      {
+        target: { value: 'fontFamily' },
+      },
+    )
 
     expect(document.querySelector('[data-testid="css-property-row-fontFamily"]')).not.toBeNull()
     expect(document.querySelector('[data-testid="css-property-row-color"]')).toBeNull()
@@ -296,7 +326,9 @@ describe('ClassPicker — suggestion hover preview', () => {
       nodeId,
       classId: cls.id,
     })
-    expect(useEditorStore.getState().site!.pages[0].nodes[nodeId].classIds ?? []).not.toContain(cls.id)
+    expect(useEditorStore.getState().site!.pages[0].nodes[nodeId].classIds ?? []).not.toContain(
+      cls.id,
+    )
 
     fireEvent.mouseLeave(item)
     expect(useEditorStore.getState().previewClassAssignment).toBeNull()
@@ -375,7 +407,7 @@ describe('PP-5 — Advanced Section removed', () => {
 // PP-6: Section shared by top-level panel and class style categories
 // ---------------------------------------------------------------------------
 
-describe("PP-6 — StyleSurface used by PropertiesPanel; Section shared in StyleSectionsEditor", () => {
+describe('PP-6 — StyleSurface used by PropertiesPanel; Section shared in StyleSectionsEditor', () => {
   it('PropertiesPanelBody.tsx imports StyleSurface from ./StyleSurface', () => {
     // The PropertiesPanel was refactored into a slim JSX shell + a body
     // component that owns the surface-selection branches. The StyleSurface
@@ -479,7 +511,9 @@ describe('PP-8 — Class pill context menu owns reorder actions', () => {
     selectNode(nodeId)
     render(<PropertiesPanel />)
 
-    fireEvent.keyDown(screen.getByRole('button', { name: /edit class \.class-1/i }), { key: 'ContextMenu' })
+    fireEvent.keyDown(screen.getByRole('button', { name: /edit class \.class-1/i }), {
+      key: 'ContextMenu',
+    })
     expect(screen.getByRole('menu', { name: /class actions/i })).toBeDefined()
 
     fireEvent.click(screen.getByRole('menuitem', { name: /rename/i }))
@@ -571,7 +605,9 @@ describe('PP-11 — Editing a text-type class property via TextControl updates c
     const cls = state.createClass('responsive-edit-class')
     state.addNodeClass(nodeId, cls.id)
     state.updateClassStyles(cls.id, { fontFamily: 'serif' })
-    useEditorStore.setState({ activeBreakpointId: 'mobile' } as Parameters<typeof useEditorStore.setState>[0])
+    useEditorStore.setState({ activeBreakpointId: 'mobile' } as Parameters<
+      typeof useEditorStore.setState
+    >[0])
     selectNode(nodeId)
     render(<PropertiesPanel />)
 
@@ -594,14 +630,18 @@ describe('PP-11 — Editing a text-type class property via TextControl updates c
 
   it('does not render a panel-local class style breakpoint picker', () => {
     const { nodeId } = loadSiteWithClasses(1)
-    useEditorStore.setState({ activeBreakpointId: 'mobile' } as Parameters<typeof useEditorStore.setState>[0])
+    useEditorStore.setState({ activeBreakpointId: 'mobile' } as Parameters<
+      typeof useEditorStore.setState
+    >[0])
     selectNode(nodeId)
     render(<PropertiesPanel />)
 
     fireEvent.click(screen.getByRole('button', { name: /edit class \.class-1/i }))
 
     expect(screen.queryByRole('combobox', { name: /class style breakpoint/i })).toBeNull()
-    expect(screen.getByRole('searchbox', { name: /search class style properties to add/i })).toBeDefined()
+    expect(
+      screen.getByRole('searchbox', { name: /search class style properties to add/i }),
+    ).toBeDefined()
   })
 })
 
@@ -623,7 +663,10 @@ describe('StyleRuleComposer unset CSS property placeholders', () => {
     expect(flexSegment.getAttribute('aria-pressed')).toBe('false')
     expect(gridSegment.getAttribute('aria-pressed')).toBe('false')
 
-    expect(useEditorStore.getState().site!.styleRules[useEditorStore.getState().activeClassId!].styles.display).toBeUndefined()
+    expect(
+      useEditorStore.getState().site!.styleRules[useEditorStore.getState().activeClassId!].styles
+        .display,
+    ).toBeUndefined()
   })
 
   it('renders unset text defaults as placeholders, not input values', () => {
@@ -681,14 +724,18 @@ describe('LayoutSection — clear via active segment X', () => {
 
     expect(useEditorStore.getState().site!.styleRules[clsId].styles.display).toBeUndefined()
     // After clearing, no segment is pressed.
-    expect(screen.getByRole('button', { name: /^flex layout$/i }).getAttribute('aria-pressed')).toBe('false')
+    expect(
+      screen.getByRole('button', { name: /^flex layout$/i }).getAttribute('aria-pressed'),
+    ).toBe('false')
   })
 
   it('clicking the active grid segment clears display from base styles even when on a breakpoint tab', () => {
     const { nodeId, classIds } = loadSiteWithClasses(1)
     const clsId = classIds[0]
     useEditorStore.getState().updateClassStyles(clsId, { display: 'grid' })
-    useEditorStore.setState({ activeBreakpointId: 'mobile' } as Parameters<typeof useEditorStore.setState>[0])
+    useEditorStore.setState({ activeBreakpointId: 'mobile' } as Parameters<
+      typeof useEditorStore.setState
+    >[0])
     selectNode(nodeId)
     render(<PropertiesPanel />)
 
@@ -703,8 +750,12 @@ describe('LayoutSection — clear via active segment X', () => {
     // otherwise the inherited base value would bleed through and the segment
     // would stay pressed (Job #1342 followup).
     expect(useEditorStore.getState().site!.styleRules[clsId].styles.display).toBeUndefined()
-    expect(screen.getByRole('button', { name: /^grid layout$/i }).getAttribute('aria-pressed')).toBe('false')
-    expect(screen.getByRole('button', { name: /^flex layout$/i }).getAttribute('aria-pressed')).toBe('false')
+    expect(
+      screen.getByRole('button', { name: /^grid layout$/i }).getAttribute('aria-pressed'),
+    ).toBe('false')
+    expect(
+      screen.getByRole('button', { name: /^flex layout$/i }).getAttribute('aria-pressed'),
+    ).toBe('false')
   })
 
   it('clicking the active flex direction icon clears flexDirection', () => {
@@ -766,31 +817,41 @@ describe('LayoutSection — grid block', () => {
 
     // Column track group renders [1, 2, 3, 4, 5, 6] count segments. Click "3".
     const columnGroup = screen.getByRole('group', { name: /grid template columns/i })
-    const threeColsSegment = columnGroup.querySelector('button[aria-label="3 tracks"]') as HTMLButtonElement
+    const threeColsSegment = columnGroup.querySelector(
+      'button[aria-label="3 tracks"]',
+    ) as HTMLButtonElement
     expect(threeColsSegment).not.toBeNull()
     fireEvent.click(threeColsSegment)
 
-    expect(useEditorStore.getState().site!.styleRules[clsId].styles.gridTemplateColumns).toBe('repeat(3, 1fr)')
+    expect(useEditorStore.getState().site!.styleRules[clsId].styles.gridTemplateColumns).toBe(
+      'repeat(3, 1fr)',
+    )
   })
 
   it('reflects an existing repeat(N, 1fr) value as a pressed segment', () => {
     const { nodeId, classIds } = loadSiteWithClasses(1)
     const clsId = classIds[0]
-    useEditorStore.getState().updateClassStyles(clsId, { display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)' })
+    useEditorStore
+      .getState()
+      .updateClassStyles(clsId, { display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)' })
     selectNode(nodeId)
     render(<PropertiesPanel />)
 
     fireEvent.click(screen.getByRole('button', { name: /edit class \.class-1/i }))
 
     const columnGroup = screen.getByRole('group', { name: /grid template columns/i })
-    const fourColsSegment = columnGroup.querySelector('button[aria-label="4 tracks"]') as HTMLButtonElement
+    const fourColsSegment = columnGroup.querySelector(
+      'button[aria-label="4 tracks"]',
+    ) as HTMLButtonElement
     expect(fourColsSegment.getAttribute('aria-pressed')).toBe('true')
   })
 
   it('falls back to a custom-value chip when gridTemplateColumns is a non-preset template', () => {
     const { nodeId, classIds } = loadSiteWithClasses(1)
     const clsId = classIds[0]
-    useEditorStore.getState().updateClassStyles(clsId, { display: 'grid', gridTemplateColumns: '200px 1fr 200px' })
+    useEditorStore
+      .getState()
+      .updateClassStyles(clsId, { display: 'grid', gridTemplateColumns: '200px 1fr 200px' })
     selectNode(nodeId)
     render(<PropertiesPanel />)
 
@@ -804,19 +865,25 @@ describe('LayoutSection — grid block', () => {
   it('clicking the active grid column segment clears gridTemplateColumns', () => {
     const { nodeId, classIds } = loadSiteWithClasses(1)
     const clsId = classIds[0]
-    useEditorStore.getState().updateClassStyles(clsId, { display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)' })
+    useEditorStore
+      .getState()
+      .updateClassStyles(clsId, { display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)' })
     selectNode(nodeId)
     render(<PropertiesPanel />)
 
     fireEvent.click(screen.getByRole('button', { name: /edit class \.class-1/i }))
 
     const columnGroup = screen.getByRole('group', { name: /grid template columns/i })
-    const twoColsSegment = columnGroup.querySelector('button[aria-label="2 tracks"]') as HTMLButtonElement
+    const twoColsSegment = columnGroup.querySelector(
+      'button[aria-label="2 tracks"]',
+    ) as HTMLButtonElement
     expect(twoColsSegment.getAttribute('aria-pressed')).toBe('true')
 
     fireEvent.click(twoColsSegment)
 
-    expect(useEditorStore.getState().site!.styleRules[clsId].styles.gridTemplateColumns).toBeUndefined()
+    expect(
+      useEditorStore.getState().site!.styleRules[clsId].styles.gridTemplateColumns,
+    ).toBeUndefined()
   })
 
   it('hides gridTemplateColumns / gridTemplateRows / justifyItems fallback rows when display is grid', () => {
@@ -830,7 +897,9 @@ describe('LayoutSection — grid block', () => {
 
     // Generic ClassPropertyRow rows for the grid-owned properties are
     // suppressed; the visual GridBlock owns those controls instead.
-    expect(document.querySelector('[data-testid="css-property-row-gridTemplateColumns"]')).toBeNull()
+    expect(
+      document.querySelector('[data-testid="css-property-row-gridTemplateColumns"]'),
+    ).toBeNull()
     expect(document.querySelector('[data-testid="css-property-row-gridTemplateRows"]')).toBeNull()
     expect(document.querySelector('[data-testid="css-property-row-justifyItems"]')).toBeNull()
     // Gap is owned by the GridBlock's GapInput (TokenAwareInput) and lives
@@ -1048,7 +1117,9 @@ describe('StyleRuleComposer set style indicators', () => {
   it('marks category rail icons and section headers that contain stored class styles', () => {
     const { nodeId, classIds } = loadSiteWithClasses(1)
     const clsId = classIds[0]
-    useEditorStore.getState().updateClassStyles(clsId, { display: 'flex', fontFamily: 'Inter, sans-serif' })
+    useEditorStore
+      .getState()
+      .updateClassStyles(clsId, { display: 'flex', fontFamily: 'Inter, sans-serif' })
     selectNode(nodeId)
     render(<PropertiesPanel />)
 
@@ -1067,7 +1138,9 @@ describe('StyleRuleComposer set style indicators', () => {
     const { nodeId, classIds } = loadSiteWithClasses(1)
     const clsId = classIds[0]
     useEditorStore.getState().updateClassStyles(clsId, { display: 'flex' })
-    useEditorStore.setState({ activeBreakpointId: 'mobile' } as Parameters<typeof useEditorStore.setState>[0])
+    useEditorStore.setState({ activeBreakpointId: 'mobile' } as Parameters<
+      typeof useEditorStore.setState
+    >[0])
     selectNode(nodeId)
     render(<PropertiesPanel />)
 
@@ -1122,7 +1195,9 @@ describe('PP-13 — Breakpoint hint inside Module section when non-desktop bp ac
   it('breakpoint dot indicator appears on Module section header when non-desktop bp active', () => {
     const { nodeId } = loadSiteWithHeading()
     selectNode(nodeId)
-    useEditorStore.setState({ activeBreakpointId: 'tablet' } as Parameters<typeof useEditorStore.setState>[0])
+    useEditorStore.setState({ activeBreakpointId: 'tablet' } as Parameters<
+      typeof useEditorStore.setState
+    >[0])
     render(<PropertiesPanel />)
 
     // The Module settings section includes the selected module name and breakpoint indicator.
@@ -1133,7 +1208,9 @@ describe('PP-13 — Breakpoint hint inside Module section when non-desktop bp ac
   it('no breakpoint hint when desktop bp is active', () => {
     const { nodeId } = loadSiteWithHeading()
     selectNode(nodeId)
-    useEditorStore.setState({ activeBreakpointId: 'desktop' } as Parameters<typeof useEditorStore.setState>[0])
+    useEditorStore.setState({ activeBreakpointId: 'desktop' } as Parameters<
+      typeof useEditorStore.setState
+    >[0])
     render(<PropertiesPanel />)
     expect(screen.queryByText(/editing.*overrides/i)).toBeNull()
   })
@@ -1170,7 +1247,9 @@ describe('PP-16 — No inline styles / no Tailwind / no !important in new files'
     })
   }
 
-  for (const { file, dir } of newFiles.filter(({ file }) => file.endsWith('.tsx') || file.endsWith('.ts'))) {
+  for (const { file, dir } of newFiles.filter(
+    ({ file }) => file.endsWith('.tsx') || file.endsWith('.ts'),
+  )) {
     it(`${file}: no style={{ ... }} inline styles`, () => {
       const src = readFileSync(join(dir, file), 'utf-8')
       // Allow the intentional CSS var injection in PropertiesPanel's aside element
@@ -1224,7 +1303,9 @@ describe('HF-2 — Switching class pills resets StyleRuleComposer local state', 
     const pill1 = screen.getByRole('button', { name: /edit class \.class-1/i })
     fireEvent.click(pill1)
 
-    const searchInput1 = screen.getByRole('searchbox', { name: /search class style properties to add/i }) as HTMLInputElement
+    const searchInput1 = screen.getByRole('searchbox', {
+      name: /search class style properties to add/i,
+    }) as HTMLInputElement
     expect(searchInput1.placeholder).toBe('Search styles in .class-1...')
 
     // Type a query into the local search field.
@@ -1236,7 +1317,9 @@ describe('HF-2 — Switching class pills resets StyleRuleComposer local state', 
     fireEvent.click(pill2)
 
     // class-2's search must be empty and scoped to class-2, NOT leaked from class-1.
-    const searchInput2 = screen.getByRole('searchbox', { name: /search class style properties to add/i }) as HTMLInputElement
+    const searchInput2 = screen.getByRole('searchbox', {
+      name: /search class style properties to add/i,
+    }) as HTMLInputElement
     expect(searchInput2.value).toBe('')
     expect(searchInput2.placeholder).toBe('Search styles in .class-2...')
   })
@@ -1264,7 +1347,9 @@ describe('HF-2 — Switching class pills resets StyleRuleComposer local state', 
     fireEvent.click(pill2)
     expect(document.querySelector('[data-testid="css-property-row-fontFamily"]')).not.toBeNull()
     expect(screen.queryByDisplayValue('serif')).toBeNull()
-    expect(document.querySelectorAll('[data-testid^="css-property-row-"]').length).toBeGreaterThan(0)
+    expect(document.querySelectorAll('[data-testid^="css-property-row-"]').length).toBeGreaterThan(
+      0,
+    )
   })
 })
 
@@ -1359,7 +1444,9 @@ describe('PP-20 — Property search adds class-backed styles to the active class
     fireEvent.click(pill)
 
     // The minimal add-property search is always present when a class is active.
-    const searchInput = screen.getByRole('searchbox', { name: /search class style properties to add/i })
+    const searchInput = screen.getByRole('searchbox', {
+      name: /search class style properties to add/i,
+    })
     expect(searchInput).toBeDefined()
 
     // Type to filter to fontFamily
@@ -1382,7 +1469,9 @@ describe('PP-20 — Property search adds class-backed styles to the active class
     const state = useEditorStore.getState()
     const cls = state.createClass('bp-prop-class')
     state.addNodeClass(nodeId, cls.id)
-    useEditorStore.setState({ activeBreakpointId: 'mobile' } as Parameters<typeof useEditorStore.setState>[0])
+    useEditorStore.setState({ activeBreakpointId: 'mobile' } as Parameters<
+      typeof useEditorStore.setState
+    >[0])
     selectNode(nodeId)
     render(<PropertiesPanel />)
 
@@ -1391,7 +1480,9 @@ describe('PP-20 — Property search adds class-backed styles to the active class
 
     expect(screen.queryByRole('combobox', { name: /class style breakpoint/i })).toBeNull()
 
-    const searchInput = screen.getByRole('searchbox', { name: /search class style properties to add/i })
+    const searchInput = screen.getByRole('searchbox', {
+      name: /search class style properties to add/i,
+    })
     fireEvent.change(searchInput, { target: { value: 'fontF' } })
     const fontFamilyInput = document
       .querySelector('[data-testid="css-property-row-fontFamily"]')
@@ -1404,7 +1495,6 @@ describe('PP-20 — Property search adds class-backed styles to the active class
     expect(updatedCls.styles.fontFamily).toBeUndefined()
     expect(updatedCls.contextStyles.mobile.fontFamily).toBe('serif')
   })
-
 })
 
 // ---------------------------------------------------------------------------
@@ -1451,10 +1541,14 @@ describe('PP-21 — Empty class shows full property catalog', () => {
     // generic property rows (fontFamily).
     expect(document.querySelector('[data-testid="css-display-switcher"]')).not.toBeNull()
     expect(document.querySelector('[data-testid="css-property-row-fontFamily"]')).not.toBeNull()
-    expect(document.querySelectorAll('[data-testid^="css-property-row-"]').length).toBeGreaterThan(0)
+    expect(document.querySelectorAll('[data-testid^="css-property-row-"]').length).toBeGreaterThan(
+      0,
+    )
 
     // Search affordance present; no extra empty state copy.
-    expect(screen.getByRole('searchbox', { name: /search class style properties to add/i })).toBeDefined()
+    expect(
+      screen.getByRole('searchbox', { name: /search class style properties to add/i }),
+    ).toBeDefined()
     expect(screen.queryByText(/no class styles set/i)).toBeNull()
   })
 })
@@ -1472,7 +1566,9 @@ describe('PP-22 — Module settings is the first visible accordion', () => {
     const classInput = screen.getByRole('textbox', { name: /add or create a css selector/i })
     const moduleSectionBtn = screen.getByRole('button', { name: /module settings/i })
 
-    expect(classInput.compareDocumentPosition(moduleSectionBtn) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
+    expect(
+      classInput.compareDocumentPosition(moduleSectionBtn) & Node.DOCUMENT_POSITION_FOLLOWING,
+    ).toBeTruthy()
     expect(screen.queryByRole('button', { name: /^classes$/i })).toBeNull()
   })
 })

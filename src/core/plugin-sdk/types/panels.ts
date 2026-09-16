@@ -8,16 +8,7 @@
  * repeats inside the visible plugin rail group.
  */
 export type PluginEditorPanelAccent =
-  | 'mint'
-  | 'sky'
-  | 'lilac'
-  | 'peach'
-  | 'rose'
-  | 'lime'
-  | 'gold'
-  | 'cyan'
-  | 'violet'
-  | 'coral'
+  'mint' | 'sky' | 'lilac' | 'peach' | 'rose' | 'lime' | 'gold' | 'cyan' | 'violet' | 'coral'
 
 /**
  * Editor panel registered by a plugin via `editor.panels.register`. Mounts in

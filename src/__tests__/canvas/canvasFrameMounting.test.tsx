@@ -6,9 +6,7 @@ import { CanvasTransformLayer } from '@site/canvas/CanvasTransformLayer'
 import { CANVAS_VIEWPORT_HEIGHT } from '@site/canvas/resolveViewportUnits'
 import { DEFAULT_BREAKPOINTS } from '@core/page-tree'
 import { useEditorStore } from '@site/store/store'
-import {
-  DEFAULT_MODULE_INSERTER_PREFERENCE,
-} from '@core/persistence/userPreferences'
+import { DEFAULT_MODULE_INSERTER_PREFERENCE } from '@core/persistence/userPreferences'
 import { __resetModuleInserterPreferenceForTests } from '@site/module-picker/useModuleInserterPreference'
 import { makeNode, makePage, makeSite } from '../fixtures'
 import {

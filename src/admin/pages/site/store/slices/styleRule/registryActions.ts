@@ -44,7 +44,11 @@ export function createRegistryActions({
 
       const existingId = node.classIds?.find((id) => {
         const cls = site.styleRules[id]
-        return cls?.scope?.type === 'node' && cls.scope.nodeId === nodeId && cls.scope.role === 'module-style'
+        return (
+          cls?.scope?.type === 'node' &&
+          cls.scope.nodeId === nodeId &&
+          cls.scope.role === 'module-style'
+        )
       })
       if (existingId && site.styleRules[existingId]) {
         return site.styleRules[existingId]
@@ -111,7 +115,8 @@ export function createRegistryActions({
       // ambient rules the selector text is copied verbatim so the rule still
       // matches the same elements after duplication.
       const kind = cls.kind ?? 'class'
-      const selector = kind === 'class' ? classKindSelector(copyName) : (cls.selector || classKindSelector(copyName))
+      const selector =
+        kind === 'class' ? classKindSelector(copyName) : cls.selector || classKindSelector(copyName)
       const newClass: StyleRule = {
         id: nanoid(),
         name: copyName,
@@ -120,9 +125,7 @@ export function createRegistryActions({
         order: nextRuleOrder(site.styleRules),
         description: cls.description,
         styles: { ...cls.styles },
-        ...(cls.stylePriorities
-          ? { stylePriorities: { ...cls.stylePriorities } }
-          : {}),
+        ...(cls.stylePriorities ? { stylePriorities: { ...cls.stylePriorities } } : {}),
         // Per-context overrides reference the shared site-level conditions
         // registry by id, so cloning the bags (independent copies) is enough —
         // no per-rule condition definitions to clone.

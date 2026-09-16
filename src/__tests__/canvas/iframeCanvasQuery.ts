@@ -34,9 +34,7 @@ export const CANVAS_FRAME_READY_TIMEOUT_MS = 5000
  * Find the first element matching `selector` inside any canvas iframe (or
  * the parent document, as a fallback).
  */
-export function queryCanvasElement<E extends Element = HTMLElement>(
-  selector: string,
-): E | null {
+export function queryCanvasElement<E extends Element = HTMLElement>(selector: string): E | null {
   // Try main document first — covers test surfaces that don't render the
   // canvas (e.g. snapshot tests of a single module preview).
   const directHit = document.querySelector<E>(selector)
@@ -57,9 +55,7 @@ export function queryCanvasElement<E extends Element = HTMLElement>(
  * parent document. Returned in iframe-iteration order (matches the order of
  * `<iframe>` elements in the parent DOM).
  */
-function queryCanvasElements<E extends Element = HTMLElement>(
-  selector: string,
-): E[] {
+function queryCanvasElements<E extends Element = HTMLElement>(selector: string): E[] {
   const out: E[] = []
   out.push(...Array.from(document.querySelectorAll<E>(selector)))
   for (const iframe of allCanvasIframes()) {
@@ -102,8 +98,8 @@ function escapeAttr(value: string): string {
 }
 
 function allCanvasIframes(): HTMLIFrameElement[] {
-  return Array.from(document.querySelectorAll<HTMLIFrameElement>('iframe')).filter(
-    (i) => i.title.startsWith('Canvas frame for '),
+  return Array.from(document.querySelectorAll<HTMLIFrameElement>('iframe')).filter((i) =>
+    i.title.startsWith('Canvas frame for '),
   )
 }
 

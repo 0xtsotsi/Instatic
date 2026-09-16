@@ -37,9 +37,5 @@ interface AgentStoreProviderProps {
 }
 
 export function AgentStoreProvider({ store, children }: AgentStoreProviderProps) {
-  return (
-    <AgentStoreContext.Provider value={store}>
-      {children}
-    </AgentStoreContext.Provider>
-  )
+  return <AgentStoreContext.Provider value={store}>{children}</AgentStoreContext.Provider>
 }

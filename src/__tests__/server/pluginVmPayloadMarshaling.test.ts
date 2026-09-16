@@ -46,7 +46,7 @@ async function makeEchoVm(): Promise<PluginVm> {
 
 const vmPromise = makeEchoVm()
 afterAll(async () => {
-  (await vmPromise).dispose()
+  ;(await vmPromise).dispose()
 })
 
 /**

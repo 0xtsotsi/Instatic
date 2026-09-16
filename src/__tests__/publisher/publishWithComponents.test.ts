@@ -129,7 +129,9 @@ describe('VC inline — prop override substitution', () => {
     name: 'Card',
     nodes: [rootNode, textNode],
     rootId: 'vc-root',
-    params: [makeParam({ id: 'param-title', name: 'title', type: 'string', defaultValue: 'Default' })],
+    params: [
+      makeParam({ id: 'param-title', name: 'title', type: 'string', defaultValue: 'Default' }),
+    ],
   })
 
   it('inlines the VC and substitutes prop override', () => {
@@ -165,7 +167,12 @@ describe('VC inline — class CSS in published output', () => {
       moduleId: 'base.container',
       children: ['vc-cls-text'],
     })
-    const vc = makeVC({ id: 'vc-cls', name: 'Cls', nodes: [rootNode, textNode], rootId: 'vc-cls-root' })
+    const vc = makeVC({
+      id: 'vc-cls',
+      name: 'Cls',
+      nodes: [rootNode, textNode],
+      rootId: 'vc-cls-root',
+    })
 
     const page = makePage({
       root: makePageNode('root', 'base.visual-component-ref', {
@@ -275,22 +282,20 @@ describe('VC inline — slot content override', () => {
   it('renders provided slot-instance content over defaultValue (Task 4 Tree Unification)', () => {
     // Slot content is now a base.slot-instance child of the VC ref in the page tree.
     // The slot-instance node's children are the user-authored content nodes.
-    const page = makePage(
-      {
-        root: makePageNode('root', 'base.visual-component-ref', {
-          props: { componentId: 'vc-slot', propOverrides: {} },
-          children: ['slot-inst-body'],
-        }),
-        'slot-inst-body': makePageNode('slot-inst-body', 'base.slot-instance', {
-          props: { slotName: 'body' },
-          children: ['override-text'],
-          locked: true,
-        }),
-        'override-text': makePageNode('override-text', 'base.text', {
-          props: { text: 'Override slot text', tag: 'p' },
-        }),
-      },
-    )
+    const page = makePage({
+      root: makePageNode('root', 'base.visual-component-ref', {
+        props: { componentId: 'vc-slot', propOverrides: {} },
+        children: ['slot-inst-body'],
+      }),
+      'slot-inst-body': makePageNode('slot-inst-body', 'base.slot-instance', {
+        props: { slotName: 'body' },
+        children: ['override-text'],
+        locked: true,
+      }),
+      'override-text': makePageNode('override-text', 'base.text', {
+        props: { text: 'Override slot text', tag: 'p' },
+      }),
+    })
     const site = makeSite({ visualComponents: [vcWithSlot], pages: [page] })
     const { html } = publishPage(page, site, registry)
     expect(html).toContain('Override slot text')

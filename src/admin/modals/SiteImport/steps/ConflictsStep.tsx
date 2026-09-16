@@ -17,7 +17,10 @@ import { ConflictRow } from '../shared/ConflictRow'
 import { crossSheetConflictKey, tokenConflictKey } from '../shared/importPlanning'
 import styles from './ConflictsStep.module.css'
 
-type BulkResolutionAction = Extract<ConflictResolution['action'], 'auto-rename' | 'overwrite' | 'skip'>
+type BulkResolutionAction = Extract<
+  ConflictResolution['action'],
+  'auto-rename' | 'overwrite' | 'skip'
+>
 
 function resolutionForAction(
   action: BulkResolutionAction,
@@ -56,7 +59,9 @@ export function ConflictsStep({
     tokens: tokenConflicts,
     crossSheetClasses: crossSheetConflicts,
   } = plan.conflicts
-  const pageBulkOverwriteAvailable = pageConflicts.every((conflict) => conflict.existingPageId !== '')
+  const pageBulkOverwriteAvailable = pageConflicts.every(
+    (conflict) => conflict.existingPageId !== '',
+  )
 
   if (
     pageConflicts.length === 0 &&
@@ -87,7 +92,10 @@ export function ConflictsStep({
 
   function applyCrossSheetResolutionToAll(action: BulkResolutionAction) {
     for (const conflict of crossSheetConflicts) {
-      onCrossSheetResolutionChange(crossSheetConflictKey(conflict), resolutionForAction(action, conflict))
+      onCrossSheetResolutionChange(
+        crossSheetConflictKey(conflict),
+        resolutionForAction(action, conflict),
+      )
     }
   }
 
@@ -96,9 +104,7 @@ export function ConflictsStep({
       {pageConflicts.length > 0 && (
         <section className={styles.section}>
           <div className={styles.sectionHeader}>
-            <h3 className={styles.heading}>
-              Page slug conflicts ({pageConflicts.length})
-            </h3>
+            <h3 className={styles.heading}>Page slug conflicts ({pageConflicts.length})</h3>
             <fieldset className={styles.bulkActions}>
               <legend className={styles.bulkLegend}>Bulk page slug conflict actions</legend>
               <Button
@@ -133,8 +139,8 @@ export function ConflictsStep({
             </fieldset>
           </div>
           <p className={styles.hint}>
-            These pages share a slug with an existing page, or with another
-            page in this import. Choose how to resolve each one.
+            These pages share a slug with an existing page, or with another page in this import.
+            Choose how to resolve each one.
           </p>
           <div className={styles.rows}>
             {pageConflicts.map((conflict) => (
@@ -156,9 +162,7 @@ export function ConflictsStep({
       {ruleConflicts.length > 0 && (
         <section className={styles.section}>
           <div className={styles.sectionHeader}>
-            <h3 className={styles.heading}>
-              Class name conflicts ({ruleConflicts.length})
-            </h3>
+            <h3 className={styles.heading}>Class name conflicts ({ruleConflicts.length})</h3>
             <fieldset className={styles.bulkActions}>
               <legend className={styles.bulkLegend}>Bulk class name conflict actions</legend>
               <Button
@@ -211,9 +215,7 @@ export function ConflictsStep({
       {crossSheetConflicts.length > 0 && (
         <section className={styles.section}>
           <div className={styles.sectionHeader}>
-            <h3 className={styles.heading}>
-              Stylesheets disagree ({crossSheetConflicts.length})
-            </h3>
+            <h3 className={styles.heading}>Stylesheets disagree ({crossSheetConflicts.length})</h3>
             <fieldset className={styles.bulkActions}>
               <legend className={styles.bulkLegend}>Bulk cross-stylesheet conflict actions</legend>
               <Button
@@ -237,10 +239,9 @@ export function ConflictsStep({
             </fieldset>
           </div>
           <p className={styles.hint}>
-            Two imported stylesheets define the same class differently. Rename
-            keeps each page faithful to its own stylesheet (the listed pages
-            move to the new name); skip uses the first definition everywhere;
-            overwrite makes this definition win the original name.
+            Two imported stylesheets define the same class differently. Rename keeps each page
+            faithful to its own stylesheet (the listed pages move to the new name); skip uses the
+            first definition everywhere; overwrite makes this definition win the original name.
           </p>
           <div className={styles.rows}>
             {crossSheetConflicts.map((conflict) => {
@@ -263,9 +264,7 @@ export function ConflictsStep({
       {tokenConflicts.length > 0 && (
         <section className={styles.section}>
           <div className={styles.sectionHeader}>
-            <h3 className={styles.heading}>
-              Design token conflicts ({tokenConflicts.length})
-            </h3>
+            <h3 className={styles.heading}>Design token conflicts ({tokenConflicts.length})</h3>
             <fieldset className={styles.bulkActions}>
               <legend className={styles.bulkLegend}>Bulk design token conflict actions</legend>
               <Button
@@ -298,10 +297,9 @@ export function ConflictsStep({
             </fieldset>
           </div>
           <p className={styles.hint}>
-            These colour / font variables already exist in this site. Rename keeps
-            the imported value on a new <code>--variable</code> (and rewrites the
-            imported CSS to match); skip keeps your current token; overwrite
-            replaces your token's value.
+            These colour / font variables already exist in this site. Rename keeps the imported
+            value on a new <code>--variable</code> (and rewrites the imported CSS to match); skip
+            keeps your current token; overwrite replaces your token's value.
           </p>
           <div className={styles.rows}>
             {tokenConflicts.map((conflict) => {

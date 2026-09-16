@@ -12,10 +12,7 @@ interface RoleListItem {
   capabilities: string[]
 }
 
-async function listRoles(
-  harness: CapabilityTestHarness,
-  cookie: string,
-): Promise<RoleListItem[]> {
+async function listRoles(harness: CapabilityTestHarness, cookie: string): Promise<RoleListItem[]> {
   const res = await harness.cms('/admin/api/cms/roles', { cookie })
   expect(res.status).toBe(200)
   const body = await readJson<{ roles: RoleListItem[] }>(res)
@@ -55,8 +52,9 @@ describe('role management edge semantics', () => {
     expect(duplicate.status).toBe(409)
     expect(await roleError(duplicate)).toBe('Role slug is already in use')
 
-    const matchingRoles = (await listRoles(harness, ownerCookie))
-      .filter((role) => role.slug === 'duplicate-role')
+    const matchingRoles = (await listRoles(harness, ownerCookie)).filter(
+      (role) => role.slug === 'duplicate-role',
+    )
     expect(matchingRoles).toHaveLength(1)
     expect(matchingRoles[0]?.capabilities).toEqual(['site.read'])
   })
@@ -135,7 +133,9 @@ describe('role management edge semantics', () => {
     })
     expect(systemDelete.status).toBe(409)
     expect(await roleError(systemDelete)).toBe('System roles cannot be deleted')
-    expect((await listRoles(harness, ownerCookie)).find((role) => role.id === 'admin')).toMatchObject({
+    expect(
+      (await listRoles(harness, ownerCookie)).find((role) => role.id === 'admin'),
+    ).toMatchObject({
       isSystem: true,
     })
 
@@ -156,6 +156,8 @@ describe('role management edge semantics', () => {
     })
     expect(assignedDelete.status).toBe(409)
     expect(await roleError(assignedDelete)).toBe('Cannot delete a role assigned to users')
-    expect((await listRoles(harness, ownerCookie)).some((role) => role.id === assignedRoleId)).toBe(true)
+    expect((await listRoles(harness, ownerCookie)).some((role) => role.id === assignedRoleId)).toBe(
+      true,
+    )
   })
 })

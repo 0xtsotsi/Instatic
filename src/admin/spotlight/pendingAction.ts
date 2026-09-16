@@ -73,10 +73,7 @@ const STALE_AFTER_MS = 30_000
  * Queue an action to run on the target workspace's next mount. Idempotent:
  * a second queue call within one navigation overwrites the first.
  */
-export function queuePendingAction(
-  type: PendingActionType,
-  args?: Record<string, string>,
-): void {
+export function queuePendingAction(type: PendingActionType, args?: Record<string, string>): void {
   try {
     const action: PendingAction = { type, args, queuedAt: Date.now() }
     globalThis.sessionStorage?.setItem(STORAGE_KEY, JSON.stringify(action))
@@ -94,9 +91,7 @@ export function queuePendingAction(
  * parent component (e.g. UsersPage) needs to inspect the action to switch
  * tabs before the receiving tab's useEffect consumer fires.
  */
-export function peekPendingAction(
-  type: PendingActionType,
-): PendingAction | null {
+export function peekPendingAction(type: PendingActionType): PendingAction | null {
   const raw = globalThis.sessionStorage?.getItem(STORAGE_KEY) ?? null
   if (!raw) return null
 
@@ -118,9 +113,7 @@ export function peekPendingAction(
  * Read AND CLEAR the queued action if it matches `type` and is not stale.
  * Returns `null` when no matching action is pending.
  */
-export function consumePendingAction(
-  type: PendingActionType,
-): PendingAction | null {
+export function consumePendingAction(type: PendingActionType): PendingAction | null {
   const raw = globalThis.sessionStorage?.getItem(STORAGE_KEY) ?? null
   if (!raw) return null
 

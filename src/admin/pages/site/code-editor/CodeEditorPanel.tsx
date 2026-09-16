@@ -42,15 +42,20 @@ import styles from './CodeEditorPanel.module.css'
 /** Map a SiteFile to the editor's highlighting language (no CM6 imports here). */
 function fileLanguage(file: SiteFile): CodeLanguage {
   switch (file.type) {
-    case 'component': return 'tsx'
-    case 'script': return 'ts'
-    case 'style': return 'css'
+    case 'component':
+      return 'tsx'
+    case 'script':
+      return 'ts'
+    case 'style':
+      return 'css'
     case 'config':
       if (file.path.endsWith('.json')) return 'json'
       if (file.path.endsWith('.ts') || file.path.endsWith('.mts')) return 'ts'
       return 'text'
-    case 'doc': return 'markdown'
-    default: return 'text'
+    case 'doc':
+      return 'markdown'
+    default:
+      return 'text'
   }
 }
 
@@ -86,9 +91,10 @@ export function CodeEditorPanel() {
   const updateNodeProps = useEditorStore((s) => s.updateNodeProps)
 
   // Find the active file (null when no file is open or loading site)
-  const activeFile = activeEditorFileId && site
-    ? (site.files.find((f) => f.id === activeEditorFileId) ?? null)
-    : null
+  const activeFile =
+    activeEditorFileId && site
+      ? (site.files.find((f) => f.id === activeEditorFileId) ?? null)
+      : null
 
   // Current value of the active node-prop buffer (read live so the editor
   // mounts with the node's markup). Looked up in the active page tree.
@@ -108,9 +114,7 @@ export function CodeEditorPanel() {
   const { panelRef, setPanelRef, headerDragProps, panelPositionStyle } = useDraggablePanel(
     'codeeditor',
     () => ({
-      x: typeof window !== 'undefined'
-        ? Math.max(220, (window.innerWidth - PANEL_WIDTH) / 2)
-        : 220,
+      x: typeof window !== 'undefined' ? Math.max(220, (window.innerWidth - PANEL_WIDTH) / 2) : 220,
       y: 80,
     }),
   )
@@ -122,7 +126,9 @@ export function CodeEditorPanel() {
   //
   // `panelRef` is a stable ref identity (React guarantees) — listing it in
   // deps is a no-op but satisfies exhaustive-deps without an opt-out.
-  const activeDocKey = activeEditorFileId ?? (activeCodeBuffer ? `prop:${activeCodeBuffer.nodeId}:${activeCodeBuffer.propKey}` : null)
+  const activeDocKey =
+    activeEditorFileId ??
+    (activeCodeBuffer ? `prop:${activeCodeBuffer.nodeId}:${activeCodeBuffer.propKey}` : null)
   const prevFileIdRef = useRef<string | null>(null)
   useEffect(() => {
     const prev = prevFileIdRef.current
@@ -190,7 +196,10 @@ export function CodeEditorPanel() {
       onClick={(e) => e.stopPropagation()}
       // panelPositionStyle injects --panel-x / --panel-y CSS vars (whitelisted)
       style={panelPositionStyle}
-      className={cn(styles.panel, (!hasActivePreview || !codeEditorPanelOpen) && styles.panelHidden)}
+      className={cn(
+        styles.panel,
+        (!hasActivePreview || !codeEditorPanelOpen) && styles.panelHidden,
+      )}
     >
       <div className={styles.inner}>
         {/* ── Shared Panel Header ──────────────────────────────────────────── */}
@@ -210,11 +219,9 @@ export function CodeEditorPanel() {
               title="Select a file to edit"
               description="Click any file in the Files panel to open it here."
             />
-
           ) : activeFile && (isImageAsset || isNonImageAsset) ? (
             /* Asset file — ImagePreview handles both image and binary cases */
             <ImagePreview file={activeFile} />
-
           ) : editorDoc ? (
             /* Text file OR node-prop buffer — lazy-load the CodeMirror 6 bundle */
             <div className={styles.editorWorkspace}>
@@ -231,7 +238,6 @@ export function CodeEditorPanel() {
                 </Suspense>
               </div>
             </div>
-
           ) : null}
         </div>
       </div>
@@ -255,8 +261,18 @@ export function CodeEditorPanel() {
 type SkeletonLineStyle = CSSProperties & { '--skeleton-line-width': string }
 
 const SKELETON_LINE_WIDTHS = [
-  '72%', '54%', '88%', '40%', '66%', '78%', '48%', '92%', '60%', '34%',
-  '82%', '58%',
+  '72%',
+  '54%',
+  '88%',
+  '40%',
+  '66%',
+  '78%',
+  '48%',
+  '92%',
+  '60%',
+  '34%',
+  '82%',
+  '58%',
 ] as const
 
 export function CodeEditorSkeleton() {

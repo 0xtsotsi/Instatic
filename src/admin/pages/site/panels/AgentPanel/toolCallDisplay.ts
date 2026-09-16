@@ -70,7 +70,12 @@ export function getToolCallDisplay(actionType: string, params: unknown): ToolCal
     case 'delete_node':
       return display('Deleting node', nodeDetail(p.nodeId), 'delete', 'danger')
     case 'update_node_props':
-      return display('Updating node props', nodeBreakpointDetail(p.nodeId, p.breakpointId), 'edit', 'write')
+      return display(
+        'Updating node props',
+        nodeBreakpointDetail(p.nodeId, p.breakpointId),
+        'edit',
+        'write',
+      )
     case 'move_node':
       return display('Moving node', targetDetail('to', p.newParentId), 'move', 'write')
     case 'rename_node':
@@ -114,9 +119,19 @@ export function getToolCallDisplay(actionType: string, params: unknown): ToolCal
     case 'set_font_tokens':
       return display('Updating font tokens', tokenCountDetail(p.tokens), 'tokens', 'style')
     case 'set_type_scale':
-      return display('Updating type scale', scaleDetail(p.groupId, p.namingConvention), 'tokens', 'style')
+      return display(
+        'Updating type scale',
+        scaleDetail(p.groupId, p.namingConvention),
+        'tokens',
+        'style',
+      )
     case 'set_spacing_scale':
-      return display('Updating spacing scale', scaleDetail(p.groupId, p.namingConvention), 'tokens', 'style')
+      return display(
+        'Updating spacing scale',
+        scaleDetail(p.groupId, p.namingConvention),
+        'tokens',
+        'style',
+      )
     case 'render_snapshot':
       return display('Capturing preview', previewDetail(p), 'preview', 'read')
 
@@ -137,13 +152,23 @@ export function getToolCallDisplay(actionType: string, params: unknown): ToolCal
     case 'delete_document':
       return display('Deleting document', contentDocumentDetail(p), 'delete', 'danger')
     case 'set_document_status':
-      return display('Setting document status', titleCase(optionalString(p.status)), 'edit', 'write')
+      return display(
+        'Setting document status',
+        titleCase(optionalString(p.status)),
+        'edit',
+        'write',
+      )
     case 'set_document_field':
       return display('Updating document field', optionalString(p.field), 'edit', 'write')
     case 'set_document_fields':
       return display('Updating document fields', fieldCountDetail(p.fields), 'edit', 'write')
     case 'set_document_author':
-      return display('Setting document author', optionalString(p.authorId ?? p.userId), 'users', 'write')
+      return display(
+        'Setting document author',
+        optionalString(p.authorId ?? p.userId),
+        'users',
+        'write',
+      )
     case 'set_active_document':
       return display('Opening document', contentDocumentDetail(p), 'open', 'read')
     case 'set_active_collection':
@@ -154,7 +179,12 @@ export function getToolCallDisplay(actionType: string, params: unknown): ToolCal
   }
 }
 
-function display(title: string, detail: string, icon: ToolCallIcon, tone: ToolCallTone): ToolCallDisplay {
+function display(
+  title: string,
+  detail: string,
+  icon: ToolCallIcon,
+  tone: ToolCallTone,
+): ToolCallDisplay {
   return { title, detail, icon, tone }
 }
 
@@ -195,7 +225,7 @@ function normalizeToolName(actionType: string): string {
 
 function asRecord(value: unknown): Record<string, unknown> {
   return value && typeof value === 'object' && !Array.isArray(value)
-    ? value as Record<string, unknown>
+    ? (value as Record<string, unknown>)
     : {}
 }
 
@@ -319,23 +349,25 @@ function contentScopeDetail(params: Record<string, unknown>): string {
 }
 
 function collectionDetail(params: Record<string, unknown>): string {
-  return optionalString(params.tableId)
-    || optionalString(params.tableSlug)
+  return optionalString(params.tableId) || optionalString(params.tableSlug)
 }
 
 function contentDocumentDetail(params: Record<string, unknown>): string {
-  return optionalString(params.title)
-    || shortId(params.documentId)
-    || shortId(params.rowId)
-    || collectionDetail(params)
+  return (
+    optionalString(params.title) ||
+    shortId(params.documentId) ||
+    shortId(params.rowId) ||
+    collectionDetail(params)
+  )
 }
 
 function summarizeCss(css: string): string {
   if (!css) return ''
-  const selectors = css
-    .match(/[^{}]+(?=\{)/g)
-    ?.map((selector) => selector.trim().replace(/\s+/g, ' '))
-    .filter(Boolean) ?? []
+  const selectors =
+    css
+      .match(/[^{}]+(?=\{)/g)
+      ?.map((selector) => selector.trim().replace(/\s+/g, ' '))
+      .filter(Boolean) ?? []
   if (selectors.length === 0) return 'CSS changes'
   const head = selectors.slice(0, 2).join(', ')
   return selectors.length > 2 ? `${head} +${selectors.length - 2}` : head

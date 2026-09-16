@@ -30,10 +30,22 @@ import { useEditorStore } from '@site/store/store'
 import { makeSite, makePage, makeNode, makeVC, makeVCNode, makeVCTree } from '../fixtures'
 
 const TREE_ROW_CSS_PATH = join(import.meta.dir, '../../admin/pages/site/ui/Tree/TreeRow.module.css')
-const TREE_DROP_CSS_PATH = join(import.meta.dir, '../../admin/pages/site/ui/Tree/TreeDrop.module.css')
-const TREE_NODE_CSS_PATH = join(import.meta.dir, '../../admin/pages/site/panels/DomPanel/TreeNode.module.css')
-const TREE_NODE_SOURCE_PATH = join(import.meta.dir, '../../admin/pages/site/panels/DomPanel/TreeNode.tsx')
-const DOM_PANEL_SOURCE_PATH = join(import.meta.dir, '../../admin/pages/site/panels/DomPanel/DomPanel.tsx')
+const TREE_DROP_CSS_PATH = join(
+  import.meta.dir,
+  '../../admin/pages/site/ui/Tree/TreeDrop.module.css',
+)
+const TREE_NODE_CSS_PATH = join(
+  import.meta.dir,
+  '../../admin/pages/site/panels/DomPanel/TreeNode.module.css',
+)
+const TREE_NODE_SOURCE_PATH = join(
+  import.meta.dir,
+  '../../admin/pages/site/panels/DomPanel/TreeNode.tsx',
+)
+const DOM_PANEL_SOURCE_PATH = join(
+  import.meta.dir,
+  '../../admin/pages/site/panels/DomPanel/DomPanel.tsx',
+)
 
 afterEach(cleanup)
 
@@ -68,7 +80,11 @@ function loadSite(rootHasChildren = false) {
   const childId = 'node-child-1'
 
   const nodes: Record<string, ReturnType<typeof makeNode>> = {
-    [rootId]: makeNode({ id: rootId, moduleId: 'base.body', children: rootHasChildren ? [childId] : [] }),
+    [rootId]: makeNode({
+      id: rootId,
+      moduleId: 'base.body',
+      children: rootHasChildren ? [childId] : [],
+    }),
   }
   if (rootHasChildren) {
     nodes[childId] = makeNode({ id: childId, moduleId: 'base.text', children: [] })
@@ -200,9 +216,7 @@ function loadLockedSlotInstanceSite() {
   const vc = makeVC({
     id: 'vc-1',
     name: 'Card',
-    tree: makeVCTree(vcRootId, [
-      makeVCNode({ id: vcRootId, moduleId: 'base.body', children: [] }),
-    ]),
+    tree: makeVCTree(vcRootId, [makeVCNode({ id: vcRootId, moduleId: 'base.body', children: [] })]),
   })
 
   const site = makeSite({ pages: [page], visualComponents: [vc] })
@@ -256,7 +270,9 @@ describe('DomPanel — ARIA landmark', () => {
   })
 
   it('uses the visible panel landmark as the F6 focus target', async () => {
-    useEditorStore.setState({ focusedPanel: 'domTree' } as Parameters<typeof useEditorStore.setState>[0])
+    useEditorStore.setState({ focusedPanel: 'domTree' } as Parameters<
+      typeof useEditorStore.setState
+    >[0])
 
     render(<DomPanel />)
 
@@ -321,9 +337,13 @@ describe('DomPanel — data-panel attribute (Guideline #192)', () => {
   it('click events on the panel do not propagate to parent (stopPropagation)', () => {
     let parentClicked = false
     render(
-      <div onClick={() => { parentClicked = true }}>
+      <div
+        onClick={() => {
+          parentClicked = true
+        }}
+      >
         <DomPanel />
-      </div>
+      </div>,
     )
     const panel = screen.getByRole('complementary')
     fireEvent.click(panel)
@@ -407,8 +427,11 @@ describe('DomPanel — tree accessibility', () => {
     expect(css).toContain('.dropAfter::after')
     expect(css).toContain('position: absolute')
 
-    const beforeAfterBlocks = css.match(/\.dropBefore::before,\n\.dropAfter::after\s*\{[^}]*\}/s)?.[0] ?? ''
-    expect(beforeAfterBlocks).not.toMatch(/(?:^|\n)\s*(height:\s*(?:2[89]|[3-9]\d)px|margin|padding)\b/)
+    const beforeAfterBlocks =
+      css.match(/\.dropBefore::before,\n\.dropAfter::after\s*\{[^}]*\}/s)?.[0] ?? ''
+    expect(beforeAfterBlocks).not.toMatch(
+      /(?:^|\n)\s*(height:\s*(?:2[89]|[3-9]\d)px|margin|padding)\b/,
+    )
 
     const insideBlock = css.match(/\.dropInside\s*\{[^}]*\}/s)?.[0] ?? ''
     expect(insideBlock).toContain('outline')
@@ -471,7 +494,9 @@ describe('DomPanel — tree accessibility', () => {
     // Select the root node (root is always visible regardless of expand state).
     // Multi-select: keep `selectedNodeId` and `selectedNodeIds` in sync — the
     // per-row `isSelected` selector reads `selectedNodeIds.includes(nodeId)`.
-    useEditorStore.setState({ selectedNodeId: 'root-1', selectedNodeIds: ['root-1'] } as Parameters<typeof useEditorStore.setState>[0])
+    useEditorStore.setState({ selectedNodeId: 'root-1', selectedNodeIds: ['root-1'] } as Parameters<
+      typeof useEditorStore.setState
+    >[0])
     render(<DomPanel />)
     const selected = screen.getByRole('treeitem', { selected: true })
     expect(selected).toBeDefined()
@@ -479,7 +504,9 @@ describe('DomPanel — tree accessibility', () => {
 
   it('unselected tree node has aria-selected="false"', () => {
     loadSite(true)
-    useEditorStore.setState({ selectedNodeId: null, selectedNodeIds: [] } as Parameters<typeof useEditorStore.setState>[0])
+    useEditorStore.setState({ selectedNodeId: null, selectedNodeIds: [] } as Parameters<
+      typeof useEditorStore.setState
+    >[0])
     render(<DomPanel />)
     const items = screen.getAllByRole('treeitem')
     // All items should have aria-selected=false when nothing selected
@@ -495,9 +522,11 @@ describe('DomPanel — tree accessibility', () => {
     fireEvent.click(screen.getByRole('treeitem', { name: /body/i }))
     fireEvent.doubleClick(screen.getByRole('treeitem', { name: /container/i }))
 
-    const input = await waitFor(() => screen.getByRole('textbox', {
-      name: /rename (base\.container|container)/i,
-    }))
+    const input = await waitFor(() =>
+      screen.getByRole('textbox', {
+        name: /rename (base\.container|container)/i,
+      }),
+    )
     expect((input as HTMLInputElement).disabled).toBe(false)
     expect(input.closest('[role="treeitem"]')?.getAttribute('aria-disabled')).not.toBe('true')
   })
@@ -580,7 +609,9 @@ describe('DomPanel — open container group highlight', () => {
 describe('DomPanel — tree keyboard navigation', () => {
   it('pressing Enter on a tree row selects the node', () => {
     loadSite(true)
-    useEditorStore.setState({ selectedNodeId: null, selectedNodeIds: [] } as Parameters<typeof useEditorStore.setState>[0])
+    useEditorStore.setState({ selectedNodeId: null, selectedNodeIds: [] } as Parameters<
+      typeof useEditorStore.setState
+    >[0])
     render(<DomPanel />)
     // Root is always the first (and only top-level) treeitem visible
     const items = screen.getAllByRole('treeitem')
@@ -592,7 +623,9 @@ describe('DomPanel — tree keyboard navigation', () => {
 
   it('pressing Space on a tree row selects the node', () => {
     loadSite(true)
-    useEditorStore.setState({ selectedNodeId: null, selectedNodeIds: [] } as Parameters<typeof useEditorStore.setState>[0])
+    useEditorStore.setState({ selectedNodeId: null, selectedNodeIds: [] } as Parameters<
+      typeof useEditorStore.setState
+    >[0])
     render(<DomPanel />)
     const items = screen.getAllByRole('treeitem')
     const rootItem = items[0]
@@ -683,9 +716,11 @@ describe('DomPanel — tree keyboard navigation', () => {
     const containerItem = screen.getByRole('treeitem', { name: /container/i })
     fireEvent.doubleClick(containerItem)
 
-    expect(screen.getByRole('textbox', {
-      name: /rename (base\.container|container)/i,
-    })).toBeDefined()
+    expect(
+      screen.getByRole('textbox', {
+        name: /rename (base\.container|container)/i,
+      }),
+    ).toBeDefined()
   })
 
   it('keeps hidden nodes in the tree and marks them with a hidden icon', () => {

@@ -22,12 +22,7 @@ interface TextProps {
   children?: ReactNode
 }
 
-export function Text({
-  variant = 'default',
-  size = 'md',
-  className,
-  children,
-}: TextProps) {
+export function Text({ variant = 'default', size = 'md', className, children }: TextProps) {
   return (
     <p
       className={cn(

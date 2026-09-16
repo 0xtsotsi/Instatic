@@ -9,5 +9,5 @@ export const helpScope: Scope = {
   id: 'help',
   title: 'Keyboard shortcuts',
   placeholder: 'Search shortcuts…',
-  commands: () => [],  // Phase 5
+  commands: () => [], // Phase 5
 }

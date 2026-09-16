@@ -91,7 +91,7 @@ const FORBIDDEN_PATTERNS: ForbiddenPattern[] = [
     regex: /->>'/, // single-quote variant used for scalar text extraction
   },
   {
-    name: "json_extract( — SQLite JSON path extraction; use jsonField() from server/db/jsonExtract.ts",
+    name: 'json_extract( — SQLite JSON path extraction; use jsonField() from server/db/jsonExtract.ts',
     regex: /\bjson_extract\s*\(/i,
   },
 ]
@@ -184,9 +184,7 @@ describe('JSON extraction operator egress — server/ files', () => {
     }
 
     const lines = violations.map(
-      (v) =>
-        `  ${v.file}:${v.line} — [${v.pattern}]\n` +
-        `    matched: ${JSON.stringify(v.match)}`,
+      (v) => `  ${v.file}:${v.line} — [${v.pattern}]\n` + `    matched: ${JSON.stringify(v.match)}`,
     )
 
     throw new Error(

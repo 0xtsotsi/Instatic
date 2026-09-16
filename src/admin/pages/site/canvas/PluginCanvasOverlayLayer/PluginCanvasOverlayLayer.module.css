@@ -11,15 +11,15 @@
  * to the underlying transform layer.
  */
 .layer {
-    position: absolute;
-    inset: 0;
-    pointer-events: none;
-    z-index: 50;
-    overflow: hidden;
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 50;
+  overflow: hidden;
 }
 
 .overlaySlot {
-    position: absolute;
-    inset: 0;
-    pointer-events: none;
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
 }

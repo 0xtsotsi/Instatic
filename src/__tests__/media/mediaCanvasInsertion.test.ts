@@ -31,11 +31,15 @@ function asset(overrides: Partial<CmsMediaAsset>): CmsMediaAsset {
 
 describe('mediaCanvasInsertionForAsset', () => {
   it('turns image assets into base.image defaults', () => {
-    expect(mediaCanvasInsertionForAsset(asset({
-      filename: 'hero.png',
-      mimeType: 'image/png',
-      publicPath: '/uploads/hero.png',
-    }))).toEqual({
+    expect(
+      mediaCanvasInsertionForAsset(
+        asset({
+          filename: 'hero.png',
+          mimeType: 'image/png',
+          publicPath: '/uploads/hero.png',
+        }),
+      ),
+    ).toEqual({
       moduleId: 'base.image',
       defaults: { src: '/uploads/hero.png' },
       name: 'Image',
@@ -43,11 +47,15 @@ describe('mediaCanvasInsertionForAsset', () => {
   })
 
   it('turns video assets into base.video defaults', () => {
-    expect(mediaCanvasInsertionForAsset(asset({
-      filename: 'intro.mp4',
-      mimeType: 'video/mp4',
-      publicPath: '/uploads/intro.mp4',
-    }))).toEqual({
+    expect(
+      mediaCanvasInsertionForAsset(
+        asset({
+          filename: 'intro.mp4',
+          mimeType: 'video/mp4',
+          publicPath: '/uploads/intro.mp4',
+        }),
+      ),
+    ).toEqual({
       moduleId: 'base.video',
       defaults: { videoUrl: '/uploads/intro.mp4' },
       name: 'Video',
@@ -55,18 +63,26 @@ describe('mediaCanvasInsertionForAsset', () => {
   })
 
   it('uses filename fallback buckets when MIME type is generic', () => {
-    expect(mediaCanvasInsertionForAsset(asset({
-      filename: 'clip.webm',
-      mimeType: 'application/octet-stream',
-      publicPath: '/uploads/clip.webm',
-    }))?.moduleId).toBe('base.video')
+    expect(
+      mediaCanvasInsertionForAsset(
+        asset({
+          filename: 'clip.webm',
+          mimeType: 'application/octet-stream',
+          publicPath: '/uploads/clip.webm',
+        }),
+      )?.moduleId,
+    ).toBe('base.video')
   })
 
   it('does not create canvas modules for other asset types', () => {
-    expect(mediaCanvasInsertionForAsset(asset({
-      filename: 'document.pdf',
-      mimeType: 'application/pdf',
-      publicPath: '/uploads/document.pdf',
-    }))).toBeNull()
+    expect(
+      mediaCanvasInsertionForAsset(
+        asset({
+          filename: 'document.pdf',
+          mimeType: 'application/pdf',
+          publicPath: '/uploads/document.pdf',
+        }),
+      ),
+    ).toBeNull()
   })
 })

@@ -14,9 +14,7 @@
  * overriding `base.text` or shadowing another plugin's modules.
  */
 import { BoxStackSolidIcon } from 'pixel-art-icons/icons/box-stack-solid'
-import type {
-  IconComponent,
-} from 'pixel-art-icons/types'
+import type { IconComponent } from 'pixel-art-icons/types'
 import type {
   ModuleComponentProps,
   ModuleDefinition,

@@ -76,13 +76,7 @@ const noop = () => {}
 
 function renderMenu(vcs: VisualComponent[] = []) {
   resetStore(vcs)
-  return render(
-    <TreeBackgroundContextMenu
-      x={100}
-      y={200}
-      onClose={noop}
-    />,
-  )
+  return render(<TreeBackgroundContextMenu x={100} y={200} onClose={noop} />)
 }
 
 function openInsertSubmenu() {
@@ -112,9 +106,9 @@ describe('TreeBackgroundContextMenu — Insert module submenu', () => {
     openInsertSubmenu()
 
     const submenu = screen.getByRole('menu', { name: 'Insert module' })
-    const textOption = within(submenu).getAllByRole('menuitem').find(
-      (el) => el.getAttribute('data-module-id') === 'base.text',
-    )
+    const textOption = within(submenu)
+      .getAllByRole('menuitem')
+      .find((el) => el.getAttribute('data-module-id') === 'base.text')
     expect(textOption).toBeDefined()
     fireEvent.click(textOption!)
 
@@ -162,20 +156,10 @@ describe('TreeBackgroundContextMenu — Paste action', () => {
     // Seed a clipboard entry by copying an actual node first. We add a node,
     // copy it via the public store action, then render the menu. This keeps
     // the test path identical to the runtime path (no faked entries).
-    const insertedId = useEditorStore.getState().insertNode(
-      'base.text',
-      {},
-      'root-home',
-    )
+    const insertedId = useEditorStore.getState().insertNode('base.text', {}, 'root-home')
     useEditorStore.getState().copyNode(insertedId)
 
-    render(
-      <TreeBackgroundContextMenu
-        x={100}
-        y={200}
-        onClose={noop}
-      />,
-    )
+    render(<TreeBackgroundContextMenu x={100} y={200} onClose={noop} />)
 
     expect(screen.getByRole('menuitem', { name: /^paste$/i })).toBeDefined()
   })
@@ -185,11 +169,7 @@ describe('TreeBackgroundContextMenu — Paste action', () => {
 
     // Build a small subtree under root, copy one node, then delete it so the
     // paste lands at root rather than as a sibling next to the original.
-    const containerId = useEditorStore.getState().insertNode(
-      'base.container',
-      {},
-      'root-home',
-    )
+    const containerId = useEditorStore.getState().insertNode('base.container', {}, 'root-home')
     useEditorStore.getState().copyNode(containerId)
     useEditorStore.getState().deleteNode(containerId)
 
@@ -200,13 +180,7 @@ describe('TreeBackgroundContextMenu — Paste action', () => {
       expect(page?.nodes['root-home']?.children.length).toBe(0)
     }
 
-    render(
-      <TreeBackgroundContextMenu
-        x={100}
-        y={200}
-        onClose={noop}
-      />,
-    )
+    render(<TreeBackgroundContextMenu x={100} y={200} onClose={noop} />)
 
     const pasteItem = screen.getByRole('menuitem', { name: /^paste$/i })
     fireEvent.click(pasteItem)

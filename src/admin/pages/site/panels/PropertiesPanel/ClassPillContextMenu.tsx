@@ -2,11 +2,7 @@
 
 import { useRef, useEffect } from 'react'
 import { createPortal } from 'react-dom'
-import {
-  ContextMenu,
-  ContextMenuItem,
-  ContextMenuSeparator,
-} from '@ui/components/ContextMenu'
+import { ContextMenu, ContextMenuItem, ContextMenuSeparator } from '@ui/components/ContextMenu'
 import { ChevronUpIcon } from 'pixel-art-icons/icons/chevron-up'
 import { ChevronDownIcon } from 'pixel-art-icons/icons/chevron-down'
 import { CloseIcon } from 'pixel-art-icons/icons/close'
@@ -97,25 +93,35 @@ function ClassPillContextMenu({
   return (
     <ContextMenu x={x} y={y} ariaLabel="Class actions" onClose={onClose}>
       <ContextMenuItem ref={firstItemRef} onClick={onEdit}>
-        <span aria-hidden="true"><EditSolidIcon size={13} /></span>
+        <span aria-hidden="true">
+          <EditSolidIcon size={13} />
+        </span>
         {locked ? 'View utility' : 'Edit styles'}
       </ContextMenuItem>
       <ContextMenuItem disabled={locked} onClick={onRename}>
-        <span aria-hidden="true"><EditSolidIcon size={13} /></span>
+        <span aria-hidden="true">
+          <EditSolidIcon size={13} />
+        </span>
         Rename
       </ContextMenuItem>
       <ContextMenuSeparator />
       <ContextMenuItem disabled={!canMoveUp} onClick={onMoveUp}>
-        <span aria-hidden="true"><ChevronUpIcon size={13} /></span>
+        <span aria-hidden="true">
+          <ChevronUpIcon size={13} />
+        </span>
         Move up
       </ContextMenuItem>
       <ContextMenuItem disabled={!canMoveDown} onClick={onMoveDown}>
-        <span aria-hidden="true"><ChevronDownIcon size={13} /></span>
+        <span aria-hidden="true">
+          <ChevronDownIcon size={13} />
+        </span>
         Move down
       </ContextMenuItem>
       <ContextMenuSeparator />
       <ContextMenuItem danger onClick={onRemove}>
-        <span aria-hidden="true"><CloseIcon size={13} /></span>
+        <span aria-hidden="true">
+          <CloseIcon size={13} />
+        </span>
         Remove from this element
       </ContextMenuItem>
     </ContextMenu>

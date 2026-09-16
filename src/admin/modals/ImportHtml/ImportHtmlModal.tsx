@@ -155,11 +155,7 @@ interface FragmentPreviewProps {
 
 function FragmentPreview({ result, showIcon, showTag, showClasses }: FragmentPreviewProps) {
   if (!result || result.rootIds.length === 0) {
-    return (
-      <p className={styles.previewEmpty}>
-        No imported nodes
-      </p>
-    )
+    return <p className={styles.previewEmpty}>No imported nodes</p>
   }
 
   const total = Object.keys(result.nodes).length
@@ -270,7 +266,9 @@ export function ImportHtmlModal() {
       const { stripped } = result
       if (stripped.scripts) detailParts.push(`stripped ${stripped.scripts} <script>`)
       if (stripped.inlineHandlers) {
-        detailParts.push(`stripped ${stripped.inlineHandlers} inline handler${stripped.inlineHandlers > 1 ? 's' : ''}`)
+        detailParts.push(
+          `stripped ${stripped.inlineHandlers} inline handler${stripped.inlineHandlers > 1 ? 's' : ''}`,
+        )
       }
       const toastBody = detailParts.length > 0 ? detailParts.join(', ') : undefined
 
@@ -296,12 +294,7 @@ export function ImportHtmlModal() {
           <Button variant="secondary" type="button" onClick={closeModal}>
             Cancel
           </Button>
-          <Button
-            variant="primary"
-            type="button"
-            onClick={handleInsert}
-            disabled={!canInsert}
-          >
+          <Button variant="primary" type="button" onClick={handleInsert} disabled={!canInsert}>
             Insert
           </Button>
         </>
@@ -317,10 +310,7 @@ export function ImportHtmlModal() {
               </div>
             )}
           </div>
-          <div
-            className={styles.codeEditor}
-            data-testid="import-html-code-editor"
-          >
+          <div className={styles.codeEditor} data-testid="import-html-code-editor">
             <Suspense fallback={<div className={styles.editorLoading}>Loading editor</div>}>
               <CodeMirrorEditor
                 docKey="import-html"

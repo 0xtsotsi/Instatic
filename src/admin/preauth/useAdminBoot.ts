@@ -31,7 +31,8 @@ interface PreflightedBootPromises {
 
 function readPreflightedBootPromises(): PreflightedBootPromises | null {
   if (typeof window === 'undefined') return null
-  const candidate = (window as unknown as { __instaticBootPromises?: unknown }).__instaticBootPromises
+  const candidate = (window as unknown as { __instaticBootPromises?: unknown })
+    .__instaticBootPromises
   if (!candidate || typeof candidate !== 'object') return null
   const c = candidate as Record<string, unknown>
   if (!('setupStatus' in c) || !('me' in c) || !('publicSite' in c)) return null
@@ -92,11 +93,11 @@ export function useAdminBoot(): AdminBootResult {
       try {
         const setupStatusPromise = preflighted?.setupStatus ?? getCmsSetupStatus()
         const currentUserPromise: Promise<{ ok: true; user: CmsCurrentUser } | { ok: false }> =
-          preflighted?.me
-            ?? getCurrentCmsUser().then(
-              (u) => ({ ok: true as const, user: u }),
-              () => ({ ok: false as const }),
-            )
+          preflighted?.me ??
+          getCurrentCmsUser().then(
+            (u) => ({ ok: true as const, user: u }),
+            () => ({ ok: false as const }),
+          )
         const setupStatus = await setupStatusPromise
         if (cancelled) return
 
@@ -154,7 +155,9 @@ export function useAdminBoot(): AdminBootResult {
     }
 
     void resolveAuthPhase()
-    return () => { cancelled = true }
+    return () => {
+      cancelled = true
+    }
   }, [])
 
   return { status, phase, currentUser, publicSite, initialError }

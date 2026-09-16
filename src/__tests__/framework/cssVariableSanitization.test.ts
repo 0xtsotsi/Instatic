@@ -11,10 +11,7 @@
  */
 
 import { describe, expect, it } from 'bun:test'
-import type {
-  FrameworkColorSettings,
-  FrameworkSpacingSettings,
-} from '@core/framework-schema'
+import type { FrameworkColorSettings, FrameworkSpacingSettings } from '@core/framework-schema'
 import {
   formatCssVariableBlock,
   generateFrameworkColorVariableSets,

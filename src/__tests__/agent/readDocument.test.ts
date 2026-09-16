@@ -16,17 +16,20 @@ function fixture(): { page: Page; site: SiteDocument } {
   const site = makeSite({
     pages: [page],
     styleRules: {
-      r1: { id: 'r1', name: 'heading', kind: 'ambient', selector: 'h1', order: 0, styles: { color: 'red' } },
+      r1: {
+        id: 'r1',
+        name: 'heading',
+        kind: 'ambient',
+        selector: 'h1',
+        order: 0,
+        styles: { color: 'red' },
+      },
     },
   })
   return { page, site }
 }
 
-function renderDoc(
-  page: Page,
-  site: SiteDocument,
-  options?: AgentDocumentRenderOptions,
-) {
+function renderDoc(page: Page, site: SiteDocument, options?: AgentDocumentRenderOptions) {
   return renderAgentDocument(page, site, registry, options)
 }
 
@@ -211,30 +214,36 @@ describe('renderAgentDocument', () => {
       settings: {
         ...makeSite().settings,
         fonts: {
-          items: [{
-            id: 'font-1',
-            source: 'custom',
-            family: 'Example Sans',
-            variants: ['400'],
-            subsets: ['latin'],
-            files: [{
-              path: '/uploads/example.woff2',
-              format: 'woff2',
-              variant: '400',
-            }],
-            createdAt: 0,
-            updatedAt: 0,
-          }],
-          tokens: [{
-            id: 'token-1',
-            name: 'Heading',
-            variable: 'font-heading',
-            familyId: 'font-1',
-            fallback: 'sans-serif',
-            order: 0,
-            createdAt: 0,
-            updatedAt: 0,
-          }],
+          items: [
+            {
+              id: 'font-1',
+              source: 'custom',
+              family: 'Example Sans',
+              variants: ['400'],
+              subsets: ['latin'],
+              files: [
+                {
+                  path: '/uploads/example.woff2',
+                  format: 'woff2',
+                  variant: '400',
+                },
+              ],
+              createdAt: 0,
+              updatedAt: 0,
+            },
+          ],
+          tokens: [
+            {
+              id: 'token-1',
+              name: 'Heading',
+              variable: 'font-heading',
+              familyId: 'font-1',
+              fallback: 'sans-serif',
+              order: 0,
+              createdAt: 0,
+              updatedAt: 0,
+            },
+          ],
         },
       },
     })
@@ -265,9 +274,8 @@ describe('catalog derivations', () => {
   })
 
   it('filterTokenFamily narrows to one family', async () => {
-    const { describeAgentTokens, filterTokenFamily } = await import(
-      '../../../server/ai/tools/site/render'
-    )
+    const { describeAgentTokens, filterTokenFamily } =
+      await import('../../../server/ai/tools/site/render')
     const tokens = describeAgentTokens(fixture().site)
     const onlyColors = filterTokenFamily(tokens, 'colors')
     expect(onlyColors.colors).toBe(tokens.colors)

@@ -115,7 +115,9 @@ export function ConditionBuilder({
     <>
       {kind === 'container' && (
         <div className={styles.field}>
-          <label htmlFor={nameId} className={styles.label}>Container name (CSS, optional)</label>
+          <label htmlFor={nameId} className={styles.label}>
+            Container name (CSS, optional)
+          </label>
           <Input
             id={nameId}
             fieldSize="sm"
@@ -159,7 +161,9 @@ export function ConditionBuilder({
               value={range.min}
               placeholder="min"
               aria-label="Minimum width"
-              onChange={(e: ChangeEvent<HTMLInputElement>) => applyRange({ ...range, min: e.target.value })}
+              onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                applyRange({ ...range, min: e.target.value })
+              }
             />
             <Input
               fieldSize="sm"
@@ -168,14 +172,18 @@ export function ConditionBuilder({
               value={range.max}
               placeholder="max"
               aria-label="Maximum width"
-              onChange={(e: ChangeEvent<HTMLInputElement>) => applyRange({ ...range, max: e.target.value })}
+              onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                applyRange({ ...range, max: e.target.value })
+              }
             />
             <Select
               value={range.unit}
               fieldSize="sm"
               aria-label="Width unit"
               options={UNIT_OPTIONS}
-              onChange={(e: ChangeEvent<HTMLSelectElement>) => applyRange({ ...range, unit: e.target.value })}
+              onChange={(e: ChangeEvent<HTMLSelectElement>) =>
+                applyRange({ ...range, unit: e.target.value })
+              }
             />
           </div>
         </div>
@@ -183,22 +191,41 @@ export function ConditionBuilder({
 
       <div className={styles.field}>
         <label htmlFor={queryId} className={styles.label}>
-          {kind === 'media' ? 'Media query' : kind === 'container' ? 'Container query' : 'Feature query'}
+          {kind === 'media'
+            ? 'Media query'
+            : kind === 'container'
+              ? 'Container query'
+              : 'Feature query'}
         </label>
         <Input
           id={queryId}
           fieldSize="sm"
           value={query}
-          placeholder={kind === 'media' ? '(orientation: landscape)' : kind === 'container' ? 'min-width: 400px' : 'display: grid'}
+          placeholder={
+            kind === 'media'
+              ? '(orientation: landscape)'
+              : kind === 'container'
+                ? 'min-width: 400px'
+                : 'display: grid'
+          }
           autoComplete="off"
           spellCheck={false}
           onChange={(e) => onQueryChange(e.target.value)}
         />
         {kind === 'supports' && supported !== null && (
-          <span className={`${styles.supportBadge} ${supported ? styles.supportYes : styles.supportNo}`} role="status">
-            {supported
-              ? <><CheckIcon size={11} aria-hidden="true" /> This browser supports it</>
-              : <><CloseIcon size={11} aria-hidden="true" /> Not supported in this browser</>}
+          <span
+            className={`${styles.supportBadge} ${supported ? styles.supportYes : styles.supportNo}`}
+            role="status"
+          >
+            {supported ? (
+              <>
+                <CheckIcon size={11} aria-hidden="true" /> This browser supports it
+              </>
+            ) : (
+              <>
+                <CloseIcon size={11} aria-hidden="true" /> Not supported in this browser
+              </>
+            )}
           </span>
         )}
       </div>

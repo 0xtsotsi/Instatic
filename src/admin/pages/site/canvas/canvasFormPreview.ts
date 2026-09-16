@@ -25,7 +25,10 @@ const DEFAULT_FORM_SUCCESS_MESSAGE = 'Thanks. Your submission was received.'
  * Resolve the editor form-preview state for `nodeId` — `default` unless the
  * node is a form (or a form-message inside one) with an active preview.
  */
-export function resolveEditorFormPreviewState(state: EditorStore, nodeId: string): FormPreviewState {
+export function resolveEditorFormPreviewState(
+  state: EditorStore,
+  nodeId: string,
+): FormPreviewState {
   const formNode = previewedFormNode(state, nodeId)
   if (!formNode) return 'default'
   return state.formPreviewStates[formNode.id] ?? 'default'

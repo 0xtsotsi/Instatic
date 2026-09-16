@@ -32,17 +32,19 @@ export function PagesWidget({ span, editing }: DashboardWidgetRendererProps) {
         <>
           <StatValue
             value={stats.published.toLocaleString()}
-            sub={(
+            sub={
               <>
                 <span>Published</span>
                 {stats.deltaPublishedThisWeek > 0 && (
                   <Delta>+{stats.deltaPublishedThisWeek} this week</Delta>
                 )}
               </>
-            )}
+            }
           />
           <div className={styles.subFootRow}>
-            <span>{stats.drafts} draft{stats.drafts === 1 ? '' : 's'}</span>
+            <span>
+              {stats.drafts} draft{stats.drafts === 1 ? '' : 's'}
+            </span>
             <span>{stats.scheduled} scheduled</span>
           </div>
         </>

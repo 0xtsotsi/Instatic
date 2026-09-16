@@ -6,18 +6,5 @@
  * The .tsx/.ts split between Router.tsx and routerHooks.ts is required for
  * React Fast Refresh: mixing component and non-component exports breaks HMR.
  */
-export {
-  Router,
-  MemoryRouter,
-  Routes,
-  Route,
-  Navigate,
-  Link,
-} from './Router'
-export {
-  matchPath,
-  useLocation,
-  useNavigate,
-  useParams,
-  useInRouterContext,
-} from './routerHooks'
+export { Router, MemoryRouter, Routes, Route, Navigate, Link } from './Router'
+export { matchPath, useLocation, useNavigate, useParams, useInRouterContext } from './routerHooks'

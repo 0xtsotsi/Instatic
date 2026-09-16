@@ -177,14 +177,30 @@ export function CustomPropertiesSection({
               />
             </div>
             <div className={styles.addActions}>
-              <Button variant="secondary" size="xs" onClick={() => { setAdding(false); setError(null) }}>
+              <Button
+                variant="secondary"
+                size="xs"
+                onClick={() => {
+                  setAdding(false)
+                  setError(null)
+                }}
+              >
                 Cancel
               </Button>
-              <Button variant="primary" size="xs" onClick={commitNew} disabled={!newName.trim() || !newValue.trim()}>
+              <Button
+                variant="primary"
+                size="xs"
+                onClick={commitNew}
+                disabled={!newName.trim() || !newValue.trim()}
+              >
                 Add
               </Button>
             </div>
-            {error && <p role="alert" className={styles.error}>{error}</p>}
+            {error && (
+              <p role="alert" className={styles.error}>
+                {error}
+              </p>
+            )}
           </div>
         ) : (
           <Button

@@ -270,19 +270,19 @@
  * Display chips — used for select / multiSelect / relation / overflow.
  * Re-uses the .chip class above; data-tone variants tune the surface.
  */
-.chip[data-tone="tag"] {
+.chip[data-tone='tag'] {
   background: var(--bg-surface);
   border-color: var(--border-muted);
   color: var(--text-muted);
 }
 
-.chip[data-tone="relation"] {
+.chip[data-tone='relation'] {
   background: var(--bg-surface-2);
   border-color: var(--bg-surface-3);
   color: var(--text);
 }
 
-.chip[data-tone="overflow"] {
+.chip[data-tone='overflow'] {
   background: transparent;
   border-color: transparent;
   color: var(--text-subtle);

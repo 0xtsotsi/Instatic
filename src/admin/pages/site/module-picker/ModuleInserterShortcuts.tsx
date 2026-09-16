@@ -3,10 +3,7 @@ import styles from './ModuleInserterDialog.module.css'
 
 export function ModuleInserterShortcuts() {
   return (
-    <div
-      className={styles.shortcutFooter}
-      aria-label="Module inserter keyboard shortcuts"
-    >
+    <div className={styles.shortcutFooter} aria-label="Module inserter keyboard shortcuts">
       <div className={styles.shortcutHint}>
         <Kbd>↑</Kbd>
         <Kbd>↓</Kbd>

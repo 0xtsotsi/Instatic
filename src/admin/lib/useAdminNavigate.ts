@@ -32,9 +32,11 @@ type AdminNavigate = (to: string) => void
 export function useAdminNavigate(): AdminNavigate {
   const navigate = useNavigate()
   return (to) => {
-    const startViewTransition = (document as Document & {
-      startViewTransition?: (callback: () => void) => void
-    }).startViewTransition
+    const startViewTransition = (
+      document as Document & {
+        startViewTransition?: (callback: () => void) => void
+      }
+    ).startViewTransition
     if (typeof startViewTransition !== 'function') {
       void navigate(to)
       return

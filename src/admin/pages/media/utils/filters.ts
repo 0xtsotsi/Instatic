@@ -90,15 +90,13 @@ function compareAssets(a: CmsMediaAsset, b: CmsMediaAsset, sort: MediaSort): num
   }
 }
 
-export function filterMediaAssets(
-  assets: CmsMediaAsset[],
-  filters: MediaFilters,
-): CmsMediaAsset[] {
-  const filtered = assets.filter((asset) =>
-    matchesType(asset, filters.type) &&
-    matchesQuery(asset, filters.q) &&
-    matchesTag(asset, filters.tag) &&
-    matchesFolder(asset, filters.folderId),
+export function filterMediaAssets(assets: CmsMediaAsset[], filters: MediaFilters): CmsMediaAsset[] {
+  const filtered = assets.filter(
+    (asset) =>
+      matchesType(asset, filters.type) &&
+      matchesQuery(asset, filters.q) &&
+      matchesTag(asset, filters.tag) &&
+      matchesFolder(asset, filters.folderId),
   )
   const sort = filters.sort ?? 'newest'
   return filtered.slice().sort((a, b) => compareAssets(a, b, sort))

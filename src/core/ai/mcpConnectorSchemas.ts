@@ -11,16 +11,10 @@
 import { Type, type Static } from '@core/utils/typeboxHelpers'
 import { CORE_CAPABILITIES } from '@core/capabilities'
 
-export const McpConnectorTypeSchema = Type.Union([
-  Type.Literal('local'),
-  Type.Literal('remote'),
-])
+export const McpConnectorTypeSchema = Type.Union([Type.Literal('local'), Type.Literal('remote')])
 export type McpConnectorType = Static<typeof McpConnectorTypeSchema>
 
-export const McpAuthModeSchema = Type.Union([
-  Type.Literal('bearer'),
-  Type.Literal('oauth'),
-])
+export const McpAuthModeSchema = Type.Union([Type.Literal('bearer'), Type.Literal('oauth')])
 export type McpAuthMode = Static<typeof McpAuthModeSchema>
 
 /** Closed enum over the capability vocabulary — bodies are validated, not free text. */

@@ -28,11 +28,12 @@ import { useEffect, useEffectEvent, useState } from 'react'
 import type { Page, SiteDocument } from '@core/page-tree'
 import type { TemplateRenderDataContext } from '@core/templates/dynamicBindings'
 import { useEditorStore } from '@site/store/store'
-import {
-  buildCmsRuntimePreview,
-  type CmsRuntimePreviewResult,
-} from '@core/persistence/cmsRuntime'
-import type { SiteRuntimeDiagnostic, SiteScriptFormat, SiteScriptPlacement } from '@core/site-runtime'
+import { buildCmsRuntimePreview, type CmsRuntimePreviewResult } from '@core/persistence/cmsRuntime'
+import type {
+  SiteRuntimeDiagnostic,
+  SiteScriptFormat,
+  SiteScriptPlacement,
+} from '@core/site-runtime'
 import { getErrorMessage } from '@core/utils/errorMessage'
 
 export type RuntimeScriptStatus = 'idle' | 'building' | 'ready' | 'error'
@@ -199,11 +200,7 @@ export function useRuntimeScriptBuild({
   }
 
   const matchesCurrent = build !== null && build.signature === buildSignature
-  const status: RuntimeScriptStatus = isIdle
-    ? 'idle'
-    : matchesCurrent
-      ? build.status
-      : 'building'
+  const status: RuntimeScriptStatus = isIdle ? 'idle' : matchesCurrent ? build.status : 'building'
   const scripts = isIdle || !matchesCurrent ? EMPTY_SCRIPTS : build.scripts
   const diagnostics = isIdle || !matchesCurrent ? EMPTY_DIAGNOSTICS : build.diagnostics
 

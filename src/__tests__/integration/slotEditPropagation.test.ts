@@ -98,9 +98,7 @@ describe('slot edit propagation — page mode', () => {
     } as Parameters<typeof useEditorStore.setState>[0])
 
     // 2. Drop the VC ref on the page — sync auto-materializes the slot-instance.
-    const refId = useEditorStore
-      .getState()
-      .insertComponentRef('root', 'vc-1')!
+    const refId = useEditorStore.getState().insertComponentRef('root', 'vc-1')!
     expect(refId).toBeTruthy()
 
     const refNode = useEditorStore.getState().site!.pages[0].nodes[refId]
@@ -111,11 +109,9 @@ describe('slot edit propagation — page mode', () => {
     expect(slotInst.props.slotName).toBe('children')
 
     // 3. Insert a base.text into the slot-instance.
-    const textId = useEditorStore.getState().insertNode(
-      'base.text',
-      { text: 'Initial text' },
-      slotInstId,
-    )
+    const textId = useEditorStore
+      .getState()
+      .insertNode('base.text', { text: 'Initial text' }, slotInstId)
     expect(textId).toBeTruthy()
 
     const slotInstAfterInsert = useEditorStore.getState().site!.pages[0].nodes[slotInstId]
@@ -123,17 +119,8 @@ describe('slot edit propagation — page mode', () => {
 
     // 4. Verify that instantiateVCAtRef produces an output containing the
     //    text node with the INITIAL text.
-    let pageNodes = useEditorStore.getState().site!.pages[0].nodes as Record<
-      string,
-      BaseNode
-    >
-    let result = instantiateVCAtRef(
-      vc,
-      {},
-      { children: [textId] },
-      pageNodes,
-      refId,
-    )
+    let pageNodes = useEditorStore.getState().site!.pages[0].nodes as Record<string, BaseNode>
+    let result = instantiateVCAtRef(vc, {}, { children: [textId] }, pageNodes, refId)
     expect(result.nodes[textId]).toBeDefined()
     expect(result.nodes[textId].props.text).toBe('Initial text')
 
@@ -145,21 +132,10 @@ describe('slot edit propagation — page mode', () => {
     expect(textAfterEdit.props.text).toBe('Edited text')
 
     // 7. Re-call instantiateVCAtRef — the inlined output must reflect the edit.
-    pageNodes = useEditorStore.getState().site!.pages[0].nodes as Record<
-      string,
-      BaseNode
-    >
+    pageNodes = useEditorStore.getState().site!.pages[0].nodes as Record<string, BaseNode>
     // Read the latest VC after sync side-effects.
-    const vcLatest = useEditorStore.getState().site!.visualComponents.find(
-      (v) => v.id === 'vc-1',
-    )!
-    result = instantiateVCAtRef(
-      vcLatest,
-      {},
-      { children: [textId] },
-      pageNodes,
-      refId,
-    )
+    const vcLatest = useEditorStore.getState().site!.visualComponents.find((v) => v.id === 'vc-1')!
+    result = instantiateVCAtRef(vcLatest, {}, { children: [textId] }, pageNodes, refId)
     expect(result.nodes[textId]).toBeDefined()
     expect(result.nodes[textId].props.text).toBe('Edited text')
   })

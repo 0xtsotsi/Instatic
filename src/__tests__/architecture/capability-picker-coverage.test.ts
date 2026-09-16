@@ -21,10 +21,10 @@ describe('capability picker coverage', () => {
     if (missing.length > 0) {
       throw new Error(
         `[capability-picker-coverage] capabilities missing from CAPABILITY_META:\n` +
-        missing.map((c) => `  - ${c}`).join('\n') +
-        `\n\nAdd a { label, description } entry in ` +
-        `src/admin/shared/CapabilityPicker/capabilityMeta.ts so the picker ` +
-        `can render a human-readable row for each grant.`,
+          missing.map((c) => `  - ${c}`).join('\n') +
+          `\n\nAdd a { label, description } entry in ` +
+          `src/admin/shared/CapabilityPicker/capabilityMeta.ts so the picker ` +
+          `can render a human-readable row for each grant.`,
       )
     }
     expect(missing).toHaveLength(0)
@@ -36,10 +36,10 @@ describe('capability picker coverage', () => {
     if (missing.length > 0) {
       throw new Error(
         `[capability-picker-coverage] capabilities not assigned to a picker group:\n` +
-        missing.map((c) => `  - ${c}`).join('\n') +
-        `\n\nAdd each capability to the appropriate { title, capabilities } ` +
-        `entry in CAPABILITY_GROUPS so the role-edit dialog renders a ` +
-        `checkbox for it.`,
+          missing.map((c) => `  - ${c}`).join('\n') +
+          `\n\nAdd each capability to the appropriate { title, capabilities } ` +
+          `entry in CAPABILITY_GROUPS so the role-edit dialog renders a ` +
+          `checkbox for it.`,
       )
     }
     expect(missing).toHaveLength(0)
@@ -51,11 +51,11 @@ describe('capability picker coverage', () => {
     if (orphans.length > 0) {
       throw new Error(
         `[capability-picker-coverage] picker references capabilities that ` +
-        `are not in CORE_CAPABILITIES:\n` +
-        orphans.map((c) => `  - ${c}`).join('\n') +
-        `\n\nEither remove them from CAPABILITY_GROUPS or add them to ` +
-        `CORE_CAPABILITIES in both src/core/capabilities.ts and ` +
-        `server/auth/capabilities.ts.`,
+          `are not in CORE_CAPABILITIES:\n` +
+          orphans.map((c) => `  - ${c}`).join('\n') +
+          `\n\nEither remove them from CAPABILITY_GROUPS or add them to ` +
+          `CORE_CAPABILITIES in both src/core/capabilities.ts and ` +
+          `server/auth/capabilities.ts.`,
       )
     }
     expect(orphans).toHaveLength(0)

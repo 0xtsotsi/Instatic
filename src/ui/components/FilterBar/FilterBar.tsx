@@ -11,11 +11,11 @@
  * `role="group"` wrapper. This is intentionally minimal — visuals lean on the
  * existing Button primitive so design tweaks happen in one place.
  */
-import { useEffect, useRef, useState, type ReactNode } from "react";
-import { Button } from "@ui/components/Button";
-import { SearchBar } from "@ui/components/SearchBar";
-import { cn } from "@ui/cn";
-import styles from "./FilterBar.module.css";
+import { useEffect, useRef, useState, type ReactNode } from 'react'
+import { Button } from '@ui/components/Button'
+import { SearchBar } from '@ui/components/SearchBar'
+import { cn } from '@ui/cn'
+import styles from './FilterBar.module.css'
 
 /**
  * Track whether the (horizontally scrollable) chip strip is clipped at its
@@ -27,72 +27,70 @@ import styles from "./FilterBar.module.css";
  * scroll geometry.
  */
 function useEdgeFades() {
-  const ref = useRef<HTMLDivElement>(null);
-  const [edges, setEdges] = useState({ start: false, end: false });
+  const ref = useRef<HTMLDivElement>(null)
+  const [edges, setEdges] = useState({ start: false, end: false })
   useEffect(() => {
-    const el = ref.current;
-    if (!el) return;
+    const el = ref.current
+    if (!el) return
     const update = () => {
-      const max = el.scrollWidth - el.clientWidth;
-      const start = el.scrollLeft > 1;
-      const end = el.scrollLeft < max - 1;
-      setEdges((prev) =>
-        prev.start === start && prev.end === end ? prev : { start, end },
-      );
-    };
-    update();
-    el.addEventListener("scroll", update, { passive: true });
-    const resizeObserver = new ResizeObserver(update);
-    resizeObserver.observe(el);
-    const mutationObserver = new MutationObserver(update);
-    mutationObserver.observe(el, { childList: true, subtree: true });
+      const max = el.scrollWidth - el.clientWidth
+      const start = el.scrollLeft > 1
+      const end = el.scrollLeft < max - 1
+      setEdges((prev) => (prev.start === start && prev.end === end ? prev : { start, end }))
+    }
+    update()
+    el.addEventListener('scroll', update, { passive: true })
+    const resizeObserver = new ResizeObserver(update)
+    resizeObserver.observe(el)
+    const mutationObserver = new MutationObserver(update)
+    mutationObserver.observe(el, { childList: true, subtree: true })
     return () => {
-      el.removeEventListener("scroll", update);
-      resizeObserver.disconnect();
-      mutationObserver.disconnect();
-    };
-  }, []);
-  return { ref, edges };
+      el.removeEventListener('scroll', update)
+      resizeObserver.disconnect()
+      mutationObserver.disconnect()
+    }
+  }, [])
+  return { ref, edges }
 }
 
 export interface FilterBarItem<TValue = string> {
   /** Value compared against `value` to determine the active item. */
-  value: TValue;
+  value: TValue
   /** Display content (text or text + icon). */
-  label: ReactNode;
+  label: ReactNode
   /** Custom aria-label override. */
-  ariaLabel?: string;
+  ariaLabel?: string
   /** Disable an individual item. */
-  disabled?: boolean;
+  disabled?: boolean
 }
 
 interface FilterBarSearchProps {
-  value: string;
-  onValueChange: (value: string) => void;
-  onClear?: () => void;
-  placeholder?: string;
-  ariaLabel?: string;
+  value: string
+  onValueChange: (value: string) => void
+  onClear?: () => void
+  placeholder?: string
+  ariaLabel?: string
 }
 
 interface FilterBarProps<TValue = string> {
-  items: FilterBarItem<TValue>[];
-  value: TValue;
-  onValueChange: (value: TValue) => void;
+  items: FilterBarItem<TValue>[]
+  value: TValue
+  onValueChange: (value: TValue) => void
   /** Optional search bar rendered above the chip row. */
-  search?: FilterBarSearchProps;
+  search?: FilterBarSearchProps
   /** Element rendered to the LEFT of the search bar (same row). Use for
    *  primary actions like "Upload" that belong next to the search field. */
-  searchLeading?: ReactNode;
+  searchLeading?: ReactNode
   /** Element rendered to the RIGHT of the search bar (same row). Use for
    *  compact actions that should visually pair with filtering. */
-  searchTrailing?: ReactNode;
+  searchTrailing?: ReactNode
   /** Inline action(s) appended after the chips (same row, e.g. "Add category"). */
-  inlineActions?: ReactNode;
+  inlineActions?: ReactNode
   /** Trailing slot pinned to the right of the row (e.g. view-mode toggles). */
-  trailing?: ReactNode;
+  trailing?: ReactNode
   /** Aria-label for the chip group container. */
-  groupLabel?: string;
-  className?: string;
+  groupLabel?: string
+  className?: string
 }
 
 export function FilterBar<TValue = string>({
@@ -107,11 +105,11 @@ export function FilterBar<TValue = string>({
   groupLabel,
   className,
 }: FilterBarProps<TValue>) {
-  const { ref: chipsRef, edges } = useEdgeFades();
+  const { ref: chipsRef, edges } = useEdgeFades()
   return (
     <div className={cn(styles.bar, className)}>
-      {search && (
-        searchLeading || searchTrailing ? (
+      {search &&
+        (searchLeading || searchTrailing ? (
           <div className={styles.searchRow}>
             {searchLeading && <div className={styles.searchAction}>{searchLeading}</div>}
             <SearchBar
@@ -133,8 +131,7 @@ export function FilterBar<TValue = string>({
             aria-label={search.ariaLabel}
             className={styles.search}
           />
-        )
-      )}
+        ))}
 
       <div className={styles.row}>
         <div
@@ -146,10 +143,10 @@ export function FilterBar<TValue = string>({
           data-fade-end={edges.end || undefined}
         >
           {items.map((item, index) => {
-            const pressed = item.value === value;
+            const pressed = item.value === value
             return (
               <Button
-                key={typeof item.value === "string" ? item.value : index}
+                key={typeof item.value === 'string' ? item.value : index}
                 className={styles.chip}
                 variant="ghost"
                 size="xs"
@@ -160,12 +157,12 @@ export function FilterBar<TValue = string>({
               >
                 {item.label}
               </Button>
-            );
+            )
           })}
           {inlineActions}
         </div>
         {trailing && <div className={styles.trailing}>{trailing}</div>}
       </div>
     </div>
-  );
+  )
 }

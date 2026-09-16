@@ -1,8 +1,5 @@
 import type { PropertyControl } from '@core/module-engine'
-import {
-  normalizeHtmlAttributeName,
-  sanitizeRenderableHtmlAttribute,
-} from '@core/htmlAttributes'
+import { normalizeHtmlAttributeName, sanitizeRenderableHtmlAttribute } from '@core/htmlAttributes'
 import { escapeHtml } from '@modules/base/utils/escape'
 
 export const HtmlAttributesPropSchemaOptions = { default: {} } as const

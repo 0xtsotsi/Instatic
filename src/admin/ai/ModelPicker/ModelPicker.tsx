@@ -118,9 +118,7 @@ export function ModelPicker({
   useEffect(() => {
     if (credentials.length === 0) return
     let cancelled = false
-    const targets = open
-      ? credentials
-      : credentials.filter((c) => c.id === value?.credentialId)
+    const targets = open ? credentials : credentials.filter((c) => c.id === value?.credentialId)
     for (const cred of targets) {
       if (modelsByCred[cred.id]) continue
       void listModels(cred.providerId, cred.id)
@@ -230,9 +228,7 @@ export function ModelPicker({
 
   function moveActive(direction: 1 | -1) {
     if (flat.length === 0) return
-    const current = activeEntry
-      ? flat.findIndex((f) => f.optionId === activeEntry.optionId)
-      : -1
+    const current = activeEntry ? flat.findIndex((f) => f.optionId === activeEntry.optionId) : -1
     const next = (current + direction + flat.length) % flat.length
     const entry = flat[next]
     setActiveKey(choiceKey(entry.credentialId, entry.modelId))
@@ -289,9 +285,7 @@ export function ModelPicker({
         aria-label={variant === 'field' ? ariaLabel : undefined}
         className={variant === 'field' ? styles.fieldTrigger : styles.inlineTrigger}
       >
-        <span
-          className={cn(styles.triggerLabel, !value && styles.triggerPlaceholder)}
-        >
+        <span className={cn(styles.triggerLabel, !value && styles.triggerPlaceholder)}>
           {activeLabel}
         </span>
         <ChevronDownIcon size={variant === 'field' ? 12 : 10} aria-hidden="true" />
@@ -311,20 +305,22 @@ export function ModelPicker({
           maxHeight={320}
           ariaLabel={ariaLabel}
           onClose={closeMenu}
-          header={searchEnabled ? (
-            <MenuSearchHeader
-              inputRef={searchInputRef}
-              value={query}
-              onValueChange={(next) => {
-                setQuery(next)
-                setActiveKey(null)
-              }}
-              onKeyDown={handleSearchKeyDown}
-              placeholder="Search models…"
-              controls={menuId}
-              activeOptionId={activeOptionId}
-            />
-          ) : undefined}
+          header={
+            searchEnabled ? (
+              <MenuSearchHeader
+                inputRef={searchInputRef}
+                value={query}
+                onValueChange={(next) => {
+                  setQuery(next)
+                  setActiveKey(null)
+                }}
+                onKeyDown={handleSearchKeyDown}
+                placeholder="Search models…"
+                controls={menuId}
+                activeOptionId={activeOptionId}
+              />
+            ) : undefined
+          }
         >
           {showEmpty ? (
             <div className={styles.emptyOption} role="presentation">
@@ -341,7 +337,11 @@ export function ModelPicker({
               // disabled Button is dimmed to 0.38 opacity, which made the group
               // header almost invisible.
               items.push(
-                <div key={`${credentialId}:header`} role="presentation" className={styles.groupHeaderRow}>
+                <div
+                  key={`${credentialId}:header`}
+                  role="presentation"
+                  className={styles.groupHeaderRow}
+                >
                   <span className={styles.groupHeader}>
                     {group.cred.displayLabel}
                     <span className={styles.groupProvider}> · {group.cred.providerId}</span>
@@ -377,7 +377,10 @@ export function ModelPicker({
                       <span className={styles.modelMeta}>
                         {priceLabel && (
                           // in/out price per million tokens
-                          <span className={styles.modelPrice} title="Input / output price per 1M tokens">
+                          <span
+                            className={styles.modelPrice}
+                            title="Input / output price per 1M tokens"
+                          >
                             {priceLabel}
                           </span>
                         )}

@@ -9,11 +9,7 @@ import { PluginSchedulesDialog } from './components/PluginSchedulesDialog/Plugin
 import { isSandboxRelatedError, usePluginsWorkspace } from './hooks/usePluginsWorkspace'
 import { notifyCmsPluginsChanged } from './utils/pluginEvents'
 import { useAuthenticatedAdminUser } from '@admin/sessionContext'
-import {
-  canConfigurePlugins,
-  canInstallPlugins,
-  canManagePluginLifecycle,
-} from '@admin/access'
+import { canConfigurePlugins, canInstallPlugins, canManagePluginLifecycle } from '@admin/access'
 import styles from './PluginsPage.module.css'
 
 // Number of skeleton plugin cards rendered while the installed-plugin
@@ -49,27 +45,29 @@ export function PluginsPage() {
       title="Plugins"
       titleId="plugins-title"
       description="Install admin extensions and control what they add to the CMS."
-      actions={canInstall ? (
-        <>
-          <Button
-            variant="primary"
-            size="md"
-            disabled={uploading}
-            onClick={() => fileInputRef.current?.click()}
-          >
-            <UploadIcon size={15} aria-hidden="true" />
-            <span>{uploading ? 'Uploading' : 'Upload Plugin'}</span>
-          </Button>
-          <input
-            ref={fileInputRef}
-            className={styles.fileInput}
-            aria-label="Plugin file"
-            type="file"
-            accept="application/json,.json,.plugin.json,.pbplugin,.zip,application/zip"
-            onChange={(event) => void vm.handleUpload(event)}
-          />
-        </>
-      ) : null}
+      actions={
+        canInstall ? (
+          <>
+            <Button
+              variant="primary"
+              size="md"
+              disabled={uploading}
+              onClick={() => fileInputRef.current?.click()}
+            >
+              <UploadIcon size={15} aria-hidden="true" />
+              <span>{uploading ? 'Uploading' : 'Upload Plugin'}</span>
+            </Button>
+            <input
+              ref={fileInputRef}
+              className={styles.fileInput}
+              aria-label="Plugin file"
+              type="file"
+              accept="application/json,.json,.plugin.json,.pbplugin,.zip,application/zip"
+              onChange={(event) => void vm.handleUpload(event)}
+            />
+          </>
+        ) : null
+      }
     >
       <div className={styles.pluginsBody} data-testid="plugins-admin-canvas">
         {error && (
@@ -84,8 +82,8 @@ export function PluginsPage() {
                   rel="noopener noreferrer"
                 >
                   sandbox documentation
-                </a>
-                {' '}for what's allowed inside plugin code.
+                </a>{' '}
+                for what's allowed inside plugin code.
               </p>
             )}
           </div>
@@ -95,26 +93,19 @@ export function PluginsPage() {
           <div role="alert" className={styles.removeFailure}>
             <p className={styles.error}>{removeFailure.message}</p>
             <p className={styles.errorHint}>
-              Removing anyway skips the plugin&rsquo;s cleanup code — external
-              resources it created (webhooks, third-party registrations) may
-              remain.
+              Removing anyway skips the plugin&rsquo;s cleanup code — external resources it created
+              (webhooks, third-party registrations) may remain.
             </p>
             <div className={styles.removeFailureActions}>
               <Button
                 variant="destructive"
                 size="sm"
                 disabled={busyPluginId === removeFailure.plugin.id}
-                onClick={() =>
-                  vm.setPendingRemove({ plugin: removeFailure.plugin, force: true })
-                }
+                onClick={() => vm.setPendingRemove({ plugin: removeFailure.plugin, force: true })}
               >
                 Remove anyway
               </Button>
-              <Button
-                variant="secondary"
-                size="sm"
-                onClick={() => vm.setRemoveFailure(null)}
-              >
+              <Button variant="secondary" size="sm" onClick={() => vm.setRemoveFailure(null)}>
                 Dismiss
               </Button>
             </div>
@@ -140,9 +131,7 @@ export function PluginsPage() {
             // flight. PluginCard renders its own universal skeleton
             // body when `loading` is set — no per-page skeleton markup,
             // no mock data.
-            Array.from({ length: SKELETON_CARD_COUNT }, (_, i) => (
-              <PluginCard key={i} loading />
-            ))
+            Array.from({ length: SKELETON_CARD_COUNT }, (_, i) => <PluginCard key={i} loading />)
           ) : payload.plugins.length === 0 ? (
             <p className={styles.emptyState}>No plugins installed yet.</p>
           ) : (
@@ -171,8 +160,7 @@ export function PluginsPage() {
           <PluginSettingsDialog
             pluginId={settingsPluginId}
             pluginName={
-              payload.plugins.find((p) => p.id === settingsPluginId)?.name ??
-              settingsPluginId
+              payload.plugins.find((p) => p.id === settingsPluginId)?.name ?? settingsPluginId
             }
             onClose={() => vm.setSettingsPluginId(null)}
             onSaved={() => {
@@ -186,8 +174,7 @@ export function PluginsPage() {
           <PluginSchedulesDialog
             pluginId={schedulesPluginId}
             pluginName={
-              payload.plugins.find((p) => p.id === schedulesPluginId)?.name ??
-              schedulesPluginId
+              payload.plugins.find((p) => p.id === schedulesPluginId)?.name ?? schedulesPluginId
             }
             canManageLifecycle={canManageLifecycle}
             onClose={() => vm.setSchedulesPluginId(null)}

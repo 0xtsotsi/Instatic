@@ -55,8 +55,22 @@ function makePageWithImageProp(nodeId: string, propKey: string, value: string) {
   return {
     id: 'page-1',
     nodes: {
-      root: { id: 'root', moduleId: 'base.body', props: {}, children: [nodeId], breakpointOverrides: {}, classIds: [] },
-      [nodeId]: { id: nodeId, moduleId: 'test.image', props: { [propKey]: value }, children: [], breakpointOverrides: {}, classIds: [] },
+      root: {
+        id: 'root',
+        moduleId: 'base.body',
+        props: {},
+        children: [nodeId],
+        breakpointOverrides: {},
+        classIds: [],
+      },
+      [nodeId]: {
+        id: nodeId,
+        moduleId: 'test.image',
+        props: { [propKey]: value },
+        children: [],
+        breakpointOverrides: {},
+        classIds: [],
+      },
     },
     rootNodeId: 'root',
   }
@@ -69,7 +83,10 @@ function makePageWithImageProp(nodeId: string, propKey: string, value: string) {
 describe('resolveMediaIdsToPaths (Finding 1)', () => {
   it('empty id list → empty map, zero DB queries issued', async () => {
     let queryCount = 0
-    const db = createFakeDb(async () => { queryCount++; return { rows: [], rowCount: 0 } })
+    const db = createFakeDb(async () => {
+      queryCount++
+      return { rows: [], rowCount: 0 }
+    })
     const map = await resolveMediaIdsToPaths(db, [])
     expect(map.size).toBe(0)
     expect(queryCount).toBe(0)
@@ -141,10 +158,18 @@ describe('resolveMediaIdsToPaths (Finding 1)', () => {
 describe('prefetchMediaAssets (Finding 2)', () => {
   it('page with no image props → empty map, zero DB queries', async () => {
     let queryCount = 0
-    const db = createFakeDb(async () => { queryCount++; return { rows: [], rowCount: 0 } })
+    const db = createFakeDb(async () => {
+      queryCount++
+      return { rows: [], rowCount: 0 }
+    })
     const registry = { get: () => ({ id: 'base.text', schema: {} }) } as unknown as IModuleRegistry
     const page = makePageWithImageProp('n1', 'content', 'hello') as never
-    const map = await prefetchMediaAssets(page as never, { visualComponents: [] } as never, registry, db)
+    const map = await prefetchMediaAssets(
+      page as never,
+      { visualComponents: [] } as never,
+      registry,
+      db,
+    )
     expect(map.size).toBe(0)
     expect(queryCount).toBe(0)
   })
@@ -159,14 +184,40 @@ describe('prefetchMediaAssets (Finding 2)', () => {
     const page = {
       id: 'p',
       nodes: {
-        root: { id: 'root', moduleId: 'base.body', props: {}, children: ['n1', 'n2'], breakpointOverrides: {}, classIds: [] },
-        n1: { id: 'n1', moduleId: 'test.img', props: { src: '/uploads/a.png' }, children: [], breakpointOverrides: {}, classIds: [] },
-        n2: { id: 'n2', moduleId: 'test.img', props: { src: '/uploads/b.png' }, children: [], breakpointOverrides: {}, classIds: [] },
+        root: {
+          id: 'root',
+          moduleId: 'base.body',
+          props: {},
+          children: ['n1', 'n2'],
+          breakpointOverrides: {},
+          classIds: [],
+        },
+        n1: {
+          id: 'n1',
+          moduleId: 'test.img',
+          props: { src: '/uploads/a.png' },
+          children: [],
+          breakpointOverrides: {},
+          classIds: [],
+        },
+        n2: {
+          id: 'n2',
+          moduleId: 'test.img',
+          props: { src: '/uploads/b.png' },
+          children: [],
+          breakpointOverrides: {},
+          classIds: [],
+        },
       },
       rootNodeId: 'root',
     }
     const registry = makeImageRegistry('src')
-    const map = await prefetchMediaAssets(page as never, { visualComponents: [] } as never, registry, db)
+    const map = await prefetchMediaAssets(
+      page as never,
+      { visualComponents: [] } as never,
+      registry,
+      db,
+    )
     expect(queryCount).toBe(1)
     expect(map.size).toBe(0) // both paths not in DB → hits absent from map
   })
@@ -220,7 +271,9 @@ describe('prefetchMediaAssets (Finding 2)', () => {
         },
       },
     }
-    const registry = { get: () => ({ id: 'base.container', schema: {} }) } as unknown as IModuleRegistry
+    const registry = {
+      get: () => ({ id: 'base.container', schema: {} }),
+    } as unknown as IModuleRegistry
 
     const map = await prefetchMediaAssets(page as never, site as never, registry, db)
 
@@ -238,7 +291,12 @@ describe('prefetchMediaAssets (Finding 2)', () => {
     try {
       const page = makePageWithImageProp('n1', 'src', '/uploads/nonexistent.png')
       const registry = makeImageRegistry('src')
-      const map = await prefetchMediaAssets(page as never, { visualComponents: [] } as never, registry, db)
+      const map = await prefetchMediaAssets(
+        page as never,
+        { visualComponents: [] } as never,
+        registry,
+        db,
+      )
       expect(map.has('/uploads/nonexistent.png')).toBe(false)
       expect(map.size).toBe(0)
     } finally {
@@ -255,14 +313,40 @@ describe('prefetchMediaAssets (Finding 2)', () => {
       const page = {
         id: 'p',
         nodes: {
-          root: { id: 'root', moduleId: 'base.body', props: {}, children: ['n1', 'n2'], breakpointOverrides: {}, classIds: [] },
-          n1: { id: 'n1', moduleId: 'test.img', props: { src: '/uploads/hero.png' }, children: [], breakpointOverrides: {}, classIds: [] },
-          n2: { id: 'n2', moduleId: 'test.img', props: { src: '/uploads/logo.png' }, children: [], breakpointOverrides: {}, classIds: [] },
+          root: {
+            id: 'root',
+            moduleId: 'base.body',
+            props: {},
+            children: ['n1', 'n2'],
+            breakpointOverrides: {},
+            classIds: [],
+          },
+          n1: {
+            id: 'n1',
+            moduleId: 'test.img',
+            props: { src: '/uploads/hero.png' },
+            children: [],
+            breakpointOverrides: {},
+            classIds: [],
+          },
+          n2: {
+            id: 'n2',
+            moduleId: 'test.img',
+            props: { src: '/uploads/logo.png' },
+            children: [],
+            breakpointOverrides: {},
+            classIds: [],
+          },
         },
         rootNodeId: 'root',
       }
       const registry = makeImageRegistry('src')
-      const map = await prefetchMediaAssets(page as never, { visualComponents: [] } as never, registry, db)
+      const map = await prefetchMediaAssets(
+        page as never,
+        { visualComponents: [] } as never,
+        registry,
+        db,
+      )
       expect(map.size).toBe(2)
       expect(map.get('/uploads/hero.png')?.id).toBe('asset-1')
       expect(map.get('/uploads/logo.png')?.id).toBe('asset-2')

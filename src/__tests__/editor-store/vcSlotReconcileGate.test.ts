@@ -44,7 +44,11 @@ function loadVCEditingSite(): void {
     id: 'vc-1',
     name: 'Hero',
     tree: makeVCTree('vc-root', [
-      makeVCNode({ id: 'vc-root', moduleId: 'base.body', children: ['outlet-a', 'outlet-b', 'vc-text'] }),
+      makeVCNode({
+        id: 'vc-root',
+        moduleId: 'base.body',
+        children: ['outlet-a', 'outlet-b', 'vc-text'],
+      }),
       makeVCNode({ id: 'outlet-a', moduleId: 'base.slot-outlet', props: { slotName: 'a' } }),
       makeVCNode({ id: 'outlet-b', moduleId: 'base.slot-outlet', props: { slotName: 'b' } }),
       makeVCNode({ id: 'vc-text', moduleId: 'base.text', props: { text: 'hello' } }),
@@ -61,8 +65,18 @@ function loadVCEditingSite(): void {
         props: { componentId: 'vc-1', propOverrides: {} },
         children: ['inst-a', 'inst-b'],
       }),
-      'inst-a': makeNode({ id: 'inst-a', moduleId: 'base.slot-instance', props: { slotName: 'a' }, locked: true }),
-      'inst-b': makeNode({ id: 'inst-b', moduleId: 'base.slot-instance', props: { slotName: 'b' }, locked: true }),
+      'inst-a': makeNode({
+        id: 'inst-a',
+        moduleId: 'base.slot-instance',
+        props: { slotName: 'a' },
+        locked: true,
+      }),
+      'inst-b': makeNode({
+        id: 'inst-b',
+        moduleId: 'base.slot-instance',
+        props: { slotName: 'b' },
+        locked: true,
+      }),
     },
   })
   useEditorStore.getState().loadSite(makeSite({ pages: [page], visualComponents: [vc] }))

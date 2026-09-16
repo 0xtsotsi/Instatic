@@ -107,11 +107,9 @@ describe('slot content reactivity in the canvas', () => {
     // Insert a text node into the slot-instance with INITIAL content.
     let textId = ''
     act(() => {
-      textId = useEditorStore.getState().insertNode(
-        'base.text',
-        { text: 'Initial text' },
-        slotInstId,
-      )!
+      textId = useEditorStore
+        .getState()
+        .insertNode('base.text', { text: 'Initial text' }, slotInstId)!
     })
     expect(textId).toBeTruthy()
 
@@ -141,10 +139,8 @@ describe('slot content reactivity in the canvas', () => {
 })
 
 function combinedCanvasText(): string {
-  const iframes = Array.from(document.querySelectorAll<HTMLIFrameElement>('iframe')).filter(
-    (i) => i.title.startsWith('Canvas frame for '),
+  const iframes = Array.from(document.querySelectorAll<HTMLIFrameElement>('iframe')).filter((i) =>
+    i.title.startsWith('Canvas frame for '),
   )
-  return iframes
-    .map((i) => i.contentDocument?.body.textContent ?? '')
-    .join(' ')
+  return iframes.map((i) => i.contentDocument?.body.textContent ?? '').join(' ')
 }

@@ -26,8 +26,14 @@ describe('SegmentedControl editor chrome variants', () => {
   })
 
   it('uses the recessed tab surface and top fade in Explorer Layers chrome', () => {
-    const explorerSource = readFileSync('src/admin/pages/site/panels/ExplorerPanel/ExplorerPanel.tsx', 'utf8')
-    const domPanelCss = readFileSync('src/admin/pages/site/panels/DomPanel/DomPanel.module.css', 'utf8')
+    const explorerSource = readFileSync(
+      'src/admin/pages/site/panels/ExplorerPanel/ExplorerPanel.tsx',
+      'utf8',
+    )
+    const domPanelCss = readFileSync(
+      'src/admin/pages/site/panels/DomPanel/DomPanel.module.css',
+      'utf8',
+    )
 
     expect(explorerSource).toContain('activeSurface="recessed"')
     expect(domPanelCss).toContain('.searchRow::after')

@@ -39,7 +39,9 @@ export function useClassPickerDerivedState({
     selectedElement,
     activeRuleId: inlineStyleEditing ? null : activeClassId,
   })
-  const ambientSelectorItems = selectorModel.suggestions.filter((item) => item.rule.kind === 'ambient')
+  const ambientSelectorItems = selectorModel.suggestions.filter(
+    (item) => item.rule.kind === 'ambient',
+  )
   const suggestions = useClassPickerSuggestions({
     allClasses,
     assignedIds,
@@ -47,11 +49,10 @@ export function useClassPickerDerivedState({
     query,
     highlightedIndex,
   })
-  const hasSuggestionRows = (
-    suggestions.isEmptyQuery
+  const hasSuggestionRows =
+    (suggestions.isEmptyQuery
       ? suggestions.candidates.length > 0
-      : suggestions.filteredSuggestions.length > 0
-  ) || suggestions.selectorSuggestions.length > 0
+      : suggestions.filteredSuggestions.length > 0) || suggestions.selectorSuggestions.length > 0
 
   return {
     visibleAssignedIds,

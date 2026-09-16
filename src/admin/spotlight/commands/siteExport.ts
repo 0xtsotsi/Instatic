@@ -16,7 +16,17 @@ export function getSiteExportCommands(): Command[] {
       subtitle: 'Download a full or partial site bundle — pages, media, folders, redirects',
       group: 'data',
       iconName: 'arrow-down',
-      keywords: ['export', 'site', 'bundle', 'backup', 'download', 'json', 'migrate', 'transfer', 'snapshot'],
+      keywords: [
+        'export',
+        'site',
+        'bundle',
+        'backup',
+        'download',
+        'json',
+        'migrate',
+        'transfer',
+        'snapshot',
+      ],
       workspaces: ['any'],
       capability: 'data.export',
       run: async (ctx) => {

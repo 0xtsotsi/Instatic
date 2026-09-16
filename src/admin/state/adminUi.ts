@@ -136,19 +136,19 @@ export const useAdminUi = create<AdminUiState>((set) => ({
   closeSiteImport: () => set({ siteImportOpen: false }),
 
   siteExport: null,
-  openSiteExport: (context) => set({
-    siteExport: {
-      activeTableId: context?.activeTableId ?? null,
-      selectedRowIds: context?.selectedRowIds ?? [],
-      initialScope: context?.initialScope ?? 'all',
-    },
-  }),
+  openSiteExport: (context) =>
+    set({
+      siteExport: {
+        activeTableId: context?.activeTableId ?? null,
+        selectedRowIds: context?.selectedRowIds ?? [],
+        initialScope: context?.initialScope ?? 'all',
+      },
+    }),
   closeSiteExport: () => set({ siteExport: null }),
 
   siteName: null,
   siteFaviconUrl: null,
-  setSiteSummary: ({ name, faviconUrl }) =>
-    set({ siteName: name, siteFaviconUrl: faviconUrl }),
+  setSiteSummary: ({ name, faviconUrl }) => set({ siteName: name, siteFaviconUrl: faviconUrl }),
 
   activeLivePath: null,
   setActiveLivePath: (path) => set({ activeLivePath: path }),

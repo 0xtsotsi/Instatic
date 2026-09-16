@@ -37,9 +37,7 @@ export function MultiSelectCell({
   }
 
   const selectedOptions = field.options.filter((o) => selected.includes(o.id))
-  const buttonLabel = selected.length === 0
-    ? 'Select options…'
-    : `${selected.length} selected`
+  const buttonLabel = selected.length === 0 ? 'Select options…' : `${selected.length} selected`
 
   return (
     <div className={styles.multiSelectWrapper}>
@@ -63,7 +61,9 @@ export function MultiSelectCell({
 
       {!readOnly && (
         <Button
-          ref={(el) => { anchorRef.current = el }}
+          ref={(el) => {
+            anchorRef.current = el
+          }}
           variant="ghost"
           size="xs"
           aria-label={ariaLabel ?? `${field.label}: ${buttonLabel}`}
@@ -76,30 +76,31 @@ export function MultiSelectCell({
         </Button>
       )}
 
-      {open && createPortal(
-        <ContextMenu
-          ariaLabel={`${field.label} options`}
-          anchorRef={anchorRef}
-          side="auto"
-          align="start"
-          offset={4}
-          minWidth={160}
-          onClose={() => setOpen(false)}
-        >
-          {field.options.map((opt) => (
-            <ContextMenuItem
-              key={opt.id}
-              role="option"
-              aria-selected={selected.includes(opt.id)}
-              onClick={() => toggle(opt.id)}
-            >
-              {selected.includes(opt.id) ? '✓ ' : '  '}
-              {opt.label}
-            </ContextMenuItem>
-          ))}
-        </ContextMenu>,
-        document.body,
-      )}
+      {open &&
+        createPortal(
+          <ContextMenu
+            ariaLabel={`${field.label} options`}
+            anchorRef={anchorRef}
+            side="auto"
+            align="start"
+            offset={4}
+            minWidth={160}
+            onClose={() => setOpen(false)}
+          >
+            {field.options.map((opt) => (
+              <ContextMenuItem
+                key={opt.id}
+                role="option"
+                aria-selected={selected.includes(opt.id)}
+                onClick={() => toggle(opt.id)}
+              >
+                {selected.includes(opt.id) ? '✓ ' : '  '}
+                {opt.label}
+              </ContextMenuItem>
+            ))}
+          </ContextMenu>,
+          document.body,
+        )}
     </div>
   )
 }

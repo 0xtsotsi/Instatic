@@ -136,12 +136,7 @@ export function buildAssetPlan(
 
   // --- Normalise node fragments ---
   const normalizedPagePlans: PagePlan[] = pagePlans.map((plan) => {
-    const normalizedFragment = normalizeFragment(
-      plan.nodeFragment,
-      plan.source,
-      fileMap,
-      assetMap,
-    )
+    const normalizedFragment = normalizeFragment(plan.nodeFragment, plan.source, fileMap, assetMap)
     return { ...plan, nodeFragment: normalizedFragment }
   })
 
@@ -188,14 +183,23 @@ export function buildAssetPlan(
   for (const [filePath, entry] of Object.entries(fileMap.files)) {
     if (assetMap.has(filePath)) continue
     const mimeType = entry.mimeType ?? guessMimeType(filePath)
-    if (NON_ASSET_MIME_PREFIXES.some((prefix) => mimeType.toLowerCase().startsWith(prefix))) continue
+    if (NON_ASSET_MIME_PREFIXES.some((prefix) => mimeType.toLowerCase().startsWith(prefix)))
+      continue
     if (!isImportUploadableMimeType(mimeType)) continue
     assetMap.set(filePath, { sourcePath: filePath, mimeType, bytes: entry.bytes })
   }
 
   const assets = Array.from(assetMap.values())
 
-  return { normalizedPagePlans, normalizedStyleRules, styleRuleSources, stylesheets, fonts, assets, warnings }
+  return {
+    normalizedPagePlans,
+    normalizedStyleRules,
+    styleRuleSources,
+    stylesheets,
+    fonts,
+    assets,
+    warnings,
+  }
 }
 
 /**
@@ -240,7 +244,10 @@ function buildFontFamilies(
   warnings: ImportWarning[],
 ): ImportFontFamily[] {
   // family-lowercase → { display family, files, seen (variant) }
-  const byFamily = new Map<string, { family: string; files: ImportFontFile[]; seenVariants: Set<string> }>()
+  const byFamily = new Map<
+    string,
+    { family: string; files: ImportFontFile[]; seenVariants: Set<string> }
+  >()
 
   for (const { cssPath, fontFaces } of cssFileResults) {
     if (!fontFaces || fontFaces.length === 0) continue
@@ -308,7 +315,12 @@ function normalizeFragment(
     // payloads — normalise them to FileMap keys exactly like CSS-rule
     // background values so `applyAssetRewrites` can swap in the media URL.
     const newInlineStyles = node.inlineStyles
-      ? normalizeCssBag(node.inlineStyles as Record<string, string>, htmlFilePath, fileMap, assetMap)
+      ? normalizeCssBag(
+          node.inlineStyles as Record<string, string>,
+          htmlFilePath,
+          fileMap,
+          assetMap,
+        )
       : undefined
     normalizedNodes[id] = {
       ...node,
@@ -403,7 +415,10 @@ function normalizeSrcset(
   fileMap: FileMap,
   assetMap: Map<string, { sourcePath: string; mimeType: string; bytes: Uint8Array }>,
 ): string {
-  const parts = srcset.split(',').map((s) => s.trim()).filter(Boolean)
+  const parts = srcset
+    .split(',')
+    .map((s) => s.trim())
+    .filter(Boolean)
   const normalized = parts.map((part) => {
     const [urlPart, ...descriptors] = part.split(/\s+/)
     if (!urlPart) return part
@@ -595,4 +610,3 @@ function replaceRawUrlInValue(value: string, rawUrl: string, fileMapKey: string)
   const re = new RegExp(`url\\(\\s*(['"]?)${escaped}\\1\\s*\\)`, 'g')
   return value.replace(re, `url('${fileMapKey}')`)
 }
-

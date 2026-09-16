@@ -6,8 +6,4 @@ export {
   Skeleton,
   SkeletonCircle,
 } from './Skeleton'
-export type {
-  SkeletonBlockProps,
-  SkeletonCardsProps,
-  SkeletonRowsProps,
-} from './Skeleton'
+export type { SkeletonBlockProps, SkeletonCardsProps, SkeletonRowsProps } from './Skeleton'

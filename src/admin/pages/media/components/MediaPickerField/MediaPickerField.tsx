@@ -112,12 +112,12 @@ export function MediaPickerField({
   // button so screen-reader / test queries that target one don't
   // accidentally pick up the other.
   const onTileClick = asset && onEdit ? onEdit : onBrowse
-  const tileAria = asset && onEdit
-    ? `Edit ${asset.filename} in viewer`
-    : `Open the ${subject} library`
-  const tileTooltip = asset && onEdit
-    ? 'Click to edit this asset (alt text, caption, tags…)'
-    : `Open the media library to ${populated ? 'pick a different' : 'pick a'} ${subject}`
+  const tileAria =
+    asset && onEdit ? `Edit ${asset.filename} in viewer` : `Open the ${subject} library`
+  const tileTooltip =
+    asset && onEdit
+      ? 'Click to edit this asset (alt text, caption, tags…)'
+      : `Open the media library to ${populated ? 'pick a different' : 'pick a'} ${subject}`
 
   return (
     <div className={styles.field}>
@@ -236,9 +236,10 @@ function PickedTile({
     )
   } else {
     // Populated.
-    const thumbUrl = mediaKind === 'image' || asset.mimeType.startsWith('image/')
-      ? pickVariantUrl(asset, 48)
-      : null
+    const thumbUrl =
+      mediaKind === 'image' || asset.mimeType.startsWith('image/')
+        ? pickVariantUrl(asset, 48)
+        : null
     const blurUrl = thumbUrl ? blurHashToDataUrl(asset.blurHash) : null
     const thumbStyle = blurUrl
       ? ({ backgroundImage: `url(${blurUrl})`, backgroundSize: 'cover' } as React.CSSProperties)

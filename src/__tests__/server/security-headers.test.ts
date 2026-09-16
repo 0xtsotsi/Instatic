@@ -186,10 +186,10 @@ describe('/uploads/* responses via router (integration)', () => {
     const uploadsDir = mkdtempSync(join(tmpdir(), 'instatic-sec-test-'))
     try {
       writeFileSync(join(uploadsDir, 'photo.png'), 'fake-png-bytes')
-      const res = await handleServerRequest(
-        new Request('http://localhost/uploads/photo.png'),
-        { db: fakeDb, uploadsDir },
-      )
+      const res = await handleServerRequest(new Request('http://localhost/uploads/photo.png'), {
+        db: fakeDb,
+        uploadsDir,
+      })
       expect(res.status).toBe(200)
       expect(res.headers.get('content-security-policy')).toBe("default-src 'none'")
       expect(res.headers.get('x-content-type-options')).toBe('nosniff')
@@ -202,10 +202,10 @@ describe('/uploads/* responses via router (integration)', () => {
     const uploadsDir = mkdtempSync(join(tmpdir(), 'instatic-sec-test-'))
     try {
       writeFileSync(join(uploadsDir, 'data.html'), '<script>evil()</script>')
-      const res = await handleServerRequest(
-        new Request('http://localhost/uploads/data.html'),
-        { db: fakeDb, uploadsDir },
-      )
+      const res = await handleServerRequest(new Request('http://localhost/uploads/data.html'), {
+        db: fakeDb,
+        uploadsDir,
+      })
       expect(res.status).toBe(200)
       expect(res.headers.get('content-security-policy')).toBe("default-src 'none'")
       expect(res.headers.get('content-disposition')).toBe('attachment')

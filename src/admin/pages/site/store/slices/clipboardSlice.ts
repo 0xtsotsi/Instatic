@@ -134,10 +134,7 @@ function topLevelOnly(page: Page, ids: string[]): string[] {
 // Slice implementation
 // ---------------------------------------------------------------------------
 
-export const createClipboardSlice: EditorStoreSliceCreator<ClipboardSlice> = (
-  set,
-  get,
-) => {
+export const createClipboardSlice: EditorStoreSliceCreator<ClipboardSlice> = (set, get) => {
   const { mutateSiteState } = buildSiteHelpers(set, get)
 
   // Hydrate the in-memory entry from localStorage at slice creation. The
@@ -260,12 +257,14 @@ export const createClipboardSlice: EditorStoreSliceCreator<ClipboardSlice> = (
         const draftPage = site.pages.find((p) => p.id === draft.activePageId)
         if (!draftPage) return false
 
-        newRootIds.push(...insertSnapshotSubtrees(
-          draftPage,
-          site,
-          { rootNodeIds: entry.rootNodeIds, nodes: entry.nodes, classes: entry.classes },
-          location,
-        ))
+        newRootIds.push(
+          ...insertSnapshotSubtrees(
+            draftPage,
+            site,
+            { rootNodeIds: entry.rootNodeIds, nodes: entry.nodes, classes: entry.classes },
+            location,
+          ),
+        )
 
         return newRootIds.length > 0
       })

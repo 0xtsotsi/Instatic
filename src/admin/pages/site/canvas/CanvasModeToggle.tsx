@@ -48,7 +48,11 @@ interface CanvasModeToggleProps {
   peek?: boolean
 }
 
-export function CanvasModeToggle({ scriptStatus, onRefreshScripts, peek = false }: CanvasModeToggleProps) {
+export function CanvasModeToggle({
+  scriptStatus,
+  onRefreshScripts,
+  peek = false,
+}: CanvasModeToggleProps) {
   const view = useEditorStore((s) => s.canvasView)
   const setView = useEditorStore((s) => s.setCanvasView)
   const breakpoints = useEditorStore((s) => s.site?.breakpoints ?? EMPTY_BREAKPOINTS)
@@ -75,101 +79,101 @@ export function CanvasModeToggle({ scriptStatus, onRefreshScripts, peek = false 
           data-testid="canvas-mode-toggle"
           onClick={stopCanvasInteraction}
         >
-      <div role="tablist" aria-label="Canvas view" className={styles.tablist}>
-        <Tooltip content="Design mode (multi-breakpoint canvas)">
-          <button
-            type="button"
-            role="tab"
-            aria-selected={view === 'design'}
-            aria-label="Design"
-            data-testid="canvas-mode-toggle-design"
-            className={cn(styles.tab, view === 'design' && styles.tabActive)}
-            onClick={() => setView('design')}
-          >
-            <CursorMinimalSolidIcon size={14} aria-hidden="true" />
-          </button>
-        </Tooltip>
-        <Tooltip content="Live mode (single real-size editable frame)">
-          <button
-            type="button"
-            role="tab"
-            aria-selected={view === 'live'}
-            aria-label="Live"
-            data-testid="canvas-mode-toggle-live"
-            className={cn(styles.tab, view === 'live' && styles.tabActive)}
-            onClick={() => setView('live')}
-          >
-            <EyeSolidIcon size={14} aria-hidden="true" />
-          </button>
-        </Tooltip>
-      </div>
-
-      {/* Run scripts toggle — injects the site's bundled runtime scripts into
-          the editable frames so authored behaviour runs while editing. */}
-      <span className={styles.divider} aria-hidden="true" />
-      <Tooltip content="Run site scripts inside the editable frames">
-        <button
-          type="button"
-          aria-pressed={runScripts}
-          aria-label="Run scripts"
-          data-testid="canvas-run-scripts-toggle"
-          className={cn(styles.tab, runScripts && styles.tabActive)}
-          data-script-status={runScripts ? scriptStatus : undefined}
-          onClick={() => setRunScripts(!runScripts)}
-        >
-          <CodeIcon size={14} aria-hidden="true" />
-        </button>
-      </Tooltip>
-      {runScripts && (
-        <Tooltip content="Re-run scripts from current site state">
-          <button
-            type="button"
-            aria-label="Refresh scripts"
-            data-testid="canvas-run-scripts-refresh"
-            className={styles.tab}
-            disabled={scriptStatus === 'building'}
-            onClick={() => onRefreshScripts()}
-          >
-            <ReloadIcon size={14} aria-hidden="true" />
-          </button>
-        </Tooltip>
-      )}
-
-      {/* Breakpoint switcher — only in live mode. Design mode keeps its own
-          breakpoint context selector elsewhere on the canvas chrome. */}
-      {view === 'live' && breakpoints.length > 0 && (
-        <>
-          <span className={styles.divider} aria-hidden="true" />
-          <div
-            role="radiogroup"
-            aria-label="Live frame width"
-            className={styles.breakpointGroup}
-            data-testid="canvas-live-breakpoints"
-          >
-            {breakpoints.map((breakpoint) => {
-              const active = breakpoint.id === activeBreakpointId
-              return (
-                <Tooltip
-                  key={breakpoint.id}
-                  content={`${breakpoint.label} · ${breakpoint.width}px`}
-                >
-                  <button
-                    type="button"
-                    role="radio"
-                    aria-checked={active}
-                    aria-label={`Frame width: ${breakpoint.label} (${breakpoint.width}px)`}
-                    data-testid={`canvas-live-breakpoint-${breakpoint.id}`}
-                    className={cn(styles.tab, active && styles.tabActive)}
-                    onClick={() => setActiveBreakpoint(breakpoint.id)}
-                  >
-                    <BreakpointIcon name={breakpoint.icon} />
-                  </button>
-                </Tooltip>
-              )
-            })}
+          <div role="tablist" aria-label="Canvas view" className={styles.tablist}>
+            <Tooltip content="Design mode (multi-breakpoint canvas)">
+              <button
+                type="button"
+                role="tab"
+                aria-selected={view === 'design'}
+                aria-label="Design"
+                data-testid="canvas-mode-toggle-design"
+                className={cn(styles.tab, view === 'design' && styles.tabActive)}
+                onClick={() => setView('design')}
+              >
+                <CursorMinimalSolidIcon size={14} aria-hidden="true" />
+              </button>
+            </Tooltip>
+            <Tooltip content="Live mode (single real-size editable frame)">
+              <button
+                type="button"
+                role="tab"
+                aria-selected={view === 'live'}
+                aria-label="Live"
+                data-testid="canvas-mode-toggle-live"
+                className={cn(styles.tab, view === 'live' && styles.tabActive)}
+                onClick={() => setView('live')}
+              >
+                <EyeSolidIcon size={14} aria-hidden="true" />
+              </button>
+            </Tooltip>
           </div>
-        </>
-      )}
+
+          {/* Run scripts toggle — injects the site's bundled runtime scripts into
+          the editable frames so authored behaviour runs while editing. */}
+          <span className={styles.divider} aria-hidden="true" />
+          <Tooltip content="Run site scripts inside the editable frames">
+            <button
+              type="button"
+              aria-pressed={runScripts}
+              aria-label="Run scripts"
+              data-testid="canvas-run-scripts-toggle"
+              className={cn(styles.tab, runScripts && styles.tabActive)}
+              data-script-status={runScripts ? scriptStatus : undefined}
+              onClick={() => setRunScripts(!runScripts)}
+            >
+              <CodeIcon size={14} aria-hidden="true" />
+            </button>
+          </Tooltip>
+          {runScripts && (
+            <Tooltip content="Re-run scripts from current site state">
+              <button
+                type="button"
+                aria-label="Refresh scripts"
+                data-testid="canvas-run-scripts-refresh"
+                className={styles.tab}
+                disabled={scriptStatus === 'building'}
+                onClick={() => onRefreshScripts()}
+              >
+                <ReloadIcon size={14} aria-hidden="true" />
+              </button>
+            </Tooltip>
+          )}
+
+          {/* Breakpoint switcher — only in live mode. Design mode keeps its own
+          breakpoint context selector elsewhere on the canvas chrome. */}
+          {view === 'live' && breakpoints.length > 0 && (
+            <>
+              <span className={styles.divider} aria-hidden="true" />
+              <div
+                role="radiogroup"
+                aria-label="Live frame width"
+                className={styles.breakpointGroup}
+                data-testid="canvas-live-breakpoints"
+              >
+                {breakpoints.map((breakpoint) => {
+                  const active = breakpoint.id === activeBreakpointId
+                  return (
+                    <Tooltip
+                      key={breakpoint.id}
+                      content={`${breakpoint.label} · ${breakpoint.width}px`}
+                    >
+                      <button
+                        type="button"
+                        role="radio"
+                        aria-checked={active}
+                        aria-label={`Frame width: ${breakpoint.label} (${breakpoint.width}px)`}
+                        data-testid={`canvas-live-breakpoint-${breakpoint.id}`}
+                        className={cn(styles.tab, active && styles.tabActive)}
+                        onClick={() => setActiveBreakpoint(breakpoint.id)}
+                      >
+                        <BreakpointIcon name={breakpoint.icon} />
+                      </button>
+                    </Tooltip>
+                  )
+                })}
+              </div>
+            </>
+          )}
         </div>
       </div>
     </div>

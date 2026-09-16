@@ -1,7 +1,4 @@
-import type {
-  MouseEvent as ReactMouseEvent,
-  PointerEvent as ReactPointerEvent,
-} from 'react'
+import type { MouseEvent as ReactMouseEvent, PointerEvent as ReactPointerEvent } from 'react'
 import type { IconComponent } from 'pixel-art-icons/types'
 import { BracesIcon } from 'pixel-art-icons/icons/braces'
 import { HandGrabSolidIcon } from 'pixel-art-icons/icons/hand-grab-solid'
@@ -37,19 +34,13 @@ interface InserterItemButtonProps {
   onPick: () => void
   favorite: boolean
   onToggleFavorite: () => void
-  onPointerDown: (
-    item: ModuleInserterItem,
-    event: ReactPointerEvent<HTMLButtonElement>,
-  ) => void
+  onPointerDown: (item: ModuleInserterItem, event: ReactPointerEvent<HTMLButtonElement>) => void
   /**
    * Right-click handler — saved layouts open a manage (rename/delete) menu.
    * Attached to the item shell (not the inner button) so it still fires on
    * disabled items.
    */
-  onContextMenu?: (
-    item: ModuleInserterItem,
-    event: ReactMouseEvent<HTMLDivElement>,
-  ) => void
+  onContextMenu?: (item: ModuleInserterItem, event: ReactMouseEvent<HTMLDivElement>) => void
 }
 
 function stopFavoritePointer(event: ReactPointerEvent<HTMLButtonElement>) {

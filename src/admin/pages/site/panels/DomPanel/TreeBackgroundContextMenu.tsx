@@ -41,16 +41,10 @@ interface TreeBackgroundContextMenuProps {
   onClose: () => void
 }
 
-export function TreeBackgroundContextMenu({
-  x,
-  y,
-  onClose,
-}: TreeBackgroundContextMenuProps) {
+export function TreeBackgroundContextMenu({ x, y, onClose }: TreeBackgroundContextMenuProps) {
   const firstItemRef = useRef<HTMLButtonElement>(null)
 
-  const rootNodeId = useEditorStore(
-    (s) => selectActiveCanvasPage(s)?.rootNodeId ?? null,
-  )
+  const rootNodeId = useEditorStore((s) => selectActiveCanvasPage(s)?.rootNodeId ?? null)
   const insertComponentRef = useEditorStore((s) => s.insertComponentRef)
   const pasteNodeAction = useEditorStore((s) => s.pasteNode)
   const insertModule = useInsertModule()
@@ -89,17 +83,13 @@ export function TreeBackgroundContextMenu({
   if (!rootNodeId) return null
 
   return (
-    <UIContextMenu
-      x={x}
-      y={y}
-      ariaLabel="Tree background options"
-      animateExit
-      onClose={onClose}
-    >
+    <UIContextMenu x={x} y={y} ariaLabel="Tree background options" animateExit onClose={onClose}>
       {canPaste && (
         <>
           <ContextMenuItem ref={firstItemRef} onClick={handlePaste}>
-            <span aria-hidden="true"><FilesStack2SolidIcon size={13} /></span>
+            <span aria-hidden="true">
+              <FilesStack2SolidIcon size={13} />
+            </span>
             Paste
           </ContextMenuItem>
           <ContextMenuSeparator />
@@ -117,10 +107,7 @@ export function TreeBackgroundContextMenu({
         // should close.
         closeOnItemClickOnly
       >
-        <ModulePicker
-          onSelectModule={handleSelectModule}
-          onSelectVC={handleSelectVC}
-        />
+        <ModulePicker onSelectModule={handleSelectModule} onSelectVC={handleSelectVC} />
       </ContextMenuSubmenu>
     </UIContextMenu>
   )

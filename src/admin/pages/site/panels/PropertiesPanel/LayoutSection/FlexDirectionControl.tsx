@@ -17,7 +17,12 @@ interface FlexDirectionControlProps {
   onClear: () => void
 }
 
-export function FlexDirectionControl({ value, isSet, onChange, onClear }: FlexDirectionControlProps) {
+export function FlexDirectionControl({
+  value,
+  isSet,
+  onChange,
+  onClear,
+}: FlexDirectionControlProps) {
   return (
     <LabeledControl label="Direction" isSet={isSet}>
       <SegmentedControl

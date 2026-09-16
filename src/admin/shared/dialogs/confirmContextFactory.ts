@@ -36,8 +36,7 @@ interface CommittableRequest {
  *   - `confirm` — the change has impact; defer to the dialog with `impact`.
  */
 export type ConfirmResolution<TImpact> =
-  | { status: 'handled' }
-  | { status: 'confirm'; impact: TImpact }
+  { status: 'handled' } | { status: 'confirm'; impact: TImpact }
 
 interface PendingConfirmState<TRequest, TImpact> {
   request: TRequest

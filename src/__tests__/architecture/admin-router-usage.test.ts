@@ -32,7 +32,9 @@ describe('Admin router usage', () => {
     for (const file of files) {
       const source = readFileSync(file, 'utf8')
       for (const match of source.matchAll(rawAdminHrefRe)) {
-        violations.push(`${file.replace(SRC_ROOT, 'src/')}:${lineNumberFor(source, match.index ?? 0)}`)
+        violations.push(
+          `${file.replace(SRC_ROOT, 'src/')}:${lineNumberFor(source, match.index ?? 0)}`,
+        )
       }
     }
 
@@ -72,7 +74,9 @@ describe('Admin router usage', () => {
       ...collectFiles(join(SRC_ROOT, 'modules')),
     ]
     const violations = files.filter((file) =>
-      /from\s+['"](?:@admin\/lib\/routing|(?:[./]+)admin\/lib\/routing)['"]/.test(readFileSync(file, 'utf8')),
+      /from\s+['"](?:@admin\/lib\/routing|(?:[./]+)admin\/lib\/routing)['"]/.test(
+        readFileSync(file, 'utf8'),
+      ),
     )
 
     if (violations.length > 0) {

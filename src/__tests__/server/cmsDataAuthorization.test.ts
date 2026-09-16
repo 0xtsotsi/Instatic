@@ -71,7 +71,7 @@ async function createUser(
     body: JSON.stringify({ ...input, password: ownedPassword }),
   })
   expect(res.status).toBe(201)
-  const payload = await body(res) as { user: { id: string } }
+  const payload = (await body(res)) as { user: { id: string } }
   return payload.user.id
 }
 
@@ -97,16 +97,11 @@ async function createCustomRole(
     }),
   })
   expect(res.status).toBe(201)
-  const payload = await body(res) as { role: { id: string } }
+  const payload = (await body(res)) as { role: { id: string } }
   return payload.role.id
 }
 
-const OWN_EDIT_CAPS = [
-  'site.read',
-  'content.create',
-  'content.edit.own',
-  'content.publish.own',
-]
+const OWN_EDIT_CAPS = ['site.read', 'content.create', 'content.edit.own', 'content.publish.own']
 
 const ANY_EDIT_CAPS = [
   'site.read',
@@ -120,18 +115,14 @@ const ANY_EDIT_CAPS = [
   'media.delete',
 ]
 
-async function createRow(
-  db: DbClient,
-  cookie: string,
-  title: string,
-): Promise<string> {
+async function createRow(db: DbClient, cookie: string, title: string): Promise<string> {
   const res = await request(db, '/admin/api/cms/data/tables/posts/rows', {
     method: 'POST',
     cookie,
     body: JSON.stringify({ cells: { title } }),
   })
   expect(res.status).toBe(201)
-  const payload = await body(res) as { row: { id: string } }
+  const payload = (await body(res)) as { row: { id: string } }
   return payload.row.id
 }
 
@@ -140,14 +131,13 @@ async function createTable(
   cookie: string,
   input: { name: string; slug: string; kind: 'data' | 'postType' },
 ): Promise<string> {
-  const fields = input.kind === 'postType'
-    ? [
-        { id: 'title', label: 'Title', type: 'text', required: true },
-        { id: 'slug', label: 'Slug', type: 'text', required: true },
-      ]
-    : [
-        { id: 'title', label: 'Title', type: 'text', required: true },
-      ]
+  const fields =
+    input.kind === 'postType'
+      ? [
+          { id: 'title', label: 'Title', type: 'text', required: true },
+          { id: 'slug', label: 'Slug', type: 'text', required: true },
+        ]
+      : [{ id: 'title', label: 'Title', type: 'text', required: true }]
   const res = await request(db, '/admin/api/cms/data/tables', {
     method: 'POST',
     cookie,
@@ -161,7 +151,7 @@ async function createTable(
     }),
   })
   expect(res.status).toBe(201)
-  const payload = await body(res) as { table: { id: string } }
+  const payload = (await body(res)) as { table: { id: string } }
   return payload.table.id
 }
 
@@ -186,7 +176,7 @@ async function createRowInTableWithCells(
     body: JSON.stringify({ cells }),
   })
   expect(res.status).toBe(201)
-  const payload = await body(res) as { row: { id: string } }
+  const payload = (await body(res)) as { row: { id: string } }
   return payload.row.id
 }
 
@@ -207,14 +197,30 @@ describe('CMS data ownership authorization', () => {
     const { db } = await makeDb()
     const ownerCookie = await setupOwner(db)
     const ownEditRoleId = await createCustomRole(db, ownerCookie, {
-      slug: 'own-editor', name: 'Own Editor', capabilities: OWN_EDIT_CAPS,
+      slug: 'own-editor',
+      name: 'Own Editor',
+      capabilities: OWN_EDIT_CAPS,
     })
     const anyEditRoleId = await createCustomRole(db, ownerCookie, {
-      slug: 'any-editor', name: 'Any Editor', capabilities: ANY_EDIT_CAPS,
+      slug: 'any-editor',
+      name: 'Any Editor',
+      capabilities: ANY_EDIT_CAPS,
     })
-    await createUser(db, ownerCookie, { email: 'editor-one@example.com', displayName: 'Editor One', roleId: ownEditRoleId })
-    await createUser(db, ownerCookie, { email: 'editor-two@example.com', displayName: 'Editor Two', roleId: ownEditRoleId })
-    await createUser(db, ownerCookie, { email: 'manager@example.com', displayName: 'Manager', roleId: anyEditRoleId })
+    await createUser(db, ownerCookie, {
+      email: 'editor-one@example.com',
+      displayName: 'Editor One',
+      roleId: ownEditRoleId,
+    })
+    await createUser(db, ownerCookie, {
+      email: 'editor-two@example.com',
+      displayName: 'Editor Two',
+      roleId: ownEditRoleId,
+    })
+    await createUser(db, ownerCookie, {
+      email: 'manager@example.com',
+      displayName: 'Manager',
+      roleId: anyEditRoleId,
+    })
     const editorOneCookie = await login(db, 'editor-one@example.com')
     const editorTwoCookie = await login(db, 'editor-two@example.com')
     const managerCookie = await login(db, 'manager@example.com')
@@ -246,14 +252,20 @@ describe('CMS data ownership authorization', () => {
     const { db } = await makeDb()
     const ownerCookie = await setupOwner(db)
     const ownEditRoleId = await createCustomRole(db, ownerCookie, {
-      slug: 'own-editor', name: 'Own Editor', capabilities: OWN_EDIT_CAPS,
+      slug: 'own-editor',
+      name: 'Own Editor',
+      capabilities: OWN_EDIT_CAPS,
     })
     const editorTwoId = await createUser(db, ownerCookie, {
       email: 'second-editor@example.com',
       displayName: 'Second Editor',
       roleId: ownEditRoleId,
     })
-    await createUser(db, ownerCookie, { email: 'first-editor@example.com', displayName: 'First Editor', roleId: ownEditRoleId })
+    await createUser(db, ownerCookie, {
+      email: 'first-editor@example.com',
+      displayName: 'First Editor',
+      roleId: ownEditRoleId,
+    })
     const firstEditorCookie = await login(db, 'first-editor@example.com')
     const secondEditorCookie = await login(db, 'second-editor@example.com')
     const secondRowId = await createRow(db, secondEditorCookie, 'Second Editor Draft')
@@ -292,10 +304,14 @@ describe('CMS data ownership authorization', () => {
     const { db } = await makeDb()
     const ownerCookie = await setupOwner(db)
     const ownEditRoleId = await createCustomRole(db, ownerCookie, {
-      slug: 'own-editor', name: 'Own Editor', capabilities: OWN_EDIT_CAPS,
+      slug: 'own-editor',
+      name: 'Own Editor',
+      capabilities: OWN_EDIT_CAPS,
     })
     const anyEditRoleId = await createCustomRole(db, ownerCookie, {
-      slug: 'any-editor', name: 'Any Editor', capabilities: ANY_EDIT_CAPS,
+      slug: 'any-editor',
+      name: 'Any Editor',
+      capabilities: ANY_EDIT_CAPS,
     })
     const editorOneId = await createUser(db, ownerCookie, {
       email: 'publish-editor@example.com',
@@ -316,7 +332,9 @@ describe('CMS data ownership authorization', () => {
       cookie: editorCookie,
     })
     expect(publish.status).toBe(200)
-    expect(await body(publish)).toMatchObject({ row: { status: 'published', authorUserId: editorOneId } })
+    expect(await body(publish)).toMatchObject({
+      row: { status: 'published', authorUserId: editorOneId },
+    })
 
     const reassign = await request(db, `/admin/api/cms/data/rows/${rowId}/author`, {
       method: 'PATCH',
@@ -529,7 +547,9 @@ describe('CMS data ownership authorization', () => {
       body: JSON.stringify({ tableId: targetTableId }),
     })
     expect(move.status).toBe(409)
-    expect(await body(move)).toEqual({ error: 'A row with this slug already exists in the target table' })
+    expect(await body(move)).toEqual({
+      error: 'A row with this slug already exists in the target table',
+    })
 
     const row = await request(db, `/admin/api/cms/data/rows/${sourceRowId}`, {
       method: 'GET',

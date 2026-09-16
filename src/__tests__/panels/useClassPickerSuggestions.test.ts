@@ -48,10 +48,7 @@ function makeAmbient(selector: string, id = `ambient-${selector}`): StyleRule {
   }
 }
 
-function selectorItem(
-  rule: StyleRule,
-  disabled = false,
-): SelectorSuggestionItem {
+function selectorItem(rule: StyleRule, disabled = false): SelectorSuggestionItem {
   return {
     rule,
     disabled,
@@ -123,7 +120,6 @@ describe('useClassPickerSuggestions — empty query', () => {
     // flatNavIds covers only recent + frequent (no remaining slot).
     expect(result.flatNavIds).toEqual([...result.recentIds, ...result.frequentIds])
   })
-
 })
 
 // ---------------------------------------------------------------------------

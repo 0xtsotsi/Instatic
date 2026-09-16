@@ -105,9 +105,26 @@ export type MigrationRole = 'original' | 'variant'
  * trusted via a cast.
  */
 const CmsMediaMigrationEventSchema = Type.Union([
-  Type.Object({ kind: Type.Literal('started'), total: Type.Number(), role: Type.Union([Type.Literal('original'), Type.Literal('variant')]), toAdapterId: Type.String() }),
-  Type.Object({ kind: Type.Literal('progress'), id: Type.String(), ok: Type.Boolean(), migrated: Type.Number(), total: Type.Number(), error: Type.Optional(Type.String()) }),
-  Type.Object({ kind: Type.Literal('done'), migrated: Type.Number(), failed: Type.Number(), total: Type.Number() }),
+  Type.Object({
+    kind: Type.Literal('started'),
+    total: Type.Number(),
+    role: Type.Union([Type.Literal('original'), Type.Literal('variant')]),
+    toAdapterId: Type.String(),
+  }),
+  Type.Object({
+    kind: Type.Literal('progress'),
+    id: Type.String(),
+    ok: Type.Boolean(),
+    migrated: Type.Number(),
+    total: Type.Number(),
+    error: Type.Optional(Type.String()),
+  }),
+  Type.Object({
+    kind: Type.Literal('done'),
+    migrated: Type.Number(),
+    failed: Type.Number(),
+    total: Type.Number(),
+  }),
   Type.Object({ kind: Type.Literal('error'), message: Type.String() }),
 ])
 
@@ -264,7 +281,10 @@ export async function verifyCmsMediaAdapter(
  *   • a trailing partial event when the stream ends (discarded — the
  *     server always closes after a `done` or `error`)
  */
-function parseSseFrames(buffer: string): { frames: Array<{ event: string; data: string }>; rest: string } {
+function parseSseFrames(buffer: string): {
+  frames: Array<{ event: string; data: string }>
+  rest: string
+} {
   const frames: Array<{ event: string; data: string }> = []
   let cursor = 0
   while (true) {
@@ -355,7 +375,11 @@ export async function startCmsMediaMigration(
         }
       }
     } finally {
-      try { await reader.cancel() } catch { /* already cancelled */ }
+      try {
+        await reader.cancel()
+      } catch {
+        /* already cancelled */
+      }
     }
   }
 

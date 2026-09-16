@@ -46,7 +46,11 @@ function loadSiteWithTrackedImage(): string {
     },
     children: [],
   })
-  const page = makePage({ id: 'page-1', rootNodeId: rootId, nodes: { [rootId]: rootNode, [nodeId]: imageNode } })
+  const page = makePage({
+    id: 'page-1',
+    rootNodeId: rootId,
+    nodes: { [rootId]: rootNode, [nodeId]: imageNode },
+  })
   const site = makeSite({ pages: [page] })
   useEditorStore.setState({
     site,
@@ -70,7 +74,11 @@ function loadSiteWithPlainText(): string {
     },
     children: [],
   })
-  const page = makePage({ id: 'page-1', rootNodeId: rootId, nodes: { [rootId]: rootNode, [nodeId]: textNode } })
+  const page = makePage({
+    id: 'page-1',
+    rootNodeId: rootId,
+    nodes: { [rootId]: rootNode, [nodeId]: textNode },
+  })
   const site = makeSite({ pages: [page] })
   useEditorStore.setState({
     site,

@@ -43,7 +43,9 @@ describe('toolAllowedForCapabilities', () => {
   })
 
   it('allows when the caller has ANY of the requiredCapabilities', () => {
-    const t = tool({ requiredCapabilities: ['data.custom.tables.read', 'data.custom.tables.manage'] })
+    const t = tool({
+      requiredCapabilities: ['data.custom.tables.read', 'data.custom.tables.manage'],
+    })
     expect(toolAllowedForCapabilities(t, ['data.custom.tables.manage'])).toBe(true)
   })
 
@@ -75,7 +77,9 @@ describe('selectToolsForScope capability filtering', () => {
   })
 
   it('drops document read tools for a caller with only data.custom.tables.read', () => {
-    const names = selectToolsForScope('content', ['ai.chat', 'data.custom.tables.read']).map((t) => t.name)
+    const names = selectToolsForScope('content', ['ai.chat', 'data.custom.tables.read']).map(
+      (t) => t.name,
+    )
     expect(names).not.toContain('content_get_document')
     expect(names).not.toContain('list_documents')
     expect(names).not.toContain('content_search_documents')
@@ -91,7 +95,11 @@ describe('selectToolsForScope capability filtering', () => {
   it('still filters write tools by ai.tools.write (existing behaviour preserved)', () => {
     const withoutWrite = selectToolsForScope('content', ['ai.chat', 'content.manage'])
     expect(withoutWrite.every((t) => !t.mutates)).toBe(true)
-    const withWrite = selectToolsForScope('content', ['ai.chat', 'ai.tools.write', 'content.manage'])
+    const withWrite = selectToolsForScope('content', [
+      'ai.chat',
+      'ai.tools.write',
+      'content.manage',
+    ])
     expect(withWrite.some((t) => t.mutates)).toBe(true)
   })
 })

@@ -16,7 +16,9 @@ describe('sanitizeSvg', () => {
   })
 
   it('preserves presentation attributes (fill: currentColor styling)', () => {
-    const out = sanitizeSvg('<svg viewBox="0 0 10 10"><circle cx="5" cy="5" r="4" fill="currentColor"/></svg>')
+    const out = sanitizeSvg(
+      '<svg viewBox="0 0 10 10"><circle cx="5" cy="5" r="4" fill="currentColor"/></svg>',
+    )
     expect(out).toContain('<circle')
     expect(out).toContain('currentColor')
   })
@@ -34,7 +36,9 @@ describe('sanitizeSvg', () => {
   })
 
   it('strips <foreignObject> HTML smuggling', () => {
-    const out = sanitizeSvg('<svg><foreignObject><img src=x onerror="alert(1)"></foreignObject></svg>')
+    const out = sanitizeSvg(
+      '<svg><foreignObject><img src=x onerror="alert(1)"></foreignObject></svg>',
+    )
     expect(out.toLowerCase()).not.toContain('foreignobject')
     expect(out.toLowerCase()).not.toContain('onerror')
   })

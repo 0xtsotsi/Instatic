@@ -20,11 +20,7 @@
  */
 
 import type { Page, SiteDocument } from '@core/page-tree'
-import {
-  resolveTemplateChain,
-  treeHasOutlet,
-  type RouteResolutionContext,
-} from '@core/templates'
+import { resolveTemplateChain, treeHasOutlet, type RouteResolutionContext } from '@core/templates'
 
 /** Breadth rank: lower wraps higher. Non-template pages are the innermost. */
 function levelRank(page: Page): number {

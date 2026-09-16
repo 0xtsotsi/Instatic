@@ -8,10 +8,7 @@ import {
   stampSocketIp,
 } from '../../../server/auth/security'
 import { handleServerRequest } from '../../../server/router'
-import {
-  createCapabilityTestHarness,
-  readJson,
-} from '../helpers/capabilityHarness'
+import { createCapabilityTestHarness, readJson } from '../helpers/capabilityHarness'
 
 function makeThrowingDb(): { db: DbClient; wasQueried: () => boolean } {
   let queried = false
@@ -42,10 +39,7 @@ function makeRequest(
   return req
 }
 
-async function withPublicOrigins<T>(
-  origins: readonly string[],
-  fn: () => Promise<T>,
-): Promise<T> {
+async function withPublicOrigins<T>(origins: readonly string[], fn: () => Promise<T>): Promise<T> {
   configurePublicOrigins(origins)
   try {
     return await fn()
@@ -312,14 +306,21 @@ describe('admin API security boundary', () => {
     const { db, wasQueried } = makeThrowingDb()
 
     const response = await handleServerRequest(
-      makeRequest('POST', '/admin/api/cms/login', { email: 'owner@example.com', password: 'password' }, {
-        origin: 'https://evil.example',
-      }),
+      makeRequest(
+        'POST',
+        '/admin/api/cms/login',
+        { email: 'owner@example.com', password: 'password' },
+        {
+          origin: 'https://evil.example',
+        },
+      ),
       { db },
     )
 
     expect(response.status).toBe(403)
-    expect(await readJson<{ error: string }>(response)).toEqual({ error: 'Forbidden: invalid origin' })
+    expect(await readJson<{ error: string }>(response)).toEqual({
+      error: 'Forbidden: invalid origin',
+    })
     expect(wasQueried()).toBe(false)
   })
 
@@ -327,14 +328,21 @@ describe('admin API security boundary', () => {
     const { db, wasQueried } = makeThrowingDb()
 
     const response = await handleServerRequest(
-      makeRequest('PUT', '/admin/api/ai/defaults/site', { credentialId: 'cred-1', modelId: 'model-1' }, {
-        origin: 'https://evil.example',
-      }),
+      makeRequest(
+        'PUT',
+        '/admin/api/ai/defaults/site',
+        { credentialId: 'cred-1', modelId: 'model-1' },
+        {
+          origin: 'https://evil.example',
+        },
+      ),
       { db },
     )
 
     expect(response.status).toBe(403)
-    expect(await readJson<{ error: string }>(response)).toEqual({ error: 'Forbidden: invalid origin' })
+    expect(await readJson<{ error: string }>(response)).toEqual({
+      error: 'Forbidden: invalid origin',
+    })
     expect(wasQueried()).toBe(false)
   })
 
@@ -356,10 +364,7 @@ describe('admin API security boundary', () => {
   it('keeps owned CMS paths inside the namespace when the method is unsupported', async () => {
     const { db, wasQueried } = makeThrowingDb()
 
-    const response = await handleServerRequest(
-      makeRequest('PATCH', '/admin/api/cms/pages'),
-      { db },
-    )
+    const response = await handleServerRequest(makeRequest('PATCH', '/admin/api/cms/pages'), { db })
 
     expect(response.status).toBe(405)
     expect(await readJson<{ error: string }>(response)).toEqual({ error: 'Method not allowed' })
@@ -462,7 +467,9 @@ describe('admin API security boundary', () => {
       })
 
       expect(response.status).toBe(400)
-      expect(await readJson<{ error: string }>(response)).toEqual({ error: 'Invalid request body.' })
+      expect(await readJson<{ error: string }>(response)).toEqual({
+        error: 'Invalid request body.',
+      })
     } finally {
       await harness.cleanup()
     }
@@ -480,7 +487,9 @@ describe('admin API security boundary', () => {
       })
 
       expect(response.status).toBe(400)
-      expect(await readJson<{ error: string }>(response)).toEqual({ error: 'Invalid request body.' })
+      expect(await readJson<{ error: string }>(response)).toEqual({
+        error: 'Invalid request body.',
+      })
     } finally {
       await harness.cleanup()
     }

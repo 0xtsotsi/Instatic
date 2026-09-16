@@ -47,8 +47,22 @@ function makePageWithImageProp(nodeId: string, propKey: string, value: string) {
   return {
     id: 'page-1',
     nodes: {
-      root: { id: 'root', moduleId: 'base.body', props: {}, children: [nodeId], breakpointOverrides: {}, classIds: [] },
-      [nodeId]: { id: nodeId, moduleId: 'test.image', props: { [propKey]: value }, children: [], breakpointOverrides: {}, classIds: [] },
+      root: {
+        id: 'root',
+        moduleId: 'base.body',
+        props: {},
+        children: [nodeId],
+        breakpointOverrides: {},
+        classIds: [],
+      },
+      [nodeId]: {
+        id: nodeId,
+        moduleId: 'test.image',
+        props: { [propKey]: value },
+        children: [],
+        breakpointOverrides: {},
+        classIds: [],
+      },
     },
     rootNodeId: 'root',
   }
@@ -56,10 +70,29 @@ function makePageWithImageProp(nodeId: string, propKey: string, value: string) {
 
 /** The full set of keys a hydrated `MediaAsset` must carry. */
 const MEDIA_ASSET_FIELD_KEYS = [
-  'id', 'filename', 'mimeType', 'sizeBytes', 'publicPath', 'uploadedByUserId',
-  'createdAt', 'altText', 'caption', 'title', 'tags', 'width', 'height',
-  'durationMs', 'dominantColor', 'deletedAt', 'replacedAt', 'folderIds',
-  'blurHash', 'variants', 'posterPath', 'storageAdapterId', 'externallyHosted',
+  'id',
+  'filename',
+  'mimeType',
+  'sizeBytes',
+  'publicPath',
+  'uploadedByUserId',
+  'createdAt',
+  'altText',
+  'caption',
+  'title',
+  'tags',
+  'width',
+  'height',
+  'durationMs',
+  'dominantColor',
+  'deletedAt',
+  'replacedAt',
+  'folderIds',
+  'blurHash',
+  'variants',
+  'posterPath',
+  'storageAdapterId',
+  'externallyHosted',
 ].sort()
 
 // ---------------------------------------------------------------------------
@@ -152,7 +185,13 @@ describe('media-asset mapping (single source of truth)', () => {
         `update media_assets set variants_json = ${placeholder(db.dialect, 1)} where id = ${placeholder(db.dialect, 2)}`,
         [
           JSON.stringify([
-            { width: 320, height: 200, format: 'webp', path: '/uploads/logo-320.webp', sizeBytes: 400 },
+            {
+              width: 320,
+              height: 200,
+              format: 'webp',
+              path: '/uploads/logo-320.webp',
+              sizeBytes: 400,
+            },
           ]),
           'a2',
         ],

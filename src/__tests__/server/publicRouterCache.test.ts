@@ -80,13 +80,15 @@ function makeFakeDb(snapshot: PublishedPageSnapshot | null): DbClient {
     if (normalized.includes('site_snapshots.site_json')) {
       return {
         rows: snapshot
-          ? [{
-              row_id: snapshot.pageRowId,
-              site_json: snapshot.site,
-              runtime_assets_json: snapshot.runtimeAssets ?? null,
-              importmap_body: snapshot.runtimePackageImportmap?.body ?? null,
-              importmap_sha256: snapshot.runtimePackageImportmap?.sha256 ?? null,
-            } as unknown as Row]
+          ? [
+              {
+                row_id: snapshot.pageRowId,
+                site_json: snapshot.site,
+                runtime_assets_json: snapshot.runtimeAssets ?? null,
+                importmap_body: snapshot.runtimePackageImportmap?.body ?? null,
+                importmap_sha256: snapshot.runtimePackageImportmap?.sha256 ?? null,
+              } as unknown as Row,
+            ]
           : [],
         rowCount: snapshot ? 1 : 0,
       }

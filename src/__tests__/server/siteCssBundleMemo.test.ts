@@ -22,10 +22,7 @@ import {
   buildSiteCssBundle,
   buildPublishedSiteCssBundle,
 } from '../../../server/publish/siteCssBundle'
-import {
-  bumpPublishVersion,
-  resetPublishStateForTests,
-} from '../../../server/publish/publishState'
+import { bumpPublishVersion, resetPublishStateForTests } from '../../../server/publish/publishState'
 import { makeModule, makeRegistry, makePage, makeSite } from '../publisher/helpers'
 import type { SiteDocument } from '@core/page-tree'
 

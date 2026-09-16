@@ -33,9 +33,10 @@ export function ScriptSettingsPane({ file }: ScriptSettingsPaneProps) {
   const config = normalizeScriptRuntimeConfig(
     siteRuntime.scripts[file.id] ?? DEFAULT_SCRIPT_RUNTIME_CONFIG,
   )
-  const importAnalysis = config.format === 'module'
-    ? analyzeRuntimeScriptImports([file], packageJson)
-    : { usage: new Map(), diagnostics: [] }
+  const importAnalysis =
+    config.format === 'module'
+      ? analyzeRuntimeScriptImports([file], packageJson)
+      : { usage: new Map(), diagnostics: [] }
   const runtimePackages = [...importAnalysis.usage.values()]
   const diagnostics = importAnalysis.diagnostics
   const scopeOptions: ScopePageOption[] = pages.map((page) => ({
@@ -133,7 +134,9 @@ export function ScriptSettingsPane({ file }: ScriptSettingsPaneProps) {
           value={String(config.priority)}
           onChange={(event) => {
             const next = Number(event.target.value)
-            patch({ priority: Number.isFinite(next) ? next : DEFAULT_SCRIPT_RUNTIME_CONFIG.priority })
+            patch({
+              priority: Number.isFinite(next) ? next : DEFAULT_SCRIPT_RUNTIME_CONFIG.priority,
+            })
           }}
         />
       </div>

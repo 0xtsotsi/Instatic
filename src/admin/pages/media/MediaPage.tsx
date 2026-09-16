@@ -14,10 +14,7 @@
  */
 import { useEffect, useState } from 'react'
 import { AdminWorkspaceCanvasLayout } from '@admin/layouts/AdminWorkspaceCanvasLayout'
-import {
-  readWorkspaceLayout,
-  writeWorkspaceLayout,
-} from '@admin/state/workspaceLayoutStorage'
+import { readWorkspaceLayout, writeWorkspaceLayout } from '@admin/state/workspaceLayoutStorage'
 import { Button } from '@ui/components/Button'
 import { UploadIcon } from 'pixel-art-icons/icons/upload'
 import { MediaSidebar, type MediaSidebarPanelId } from './components/MediaSidebar/MediaSidebar'
@@ -76,8 +73,7 @@ export function MediaPage() {
   //   - Viewer: a single primary selection (≤ 1 item) is showing.
   //   - Bulk Edit: a 2+ multi-selection is in flight (mutually exclusive
   //     with the viewer).
-  const viewerOpen =
-    workspace.selectedAssetId !== null && workspace.selectedAssetIds.size <= 1
+  const viewerOpen = workspace.selectedAssetId !== null && workspace.selectedAssetIds.size <= 1
   const bulkEditOpen = workspace.selectedAssetIds.size >= 2
 
   // The upload queue IS genuinely stateful — it stays open after a transfer
@@ -103,7 +99,9 @@ export function MediaPage() {
       <UploadIcon size={13} />
       <span>Uploads</span>
       {workspace.uploadQueue.active && (
-        <span aria-hidden="true" style={{ marginLeft: 4 }}>·</span>
+        <span aria-hidden="true" style={{ marginLeft: 4 }}>
+          ·
+        </span>
       )}
     </Button>
   )
@@ -113,13 +111,13 @@ export function MediaPage() {
       <AdminWorkspaceCanvasLayout
         workspace="media"
         toolbarRightSlot={toolbarRightSlot}
-        contentSidebar={(
+        contentSidebar={
           <MediaSidebar
             workspace={workspace}
             activePanel={activePanel}
             onActivePanelChange={setActivePanel}
           />
-        )}
+        }
         contentCanvas={<MediaCanvas workspace={workspace} />}
         // No `contentRightPanel` — the asset inspector is a window now.
       />

@@ -1,8 +1,5 @@
 import { useId, useState } from 'react'
-import {
-  generateFrameworkColorVariableSets,
-  normalizeFrameworkColorSlug,
-} from '@core/framework'
+import { generateFrameworkColorVariableSets, normalizeFrameworkColorSlug } from '@core/framework'
 import type { FrameworkColorToken } from '@core/framework-schema'
 import type { UpdateFrameworkColorTokenPatch } from '@site/store/slices/site/types'
 import { Input } from '@ui/components/Input'
@@ -20,21 +17,13 @@ interface ColorTokenEditorProps {
   onPatch: (patch: UpdateFrameworkColorTokenPatch) => void
 }
 
-export function ColorTokenEditor({
-  token,
-  categories,
-  onPatch,
-}: ColorTokenEditorProps) {
+export function ColorTokenEditor({ token, categories, onPatch }: ColorTokenEditorProps) {
   const [slug, setSlug] = useState(token.slug)
   const slugInputId = useId()
   const [lightValue, setLightValue] = useState(token.lightValue)
-  const [alternateValue, setAlternateValue] = useState(
-    token.darkModeEnabled ? token.darkValue : '',
-  )
+  const [alternateValue, setAlternateValue] = useState(token.darkModeEnabled ? token.darkValue : '')
   const [category, setCategory] = useState(token.category)
-  const [shadeCount, setShadeCount] = useState(
-    String(token.generateShades.count),
-  )
+  const [shadeCount, setShadeCount] = useState(String(token.generateShades.count))
   const [tintCount, setTintCount] = useState(String(token.generateTints.count))
 
   const previewToken: FrameworkColorToken = {
@@ -198,24 +187,16 @@ export function ColorTokenEditor({
         <SwitchRow
           label="Generate shades"
           checked={token.generateShades.enabled}
-          onCheckedChange={(checked) =>
-            onPatch({ generateShades: { enabled: checked } })
-          }
+          onCheckedChange={(checked) => onPatch({ generateShades: { enabled: checked } })}
         />
         {token.generateShades.enabled && (
           <>
             <VariantCountStepper
               label="Shade"
               count={clampVariantCountInput(shadeCount)}
-              onCountChange={(count) =>
-                commitVariantCount('shade', String(count))
-              }
+              onCountChange={(count) => commitVariantCount('shade', String(count))}
             />
-            <ColorVariantPreview
-              kind="Shade"
-              tokenSlug={token.slug}
-              variables={shadeVariables}
-            />
+            <ColorVariantPreview kind="Shade" tokenSlug={token.slug} variables={shadeVariables} />
           </>
         )}
       </div>
@@ -224,24 +205,16 @@ export function ColorTokenEditor({
         <SwitchRow
           label="Generate tints"
           checked={token.generateTints.enabled}
-          onCheckedChange={(checked) =>
-            onPatch({ generateTints: { enabled: checked } })
-          }
+          onCheckedChange={(checked) => onPatch({ generateTints: { enabled: checked } })}
         />
         {token.generateTints.enabled && (
           <>
             <VariantCountStepper
               label="Tint"
               count={clampVariantCountInput(tintCount)}
-              onCountChange={(count) =>
-                commitVariantCount('tint', String(count))
-              }
+              onCountChange={(count) => commitVariantCount('tint', String(count))}
             />
-            <ColorVariantPreview
-              kind="Tint"
-              tokenSlug={token.slug}
-              variables={tintVariables}
-            />
+            <ColorVariantPreview kind="Tint" tokenSlug={token.slug} variables={tintVariables} />
           </>
         )}
       </div>

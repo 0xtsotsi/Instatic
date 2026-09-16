@@ -70,9 +70,7 @@ describe('registry.registerOrReplace', () => {
   })
 
   it('throws for invalid (non-namespaced) id', () => {
-    expect(() =>
-      registry.registerOrReplace(makeTestModule('invalidid' as string))
-    ).toThrow()
+    expect(() => registry.registerOrReplace(makeTestModule('invalidid' as string))).toThrow()
   })
 })
 

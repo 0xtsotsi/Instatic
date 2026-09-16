@@ -46,12 +46,16 @@ export function UserAvatar({ user, size, alt, className }: UserAvatarProps): Rea
   const url = resolveAvatarUrl(user, { size })
   const showImage = url !== null && !imageFailed
   const displayName = user.displayName.trim() || user.email
-  const altText = alt === null ? '' : alt ?? `Avatar for ${displayName}`
+  const altText = alt === null ? '' : (alt ?? `Avatar for ${displayName}`)
 
   const style: CSSProperties = { '--avatar-size': `${size}px` } as CSSProperties
 
   return (
-    <span className={cn(styles.root, className)} style={style} aria-hidden={alt === null || undefined}>
+    <span
+      className={cn(styles.root, className)}
+      style={style}
+      aria-hidden={alt === null || undefined}
+    >
       {showImage ? (
         <img
           className={styles.image}

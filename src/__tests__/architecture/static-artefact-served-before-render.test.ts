@@ -44,7 +44,9 @@ describe('static-artefact-served-before-render', () => {
   it('readArtefact is imported in publicRouter.ts from staticArtefact', async () => {
     const source = await read('server/publish/publicRouter.ts')
     // The import must name staticArtefact as the source
-    expect(source).toMatch(/import\s*\{[^}]*readArtefact[^}]*\}\s*from\s*['"]\.\/staticArtefact['"]/)
+    expect(source).toMatch(
+      /import\s*\{[^}]*readArtefact[^}]*\}\s*from\s*['"]\.\/staticArtefact['"]/,
+    )
   })
 
   it('the disk fast-path is gated on the canonical (render-affecting) query being empty', async () => {

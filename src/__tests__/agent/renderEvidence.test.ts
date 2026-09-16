@@ -69,7 +69,7 @@ const toCanvasMock = mock(async (root: HTMLElement, options: RasterOptions = {})
   const canvas = {
     width: canvasWidth,
     height: canvasHeight,
-    getContext: (type: string) => type === '2d' ? context : null,
+    getContext: (type: string) => (type === '2d' ? context : null),
     toDataURL: (type?: string) => {
       call.dataUrlType = type
       return 'data:image/png;base64,cG5n'
@@ -355,9 +355,11 @@ describe('captureAgentRenderSnapshot — on-demand browser bridge', () => {
       webkitBackgroundClip: 'text',
       webkitTextFillColor: 'transparent',
     })
-    expect(snapshot!.layout.warnings.some((warning) =>
-      warning.type === 'horizontal-overflow' && warning.nodeId === 'title',
-    )).toBe(true)
+    expect(
+      snapshot!.layout.warnings.some(
+        (warning) => warning.type === 'horizontal-overflow' && warning.nodeId === 'title',
+      ),
+    ).toBe(true)
   })
 
   it('distinguishes deferred lazy images from completed broken images', async () => {
@@ -394,7 +396,9 @@ describe('captureAgentRenderSnapshot — on-demand browser bridge', () => {
     )
     expect(brokenWarnings).toHaveLength(1)
     expect(brokenWarnings[0]?.nodeId).toBe('broken-image')
-    expect(snapshot!.layout.images.find((image) => image.nodeId === 'deferred-image')?.complete).toBe(false)
+    expect(
+      snapshot!.layout.images.find((image) => image.nodeId === 'deferred-image')?.complete,
+    ).toBe(false)
   })
 
   it('bounds computed background images before returning them as model-visible evidence', async () => {
@@ -467,7 +471,11 @@ describe('captureAgentRenderSnapshot — on-demand browser bridge', () => {
     setRect(doc.body, { x: 0, y: 0, width: 1440, height: 900 })
 
     await expect(
-      captureAgentRenderSnapshot({ breakpointId: 'desktop', nodeId: 'ghost', captureScreenshot: false }),
+      captureAgentRenderSnapshot({
+        breakpointId: 'desktop',
+        nodeId: 'ghost',
+        captureScreenshot: false,
+      }),
     ).rejects.toBeInstanceOf(SnapshotNodeNotFoundError)
   })
 

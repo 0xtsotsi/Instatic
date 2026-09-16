@@ -35,8 +35,7 @@ expect.extend({
     if (typeof received !== 'string') {
       return {
         pass: false,
-        message: () =>
-          `toBeCleanHTML: expected a string, but received ${typeof received}`,
+        message: () => `toBeCleanHTML: expected a string, but received ${typeof received}`,
       }
     }
 
@@ -44,8 +43,7 @@ expect.extend({
     if (/<script[\s>]/i.test(received)) {
       return {
         pass: false,
-        message: () =>
-          `toBeCleanHTML: HTML contains a <script> tag:\n  ${received}`,
+        message: () => `toBeCleanHTML: HTML contains a <script> tag:\n  ${received}`,
       }
     }
 
@@ -73,8 +71,7 @@ expect.extend({
 
     return {
       pass: true,
-      message: () =>
-        `toBeCleanHTML: expected HTML to NOT be clean, but no XSS vectors were found.`,
+      message: () => `toBeCleanHTML: expected HTML to NOT be clean, but no XSS vectors were found.`,
     }
   },
 })

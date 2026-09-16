@@ -20,8 +20,9 @@ interface CanvasViewportActionsContextValue {
   panBy: (dx: number, dy: number) => void
 }
 
-export const CanvasViewportActionsContext =
-  createContext<CanvasViewportActionsContextValue | null>(null)
+export const CanvasViewportActionsContext = createContext<CanvasViewportActionsContextValue | null>(
+  null,
+)
 
 export const CanvasBreakpointContext = createContext<string | undefined>(undefined)
 export const CanvasTemplateContext = createContext<TemplateRenderDataContext | undefined>(undefined)

@@ -10,7 +10,7 @@
 
 // Schemas — exported as both runtime constants (for parse/compiled validation)
 // and types (via Static<typeof X>).
-export { BaseNodeSchema,  parseBaseNodeFields } from './baseNode'
+export { BaseNodeSchema, parseBaseNodeFields } from './baseNode'
 export { asPlainObject } from './parseHelpers'
 export { NodeTreeSchema } from './treeSchema'
 export { PageNodeSchema, parsePageNode } from './pageNode'
@@ -29,7 +29,7 @@ export {
   parseStyleRule,
 } from './styleRule'
 export { SiteShellSchema } from './siteDocument'
-export {   parsePageTemplate } from './pageTemplate'
+export { parsePageTemplate } from './pageTemplate'
 
 // Types — derived from schemas. Schemas are the source of truth.
 export type { Breakpoint } from './breakpoint'
@@ -59,7 +59,11 @@ export type {
 } from './siteExplorer'
 
 // Defaults
-export { DEFAULT_BREAKPOINTS, breakpointMediaQuery, defaultBreakpointMediaQuery } from './breakpoint'
+export {
+  DEFAULT_BREAKPOINTS,
+  breakpointMediaQuery,
+  defaultBreakpointMediaQuery,
+} from './breakpoint'
 export { DEFAULT_SITE_SETTINGS } from './siteSettings'
 
 // Condition helpers
@@ -102,15 +106,9 @@ export {
   isHomePage,
   findHomePage,
 } from './slugs'
-export {
-  makePageRef,
-  isPageRef,
-  parsePageRef,
-  resolvePageRef,
-} from './pageRef'
+export { makePageRef, isPageRef, parsePageRef, resolvePageRef } from './pageRef'
 
 // Other re-exports unrelated to the schemas split
-
 
 export type { BaseNode } from './baseNode'
 
@@ -136,13 +134,7 @@ export {
   applyTreeOperation,
 } from './mutations'
 
-export {
-  addPage,
-  deletePage,
-  renamePage,
-  reorderPages,
-  duplicatePage,
-} from './pageMutations'
+export { addPage, deletePage, renamePage, reorderPages, duplicatePage } from './pageMutations'
 
 export { reindexNodeParents } from './parentIndex'
 
@@ -165,11 +157,7 @@ export {
   evaluateCondition,
 } from './selectors'
 
-export {
-  assertValidCssClassName,
-  styleRuleSelector,
-  classNamesForClassIds,
-} from './classNames'
+export { assertValidCssClassName, styleRuleSelector, classNamesForClassIds } from './classNames'
 export type { StyleRuleRegistry } from './classNames'
 
 export {
@@ -184,9 +172,7 @@ export { getNodeDisplayName, getNodeHtmlTag, getNodeClassNames } from './nodeDis
 export { resolvePageTreeDropTarget } from './dnd'
 export type { PageTreeDropPosition, PageTreeDropTarget } from './dnd'
 
-export {
-  selectVisualComponentById,
-} from './siteSelectors'
+export { selectVisualComponentById } from './siteSelectors'
 
 export {
   compareStructuralRows,

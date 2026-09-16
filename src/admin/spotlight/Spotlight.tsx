@@ -20,22 +20,12 @@
  *          query → close)
  */
 
-import {
-  use,
-  useEffect,
-  useRef,
-  type ChangeEvent,
-  type KeyboardEvent,
-  type ReactNode,
-} from 'react'
+import { use, useEffect, useRef, type ChangeEvent, type KeyboardEvent, type ReactNode } from 'react'
 import { createPortal } from 'react-dom'
 import { SpotlightInternalContext } from './spotlightContext'
 import { SpotlightResults } from './SpotlightResults'
 import { SpotlightFooter } from './SpotlightFooter'
-import {
-  computeHighlightedRowId,
-  getCommandAtIndex,
-} from './spotlightSearch'
+import { computeHighlightedRowId, getCommandAtIndex } from './spotlightSearch'
 import { SearchSolidIcon } from 'pixel-art-icons/icons/search-solid'
 import { Kbd } from '@ui/components/Kbd'
 import styles from './Spotlight.module.css'
@@ -73,15 +63,15 @@ export function Spotlight({ isClosing = false }: SpotlightProps): ReactNode {
   const asyncResults = ctx?.state.phase === 'open' ? ctx.state.asyncResults : EMPTY_ASYNC_RESULTS
 
   // Active scope id for scope-aware search.
-  const activeScopeId = scopeStack.length > 0
-    ? scopeStack[scopeStack.length - 1]!.scopeId
-    : 'root'
+  const activeScopeId = scopeStack.length > 0 ? scopeStack[scopeStack.length - 1]!.scopeId : 'root'
 
   // Compute the highlighted row id for aria-activedescendant.
   // Phase 3: pass asyncResults so the index covers provider result rows too.
   const highlightedRowId = isOpen
     ? computeHighlightedRowId(
-        query, commandContext, highlightedIndex,
+        query,
+        commandContext,
+        highlightedIndex,
         argMode ? undefined : activeScopeId,
         argMode ? undefined : asyncResults,
       )
@@ -170,8 +160,10 @@ export function Spotlight({ isClosing = false }: SpotlightProps): ReactNode {
           let value = query
           if (currentArg.type === 'select' && currentArg.options) {
             const filtered = currentArg.options.filter(
-              (opt) => !query || opt.label.toLowerCase().includes(query.toLowerCase()) ||
-                opt.value.toLowerCase().includes(query.toLowerCase())
+              (opt) =>
+                !query ||
+                opt.label.toLowerCase().includes(query.toLowerCase()) ||
+                opt.value.toLowerCase().includes(query.toLowerCase()),
             )
             const highlighted = filtered[highlightedIndex]
             if (highlighted) value = highlighted.value
@@ -228,7 +220,13 @@ export function Spotlight({ isClosing = false }: SpotlightProps): ReactNode {
       case 'Enter': {
         e.preventDefault()
         // Phase 3: pass asyncResults so Enter works on provider result rows.
-        const cmd = getCommandAtIndex(query, commandContext, highlightedIndex, activeScopeId, asyncResults)
+        const cmd = getCommandAtIndex(
+          query,
+          commandContext,
+          highlightedIndex,
+          activeScopeId,
+          asyncResults,
+        )
         if (!cmd) break
 
         // Destructive confirm: first Enter → show confirm; second → run
@@ -250,7 +248,13 @@ export function Spotlight({ isClosing = false }: SpotlightProps): ReactNode {
       case 'ArrowRight': {
         e.preventDefault()
         // Phase 3: pass asyncResults so Tab/→ works on provider result rows.
-        const cmd = getCommandAtIndex(query, commandContext, highlightedIndex, activeScopeId, asyncResults)
+        const cmd = getCommandAtIndex(
+          query,
+          commandContext,
+          highlightedIndex,
+          activeScopeId,
+          asyncResults,
+        )
         if (!cmd) break
         // If the command has args, enter arg mode
         if (cmd.args && cmd.args.length > 0) {
@@ -310,9 +314,7 @@ export function Spotlight({ isClosing = false }: SpotlightProps): ReactNode {
       if (currentArg) return currentArg.placeholder ?? currentArg.label
     }
     if (scopeStack.length > 1) {
-      const activeScope = ctx?.state.phase === 'open'
-        ? scopeStack[scopeStack.length - 1]
-        : null
+      const activeScope = ctx?.state.phase === 'open' ? scopeStack[scopeStack.length - 1] : null
       if (activeScope?.scopeId) {
         // Look up scope placeholder from registry
         return 'Type to search…'
@@ -373,7 +375,11 @@ export function Spotlight({ isClosing = false }: SpotlightProps): ReactNode {
             aria-haspopup="listbox"
             aria-controls={listboxId}
             aria-activedescendant={highlightedRowId ?? undefined}
-            aria-label={argMode ? `Enter ${argMode.command.args?.[argMode.argIndex]?.label ?? 'value'}` : 'Search commands'}
+            aria-label={
+              argMode
+                ? `Enter ${argMode.command.args?.[argMode.argIndex]?.label ?? 'value'}`
+                : 'Search commands'
+            }
             aria-autocomplete="list"
             placeholder={placeholder}
             value={query}

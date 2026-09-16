@@ -18,10 +18,7 @@
  */
 
 import { useEditorStore } from '@site/store/store'
-import type {
-  FrameworkSpacingGroup,
-  FrameworkTypographyGroup,
-} from '@core/framework-schema'
+import type { FrameworkSpacingGroup, FrameworkTypographyGroup } from '@core/framework-schema'
 import { getVariableName } from '@core/framework'
 
 // ---------------------------------------------------------------------------
@@ -53,9 +50,7 @@ interface ScaleGroupLike {
   isDisabled?: boolean
 }
 
-function expandTokensFromGroups(
-  groups: ReadonlyArray<ScaleGroupLike> | undefined,
-): Token[] {
+function expandTokensFromGroups(groups: ReadonlyArray<ScaleGroupLike> | undefined): Token[] {
   if (!groups) return []
   const tokens: Token[] = []
   for (const group of groups) {
@@ -115,17 +110,12 @@ export function useTypographyTokens(): ReadonlyArray<Token> {
  *      module entirely).
  *   5. Otherwise → keep as-is (lets users type `auto`, `1rem`, `5%`, …).
  */
-export function resolveTokenValue(
-  raw: string,
-  tokens: ReadonlyArray<Token>,
-): string | undefined {
+export function resolveTokenValue(raw: string, tokens: ReadonlyArray<Token>): string | undefined {
   const trimmed = raw.trim()
   if (!trimmed) return undefined
   if (/^(var|calc|min|max|clamp|env)\s*\(/i.test(trimmed)) return trimmed
 
-  const match = tokens.find(
-    (t) => t.step.toLowerCase() === trimmed.toLowerCase(),
-  )
+  const match = tokens.find((t) => t.step.toLowerCase() === trimmed.toLowerCase())
   if (match) return match.valueExpr
 
   if (/^-?\d+(\.\d+)?$/.test(trimmed)) return `${trimmed}px`
@@ -137,10 +127,7 @@ export function resolveTokenValue(
  * for a stored CSS value, so `var(--space-md)` shows as `md`. Falls back
  * to the raw string when no match exists.
  */
-export function displayTokenValue(
-  value: string | undefined,
-  tokens: ReadonlyArray<Token>,
-): string {
+export function displayTokenValue(value: string | undefined, tokens: ReadonlyArray<Token>): string {
   if (!value) return ''
   const trimmed = value.trim()
   if (!trimmed) return ''

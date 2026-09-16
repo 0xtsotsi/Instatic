@@ -84,11 +84,13 @@ const analysis: FormSettingsAnalysis = {
   inferredFields: [],
   missingFields: [],
   inferredTarget: null,
-  warnings: [{
-    code: 'unbound_control',
-    message: 'Bind this control to a table field.',
-    tone: 'warning',
-  }],
+  warnings: [
+    {
+      code: 'unbound_control',
+      message: 'Bind this control to a table field.',
+      tone: 'warning',
+    },
+  ],
 }
 
 describe('FormSettingsPanelView', () => {
@@ -119,14 +121,16 @@ describe('FormSettingsPanelView', () => {
     expect(select).not.toBeNull()
     fireEvent.change(select, { target: { value: 'email' } })
 
-    expect(patches).toEqual([{
-      fieldId: 'email',
-      name: 'email',
-      id: 'email-input',
-      inputType: 'email',
-      required: true,
-      maxLength: 320,
-    }])
+    expect(patches).toEqual([
+      {
+        fieldId: 'email',
+        name: 'email',
+        id: 'email-input',
+        inputType: 'email',
+        required: true,
+        maxLength: 320,
+      },
+    ])
   })
 
   it('lists only compatible target-table fields for the selected control type', () => {
@@ -134,10 +138,15 @@ describe('FormSettingsPanelView', () => {
       ...table,
       fields: [
         ...table.fields,
-        { id: 'plan', label: 'Plan', type: 'select', options: [
-          { id: 'basic', label: 'Basic', value: 'basic' },
-          { id: 'pro', label: 'Pro', value: 'pro' },
-        ] },
+        {
+          id: 'plan',
+          label: 'Plan',
+          type: 'select',
+          options: [
+            { id: 'basic', label: 'Basic', value: 'basic' },
+            { id: 'pro', label: 'Pro', value: 'pro' },
+          ],
+        },
         { id: 'consent', label: 'Consent', type: 'boolean', required: true },
       ],
     }
@@ -172,13 +181,15 @@ describe('FormSettingsPanelView', () => {
     expect(optionLabels).toEqual(['Choose field', 'Plan (select)'])
 
     fireEvent.change(select, { target: { value: 'plan' } })
-    expect(patches).toEqual([{
-      fieldId: 'plan',
-      name: 'plan',
-      id: 'plan-select',
-      required: false,
-      multiple: false,
-    }])
+    expect(patches).toEqual([
+      {
+        fieldId: 'plan',
+        name: 'plan',
+        id: 'plan-select',
+        required: false,
+        multiple: false,
+      },
+    ])
   })
 
   it('does not render for non-form modules', () => {
@@ -208,8 +219,17 @@ describe('FormSettingsPanelView', () => {
     const formAnalysis: FormSettingsAnalysis = {
       ...analysis,
       kind: 'form',
-      node: node('form', 'base.form', { mode: 'cms', formId: 'contact-iA1PLODCLc4odPTZ8ljwv', targetTableId: '' }),
-      form: { nodeId: 'form', formId: 'contact-iA1PLODCLc4odPTZ8ljwv', mode: 'cms', targetTableId: '' },
+      node: node('form', 'base.form', {
+        mode: 'cms',
+        formId: 'contact-iA1PLODCLc4odPTZ8ljwv',
+        targetTableId: '',
+      }),
+      form: {
+        nodeId: 'form',
+        formId: 'contact-iA1PLODCLc4odPTZ8ljwv',
+        mode: 'cms',
+        targetTableId: '',
+      },
       table: null,
       field: null,
       compatibleFields: [],
@@ -229,7 +249,9 @@ describe('FormSettingsPanelView', () => {
         error=""
         onPatchProps={() => undefined}
         onTargetTableChange={(tableId) => targetChanges.push(tableId)}
-        onCreateTable={(tableName) => { createdNames.push(tableName) }}
+        onCreateTable={(tableName) => {
+          createdNames.push(tableName)
+        }}
         onInsertMissingField={() => undefined}
         onPreviewStateChange={() => undefined}
       />,
@@ -295,8 +317,17 @@ describe('FormSettingsPanelView', () => {
     const formAnalysis: FormSettingsAnalysis = {
       ...analysis,
       kind: 'form',
-      node: node('form', 'base.form', { mode: 'cms', formId: 'contact', targetTableId: 'contact_submissions' }),
-      form: { nodeId: 'form', formId: 'contact', mode: 'cms', targetTableId: 'contact_submissions' },
+      node: node('form', 'base.form', {
+        mode: 'cms',
+        formId: 'contact',
+        targetTableId: 'contact_submissions',
+      }),
+      form: {
+        nodeId: 'form',
+        formId: 'contact',
+        mode: 'cms',
+        targetTableId: 'contact_submissions',
+      },
       field: null,
       compatibleFields: [],
       inferredFields: [{ id: 'email', label: 'Email', type: 'email', required: true }],
@@ -323,7 +354,9 @@ describe('FormSettingsPanelView', () => {
 
     const modeControl = screen.getByTestId('form-mode')
     const previewControl = screen.getByTestId('form-preview-state')
-    expect(modeControl.compareDocumentPosition(previewControl) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
+    expect(
+      modeControl.compareDocumentPosition(previewControl) & Node.DOCUMENT_POSITION_FOLLOWING,
+    ).toBeTruthy()
     expect(screen.getByText('Mode').tagName).toBe('LABEL')
     expect(screen.getByText('Preview state').tagName).toBe('LABEL')
 
@@ -339,18 +372,26 @@ describe('FormSettingsPanelView', () => {
   it('keeps the create-table action as a square icon beside the table select', async () => {
     const { readFileSync } = await import('fs')
     const source = readFileSync(
-      new URL('../../admin/pages/site/panels/PropertiesPanel/FormSettingsPanel.tsx', import.meta.url),
+      new URL(
+        '../../admin/pages/site/panels/PropertiesPanel/FormSettingsPanel.tsx',
+        import.meta.url,
+      ),
       'utf-8',
     )
     const css = readFileSync(
-      new URL('../../admin/pages/site/panels/PropertiesPanel/FormSettingsPanel.module.css', import.meta.url),
+      new URL(
+        '../../admin/pages/site/panels/PropertiesPanel/FormSettingsPanel.module.css',
+        import.meta.url,
+      ),
       'utf-8',
     )
 
     expect(source).toContain('className={styles.createTableButton}')
     expect(source).toContain('iconOnly')
     expect(source).toContain('tooltip="Create table"')
-    expect(css).toMatch(/\.targetTableControl\s*{[^}]*grid-template-columns:\s*minmax\(0,\s*1fr\)\s*auto;/)
+    expect(css).toMatch(
+      /\.targetTableControl\s*{[^}]*grid-template-columns:\s*minmax\(0,\s*1fr\)\s*auto;/,
+    )
   })
 
   it('offers missing table fields as one-click form nodes', () => {
@@ -358,8 +399,17 @@ describe('FormSettingsPanelView', () => {
     const formAnalysis: FormSettingsAnalysis = {
       ...analysis,
       kind: 'form',
-      node: node('form', 'base.form', { mode: 'cms', formId: 'contact', targetTableId: 'contact_submissions' }),
-      form: { nodeId: 'form', formId: 'contact', mode: 'cms', targetTableId: 'contact_submissions' },
+      node: node('form', 'base.form', {
+        mode: 'cms',
+        formId: 'contact',
+        targetTableId: 'contact_submissions',
+      }),
+      form: {
+        nodeId: 'form',
+        formId: 'contact',
+        mode: 'cms',
+        targetTableId: 'contact_submissions',
+      },
       field: null,
       compatibleFields: [],
       inferredFields: [],
@@ -414,7 +464,12 @@ describe('FormSettingsPanelView', () => {
   })
 })
 
-function node(id: string, moduleId: string, props: Record<string, unknown> = {}, children: string[] = []): PageNode {
+function node(
+  id: string,
+  moduleId: string,
+  props: Record<string, unknown> = {},
+  children: string[] = [],
+): PageNode {
   return {
     id,
     moduleId,
@@ -434,7 +489,9 @@ describe('renderModuleTabContent form setup slot', () => {
       rootNodeId: 'body',
       nodes: {
         body: node('body', 'base.body', {}, ['form']),
-        form: node('form', 'base.form', { mode: 'cms', formId: 'contact', targetTableId: '' }, ['input']),
+        form: node('form', 'base.form', { mode: 'cms', formId: 'contact', targetTableId: '' }, [
+          'input',
+        ]),
         input: node('input', 'base.input', { fieldId: '', name: '', inputType: 'text' }),
       },
     }
@@ -469,7 +526,9 @@ describe('renderModuleTabContent form setup slot', () => {
 
     const setupPanel = await waitFor(() => screen.getByTestId('form-settings-panel'))
     const rawFieldRow = screen.getByTestId('property-control-fieldId')
-    expect(setupPanel.compareDocumentPosition(rawFieldRow) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
+    expect(
+      setupPanel.compareDocumentPosition(rawFieldRow) & Node.DOCUMENT_POSITION_FOLLOWING,
+    ).toBeTruthy()
   })
 
   it('does not duplicate promoted base.form controls in the raw schema list', async () => {
@@ -487,7 +546,9 @@ describe('renderModuleTabContent form setup slot', () => {
       rootNodeId: 'body',
       nodes: {
         body: node('body', 'base.body', {}, ['form']),
-        form: node('form', 'base.form', { mode: 'cms', formId: 'contact', targetTableId: '' }, ['input']),
+        form: node('form', 'base.form', { mode: 'cms', formId: 'contact', targetTableId: '' }, [
+          'input',
+        ]),
         input: node('input', 'base.input', { fieldId: '', name: '', inputType: 'text' }),
       },
     }
@@ -495,10 +556,25 @@ describe('renderModuleTabContent form setup slot', () => {
       id: 'base.form',
       name: 'Form',
       schema: {
-        mode: { type: 'select', label: 'Mode', options: [{ label: 'CMS-native', value: 'cms' }, { label: 'Custom action', value: 'custom' }] },
+        mode: {
+          type: 'select',
+          label: 'Mode',
+          options: [
+            { label: 'CMS-native', value: 'cms' },
+            { label: 'Custom action', value: 'custom' },
+          ],
+        },
         formId: { type: 'text', label: 'Form ID' },
-        targetTableId: { type: 'dataTable', label: 'Target data table', condition: { field: 'mode', eq: 'cms' } },
-        successBehavior: { type: 'select', label: 'Success behavior', options: [{ label: 'Show message', value: 'message' }] },
+        targetTableId: {
+          type: 'dataTable',
+          label: 'Target data table',
+          condition: { field: 'mode', eq: 'cms' },
+        },
+        successBehavior: {
+          type: 'select',
+          label: 'Success behavior',
+          options: [{ label: 'Show message', value: 'message' }],
+        },
       },
     } as AnyModuleDefinition
 

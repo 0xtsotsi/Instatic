@@ -1,9 +1,6 @@
 import { describe, expect, it } from 'bun:test'
 import { readFile } from 'node:fs/promises'
-import {
-  ApiCallValidationError,
-  parseApiCall,
-} from '../../../server/plugins/protocol/parser'
+import { ApiCallValidationError, parseApiCall } from '../../../server/plugins/protocol/parser'
 
 describe('plugin worker IPC protocol', () => {
   it('rejects malformed storage create payloads before host dispatch', () => {
@@ -25,12 +22,14 @@ describe('plugin worker IPC protocol', () => {
         correlationId: 'req_2',
         pluginId: 'acme.workflow',
         target: 'cms.routes.register',
-        args: [{
-          method: 'POST',
-          path: '/status',
-          access: { kind: 'capability', capability: 'plugins.read' },
-          routeKey: 'GET:/status',
-        }],
+        args: [
+          {
+            method: 'POST',
+            path: '/status',
+            access: { kind: 'capability', capability: 'plugins.read' },
+            routeKey: 'GET:/status',
+          },
+        ],
       }),
     ).toThrow(/routeKey/)
   })
@@ -42,15 +41,17 @@ describe('plugin worker IPC protocol', () => {
         correlationId: 'req_3',
         pluginId: 'acme.workflow',
         target: 'cms.loops.registerSource',
-        args: [{
-          id: 'acme.workflow.posts',
-          label: 'Workflow Posts',
-          filterSchema: {
-            status: { type: 'unsupported', label: 'Status' },
+        args: [
+          {
+            id: 'acme.workflow.posts',
+            label: 'Workflow Posts',
+            filterSchema: {
+              status: { type: 'unsupported', label: 'Status' },
+            },
+            orderByOptions: [{ id: 'newest', label: 'Newest' }],
+            fields: [{ id: 'title', label: 'Title', format: 'plain' }],
           },
-          orderByOptions: [{ id: 'newest', label: 'Newest' }],
-          fields: [{ id: 'title', label: 'Title', format: 'plain' }],
-        }],
+        ],
       }),
     ).toThrow(ApiCallValidationError)
   })
@@ -78,12 +79,14 @@ describe('plugin worker IPC protocol', () => {
         args: [
           'entry-1',
           'body',
-          [{
-            kind: 'insertNode',
-            parentId: 'root',
-            index: 0,
-            node: { id: 'broken-node' },
-          }],
+          [
+            {
+              kind: 'insertNode',
+              parentId: 'root',
+              index: 0,
+              node: { id: 'broken-node' },
+            },
+          ],
         ],
       }),
     ).toThrow(ApiCallValidationError)

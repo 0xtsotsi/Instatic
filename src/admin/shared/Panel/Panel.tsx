@@ -108,12 +108,7 @@ export function Panel({
       className={cn(styles.panel, className)}
     >
       {!headerless && (
-        <PanelHeader
-          panelId={panelId}
-          title={title}
-          titleContent={titleContent}
-          onClose={onClose}
-        >
+        <PanelHeader panelId={panelId} title={title} titleContent={titleContent} onClose={onClose}>
           {headerActions}
         </PanelHeader>
       )}
@@ -121,10 +116,7 @@ export function Panel({
       <div
         ref={bodyRef}
         style={bodyStyle}
-        className={cn(
-          body === 'padded' ? styles.contentPadded : styles.contentBare,
-          bodyClassName,
-        )}
+        className={cn(body === 'padded' ? styles.contentPadded : styles.contentBare, bodyClassName)}
       >
         {children}
       </div>

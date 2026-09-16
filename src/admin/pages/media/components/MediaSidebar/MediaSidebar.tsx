@@ -79,10 +79,7 @@ export function MediaSidebar({ workspace, activePanel, onActivePanelChange }: Me
     if (item.id === 'storage') return hasCapability(currentUser, 'storage.elect')
     return true
   })
-  const railAccents = assignRailAccents(
-    railItems,
-    (item) => `media:${item.id}:${item.label}`,
-  )
+  const railAccents = assignRailAccents(railItems, (item) => `media:${item.id}:${item.label}`)
 
   // Defensive: if the user previously had the storage panel open and then
   // had their capability revoked, collapse it on the next render so they

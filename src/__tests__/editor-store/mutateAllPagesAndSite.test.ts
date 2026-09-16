@@ -154,24 +154,30 @@ describe('mutateAllPagesAndSite — basic happy path', () => {
     useEditorStore.getState().createSite('Test')
 
     useEditorStore.getState().mutateAllPagesAndSite((_site, helpers) => {
-      helpers.addScripts([{
-        path: 'motion.js',
-        content: `import { Motion } from '@motion.page/sdk';`,
-        format: 'module',
-        pageSources: ['index.html'],
-        priority: 100,
-        dependencies: [{ name: '@motion.page/sdk', version: '1.2.4' }],
-      }])
+      helpers.addScripts([
+        {
+          path: 'motion.js',
+          content: `import { Motion } from '@motion.page/sdk';`,
+          format: 'module',
+          pageSources: ['index.html'],
+          priority: 100,
+          dependencies: [{ name: '@motion.page/sdk', version: '1.2.4' }],
+        },
+      ])
       return true
     })
 
     expect(useEditorStore.getState().packageJson.dependencies['@motion.page/sdk']).toBe('1.2.4')
-    expect(useEditorStore.getState().site?.packageJson.dependencies['@motion.page/sdk']).toBe('1.2.4')
+    expect(useEditorStore.getState().site?.packageJson.dependencies['@motion.page/sdk']).toBe(
+      '1.2.4',
+    )
 
     useEditorStore.getState().undo()
 
     expect(useEditorStore.getState().packageJson.dependencies['@motion.page/sdk']).toBeUndefined()
-    expect(useEditorStore.getState().site?.packageJson.dependencies['@motion.page/sdk']).toBeUndefined()
+    expect(
+      useEditorStore.getState().site?.packageJson.dependencies['@motion.page/sdk'],
+    ).toBeUndefined()
   })
 })
 
@@ -204,9 +210,27 @@ describe('mutateAllPagesAndSite — atomicity', () => {
     // Now run the four-helper recipe.
     useEditorStore.getState().mutateAllPagesAndSite((_site, helpers) => {
       helpers.addPage({ title: 'Added', slug: 'added', nodeFragment: makeFragment() })
-      helpers.addStyleRule({ name: 'new-rule', kind: 'class', selector: '.new-rule', order: 0, styles: {}, contextStyles: {} })
-      helpers.overwritePage(existingPageId, { title: 'Updated', slug: 'updated', nodeFragment: makeFragment() })
-      helpers.overwriteStyleRule(existingRuleId, { name: 'old-rule', kind: 'class', selector: '.old-rule', order: 0, styles: { color: 'blue' }, contextStyles: {} })
+      helpers.addStyleRule({
+        name: 'new-rule',
+        kind: 'class',
+        selector: '.new-rule',
+        order: 0,
+        styles: {},
+        contextStyles: {},
+      })
+      helpers.overwritePage(existingPageId, {
+        title: 'Updated',
+        slug: 'updated',
+        nodeFragment: makeFragment(),
+      })
+      helpers.overwriteStyleRule(existingRuleId, {
+        name: 'old-rule',
+        kind: 'class',
+        selector: '.old-rule',
+        order: 0,
+        styles: { color: 'blue' },
+        contextStyles: {},
+      })
       return true
     })
 
@@ -220,20 +244,51 @@ describe('mutateAllPagesAndSite — atomicity', () => {
     let existingPageId = ''
     let existingRuleId = ''
     useEditorStore.getState().mutateAllPagesAndSite((_site, helpers) => {
-      existingPageId = helpers.addPage({ title: 'Seed Page', slug: 'seed', nodeFragment: makeFragment() })
-      existingRuleId = helpers.addStyleRule({ name: 'seed-rule', kind: 'class', selector: '.seed-rule', order: 0, styles: {}, contextStyles: {} })
+      existingPageId = helpers.addPage({
+        title: 'Seed Page',
+        slug: 'seed',
+        nodeFragment: makeFragment(),
+      })
+      existingRuleId = helpers.addStyleRule({
+        name: 'seed-rule',
+        kind: 'class',
+        selector: '.seed-rule',
+        order: 0,
+        styles: {},
+        contextStyles: {},
+      })
       return true
     })
 
     const snapshotPages = useEditorStore.getState().site!.pages.length
     const snapshotRules = Object.keys(useEditorStore.getState().site!.styleRules).length
-    const snapshotPageTitle = useEditorStore.getState().site!.pages.find((p) => p.id === existingPageId)!.title
+    const snapshotPageTitle = useEditorStore
+      .getState()
+      .site!.pages.find((p) => p.id === existingPageId)!.title
 
     useEditorStore.getState().mutateAllPagesAndSite((_site, helpers) => {
       helpers.addPage({ title: 'Extra', slug: 'extra', nodeFragment: makeFragment() })
-      helpers.addStyleRule({ name: 'extra-rule', kind: 'class', selector: '.extra-rule', order: 0, styles: {}, contextStyles: {} })
-      helpers.overwritePage(existingPageId, { title: 'Overwritten', slug: 'overwritten', nodeFragment: makeFragment() })
-      helpers.overwriteStyleRule(existingRuleId, { name: 'seed-rule', kind: 'class', selector: '.seed-rule', order: 0, styles: { opacity: '0.5' }, contextStyles: {} })
+      helpers.addStyleRule({
+        name: 'extra-rule',
+        kind: 'class',
+        selector: '.extra-rule',
+        order: 0,
+        styles: {},
+        contextStyles: {},
+      })
+      helpers.overwritePage(existingPageId, {
+        title: 'Overwritten',
+        slug: 'overwritten',
+        nodeFragment: makeFragment(),
+      })
+      helpers.overwriteStyleRule(existingRuleId, {
+        name: 'seed-rule',
+        kind: 'class',
+        selector: '.seed-rule',
+        order: 0,
+        styles: { opacity: '0.5' },
+        contextStyles: {},
+      })
       return true
     })
 
@@ -248,7 +303,9 @@ describe('mutateAllPagesAndSite — atomicity', () => {
 
     const undoPages = useEditorStore.getState().site!.pages.length
     const undoRules = Object.keys(useEditorStore.getState().site!.styleRules).length
-    const undoTitle = useEditorStore.getState().site!.pages.find((p) => p.id === existingPageId)!.title
+    const undoTitle = useEditorStore
+      .getState()
+      .site!.pages.find((p) => p.id === existingPageId)!.title
 
     expect(undoPages).toBe(snapshotPages)
     expect(undoRules).toBe(snapshotRules)
@@ -349,7 +406,9 @@ describe('inline background carries through to node.inlineStyles', () => {
     let newPageId = ''
     useEditorStore.getState().mutateAllPagesAndSite((_site, helpers) => {
       newPageId = helpers.addPage({
-        title: 'Bg', slug: 'bg', nodeFragment: makeBgFragment('/uploads/media/hero.png'),
+        title: 'Bg',
+        slug: 'bg',
+        nodeFragment: makeBgFragment('/uploads/media/hero.png'),
       })
       return true
     })

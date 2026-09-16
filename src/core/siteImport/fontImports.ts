@@ -60,15 +60,15 @@ function variantsForAxisSpec(axisSpec: string | undefined, entry: GoogleFontFami
   const weightIndex = axes.indexOf('wght')
   const allowed = entry.variants
     .map((variant) => ({ variant, parsed: parseVariant(variant) }))
-    .filter((item): item is { variant: string; parsed: NonNullable<ReturnType<typeof parseVariant>> } => item.parsed !== null)
+    .filter(
+      (item): item is { variant: string; parsed: NonNullable<ReturnType<typeof parseVariant>> } =>
+        item.parsed !== null,
+    )
   const selected = new Set<string>()
 
   for (const row of valuesRaw.split(';')) {
     const values = row.split(',').map((value) => value.trim())
-    const italic =
-      italicIndex >= 0
-        ? values[italicIndex] === '1'
-        : false
+    const italic = italicIndex >= 0 ? values[italicIndex] === '1' : false
     const weightRange =
       weightIndex >= 0
         ? parseWeightExpression(values[weightIndex] ?? '')
@@ -99,10 +99,7 @@ function parseFamilySpec(spec: string, url: URL): ImportGoogleFont | null {
   return { family: entry.family, variants, subsets }
 }
 
-function mergeGoogleFont(
-  byFamily: Map<string, ImportGoogleFont>,
-  font: ImportGoogleFont,
-): void {
+function mergeGoogleFont(byFamily: Map<string, ImportGoogleFont>, font: ImportGoogleFont): void {
   const key = font.family.toLowerCase()
   const existing = byFamily.get(key)
   if (!existing) {

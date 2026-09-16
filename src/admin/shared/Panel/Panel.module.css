@@ -13,15 +13,15 @@
  */
 
 .panel {
-    position: relative;
-    display: flex;
-    width: 100%;
-    height: 100%;
-    min-height: 0;
-    flex-direction: column;
-    overflow: hidden;
-    background: transparent;
-    outline: none;
+  position: relative;
+  display: flex;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  flex-direction: column;
+  overflow: hidden;
+  background: transparent;
+  outline: none;
 }
 
 /* Default body — padded, scrollable, vertical stack with consistent gap.
@@ -29,22 +29,22 @@
  * agent's message-thread + composer split, or the DOM tree's sticky
  * search bar above an unscrolled tree). */
 .contentPadded {
-    display: flex;
-    min-height: 0;
-    flex: 1;
-    flex-direction: column;
-    gap: var(--space-m);
-    overflow: auto;
-    padding: var(--space-s);
+  display: flex;
+  min-height: 0;
+  flex: 1;
+  flex-direction: column;
+  gap: var(--space-m);
+  overflow: auto;
+  padding: var(--space-s);
 }
 
 /* Bare body — no padding, no gap, no scroll container. Use when the
  * children own their own scroll surface or layout (e.g. a plugin's
  * arbitrary panel component, or content explorer's split sections). */
 .contentBare {
-    display: flex;
-    min-height: 0;
-    flex: 1;
-    flex-direction: column;
-    overflow: hidden;
+  display: flex;
+  min-height: 0;
+  flex: 1;
+  flex-direction: column;
+  overflow: hidden;
 }

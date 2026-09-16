@@ -29,7 +29,9 @@ afterEach(() => {
 })
 
 function sse(...events: unknown[]): string {
-  return events.map((e) => `event: ${(e as { type: string }).type}\ndata: ${JSON.stringify(e)}\n\n`).join('')
+  return events
+    .map((e) => `event: ${(e as { type: string }).type}\ndata: ${JSON.stringify(e)}\n\n`)
+    .join('')
 }
 
 function sseResponse(body: string): Response {
@@ -46,8 +48,16 @@ function sseResponse(body: string): Response {
 function anthropicSnapTurn(id: string): string {
   return sse(
     { type: 'message_start', message: { usage: { input_tokens: 10 } } },
-    { type: 'content_block_start', index: 0, content_block: { type: 'tool_use', id, name: 'site_render_snapshot', input: {} } },
-    { type: 'content_block_delta', index: 0, delta: { type: 'input_json_delta', partial_json: '{}' } },
+    {
+      type: 'content_block_start',
+      index: 0,
+      content_block: { type: 'tool_use', id, name: 'site_render_snapshot', input: {} },
+    },
+    {
+      type: 'content_block_delta',
+      index: 0,
+      delta: { type: 'input_json_delta', partial_json: '{}' },
+    },
     { type: 'content_block_stop', index: 0 },
     { type: 'message_delta', delta: { stop_reason: 'tool_use' }, usage: { output_tokens: 5 } },
     { type: 'message_stop' },
@@ -63,8 +73,20 @@ const ANTHROPIC_DONE = sse(
   { type: 'message_stop' },
 )
 
-const VISION_CAPS: AiProviderCapabilities = { toolCalling: true, visionInput: true, toolResultImages: true, promptCache: true, streaming: true }
-const NO_VISION_CAPS: AiProviderCapabilities = { toolCalling: true, visionInput: false, toolResultImages: false, promptCache: false, streaming: true }
+const VISION_CAPS: AiProviderCapabilities = {
+  toolCalling: true,
+  visionInput: true,
+  toolResultImages: true,
+  promptCache: true,
+  streaming: true,
+}
+const NO_VISION_CAPS: AiProviderCapabilities = {
+  toolCalling: true,
+  visionInput: false,
+  toolResultImages: false,
+  promptCache: false,
+  streaming: true,
+}
 const USER_IMAGES_ONLY_CAPS: AiProviderCapabilities = { ...VISION_CAPS, toolResultImages: false }
 
 const renderSnapshotTool: AiTool = {
@@ -89,10 +111,22 @@ function makeRequest(
     tools: [renderSnapshotTool],
     modelId: 'claude-sonnet-4-6',
     modelCapabilities: caps,
-    credentials: { id: 'cr', providerId: 'anthropic', authMode: 'apiKey', apiKey: 'sk-test', baseUrl: null },
+    credentials: {
+      id: 'cr',
+      providerId: 'anthropic',
+      authMode: 'apiKey',
+      apiKey: 'sk-test',
+      baseUrl: null,
+    },
     signal: new AbortController().signal,
     bridge,
-    toolContextBase: { db: {} as never, userId: 'u1', scope: 'site', conversationId: 'c1', snapshot: {} },
+    toolContextBase: {
+      db: {} as never,
+      userId: 'u1',
+      scope: 'site',
+      conversationId: 'c1',
+      snapshot: {},
+    },
     ...overrides,
   }
 }
@@ -126,7 +160,10 @@ describe('multimodal tool output + heavy elision (Anthropic)', () => {
     expect(browserInputs).toEqual([{ captureScreenshot: true }])
 
     // 2nd request body carries the tool_result with a native image block.
-    const messages = bodies[1]!.messages as Array<{ role: string; content: Array<Record<string, unknown>> }>
+    const messages = bodies[1]!.messages as Array<{
+      role: string
+      content: Array<Record<string, unknown>>
+    }>
     const trBlock = messages
       .flatMap((m) => m.content)
       .find((b) => b.type === 'tool_result' && b.tool_use_id === 't_s1')!
@@ -134,7 +171,8 @@ describe('multimodal tool output + heavy elision (Anthropic)', () => {
     expect(Array.isArray(trBlock.content)).toBe(true)
     const blocks = trBlock.content as Array<Record<string, unknown>>
     expect(blocks.some((b) => b.type === 'text')).toBe(true)
-    const imageBlock = blocks.find((b) => b.type === 'image') as { source: Record<string, unknown> } | undefined
+    const imageBlock = blocks.find((b) => b.type === 'image') as
+      { source: Record<string, unknown> } | undefined
     expect(imageBlock).toBeDefined()
     expect(imageBlock!.source).toEqual({ type: 'base64', media_type: 'image/png', data: 'QUJD' })
   })
@@ -154,7 +192,9 @@ describe('multimodal tool output + heavy elision (Anthropic)', () => {
       },
     }
 
-    for await (const _ of anthropicDriver.stream(makeRequest(bridge, NO_VISION_CAPS))) { void _ }
+    for await (const _ of anthropicDriver.stream(makeRequest(bridge, NO_VISION_CAPS))) {
+      void _
+    }
     expect(browserInputs).toEqual([{ captureScreenshot: false }])
   })
 
@@ -172,7 +212,9 @@ describe('multimodal tool output + heavy elision (Anthropic)', () => {
       },
     }
 
-    for await (const _ of anthropicDriver.stream(makeRequest(bridge, USER_IMAGES_ONLY_CAPS))) { void _ }
+    for await (const _ of anthropicDriver.stream(makeRequest(bridge, USER_IMAGES_ONLY_CAPS))) {
+      void _
+    }
     expect(browserInputs).toEqual([{ captureScreenshot: false }])
   })
 
@@ -191,11 +233,16 @@ describe('multimodal tool output + heavy elision (Anthropic)', () => {
       },
     }
 
-    for await (const _ of anthropicDriver.stream(makeRequest(bridge, VISION_CAPS))) { void _ }
+    for await (const _ of anthropicDriver.stream(makeRequest(bridge, VISION_CAPS))) {
+      void _
+    }
 
     // 3rd POST replays both tool results. The first (t_s1) must be stubbed to a
     // plain string breadcrumb; the latest (t_s2) keeps its native image block.
-    const messages = bodies[2]!.messages as Array<{ role: string; content: Array<Record<string, unknown>> }>
+    const messages = bodies[2]!.messages as Array<{
+      role: string
+      content: Array<Record<string, unknown>>
+    }>
     const allBlocks = messages.flatMap((m) => m.content)
     const first = allBlocks.find((b) => b.tool_use_id === 't_s1')!
     const latest = allBlocks.find((b) => b.tool_use_id === 't_s2')!
@@ -205,7 +252,9 @@ describe('multimodal tool output + heavy elision (Anthropic)', () => {
     expect(first.content as string).toContain('again')
 
     expect(Array.isArray(latest.content)).toBe(true)
-    expect((latest.content as Array<Record<string, unknown>>).some((b) => b.type === 'image')).toBe(true)
+    expect((latest.content as Array<Record<string, unknown>>).some((b) => b.type === 'image')).toBe(
+      true,
+    )
   })
 })
 
@@ -213,12 +262,18 @@ describe('text-only providers drop the image with a note (Ollama)', () => {
   const ollamaSnapTurn = JSON.stringify({
     choices: [
       {
-        delta: { tool_calls: [{ index: 0, id: 't_s1', function: { name: 'site_render_snapshot', arguments: '{}' } }] },
+        delta: {
+          tool_calls: [
+            { index: 0, id: 't_s1', function: { name: 'site_render_snapshot', arguments: '{}' } },
+          ],
+        },
         finish_reason: 'tool_calls',
       },
     ],
   })
-  const ollamaDone = JSON.stringify({ choices: [{ delta: { content: 'done' }, finish_reason: 'stop' }] })
+  const ollamaDone = JSON.stringify({
+    choices: [{ delta: { content: 'done' }, finish_reason: 'stop' }],
+  })
 
   function ollamaSse(payload: string): string {
     return `data: ${payload}\n\ndata: [DONE]\n\n`
@@ -238,12 +293,24 @@ describe('text-only providers drop the image with a note (Ollama)', () => {
     }
     const req = makeRequest(bridge, VISION_CAPS, {
       modelId: 'llava',
-      credentials: { id: 'cr', providerId: 'ollama', authMode: 'baseUrl', apiKey: null, baseUrl: 'http://localhost:11434' },
+      credentials: {
+        id: 'cr',
+        providerId: 'ollama',
+        authMode: 'baseUrl',
+        apiKey: null,
+        baseUrl: 'http://localhost:11434',
+      },
     })
 
-    for await (const _ of ollamaDriver.stream(req)) { void _ }
+    for await (const _ of ollamaDriver.stream(req)) {
+      void _
+    }
 
-    const secondMessages = bodies[1]!.messages as Array<{ role: string; content: string; tool_call_id?: string }>
+    const secondMessages = bodies[1]!.messages as Array<{
+      role: string
+      content: string
+      tool_call_id?: string
+    }>
     const toolMsg = secondMessages.find((m) => m.role === 'tool')!
     expect(toolMsg).toBeDefined()
     expect(typeof toolMsg.content).toBe('string')

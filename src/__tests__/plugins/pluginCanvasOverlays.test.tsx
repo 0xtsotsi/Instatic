@@ -11,10 +11,7 @@
 import { afterEach, beforeEach, describe, expect, it } from 'bun:test'
 import { cleanup, render, screen } from '@testing-library/react'
 import { PluginCanvasOverlayLayer } from '@site/canvas/PluginCanvasOverlayLayer'
-import {
-  activateEditorPlugin,
-  pluginRuntime,
-} from '@core/plugins/runtime'
+import { activateEditorPlugin, pluginRuntime } from '@core/plugins/runtime'
 import { definePluginCanvasOverlay } from '@core/plugin-sdk'
 import type { PluginManifest } from '@core/plugin-sdk'
 
@@ -53,17 +50,21 @@ describe('definePluginCanvasOverlay SDK builder', () => {
   })
 
   it('rejects overlay ids that are not namespaced', () => {
-    expect(() => definePluginCanvasOverlay({
-      id: 'unscoped',
-      component: NoopOverlay,
-    })).toThrow(/namespaced/)
+    expect(() =>
+      definePluginCanvasOverlay({
+        id: 'unscoped',
+        component: NoopOverlay,
+      }),
+    ).toThrow(/namespaced/)
   })
 
   it('rejects overlay ids with invalid characters', () => {
-    expect(() => definePluginCanvasOverlay({
-      id: 'Acme.Bad',
-      component: NoopOverlay,
-    })).toThrow(/lowercase/)
+    expect(() =>
+      definePluginCanvasOverlay({
+        id: 'Acme.Bad',
+        component: NoopOverlay,
+      }),
+    ).toThrow(/lowercase/)
   })
 })
 
@@ -88,26 +89,30 @@ describe('pluginRuntime canvas overlay registry', () => {
       ...baseManifest,
       grantedPermissions: [] satisfies PluginManifest['grantedPermissions'],
     }
-    await expect(activateEditorPlugin(manifest, {
-      activate(api) {
-        api.editor.canvas.registerOverlay({
-          id: 'acme.workflow.pin',
-          component: NoopOverlay,
-        })
-      },
-    })).rejects.toThrow(/editor\.canvas/)
+    await expect(
+      activateEditorPlugin(manifest, {
+        activate(api) {
+          api.editor.canvas.registerOverlay({
+            id: 'acme.workflow.pin',
+            component: NoopOverlay,
+          })
+        },
+      }),
+    ).rejects.toThrow(/editor\.canvas/)
     expect(pluginRuntime.getCanvasOverlays()).toEqual([])
   })
 
   it('rejects overlay ids that escape the plugin namespace', async () => {
-    await expect(activateEditorPlugin(baseManifest, {
-      activate(api) {
-        api.editor.canvas.registerOverlay({
-          id: 'other.vendor.pin',
-          component: NoopOverlay,
-        })
-      },
-    })).rejects.toThrow(/id must start with/)
+    await expect(
+      activateEditorPlugin(baseManifest, {
+        activate(api) {
+          api.editor.canvas.registerOverlay({
+            id: 'other.vendor.pin',
+            component: NoopOverlay,
+          })
+        },
+      }),
+    ).rejects.toThrow(/id must start with/)
     expect(pluginRuntime.getCanvasOverlays()).toEqual([])
   })
 

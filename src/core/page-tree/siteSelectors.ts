@@ -32,9 +32,7 @@ const EMPTY_VC_MAP: ReadonlyMap<string, VisualComponent> = new Map()
  * (undefined array), returns a shared empty map — callers can `.get()`
  * without a null check.
  */
-function selectVisualComponentsById(
-  site: SiteDocument,
-): ReadonlyMap<string, VisualComponent> {
+function selectVisualComponentsById(site: SiteDocument): ReadonlyMap<string, VisualComponent> {
   const vcs = site.visualComponents
   if (!vcs) return EMPTY_VC_MAP
   const cached = _vcsByIdCache.get(vcs)

@@ -24,7 +24,10 @@ describe('stampFormPageTokens', () => {
 
   it('leaves non-CMS forms untouched', () => {
     const html = stampFormPageTokens(
-      PAGE_WITH_CMS_FORM.replace('data-instatic-form-mode="cms"', 'data-instatic-form-mode="custom"'),
+      PAGE_WITH_CMS_FORM.replace(
+        'data-instatic-form-mode="cms"',
+        'data-instatic-form-mode="custom"',
+      ),
       'page-home',
     )
     expect(html).not.toContain('data-instatic-page-token=')
@@ -52,24 +55,27 @@ describe('form runtime browser behaviour', () => {
     const calls: Array<{ path: string; payload: Record<string, unknown> }> = []
     const originalFetch = globalThis.fetch
 
-    ;(globalThis as Record<string, unknown>).fetch = async (input: RequestInfo | URL, init?: RequestInit) => {
-      const path = typeof input === 'string'
-        ? input
-        : input instanceof URL
-          ? input.pathname
-          : input.url
+    ;(globalThis as Record<string, unknown>).fetch = async (
+      input: RequestInfo | URL,
+      init?: RequestInit,
+    ) => {
+      const path =
+        typeof input === 'string' ? input : input instanceof URL ? input.pathname : input.url
       const payload = JSON.parse(String(init?.body ?? '{}')) as Record<string, unknown>
       calls.push({ path, payload })
 
       if (path === '/_instatic/form/challenge') {
-        return new Response(JSON.stringify({
-          token: 'prefetched-token',
-          challenge: 'prefetched-challenge',
-          expiresAt: '2099-01-01T00:00:00.000Z',
-        }), {
-          status: 200,
-          headers: { 'content-type': 'application/json' },
-        })
+        return new Response(
+          JSON.stringify({
+            token: 'prefetched-token',
+            challenge: 'prefetched-challenge',
+            expiresAt: '2099-01-01T00:00:00.000Z',
+          }),
+          {
+            status: 200,
+            headers: { 'content-type': 'application/json' },
+          },
+        )
       }
 
       return new Response(JSON.stringify({ ok: true, rowId: 'row-1' }), {

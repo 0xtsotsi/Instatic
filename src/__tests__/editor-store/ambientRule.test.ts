@@ -47,10 +47,7 @@ function freshStore() {
   useEditorStore.getState().createSite('Test')
 }
 
-function withCssSupports(
-  supports: (conditionText: string) => boolean,
-  run: () => void,
-) {
+function withCssSupports(supports: (conditionText: string) => boolean, run: () => void) {
   const cssGlobal = globalThis as CssSupportsGlobal
   const originalCss = cssGlobal.CSS
   cssGlobal.CSS = { supports }
@@ -90,39 +87,42 @@ describe('createAmbientRule', () => {
 
   it('rejects an empty or whitespace-only selector', () => {
     freshStore()
-    expect(() =>
-      useEditorStore.getState().createAmbientRule({ selector: '   ' }),
-    ).toThrow('Ambient selector cannot be empty')
+    expect(() => useEditorStore.getState().createAmbientRule({ selector: '   ' })).toThrow(
+      'Ambient selector cannot be empty',
+    )
   })
 
   it('rejects a syntactically invalid selector', () => {
     freshStore()
-    expect(() =>
-      useEditorStore.getState().createAmbientRule({ selector: 'h1 >>> span' }),
-    ).toThrow('Invalid CSS selector')
+    expect(() => useEditorStore.getState().createAmbientRule({ selector: 'h1 >>> span' })).toThrow(
+      'Invalid CSS selector',
+    )
   })
 
   it('uses browser selector support to reject unknown pseudo-classes', () => {
     freshStore()
-    withCssSupports((conditionText) => {
-      if (conditionText === 'selector(*)') return true
-      if (conditionText === 'selector(.a)') return true
-      if (conditionText === 'selector(input:placeholder)') return false
-      if (conditionText === 'selector(input::placeholder)') return true
-      return false
-    }, () => {
-      const store = useEditorStore.getState()
-      expect(() => store.createAmbientRule({ selector: 'input:placeholder' })).toThrow(
-        'Invalid CSS selector',
-      )
-      expect(() => store.createAmbientRule({ selector: '.a, input:placeholder' })).toThrow(
-        'Invalid CSS selector',
-      )
-      const rule = store.createAmbientRule({ selector: 'input::placeholder' })
-      expect(rule.selector).toBe('input::placeholder')
-      const listRule = store.createAmbientRule({ selector: '.a, input::placeholder' })
-      expect(listRule.selector).toBe('.a, input::placeholder')
-    })
+    withCssSupports(
+      (conditionText) => {
+        if (conditionText === 'selector(*)') return true
+        if (conditionText === 'selector(.a)') return true
+        if (conditionText === 'selector(input:placeholder)') return false
+        if (conditionText === 'selector(input::placeholder)') return true
+        return false
+      },
+      () => {
+        const store = useEditorStore.getState()
+        expect(() => store.createAmbientRule({ selector: 'input:placeholder' })).toThrow(
+          'Invalid CSS selector',
+        )
+        expect(() => store.createAmbientRule({ selector: '.a, input:placeholder' })).toThrow(
+          'Invalid CSS selector',
+        )
+        const rule = store.createAmbientRule({ selector: 'input::placeholder' })
+        expect(rule.selector).toBe('input::placeholder')
+        const listRule = store.createAmbientRule({ selector: '.a, input::placeholder' })
+        expect(listRule.selector).toBe('.a, input::placeholder')
+      },
+    )
   })
 
   it('appends to the cascade — order strictly greater than every existing rule', () => {
@@ -243,13 +243,15 @@ describe('publisher emits ambient rules', () => {
 describe('parseStyleRule persisted shape', () => {
   it('drops rules missing current selector metadata', async () => {
     const { parseStyleRule } = await import('@core/page-tree')
-    expect(parseStyleRule({
-      id: 'x',
-      name: 'legacy-name',
-      styles: { color: 'red' },
-      createdAt: 0,
-      updatedAt: 0,
-    })).toBeNull()
+    expect(
+      parseStyleRule({
+        id: 'x',
+        name: 'legacy-name',
+        styles: { color: 'red' },
+        createdAt: 0,
+        updatedAt: 0,
+      }),
+    ).toBeNull()
   })
 
   it('keeps sparse declaration priorities and drops invalid or orphaned entries', async () => {

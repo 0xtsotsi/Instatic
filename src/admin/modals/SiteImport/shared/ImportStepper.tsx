@@ -32,8 +32,7 @@ export function ImportStepper({ current, allDone = false }: ImportStepperProps) 
   return (
     <ol className={styles.stepper} aria-label="Import progress">
       {STAGES.map((stage, i) => {
-        const state =
-          allDone || i < currentIdx ? 'done' : i === currentIdx ? 'current' : 'upcoming'
+        const state = allDone || i < currentIdx ? 'done' : i === currentIdx ? 'current' : 'upcoming'
         return (
           <li key={stage.id} className={styles.stepperItem} data-state={state}>
             <span className={styles.stepperDot}>

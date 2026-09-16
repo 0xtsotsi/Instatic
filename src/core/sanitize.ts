@@ -36,7 +36,10 @@ type DOMPurifyHookNode = {
 
 export type DOMPurifyRuntime = {
   sanitize?: (value: string, config?: Config) => unknown
-  addHook?: (hookName: 'afterSanitizeAttributes', callback: (node: DOMPurifyHookNode) => void) => void
+  addHook?: (
+    hookName: 'afterSanitizeAttributes',
+    callback: (node: DOMPurifyHookNode) => void,
+  ) => void
 }
 
 type DOMPurifyFactory = DOMPurifyRuntime & ((window: Window) => DOMPurifyRuntime)
@@ -123,12 +126,31 @@ function stripHtmlFallback(value: string): string {
 const RICHTEXT_CONFIG: Config = {
   // Allow safe semantic/formatting tags
   ALLOWED_TAGS: [
-    'p', 'br',
-    'h1', 'h2', 'h3', 'h4', 'h5', 'h6',
-    'strong', 'b', 'em', 'i', 'u', 's', 'del', 'ins',
-    'a', 'ul', 'ol', 'li',
-    'blockquote', 'code', 'pre',
-    'span', 'div',
+    'p',
+    'br',
+    'h1',
+    'h2',
+    'h3',
+    'h4',
+    'h5',
+    'h6',
+    'strong',
+    'b',
+    'em',
+    'i',
+    'u',
+    's',
+    'del',
+    'ins',
+    'a',
+    'ul',
+    'ol',
+    'li',
+    'blockquote',
+    'code',
+    'pre',
+    'span',
+    'div',
   ],
   // Restrict attributes to safe subset; data-* is blocked by default
   ALLOWED_ATTR: ['href', 'target', 'rel', 'class', 'id'],
@@ -154,7 +176,7 @@ export const PLAIN_TEXT_CONFIG: Config & { _plainText?: true } = {
   ALLOWED_ATTR: [],
   RETURN_DOM: false,
   RETURN_DOM_FRAGMENT: false,
-  _plainText: true,  // sentinel: triggers regex post-strip pass in sanitizeRichtext()
+  _plainText: true, // sentinel: triggers regex post-strip pass in sanitizeRichtext()
 }
 
 // ---------------------------------------------------------------------------

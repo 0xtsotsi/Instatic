@@ -33,12 +33,13 @@ export function UploadQueueWindow({ queue, open, onClose, onRevealAsset }: Uploa
   const total = queue.items.length
   const succeeded = queue.items.filter((item) => item.status === 'succeeded').length
   const failed = queue.items.filter((item) => item.status === 'failed').length
-  const inFlight = queue.items.filter((item) =>
-    item.status === 'queued' || item.status === 'uploading',
+  const inFlight = queue.items.filter(
+    (item) => item.status === 'queued' || item.status === 'uploading',
   ).length
 
-  const finishedExists = queue.items.some((item) =>
-    item.status === 'succeeded' || item.status === 'failed' || item.status === 'cancelled',
+  const finishedExists = queue.items.some(
+    (item) =>
+      item.status === 'succeeded' || item.status === 'failed' || item.status === 'cancelled',
   )
 
   const handleClear = () => queue.clearFinished()
@@ -54,7 +55,7 @@ export function UploadQueueWindow({ queue, open, onClose, onRevealAsset }: Uploa
       maxHeight={420}
       ariaLabel="Upload queue"
       testId="media-upload-queue"
-      headerActions={(
+      headerActions={
         <Button
           variant="ghost"
           size="xs"
@@ -64,7 +65,7 @@ export function UploadQueueWindow({ queue, open, onClose, onRevealAsset }: Uploa
         >
           Clear
         </Button>
-      )}
+      }
     >
       <div className={styles.summary} role="status" aria-live="polite">
         {total === 0
@@ -113,15 +114,19 @@ function UploadRow({ item, onRetry, onRemove, onReveal }: UploadRowProps) {
   const [previewUrl] = useState<string | null>(() =>
     item.file.type.startsWith('image/') ? URL.createObjectURL(item.file) : null,
   )
-  useEffect(() => () => {
-    if (previewUrl) URL.revokeObjectURL(previewUrl)
-  }, [previewUrl])
+  useEffect(
+    () => () => {
+      if (previewUrl) URL.revokeObjectURL(previewUrl)
+    },
+    [previewUrl],
+  )
 
-  const pct = item.status === 'uploading'
-    ? Math.round(item.progress * 100)
-    : item.status === 'succeeded'
-      ? 100
-      : 0
+  const pct =
+    item.status === 'uploading'
+      ? Math.round(item.progress * 100)
+      : item.status === 'succeeded'
+        ? 100
+        : 0
 
   return (
     <li className={styles.row} data-status={item.status}>
@@ -133,14 +138,18 @@ function UploadRow({ item, onRetry, onRemove, onReveal }: UploadRowProps) {
         )}
       </span>
       <span className={styles.body}>
-        <span className={styles.name} title={item.file.name}>{item.file.name}</span>
+        <span className={styles.name} title={item.file.name}>
+          {item.file.name}
+        </span>
         <span className={styles.meta}>
           <StatusBadge status={item.status} />
           <span>{formatBytes(item.file.size)}</span>
           {item.status === 'uploading' && <span>{pct}%</span>}
         </span>
         {item.error && (
-          <span className={styles.error} role="alert">{item.error}</span>
+          <span className={styles.error} role="alert">
+            {item.error}
+          </span>
         )}
         <span className={styles.progressBar} aria-hidden="true">
           <span

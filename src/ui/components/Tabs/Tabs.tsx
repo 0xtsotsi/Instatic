@@ -16,14 +16,7 @@
  * Lives under src/ui/components/ so plugins can import it via
  * @instatic/host-ui.
  */
-import {
-  createContext,
-  useContext,
-  useId,
-  useRef,
-  type KeyboardEvent,
-  type ReactNode,
-} from 'react'
+import { createContext, useContext, useId, useRef, type KeyboardEvent, type ReactNode } from 'react'
 import { cn } from '@ui/cn'
 import styles from './Tabs.module.css'
 
@@ -82,11 +75,7 @@ export interface TabPanelProps<TValue extends string> {
 // Tabs — context provider
 // ---------------------------------------------------------------------------
 
-export function Tabs<TValue extends string>({
-  value,
-  onChange,
-  children,
-}: TabsProps<TValue>) {
+export function Tabs<TValue extends string>({ value, onChange, children }: TabsProps<TValue>) {
   const idPrefix = useId()
 
   return (
@@ -117,9 +106,7 @@ export function TabList({ ariaLabel, children }: TabListProps) {
     const list = listRef.current
     if (!list) return
 
-    const tabs = Array.from(
-      list.querySelectorAll<HTMLButtonElement>('[role="tab"]'),
-    )
+    const tabs = Array.from(list.querySelectorAll<HTMLButtonElement>('[role="tab"]'))
     const focusedIndex = tabs.findIndex((t) => t === document.activeElement)
     if (focusedIndex === -1) return
 
@@ -207,10 +194,7 @@ export function Tab<TValue extends string>({ value, children }: TabProps<TValue>
 // TabPanel — content region associated with a tab
 // ---------------------------------------------------------------------------
 
-export function TabPanel<TValue extends string>({
-  value,
-  children,
-}: TabPanelProps<TValue>) {
+export function TabPanel<TValue extends string>({ value, children }: TabPanelProps<TValue>) {
   const { activeValue, idPrefix } = useTabsContext('TabPanel')
   const isActive = value === activeValue
   const tabId = `${idPrefix}-tab-${value}`

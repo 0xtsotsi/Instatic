@@ -18,7 +18,12 @@
  */
 import { applyOpenAction } from './stateHandlers'
 import type { SpotlightAction, SpotlightOpenState, SpotlightState } from './stateTypes'
-export type { ArgModeState, SpotlightAction, SpotlightOpenState, SpotlightState } from './stateTypes'
+export type {
+  ArgModeState,
+  SpotlightAction,
+  SpotlightOpenState,
+  SpotlightState,
+} from './stateTypes'
 
 // ─── Initial state ────────────────────────────────────────────────────────────
 
@@ -39,10 +44,7 @@ function makeOpenState(): SpotlightOpenState {
 
 // ─── Reducer ──────────────────────────────────────────────────────────────────
 
-export function spotlightReducer(
-  state: SpotlightState,
-  action: SpotlightAction,
-): SpotlightState {
+export function spotlightReducer(state: SpotlightState, action: SpotlightAction): SpotlightState {
   switch (action.type) {
     case 'OPEN':
       return state.phase === 'open' ? state : makeOpenState()

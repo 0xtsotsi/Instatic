@@ -1,9 +1,4 @@
-import {
-  aiToolError,
-  aiToolOk,
-  type AiToolOutput,
-  type ApplyCssExecutionInput,
-} from '@core/ai'
+import { aiToolError, aiToolOk, type AiToolOutput, type ApplyCssExecutionInput } from '@core/ai'
 import type { ConditionDef } from '@core/page-tree'
 import { cssToStyleRules, type NewStyleRule } from '@core/siteImport'
 import type { EditorStore } from '@site/store/types'

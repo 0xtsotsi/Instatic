@@ -26,7 +26,13 @@ function media(): RenderResolvedMedia {
     posterPath: null,
     variants: [
       { width: 640, height: 362, format: 'webp', path: '/uploads/hero-w640.webp', sizeBytes: 100 },
-      { width: 1024, height: 579, format: 'webp', path: '/uploads/hero-w1024.webp', sizeBytes: 200 },
+      {
+        width: 1024,
+        height: 579,
+        format: 'webp',
+        path: '/uploads/hero-w1024.webp',
+        sizeBytes: 200,
+      },
     ],
   }
 }
@@ -52,7 +58,10 @@ function sizesAttr(html: string): string | null {
 
 describe('base.image sizes resolution', () => {
   it('lazy with a publisher-resolved value emits `auto, <resolved>`', () => {
-    const html = renderImage({ loading: 'lazy', _resolvedAutoSizes: 'min(33.33vw - 16px, 410.67px)' })
+    const html = renderImage({
+      loading: 'lazy',
+      _resolvedAutoSizes: 'min(33.33vw - 16px, 410.67px)',
+    })
     expect(sizesAttr(html)).toBe('auto, min(33.33vw - 16px, 410.67px)')
   })
 

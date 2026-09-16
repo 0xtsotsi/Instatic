@@ -56,22 +56,42 @@ describe('publishPage runtime assets', () => {
     expect(html).toContain(
       '<script type="module" src="/_instatic/assets/runtime/body.123.js" data-instatic-runtime-script="body-script"></script>',
     )
-    expect(html.indexOf('/_instatic/assets/runtime/head.123.js')).toBeLessThan(html.indexOf('</head>'))
-    expect(html.indexOf('/_instatic/assets/runtime/body.123.js')).toBeLessThan(html.indexOf('</body>'))
-    expect(html.indexOf('/_instatic/assets/runtime/body.123.js')).toBeGreaterThan(html.indexOf('<body>'))
+    expect(html.indexOf('/_instatic/assets/runtime/head.123.js')).toBeLessThan(
+      html.indexOf('</head>'),
+    )
+    expect(html.indexOf('/_instatic/assets/runtime/body.123.js')).toBeLessThan(
+      html.indexOf('</body>'),
+    )
+    expect(html.indexOf('/_instatic/assets/runtime/body.123.js')).toBeGreaterThan(
+      html.indexOf('<body>'),
+    )
   })
 
   it('orders runtime scripts by priority within each placement', () => {
     const runtimeAssets: PublishedPageRuntimeAssets = {
       scripts: [
-        { fileId: 'b', src: '/_instatic/assets/runtime/b.js', placement: 'body-end', timing: 'dom-ready', priority: 20 },
-        { fileId: 'a', src: '/_instatic/assets/runtime/a.js', placement: 'body-end', timing: 'dom-ready', priority: 10 },
+        {
+          fileId: 'b',
+          src: '/_instatic/assets/runtime/b.js',
+          placement: 'body-end',
+          timing: 'dom-ready',
+          priority: 20,
+        },
+        {
+          fileId: 'a',
+          src: '/_instatic/assets/runtime/a.js',
+          placement: 'body-end',
+          timing: 'dom-ready',
+          priority: 10,
+        },
       ],
     }
 
     const { html } = publishPage(page, site, registry, { runtimeAssets })
 
-    expect(html.indexOf('/_instatic/assets/runtime/a.js')).toBeLessThan(html.indexOf('/_instatic/assets/runtime/b.js'))
+    expect(html.indexOf('/_instatic/assets/runtime/a.js')).toBeLessThan(
+      html.indexOf('/_instatic/assets/runtime/b.js'),
+    )
   })
 
   it('emits classic runtime scripts without type=module', () => {
@@ -93,17 +113,33 @@ describe('publishPage runtime assets', () => {
     expect(html).toContain(
       '<script src="/_instatic/assets/runtime/jquery.js" data-instatic-runtime-script="classic"></script>',
     )
-    expect(html).not.toContain(
-      '<script type="module" src="/_instatic/assets/runtime/jquery.js"',
-    )
+    expect(html).not.toContain('<script type="module" src="/_instatic/assets/runtime/jquery.js"')
   })
 
   it('does not inject external or unsafe runtime asset URLs', () => {
     const runtimeAssets: PublishedPageRuntimeAssets = {
       scripts: [
-        { fileId: 'cdn', src: 'https://cdn.example.com/pkg.js', placement: 'body-end', timing: 'dom-ready', priority: 10 },
-        { fileId: 'unsafe', src: 'javascript:alert(1)', placement: 'body-end', timing: 'dom-ready', priority: 20 },
-        { fileId: 'escape', src: '../escape.js', placement: 'body-end', timing: 'dom-ready', priority: 30 },
+        {
+          fileId: 'cdn',
+          src: 'https://cdn.example.com/pkg.js',
+          placement: 'body-end',
+          timing: 'dom-ready',
+          priority: 10,
+        },
+        {
+          fileId: 'unsafe',
+          src: 'javascript:alert(1)',
+          placement: 'body-end',
+          timing: 'dom-ready',
+          priority: 20,
+        },
+        {
+          fileId: 'escape',
+          src: '../escape.js',
+          placement: 'body-end',
+          timing: 'dom-ready',
+          priority: 30,
+        },
       ],
     }
 

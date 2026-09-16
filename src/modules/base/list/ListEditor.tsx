@@ -11,7 +11,11 @@ import styles from './list.module.css'
 import { parseItems } from './items'
 import type { ListStoredProps } from './props'
 
-export const ListEditor: React.FC<ModuleComponentProps<ListStoredProps>> = ({ props, mcClassName, nodeWrapperProps }) => {
+export const ListEditor: React.FC<ModuleComponentProps<ListStoredProps>> = ({
+  props,
+  mcClassName,
+  nodeWrapperProps,
+}) => {
   const items = parseItems(props.items || '')
   const Tag = props.listType === 'ordered' ? 'ol' : 'ul'
   return React.createElement(
@@ -19,6 +23,10 @@ export const ListEditor: React.FC<ModuleComponentProps<ListStoredProps>> = ({ pr
     { ...nodeWrapperProps, className: mcClassName },
     items.length > 0
       ? items.map((item, i) => React.createElement('li', { key: i }, item))
-      : React.createElement('li', { className: styles.placeholder, 'data-instatic-list-placeholder': '' }, 'List item 1'),
+      : React.createElement(
+          'li',
+          { className: styles.placeholder, 'data-instatic-list-placeholder': '' },
+          'List item 1',
+        ),
   )
 }

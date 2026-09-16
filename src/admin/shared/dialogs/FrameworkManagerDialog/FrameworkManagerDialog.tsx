@@ -205,10 +205,9 @@ export function FrameworkManagerDialog({
       }
     >
       <p className={styles.lede}>
-        Seed your design tokens from the Core Framework defaults — colors, a
-        fluid type scale, a spacing scale, and their utility classes. Pick the
-        state you want; switching adds what's missing and strips what the new
-        state drops.
+        Seed your design tokens from the Core Framework defaults — colors, a fluid type scale, a
+        spacing scale, and their utility classes. Pick the state you want; switching adds what's
+        missing and strips what the new state drops.
       </p>
 
       <div

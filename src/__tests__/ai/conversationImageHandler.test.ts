@@ -1,6 +1,9 @@
 import { afterEach, beforeEach, describe, expect, it } from 'bun:test'
 import sharp from 'sharp'
-import { createCapabilityTestHarness, type CapabilityTestHarness } from '../helpers/capabilityHarness'
+import {
+  createCapabilityTestHarness,
+  type CapabilityTestHarness,
+} from '../helpers/capabilityHarness'
 import {
   appendMessage,
   createConversationForUser,
@@ -41,7 +44,9 @@ describe('conversation image delivery', () => {
         channels: 3,
         background: { r: 12, g: 34, b: 56 },
       },
-    }).jpeg().toBuffer()
+    })
+      .jpeg()
+      .toBuffer()
     const message = await appendMessage(harness.db, conversation.id, {
       role: 'user',
       content: [
@@ -50,10 +55,9 @@ describe('conversation image delivery', () => {
       ],
     })
 
-    const detailResponse = await harness.ai(
-      `/admin/api/ai/conversations/${conversation.id}`,
-      { cookie: ownerCookie },
-    )
+    const detailResponse = await harness.ai(`/admin/api/ai/conversations/${conversation.id}`, {
+      cookie: ownerCookie,
+    })
     expect(detailResponse.status).toBe(200)
     const detailText = await detailResponse.text()
     expect(detailText).not.toContain(bytes.toString('base64'))

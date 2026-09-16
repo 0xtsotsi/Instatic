@@ -83,9 +83,10 @@ export const MediaUploadPlaceholder = Node.create<MediaUploadPlaceholderOptions>
   renderHTML({ HTMLAttributes, node }) {
     const attrs = node.attrs as MediaUploadPlaceholderAttributes
     const progressPct = Math.round(Math.max(0, Math.min(1, attrs.progress)) * 100)
-    const stateText = attrs.status === 'failed'
-      ? `Upload failed: ${attrs.error ?? 'unknown error'}`
-      : `Uploading ${attrs.filename}… ${progressPct}%`
+    const stateText =
+      attrs.status === 'failed'
+        ? `Upload failed: ${attrs.error ?? 'unknown error'}`
+        : `Uploading ${attrs.filename}… ${progressPct}%`
     return [
       'div',
       mergeAttributes(HTMLAttributes, {

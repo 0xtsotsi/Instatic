@@ -71,9 +71,11 @@ export function ContentCollectionCreateDialog({
     ? singularLabel
     : singularFromPlural(trimmedPluralLabel)
   const trimmedSingularLabel = displayedSingularLabel.trim()
-  const displayedSlug = slugTouched ? slug : (trimmedName ? slugFromTitle(trimmedName) : '')
+  const displayedSlug = slugTouched ? slug : trimmedName ? slugFromTitle(trimmedName) : ''
   const normalizedSlug = slugFromTitle(displayedSlug || trimmedName)
-  const effectiveRouteBase = routeTouched ? normalizeRouteBase(routeBase) : normalizeRouteBase(normalizedSlug)
+  const effectiveRouteBase = routeTouched
+    ? normalizeRouteBase(routeBase)
+    : normalizeRouteBase(normalizedSlug)
   const canCreate = Boolean(trimmedName && trimmedSingularLabel && trimmedPluralLabel)
 
   useEffect(() => {
@@ -94,7 +96,11 @@ export function ContentCollectionCreateDialog({
         fields: buildPostTypeDefaultFields().filter((field) => {
           if (field.id === POST_TYPE_FIELD_BODY) return bodyField
           if (field.id === POST_TYPE_FIELD_FEATURED_MEDIA) return featuredMediaField
-          if (field.id === POST_TYPE_FIELD_SEO_TITLE || field.id === POST_TYPE_FIELD_SEO_DESCRIPTION) return seoField
+          if (
+            field.id === POST_TYPE_FIELD_SEO_TITLE ||
+            field.id === POST_TYPE_FIELD_SEO_DESCRIPTION
+          )
+            return seoField
           return true
         }),
       })
@@ -118,13 +124,7 @@ export function ContentCollectionCreateDialog({
           <Button variant="secondary" size="sm" type="button" onClick={onCancel}>
             Cancel
           </Button>
-          <Button
-            variant="primary"
-            size="sm"
-            type="submit"
-            form={FORM_ID}
-            disabled={!canCreate}
-          >
+          <Button variant="primary" size="sm" type="submit" form={FORM_ID} disabled={!canCreate}>
             Create
           </Button>
         </>
@@ -132,7 +132,9 @@ export function ContentCollectionCreateDialog({
     >
       <form id={FORM_ID} className={dialogStyles.form} onSubmit={handleSubmit}>
         <div className={dialogStyles.field}>
-          <label htmlFor={nameId} className={dialogStyles.label}>Name</label>
+          <label htmlFor={nameId} className={dialogStyles.label}>
+            Name
+          </label>
           <Input
             id={nameId}
             ref={inputRef}
@@ -149,7 +151,9 @@ export function ContentCollectionCreateDialog({
         </div>
 
         <div className={dialogStyles.field}>
-          <label htmlFor={slugId} className={dialogStyles.label}>Slug</label>
+          <label htmlFor={slugId} className={dialogStyles.label}>
+            Slug
+          </label>
           <Input
             id={slugId}
             fieldSize="sm"
@@ -166,7 +170,9 @@ export function ContentCollectionCreateDialog({
         </div>
 
         <div className={dialogStyles.field}>
-          <label htmlFor={routeId} className={dialogStyles.label}>URL path</label>
+          <label htmlFor={routeId} className={dialogStyles.label}>
+            URL path
+          </label>
           <Input
             id={routeId}
             fieldSize="sm"
@@ -183,7 +189,9 @@ export function ContentCollectionCreateDialog({
         </div>
 
         <div className={dialogStyles.field}>
-          <label htmlFor={singularId} className={dialogStyles.label}>Singular label</label>
+          <label htmlFor={singularId} className={dialogStyles.label}>
+            Singular label
+          </label>
           <Input
             id={singularId}
             fieldSize="sm"
@@ -200,7 +208,9 @@ export function ContentCollectionCreateDialog({
         </div>
 
         <div className={dialogStyles.field}>
-          <label htmlFor={pluralId} className={dialogStyles.label}>Plural label</label>
+          <label htmlFor={pluralId} className={dialogStyles.label}>
+            Plural label
+          </label>
           <Input
             id={pluralId}
             fieldSize="sm"
@@ -219,11 +229,7 @@ export function ContentCollectionCreateDialog({
         <fieldset className={styles.collectionFields}>
           <legend>Fields</legend>
           <div>
-            <Checkbox
-              id={bodyFieldId}
-              checked={bodyField}
-              onCheckedChange={setBodyField}
-            />
+            <Checkbox id={bodyFieldId} checked={bodyField} onCheckedChange={setBodyField} />
             <label htmlFor={bodyFieldId}>Body</label>
           </div>
           <div>
@@ -235,11 +241,7 @@ export function ContentCollectionCreateDialog({
             <label htmlFor={featuredMediaFieldId}>Featured media</label>
           </div>
           <div>
-            <Checkbox
-              id={seoFieldId}
-              checked={seoField}
-              onCheckedChange={setSeoField}
-            />
+            <Checkbox id={seoFieldId} checked={seoField} onCheckedChange={setSeoField} />
             <label htmlFor={seoFieldId}>SEO fields</label>
           </div>
         </fieldset>

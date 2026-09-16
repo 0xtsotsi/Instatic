@@ -22,10 +22,7 @@ import { Panel } from '@admin/shared/Panel'
 import { useEditorStore } from '@site/store/store'
 import { pluginRuntime } from '@core/plugins/runtime'
 import { buildPluginRoutesHelper } from '@core/plugins/adminRuntime'
-import {
-  PluginContext,
-  type PluginContextValue,
-} from '@admin/plugin-host-hooks'
+import { PluginContext, type PluginContextValue } from '@admin/plugin-host-hooks'
 import styles from './PluginEditorPanel.module.css'
 
 interface PluginEditorPanelProps {

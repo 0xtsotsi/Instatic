@@ -5,10 +5,7 @@ import { FolderGlyphIcon } from 'pixel-art-icons/icons/folder-glyph'
 import { Button } from '@ui/components/Button'
 import { EmptyState } from '@ui/components/EmptyState'
 import { cn } from '@ui/cn'
-import {
-  TreeContainer,
-  treeDropStyles,
-} from '@site/ui/Tree'
+import { TreeContainer, treeDropStyles } from '@site/ui/Tree'
 import type { SiteExplorerSectionId } from '@core/page-tree'
 import type {
   SiteExplorerStructuralEntry,
@@ -48,9 +45,18 @@ interface SiteExplorerTreeSectionProps<TTarget> {
   onCommitInlineRename: (value: string) => void
   onCancelInlineRename: () => void
   onOpenItem: (item: SiteExplorerTreeItem<TTarget>, event: MouseEvent<HTMLButtonElement>) => void
-  onContextMenuItem: (item: SiteExplorerTreeItem<TTarget>, event: MouseEvent<HTMLButtonElement>) => void
-  onKeyDownItem: (item: SiteExplorerTreeItem<TTarget>, event: KeyboardEvent<HTMLButtonElement>) => void
-  onContextMenuFolder: (folder: SiteExplorerTreeFolder, event: MouseEvent<HTMLButtonElement>) => void
+  onContextMenuItem: (
+    item: SiteExplorerTreeItem<TTarget>,
+    event: MouseEvent<HTMLButtonElement>,
+  ) => void
+  onKeyDownItem: (
+    item: SiteExplorerTreeItem<TTarget>,
+    event: KeyboardEvent<HTMLButtonElement>,
+  ) => void
+  onContextMenuFolder: (
+    folder: SiteExplorerTreeFolder,
+    event: MouseEvent<HTMLButtonElement>,
+  ) => void
   onKeyDownFolder: (folder: SiteExplorerTreeFolder, event: KeyboardEvent<HTMLButtonElement>) => void
   emptyLabel?: string
 }
@@ -77,7 +83,9 @@ export function SiteExplorerTreeSection<TTarget>({
   onKeyDownFolder,
   emptyLabel = 'None yet',
 }: SiteExplorerTreeSectionProps<TTarget>) {
-  const [expandedFolderIds, setExpandedFolderIds] = useState(() => new Set(initialExpandedFolderIds(model)))
+  const [expandedFolderIds, setExpandedFolderIds] = useState(
+    () => new Set(initialExpandedFolderIds(model)),
+  )
   const ActionIcon = actionIcon
   const hasRows = model.pinnedItems.length > 0 || model.rootEntries.length > 0
   const rootDrop = useDroppable({
@@ -139,11 +147,7 @@ export function SiteExplorerTreeSection<TTarget>({
         containerRef={rootDrop.setNodeRef}
       >
         {!hasRows ? (
-          <EmptyState
-            compact
-            title={emptyLabel}
-            className={styles.sectionEmpty}
-          />
+          <EmptyState compact title={emptyLabel} className={styles.sectionEmpty} />
         ) : (
           <>
             {model.pinnedItems.map((item) => (
@@ -155,7 +159,12 @@ export function SiteExplorerTreeSection<TTarget>({
                 index={0}
                 parentFolderId={null}
                 dropPosition={dropPositionForItem(dropTarget, model.sectionId, item.id)}
-                renameActive={isInlineRenaming(inlineRenameTarget, 'item', model.sectionId, item.id)}
+                renameActive={isInlineRenaming(
+                  inlineRenameTarget,
+                  'item',
+                  model.sectionId,
+                  item.id,
+                )}
                 renameValue={inlineRenameTarget?.value ?? item.label}
                 selected={selectedItemIds.includes(item.id)}
                 selectedItemIds={selectedItemIds}
@@ -174,113 +183,139 @@ export function SiteExplorerTreeSection<TTarget>({
               active={isRootDropActive(dropTarget, model.sectionId, 0)}
             />
 
-            {model.kind === 'structural' ? model.rootEntries.map((entry, rootIndex) => (
-              <Fragment key={structuralEntryKey(entry)}>
-                {renderStructuralEntry(entry, {
-                  depth: 0,
-                  index: rootIndex,
-                  model,
-                  expandedFolderIds,
-                  dropTarget,
-                  inlineRenameTarget,
-                  selectedItemIds,
-                  toggleFolder,
-                  onOpenItem,
-                  onRenameItem,
-                  onCommitInlineRename,
-                  onCancelInlineRename,
-                  onContextMenuItem,
-                  onKeyDownItem,
-                  onRenameFolder,
-                  onContextMenuFolder,
-                  onKeyDownFolder,
-                })}
-                <RootDropGap
-                  sectionId={model.sectionId}
-                  index={rootIndex + 1}
-                  active={isRootDropActive(dropTarget, model.sectionId, rootIndex + 1)}
-                />
-              </Fragment>
-            )) : model.rootEntries.map((entry, rootIndex) => {
-              if (entry.kind === 'item') {
-                return (
-                  <Fragment key={entry.item.id}>
-                    <ExplorerItemRow
-                      item={entry.item}
-                      sectionId={model.sectionId}
-                      depth={0}
-                      index={rootIndex}
-                      parentFolderId={null}
-                      dropPosition={dropPositionForItem(dropTarget, model.sectionId, entry.item.id)}
-                      renameActive={isInlineRenaming(inlineRenameTarget, 'item', model.sectionId, entry.item.id)}
-                      renameValue={inlineRenameTarget?.value ?? entry.item.label}
-                      selected={selectedItemIds.includes(entry.item.id)}
-                      selectedItemIds={selectedItemIds}
-                      onOpen={onOpenItem}
-                      onRename={onRenameItem}
-                      onCommitRename={onCommitInlineRename}
-                      onCancelRename={onCancelInlineRename}
-                      onContextMenu={onContextMenuItem}
-                      onKeyDown={onKeyDownItem}
-                    />
+            {model.kind === 'structural'
+              ? model.rootEntries.map((entry, rootIndex) => (
+                  <Fragment key={structuralEntryKey(entry)}>
+                    {renderStructuralEntry(entry, {
+                      depth: 0,
+                      index: rootIndex,
+                      model,
+                      expandedFolderIds,
+                      dropTarget,
+                      inlineRenameTarget,
+                      selectedItemIds,
+                      toggleFolder,
+                      onOpenItem,
+                      onRenameItem,
+                      onCommitInlineRename,
+                      onCancelInlineRename,
+                      onContextMenuItem,
+                      onKeyDownItem,
+                      onRenameFolder,
+                      onContextMenuFolder,
+                      onKeyDownFolder,
+                    })}
                     <RootDropGap
                       sectionId={model.sectionId}
                       index={rootIndex + 1}
                       active={isRootDropActive(dropTarget, model.sectionId, rootIndex + 1)}
                     />
                   </Fragment>
-                )
-              }
+                ))
+              : model.rootEntries.map((entry, rootIndex) => {
+                  if (entry.kind === 'item') {
+                    return (
+                      <Fragment key={entry.item.id}>
+                        <ExplorerItemRow
+                          item={entry.item}
+                          sectionId={model.sectionId}
+                          depth={0}
+                          index={rootIndex}
+                          parentFolderId={null}
+                          dropPosition={dropPositionForItem(
+                            dropTarget,
+                            model.sectionId,
+                            entry.item.id,
+                          )}
+                          renameActive={isInlineRenaming(
+                            inlineRenameTarget,
+                            'item',
+                            model.sectionId,
+                            entry.item.id,
+                          )}
+                          renameValue={inlineRenameTarget?.value ?? entry.item.label}
+                          selected={selectedItemIds.includes(entry.item.id)}
+                          selectedItemIds={selectedItemIds}
+                          onOpen={onOpenItem}
+                          onRename={onRenameItem}
+                          onCommitRename={onCommitInlineRename}
+                          onCancelRename={onCancelInlineRename}
+                          onContextMenu={onContextMenuItem}
+                          onKeyDown={onKeyDownItem}
+                        />
+                        <RootDropGap
+                          sectionId={model.sectionId}
+                          index={rootIndex + 1}
+                          active={isRootDropActive(dropTarget, model.sectionId, rootIndex + 1)}
+                        />
+                      </Fragment>
+                    )
+                  }
 
-              const expanded = expandedFolderIds.has(entry.folder.id)
-              return (
-                <Fragment key={entry.folder.id}>
-                  <ExplorerFolderRow
-                    folder={entry.folder}
-                    sectionId={model.sectionId}
-                    depth={0}
-                    rootIndex={rootIndex}
-                    itemCount={entry.items.length}
-                    expanded={expanded}
-                    dropPosition={dropPositionForFolder(dropTarget, model.sectionId, entry.folder.id)}
-                    renameActive={isInlineRenaming(inlineRenameTarget, 'folder', model.sectionId, entry.folder.id)}
-                    renameValue={inlineRenameTarget?.value ?? entry.folder.name}
-                    onToggle={() => toggleFolder(entry.folder.id)}
-                    onRename={onRenameFolder}
-                    onCommitRename={onCommitInlineRename}
-                    onCancelRename={onCancelInlineRename}
-                    onContextMenu={onContextMenuFolder}
-                    onKeyDown={onKeyDownFolder}
-                  />
-                  {expanded && entry.items.map((item, index) => (
-                    <ExplorerItemRow
-                      key={item.id}
-                      item={item}
-                      sectionId={model.sectionId}
-                      depth={1}
-                      index={index}
-                      parentFolderId={entry.folder.id}
-                      dropPosition={dropPositionForItem(dropTarget, model.sectionId, item.id)}
-                      renameActive={isInlineRenaming(inlineRenameTarget, 'item', model.sectionId, item.id)}
-                      renameValue={inlineRenameTarget?.value ?? item.label}
-                      selected={selectedItemIds.includes(item.id)}
-                      selectedItemIds={selectedItemIds}
-                      onOpen={onOpenItem}
-                      onRename={onRenameItem}
-                      onCommitRename={onCommitInlineRename}
-                      onCancelRename={onCancelInlineRename}
-                      onContextMenu={onContextMenuItem}
-                      onKeyDown={onKeyDownItem}
-                    />
-                  ))}
-                  <RootDropGap
-                    sectionId={model.sectionId}
-                    index={rootIndex + 1}
-                    active={isRootDropActive(dropTarget, model.sectionId, rootIndex + 1)}
-                  />
-                </Fragment>
-              )
-            })}
+                  const expanded = expandedFolderIds.has(entry.folder.id)
+                  return (
+                    <Fragment key={entry.folder.id}>
+                      <ExplorerFolderRow
+                        folder={entry.folder}
+                        sectionId={model.sectionId}
+                        depth={0}
+                        rootIndex={rootIndex}
+                        itemCount={entry.items.length}
+                        expanded={expanded}
+                        dropPosition={dropPositionForFolder(
+                          dropTarget,
+                          model.sectionId,
+                          entry.folder.id,
+                        )}
+                        renameActive={isInlineRenaming(
+                          inlineRenameTarget,
+                          'folder',
+                          model.sectionId,
+                          entry.folder.id,
+                        )}
+                        renameValue={inlineRenameTarget?.value ?? entry.folder.name}
+                        onToggle={() => toggleFolder(entry.folder.id)}
+                        onRename={onRenameFolder}
+                        onCommitRename={onCommitInlineRename}
+                        onCancelRename={onCancelInlineRename}
+                        onContextMenu={onContextMenuFolder}
+                        onKeyDown={onKeyDownFolder}
+                      />
+                      {expanded &&
+                        entry.items.map((item, index) => (
+                          <ExplorerItemRow
+                            key={item.id}
+                            item={item}
+                            sectionId={model.sectionId}
+                            depth={1}
+                            index={index}
+                            parentFolderId={entry.folder.id}
+                            dropPosition={dropPositionForItem(dropTarget, model.sectionId, item.id)}
+                            renameActive={isInlineRenaming(
+                              inlineRenameTarget,
+                              'item',
+                              model.sectionId,
+                              item.id,
+                            )}
+                            renameValue={inlineRenameTarget?.value ?? item.label}
+                            selected={selectedItemIds.includes(item.id)}
+                            selectedItemIds={selectedItemIds}
+                            onOpen={onOpenItem}
+                            onRename={onRenameItem}
+                            onCommitRename={onCommitInlineRename}
+                            onCancelRename={onCancelInlineRename}
+                            onContextMenu={onContextMenuItem}
+                            onKeyDown={onKeyDownItem}
+                          />
+                        ))}
+                      <RootDropGap
+                        sectionId={model.sectionId}
+                        index={rootIndex + 1}
+                        active={isRootDropActive(dropTarget, model.sectionId, rootIndex + 1)}
+                      />
+                    </Fragment>
+                  )
+                })}
           </>
         )}
       </TreeContainer>
@@ -327,10 +362,19 @@ interface StructuralRenderOptions<TTarget> {
   onRenameItem: (item: SiteExplorerTreeItem<TTarget>) => void
   onCommitInlineRename: (value: string) => void
   onCancelInlineRename: () => void
-  onContextMenuItem: (item: SiteExplorerTreeItem<TTarget>, event: MouseEvent<HTMLButtonElement>) => void
-  onKeyDownItem: (item: SiteExplorerTreeItem<TTarget>, event: KeyboardEvent<HTMLButtonElement>) => void
+  onContextMenuItem: (
+    item: SiteExplorerTreeItem<TTarget>,
+    event: MouseEvent<HTMLButtonElement>,
+  ) => void
+  onKeyDownItem: (
+    item: SiteExplorerTreeItem<TTarget>,
+    event: KeyboardEvent<HTMLButtonElement>,
+  ) => void
   onRenameFolder: (folder: SiteExplorerTreeFolder) => void
-  onContextMenuFolder: (folder: SiteExplorerTreeFolder, event: MouseEvent<HTMLButtonElement>) => void
+  onContextMenuFolder: (
+    folder: SiteExplorerTreeFolder,
+    event: MouseEvent<HTMLButtonElement>,
+  ) => void
   onKeyDownFolder: (folder: SiteExplorerTreeFolder, event: KeyboardEvent<HTMLButtonElement>) => void
 }
 
@@ -346,8 +390,17 @@ function renderStructuralEntry<TTarget>(
         depth={options.depth}
         index={options.index}
         parentFolderId={parentFolderIdForDepth(options.depth, entry.item.path)}
-        dropPosition={dropPositionForItem(options.dropTarget, options.model.sectionId, entry.item.id)}
-        renameActive={isInlineRenaming(options.inlineRenameTarget, 'item', options.model.sectionId, entry.item.id)}
+        dropPosition={dropPositionForItem(
+          options.dropTarget,
+          options.model.sectionId,
+          entry.item.id,
+        )}
+        renameActive={isInlineRenaming(
+          options.inlineRenameTarget,
+          'item',
+          options.model.sectionId,
+          entry.item.id,
+        )}
         renameValue={options.inlineRenameTarget?.value ?? entry.item.label}
         selected={options.selectedItemIds.includes(entry.item.id)}
         selectedItemIds={options.selectedItemIds}
@@ -372,8 +425,17 @@ function renderStructuralEntry<TTarget>(
         rootIndex={options.index}
         itemCount={itemCount}
         expanded={expanded}
-        dropPosition={dropPositionForFolder(options.dropTarget, options.model.sectionId, entry.folder.id)}
-        renameActive={isInlineRenaming(options.inlineRenameTarget, 'folder', options.model.sectionId, entry.folder.id)}
+        dropPosition={dropPositionForFolder(
+          options.dropTarget,
+          options.model.sectionId,
+          entry.folder.id,
+        )}
+        renameActive={isInlineRenaming(
+          options.inlineRenameTarget,
+          'folder',
+          options.model.sectionId,
+          entry.folder.id,
+        )}
         renameValue={options.inlineRenameTarget?.value ?? entry.folder.name}
         onToggle={() => options.toggleFolder(entry.folder.id)}
         onRename={options.onRenameFolder}
@@ -389,8 +451,17 @@ function renderStructuralEntry<TTarget>(
           depth={options.depth + 1}
           index={0}
           parentFolderId={entry.folder.id}
-          dropPosition={dropPositionForItem(options.dropTarget, options.model.sectionId, entry.landingItem.id)}
-          renameActive={isInlineRenaming(options.inlineRenameTarget, 'item', options.model.sectionId, entry.landingItem.id)}
+          dropPosition={dropPositionForItem(
+            options.dropTarget,
+            options.model.sectionId,
+            entry.landingItem.id,
+          )}
+          renameActive={isInlineRenaming(
+            options.inlineRenameTarget,
+            'item',
+            options.model.sectionId,
+            entry.landingItem.id,
+          )}
           renameValue={options.inlineRenameTarget?.value ?? entry.landingItem.label}
           selected={options.selectedItemIds.includes(entry.landingItem.id)}
           selectedItemIds={options.selectedItemIds}
@@ -402,15 +473,16 @@ function renderStructuralEntry<TTarget>(
           onKeyDown={options.onKeyDownItem}
         />
       )}
-      {expanded && entry.children.map((child, index) => (
-        <Fragment key={structuralEntryKey(child)}>
-          {renderStructuralEntry(child, {
-            ...options,
-            depth: options.depth + 1,
-            index: index + (entry.landingItem ? 1 : 0),
-          })}
-        </Fragment>
-      ))}
+      {expanded &&
+        entry.children.map((child, index) => (
+          <Fragment key={structuralEntryKey(child)}>
+            {renderStructuralEntry(child, {
+              ...options,
+              depth: options.depth + 1,
+              index: index + (entry.landingItem ? 1 : 0),
+            })}
+          </Fragment>
+        ))}
     </Fragment>
   )
 }
@@ -431,7 +503,10 @@ function structuralEntryKey<TTarget>(entry: SiteExplorerStructuralEntry<TTarget>
   return entry.kind === 'folder' ? `folder:${entry.folder.path}` : `item:${entry.item.id}`
 }
 
-function collectStructuralFolderIds<TTarget>(entry: SiteExplorerStructuralEntry<TTarget>, ids: string[]): void {
+function collectStructuralFolderIds<TTarget>(
+  entry: SiteExplorerStructuralEntry<TTarget>,
+  ids: string[],
+): void {
   if (entry.kind === 'item') return
   ids.push(entry.folder.id)
   for (const child of entry.children) collectStructuralFolderIds(child, ids)

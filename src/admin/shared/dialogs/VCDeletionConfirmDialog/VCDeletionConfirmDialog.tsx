@@ -63,11 +63,9 @@ export function VCDeletionConfirmDialog({
       }
     >
       <p className={styles.summary}>
-        <span className={styles.summaryStrong}>{impact.vc.name}</span>{' '}
-        is used in {buildUsageSummary(impact.pageCount, impact.vcCount)}{' '}
-        (
-        <span className={styles.summaryStrong}>{impact.usages.length}</span>
-        {' '}
+        <span className={styles.summaryStrong}>{impact.vc.name}</span> is used in{' '}
+        {buildUsageSummary(impact.pageCount, impact.vcCount)} (
+        <span className={styles.summaryStrong}>{impact.usages.length}</span>{' '}
         {impact.usages.length === 1 ? 'instance' : 'instances'}
         ).
       </p>
@@ -80,7 +78,10 @@ export function VCDeletionConfirmDialog({
           <div className={styles.groupHeader}>In pages</div>
           <ul className={styles.usageList} aria-label="Pages using this component">
             {pageUsages.map((usage) => (
-              <li key={`page:${usage.source.pageId}:${usage.source.nodeId}`} className={styles.usageItem}>
+              <li
+                key={`page:${usage.source.pageId}:${usage.source.nodeId}`}
+                className={styles.usageItem}
+              >
                 <span className={styles.usageScope}>{usage.source.pageTitle}</span>
                 <span className={styles.usageNode} title={usage.source.nodeLabel}>
                   {usage.source.nodeLabel}
@@ -96,7 +97,10 @@ export function VCDeletionConfirmDialog({
           <div className={styles.groupHeader}>In other components</div>
           <ul className={styles.usageList} aria-label="Other components using this component">
             {vcUsages.map((usage) => (
-              <li key={`vc:${usage.source.vcId}:${usage.source.nodeId}`} className={styles.usageItem}>
+              <li
+                key={`vc:${usage.source.vcId}:${usage.source.nodeId}`}
+                className={styles.usageItem}
+              >
                 <span className={styles.usageScope}>{usage.source.vcName}</span>
                 <span className={styles.usageNode} title={usage.source.nodeLabel}>
                   {usage.source.nodeLabel}

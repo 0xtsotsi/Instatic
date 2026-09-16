@@ -71,8 +71,8 @@ describe('Publisher + real modules — single-level HTML escaping (CWE-116 regre
     })
     const html = render('root', realCtx(page))
     expect(html).toContain('&lt;em&gt;styled&lt;/em&gt;')
-    expect(html).not.toContain('&amp;lt;')   // would indicate double-escaping
-    expect(html).not.toContain('<em>')        // raw tag must not appear
+    expect(html).not.toContain('&amp;lt;') // would indicate double-escaping
+    expect(html).not.toContain('<em>') // raw tag must not appear
   })
 
   it('text paragraph: ampersand in text renders as &amp; not &amp;amp;', () => {
@@ -414,7 +414,7 @@ describe('Publisher — richtext prop pass-through (Constraint #299)', () => {
     const html = render('root', rtCtx(page))
     // HTML tags must survive the publisher pipeline intact (not entity-encoded)
     expect(html).toContain('<p><strong>Bold text</strong>')
-    expect(html).not.toContain('&lt;p&gt;')     // NOT double-escaped
+    expect(html).not.toContain('&lt;p&gt;') // NOT double-escaped
     expect(html).not.toContain('&lt;strong&gt;') // NOT double-escaped
   })
 
@@ -474,7 +474,8 @@ describe('Publisher — richtext prop pass-through (Constraint #299)', () => {
   })
 
   it('richtext with nested formatting survives the pipeline — complex HTML preserved', () => {
-    const complexHtml = '<h2>Title</h2><p>Para with <a href="/page" rel="noopener">link</a> and <code>code</code>.</p>'
+    const complexHtml =
+      '<h2>Title</h2><p>Para with <a href="/page" rel="noopener">link</a> and <code>code</code>.</p>'
     const page = makePage({
       root: { moduleId: 'test.richtextBlock', props: { richtext: complexHtml } },
     })
@@ -519,8 +520,8 @@ describe('publishPage() + real modules — end-to-end document', () => {
 
     // Heading: single-escaped, browser shows "Hello & <World>"
     expect(html).toContain('Hello &amp; &lt;World&gt;')
-    expect(html).not.toContain('&amp;amp;')   // no double escaping
-    expect(html).not.toContain('<World>')      // raw tag not present
+    expect(html).not.toContain('&amp;amp;') // no double escaping
+    expect(html).not.toContain('<World>') // raw tag not present
 
     // Paragraph: single-escaped
     expect(html).toContain('Terms &amp; &quot;Conditions&quot;')

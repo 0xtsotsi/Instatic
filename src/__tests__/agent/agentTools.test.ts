@@ -16,10 +16,7 @@ function snapshot(): SiteAgentSnapshot {
     root: { moduleId: 'base.body', children: ['title'] },
     title: { moduleId: 'base.text', props: { text: 'Design tools', tag: 'h1' } },
   })
-  const about = makePage(
-    { aboutRoot: { moduleId: 'base.body', children: [] } },
-    'aboutRoot',
-  )
+  const about = makePage({ aboutRoot: { moduleId: 'base.body', children: [] } }, 'aboutRoot')
   about.id = 'page-about'
   about.slug = 'about'
   about.title = 'About'
@@ -113,7 +110,13 @@ describe('site read tools', () => {
             primary_field_id: 'title',
             fields_json: [
               { id: 'title', label: 'Title', type: 'text', required: true, builtIn: true },
-              { id: 'featuredMedia', label: 'Featured media', type: 'media', mediaKind: 'image', builtIn: true },
+              {
+                id: 'featuredMedia',
+                label: 'Featured media',
+                type: 'media',
+                mediaKind: 'image',
+                builtIn: true,
+              },
               { id: 'readTime', label: 'Read time', type: 'text' },
             ],
             system: true,

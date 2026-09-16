@@ -60,12 +60,7 @@ export function ModulePickerDropdown({
         <AppGridPlusGlyphIcon size={13} />
       </Button>
 
-      {open && (
-        <ModuleInserterDialog
-          onClose={handleClose}
-          onInsertItem={handleInsertItem}
-        />
-      )}
+      {open && <ModuleInserterDialog onClose={handleClose} onInsertItem={handleInsertItem} />}
     </>
   )
 }

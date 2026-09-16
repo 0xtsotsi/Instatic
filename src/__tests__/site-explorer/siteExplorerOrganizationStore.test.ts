@@ -90,10 +90,15 @@ describe('Site Explorer organization store actions', () => {
       ],
     })
 
-    const plan = useEditorStore.getState().previewRenameExplorerFolder('pages', 'documentation', 'docs')
+    const plan = useEditorStore
+      .getState()
+      .previewRenameExplorerFolder('pages', 'documentation', 'docs')
     useEditorStore.getState().commitExplorerPathChange(plan)
 
-    const slugs = useEditorStore.getState().site!.pages.map((page) => page.slug).sort()
+    const slugs = useEditorStore
+      .getState()
+      .site!.pages.map((page) => page.slug)
+      .sort()
     expect(slugs).toEqual(['docs', 'docs/setup', 'index'])
   })
 
@@ -138,7 +143,9 @@ describe('Site Explorer organization store actions', () => {
       },
     })
 
-    const plan = useEditorStore.getState().previewRenameExplorerFolder('pages', 'new-folder', 'link')
+    const plan = useEditorStore
+      .getState()
+      .previewRenameExplorerFolder('pages', 'new-folder', 'link')
     useEditorStore.getState().commitExplorerPathChange(plan)
 
     const section = useEditorStore.getState().site!.explorer.pages
@@ -172,8 +179,22 @@ describe('Site Explorer organization store actions', () => {
   it('commits a structural scripts folder delete and removes runtime config', () => {
     loadExplorerSite({
       files: [
-        { id: 'main', path: 'documentation/assets/js/main.js', type: 'script', content: '', createdAt: 1, updatedAt: 1 },
-        { id: 'theme', path: 'src/styles/theme.css', type: 'style', content: '', createdAt: 1, updatedAt: 1 },
+        {
+          id: 'main',
+          path: 'documentation/assets/js/main.js',
+          type: 'script',
+          content: '',
+          createdAt: 1,
+          updatedAt: 1,
+        },
+        {
+          id: 'theme',
+          path: 'src/styles/theme.css',
+          type: 'style',
+          content: '',
+          createdAt: 1,
+          updatedAt: 1,
+        },
       ],
       runtime: {
         dependencyLock: { version: 1, packages: {}, updatedAt: 0 },
@@ -184,7 +205,9 @@ describe('Site Explorer organization store actions', () => {
       },
     })
 
-    const plan = useEditorStore.getState().previewDeleteExplorerFolder('scripts', 'documentation/assets/js')
+    const plan = useEditorStore
+      .getState()
+      .previewDeleteExplorerFolder('scripts', 'documentation/assets/js')
     useEditorStore.getState().commitExplorerPathChange(plan)
 
     expect(useEditorStore.getState().site!.files.some((file) => file.id === 'main')).toBe(false)
@@ -244,7 +267,9 @@ describe('Site Explorer organization store actions', () => {
 
     const explorer = useEditorStore.getState().site!.explorer
     expect(explorer.templates.folders).toEqual([{ id: folderId, name: 'Layouts', order: 0 }])
-    expect(explorer.templates.items.find((item) => item.id === 'pricing')?.parentFolderId).toBe(folderId)
+    expect(explorer.templates.items.find((item) => item.id === 'pricing')?.parentFolderId).toBe(
+      folderId,
+    )
   })
 
   it('creates structural empty folders without creating page placements', () => {
@@ -288,6 +313,8 @@ describe('Site Explorer organization store actions', () => {
     expect(() => useEditorStore.getState().commitExplorerPathChange(plan)).toThrow(
       '[SiteExplorer] Cannot commit a blocked path change plan',
     )
-    expect(useEditorStore.getState().site?.pages.find((page) => page.id === 'home')?.slug).toBe('index')
+    expect(useEditorStore.getState().site?.pages.find((page) => page.id === 'home')?.slug).toBe(
+      'index',
+    )
   })
 })

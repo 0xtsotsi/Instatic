@@ -80,30 +80,28 @@ export function ReplaceFileDialog({ asset, open, onClose, onReplace }: ReplaceFi
       title="Replace file"
       eyebrow="Media"
       size="md"
-      footer={(
+      footer={
         <>
           <Button variant="ghost" onClick={handleClose} disabled={busy}>
             Cancel
           </Button>
-          <Button
-            variant="primary"
-            onClick={() => void handleConfirm()}
-            disabled={!picked || busy}
-          >
+          <Button variant="primary" onClick={() => void handleConfirm()} disabled={!picked || busy}>
             {busy ? 'Replacing…' : 'Replace file'}
           </Button>
         </>
-      )}
+      }
     >
       <p className={styles.body}>
-        The new file inherits the same public URL — every page and content entry that
-        already references this asset will switch to the new binary instantly. The
-        previous file is removed from disk.
+        The new file inherits the same public URL — every page and content entry that already
+        references this asset will switch to the new binary instantly. The previous file is removed
+        from disk.
       </p>
 
       <dl className={styles.current}>
         <dt>Current file</dt>
-        <dd>{asset.filename} · {formatBytes(asset.sizeBytes)} · {asset.mimeType}</dd>
+        <dd>
+          {asset.filename} · {formatBytes(asset.sizeBytes)} · {asset.mimeType}
+        </dd>
       </dl>
 
       <div className={styles.picker}>
@@ -127,7 +125,9 @@ export function ReplaceFileDialog({ asset, open, onClose, onReplace }: ReplaceFi
       </div>
 
       {error && (
-        <p className={styles.error} role="alert">{error}</p>
+        <p className={styles.error} role="alert">
+          {error}
+        </p>
       )}
     </Dialog>
   )

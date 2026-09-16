@@ -21,7 +21,8 @@ export function RichTextCell({
   context,
   ariaLabel,
 }: CellEditorProps<RichTextField>): ReactElement {
-  const strValue = typeof value === 'string' ? value : readStringCell({ [field.id]: value }, field.id)
+  const strValue =
+    typeof value === 'string' ? value : readStringCell({ [field.id]: value }, field.id)
 
   if (context === 'grid') {
     // Grid context: show a truncated plain-text read-only preview.

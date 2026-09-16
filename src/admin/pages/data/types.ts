@@ -22,4 +22,3 @@ export interface CellEditorProps<TField extends DataField = DataField> {
   /** Lookup helper for relation cells (id → row in the target table). */
   resolveRelationTarget?: (rowId: string) => DataRow | null
 }
-

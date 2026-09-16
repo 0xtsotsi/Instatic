@@ -155,9 +155,7 @@ export function AddGoogleFontDialog({
         if (cancelled) return
         setFamilies(entries)
         if (editEntry) {
-          const dto = entries.find(
-            (f) => f.family.toLowerCase() === editEntry.family.toLowerCase(),
-          )
+          const dto = entries.find((f) => f.family.toLowerCase() === editEntry.family.toLowerCase())
           if (dto) {
             setSelected(dto)
             loadFontPreviewWithVariants(dto.family, dto.variants)
@@ -293,7 +291,14 @@ export function AddGoogleFontDialog({
   async function handleInstall() {
     if (!selected || installing) return
     if (pickedVariants.length === 0 || pickedSubsets.length === 0) return
-    await runGoogleFontInstall(selected, pickedVariants, pickedSubsets, setInstalling, setInstallError, onInstalled)
+    await runGoogleFontInstall(
+      selected,
+      pickedVariants,
+      pickedSubsets,
+      setInstalling,
+      setInstallError,
+      onInstalled,
+    )
   }
 
   return (
@@ -314,47 +319,50 @@ export function AddGoogleFontDialog({
       }
       size="xl"
       bodyClassName={styles.dialogBody}
-      footer={selected ? (
-        <>
-          <EstimateHint estimate={displayedEstimate} />
-          {/* No "Back" in edit mode: the family is fixed, so there's no picker
+      footer={
+        selected ? (
+          <>
+            <EstimateHint estimate={displayedEstimate} />
+            {/* No "Back" in edit mode: the family is fixed, so there's no picker
               step to return to — only Cancel / Save. */}
-          {!editEntry && (
+            {!editEntry && (
+              <Button
+                variant="secondary"
+                size="sm"
+                type="button"
+                onClick={() => setSelected(null)}
+                disabled={installing}
+              >
+                Back
+              </Button>
+            )}
             <Button
-              variant="secondary"
+              variant="primary"
               size="sm"
               type="button"
-              onClick={() => setSelected(null)}
-              disabled={installing}
+              onClick={() => {
+                void handleInstall()
+              }}
+              disabled={installing || pickedVariants.length === 0 || pickedSubsets.length === 0}
             >
-              Back
+              {installing ? (
+                <>
+                  <LoaderIcon size={12} aria-hidden="true" />{' '}
+                  {editEntry ? 'Saving…' : 'Installing…'}
+                </>
+              ) : editEntry ? (
+                'Save changes'
+              ) : (
+                'Install font'
+              )}
             </Button>
-          )}
-          <Button
-            variant="primary"
-            size="sm"
-            type="button"
-            onClick={() => { void handleInstall() }}
-            disabled={
-              installing
-              || pickedVariants.length === 0
-              || pickedSubsets.length === 0
-            }
-          >
-            {installing ? (
-              <>
-                <LoaderIcon size={12} aria-hidden="true" /> {editEntry ? 'Saving…' : 'Installing…'}
-              </>
-            ) : (
-              editEntry ? 'Save changes' : 'Install font'
-            )}
+          </>
+        ) : (
+          <Button variant="secondary" size="sm" type="button" onClick={onCancel}>
+            Cancel
           </Button>
-        </>
-      ) : (
-        <Button variant="secondary" size="sm" type="button" onClick={onCancel}>
-          Cancel
-        </Button>
-      )}
+        )
+      }
     >
       {selected ? (
         <VariantsAndSubsetsStep
@@ -380,7 +388,9 @@ export function AddGoogleFontDialog({
       )}
 
       {installError && (
-        <p role="alert" className={styles.errorAlert}>{installError}</p>
+        <p role="alert" className={styles.errorAlert}>
+          {installError}
+        </p>
       )}
     </Dialog>
   )
@@ -443,7 +453,9 @@ function FamilyPickerStep({
       />
 
       {loadError ? (
-        <p role="alert" className={styles.errorAlert}>{loadError}</p>
+        <p role="alert" className={styles.errorAlert}>
+          {loadError}
+        </p>
       ) : loading ? (
         <SkeletonBlock minHeight={200} ariaLabel="Loading Google Fonts" />
       ) : families.length === 0 ? (
@@ -467,22 +479,24 @@ function FamilyPickerStep({
                 aria-label={`${entry.family}${installed ? ' (already installed)' : ''}`}
                 disabled={installed}
                 className={styles.pickerItem}
-                onClick={() => { if (!installed) onPick(entry) }}
+                onClick={() => {
+                  if (!installed) onPick(entry)
+                }}
               >
                 <span
                   className={styles.pickerName}
                   // Inline font-family is the entire point: each tile renders
                   // its name in its own font once the lazy-loaded preview
                   // CSS resolves. Falls back to system sans until then.
-                  style={{ fontFamily: `"${entry.family}", system-ui, sans-serif` } as CSSProperties}
+                  style={
+                    { fontFamily: `"${entry.family}", system-ui, sans-serif` } as CSSProperties
+                  }
                 >
                   {entry.family}
                 </span>
                 <span className={styles.pickerMeta}>
                   <span className={styles.pickerCategory}>{entry.category}</span>
-                  {installed && (
-                    <span className={styles.pickerInstalled}>Installed</span>
-                  )}
+                  {installed && <span className={styles.pickerInstalled}>Installed</span>}
                 </span>
               </button>
             )
@@ -568,10 +582,12 @@ function VariantsAndSubsetsStep({
           suppressContentEditableWarning
           spellCheck={false}
           aria-label="Preview text"
-          style={{
-            fontFamily: `"${family.family}", system-ui, sans-serif`,
-            fontWeight: heroWeight,
-          } as CSSProperties}
+          style={
+            {
+              fontFamily: `"${family.family}", system-ui, sans-serif`,
+              fontWeight: heroWeight,
+            } as CSSProperties
+          }
           dangerouslySetInnerHTML={{ __html: DEFAULT_PREVIEW_TEXT }}
         />
       </div>
@@ -586,9 +602,7 @@ function VariantsAndSubsetsStep({
           <button
             type="button"
             className={styles.dialogSectionSelectAll}
-            onClick={() =>
-              onPickedVariantsChange(allVariantsPicked ? [] : [...sortedVariants])
-            }
+            onClick={() => onPickedVariantsChange(allVariantsPicked ? [] : [...sortedVariants])}
           >
             {allVariantsPicked ? 'Clear all' : 'Select all'}
           </button>
@@ -599,10 +613,7 @@ function VariantsAndSubsetsStep({
             const checked = variantsSet.has(variant)
             return (
               <li key={variant}>
-                <label
-                  className={styles.variantRow}
-                  data-checked={checked ? 'true' : undefined}
-                >
+                <label className={styles.variantRow} data-checked={checked ? 'true' : undefined}>
                   <Checkbox
                     checked={checked}
                     onCheckedChange={() => toggleVariant(variant)}
@@ -610,16 +621,19 @@ function VariantsAndSubsetsStep({
                   />
                   <span
                     className={styles.variantSample}
-                    style={{
-                      fontFamily: `"${family.family}", system-ui, sans-serif`,
-                      fontWeight: parsed?.weight ?? 400,
-                      fontStyle: parsed?.italic ? 'italic' : 'normal',
-                    } as CSSProperties}
+                    style={
+                      {
+                        fontFamily: `"${family.family}", system-ui, sans-serif`,
+                        fontWeight: parsed?.weight ?? 400,
+                        fontStyle: parsed?.italic ? 'italic' : 'normal',
+                      } as CSSProperties
+                    }
                   >
                     {variantLabel(variant)}
                   </span>
                   <span className={styles.variantWeightLabel}>
-                    {parsed?.weight ?? variant}{parsed?.italic ? ' i' : ''}
+                    {parsed?.weight ?? variant}
+                    {parsed?.italic ? ' i' : ''}
                   </span>
                 </label>
               </li>
@@ -638,9 +652,7 @@ function VariantsAndSubsetsStep({
           <button
             type="button"
             className={styles.dialogSectionSelectAll}
-            onClick={() =>
-              onPickedSubsetsChange(allSubsetsPicked ? [] : [...sortedSubsets])
-            }
+            onClick={() => onPickedSubsetsChange(allSubsetsPicked ? [] : [...sortedSubsets])}
           >
             {allSubsetsPicked ? 'Clear all' : 'Select all'}
           </button>

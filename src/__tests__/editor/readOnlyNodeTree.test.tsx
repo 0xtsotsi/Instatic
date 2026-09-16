@@ -46,9 +46,27 @@ function resolvedMedia(path = '/uploads/hero.png'): RenderResolvedMedia {
     altText: '',
     blurHash: null,
     variants: [
-      { width: 320, height: 160, format: 'webp', path: '/uploads/hero-w320.webp', sizeBytes: 12_000 },
-      { width: 1024, height: 512, format: 'webp', path: '/uploads/hero-w1024.webp', sizeBytes: 82_000 },
-      { width: 2048, height: 1024, format: 'webp', path: '/uploads/hero-w2048.webp', sizeBytes: 190_000 },
+      {
+        width: 320,
+        height: 160,
+        format: 'webp',
+        path: '/uploads/hero-w320.webp',
+        sizeBytes: 12_000,
+      },
+      {
+        width: 1024,
+        height: 512,
+        format: 'webp',
+        path: '/uploads/hero-w1024.webp',
+        sizeBytes: 82_000,
+      },
+      {
+        width: 2048,
+        height: 1024,
+        format: 'webp',
+        path: '/uploads/hero-w2048.webp',
+        sizeBytes: 190_000,
+      },
     ],
     posterPath: null,
   }
@@ -65,9 +83,7 @@ describe('ReadOnlyNodeTree — inline styles', () => {
         inlineStyles: { fontSize: '138px', letterSpacing: '-0.02em' },
       }),
     }
-    const { container } = render(
-      <ReadOnlyNodeTree nodes={nodes} rootNodeId="h1" classes={{}} />,
-    )
+    const { container } = render(<ReadOnlyNodeTree nodes={nodes} rootNodeId="h1" classes={{}} />)
     const h1 = container.querySelector('h1')
     expect(h1).not.toBeNull()
     expect(h1!.style.fontSize).toBe('138px')
@@ -80,9 +96,7 @@ describe('ReadOnlyNodeTree — inline styles', () => {
         inlineStyles: { color: 'red', backgroundImage: 'expression(alert(1))' },
       }),
     }
-    const { container } = render(
-      <ReadOnlyNodeTree nodes={nodes} rootNodeId="h1" classes={{}} />,
-    )
+    const { container } = render(<ReadOnlyNodeTree nodes={nodes} rootNodeId="h1" classes={{}} />)
     const h1 = container.querySelector('h1')!
     expect(h1.style.color).toBe('red')
     expect(h1.style.backgroundImage).toBe('')
@@ -90,9 +104,7 @@ describe('ReadOnlyNodeTree — inline styles', () => {
 
   it('renders no style attribute when the node has no inline styles', () => {
     const nodes: Record<string, BaseNode> = { h1: textNode('h1') }
-    const { container } = render(
-      <ReadOnlyNodeTree nodes={nodes} rootNodeId="h1" classes={{}} />,
-    )
+    const { container } = render(<ReadOnlyNodeTree nodes={nodes} rootNodeId="h1" classes={{}} />)
     expect(container.querySelector('h1')!.getAttribute('style')).toBeNull()
   })
 

@@ -104,8 +104,7 @@ export function DepsSection() {
 
   const totalFiltered = filteredDeps.length + filteredDevDeps.length
   const totalAll =
-    Object.keys(packageJson.dependencies).length +
-    Object.keys(packageJson.devDependencies).length
+    Object.keys(packageJson.dependencies).length + Object.keys(packageJson.devDependencies).length
 
   const lockedPackages = siteRuntime.dependencyLock.packages
   const lockStatus = evaluateDependencyLockStatus(packageJson, lockedPackages)
@@ -115,8 +114,7 @@ export function DepsSection() {
   // a successful resolve), the "N locked" toast would be misleading. Hide
   // the toast in that window; the auto-resolve hook will re-fire and the
   // toast re-appears once the new lock lands.
-  const isResolveToastStale =
-    lockStatus.kind !== 'in-sync' && resolveStatus === 'resolved'
+  const isResolveToastStale = lockStatus.kind !== 'in-sync' && resolveStatus === 'resolved'
   const displayedResolveStatus = isResolveToastStale ? 'idle' : resolveStatus
   const displayedResolveMessage = (() => {
     if (isResolveToastStale) return null
@@ -202,15 +200,13 @@ export function DepsSection() {
     // The auto-resolve hook handles the common case (dep added/removed →
     // background resolve). This button is the manual escape hatch: surface
     // when an auto-resolve errored, or let the user re-run on demand.
-    resolveDependencyLock().catch(() => {/* slice stores the error */})
+    resolveDependencyLock().catch(() => {
+      /* slice stores the error */
+    })
   }
 
   return (
-    <div
-      id="deps-section-body"
-      className={styles.body}
-      data-testid="deps-section"
-    >
+    <div id="deps-section-body" className={styles.body} data-testid="deps-section">
       <SearchBar
         value={searchQuery}
         onValueChange={setSearchQuery}
@@ -218,28 +214,16 @@ export function DepsSection() {
         aria-label="Search packages"
       />
       {/* Live region for search results (Guideline #221) */}
-      <div
-        aria-live="polite"
-        aria-atomic="true"
-        className={styles.srLiveRegion}
-      >
-        {searchQuery
-          ? `${totalFiltered} of ${totalAll} packages shown`
-          : ''}
+      <div aria-live="polite" aria-atomic="true" className={styles.srLiveRegion}>
+        {searchQuery ? `${totalFiltered} of ${totalAll} packages shown` : ''}
       </div>
 
       {/* ─── Package list ──────────────────────────────────────────── */}
       <div className={styles.packageList} data-testid="deps-tab">
         {runtimeIssues.length > 0 && (
-          <div
-            className={styles.runtimeIssues}
-            aria-label="Runtime dependency issues"
-          >
+          <div className={styles.runtimeIssues} aria-label="Runtime dependency issues">
             {runtimeIssues.map((issue) => (
-              <div
-                key={`${issue.code}:${issue.packageName}`}
-                className={styles.runtimeIssue}
-              >
+              <div key={`${issue.code}:${issue.packageName}`} className={styles.runtimeIssue}>
                 <span className={styles.runtimeIssueText}>
                   <span className={styles.runtimeIssuePackage}>{issue.packageName}</span>
                   <span>{issue.message}</span>
@@ -366,11 +350,7 @@ export function DepsSection() {
               />
             </div>
             {addError && (
-              <div
-                id="deps-add-error"
-                role="alert"
-                className={styles.addError}
-              >
+              <div id="deps-add-error" role="alert" className={styles.addError}>
                 {addError}
               </div>
             )}
@@ -391,13 +371,10 @@ export function DepsSection() {
 
         {/* dev toggle */}
         <div className={styles.devToggle}>
-          <Switch
-            id={devToggleId}
-            checked={addDev}
-            onCheckedChange={setAddDev}
-            switchSize="sm"
-          />
-          <label htmlFor={devToggleId} className={styles.devLabel}>devDependency</label>
+          <Switch id={devToggleId} checked={addDev} onCheckedChange={setAddDev} switchSize="sm" />
+          <label htmlFor={devToggleId} className={styles.devLabel}>
+            devDependency
+          </label>
         </div>
       </div>
     </div>
@@ -440,16 +417,13 @@ function DepRow({
   if (isPendingRemoval) {
     // Inline confirmation (Guideline #258)
     return (
-      <div
-        data-testid={`dep-row-${name}`}
-        onKeyDown={onKeyDown}
-        className={styles.depRowConfirm}
-      >
+      <div data-testid={`dep-row-${name}`} onKeyDown={onKeyDown} className={styles.depRowConfirm}>
         <span className={styles.depConfirmText}>
           Remove <strong>{name}</strong>?
           {usage && (
             <span className={styles.depConfirmDetail}>
-              {' '}Used by {formatDependencyUsage(usage)}.
+              {' '}
+              Used by {formatDependencyUsage(usage)}.
             </span>
           )}
         </span>
@@ -475,17 +449,11 @@ function DepRow({
   }
 
   return (
-    <div
-      data-testid={`dep-row-${name}`}
-      className={styles.depRow}
-    >
+    <div data-testid={`dep-row-${name}`} className={styles.depRow}>
       <span className={styles.depRowIcon} aria-hidden="true">
         <PackageSolidIcon size={11} />
       </span>
-      <span
-        className={styles.depName}
-        title={name}
-      >
+      <span className={styles.depName} title={name}>
         {name}
       </span>
       <span className={styles.depVersion}>
@@ -500,10 +468,7 @@ function DepRow({
         )}
       </span>
       {usage && (
-        <span
-          className={styles.depUsage}
-          title={`Required by ${formatDependencyUsage(usage)}`}
-        >
+        <span className={styles.depUsage} title={`Required by ${formatDependencyUsage(usage)}`}>
           in use
         </span>
       )}
@@ -605,4 +570,3 @@ function summarizeRuntimeDependencyIssues(
 
   return [...issues.values()]
 }
-

@@ -11,28 +11,28 @@ export interface PluginPin {
 
 export type PluginPageContent =
   | {
-    kind: 'markdown'
-    heading?: string
-    body: string
-  }
+      kind: 'markdown'
+      heading?: string
+      body: string
+    }
   | {
-    kind: 'map'
-    heading: string
-    body?: string
-    centerLabel?: string
-    pins: PluginPin[]
-  }
+      kind: 'map'
+      heading: string
+      body?: string
+      centerLabel?: string
+      pins: PluginPin[]
+    }
   | {
-    kind: 'resource'
-    heading: string
-    resource: string
-  }
+      kind: 'resource'
+      heading: string
+      resource: string
+    }
   | {
-    kind: 'app'
-    heading: string
-    entry: string
-    assetPath?: string
-  }
+      kind: 'app'
+      heading: string
+      entry: string
+      assetPath?: string
+    }
 
 export interface PluginAdminPage {
   id: string

@@ -11,7 +11,14 @@
  * canonical Site Import modal so CMS bundles and static-site imports share one
  * front door.
  */
-import { useEffect, useEffectEvent, useRef, useState, type CSSProperties, type MouseEvent } from 'react'
+import {
+  useEffect,
+  useEffectEvent,
+  useRef,
+  useState,
+  type CSSProperties,
+  type MouseEvent,
+} from 'react'
 import { Button } from '@ui/components/Button'
 import { Skeleton } from '@ui/components/Skeleton'
 import { railAccent, railTintVar } from '@ui/railAccent'
@@ -100,9 +107,8 @@ export function DataSidebar({
   const tablesRailButtonStyle = {
     '--rail-icon-tint': railTintVar(tablesRailAccent),
   } as CSSProperties
-  const contextMenuTable = contextMenu === null
-    ? null
-    : tables.find((table) => table.id === contextMenu.tableId) ?? null
+  const contextMenuTable =
+    contextMenu === null ? null : (tables.find((table) => table.id === contextMenu.tableId) ?? null)
 
   function openTableContextMenuAt(table: DataTableListItem, x: number, y: number): void {
     onSelectTable(table.id)
@@ -135,37 +141,42 @@ export function DataSidebar({
         <DatabaseSolidIcon size={13} aria-hidden="true" />
         <span className={styles.tableLabel}>{table.pluralLabel}</span>
         <span className={styles.kindBadge}>
-          {table.kind === 'postType' ? 'post-type'
-            : table.kind === 'page' ? 'page'
-            : table.kind === 'component' ? 'component'
-            : 'data'}
+          {table.kind === 'postType'
+            ? 'post-type'
+            : table.kind === 'page'
+              ? 'page'
+              : table.kind === 'component'
+                ? 'component'
+                : 'data'}
         </span>
       </Button>
     )
   }
 
-  function openTableContextMenu(table: DataTableListItem, event: MouseEvent<HTMLButtonElement>): void {
+  function openTableContextMenu(
+    table: DataTableListItem,
+    event: MouseEvent<HTMLButtonElement>,
+  ): void {
     event.preventDefault()
     event.stopPropagation()
     openTableContextMenuAt(table, event.clientX, event.clientY)
   }
 
-  const handleTableContextMenu = useEffectEvent((
-    event: globalThis.MouseEvent,
-    currentTableList: HTMLDivElement,
-  ): void => {
-    if (!(event.target instanceof Element)) return
-    const tableElement = event.target.closest<HTMLElement>('[data-data-table-id]')
-    if (tableElement === null || !currentTableList.contains(tableElement)) return
-    const tableId = tableElement.dataset.dataTableId
-    const table = tables.find((candidate) => candidate.id === tableId)
-    if (table === undefined) return
+  const handleTableContextMenu = useEffectEvent(
+    (event: globalThis.MouseEvent, currentTableList: HTMLDivElement): void => {
+      if (!(event.target instanceof Element)) return
+      const tableElement = event.target.closest<HTMLElement>('[data-data-table-id]')
+      if (tableElement === null || !currentTableList.contains(tableElement)) return
+      const tableId = tableElement.dataset.dataTableId
+      const table = tables.find((candidate) => candidate.id === tableId)
+      if (table === undefined) return
 
-    event.preventDefault()
-    event.stopPropagation()
-    onSelectTable(table.id)
-    setContextMenu({ x: event.clientX, y: event.clientY, tableId: table.id })
-  })
+      event.preventDefault()
+      event.stopPropagation()
+      onSelectTable(table.id)
+      setContextMenu({ x: event.clientX, y: event.clientY, tableId: table.id })
+    },
+  )
 
   useEffect(() => {
     const tableList = tableListRef.current
@@ -177,7 +188,10 @@ export function DataSidebar({
     }
 
     currentTableList.addEventListener('contextmenu', handleNativeContextMenu, { capture: true })
-    return () => currentTableList.removeEventListener('contextmenu', handleNativeContextMenu, { capture: true })
+    return () =>
+      currentTableList.removeEventListener('contextmenu', handleNativeContextMenu, {
+        capture: true,
+      })
   }, [])
 
   return (
@@ -263,25 +277,22 @@ export function DataSidebar({
               aria-label="Data tables"
               aria-busy={loading || undefined}
             >
-              {loading && Array.from({ length: 4 }, (_, i) => (
-                // Skeleton row mirrors the real `.tableButton` chrome
-                // (padding, gap, height, column ladder) via a plain
-                // div — using a disabled `<Button>` would inherit its
-                // `opacity: 0.38` and dim the shimmer so the row
-                // reads as "muted disabled state" rather than a
-                // proper loading skeleton.
-                <div
-                  key={`skeleton-${i}`}
-                  className={styles.tableSkeletonRow}
-                  aria-hidden="true"
-                >
-                  <Skeleton width={13} height={13} radius={3} />
-                  <span className={styles.tableLabel}>
-                    <Skeleton width={`${60 + (i % 3) * 14}%`} height={12} />
-                  </span>
-                  <Skeleton width={48} height={14} radius={999} />
-                </div>
-              ))}
+              {loading &&
+                Array.from({ length: 4 }, (_, i) => (
+                  // Skeleton row mirrors the real `.tableButton` chrome
+                  // (padding, gap, height, column ladder) via a plain
+                  // div — using a disabled `<Button>` would inherit its
+                  // `opacity: 0.38` and dim the shimmer so the row
+                  // reads as "muted disabled state" rather than a
+                  // proper loading skeleton.
+                  <div key={`skeleton-${i}`} className={styles.tableSkeletonRow} aria-hidden="true">
+                    <Skeleton width={13} height={13} radius={3} />
+                    <span className={styles.tableLabel}>
+                      <Skeleton width={`${60 + (i % 3) * 14}%`} height={12} />
+                    </span>
+                    <Skeleton width={48} height={14} radius={999} />
+                  </div>
+                ))}
 
               {!loading && error && (
                 <p role="alert" className={styles.errorText}>
@@ -323,9 +334,11 @@ export function DataSidebar({
                       </span>
                     )}
                   </div>
-                  {customTables.length > 0
-                    ? customTables.map(renderTableButton)
-                    : <p className={styles.emptyText}>None yet</p>}
+                  {customTables.length > 0 ? (
+                    customTables.map(renderTableButton)
+                  ) : (
+                    <p className={styles.emptyText}>None yet</p>
+                  )}
                 </>
               )}
             </div>

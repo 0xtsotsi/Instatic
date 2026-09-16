@@ -25,9 +25,7 @@ import {
   selectRecentAndFrequent,
 } from '@site/preferences/classUsage'
 import { isValidCssSelector } from '@site/store/styleRuleRename'
-import {
-  type SelectorSuggestionItem,
-} from './selectorPickerModel'
+import { type SelectorSuggestionItem } from './selectorPickerModel'
 
 /** Installation-local class-usage table — return type of `readClassUsage`. */
 type ClassUsageMap = ReturnType<typeof readClassUsage>
@@ -132,9 +130,8 @@ export function useClassPickerSuggestions(
   // Ranking tiers (in classPickerRanking):
   //   4 = exact name | 3 = prefix | 2 = word boundary | 1 = substring
   // shorter names win within a tier, then alphabetical.
-  const classSearchQuery = createIntent.kind === 'class'
-    ? createIntent.name.toLowerCase()
-    : trimmedQuery
+  const classSearchQuery =
+    createIntent.kind === 'class' ? createIntent.name.toLowerCase() : trimmedQuery
   const filteredSuggestions = isEmptyQuery
     ? candidates
     : rankBySuggestionScore(candidates, classSearchQuery)
@@ -146,7 +143,10 @@ export function useClassPickerSuggestions(
   // "All classes" section so fresh sites with sparse history stay browsable.
   const usage: ClassUsageMap = isEmptyQuery ? readUsage() : {}
   const { recent: recentIds, frequent: frequentIds } = isEmptyQuery
-    ? selectRecentAndFrequent(usage, candidates.map((c) => c.id))
+    ? selectRecentAndFrequent(
+        usage,
+        candidates.map((c) => c.id),
+      )
     : { recent: [] as string[], frequent: [] as string[] }
   const surfacedSet = new Set<string>([...recentIds, ...frequentIds])
   const surfacedCount = surfacedSet.size
@@ -163,10 +163,7 @@ export function useClassPickerSuggestions(
         ...(shouldShowAllSection ? remainingCandidates.map((c) => c.id) : []),
         ...selectorSuggestions.map((item) => item.rule.id),
       ]
-    : [
-        ...filteredSuggestions.map((c) => c.id),
-        ...selectorSuggestions.map((item) => item.rule.id),
-      ]
+    : [...filteredSuggestions.map((c) => c.id), ...selectorSuggestions.map((item) => item.rule.id)]
 
   // Clamp the stored highlight to the live suggestion list rather than
   // "fixing it up" through a setState-in-effect.
@@ -174,44 +171,51 @@ export function useClassPickerSuggestions(
     highlightedIndex >= 0 && highlightedIndex < flatNavIds.length ? highlightedIndex : -1
   const hasArrowSelection = effectiveHighlightedIndex >= 0
   const highlightedClassId = hasArrowSelection
-    ? candidatesById.get(flatNavIds[effectiveHighlightedIndex] ?? '')?.id ?? null
+    ? (candidatesById.get(flatNavIds[effectiveHighlightedIndex] ?? '')?.id ?? null)
     : null
-  const highlightedClass = highlightedClassId ? candidatesById.get(highlightedClassId) ?? null : null
+  const highlightedClass = highlightedClassId
+    ? (candidatesById.get(highlightedClassId) ?? null)
+    : null
   const selectorSuggestionsById = new Map(selectorSuggestions.map((item) => [item.rule.id, item]))
   const highlightedSelectorItem = hasArrowSelection
-    ? selectorSuggestionsById.get(flatNavIds[effectiveHighlightedIndex] ?? '') ?? null
+    ? (selectorSuggestionsById.get(flatNavIds[effectiveHighlightedIndex] ?? '') ?? null)
     : null
   const highlightedName = highlightedClass ? styleRuleSelector(highlightedClass) : null
 
   // Exact-name match against ALL user-visible classes (including ones already
   // assigned). Drives the Enter-with-typed-input path: typing an existing
   // unassigned name adds that class; typing something new creates and adds it.
-  const exactMatchedClass = !isEmptyQuery && createIntent.kind === 'class'
-    ? allClasses.find((c) => c.name === createIntent.name) ?? null
-    : null
+  const exactMatchedClass =
+    !isEmptyQuery && createIntent.kind === 'class'
+      ? (allClasses.find((c) => c.name === createIntent.name) ?? null)
+      : null
   const exactMatchAlreadyAssigned =
     exactMatchedClass !== null && assignedIds.includes(exactMatchedClass.id)
-  const exactMatchedSelectorItem = !isEmptyQuery && createIntent.kind === 'ambient'
-    ? selectorItems.find((item) => styleRuleSelector(item.rule) === createIntent.selector) ?? null
-    : null
-  const createValidationError = createIntent.kind === 'ambient' && !isValidCssSelector(createIntent.selector)
-    ? `Invalid CSS selector: ${createIntent.selector}`
-    : null
+  const exactMatchedSelectorItem =
+    !isEmptyQuery && createIntent.kind === 'ambient'
+      ? (selectorItems.find((item) => styleRuleSelector(item.rule) === createIntent.selector) ??
+        null)
+      : null
+  const createValidationError =
+    createIntent.kind === 'ambient' && !isValidCssSelector(createIntent.selector)
+      ? `Invalid CSS selector: ${createIntent.selector}`
+      : null
   const canCreateNew =
-    !isEmptyQuery
-    && createIntent.kind !== 'empty'
-    && createValidationError === null
-    && exactMatchedClass === null
-    && exactMatchedSelectorItem === null
+    !isEmptyQuery &&
+    createIntent.kind !== 'empty' &&
+    createValidationError === null &&
+    exactMatchedClass === null &&
+    exactMatchedSelectorItem === null
 
   // Enter has a meaningful effect when one of these is true; otherwise it's
   // a no-op (empty input, or query matches an already-assigned class with
   // no Arrow-nav highlight).
   const hasSubmittableQuery = hasArrowSelection
-    ? highlightedClassId !== null || (highlightedSelectorItem !== null && !highlightedSelectorItem.disabled)
-    : canCreateNew
-      || (exactMatchedClass !== null && !exactMatchAlreadyAssigned)
-      || (exactMatchedSelectorItem !== null && !exactMatchedSelectorItem.disabled)
+    ? highlightedClassId !== null ||
+      (highlightedSelectorItem !== null && !highlightedSelectorItem.disabled)
+    : canCreateNew ||
+      (exactMatchedClass !== null && !exactMatchAlreadyAssigned) ||
+      (exactMatchedSelectorItem !== null && !exactMatchedSelectorItem.disabled)
 
   const submitTooltip = deriveSubmitTooltip({
     hasArrowSelection,
@@ -279,7 +283,11 @@ function scoreSelectorLabel(label: string, query: string): number {
   const haystack = label.toLowerCase()
   if (haystack === query) return 4
   if (haystack.startsWith(query) || haystack.startsWith(`.${query}`)) return 3
-  if (haystack.includes(` ${query}`) || haystack.includes(`.${query}`) || haystack.includes(`-${query}`)) {
+  if (
+    haystack.includes(` ${query}`) ||
+    haystack.includes(`.${query}`) ||
+    haystack.includes(`-${query}`)
+  ) {
     return 2
   }
   return haystack.includes(query) ? 1 : 0
@@ -327,7 +335,8 @@ function deriveSubmitTooltip(args: {
     }
     return `Edit selector “${styleRuleSelector(highlightedSelectorItem.rule)}”`
   }
-  if (exactMatchedClass && !exactMatchAlreadyAssigned) return `Add class “${styleRuleSelector(exactMatchedClass)}”`
+  if (exactMatchedClass && !exactMatchAlreadyAssigned)
+    return `Add class “${styleRuleSelector(exactMatchedClass)}”`
   if (exactMatchedClass && exactMatchAlreadyAssigned) {
     return `“${styleRuleSelector(exactMatchedClass)}” is already on this element`
   }
@@ -339,7 +348,8 @@ function deriveSubmitTooltip(args: {
   }
   if (canCreateNew && trimmedQueryRaw) {
     if (createIntent.kind === 'ambient') return `Create selector “${createIntent.selector}”`
-    if (createIntent.kind === 'class') return `Create class “${classKindSelector(createIntent.name)}”`
+    if (createIntent.kind === 'class')
+      return `Create class “${classKindSelector(createIntent.name)}”`
   }
   return 'Type a class name or selector to add or create'
 }

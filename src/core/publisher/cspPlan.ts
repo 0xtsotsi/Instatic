@@ -29,8 +29,7 @@ interface CspPlan {
 }
 
 /** Matches the published-page CSP `<meta>` tag so its policy can be rewritten. */
-const CSP_META_PATTERN =
-  /<meta http-equiv="Content-Security-Policy"\s+content="([^"]*)"\s*\/?>/i
+const CSP_META_PATTERN = /<meta http-equiv="Content-Security-Policy"\s+content="([^"]*)"\s*\/?>/i
 
 /** An empty plan. */
 function emptyCspPlan(): CspPlan {
@@ -41,11 +40,7 @@ function emptyCspPlan(): CspPlan {
  * Replace a directive's source list outright. Use when a stage owns the
  * directive's value (e.g. relaxing `script-src` to exactly `'self'`).
  */
-export function setCspDirective(
-  plan: CspPlan,
-  directive: string,
-  sources: Iterable<string>,
-): void {
+export function setCspDirective(plan: CspPlan, directive: string, sources: Iterable<string>): void {
   plan.directives.set(directive, new Set(sources))
 }
 
@@ -54,11 +49,7 @@ export function setCspDirective(
  * source to a `'none'` directive drops `'none'` — `'none'` is only valid as the
  * sole value, and mixing it with a real source is a contradiction.
  */
-export function addCspSources(
-  plan: CspPlan,
-  directive: string,
-  sources: Iterable<string>,
-): void {
+export function addCspSources(plan: CspPlan, directive: string, sources: Iterable<string>): void {
   const set = plan.directives.get(directive) ?? new Set<string>()
   set.delete("'none'")
   for (const source of sources) set.add(source)
@@ -70,10 +61,7 @@ export function addCspSources(
  * and relax to `'self'` (+ the importmap hash) once the page carries any
  * script tag; the runtime cache URLs live under the same origin.
  */
-export function createBaseCspPlan(opts: {
-  anyScriptTag: boolean
-  importmapSha?: string
-}): CspPlan {
+export function createBaseCspPlan(opts: { anyScriptTag: boolean; importmapSha?: string }): CspPlan {
   const plan = emptyCspPlan()
   setCspDirective(plan, 'default-src', ["'self'"])
 
@@ -118,9 +106,7 @@ export function serializeCsp(plan: CspPlan): string {
     .sort(([a], [b]) => (a < b ? -1 : a > b ? 1 : 0))
   if (directives.length === 0) return ''
   return (
-    directives
-      .map(([name, sources]) => `${name} ${[...sources].sort().join(' ')}`)
-      .join('; ') + ';'
+    directives.map(([name, sources]) => `${name} ${[...sources].sort().join(' ')}`).join('; ') + ';'
   )
 }
 

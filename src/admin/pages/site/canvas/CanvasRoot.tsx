@@ -23,7 +23,11 @@
  */
 
 import { lazy, Suspense, useContext, useEffect, useEffectEvent, useRef } from 'react'
-import { useEditorStore, selectActiveCanvasPage, selectRightSidebarExpanded } from '@site/store/store'
+import {
+  useEditorStore,
+  selectActiveCanvasPage,
+  selectRightSidebarExpanded,
+} from '@site/store/store'
 import type { Breakpoint } from '@core/page-tree'
 import { registry } from '@core/module-engine'
 import { getNodeDisplayName } from '@core/page-tree'
@@ -53,7 +57,10 @@ import { useCanvasLayerContextMenu } from './useCanvasLayerContextMenu'
 import { useCanvasKeyboardShortcuts } from './useCanvasKeyboardShortcuts'
 import { clientPointToEditorDoc } from './canvasDomGeometry'
 import { useConfirmDelete } from '@admin/shared/dialogs/ConfirmDeleteDialog'
-import { useEditorPreference, readEditorSelectPreference } from '@site/preferences/editorPreferences'
+import {
+  useEditorPreference,
+  readEditorSelectPreference,
+} from '@site/preferences/editorPreferences'
 import { useTemplatePreviewContext } from '@site/hooks/useTemplatePreviewContext'
 import styles from './CanvasRoot.module.css'
 
@@ -118,12 +125,12 @@ export function CanvasRoot({ editable = true }: CanvasRootProps) {
   const setFocusedPanel = useEditorStore((s) => s.setFocusedPanel)
   const setActiveDocument = useEditorStore((s) => s.setActiveDocument)
   const activeDocument = useEditorStore((s) => s.activeDocument)
-  const {
-    context: templatePreviewContext,
-    loading: templatePreviewContextLoading,
-  } = useTemplatePreviewContext(canvasPage)
+  const { context: templatePreviewContext, loading: templatePreviewContextLoading } =
+    useTemplatePreviewContext(canvasPage)
   const agentSnapshotBreakpoint = agentSnapshotCaptureRequest
-    ? breakpoints.find((breakpoint) => breakpoint.id === agentSnapshotCaptureRequest.breakpointId) ?? null
+    ? (breakpoints.find(
+        (breakpoint) => breakpoint.id === agentSnapshotCaptureRequest.breakpointId,
+      ) ?? null)
     : null
   // Permission context — gates canvas affordances:
   //   canEditContent → double-click inline text editing
@@ -167,7 +174,12 @@ export function CanvasRoot({ editable = true }: CanvasRootProps) {
   // silently mutating transformRef while in preview, which would otherwise
   // make the design canvas visibly jump on the first interaction after
   // returning from preview.
-  const { bind, handleKeyDown: canvasKeyDown, panBy, centerOnBreakpointFrame } = useCanvas({
+  const {
+    bind,
+    handleKeyDown: canvasKeyDown,
+    panBy,
+    centerOnBreakpointFrame,
+  } = useCanvas({
     canvasRootRef: canvasRef,
     transformLayerRef,
     enabled: !isLive,
@@ -259,11 +271,7 @@ export function CanvasRoot({ editable = true }: CanvasRootProps) {
     // Modifier-aware selection (multi-select): Cmd/Ctrl-click toggles, Shift-
     // click extends a range from the anchor. Plain clicks replace the
     // selection (default mode in `selectNode`).
-    const mode = e.shiftKey
-      ? 'range'
-      : e.metaKey || e.ctrlKey
-        ? 'toggle'
-        : 'replace'
+    const mode = e.shiftKey ? 'range' : e.metaKey || e.ctrlKey ? 'toggle' : 'replace'
     selectNode(nodeId, mode)
     setFocusedPanel('canvas')
   }
@@ -344,17 +352,16 @@ export function CanvasRoot({ editable = true }: CanvasRootProps) {
     runShortcut: spotlight?.runShortcut,
   })
 
-  const requestDeleteSelectionFromShortcut = useEffectEvent((
-    currentSelectedNodeId: string,
-    currentIds: readonly string[],
-  ) => {
-    if (currentIds.length > 1) {
-      deleteNodes([...currentIds])
-      clearSelection()
-    } else {
-      requestDeleteNode(currentSelectedNodeId)
-    }
-  })
+  const requestDeleteSelectionFromShortcut = useEffectEvent(
+    (currentSelectedNodeId: string, currentIds: readonly string[]) => {
+      if (currentIds.length > 1) {
+        deleteNodes([...currentIds])
+        clearSelection()
+      } else {
+        requestDeleteNode(currentSelectedNodeId)
+      }
+    },
+  )
 
   useEffect(() => {
     if (isLive || !editable) return
@@ -398,7 +405,8 @@ export function CanvasRoot({ editable = true }: CanvasRootProps) {
 
   // Resolve the active breakpoint object for the live surface (which wants the
   // full Breakpoint, not just the id, to read .width).
-  const activeBreakpoint = breakpoints.find((bp) => bp.id === activeBreakpointId) ?? breakpoints[0] ?? null
+  const activeBreakpoint =
+    breakpoints.find((bp) => bp.id === activeBreakpointId) ?? breakpoints[0] ?? null
 
   // Runtime scripts (opt-in "Run scripts" toggle). Built once here and shared
   // by every editable frame — the design canvas's per-breakpoint frames AND
@@ -489,9 +497,9 @@ export function CanvasRoot({ editable = true }: CanvasRootProps) {
               (viewports + custom conditions), so it's only meaningful for
               callers who can edit style or structure. Content-only Clients and
               pure Viewers get the same plain frames without this affordance. */}
-          {!isLive && rightSidebarExpanded && (permissions.canEditStyle || permissions.canEditStructure) && (
-            <CanvasContextSelector />
-          )}
+          {!isLive &&
+            rightSidebarExpanded &&
+            (permissions.canEditStyle || permissions.canEditStructure) && <CanvasContextSelector />}
 
           {/*
           A buggy module render must not blank the toolbar / DOM panel /

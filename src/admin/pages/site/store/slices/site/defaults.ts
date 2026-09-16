@@ -11,14 +11,8 @@ import {
   createNode,
   createDefaultSiteExplorerOrganization,
 } from '@core/page-tree'
-import {
-  clonePackageJson,
-  DEFAULT_SITE_PACKAGE_JSON,
-} from '@core/site-dependencies/manifest'
-import {
-  cloneSiteRuntimeConfig,
-  DEFAULT_SITE_RUNTIME,
-} from '@core/site-runtime'
+import { clonePackageJson, DEFAULT_SITE_PACKAGE_JSON } from '@core/site-dependencies/manifest'
+import { cloneSiteRuntimeConfig, DEFAULT_SITE_RUNTIME } from '@core/site-runtime'
 
 /** Maximum undo history depth — prevents unbounded memory growth. */
 export const MAX_HISTORY = 50
@@ -36,9 +30,9 @@ export function createDefaultSiteDocument(name: string): SiteDocument {
     id: nanoid(),
     name,
     pages: [homePage],
-    files: [],             // Contribution #595 — files data layer
-    visualComponents: [],  // Contribution #619 — visual components data layer
-    layouts: [],           // user-saved layouts data layer
+    files: [], // Contribution #595 — files data layer
+    visualComponents: [], // Contribution #619 — visual components data layer
+    layouts: [], // user-saved layouts data layer
     packageJson: clonePackageJson(DEFAULT_SITE_PACKAGE_JSON),
     runtime: cloneSiteRuntimeConfig(DEFAULT_SITE_RUNTIME),
     breakpoints: DEFAULT_BREAKPOINTS,

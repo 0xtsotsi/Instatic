@@ -170,7 +170,10 @@ describe('cssToStyleRules — unmatched @media → faithful condition context', 
     const cid = conditionId({ kind: 'media', query: '(max-width: 768px)' })
     expect(rules[0].contextStyles[cid]).toMatchObject({ color: 'blue' })
     // The reusable condition is registered.
-    expect(conditions.map((c) => c.condition)).toContainEqual({ kind: 'media', query: '(max-width: 768px)' })
+    expect(conditions.map((c) => c.condition)).toContainEqual({
+      kind: 'media',
+      query: '(max-width: 768px)',
+    })
     // No lossy "unmatched-media-query" warning anymore.
     expect(warnings.filter((w) => w.kind === 'unmatched-media-query')).toHaveLength(0)
   })
@@ -182,7 +185,10 @@ describe('cssToStyleRules — unmatched @media → faithful condition context', 
     expect(rules[0].styles).toEqual({}) // nothing folded into base
     const cid = conditionId({ kind: 'media', query: '(orientation: landscape)' })
     expect(rules[0].contextStyles[cid]).toMatchObject({ color: 'red' })
-    expect(conditions.map((c) => c.condition)).toContainEqual({ kind: 'media', query: '(orientation: landscape)' })
+    expect(conditions.map((c) => c.condition)).toContainEqual({
+      kind: 'media',
+      query: '(orientation: landscape)',
+    })
     expect(warnings.filter((w) => w.kind === 'unmatched-media-query')).toHaveLength(0)
   })
 })
@@ -275,7 +281,9 @@ describe('cssToStyleRules — permissive property model (Phase 1a)', () => {
     const { rules, warnings } = cssToStyleRules('.foo { color: red; flex-grow: 2 }')
     expect(rules).toHaveLength(1)
     expect(rules[0].styles).toMatchObject({ color: 'red', flexGrow: '2' })
-    expect(warnings.filter((w) => w.kind === 'unknown-property' || w.kind === 'blocked-property')).toHaveLength(0)
+    expect(
+      warnings.filter((w) => w.kind === 'unknown-property' || w.kind === 'blocked-property'),
+    ).toHaveLength(0)
   })
 
   it('a CSS custom property (--var) round-trips', () => {
@@ -287,9 +295,7 @@ describe('cssToStyleRules — permissive property model (Phase 1a)', () => {
   it('a denied property (behavior) is dropped with a blocked-property warning', () => {
     // The CSS engine may or may not surface `behavior` (it is non-standard).
     // When it does, it must be dropped via the security denylist, never kept.
-    const { rules, warnings } = cssToStyleRules(
-      ".foo { color: red; behavior: url('xss.htc') }",
-    )
+    const { rules, warnings } = cssToStyleRules(".foo { color: red; behavior: url('xss.htc') }")
     expect(rules[0].styles).not.toHaveProperty('behavior')
     expect(rules[0].styles).toMatchObject({ color: 'red' })
     // If the engine surfaced `behavior`, exactly one blocked-property warning fired.
@@ -305,9 +311,7 @@ describe('cssToStyleRules — permissive property model (Phase 1a)', () => {
 
 describe('cssToStyleRules — url(...) collection', () => {
   it('single url → 1 assetRef', () => {
-    const { rules, assetRefs } = cssToStyleRules(
-      ".foo { background-image: url('assets/bg.png') }",
-    )
+    const { rules, assetRefs } = cssToStyleRules(".foo { background-image: url('assets/bg.png') }")
     expect(rules).toHaveLength(1)
     expect(assetRefs).toHaveLength(1)
     expect(assetRefs[0].ruleIndex).toBe(0)
@@ -463,17 +467,13 @@ describe('cssToStyleRules — duplicate class names', () => {
   })
 
   it('an earlier important declaration resists a later normal declaration', () => {
-    const { rules } = cssToStyleRules(
-      '.foo { color: red !important } .foo { color: blue }',
-    )
+    const { rules } = cssToStyleRules('.foo { color: red !important } .foo { color: blue }')
     expect(rules[0].styles.color).toBe('red')
     expect(rules[0].stylePriorities).toEqual({ color: 'important' })
   })
 
   it('a later important declaration replaces an earlier normal declaration', () => {
-    const { rules } = cssToStyleRules(
-      '.foo { color: red } .foo { color: blue !important }',
-    )
+    const { rules } = cssToStyleRules('.foo { color: red } .foo { color: blue !important }')
     expect(rules[0].styles.color).toBe('blue')
     expect(rules[0].stylePriorities).toEqual({ color: 'important' })
   })
@@ -516,7 +516,8 @@ describe('cssToStyleRules — order assignment', () => {
 
 describe('cssToStyleRules — integration', () => {
   it('multiple class rules produce independent NewStyleRule objects', () => {
-    const css = '.hero { background-color: #fff; padding: 20px } .title { font-size: 24px; color: #333 }'
+    const css =
+      '.hero { background-color: #fff; padding: 20px } .title { font-size: 24px; color: #333 }'
     // Note: padding and background-color are in ALLOWED_PROPS; #fff/#333 hex values pass through
     const { rules, warnings } = cssToStyleRules(css)
     expect(rules).toHaveLength(2)
@@ -536,7 +537,9 @@ describe('cssToStyleRules — integration', () => {
     // surfaced property round-trips camelCased.)
     const { rules, warnings } = cssToStyleRules('.foo { totally-made-up: 1; also-fake: 2 }')
     expect(rules).toHaveLength(1)
-    expect(warnings.filter((w) => w.kind === 'unknown-property' || w.kind === 'blocked-property')).toHaveLength(0)
+    expect(
+      warnings.filter((w) => w.kind === 'unknown-property' || w.kind === 'blocked-property'),
+    ).toHaveLength(0)
   })
 })
 
@@ -555,7 +558,9 @@ describe('cssToStyleRules — integration', () => {
 describe('cssToStyleRules — ALLOWED_PROPS expansion: isolation', () => {
   it('isolation: isolate → no unknown-property warning, key present in styles', () => {
     const { rules, warnings } = cssToStyleRules('.foo { isolation: isolate }')
-    expect(warnings.filter((w) => w.kind === 'unknown-property' && w.property === 'isolation')).toHaveLength(0)
+    expect(
+      warnings.filter((w) => w.kind === 'unknown-property' && w.property === 'isolation'),
+    ).toHaveLength(0)
     expect(rules).toHaveLength(1)
     expect(rules[0].styles).toHaveProperty('isolation')
   })
@@ -564,7 +569,9 @@ describe('cssToStyleRules — ALLOWED_PROPS expansion: isolation', () => {
 describe('cssToStyleRules — ALLOWED_PROPS expansion: backgroundPositionX', () => {
   it('background-position-x: 50% → no unknown-property warning, key present', () => {
     const { rules, warnings } = cssToStyleRules('.foo { background-position-x: 50% }')
-    expect(warnings.filter((w) => w.kind === 'unknown-property' && w.property === 'backgroundPositionX')).toHaveLength(0)
+    expect(
+      warnings.filter((w) => w.kind === 'unknown-property' && w.property === 'backgroundPositionX'),
+    ).toHaveLength(0)
     expect(rules).toHaveLength(1)
     expect(rules[0].styles).toHaveProperty('backgroundPositionX')
   })
@@ -573,7 +580,9 @@ describe('cssToStyleRules — ALLOWED_PROPS expansion: backgroundPositionX', () 
 describe('cssToStyleRules — ALLOWED_PROPS expansion: backgroundPositionY', () => {
   it('background-position-y: 50% → no unknown-property warning, key present', () => {
     const { rules, warnings } = cssToStyleRules('.foo { background-position-y: 50% }')
-    expect(warnings.filter((w) => w.kind === 'unknown-property' && w.property === 'backgroundPositionY')).toHaveLength(0)
+    expect(
+      warnings.filter((w) => w.kind === 'unknown-property' && w.property === 'backgroundPositionY'),
+    ).toHaveLength(0)
     expect(rules).toHaveLength(1)
     expect(rules[0].styles).toHaveProperty('backgroundPositionY')
   })
@@ -582,7 +591,11 @@ describe('cssToStyleRules — ALLOWED_PROPS expansion: backgroundPositionY', () 
 describe('cssToStyleRules — ALLOWED_PROPS expansion: backgroundAttachment', () => {
   it('background-attachment: fixed → no unknown-property warning, key present', () => {
     const { rules, warnings } = cssToStyleRules('.foo { background-attachment: fixed }')
-    expect(warnings.filter((w) => w.kind === 'unknown-property' && w.property === 'backgroundAttachment')).toHaveLength(0)
+    expect(
+      warnings.filter(
+        (w) => w.kind === 'unknown-property' && w.property === 'backgroundAttachment',
+      ),
+    ).toHaveLength(0)
     expect(rules).toHaveLength(1)
     expect(rules[0].styles).toHaveProperty('backgroundAttachment')
   })
@@ -591,7 +604,9 @@ describe('cssToStyleRules — ALLOWED_PROPS expansion: backgroundAttachment', ()
 describe('cssToStyleRules — ALLOWED_PROPS expansion: backgroundOrigin', () => {
   it('background-origin: content-box → no unknown-property warning, key present', () => {
     const { rules, warnings } = cssToStyleRules('.foo { background-origin: content-box }')
-    expect(warnings.filter((w) => w.kind === 'unknown-property' && w.property === 'backgroundOrigin')).toHaveLength(0)
+    expect(
+      warnings.filter((w) => w.kind === 'unknown-property' && w.property === 'backgroundOrigin'),
+    ).toHaveLength(0)
     expect(rules).toHaveLength(1)
     expect(rules[0].styles).toHaveProperty('backgroundOrigin')
   })
@@ -600,7 +615,9 @@ describe('cssToStyleRules — ALLOWED_PROPS expansion: backgroundOrigin', () => 
 describe('cssToStyleRules — ALLOWED_PROPS expansion: backgroundClip', () => {
   it('background-clip: text → no unknown-property warning, key present', () => {
     const { rules, warnings } = cssToStyleRules('.foo { background-clip: text }')
-    expect(warnings.filter((w) => w.kind === 'unknown-property' && w.property === 'backgroundClip')).toHaveLength(0)
+    expect(
+      warnings.filter((w) => w.kind === 'unknown-property' && w.property === 'backgroundClip'),
+    ).toHaveLength(0)
     expect(rules).toHaveLength(1)
     expect(rules[0].styles).toHaveProperty('backgroundClip')
   })
@@ -611,7 +628,9 @@ describe('cssToStyleRules — ALLOWED_PROPS expansion: content', () => {
     // content is valid on any element (CSS spec allows it, though browsers
     // may treat it as a no-op outside pseudo-elements).
     const { rules, warnings } = cssToStyleRules('.foo { content: "" }')
-    expect(warnings.filter((w) => w.kind === 'unknown-property' && w.property === 'content')).toHaveLength(0)
+    expect(
+      warnings.filter((w) => w.kind === 'unknown-property' && w.property === 'content'),
+    ).toHaveLength(0)
     expect(rules).toHaveLength(1)
     expect(rules[0].styles).toHaveProperty('content')
   })
@@ -624,7 +643,9 @@ describe('cssToStyleRules — ALLOWED_PROPS expansion: textWrapMode', () => {
     // no warning of any kind is emitted — that is a CSS-engine limitation, not an
     // allowlist regression. We at minimum verify no false unknown-property warning.
     const { warnings } = cssToStyleRules('.foo { text-wrap-mode: nowrap }')
-    expect(warnings.filter((w) => w.kind === 'unknown-property' && w.property === 'textWrapMode')).toHaveLength(0)
+    expect(
+      warnings.filter((w) => w.kind === 'unknown-property' && w.property === 'textWrapMode'),
+    ).toHaveLength(0)
   })
 })
 
@@ -632,7 +653,9 @@ describe('cssToStyleRules — ALLOWED_PROPS expansion: textWrapStyle', () => {
   it('text-wrap-style: balance → no unknown-property warning', () => {
     // Same caveat as text-wrap-mode above.
     const { warnings } = cssToStyleRules('.foo { text-wrap-style: balance }')
-    expect(warnings.filter((w) => w.kind === 'unknown-property' && w.property === 'textWrapStyle')).toHaveLength(0)
+    expect(
+      warnings.filter((w) => w.kind === 'unknown-property' && w.property === 'textWrapStyle'),
+    ).toHaveLength(0)
   })
 })
 

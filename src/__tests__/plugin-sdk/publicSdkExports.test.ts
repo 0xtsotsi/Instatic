@@ -12,13 +12,15 @@ const legacyTypesImportMarker = ['plugins', 'types'].join('/')
 
 async function collectFiles(dir: string): Promise<string[]> {
   const entries = await readdir(dir, { withFileTypes: true })
-  const files = await Promise.all(entries.map(async (entry) => {
-    const fullPath = join(dir, entry.name)
-    if (entry.isDirectory()) return collectFiles(fullPath)
-    if (!entry.isFile()) return []
-    if (!/\.(ts|tsx|md)$/.test(entry.name)) return []
-    return [fullPath]
-  }))
+  const files = await Promise.all(
+    entries.map(async (entry) => {
+      const fullPath = join(dir, entry.name)
+      if (entry.isDirectory()) return collectFiles(fullPath)
+      if (!entry.isFile()) return []
+      if (!/\.(ts|tsx|md)$/.test(entry.name)) return []
+      return [fullPath]
+    }),
+  )
   return files.flat()
 }
 
@@ -46,9 +48,9 @@ describe('public plugin SDK exports', () => {
   it('does not keep legacy plugin type compatibility paths', async () => {
     expect(existsSync(join(repoRoot, legacyTypesPath))).toBe(false)
 
-    const files = (await Promise.all(
-      scannedRoots.map((root) => collectFiles(join(repoRoot, root))),
-    )).flat()
+    const files = (
+      await Promise.all(scannedRoots.map((root) => collectFiles(join(repoRoot, root))))
+    ).flat()
 
     const offenders: string[] = []
     for (const file of files) {

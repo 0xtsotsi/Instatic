@@ -147,9 +147,10 @@ export function Toolbar({
       const result = await pluginRuntime.runCommand(button.command)
       setPluginStatus(key, {
         state: 'success',
-        message: result && typeof result === 'object' && result.message
-          ? result.message
-          : `${button.label} complete`,
+        message:
+          result && typeof result === 'object' && result.message
+            ? result.message
+            : `${button.label} complete`,
       })
     } catch (err) {
       console.error('[plugin-runtime] command failed:', err)
@@ -163,11 +164,7 @@ export function Toolbar({
   return (
     <>
       {overlay}
-      <header
-        aria-label="Editor toolbar"
-        data-testid="toolbar"
-        className={styles.header}
-      >
+      <header aria-label="Editor toolbar" data-testid="toolbar" className={styles.header}>
         {/* ── Left section ────────────────────────────────────────────────── */}
 
         {siteName === null ? (

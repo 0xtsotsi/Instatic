@@ -68,10 +68,21 @@ function loadSiteWithHeading(): { nodeId: string; rootId: string } {
   const rootId = 'root-1'
   const nodeId = 'text-1'
   const rootNode = makeNode({ id: rootId, moduleId: 'base.body', children: [nodeId] })
-  const textNode = makeNode({ id: nodeId, moduleId: 'base.text', props: { text: 'Hello', tag: 'h2' }, children: [] })
-  const page = makePage({ id: 'page-1', rootNodeId: rootId, nodes: { [rootId]: rootNode, [nodeId]: textNode } })
+  const textNode = makeNode({
+    id: nodeId,
+    moduleId: 'base.text',
+    props: { text: 'Hello', tag: 'h2' },
+    children: [],
+  })
+  const page = makePage({
+    id: 'page-1',
+    rootNodeId: rootId,
+    nodes: { [rootId]: rootNode, [nodeId]: textNode },
+  })
   const site = makeSite({ pages: [page] })
-  useEditorStore.setState({ site, activePageId: 'page-1' } as Parameters<typeof useEditorStore.setState>[0])
+  useEditorStore.setState({ site, activePageId: 'page-1' } as Parameters<
+    typeof useEditorStore.setState
+  >[0])
   return { nodeId, rootId }
 }
 
@@ -80,8 +91,18 @@ function loadSiteWithHeadingAndButton(): { headingId: string; buttonId: string; 
   const headingId = 'text-1'
   const buttonId = 'button-1'
   const rootNode = makeNode({ id: rootId, moduleId: 'base.body', children: [buttonId, headingId] })
-  const buttonNode = makeNode({ id: buttonId, moduleId: 'base.button', props: { label: 'Click me' }, children: [] })
-  const headingNode = makeNode({ id: headingId, moduleId: 'base.text', props: { text: 'Hello', tag: 'h2' }, children: [] })
+  const buttonNode = makeNode({
+    id: buttonId,
+    moduleId: 'base.button',
+    props: { label: 'Click me' },
+    children: [],
+  })
+  const headingNode = makeNode({
+    id: headingId,
+    moduleId: 'base.text',
+    props: { text: 'Hello', tag: 'h2' },
+    children: [],
+  })
   const page = makePage({
     id: 'page-1',
     rootNodeId: rootId,
@@ -92,12 +113,16 @@ function loadSiteWithHeadingAndButton(): { headingId: string; buttonId: string; 
     },
   })
   const site = makeSite({ pages: [page] })
-  useEditorStore.setState({ site, activePageId: 'page-1' } as Parameters<typeof useEditorStore.setState>[0])
+  useEditorStore.setState({ site, activePageId: 'page-1' } as Parameters<
+    typeof useEditorStore.setState
+  >[0])
   return { headingId, buttonId, rootId }
 }
 
 function selectNode(nodeId: string) {
-  useEditorStore.setState({ selectedNodeId: nodeId } as Parameters<typeof useEditorStore.setState>[0])
+  useEditorStore.setState({ selectedNodeId: nodeId } as Parameters<
+    typeof useEditorStore.setState
+  >[0])
 }
 
 // ---------------------------------------------------------------------------
@@ -155,9 +180,13 @@ describe('PropertiesPanel — data-panel + stopPropagation', () => {
     selectNode(nodeId)
     let parentClicked = false
     render(
-      <div onClick={() => { parentClicked = true }}>
+      <div
+        onClick={() => {
+          parentClicked = true
+        }}
+      >
         <PropertiesPanel />
-      </div>
+      </div>,
     )
     const panel = screen.getByTestId('properties-panel')
     fireEvent.click(panel)
@@ -245,7 +274,7 @@ describe('PropertiesPanel — header rename uncontrolled input (Guideline #220)'
     const { readFileSync } = await import('fs')
     const src = readFileSync(
       new URL('../../admin/pages/site/panels/PropertiesPanel/NodeHeader.tsx', import.meta.url),
-      'utf-8'
+      'utf-8',
     )
     // NodeHeader uses defaultValue for the inline label editor
     expect(src).toContain('defaultValue={displayName}')

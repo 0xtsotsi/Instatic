@@ -98,17 +98,19 @@ export function SelectMenu({
       aria-labelledby={ariaLabelledBy}
       role="listbox"
       onClose={onClose}
-      header={searchable ? (
-        <MenuSearchHeader
-          inputRef={searchInputRef}
-          value={query}
-          onValueChange={onQueryChange}
-          onKeyDown={onSearchKeyDown}
-          placeholder={searchPlaceholder}
-          controls={menuId}
-          activeOptionId={activeOptionId}
-        />
-      ) : undefined}
+      header={
+        searchable ? (
+          <MenuSearchHeader
+            inputRef={searchInputRef}
+            value={query}
+            onValueChange={onQueryChange}
+            onKeyDown={onSearchKeyDown}
+            placeholder={searchPlaceholder}
+            controls={menuId}
+            activeOptionId={activeOptionId}
+          />
+        ) : undefined
+      }
     >
       {options.length === 0 ? (
         <div className={styles.emptyOption} role="presentation">
@@ -117,11 +119,7 @@ export function SelectMenu({
       ) : (
         options.map((option, index) =>
           option.header ? (
-            <div
-              key={option.value}
-              className={styles.groupHeader}
-              role="presentation"
-            >
+            <div key={option.value} className={styles.groupHeader} role="presentation">
               {option.label}
             </div>
           ) : (
@@ -142,11 +140,7 @@ export function SelectMenu({
               }}
               onClick={() => onSelect(option.value)}
             >
-              {option.icon && (
-                <span aria-hidden="true">
-                  {option.icon}
-                </span>
-              )}
+              {option.icon && <span aria-hidden="true">{option.icon}</span>}
               <span className={styles.optionLabel}>{option.label}</span>
             </ContextMenuItem>
           ),

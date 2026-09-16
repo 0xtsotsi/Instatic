@@ -124,14 +124,22 @@ describe('makeHtmlPagePlan', () => {
   const fileMap = makeSampleFileMap()
 
   it('extracts title from <title> tag', () => {
-    const { pagePlan } = makeHtmlPagePlan('index.html', fileMap.files['index.html']!.bytes instanceof Uint8Array
-      ? new TextDecoder().decode(fileMap.files['index.html']!.bytes)
-      : '', fileMap)
+    const { pagePlan } = makeHtmlPagePlan(
+      'index.html',
+      fileMap.files['index.html']!.bytes instanceof Uint8Array
+        ? new TextDecoder().decode(fileMap.files['index.html']!.bytes)
+        : '',
+      fileMap,
+    )
     expect(pagePlan.title).toBe('Home Page')
   })
 
   it('derives slug from filename', () => {
-    const { pagePlan } = makeHtmlPagePlan('index.html', new TextDecoder().decode(fileMap.files['index.html']!.bytes), fileMap)
+    const { pagePlan } = makeHtmlPagePlan(
+      'index.html',
+      new TextDecoder().decode(fileMap.files['index.html']!.bytes),
+      fileMap,
+    )
     expect(pagePlan.slug).toBe('index')
   })
 
@@ -142,13 +150,21 @@ describe('makeHtmlPagePlan', () => {
   })
 
   it('resolves linked CSS paths to FileMap keys', () => {
-    const { pagePlan } = makeHtmlPagePlan('index.html', new TextDecoder().decode(fileMap.files['index.html']!.bytes), fileMap)
+    const { pagePlan } = makeHtmlPagePlan(
+      'index.html',
+      new TextDecoder().decode(fileMap.files['index.html']!.bytes),
+      fileMap,
+    )
     expect(pagePlan.linkedCssPaths).toContain('styles/main.css')
     expect(pagePlan.linkedCssPaths).toContain('styles/theme.css')
   })
 
   it('resolves linked script paths with classic/module format', () => {
-    const { pagePlan } = makeHtmlPagePlan('index.html', new TextDecoder().decode(fileMap.files['index.html']!.bytes), fileMap)
+    const { pagePlan } = makeHtmlPagePlan(
+      'index.html',
+      new TextDecoder().decode(fileMap.files['index.html']!.bytes),
+      fileMap,
+    )
     expect(pagePlan.scripts).toEqual([
       { kind: 'external', path: 'scripts/vendor.js', format: 'classic' },
       { kind: 'external', path: 'scripts/app.js', format: 'module' },
@@ -212,7 +228,11 @@ describe('makeHtmlPagePlan', () => {
   })
 
   it('produces a nodeFragment with rootIds', () => {
-    const { pagePlan } = makeHtmlPagePlan('index.html', new TextDecoder().decode(fileMap.files['index.html']!.bytes), fileMap)
+    const { pagePlan } = makeHtmlPagePlan(
+      'index.html',
+      new TextDecoder().decode(fileMap.files['index.html']!.bytes),
+      fileMap,
+    )
     expect(pagePlan.nodeFragment.rootIds.length).toBeGreaterThan(0)
     expect(Object.keys(pagePlan.nodeFragment.nodes).length).toBeGreaterThan(0)
   })
@@ -236,7 +256,11 @@ describe('makeHtmlPagePlan', () => {
   })
 
   it('sets source to the HTML file path', () => {
-    const { pagePlan } = makeHtmlPagePlan('about.html', new TextDecoder().decode(fileMap.files['about.html']!.bytes), fileMap)
+    const { pagePlan } = makeHtmlPagePlan(
+      'about.html',
+      new TextDecoder().decode(fileMap.files['about.html']!.bytes),
+      fileMap,
+    )
     expect(pagePlan.source).toBe('about.html')
   })
 

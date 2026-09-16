@@ -59,14 +59,8 @@ interface ScaleFamilyTypes {
 interface ScaleFamilyConfig<F extends 'typography' | 'spacing'> {
   family: F
   buildDefault: (order: number) => ScaleFamilyTypes[F]['Group']
-  makeFresh: (
-    name: string,
-    varName: string,
-    order: number,
-  ) => ScaleFamilyTypes[F]['Group']
-  nextTabValues: (
-    groups: Array<ScaleFamilyTypes[F]['Group']>,
-  ) => { name: string; varName: string }
+  makeFresh: (name: string, varName: string, order: number) => ScaleFamilyTypes[F]['Group']
+  nextTabValues: (groups: Array<ScaleFamilyTypes[F]['Group']>) => { name: string; varName: string }
 }
 
 // ---------------------------------------------------------------------------
@@ -113,9 +107,7 @@ function readScaleSettings<F extends 'typography' | 'spacing'>(
   family: F,
 ): ScaleFamilyTypes[F]['Settings'] | null {
   const branch =
-    family === 'typography'
-      ? site.settings.framework?.typography
-      : site.settings.framework?.spacing
+    family === 'typography' ? site.settings.framework?.typography : site.settings.framework?.spacing
   return (branch ?? null) as ScaleFamilyTypes[F]['Settings'] | null
 }
 
@@ -196,9 +188,7 @@ interface ScaleGroupActions<F extends 'typography' | 'spacing'> {
     sizeId: string,
     patch: Partial<{ name: string; min: number; max: number }>,
   ) => void
-  setClassGenerators: (
-    classes: ScaleFamilyTypes[F]['ClassGenerator'][],
-  ) => void
+  setClassGenerators: (classes: ScaleFamilyTypes[F]['ClassGenerator'][]) => void
 }
 
 /**
@@ -316,9 +306,9 @@ export function createScaleGroupActions<F extends 'typography' | 'spacing'>(
         settings.groups = settings.groups.filter(
           (g: { id: string }) => g.id !== groupId,
         ) as ScaleFamilyTypes[F]['Settings']['groups']
-        settings.classes = (
-          settings.classes?.filter((c: { tabId: string }) => c.tabId !== groupId) ?? []
-        ) as ScaleFamilyTypes[F]['Settings']['classes']
+        settings.classes = (settings.classes?.filter(
+          (c: { tabId: string }) => c.tabId !== groupId,
+        ) ?? []) as ScaleFamilyTypes[F]['Settings']['classes']
         reconcileFrameworkClasses(site)
         return true
       })
@@ -366,8 +356,7 @@ export function createScaleGroupActions<F extends 'typography' | 'spacing'>(
     setClassGenerators: (classes) => {
       mutateSite((site) => {
         const settings = ensureScaleSettings(site, family)
-        settings.classes =
-          classes as ScaleFamilyTypes[F]['Settings']['classes']
+        settings.classes = classes as ScaleFamilyTypes[F]['Settings']['classes']
         reconcileFrameworkClasses(site)
         return true
       })

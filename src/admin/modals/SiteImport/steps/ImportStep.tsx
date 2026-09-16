@@ -51,19 +51,49 @@ type BaseCategoryConfig = Omit<CategoryConfig, 'accent' | 'tint'>
 
 const CATEGORIES: CategoryConfig[] = withSiteImportCategoryTints<BaseCategoryConfig>([
   { id: 'pages', label: 'Pages', unit: 'pages', verb: 'Building pages', Icon: FileTextSolidIcon },
-  { id: 'styles', label: 'Style rules', unit: 'rules', verb: 'Applying style rules', Icon: BracesIcon },
+  {
+    id: 'styles',
+    label: 'Style rules',
+    unit: 'rules',
+    verb: 'Applying style rules',
+    Icon: BracesIcon,
+  },
   { id: 'media', label: 'Media', unit: 'files', verb: 'Uploading media', Icon: ImageSolidIcon },
-  { id: 'colors', label: 'Color tokens', unit: 'tokens', verb: 'Creating color tokens', Icon: PaintBucketSolidIcon },
+  {
+    id: 'colors',
+    label: 'Color tokens',
+    unit: 'tokens',
+    verb: 'Creating color tokens',
+    Icon: PaintBucketSolidIcon,
+  },
   { id: 'fonts', label: 'Fonts', unit: 'fonts', verb: 'Embedding fonts', Icon: HeadingIcon },
   { id: 'scripts', label: 'Scripts', unit: 'files', verb: 'Attaching scripts', Icon: CodeIcon },
 ])
 
 const CMS_CATEGORIES: CategoryConfig[] = withSiteImportCategoryTints<BaseCategoryConfig>([
-  { id: 'site', label: 'Theme & settings', unit: 'shell', verb: 'Applying site shell', Icon: PaintBucketSolidIcon },
+  {
+    id: 'site',
+    label: 'Theme & settings',
+    unit: 'shell',
+    verb: 'Applying site shell',
+    Icon: PaintBucketSolidIcon,
+  },
   { id: 'rows', label: 'Rows', unit: 'rows', verb: 'Importing rows', Icon: FileTextSolidIcon },
   { id: 'media', label: 'Media', unit: 'files', verb: 'Streaming media', Icon: ImageSolidIcon },
-  { id: 'mediaFolders', label: 'Media folders', unit: 'folders', verb: 'Restoring folders', Icon: HeadingIcon },
-  { id: 'redirects', label: 'Redirects', unit: 'redirects', verb: 'Restoring redirects', Icon: CodeIcon },
+  {
+    id: 'mediaFolders',
+    label: 'Media folders',
+    unit: 'folders',
+    verb: 'Restoring folders',
+    Icon: HeadingIcon,
+  },
+  {
+    id: 'redirects',
+    label: 'Redirects',
+    unit: 'redirects',
+    verb: 'Restoring redirects',
+    Icon: CodeIcon,
+  },
 ])
 
 type RowState = 'pending' | 'active' | 'done'
@@ -115,7 +145,7 @@ export function ImportStep({
   const activeCfg =
     phase === 'uploading' && media.total > 0 && media.done < media.total
       ? configs.find((c) => c.id === 'media')!
-      : configs.find((c) => categoryCount(categories, c.id).total > 0) ?? configs[0]
+      : (configs.find((c) => categoryCount(categories, c.id).total > 0) ?? configs[0])
   const activeCount = categoryCount(categories, activeCfg.id)
 
   return (
@@ -130,7 +160,8 @@ export function ImportStep({
             </span>
             <h3 className={styles.failedTitle}>Import didn’t finish</h3>
             <p className={styles.failedSub}>
-              {progress.errorMessage ?? 'Something went wrong while importing. No changes were applied.'}
+              {progress.errorMessage ??
+                'Something went wrong while importing. No changes were applied.'}
             </p>
           </div>
         ) : done ? (
@@ -139,7 +170,9 @@ export function ImportStep({
               <CheckIcon size={28} />
             </span>
             <h3 className={styles.doneTitle}>Imported into {siteName}</h3>
-            {mode === 'cms' && cmsResult && <p className={styles.doneSub}>{cmsSummaryLine(cmsResult)}</p>}
+            {mode === 'cms' && cmsResult && (
+              <p className={styles.doneSub}>{cmsSummaryLine(cmsResult)}</p>
+            )}
             {mode !== 'cms' && result && <p className={styles.doneSub}>{summaryLine(result)}</p>}
           </div>
         ) : (
@@ -175,7 +208,8 @@ export function ImportStep({
               {configs.map((cfg) => {
                 const c = categoryCount(categories, cfg.id)
                 const state = rowState(cfg.id, c)
-                const local = state === 'done' ? 1 : cfg.id === 'media' && c.total > 0 ? c.done / c.total : 0
+                const local =
+                  state === 'done' ? 1 : cfg.id === 'media' && c.total > 0 ? c.done / c.total : 0
                 const countText =
                   state === 'done'
                     ? `${c.total} / ${c.total}`
@@ -222,9 +256,7 @@ export function ImportStep({
         {mode === 'static' && logOpen && done && result && (
           <ImportLog result={result} droppedAtRules={droppedAtRules} />
         )}
-        {mode === 'cms' && logOpen && done && cmsResult && (
-          <CmsImportLog result={cmsResult} />
-        )}
+        {mode === 'cms' && logOpen && done && cmsResult && <CmsImportLog result={cmsResult} />}
       </div>
     </div>
   )
@@ -240,13 +272,19 @@ function ImportLog({ result, droppedAtRules }: { result: ImportResult; droppedAt
     `${result.styleRules.length} style ${plural(result.styleRules.length, 'rule')} imported`,
     `${result.assets.length} ${plural(result.assets.length, 'asset')} uploaded`,
   ]
-  if (result.colors.length > 0) counts.push(`${result.colors.length} ${plural(result.colors.length, 'color')} added`)
-  if (result.fonts.length > 0) counts.push(`${result.fonts.length} ${plural(result.fonts.length, 'font')} imported`)
+  if (result.colors.length > 0)
+    counts.push(`${result.colors.length} ${plural(result.colors.length, 'color')} added`)
+  if (result.fonts.length > 0)
+    counts.push(`${result.fonts.length} ${plural(result.fonts.length, 'font')} imported`)
   if (result.fontTokens.length > 0) {
-    counts.push(`${result.fontTokens.length} font ${plural(result.fontTokens.length, 'token')} imported`)
+    counts.push(
+      `${result.fontTokens.length} font ${plural(result.fontTokens.length, 'token')} imported`,
+    )
   }
-  if (result.scripts.length > 0) counts.push(`${result.scripts.length} ${plural(result.scripts.length, 'script')} imported`)
-  if (droppedAtRules > 0) counts.push(`${droppedAtRules} @-${plural(droppedAtRules, 'rule')} dropped`)
+  if (result.scripts.length > 0)
+    counts.push(`${result.scripts.length} ${plural(result.scripts.length, 'script')} imported`)
+  if (droppedAtRules > 0)
+    counts.push(`${droppedAtRules} @-${plural(droppedAtRules, 'rule')} dropped`)
 
   const warnings = result.warnings
 
@@ -255,7 +293,9 @@ function ImportLog({ result, droppedAtRules }: { result: ImportResult; droppedAt
       <p className={styles.logHeading}>Import log</p>
       <ul className={styles.logList}>
         {counts.map((line) => (
-          <li key={line} className={styles.logLine}>{line}</li>
+          <li key={line} className={styles.logLine}>
+            {line}
+          </li>
         ))}
       </ul>
       {warnings.length > 0 && (
@@ -301,7 +341,9 @@ function CmsImportLog({ result }: { result: CmsImportResult }) {
       <p className={styles.logHeading}>Import log</p>
       <ul className={styles.logList}>
         {counts.map((line) => (
-          <li key={line} className={styles.logLine}>{line}</li>
+          <li key={line} className={styles.logLine}>
+            {line}
+          </li>
         ))}
       </ul>
     </section>
@@ -318,7 +360,8 @@ function summaryLine(result: ImportResult): string {
     `${result.styleRules.length} ${plural(result.styleRules.length, 'rule')}`,
     `${result.assets.length} media`,
   ]
-  if (result.colors.length > 0) parts.push(`${result.colors.length} ${plural(result.colors.length, 'token')}`)
+  if (result.colors.length > 0)
+    parts.push(`${result.colors.length} ${plural(result.colors.length, 'token')}`)
   if (result.fontTokens.length > 0) {
     parts.push(`${result.fontTokens.length} font ${plural(result.fontTokens.length, 'token')}`)
   }
@@ -331,9 +374,12 @@ function cmsSummaryLine(result: CmsImportResult): string {
     `${result.rowsReplaced} ${plural(result.rowsReplaced, 'row')} replaced`,
     `${result.mediaImported} media`,
   ]
-  if (result.rowsSkipped > 0) parts.push(`${result.rowsSkipped} ${plural(result.rowsSkipped, 'row')} skipped`)
-  if (result.mediaFoldersImported > 0) parts.push(`${result.mediaFoldersImported} ${plural(result.mediaFoldersImported, 'folder')}`)
-  if (result.redirectsImported > 0) parts.push(`${result.redirectsImported} ${plural(result.redirectsImported, 'redirect')}`)
+  if (result.rowsSkipped > 0)
+    parts.push(`${result.rowsSkipped} ${plural(result.rowsSkipped, 'row')} skipped`)
+  if (result.mediaFoldersImported > 0)
+    parts.push(`${result.mediaFoldersImported} ${plural(result.mediaFoldersImported, 'folder')}`)
+  if (result.redirectsImported > 0)
+    parts.push(`${result.redirectsImported} ${plural(result.redirectsImported, 'redirect')}`)
   return parts.join(' · ')
 }
 

@@ -10,9 +10,8 @@ import {
  * further 16 MiB for JSON framing and the bounded editor snapshot while keeping
  * the HTTP boundary finite before JSON parsing.
  */
-export const AI_CHAT_MAX_REQUEST_BYTES = (
-  AI_USER_IMAGE_MAX_PER_MESSAGE * AI_USER_IMAGE_MAX_BASE64_CHARS
-) + (16 * 1024 * 1024)
+export const AI_CHAT_MAX_REQUEST_BYTES =
+  AI_USER_IMAGE_MAX_PER_MESSAGE * AI_USER_IMAGE_MAX_BASE64_CHARS + 16 * 1024 * 1024
 
 const AiUserTextBlockSchema = Type.Object(
   {
@@ -23,10 +22,7 @@ const AiUserTextBlockSchema = Type.Object(
 )
 
 /** User-authored chat content cannot inject assistant/tool blocks. */
-export const AiUserContentBlockSchema = Type.Union([
-  AiUserTextBlockSchema,
-  AiUserImageBlockSchema,
-])
+export const AiUserContentBlockSchema = Type.Union([AiUserTextBlockSchema, AiUserImageBlockSchema])
 
 export type AiUserContentBlock = Static<typeof AiUserContentBlockSchema>
 

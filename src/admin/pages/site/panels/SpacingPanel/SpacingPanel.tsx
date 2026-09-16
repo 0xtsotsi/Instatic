@@ -26,50 +26,44 @@
  * min breakpoint (Mobile).
  */
 
-import { type CSSProperties } from "react";
-import { useEditorStore } from "@site/store/store";
+import { type CSSProperties } from 'react'
+import { useEditorStore } from '@site/store/store'
 import { SPACING_RATIO_OPTIONS } from '@core/framework'
-import type {
-  FrameworkSpacingClassGenerator,
-  FrameworkSpacingGroup,
-} from '@core/framework-schema'
-import { cn } from "@ui/cn";
-import { MonitorSolidIcon } from "pixel-art-icons/icons/monitor-solid";
-import { RulerDimensionSolidIcon } from "pixel-art-icons/icons/ruler-dimension-solid";
-import { SmartphoneSolidIcon } from "pixel-art-icons/icons/smartphone-solid";
-import {
-  FrameworkScalePanel,
-  type ScaleAdapter,
-} from "@site/panels/FrameworkScalePanel";
-import { useFrameworkChangeConfirm } from "@admin/shared/dialogs/FrameworkChangeConfirmDialog";
-import { applySpacingGroupPatchPreview } from "@site/store/slices/site/framework/spacing";
-import styles from "./SpacingPanel.module.css";
+import type { FrameworkSpacingClassGenerator, FrameworkSpacingGroup } from '@core/framework-schema'
+import { cn } from '@ui/cn'
+import { MonitorSolidIcon } from 'pixel-art-icons/icons/monitor-solid'
+import { RulerDimensionSolidIcon } from 'pixel-art-icons/icons/ruler-dimension-solid'
+import { SmartphoneSolidIcon } from 'pixel-art-icons/icons/smartphone-solid'
+import { FrameworkScalePanel, type ScaleAdapter } from '@site/panels/FrameworkScalePanel'
+import { useFrameworkChangeConfirm } from '@admin/shared/dialogs/FrameworkChangeConfirmDialog'
+import { applySpacingGroupPatchPreview } from '@site/store/slices/site/framework/spacing'
+import styles from './SpacingPanel.module.css'
 
 const SPACING_CSS_PROPERTIES = [
-  { value: "padding", label: "padding" },
-  { value: "padding-top", label: "padding-top" },
-  { value: "padding-right", label: "padding-right" },
-  { value: "padding-bottom", label: "padding-bottom" },
-  { value: "padding-left", label: "padding-left" },
-  { value: "margin", label: "margin" },
-  { value: "margin-top", label: "margin-top" },
-  { value: "margin-right", label: "margin-right" },
-  { value: "margin-bottom", label: "margin-bottom" },
-  { value: "margin-left", label: "margin-left" },
-  { value: "gap", label: "gap" },
-  { value: "row-gap", label: "row-gap" },
-  { value: "column-gap", label: "column-gap" },
-] as const;
+  { value: 'padding', label: 'padding' },
+  { value: 'padding-top', label: 'padding-top' },
+  { value: 'padding-right', label: 'padding-right' },
+  { value: 'padding-bottom', label: 'padding-bottom' },
+  { value: 'padding-left', label: 'padding-left' },
+  { value: 'margin', label: 'margin' },
+  { value: 'margin-top', label: 'margin-top' },
+  { value: 'margin-right', label: 'margin-right' },
+  { value: 'margin-bottom', label: 'margin-bottom' },
+  { value: 'margin-left', label: 'margin-left' },
+  { value: 'gap', label: 'gap' },
+  { value: 'row-gap', label: 'row-gap' },
+  { value: 'column-gap', label: 'column-gap' },
+] as const
 
-const EMPTY_GROUPS: FrameworkSpacingGroup[] = [];
-const EMPTY_CLASSES: FrameworkSpacingClassGenerator[] = [];
+const EMPTY_GROUPS: FrameworkSpacingGroup[] = []
+const EMPTY_CLASSES: FrameworkSpacingClassGenerator[] = []
 
 export interface ChartPoint {
-  stepLabel: string;
-  variableName: string;
-  minPx: number;
-  maxPx: number;
-  isBase: boolean;
+  stepLabel: string
+  variableName: string
+  minPx: number
+  maxPx: number
+  isBase: boolean
 }
 
 // Reserved label space at the outer edge of each row so a bar's value label
@@ -94,13 +88,7 @@ function formatBarValue(v: number): string {
  * and are anchored to the centerline-side of the row by the parent's
  * `align-items` (set in the stylesheet, per side).
  */
-function PillBarRow({
-  heights,
-  seriesClassName,
-}: {
-  heights: number[]
-  seriesClassName: string
-}) {
+function PillBarRow({ heights, seriesClassName }: { heights: number[]; seriesClassName: string }) {
   return (
     <div className={styles.barChartBars} aria-hidden="true">
       {heights.map((h, idx) => (
@@ -122,17 +110,11 @@ export function SpacingBarChart({ points }: { points: ChartPoint[] }) {
   // leaving room for the floating value labels.
   const desktopBarHeight = desktopHeights.reduce((acc, h) => Math.max(acc, h), 0)
   const mobileBarHeight = mobileHeights.reduce((acc, h) => Math.max(acc, h), 0)
-  const desktopRowHeight =
-    desktopBarHeight > 0 ? desktopBarHeight + VALUE_LABEL_RESERVE_PX : 0
-  const mobileRowHeight =
-    mobileBarHeight > 0 ? mobileBarHeight + VALUE_LABEL_RESERVE_PX : 0
+  const desktopRowHeight = desktopBarHeight > 0 ? desktopBarHeight + VALUE_LABEL_RESERVE_PX : 0
+  const mobileRowHeight = mobileBarHeight > 0 ? mobileBarHeight + VALUE_LABEL_RESERVE_PX : 0
 
   return (
-    <div
-      className={styles.barChart}
-      role="group"
-      aria-label="Spacing scale chart"
-    >
+    <div className={styles.barChart} role="group" aria-label="Spacing scale chart">
       {/* Baseline-step highlight — a vertical pill in the base step's
        *  column that spans the full chart height (desktop bars + center
        *  + mobile bars). Same width as a bar, same border-radius. Sits
@@ -150,11 +132,7 @@ export function SpacingBarChart({ points }: { points: ChartPoint[] }) {
       </div>
 
       {/* Desktop row — icon on the left, pill bars + floating value labels. */}
-      <div
-        className={styles.barChartIcon}
-        data-side="desktop"
-        aria-label="Desktop"
-      >
+      <div className={styles.barChartIcon} data-side="desktop" aria-label="Desktop">
         <MonitorSolidIcon size={14} aria-hidden="true" />
       </div>
       <div
@@ -162,16 +140,10 @@ export function SpacingBarChart({ points }: { points: ChartPoint[] }) {
         data-side="desktop"
         style={{ height: `${desktopRowHeight}px` } as CSSProperties}
       >
-        <PillBarRow
-          heights={desktopHeights}
-          seriesClassName={styles.barChartBarMax}
-        />
+        <PillBarRow heights={desktopHeights} seriesClassName={styles.barChartBarMax} />
         <div className={styles.barChartLabelOverlay} aria-hidden="true">
           {points.map((p, idx) => (
-            <span
-              key={`desktop-label-${p.stepLabel}-${idx}`}
-              className={styles.barChartLabelCell}
-            >
+            <span key={`desktop-label-${p.stepLabel}-${idx}`} className={styles.barChartLabelCell}>
               <span
                 className={styles.barValueLabel}
                 data-series="max"
@@ -211,11 +183,7 @@ export function SpacingBarChart({ points }: { points: ChartPoint[] }) {
       </div>
 
       {/* Mobile row — same approach as desktop, mirrored. */}
-      <div
-        className={styles.barChartIcon}
-        data-side="mobile"
-        aria-label="Mobile"
-      >
+      <div className={styles.barChartIcon} data-side="mobile" aria-label="Mobile">
         <SmartphoneSolidIcon size={14} aria-hidden="true" />
       </div>
       <div
@@ -223,16 +191,10 @@ export function SpacingBarChart({ points }: { points: ChartPoint[] }) {
         data-side="mobile"
         style={{ height: `${mobileRowHeight}px` } as CSSProperties}
       >
-        <PillBarRow
-          heights={mobileHeights}
-          seriesClassName={styles.barChartBarMin}
-        />
+        <PillBarRow heights={mobileHeights} seriesClassName={styles.barChartBarMin} />
         <div className={styles.barChartLabelOverlay} aria-hidden="true">
           {points.map((p, idx) => (
-            <span
-              key={`mobile-label-${p.stepLabel}-${idx}`}
-              className={styles.barChartLabelCell}
-            >
+            <span key={`mobile-label-${p.stepLabel}-${idx}`} className={styles.barChartLabelCell}>
               <span
                 className={styles.barValueLabel}
                 data-series="min"
@@ -258,84 +220,64 @@ export function SpacingBarChart({ points }: { points: ChartPoint[] }) {
 }
 
 export function SpacingTab() {
-  const onToggleDisabled = useEditorStore(
-    (s) => s.toggleFrameworkSpacingDisabled,
-  );
-  const onCreateGroup = useEditorStore((s) => s.createFrameworkSpacingGroup);
-  const onUpdateGroup = useEditorStore((s) => s.updateFrameworkSpacingGroup);
-  const onDuplicateGroup = useEditorStore(
-    (s) => s.duplicateFrameworkSpacingGroup,
-  );
-  const onResetGroup = useEditorStore((s) => s.resetFrameworkSpacingGroup);
-  const onDeleteGroup = useEditorStore((s) => s.deleteFrameworkSpacingGroup);
-  const onUpsertManualSize = useEditorStore(
-    (s) => s.upsertFrameworkSpacingManualSize,
-  );
-  const onSetClassGenerators = useEditorStore(
-    (s) => s.setFrameworkSpacingClassGenerators,
-  );
-  const confirmFrameworkChange = useFrameworkChangeConfirm();
+  const onToggleDisabled = useEditorStore((s) => s.toggleFrameworkSpacingDisabled)
+  const onCreateGroup = useEditorStore((s) => s.createFrameworkSpacingGroup)
+  const onUpdateGroup = useEditorStore((s) => s.updateFrameworkSpacingGroup)
+  const onDuplicateGroup = useEditorStore((s) => s.duplicateFrameworkSpacingGroup)
+  const onResetGroup = useEditorStore((s) => s.resetFrameworkSpacingGroup)
+  const onDeleteGroup = useEditorStore((s) => s.deleteFrameworkSpacingGroup)
+  const onUpsertManualSize = useEditorStore((s) => s.upsertFrameworkSpacingManualSize)
+  const onSetClassGenerators = useEditorStore((s) => s.setFrameworkSpacingClassGenerators)
+  const confirmFrameworkChange = useFrameworkChangeConfirm()
 
   const wrappedToggleDisabled = () =>
     confirmFrameworkChange({
-      actionLabel: "Disable spacing framework",
+      actionLabel: 'Disable spacing framework',
       applyChange: (draft) => {
-        const sg = draft.settings.framework?.spacing;
-        if (sg) sg.isDisabled = !sg.isDisabled;
+        const sg = draft.settings.framework?.spacing
+        if (sg) sg.isDisabled = !sg.isDisabled
       },
       commit: onToggleDisabled,
-    });
+    })
 
   const wrappedDeleteGroup = (groupId: string) =>
     confirmFrameworkChange({
-      actionLabel: "Delete spacing scale",
+      actionLabel: 'Delete spacing scale',
       applyChange: (draft) => {
-        const sg = draft.settings.framework?.spacing;
-        if (!sg) return;
-        sg.groups = (sg.groups ?? []).filter((g) => g.id !== groupId);
+        const sg = draft.settings.framework?.spacing
+        if (!sg) return
+        sg.groups = (sg.groups ?? []).filter((g) => g.id !== groupId)
       },
       commit: () => onDeleteGroup(groupId),
-    });
+    })
 
-  const wrappedUpdateGroup = (
-    groupId: string,
-    patch: Parameters<typeof onUpdateGroup>[1],
-  ) =>
+  const wrappedUpdateGroup = (groupId: string, patch: Parameters<typeof onUpdateGroup>[1]) =>
     confirmFrameworkChange({
-      actionLabel: "Update spacing scale",
-      applyChange: (draft) =>
-        applySpacingGroupPatchPreview(draft, groupId, patch),
+      actionLabel: 'Update spacing scale',
+      applyChange: (draft) => applySpacingGroupPatchPreview(draft, groupId, patch),
       commit: () => onUpdateGroup(groupId, patch),
-    });
+    })
 
-  const wrappedSetClassGenerators = (
-    next: FrameworkSpacingClassGenerator[],
-  ) =>
+  const wrappedSetClassGenerators = (next: FrameworkSpacingClassGenerator[]) =>
     confirmFrameworkChange({
-      actionLabel: "Update spacing class generators",
+      actionLabel: 'Update spacing class generators',
       applyChange: (draft) => {
-        const sg = draft.settings.framework?.spacing;
-        if (sg) sg.classes = next;
+        const sg = draft.settings.framework?.spacing
+        if (sg) sg.classes = next
       },
       commit: () => onSetClassGenerators(next),
-    });
+    })
 
-  const adapter: ScaleAdapter<
-    FrameworkSpacingGroup,
-    FrameworkSpacingClassGenerator
-  > = {
-    title: "Spacing",
-    panelId: "spacing",
-    selectGroups: (state) =>
-      state.site?.settings.framework?.spacing?.groups ?? EMPTY_GROUPS,
-    selectClasses: (state) =>
-      state.site?.settings.framework?.spacing?.classes ?? EMPTY_CLASSES,
-    selectIsDisabled: (state) =>
-      Boolean(state.site?.settings.framework?.spacing?.isDisabled),
+  const adapter: ScaleAdapter<FrameworkSpacingGroup, FrameworkSpacingClassGenerator> = {
+    title: 'Spacing',
+    panelId: 'spacing',
+    selectGroups: (state) => state.site?.settings.framework?.spacing?.groups ?? EMPTY_GROUPS,
+    selectClasses: (state) => state.site?.settings.framework?.spacing?.classes ?? EMPTY_CLASSES,
+    selectIsDisabled: (state) => Boolean(state.site?.settings.framework?.spacing?.isDisabled),
     ratioOptions: SPACING_RATIO_OPTIONS,
     classGeneratorProperties: SPACING_CSS_PROPERTIES,
     scalesSectionIcon: RulerDimensionSolidIcon,
-    baseSizeLabel: "Size",
+    baseSizeLabel: 'Size',
     readBaseSize: (group, side) => Number(group[side].size),
     patchBaseSize: (side, value) => ({
       [side]: { size: value },
@@ -359,7 +301,7 @@ export function SpacingTab() {
     onDeleteGroup: wrappedDeleteGroup,
     onUpsertManualSize,
     onSetClassGenerators: wrappedSetClassGenerators,
-  };
+  }
 
-  return <FrameworkScalePanel adapter={adapter} />;
+  return <FrameworkScalePanel adapter={adapter} />
 }

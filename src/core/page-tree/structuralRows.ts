@@ -53,7 +53,11 @@ export function structuralRowsForSection(
   }
 
   for (const folderPath of folders) {
-    rows.push({ kind: 'folder', id: folderPath, ...optionalParentPath(parentPathForPath(folderPath)) })
+    rows.push({
+      kind: 'folder',
+      id: folderPath,
+      ...optionalParentPath(parentPathForPath(folderPath)),
+    })
   }
 
   const orderByKey = new Map(
@@ -67,7 +71,11 @@ export function structuralRowsForSection(
 }
 
 /** Identity of a row within its section: kind + parent + id. */
-export function structuralRowKey(row: { kind: 'folder' | 'item'; id: string; parentPath?: string }): string {
+export function structuralRowKey(row: {
+  kind: 'folder' | 'item'
+  id: string
+  parentPath?: string
+}): string {
   return `${row.kind}:${row.parentPath ?? ''}:${row.id}`
 }
 
@@ -77,8 +85,13 @@ export function sameStructuralParent(left: string | undefined, right: string | u
 }
 
 /** Persisted order first, natural enumeration second, id as final tie-break. */
-export function compareStructuralRows(left: StructuralExplorerRow, right: StructuralExplorerRow): number {
-  return left.order - right.order
-    || left.naturalOrder - right.naturalOrder
-    || left.id.localeCompare(right.id)
+export function compareStructuralRows(
+  left: StructuralExplorerRow,
+  right: StructuralExplorerRow,
+): number {
+  return (
+    left.order - right.order ||
+    left.naturalOrder - right.naturalOrder ||
+    left.id.localeCompare(right.id)
+  )
 }

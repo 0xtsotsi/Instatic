@@ -14,8 +14,18 @@ const inter: FontEntry = {
   variants: ['400', '700italic'],
   subsets: ['latin'],
   files: [
-    { variant: '400', subset: 'latin', path: '/uploads/fonts/inter/400-latin.woff2', format: 'woff2' },
-    { variant: '700italic', subset: 'latin', path: '/uploads/fonts/inter/700italic-latin.woff2', format: 'woff2' },
+    {
+      variant: '400',
+      subset: 'latin',
+      path: '/uploads/fonts/inter/400-latin.woff2',
+      format: 'woff2',
+    },
+    {
+      variant: '700italic',
+      subset: 'latin',
+      path: '/uploads/fonts/inter/700italic-latin.woff2',
+      format: 'woff2',
+    },
   ],
   category: 'Sans Serif',
   createdAt: 0,
@@ -32,9 +42,19 @@ const malicious: FontEntry = {
   variants: ['400'],
   subsets: ['latin'],
   files: [
-    { variant: '400', subset: 'latin', path: '/uploads/fonts/bad/400-latin.woff2', format: 'woff2' },
+    {
+      variant: '400',
+      subset: 'latin',
+      path: '/uploads/fonts/bad/400-latin.woff2',
+      format: 'woff2',
+    },
     // Path outside /uploads/fonts/ — must NOT be emitted.
-    { variant: '400', subset: 'latin', path: 'https://attacker.example/evil.woff2', format: 'woff2' as const },
+    {
+      variant: '400',
+      subset: 'latin',
+      path: 'https://attacker.example/evil.woff2',
+      format: 'woff2' as const,
+    },
   ],
   category: 'Sans Serif',
   createdAt: 0,
@@ -164,7 +184,9 @@ describe('generateFontTokenVariablesCss', () => {
         },
       ],
     }
-    expect(generateFontTokenVariablesCss(settings)).toContain('--font-system: system-ui, sans-serif;')
+    expect(generateFontTokenVariablesCss(settings)).toContain(
+      '--font-system: system-ui, sans-serif;',
+    )
   })
 
   it('does not emit installed-family variables', () => {

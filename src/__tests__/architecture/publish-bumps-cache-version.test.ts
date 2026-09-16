@@ -41,8 +41,7 @@ describe('publish-bumps-cache-version', () => {
     it(`${file} bumps the publish version`, () => {
       const src = read(file)
       const bumps =
-        src.includes('bumpPublishVersion()') ||
-        src.includes('bumpPublishVersionSerialized()')
+        src.includes('bumpPublishVersion()') || src.includes('bumpPublishVersionSerialized()')
       expect(bumps).toBe(true)
     })
 
@@ -50,9 +49,7 @@ describe('publish-bumps-cache-version', () => {
       const src = read(file)
       const expectedPath = EXPECTED_IMPORT_PATHS[file]
       // The import must name publishState as the source and include bumpPublishVersion.
-      const hasImport =
-        src.includes(`from ${expectedPath}`) &&
-        src.includes('bumpPublishVersion')
+      const hasImport = src.includes(`from ${expectedPath}`) && src.includes('bumpPublishVersion')
       expect(hasImport).toBe(true)
     })
   }

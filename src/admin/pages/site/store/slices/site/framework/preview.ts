@@ -15,9 +15,7 @@ import type { SiteSlice, SiteSliceHelpers } from '@site/store/slices/site/types'
 
 type FrameworkPreviewActions = Pick<SiteSlice, 'previewFrameworkChange'>
 
-export function createFrameworkPreviewActions({
-  get,
-}: SiteSliceHelpers): FrameworkPreviewActions {
+export function createFrameworkPreviewActions({ get }: SiteSliceHelpers): FrameworkPreviewActions {
   return {
     previewFrameworkChange: (applyChange) => {
       const { site } = get()

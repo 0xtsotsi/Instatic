@@ -184,13 +184,15 @@ function makeFakeDb(
       if (counters) counters.snapshotLoads++
       return {
         rows: snapshot
-          ? [{
-              row_id: snapshot.pageRowId,
-              site_json: snapshot.site,
-              runtime_assets_json: null,
-              importmap_body: null,
-              importmap_sha256: null,
-            } as unknown as Row]
+          ? [
+              {
+                row_id: snapshot.pageRowId,
+                site_json: snapshot.site,
+                runtime_assets_json: null,
+                importmap_body: null,
+                importmap_sha256: null,
+              } as unknown as Row,
+            ]
           : [],
         rowCount: snapshot ? 1 : 0,
       }
@@ -210,10 +212,14 @@ beforeEach(() => {
   liveCalls = 0
   visitorCalls = 0
   registry.registerOrReplace(
-    makeModule('test.body', { render: (_p, children) => ({ html: `<div>${children.join('')}</div>` }) }),
+    makeModule('test.body', {
+      render: (_p, children) => ({ html: `<div>${children.join('')}</div>` }),
+    }),
   )
   registry.registerOrReplace(
-    makeModule('test.text', { render: (p) => ({ html: `<span>${String(p['text'] ?? '')}</span>` }) }),
+    makeModule('test.text', {
+      render: (p) => ({ html: `<span>${String(p['text'] ?? '')}</span>` }),
+    }),
   )
   // base.loop only needs a registry entry so renderNode finds a def; the actual
   // iteration is handled by the specialised renderLoop dispatcher.
@@ -305,7 +311,9 @@ describe('hole endpoint — shared (requestDependent) hole', () => {
     const v = getPublishVersion()
 
     const hit = async (q: string) => {
-      const url = new URL(`http://localhost/_instatic/hole/hole-loop?v=${v}&u=${encodeURIComponent(`/search?q=${q}`)}`)
+      const url = new URL(
+        `http://localhost/_instatic/hole/hole-loop?v=${v}&u=${encodeURIComponent(`/search?q=${q}`)}`,
+      )
       return (await handleHoleRequest(makeReq(), url, { db })).text()
     }
 
@@ -329,7 +337,9 @@ describe('hole endpoint — per-visitor hole', () => {
     const snap = makeSnapshotWithLoop('hole-loop', VISITOR_SOURCE_ID)
     const db = makeFakeDb(snap)
     const v = getPublishVersion()
-    const url = new URL(`http://localhost/_instatic/hole/hole-loop?v=${v}&u=${encodeURIComponent('/')}`)
+    const url = new URL(
+      `http://localhost/_instatic/hole/hole-loop?v=${v}&u=${encodeURIComponent('/')}`,
+    )
 
     const res1 = await handleHoleRequest(makeReq('sid=alice'), url, { db })
     expect(res1.headers.get('cache-control')).toBe('no-store')
@@ -359,7 +369,9 @@ describe('hole endpoint — versioned snapshot cache', () => {
     const v = getPublishVersion()
 
     for (const q of ['a', 'b', 'c']) {
-      const url = new URL(`http://localhost/_instatic/hole/hole-loop?v=${v}&u=${encodeURIComponent(`/s?q=${q}`)}`)
+      const url = new URL(
+        `http://localhost/_instatic/hole/hole-loop?v=${v}&u=${encodeURIComponent(`/s?q=${q}`)}`,
+      )
       await handleHoleRequest(makeReq(), url, { db })
     }
     // Three distinct requests, one snapshot DB read.

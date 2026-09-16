@@ -26,13 +26,17 @@ export function SiteExportModal() {
     if (!siteExport) return undefined
     let cancelled = false
     listCmsDataTables()
-      .then((loaded) => { if (!cancelled) setTables(loaded) })
+      .then((loaded) => {
+        if (!cancelled) setTables(loaded)
+      })
       .catch((err) => {
         if (cancelled) return
         console.error('[SiteExportModal] Failed to load tables:', err)
         setTables([])
       })
-    return () => { cancelled = true }
+    return () => {
+      cancelled = true
+    }
   }, [siteExport])
 
   if (!siteExport || tables === null) return null

@@ -88,22 +88,21 @@ function optionFromChild(child: ReactNode): NormalizedSelectOption[] {
 
   const option = child as ReactElement<OptionHTMLAttributes<HTMLOptionElement>>
   const textValue = getNodeText(option.props.children)
-  return [{
-    value: stringifySelectValue(option.props.value ?? textValue),
-    label: option.props.children,
-    textValue,
-    disabled: option.props.disabled,
-  }]
+  return [
+    {
+      value: stringifySelectValue(option.props.value ?? textValue),
+      label: option.props.children,
+      textValue,
+      disabled: option.props.disabled,
+    },
+  ]
 }
 
 export function getOptionId(menuId: string, index: number): string {
   return `${menuId}-option-${index}`
 }
 
-export function isEnabledOptionIndex(
-  options: NormalizedSelectOption[],
-  index: number,
-): boolean {
+export function isEnabledOptionIndex(options: NormalizedSelectOption[], index: number): boolean {
   return index >= 0 && index < options.length && isSelectableOption(options[index])
 }
 

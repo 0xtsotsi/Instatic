@@ -46,7 +46,7 @@ const STRATEGY_OPTIONS: ReadonlyArray<{
   {
     value: 'merge-add',
     title: 'Merge: add only',
-    description: "Insert bundle rows that do not exist locally. Existing rows stay untouched.",
+    description: 'Insert bundle rows that do not exist locally. Existing rows stay untouched.',
   },
   {
     value: 'merge-overwrite',
@@ -117,16 +117,15 @@ export function CmsBundleAnalyzeStep({
   function toggleTableRow(tableId: string, rowId: string) {
     const rows = tableRows(tableId)
     const current = tableSelection(tableId)
-    const selected = new Set(
-      current
-        ? current.rowIds ?? rows.map((row) => row.id)
-        : [],
-    )
+    const selected = new Set(current ? (current.rowIds ?? rows.map((row) => row.id)) : [])
     if (selected.has(rowId)) selected.delete(rowId)
     else selected.add(rowId)
     const nextTables = state.selection.tables.filter((entry) => entry.tableId !== tableId)
     if (selected.size > 0) {
-      nextTables.push({ tableId, rowIds: rows.every((row) => selected.has(row.id)) ? undefined : [...selected] })
+      nextTables.push({
+        tableId,
+        rowIds: rows.every((row) => selected.has(row.id)) ? undefined : [...selected],
+      })
     }
     patch({ tables: nextTables })
   }
@@ -135,7 +134,7 @@ export function CmsBundleAnalyzeStep({
     const media = state.bundle.media ?? []
     const selected = new Set(
       state.selection.includeMedia
-        ? state.selection.mediaIds ?? media.map((asset) => asset.id)
+        ? (state.selection.mediaIds ?? media.map((asset) => asset.id))
         : [],
     )
     if (selected.has(assetId)) selected.delete(assetId)
@@ -163,7 +162,15 @@ export function CmsBundleAnalyzeStep({
         return renderCmsSiteShell(state, patch)
       case 'table':
         return activeCategory.tableId
-          ? renderCmsTable(state, activeCategory.tableId, tableRows, tableSelection, selectTableAll, selectTableNone, toggleTableRow)
+          ? renderCmsTable(
+              state,
+              activeCategory.tableId,
+              tableRows,
+              tableSelection,
+              selectTableAll,
+              selectTableNone,
+              toggleTableRow,
+            )
           : null
       case 'media':
         return renderCmsMedia(state, selectAllMedia, selectNoMedia, toggleMedia)
@@ -171,7 +178,7 @@ export function CmsBundleAnalyzeStep({
         return renderCmsToggleCategory({
           title: 'Media folders',
           sub: 'Restore the media library folder tree',
-          count: state.selection.includeMediaFolders ? state.bundle.mediaFolders?.length ?? 0 : 0,
+          count: state.selection.includeMediaFolders ? (state.bundle.mediaFolders?.length ?? 0) : 0,
           total: state.bundle.mediaFolders?.length ?? 0,
           checked: state.selection.includeMediaFolders,
           onCheckedChange: (checked) => patch({ includeMediaFolders: checked }),
@@ -180,7 +187,7 @@ export function CmsBundleAnalyzeStep({
         return renderCmsToggleCategory({
           title: 'Redirects',
           sub: 'Restore published URL redirects that target selected rows',
-          count: state.selection.includeRedirects ? state.bundle.redirects?.length ?? 0 : 0,
+          count: state.selection.includeRedirects ? (state.bundle.redirects?.length ?? 0) : 0,
           total: state.bundle.redirects?.length ?? 0,
           checked: state.selection.includeRedirects,
           onCheckedChange: (checked) => patch({ includeRedirects: checked }),
@@ -211,29 +218,40 @@ export function CmsBundleAnalyzeStep({
                 data-testid={`site-import-review-category-${category.testId}`}
                 onClick={() => setActive(category.id)}
               >
-                <span className={styles.navDot} style={{ '--tint': category.tint } as CSSProperties} />
+                <span
+                  className={styles.navDot}
+                  style={{ '--tint': category.tint } as CSSProperties}
+                />
                 <span className={styles.navLabel}>{category.label}</span>
                 <span className={styles.navCount}>{category.count}</span>
-                <span className={styles.navState} data-on={category.included ? 'true' : undefined} />
+                <span
+                  className={styles.navState}
+                  data-on={category.included ? 'true' : undefined}
+                />
               </button>
             ))}
           </div>
           <div className={styles.navBottom}>
-            <button type="button" className={styles.addFiles} onClick={onChooseDifferentFile} disabled={state.importing}>
+            <button
+              type="button"
+              className={styles.addFiles}
+              onClick={onChooseDifferentFile}
+              disabled={state.importing}
+            >
               <span className={styles.addFilesIcon}>
                 <DragAndDropSolidIcon size={15} />
               </span>
               <span className={styles.addFilesText}>
                 <span className={styles.addFilesTitle}>Choose different file</span>
-                <span className={styles.addFilesSub}>Drop another bundle, HTML, media, or browse</span>
+                <span className={styles.addFilesSub}>
+                  Drop another bundle, HTML, media, or browse
+                </span>
               </span>
             </button>
           </div>
         </aside>
 
-        <div className={styles.detail}>
-          {renderActiveCategory()}
-        </div>
+        <div className={styles.detail}>{renderActiveCategory()}</div>
       </div>
     </div>
   )
@@ -271,7 +289,8 @@ function buildCmsReviewCategories(state: CmsBundleState): CmsReviewCategory[] {
       testId: table.id,
       kind: 'table',
       label: table.name,
-      count: preview?.inBundle ?? state.bundle.rows.filter((row) => row.tableId === table.id).length,
+      count:
+        preview?.inBundle ?? state.bundle.rows.filter((row) => row.tableId === table.id).length,
       included: tableSelection !== undefined,
       tableId: table.id,
     })
@@ -279,7 +298,7 @@ function buildCmsReviewCategories(state: CmsBundleState): CmsReviewCategory[] {
 
   if ((state.bundle.media?.length ?? 0) > 0) {
     const selectedMedia = state.selection.includeMedia
-      ? state.selection.mediaIds?.length ?? state.bundle.media?.length ?? 0
+      ? (state.selection.mediaIds?.length ?? state.bundle.media?.length ?? 0)
       : 0
     baseCategories.push({
       id: 'media',
@@ -313,7 +332,10 @@ function buildCmsReviewCategories(state: CmsBundleState): CmsReviewCategory[] {
     })
   }
 
-  const accents = assignRailAccents(baseCategories, (category) => `cms-import:${category.id}:${category.label}`)
+  const accents = assignRailAccents(
+    baseCategories,
+    (category) => `cms-import:${category.id}:${category.label}`,
+  )
   return baseCategories.map((category, index) => {
     const accent = accents[index] ?? 'mint'
     return {
@@ -365,9 +387,7 @@ function renderCmsMode(
           </p>
         )}
       </div>
-      {!hasContent && (
-        <p className={styles.empty}>No content in this bundle.</p>
-      )}
+      {!hasContent && <p className={styles.empty}>No content in this bundle.</p>}
       <fieldset className={styles.strategyFieldset}>
         {STRATEGY_OPTIONS.map((option) => (
           <label
@@ -385,7 +405,10 @@ function renderCmsMode(
             />
             <span className={styles.strategyContent}>
               <span className={styles.strategyTitle}>{option.title}</span>
-              <span className={styles.strategyDescription} data-tone={option.value === 'replace' ? 'danger' : undefined}>
+              <span
+                className={styles.strategyDescription}
+                data-tone={option.value === 'replace' ? 'danger' : undefined}
+              >
                 {option.description}
               </span>
             </span>
@@ -423,15 +446,15 @@ function renderCmsTable(
   if (!table) return null
   const rows = tableRows(tableId)
   const selection = tableSelection(tableId)
-  const selectedRows = selection
-    ? selection.rowIds?.length ?? rows.length
-    : 0
+  const selectedRows = selection ? (selection.rowIds?.length ?? rows.length) : 0
 
   return (
     <>
       <DetailHead
         title={table.name}
-        sub={table.kind === 'page' ? 'Pages from the exported site' : 'Rows from this exported table'}
+        sub={
+          table.kind === 'page' ? 'Pages from the exported site' : 'Rows from this exported table'
+        }
         count={selectedRows}
         total={rows.length}
         onAll={() => selectTableAll(tableId)}
@@ -442,9 +465,7 @@ function renderCmsTable(
       ) : (
         <div className={styles.rows}>
           {rows.map((row) => {
-            const on = selection
-              ? selection.rowIds?.includes(row.id) ?? true
-              : false
+            const on = selection ? (selection.rowIds?.includes(row.id) ?? true) : false
             return (
               <div key={row.id} className={styles.listRow} data-off={on ? undefined : 'true'}>
                 <Checkbox
@@ -499,7 +520,9 @@ function renderCmsMedia(
                 {renderCmsMediaThumb(asset)}
                 <div className={styles.info}>
                   <span className={styles.title}>{asset.filename}</span>
-                  <span className={styles.meta}>{asset.mimeType} · {formatBytes(asset.sizeBytes)}</span>
+                  <span className={styles.meta}>
+                    {asset.mimeType} · {formatBytes(asset.sizeBytes)}
+                  </span>
                 </div>
                 <Switch
                   checked={on}
@@ -567,9 +590,10 @@ function renderCmsMediaThumb(asset: NonNullable<CmsBundleState['bundle']['media'
     : asset.mimeType.startsWith('font/')
       ? HeadingIcon
       : FileTextSolidIcon
-  const style = asset.mimeType.startsWith('image/') && asset.dominantColor
-    ? { '--cms-thumb-bg': asset.dominantColor } as CSSProperties
-    : undefined
+  const style =
+    asset.mimeType.startsWith('image/') && asset.dominantColor
+      ? ({ '--cms-thumb-bg': asset.dominantColor } as CSSProperties)
+      : undefined
 
   return (
     <span className={styles.cmsFileThumb} style={style} aria-hidden="true">

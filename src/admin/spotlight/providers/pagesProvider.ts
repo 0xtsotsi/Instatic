@@ -32,8 +32,7 @@ export const pagesProvider: SpotlightProvider = {
       const pages = q
         ? site.pages.filter(
             (p) =>
-              p.title.toLowerCase().includes(q) ||
-              (p.slug && p.slug.toLowerCase().includes(q)),
+              p.title.toLowerCase().includes(q) || (p.slug && p.slug.toLowerCase().includes(q)),
           )
         : site.pages
 

@@ -4,14 +4,14 @@
 
 /* ── Panel shell ─────────────────────────────────────────────────────────── */
 .panel {
-    position: relative;
-    display: flex;
-    flex-direction: column;
-    width: 100%;
-    height: 100%;
-    min-height: 0;
-    overflow: hidden;
-    outline: none;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
+  outline: none;
 }
 
 /* ── Search bar — match the 8px content inset used by every other docked
@@ -25,63 +25,63 @@
  * row owns the outer spacing; the SearchBar fills, the button keeps its
  * intrinsic size. */
 .searchRow {
-    position: relative;
-    z-index: 1;
-    display: flex;
-    align-items: center;
-    gap: var(--space-xs);
-    margin: var(--space-s) var(--space-s) 0;
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+  margin: var(--space-s) var(--space-s) 0;
 }
 
 .searchRow::after {
-    content: "";
-    position: absolute;
-    inset-inline: calc(-1 * var(--space-s));
-    top: 100%;
-    height: var(--space-2xl);
-    pointer-events: none;
-    background: linear-gradient(180deg, var(--bg-body) 0%, transparent);
+  content: '';
+  position: absolute;
+  inset-inline: calc(-1 * var(--space-s));
+  top: 100%;
+  height: var(--space-2xl);
+  pointer-events: none;
+  background: linear-gradient(180deg, var(--bg-body) 0%, transparent);
 }
 
 .searchFill {
-    flex: 1 1 auto;
-    min-width: 0;
-    width: auto;
+  flex: 1 1 auto;
+  min-width: 0;
+  width: auto;
 }
 
 /* ── Tree / scrollable content area ─────────────────────────────────────── */
 .treeArea {
-    flex: 1;
-    min-height: 0;
-    overflow-y: auto;
-    overflow-x: hidden;
-    /* 10px gap below the search bar mirrors the `gap: 10px` on the shared
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  /* 10px gap below the search bar mirrors the `gap: 10px` on the shared
      * Panel content area so the visual rhythm matches sibling panels. */
-    padding-top: var(--space-m);
-    padding-bottom: var(--space-xs);
-    padding-right: var(--space-s);
+  padding-top: var(--space-m);
+  padding-bottom: var(--space-xs);
+  padding-right: var(--space-s);
 }
 
 .dragOverlayRow {
-    width: min(240px, 70vw);
-    background: var(--bg-surface);
-    border-radius: 12px;
-    box-shadow: 0 8px 24px var(--scrim-30);
-    pointer-events: none;
+  width: min(240px, 70vw);
+  background: var(--bg-surface);
+  border-radius: 12px;
+  box-shadow: 0 8px 24px var(--scrim-30);
+  pointer-events: none;
 }
 
 .noMatchMsg {
-    padding: var(--space-2xl);
-    color: var(--text-disabled);
-    font-size: var(--text-s);
+  padding: var(--space-2xl);
+  color: var(--text-disabled);
+  font-size: var(--text-s);
 }
 
 /* Search-result pill layout only; shared visuals live in TagPill. */
 .searchTagPill {
-    flex-shrink: 0;
+  flex-shrink: 0;
 }
 
 .searchClassChip {
-    flex: 0 1 auto;
-    min-width: 0;
+  flex: 0 1 auto;
+  min-width: 0;
 }

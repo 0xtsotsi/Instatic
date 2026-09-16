@@ -92,13 +92,15 @@ describe('CMS dynamic template routes', () => {
         // getLatestPublishedSiteSnapshot — return the snapshot so the template
         // renderer can find the matching template page
         return {
-          rows: [{
-            row_id: snapshot.pageRowId,
-            site_json: snapshot.site,
-            runtime_assets_json: null,
-            importmap_body: null,
-            importmap_sha256: null,
-          }],
+          rows: [
+            {
+              row_id: snapshot.pageRowId,
+              site_json: snapshot.site,
+              runtime_assets_json: null,
+              importmap_body: null,
+              importmap_sha256: null,
+            },
+          ],
           rowCount: 1,
         }
       },
@@ -106,32 +108,36 @@ describe('CMS dynamic template routes', () => {
         if (!sql.startsWith('select data_row_versions.id')) return undefined
         expect(params).toEqual(['/posts', 'dynamic-post'])
         return {
-          rows: [{
-            id: 'version_1',
-            row_id: 'row_1',
-            table_id: 'posts',
-            table_slug: 'posts',
-            table_kind: 'postType',
-            table_route_base: '/posts',
-            version_number: 1,
-            cells_json: {
-              title: 'Dynamic Post',
+          rows: [
+            {
+              id: 'version_1',
+              row_id: 'row_1',
+              table_id: 'posts',
+              table_slug: 'posts',
+              table_kind: 'postType',
+              table_route_base: '/posts',
+              version_number: 1,
+              cells_json: {
+                title: 'Dynamic Post',
+                slug: 'dynamic-post',
+                body: 'Body',
+                featuredMedia: null,
+                seoTitle: '',
+                seoDescription: '',
+              },
               slug: 'dynamic-post',
-              body: 'Body',
-              featuredMedia: null,
-              seoTitle: '',
-              seoDescription: '',
+              published_at: rowDate('2026-05-01T10:00:00Z'),
+              created_at: rowDate('2026-05-01T10:00:00Z'),
             },
-            slug: 'dynamic-post',
-            published_at: rowDate('2026-05-01T10:00:00Z'),
-            created_at: rowDate('2026-05-01T10:00:00Z'),
-          }],
+          ],
           rowCount: 1,
         }
       },
     ])
 
-    const res = await handleServerRequest(new Request('http://localhost/posts/dynamic-post'), { db })
+    const res = await handleServerRequest(new Request('http://localhost/posts/dynamic-post'), {
+      db,
+    })
     const html = await res.text()
 
     expect(res.status).toBe(200)
@@ -146,7 +152,11 @@ describe('CMS dynamic template routes', () => {
     try {
       // Bake a pre-rendered artefact for the template route
       const { slot, slotDir } = await prepareInactiveSlot(uploadsDir)
-      await writeArtefact(slotDir, '/posts/dynamic-post', '<html><body><h1>Baked template post</h1></body></html>')
+      await writeArtefact(
+        slotDir,
+        '/posts/dynamic-post',
+        '<html><body><h1>Baked template post</h1></body></html>',
+      )
       await swapSlot(uploadsDir, slot)
 
       // DB that would error if the snapshot path were consulted
@@ -156,14 +166,15 @@ describe('CMS dynamic template routes', () => {
           throw new Error('Snapshot queried despite disk artefact hit')
         }
         if (s.includes('count(*) as count from site')) return { rows: [{ count: 1 }], rowCount: 1 }
-        if (s.includes('from users') && s.includes('role_id')) return { rows: [{ count: 1 }], rowCount: 1 }
+        if (s.includes('from users') && s.includes('role_id'))
+          return { rows: [{ count: 1 }], rowCount: 1 }
         return { rows: [], rowCount: 0 }
       })
 
-      const res = await handleServerRequest(
-        new Request('http://localhost/posts/dynamic-post'),
-        { db, uploadsDir },
-      )
+      const res = await handleServerRequest(new Request('http://localhost/posts/dynamic-post'), {
+        db,
+        uploadsDir,
+      })
 
       expect(res.status).toBe(200)
       expect(res.headers.get('content-type')).toContain('text/html')
@@ -224,39 +235,43 @@ describe('CMS dynamic template routes', () => {
             return { rows: [], rowCount: 0 }
           }
           return {
-            rows: [{
-              row_id: snapshot.pageRowId,
-              site_json: snapshot.site,
-              runtime_assets_json: null,
-              importmap_body: null,
-              importmap_sha256: null,
-            }],
+            rows: [
+              {
+                row_id: snapshot.pageRowId,
+                site_json: snapshot.site,
+                runtime_assets_json: null,
+                importmap_body: null,
+                importmap_sha256: null,
+              },
+            ],
             rowCount: 1,
           }
         },
         (sql, params) => {
           if (!sql.startsWith('select data_row_versions.id')) return undefined
           return {
-            rows: [{
-              id: 'version_qs',
-              row_id: 'row_qs',
-              table_id: 'posts',
-              table_slug: 'posts',
-              table_kind: 'postType',
-              table_route_base: '/posts',
-              version_number: 1,
-              cells_json: {
-                title: 'QS Post',
+            rows: [
+              {
+                id: 'version_qs',
+                row_id: 'row_qs',
+                table_id: 'posts',
+                table_slug: 'posts',
+                table_kind: 'postType',
+                table_route_base: '/posts',
+                version_number: 1,
+                cells_json: {
+                  title: 'QS Post',
+                  slug: 'dynamic-post',
+                  body: 'Body',
+                  featuredMedia: null,
+                  seoTitle: '',
+                  seoDescription: '',
+                },
                 slug: 'dynamic-post',
-                body: 'Body',
-                featuredMedia: null,
-                seoTitle: '',
-                seoDescription: '',
+                published_at: rowDate('2026-05-01T10:00:00Z'),
+                created_at: rowDate('2026-05-01T10:00:00Z'),
               },
-              slug: 'dynamic-post',
-              published_at: rowDate('2026-05-01T10:00:00Z'),
-              created_at: rowDate('2026-05-01T10:00:00Z'),
-            }],
+            ],
             rowCount: 1,
           }
         },
@@ -297,13 +312,15 @@ describe('CMS dynamic template routes', () => {
         if (!sql.startsWith('select data_row_redirects.id')) return undefined
         expect(params).toEqual(['/posts', 'untitled'])
         return {
-          rows: [{
-            id: 'redirect_1',
-            from_route_base: '/posts',
-            from_slug: 'untitled',
-            target_route_base: '/posts',
-            target_slug: 'post',
-          }],
+          rows: [
+            {
+              id: 'redirect_1',
+              from_route_base: '/posts',
+              from_slug: 'untitled',
+              target_route_base: '/posts',
+              target_slug: 'post',
+            },
+          ],
           rowCount: 1,
         }
       },

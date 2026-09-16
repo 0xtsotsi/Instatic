@@ -58,39 +58,37 @@ export function CanvasTransformLayer({
       // blank at scale/low zoom. See WILL_CHANGE_RELEASE_MS in useCanvas.ts.
       className={styles.transformLayer}
     >
-      {page ? (
-        // Only breakpoints flagged for a preview frame render an iframe on the
-        // canvas (`previewFrame !== false`; undefined = framed for back-compat).
-        // Frame-less breakpoints are still selectable editing contexts in the
-        // toolbar switcher and still publish their @media CSS — they just don't
-        // spawn an editor iframe.
-        //
-        // All frames mount as soon as the page document is in the store: the
-        // tree is already in memory, so there's no async load to stagger. The
-        // skeletons above cover the only genuine wait — the document not being
-        // loaded yet (`page === null`).
-        framedBreakpoints.map((bp) => (
-          <BreakpointFrame
-            key={bp.id}
-            page={page}
-            breakpoint={bp}
-            isActive={activeBreakpointId === bp.id}
-            isDimmed={dimInactiveBreakpoints && activeBreakpointId !== bp.id}
-            activationHintEnabled={activationHintEnabled}
-            onActivate={onBreakpointActivate}
-            templateContext={templateContext}
-            runtimeScripts={runtimeScripts}
-          />
-        ))
-      ) : (
-        fallbackBreakpoints.map((breakpoint) => (
-          <CanvasFrameSkeletonFrame
-            key={breakpoint.id}
-            breakpoint={breakpoint}
-            dimmed={dimInactiveBreakpoints && activeBreakpointId !== breakpoint.id}
-          />
-        ))
-      )}
+      {page
+        ? // Only breakpoints flagged for a preview frame render an iframe on the
+          // canvas (`previewFrame !== false`; undefined = framed for back-compat).
+          // Frame-less breakpoints are still selectable editing contexts in the
+          // toolbar switcher and still publish their @media CSS — they just don't
+          // spawn an editor iframe.
+          //
+          // All frames mount as soon as the page document is in the store: the
+          // tree is already in memory, so there's no async load to stagger. The
+          // skeletons above cover the only genuine wait — the document not being
+          // loaded yet (`page === null`).
+          framedBreakpoints.map((bp) => (
+            <BreakpointFrame
+              key={bp.id}
+              page={page}
+              breakpoint={bp}
+              isActive={activeBreakpointId === bp.id}
+              isDimmed={dimInactiveBreakpoints && activeBreakpointId !== bp.id}
+              activationHintEnabled={activationHintEnabled}
+              onActivate={onBreakpointActivate}
+              templateContext={templateContext}
+              runtimeScripts={runtimeScripts}
+            />
+          ))
+        : fallbackBreakpoints.map((breakpoint) => (
+            <CanvasFrameSkeletonFrame
+              key={breakpoint.id}
+              breakpoint={breakpoint}
+              dimmed={dimInactiveBreakpoints && activeBreakpointId !== breakpoint.id}
+            />
+          ))}
     </div>
   )
 }

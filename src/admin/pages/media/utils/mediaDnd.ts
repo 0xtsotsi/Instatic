@@ -34,7 +34,8 @@ export function canMoveFolderTo(
   if (!folder) return false
   if (folderId === targetFolderId) return false
   if (folder.parentId === targetFolderId) return false
-  if (targetFolderId && isFolderDescendant(workspace.folders, folderId, targetFolderId)) return false
+  if (targetFolderId && isFolderDescendant(workspace.folders, folderId, targetFolderId))
+    return false
   return true
 }
 

@@ -27,10 +27,12 @@ function humanizeActionId(action: string): string {
 }
 
 function dataTableLabel(event: CmsAuditEvent): string {
-  return metadataString(event.metadata, 'name')
-    ?? metadataString(event.metadata, 'slug')
-    ?? event.targetId
-    ?? 'unknown table'
+  return (
+    metadataString(event.metadata, 'name') ??
+    metadataString(event.metadata, 'slug') ??
+    event.targetId ??
+    'unknown table'
+  )
 }
 
 function dataRowLabel(event: CmsAuditEvent): string {
@@ -52,7 +54,7 @@ function auditUserLabel(
 ): string | null {
   if (!userId) return fallback
   const user = usersById.get(userId)
-  return user ? displayUserName(user) : fallback ?? userId
+  return user ? displayUserName(user) : (fallback ?? userId)
 }
 
 export function auditActor(event: CmsAuditEvent, usersById: Map<string, CmsCurrentUser>): string {
@@ -78,7 +80,9 @@ function auditTargetRole(event: CmsAuditEvent, rolesById: Map<string, CmsRole>):
   return roleName(
     event.targetId,
     rolesById,
-    event.targetLabel ?? metadataString(event.metadata, 'name') ?? metadataString(event.metadata, 'slug'),
+    event.targetLabel ??
+      metadataString(event.metadata, 'name') ??
+      metadataString(event.metadata, 'slug'),
   )
 }
 
@@ -98,7 +102,7 @@ export function auditTitle(
 
   switch (event.action) {
     case 'login.success':
-      return `${event.actorUserId ? auditUserLabel(event.actorUserId, usersById, event.actorLabel) : email ?? 'User'} logged in`
+      return `${event.actorUserId ? auditUserLabel(event.actorUserId, usersById, event.actorLabel) : (email ?? 'User')} logged in`
     case 'login.failure':
       return `Failed login for ${email ?? targetUser}`
     case 'login.locked':

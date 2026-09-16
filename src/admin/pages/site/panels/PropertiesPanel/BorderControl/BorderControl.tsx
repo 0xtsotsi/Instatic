@@ -283,7 +283,9 @@ export function BorderControl({
                   { label: '—', value: '' },
                   ...styleOptions.map((o) => ({ label: o, value: o })),
                 ]}
-                onOptionPreview={previewSide ? (v) => previewSide('Style', v || undefined) : undefined}
+                onOptionPreview={
+                  previewSide ? (v) => previewSide('Style', v || undefined) : undefined
+                }
                 onOptionPreviewClear={previewSide ? onClearPreview : undefined}
               />
             </FieldRow>

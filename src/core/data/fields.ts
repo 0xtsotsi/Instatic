@@ -61,10 +61,7 @@ export function isPostTypeBuiltInFieldId(fieldId: string): boolean {
 // omitted from the output — a dangling reference is not useful in a picker.
 // ---------------------------------------------------------------------------
 
-function buildMetaFields(
-  fields: DataField[],
-  tableSlugById: Map<string, string>,
-): DataMetaField[] {
+function buildMetaFields(fields: DataField[], tableSlugById: Map<string, string>): DataMetaField[] {
   const result: DataMetaField[] = []
   for (const field of fields) {
     if (field.type === 'media') {

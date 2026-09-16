@@ -94,7 +94,8 @@ export function SegmentedControl<T extends string>({
       {options.map((option) => {
         const isActive = value === option.value
         const iconOnly = option.icon != null && option.label == null
-        const label = option.ariaLabel ?? (typeof option.label === 'string' ? option.label : option.value)
+        const label =
+          option.ariaLabel ?? (typeof option.label === 'string' ? option.label : option.value)
         return (
           <Button
             key={option.value}

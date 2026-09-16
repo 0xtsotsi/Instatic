@@ -143,7 +143,9 @@ export function useDataWorkspace({ shouldLoadRows }: DataWorkspaceOptions): Data
         if (!cancelled) setLoadingTables(false)
       }
     })()
-    return () => { cancelled = true }
+    return () => {
+      cancelled = true
+    }
   }, [initialTableSlug])
 
   // ---------------------------------------------------------------------------
@@ -169,7 +171,9 @@ export function useDataWorkspace({ shouldLoadRows }: DataWorkspaceOptions): Data
         if (!cancelled) setLoadingRows(false)
       }
     })()
-    return () => { cancelled = true }
+    return () => {
+      cancelled = true
+    }
   }, [selectedTableId, shouldLoadRows])
 
   // Deep-link: once the (initially selected) table's rows have loaded, select
@@ -255,17 +259,14 @@ export function useDataWorkspace({ shouldLoadRows }: DataWorkspaceOptions): Data
     return table
   }
 
-  const updateTable = async (
-    tableId: string,
-    input: UpdateDataTableInput,
-  ): Promise<DataTable> => {
+  const updateTable = async (tableId: string, input: UpdateDataTableInput): Promise<DataTable> => {
     setTablesError(null)
     const table = await updateCmsDataTable(tableId, input)
     // Preserve the existing rowCount — the update endpoint returns a plain
     // DataTable (no rowCount), so we carry it forward from the current entry.
-    setTables((current) => current.map((t) =>
-      t.id === tableId ? { ...table, rowCount: t.rowCount } : t,
-    ))
+    setTables((current) =>
+      current.map((t) => (t.id === tableId ? { ...table, rowCount: t.rowCount } : t)),
+    )
     return table
   }
 
@@ -357,10 +358,7 @@ export function useDataWorkspace({ shouldLoadRows }: DataWorkspaceOptions): Data
     return row
   }
 
-  const setRowStatus = async (
-    rowId: string,
-    status: 'draft' | 'unpublished',
-  ): Promise<DataRow> => {
+  const setRowStatus = async (rowId: string, status: 'draft' | 'unpublished'): Promise<DataRow> => {
     setRowsError(null)
     const row = await updateCmsDataRowStatus(rowId, status)
     setRows((current) => updateRowList(current, row))

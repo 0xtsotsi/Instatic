@@ -2,8 +2,7 @@ import { type ButtonHTMLAttributes, type Ref } from 'react'
 import { cn } from '@ui/cn'
 import styles from './Switch.module.css'
 
-interface SwitchProps
-  extends Omit<ButtonHTMLAttributes<HTMLButtonElement>, 'role' | 'onChange'> {
+interface SwitchProps extends Omit<ButtonHTMLAttributes<HTMLButtonElement>, 'role' | 'onChange'> {
   checked: boolean
   onCheckedChange?: (checked: boolean) => void
   hitArea?: boolean

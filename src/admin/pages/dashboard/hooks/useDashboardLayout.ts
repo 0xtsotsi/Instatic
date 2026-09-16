@@ -177,15 +177,15 @@ const SAVE_DEBOUNCE_MS = 600
  */
 const DEFAULT_LAYOUT: DashboardLayout = {
   items: [
-    { id: 'storage',   col: 1,  row: 1,  size: 12, rows: 4 },
-    { id: 'pages',     col: 1,  row: 5,  size: 3,  rows: 3 },
-    { id: 'posts',     col: 4,  row: 5,  size: 3,  rows: 3 },
-    { id: 'media',     col: 7,  row: 5,  size: 3,  rows: 3 },
-    { id: 'status',    col: 10, row: 5,  size: 3,  rows: 3 },
-    { id: 'activity',  col: 1,  row: 8,  size: 6,  rows: 5 },
-    { id: 'publish',   col: 7,  row: 8,  size: 6,  rows: 5 },
-    { id: 'plugins',   col: 1,  row: 13, size: 6,  rows: 5 },
-    { id: 'domain',    col: 7,  row: 13, size: 6,  rows: 3 },
+    { id: 'storage', col: 1, row: 1, size: 12, rows: 4 },
+    { id: 'pages', col: 1, row: 5, size: 3, rows: 3 },
+    { id: 'posts', col: 4, row: 5, size: 3, rows: 3 },
+    { id: 'media', col: 7, row: 5, size: 3, rows: 3 },
+    { id: 'status', col: 10, row: 5, size: 3, rows: 3 },
+    { id: 'activity', col: 1, row: 8, size: 6, rows: 5 },
+    { id: 'publish', col: 7, row: 8, size: 6, rows: 5 },
+    { id: 'plugins', col: 1, row: 13, size: 6, rows: 5 },
+    { id: 'domain', col: 7, row: 13, size: 6, rows: 3 },
   ],
   onboardingDismissed: false,
   libraryHeight: LIBRARY_DEFAULT_HEIGHT,
@@ -252,7 +252,7 @@ function resolveCollisions(items: readonly DashboardItem[], pinnedId: string): D
   const others = items
     .filter((i) => i.id !== pinnedId)
     .map((i) => ({ ...i }))
-    .sort((a, b) => (a.row - b.row) || (a.col - b.col))
+    .sort((a, b) => a.row - b.row || a.col - b.col)
 
   const settled: DashboardItem[] = [{ ...pinned }]
 
@@ -284,9 +284,10 @@ function normalizeItem(
     size: item.size,
     rows: typeof item.rows === 'number' && item.rows >= MIN_ROWS ? item.rows : MIN_ROWS,
     col: typeof item.col === 'number' && item.col >= 1 ? item.col : 1,
-    row: typeof item.row === 'number' && item.row >= 1
-      ? item.row
-      : 1 + fallbackIndex * (typeof item.rows === 'number' ? item.rows : MIN_ROWS),
+    row:
+      typeof item.row === 'number' && item.row >= 1
+        ? item.row
+        : 1 + fallbackIndex * (typeof item.rows === 'number' ? item.rows : MIN_ROWS),
   }
 }
 
@@ -388,10 +389,16 @@ export function useDashboardLayout(): DashboardLayoutApi {
     // wastes a few KB per browser. Pre-release, no migration code needed —
     // just nuke it on mount.
     if (typeof window !== 'undefined') {
-      try { window.localStorage.removeItem('instatic-admin-dashboard-layout-v3') } catch { /* private browsing */ }
+      try {
+        window.localStorage.removeItem('instatic-admin-dashboard-layout-v3')
+      } catch {
+        /* private browsing */
+      }
     }
 
-    return () => { cancelled = true }
+    return () => {
+      cancelled = true
+    }
   }, [])
 
   // 2. Debounced save on every layout change AFTER initial load.
@@ -439,14 +446,8 @@ export function useDashboardLayout(): DashboardLayoutApi {
       // every existing widget — that's always empty space by definition,
       // so the drop succeeds with no overlap check needed.
       if (col === undefined || row === undefined) {
-        const bottomRow = curr.items.reduce(
-          (max, item) => Math.max(max, item.row + item.rows),
-          1,
-        )
-        const nextItems = [
-          ...curr.items,
-          { id, size, rows, col: 1, row: bottomRow },
-        ]
+        const bottomRow = curr.items.reduce((max, item) => Math.max(max, item.row + item.rows), 1)
+        const nextItems = [...curr.items, { id, size, rows, col: 1, row: bottomRow }]
         return { ...curr, items: nextItems }
       }
       // Explicit cell (drag-and-drop from library): the new widget must
@@ -495,9 +496,7 @@ export function useDashboardLayout(): DashboardLayoutApi {
       const target = curr.items.find((i) => i.id === id)
       if (!target || target.size === size) return curr
       const clampedSize = Math.max(MIN_COLS, Math.min(MAX_COLS - target.col + 1, size))
-      const nextItems = curr.items.map((i) =>
-        i.id === id ? { ...i, size: clampedSize } : i,
-      )
+      const nextItems = curr.items.map((i) => (i.id === id ? { ...i, size: clampedSize } : i))
       return { ...curr, items: resolveCollisions(nextItems, id) }
     })
   }
@@ -507,9 +506,7 @@ export function useDashboardLayout(): DashboardLayoutApi {
       const target = curr.items.find((i) => i.id === id)
       if (!target || target.rows === rows) return curr
       const clampedRows = Math.max(MIN_ROWS, Math.min(MAX_ROWS, rows))
-      const nextItems = curr.items.map((i) =>
-        i.id === id ? { ...i, rows: clampedRows } : i,
-      )
+      const nextItems = curr.items.map((i) => (i.id === id ? { ...i, rows: clampedRows } : i))
       return { ...curr, items: resolveCollisions(nextItems, id) }
     })
   }

@@ -4,10 +4,7 @@ import { selectActiveCanvasPage, useEditorStore } from '@site/store/store'
 import type { StyleRuleRegistry } from '@core/page-tree'
 import type { VisualComponent } from '@core/visualComponents'
 import { CanvasTreeLadderRowButton } from './CanvasTreeLadderRowButton'
-import {
-  buildCanvasTreeLadderRows,
-  commitCanvasTreeLadderSelection,
-} from './canvasTreeLadder'
+import { buildCanvasTreeLadderRows, commitCanvasTreeLadderSelection } from './canvasTreeLadder'
 import styles from './BreakpointSelectionOverlay.module.css'
 
 const EMPTY_STYLE_RULES: StyleRuleRegistry = {}
@@ -29,13 +26,15 @@ export function CanvasTreeLadderMenu({
   const activePage = useEditorStore(selectActiveCanvasPage)
   const activeBreakpointId = useEditorStore((s) => s.activeBreakpointId)
   const styleRules = useEditorStore((s) => s.site?.styleRules ?? EMPTY_STYLE_RULES)
-  const visualComponents = useEditorStore((s) => s.site?.visualComponents ?? EMPTY_VISUAL_COMPONENTS)
+  const visualComponents = useEditorStore(
+    (s) => s.site?.visualComponents ?? EMPTY_VISUAL_COMPONENTS,
+  )
   const [highlightedNodeId, setHighlightedNodeId] = useState(nodeId)
 
   const rows = buildCanvasTreeLadderRows(activePage, nodeId)
   const effectiveHighlightedNodeId = rows.some((row) => row.nodeId === highlightedNodeId)
     ? highlightedNodeId
-    : rows.find((row) => row.relation === 'current')?.nodeId ?? rows[0]?.nodeId ?? nodeId
+    : (rows.find((row) => row.relation === 'current')?.nodeId ?? rows[0]?.nodeId ?? nodeId)
 
   const commitSelection = (nextNodeId: string) => {
     const state = useEditorStore.getState()

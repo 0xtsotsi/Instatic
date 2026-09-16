@@ -37,7 +37,15 @@ const VCParamTypeSchema = Type.Union([
 export type VCParamType = Static<typeof VCParamTypeSchema>
 
 const VC_PARAM_TYPE_VALUES: VCParamType[] = [
-  'string', 'number', 'boolean', 'url', 'enum', 'color', 'image', 'richText', 'slot',
+  'string',
+  'number',
+  'boolean',
+  'url',
+  'enum',
+  'color',
+  'image',
+  'richText',
+  'slot',
 ]
 
 // ---------------------------------------------------------------------------
@@ -208,7 +216,8 @@ export function parseVisualComponent(raw: unknown): VisualComponent | null {
   if (!r.tree || typeof r.tree !== 'object' || Array.isArray(r.tree)) return null
   const rawTree = r.tree as Record<string, unknown>
   if (typeof rawTree.rootNodeId !== 'string' || rawTree.rootNodeId.length === 0) return null
-  if (!rawTree.nodes || typeof rawTree.nodes !== 'object' || Array.isArray(rawTree.nodes)) return null
+  if (!rawTree.nodes || typeof rawTree.nodes !== 'object' || Array.isArray(rawTree.nodes))
+    return null
 
   const rawNodes = rawTree.nodes as Record<string, unknown>
   const nodes: Record<string, VCNode> = {}

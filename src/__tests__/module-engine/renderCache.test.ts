@@ -32,7 +32,7 @@ describe('renderCache — basic get/set', () => {
     const output = mockOutput('<h1>Hello</h1>')
     renderCache.set('base.text', { text: 'Hello' }, [], output)
     const result = renderCache.get('base.text', { text: 'Hello' }, [])
-    expect(result).toBe(output)  // same object reference
+    expect(result).toBe(output) // same object reference
   })
 
   it('different props → different cache entries', () => {

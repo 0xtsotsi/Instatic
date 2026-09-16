@@ -25,12 +25,7 @@ interface MenuPosition {
 }
 
 export interface SlashMenuHandle {
-  open: (
-    editor: Editor,
-    range: Range,
-    items: SlashCommandItem[],
-    rect: DOMRect | null,
-  ) => void
+  open: (editor: Editor, range: Range, items: SlashCommandItem[], rect: DOMRect | null) => void
   update: (range: Range, items: SlashCommandItem[], rect: DOMRect | null) => void
   close: () => void
   /** Returns true if the key was handled and should be swallowed. */
@@ -56,9 +51,7 @@ export function BodySlashMenu({ handleRef }: BodySlashMenuProps) {
   // Derived: clamp the active index to the items range without writing
   // back to state, so re-renders don't cascade through an effect.
   const clampedActiveIndex =
-    state && state.items.length > 0
-      ? Math.min(Math.max(activeIndex, 0), state.items.length - 1)
-      : 0
+    state && state.items.length > 0 ? Math.min(Math.max(activeIndex, 0), state.items.length - 1) : 0
 
   useImperativeHandle(
     handleRef,

@@ -43,7 +43,9 @@ function seedSubtree() {
   const site = store.createSite('Layouts Site')
   const rootId = site.pages[0].rootNodeId
   const containerId = useEditorStore.getState().insertNode('base.container', {}, rootId)
-  const textId = useEditorStore.getState().insertNode('base.text', { text: 'Saved copy' }, containerId)
+  const textId = useEditorStore
+    .getState()
+    .insertNode('base.text', { text: 'Saved copy' }, containerId)
   const cls = useEditorStore.getState().createClass('layout-style')
   useEditorStore.getState().addNodeClass(textId, cls.id)
   return { rootId, containerId, textId, classId: cls.id }
@@ -78,10 +80,14 @@ describe('layoutsSlice.saveNodeAsLayout', () => {
 
   it('throws SavedLayoutNameError for empty and duplicate names', () => {
     const { containerId } = seedSubtree()
-    expect(() => useEditorStore.getState().saveNodeAsLayout(containerId, '   ')).toThrow(SavedLayoutNameError)
+    expect(() => useEditorStore.getState().saveNodeAsLayout(containerId, '   ')).toThrow(
+      SavedLayoutNameError,
+    )
 
     useEditorStore.getState().saveNodeAsLayout(containerId, 'Hero')
-    expect(() => useEditorStore.getState().saveNodeAsLayout(containerId, 'Hero')).toThrow(SavedLayoutNameError)
+    expect(() => useEditorStore.getState().saveNodeAsLayout(containerId, 'Hero')).toThrow(
+      SavedLayoutNameError,
+    )
     expect(useEditorStore.getState().site!.layouts).toHaveLength(1)
   })
 })
@@ -126,12 +132,18 @@ describe('layoutsSlice.insertLayout', () => {
     const state = useEditorStore.getState()
     const page = state.site!.pages[0]
     const newText = page.nodes[page.nodes[newRootId].children[0]]
-    const newScopedId = newText.classIds.find((id) => id !== scoped.id && state.site!.styleRules[id]?.scope?.type === 'node')
+    const newScopedId = newText.classIds.find(
+      (id) => id !== scoped.id && state.site!.styleRules[id]?.scope?.type === 'node',
+    )
     expect(newScopedId).toBeDefined()
     const newScoped = state.site!.styleRules[newScopedId!]
     expect(newScoped.scope).toEqual({ type: 'node', nodeId: newText.id, role: 'module-style' })
     // The original scoped class still points at the original node.
-    expect(state.site!.styleRules[scoped.id].scope).toEqual({ type: 'node', nodeId: textId, role: 'module-style' })
+    expect(state.site!.styleRules[scoped.id].scope).toEqual({
+      type: 'node',
+      nodeId: textId,
+      role: 'module-style',
+    })
   })
 
   it('refuses to insert a second content outlet into the same document', () => {

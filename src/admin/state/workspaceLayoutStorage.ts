@@ -131,12 +131,8 @@ const StoredWorkspaceLayoutSchema = Type.Object(
 const StoredEditorLayoutSchema = Type.Object(
   {
     version: Type.Literal(2),
-    panelPositions: Type.Optional(
-      Type.Record(Type.String(), PanelPositionSchema),
-    ),
-    workspaces: Type.Optional(
-      Type.Record(Type.String(), StoredWorkspaceLayoutSchema),
-    ),
+    panelPositions: Type.Optional(Type.Record(Type.String(), PanelPositionSchema)),
+    workspaces: Type.Optional(Type.Record(Type.String(), StoredWorkspaceLayoutSchema)),
   },
   { additionalProperties: true },
 )
@@ -148,8 +144,12 @@ function storageAvailable() {
 function isPanelPosition(value: unknown): value is PanelPosition {
   if (!value || typeof value !== 'object') return false
   const pos = value as Partial<PanelPosition>
-  return typeof pos.x === 'number' && Number.isFinite(pos.x)
-    && typeof pos.y === 'number' && Number.isFinite(pos.y)
+  return (
+    typeof pos.x === 'number' &&
+    Number.isFinite(pos.x) &&
+    typeof pos.y === 'number' &&
+    Number.isFinite(pos.y)
+  )
 }
 
 export function readEditorLayout(): StoredEditorLayout | null {
@@ -170,9 +170,7 @@ function writeEditorLayout(layout: StoredEditorLayout) {
   }
 }
 
-function updateEditorLayout(
-  updater: (layout: StoredEditorLayout) => StoredEditorLayout,
-) {
+function updateEditorLayout(updater: (layout: StoredEditorLayout) => StoredEditorLayout) {
   const current = readEditorLayout() ?? { version: 2 as const }
   writeEditorLayout(updater(current))
 }
@@ -181,9 +179,7 @@ function updateEditorLayout(
  * Read the stored layout for a single workspace. Returns an empty object when
  * no state has been persisted yet — callers should layer their own defaults.
  */
-export function readWorkspaceLayout(
-  workspace: EditorWorkspaceId,
-): StoredWorkspaceLayout {
+export function readWorkspaceLayout(workspace: EditorWorkspaceId): StoredWorkspaceLayout {
   return readEditorLayout()?.workspaces?.[workspace] ?? {}
 }
 

@@ -9,5 +9,5 @@ export const editorScope: Scope = {
   id: 'editor',
   title: 'Editor',
   placeholder: 'Search editor commands…',
-  commands: () => [],  // Phase 2
+  commands: () => [], // Phase 2
 }

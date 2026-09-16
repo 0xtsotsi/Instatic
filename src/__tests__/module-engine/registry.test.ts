@@ -22,7 +22,7 @@ function makeModule(id: string): ModuleDefinition {
 }
 
 // We need a fresh registry per test — import the class directly
- 
+
 const { registry: _unusedRegistry, ...registryModule } = await import('@core/module-engine')
 
 // Dynamically re-construct registry for isolation
@@ -33,14 +33,20 @@ class TestRegistry {
     if (this._modules.has(def.id)) throw new Error(`Already registered: ${def.id}`)
     this._modules.set(def.id, def)
   }
-  get(id: string) { return this._modules.get(id) }
+  get(id: string) {
+    return this._modules.get(id)
+  }
   getOrThrow(id: string) {
     const m = this._modules.get(id)
     if (!m) throw new Error(`Not found: ${id}`)
     return m
   }
-  has(id: string) { return this._modules.has(id) }
-  list() { return Array.from(this._modules.values()) }
+  has(id: string) {
+    return this._modules.has(id)
+  }
+  list() {
+    return Array.from(this._modules.values())
+  }
   listByCategory() {
     const r: Record<string, ModuleDefinition[]> = {}
     for (const m of this._modules.values()) {
@@ -49,7 +55,9 @@ class TestRegistry {
     }
     return r
   }
-  get size() { return this._modules.size }
+  get size() {
+    return this._modules.size
+  }
 }
 
 describe('ModuleRegistry', () => {

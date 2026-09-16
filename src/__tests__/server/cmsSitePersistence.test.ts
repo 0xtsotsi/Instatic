@@ -3,10 +3,7 @@ import type { SiteShell } from '@core/page-tree'
 import { SiteValidationError } from '@core/persistence/validate'
 import { normalizeSiteRuntimeConfig } from '@core/site-runtime'
 import type { DbResult } from '../../../server/db'
-import {
-  getDraftSite,
-  saveDraftSite,
-} from '../../../server/repositories/site'
+import { getDraftSite, saveDraftSite } from '../../../server/repositories/site'
 import { createFakeDb } from './dbTestFake'
 
 function createSiteFakeDb() {
@@ -50,9 +47,7 @@ function validShell(overrides: Partial<SiteShell> = {}): SiteShell {
       devDependencies: {},
     },
     runtime: normalizeSiteRuntimeConfig(undefined),
-    breakpoints: [
-      { id: 'desktop', label: 'Desktop', width: 1440, icon: 'monitor' },
-    ],
+    breakpoints: [{ id: 'desktop', label: 'Desktop', width: 1440, icon: 'monitor' }],
     settings: {
       metaTitle: 'Example',
       shortcuts: {},
@@ -110,30 +105,34 @@ describe('CMS draft site persistence', () => {
 
   it('round-trips reusable CSS conditions in the site shell', async () => {
     const { db } = createSiteFakeDb()
-    await saveDraftSite(db, validShell({
-      conditions: [
-        {
-          id: 'media:(min-width: 1200px)',
-          label: '(min-width: 1200px)',
-          condition: { kind: 'media', query: '(min-width: 1200px)' },
-        },
-      ],
-      styleRules: {
-        class_1: {
-          id: 'class_1',
-          name: 'd-xl-block',
-          kind: 'class',
-          selector: '.d-xl-block',
-          order: 0,
-          styles: {},
-          contextStyles: {
-            'media:(min-width: 1200px)': { display: 'block' },
+    await saveDraftSite(
+      db,
+      validShell({
+        conditions: [
+          {
+            id: 'media:(min-width: 1200px)',
+            label: '(min-width: 1200px)',
+            condition: { kind: 'media', query: '(min-width: 1200px)' },
           },
-          createdAt: 1,
-          updatedAt: 2,
+        ],
+        styleRules: {
+          class_1: {
+            id: 'class_1',
+            name: 'd-xl-block',
+            kind: 'class',
+            selector: '.d-xl-block',
+            order: 0,
+            styles: {},
+            contextStyles: {
+              'media:(min-width: 1200px)': { display: 'block' },
+            },
+            createdAt: 1,
+            updatedAt: 2,
+          },
         },
-      },
-    }), 'user_1')
+      }),
+      'user_1',
+    )
 
     const loaded = await getDraftSite(db)
 
@@ -163,16 +162,19 @@ describe('CMS draft site persistence', () => {
 
   it('round-trips site runtime settings in the site shell', async () => {
     const { db } = createSiteFakeDb()
-    await saveDraftSite(db, validShell({
-      runtime: normalizeSiteRuntimeConfig({
-        scripts: {
-          script_1: {
-            placement: 'head',
-            priority: 10,
+    await saveDraftSite(
+      db,
+      validShell({
+        runtime: normalizeSiteRuntimeConfig({
+          scripts: {
+            script_1: {
+              placement: 'head',
+              priority: 10,
+            },
           },
-        },
+        }),
       }),
-    }))
+    )
 
     const loaded = await getDraftSite(db)
 

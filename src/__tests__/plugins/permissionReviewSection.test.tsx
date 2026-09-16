@@ -61,10 +61,7 @@ describe('computePermissionDiff', () => {
   })
 
   it('returns only existing rows when nothing changes', () => {
-    const rows = computePermissionDiff(
-      ['cms.routes', 'cms.storage'],
-      ['cms.routes', 'cms.storage'],
-    )
+    const rows = computePermissionDiff(['cms.routes', 'cms.storage'], ['cms.routes', 'cms.storage'])
     expect(rows.every((r) => r.status === 'existing')).toBe(true)
   })
 })
@@ -82,9 +79,7 @@ describe('PermissionReviewSection — fresh install', () => {
       />,
     )
     expect(screen.getByText('Review Acme Plugin')).toBeDefined()
-    expect(
-      screen.getByRole('button', { name: 'Approve and Install' }),
-    ).toBeDefined()
+    expect(screen.getByRole('button', { name: 'Approve and Install' })).toBeDefined()
     // Fresh install doesn't show diff badges.
     expect(screen.queryByText('Already approved')).toBeNull()
     expect(screen.queryByText('No longer requested')).toBeNull()
@@ -101,9 +96,7 @@ describe('PermissionReviewSection — fresh install', () => {
     )
     const empty = screen.getByTestId('permission-review-empty')
     expect(empty.textContent).toContain('No permissions requested')
-    expect(
-      screen.getByRole('button', { name: 'Approve and Install' }),
-    ).toBeDefined()
+    expect(screen.getByRole('button', { name: 'Approve and Install' })).toBeDefined()
     // No unsandboxed-code callout for a declarative plugin.
     expect(screen.queryByTestId('unsandboxed-code-alert')).toBeNull()
   })
@@ -135,12 +128,14 @@ describe('PermissionReviewSection — fresh install', () => {
           manifest: {
             ...baseManifest,
             permissions: ['admin.navigation', 'editor.code'] satisfies PluginPermission[],
-            adminPages: [{
-              id: 'dashboard',
-              title: 'Dashboard',
-              route: '/admin/plugins/acme.test/dashboard',
-              content: { kind: 'app', heading: 'Dashboard', entry: 'admin/dashboard.js' },
-            }],
+            adminPages: [
+              {
+                id: 'dashboard',
+                title: 'Dashboard',
+                route: '/admin/plugins/acme.test/dashboard',
+                content: { kind: 'app', heading: 'Dashboard', entry: 'admin/dashboard.js' },
+              },
+            ],
           },
         }}
         uploading={false}
@@ -179,10 +174,7 @@ describe('PermissionReviewSection — upgrade with new permissions', () => {
         pending={{
           manifest: {
             ...baseManifest,
-            permissions: [
-              'cms.storage',
-              'editor.canvas',
-            ] satisfies PluginPermission[],
+            permissions: ['cms.storage', 'editor.canvas'] satisfies PluginPermission[],
           },
           upgradeFromVersion: '1.0.0',
           previouslyGrantedPermissions: ['cms.storage'] satisfies PluginPermission[],
@@ -192,9 +184,7 @@ describe('PermissionReviewSection — upgrade with new permissions', () => {
         onConfirm={() => {}}
       />,
     )
-    const rows = Array.from(
-      container.querySelectorAll<HTMLElement>('[data-permission]'),
-    )
+    const rows = Array.from(container.querySelectorAll<HTMLElement>('[data-permission]'))
     expect(rows[0].dataset.permission).toBe('editor.canvas')
     expect(rows[0].dataset.status).toBe('new')
     expect(rows[1].dataset.permission).toBe('cms.storage')
@@ -254,10 +244,7 @@ describe('PermissionReviewSection — upgrade with new permissions', () => {
             permissions: ['cms.routes'] satisfies PluginPermission[],
           },
           upgradeFromVersion: '1.0.0',
-          previouslyGrantedPermissions: [
-            'cms.routes',
-            'cms.storage',
-          ] satisfies PluginPermission[],
+          previouslyGrantedPermissions: ['cms.routes', 'cms.storage'] satisfies PluginPermission[],
         }}
         uploading={false}
         onCancel={() => {}}

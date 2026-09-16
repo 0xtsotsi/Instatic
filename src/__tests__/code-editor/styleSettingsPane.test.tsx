@@ -17,14 +17,16 @@ function resetStore() {
     site: makeSite({
       pages: [home, about],
       runtime,
-      files: [{
-        id: 'style-1',
-        path: 'src/styles/theme.css',
-        type: 'style',
-        content: '.brand { color: red }',
-        createdAt: 1,
-        updatedAt: 1,
-      }],
+      files: [
+        {
+          id: 'style-1',
+          path: 'src/styles/theme.css',
+          type: 'style',
+          content: '.brand { color: red }',
+          createdAt: 1,
+          updatedAt: 1,
+        },
+      ],
     }),
     siteRuntime: runtime,
     activePageId: 'page-home',

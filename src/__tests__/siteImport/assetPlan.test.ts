@@ -34,12 +34,18 @@ describe('buildAssetPlan — img src normalisation', () => {
       'index.html': { bytes: txt('<html><body><img src="images/hero.png"></body></html>') },
       'images/hero.png': { bytes: MINIMAL_PNG, mimeType: 'image/png' },
     })
-    const { pagePlan } = makeHtmlPagePlan('index.html', new TextDecoder().decode(fileMap.files['index.html']!.bytes), fileMap)
+    const { pagePlan } = makeHtmlPagePlan(
+      'index.html',
+      new TextDecoder().decode(fileMap.files['index.html']!.bytes),
+      fileMap,
+    )
     const { normalizedPagePlans, assets } = buildAssetPlan([pagePlan], [], fileMap)
 
     // Find the image node
     const nodes = Object.values(normalizedPagePlans[0].nodeFragment.nodes)
-    const imageNode = nodes.find((n) => typeof n.props['src'] === 'string' && (n.props['src'] as string).startsWith('images/'))
+    const imageNode = nodes.find(
+      (n) => typeof n.props['src'] === 'string' && (n.props['src'] as string).startsWith('images/'),
+    )
     expect(imageNode?.props['src']).toBe('images/hero.png')
     // Asset should be recorded
     expect(assets.some((a) => a.sourcePath === 'images/hero.png')).toBe(true)
@@ -47,9 +53,15 @@ describe('buildAssetPlan — img src normalisation', () => {
 
   it('leaves external URLs unchanged', () => {
     const fileMap = makeFileMap({
-      'index.html': { bytes: txt('<html><body><img src="https://cdn.example.com/img.png"></body></html>') },
+      'index.html': {
+        bytes: txt('<html><body><img src="https://cdn.example.com/img.png"></body></html>'),
+      },
     })
-    const { pagePlan } = makeHtmlPagePlan('index.html', new TextDecoder().decode(fileMap.files['index.html']!.bytes), fileMap)
+    const { pagePlan } = makeHtmlPagePlan(
+      'index.html',
+      new TextDecoder().decode(fileMap.files['index.html']!.bytes),
+      fileMap,
+    )
     const { normalizedPagePlans, assets } = buildAssetPlan([pagePlan], [], fileMap)
 
     const nodes = Object.values(normalizedPagePlans[0].nodeFragment.nodes)
@@ -62,7 +74,11 @@ describe('buildAssetPlan — img src normalisation', () => {
     const fileMap = makeFileMap({
       'index.html': { bytes: txt('<html><body><img src="missing.png"></body></html>') },
     })
-    const { pagePlan } = makeHtmlPagePlan('index.html', new TextDecoder().decode(fileMap.files['index.html']!.bytes), fileMap)
+    const { pagePlan } = makeHtmlPagePlan(
+      'index.html',
+      new TextDecoder().decode(fileMap.files['index.html']!.bytes),
+      fileMap,
+    )
     const { assets } = buildAssetPlan([pagePlan], [], fileMap)
     expect(assets).toHaveLength(0)
   })
@@ -76,14 +92,21 @@ describe('buildAssetPlan — HTML attribute asset normalisation', () => {
   it('normalises data-bg-src to a FileMap key and records the asset', () => {
     const fileMap = makeFileMap({
       'pricing.html': {
-        bytes: txt('<html><body><section data-bg-src="assets/images/shape/heroShape1_1.png">Pricing</section></body></html>'),
+        bytes: txt(
+          '<html><body><section data-bg-src="assets/images/shape/heroShape1_1.png">Pricing</section></body></html>',
+        ),
       },
       'assets/images/shape/heroShape1_1.png': { bytes: MINIMAL_PNG, mimeType: 'image/png' },
     })
-    const { pagePlan } = makeHtmlPagePlan('pricing.html', new TextDecoder().decode(fileMap.files['pricing.html']!.bytes), fileMap)
+    const { pagePlan } = makeHtmlPagePlan(
+      'pricing.html',
+      new TextDecoder().decode(fileMap.files['pricing.html']!.bytes),
+      fileMap,
+    )
     const { normalizedPagePlans, assets } = buildAssetPlan([pagePlan], [], fileMap)
 
-    const node = normalizedPagePlans[0].nodeFragment.nodes[normalizedPagePlans[0].nodeFragment.rootIds[0]!]!
+    const node =
+      normalizedPagePlans[0].nodeFragment.nodes[normalizedPagePlans[0].nodeFragment.rootIds[0]!]!
     expect(node.props['htmlAttributes']).toEqual({
       'data-bg-src': 'assets/images/shape/heroShape1_1.png',
     })
@@ -93,14 +116,23 @@ describe('buildAssetPlan — HTML attribute asset normalisation', () => {
   it('leaves external data-* URLs unchanged and records no asset', () => {
     const fileMap = makeFileMap({
       'index.html': {
-        bytes: txt('<html><body><section data-bg-src="https://cdn.example.com/bg.png">Hero</section></body></html>'),
+        bytes: txt(
+          '<html><body><section data-bg-src="https://cdn.example.com/bg.png">Hero</section></body></html>',
+        ),
       },
     })
-    const { pagePlan } = makeHtmlPagePlan('index.html', new TextDecoder().decode(fileMap.files['index.html']!.bytes), fileMap)
+    const { pagePlan } = makeHtmlPagePlan(
+      'index.html',
+      new TextDecoder().decode(fileMap.files['index.html']!.bytes),
+      fileMap,
+    )
     const { normalizedPagePlans, assets } = buildAssetPlan([pagePlan], [], fileMap)
 
-    const node = normalizedPagePlans[0].nodeFragment.nodes[normalizedPagePlans[0].nodeFragment.rootIds[0]!]!
-    expect(node.props['htmlAttributes']).toEqual({ 'data-bg-src': 'https://cdn.example.com/bg.png' })
+    const node =
+      normalizedPagePlans[0].nodeFragment.nodes[normalizedPagePlans[0].nodeFragment.rootIds[0]!]!
+    expect(node.props['htmlAttributes']).toEqual({
+      'data-bg-src': 'https://cdn.example.com/bg.png',
+    })
     expect(assets).toHaveLength(0)
   })
 })
@@ -109,7 +141,9 @@ describe('buildAssetPlan — HTML attribute asset normalisation', () => {
 // Inline background-image (node.inlineStyles) normalisation
 // ---------------------------------------------------------------------------
 
-function inlineBgNode(plan: { nodeFragment: { nodes: Record<string, { inlineStyles?: Record<string, unknown> }> } }) {
+function inlineBgNode(plan: {
+  nodeFragment: { nodes: Record<string, { inlineStyles?: Record<string, unknown> }> }
+}) {
   return Object.values(plan.nodeFragment.nodes).find((n) => n.inlineStyles)
 }
 
@@ -117,11 +151,17 @@ describe('buildAssetPlan — inline background node.inlineStyles normalisation',
   it('normalises an inline background url() to a FileMap key and records the asset', () => {
     const fileMap = makeFileMap({
       'index.html': {
-        bytes: txt(`<html><body><section style="background-image: url('images/hero.png')">x</section></body></html>`),
+        bytes: txt(
+          `<html><body><section style="background-image: url('images/hero.png')">x</section></body></html>`,
+        ),
       },
       'images/hero.png': { bytes: MINIMAL_PNG, mimeType: 'image/png' },
     })
-    const { pagePlan } = makeHtmlPagePlan('index.html', new TextDecoder().decode(fileMap.files['index.html']!.bytes), fileMap)
+    const { pagePlan } = makeHtmlPagePlan(
+      'index.html',
+      new TextDecoder().decode(fileMap.files['index.html']!.bytes),
+      fileMap,
+    )
     // Sanity: the importer captured the inline background on a node.
     expect(inlineBgNode(pagePlan)).toBeDefined()
 
@@ -134,10 +174,16 @@ describe('buildAssetPlan — inline background node.inlineStyles normalisation',
   it('leaves an external inline background url() unchanged and records no asset', () => {
     const fileMap = makeFileMap({
       'index.html': {
-        bytes: txt(`<html><body><section style="background-image: url('https://cdn.example.com/bg.png')">x</section></body></html>`),
+        bytes: txt(
+          `<html><body><section style="background-image: url('https://cdn.example.com/bg.png')">x</section></body></html>`,
+        ),
       },
     })
-    const { pagePlan } = makeHtmlPagePlan('index.html', new TextDecoder().decode(fileMap.files['index.html']!.bytes), fileMap)
+    const { pagePlan } = makeHtmlPagePlan(
+      'index.html',
+      new TextDecoder().decode(fileMap.files['index.html']!.bytes),
+      fileMap,
+    )
     const { normalizedPagePlans, assets } = buildAssetPlan([pagePlan], [], fileMap)
     const bag = inlineBgNode(normalizedPagePlans[0])!.inlineStyles!
     expect(bag.backgroundImage).toContain('https://cdn.example.com/bg.png')
@@ -181,11 +227,13 @@ describe('buildAssetPlan — CSS url() normalisation', () => {
     })
     const { rules, assetRefs } = cssToStyleRules(css)
     const { normalizedStyleRules, assets } = buildAssetPlan(
-      [], [{ cssPath: 'styles.css', rules, assetRefs }], fileMap,
+      [],
+      [{ cssPath: 'styles.css', rules, assetRefs }],
+      fileMap,
     )
     const hero = normalizedStyleRules.find((r) => r.selector === '.hero')!
     const bag = Object.values(hero.contextStyles)[0] as Record<string, string>
-    expect(bag['backgroundImage']).toContain(`url('img/bg.png')`)  // normalised to FileMap key
+    expect(bag['backgroundImage']).toContain(`url('img/bg.png')`) // normalised to FileMap key
     expect(assets.some((a) => a.sourcePath === 'img/bg.png')).toBe(true) // uploaded
   })
 
@@ -250,7 +298,11 @@ describe('buildAssetPlan — MIME types', () => {
       'index.html': { bytes: txt('<html><body><img src="logo.svg"></body></html>') },
       'logo.svg': { bytes: txt('<svg/>'), mimeType: 'image/svg+xml' },
     })
-    const { pagePlan } = makeHtmlPagePlan('index.html', new TextDecoder().decode(fileMap.files['index.html']!.bytes), fileMap)
+    const { pagePlan } = makeHtmlPagePlan(
+      'index.html',
+      new TextDecoder().decode(fileMap.files['index.html']!.bytes),
+      fileMap,
+    )
     const { assets } = buildAssetPlan([pagePlan], [], fileMap)
     expect(assets[0]?.mimeType).toBe('image/svg+xml')
   })
@@ -260,14 +312,21 @@ describe('buildAssetPlan — MIME types', () => {
       'index.html': { bytes: txt('<html><body><img src="logo.png"></body></html>') },
       'logo.png': { bytes: MINIMAL_PNG },
     })
-    const { pagePlan } = makeHtmlPagePlan('index.html', new TextDecoder().decode(fileMap.files['index.html']!.bytes), fileMap)
+    const { pagePlan } = makeHtmlPagePlan(
+      'index.html',
+      new TextDecoder().decode(fileMap.files['index.html']!.bytes),
+      fileMap,
+    )
     const { assets } = buildAssetPlan([pagePlan], [], fileMap)
     expect(assets[0]?.mimeType).toBe('image/png')
   })
 
   it('sweeps unreferenced uploadable assets but skips source companion files', () => {
     const fileMap = makeFileMap({
-      'index.html': { bytes: txt('<html><body><h1>Home</h1></body></html>'), mimeType: 'text/html' },
+      'index.html': {
+        bytes: txt('<html><body><h1>Home</h1></body></html>'),
+        mimeType: 'text/html',
+      },
       'assets/logo.png': { bytes: MINIMAL_PNG },
       'assets/brand.woff2': { bytes: txt('font') },
       'assets/reel.mp4': { bytes: txt('video') },
@@ -289,11 +348,7 @@ describe('buildAssetPlan — MIME types', () => {
       'assets/logo.png',
       'assets/reel.mp4',
     ])
-    expect(assets.map((a) => a.mimeType).sort()).toEqual([
-      'font/woff2',
-      'image/png',
-      'video/mp4',
-    ])
+    expect(assets.map((a) => a.mimeType).sort()).toEqual(['font/woff2', 'image/png', 'video/mp4'])
   })
 })
 

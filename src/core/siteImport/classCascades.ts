@@ -29,12 +29,7 @@
  * contract. They stay global.
  */
 
-import type {
-  CrossSheetClassConflict,
-  ImportPlan,
-  NewStyleRule,
-  PagePlan,
-} from './types'
+import type { CrossSheetClassConflict, ImportPlan, NewStyleRule, PagePlan } from './types'
 import type { CssFileResult } from './assetPlan'
 import {
   createCascadedStyleRuleLayers,
@@ -56,15 +51,25 @@ const BOOTSTRAP_SIDE_RE = '(?:t|b|s|e|x|y)'
 const SHARED_UTILITY_CLASS_PATTERNS = [
   /^container(?:-(?:sm|md|lg|xl|xxl|fluid))?$/,
   /^row(?:-cols(?:-(?:sm|md|lg|xl|xxl))?-(?:auto|[1-6]))?$/,
-  new RegExp(`^col(?:-${BOOTSTRAP_GRID_SPAN_RE}|-${BOOTSTRAP_BREAKPOINT_RE}(?:-${BOOTSTRAP_GRID_SPAN_RE})?)?$`),
+  new RegExp(
+    `^col(?:-${BOOTSTRAP_GRID_SPAN_RE}|-${BOOTSTRAP_BREAKPOINT_RE}(?:-${BOOTSTRAP_GRID_SPAN_RE})?)?$`,
+  ),
   new RegExp(`^offset(?:-${BOOTSTRAP_BREAKPOINT_RE})?-(?:[0-9]|1[0-1])$`),
   new RegExp(`^order(?:-${BOOTSTRAP_BREAKPOINT_RE})?-(?:first|last|[0-5])$`),
   new RegExp(`^(?:g|gx|gy)(?:-${BOOTSTRAP_BREAKPOINT_RE})?-${BOOTSTRAP_SIZE_RE}$`),
   new RegExp(`^(?:m|p)${BOOTSTRAP_SIDE_RE}?(?:-${BOOTSTRAP_BREAKPOINT_RE})?-${BOOTSTRAP_SIZE_RE}$`),
-  new RegExp('^d(?:-(?:sm|md|lg|xl|xxl))?-(?:none|inline|inline-block|block|grid|table|table-row|table-cell|flex|inline-flex)$'),
-  new RegExp('^flex(?:-(?:sm|md|lg|xl|xxl))?-(?:row|column|row-reverse|column-reverse|wrap|nowrap|wrap-reverse|fill|grow-0|grow-1|shrink-0|shrink-1)$'),
-  new RegExp('^justify-content(?:-(?:sm|md|lg|xl|xxl))?-(?:start|end|center|between|around|evenly)$'),
-  new RegExp('^align-(?:items|content|self)(?:-(?:sm|md|lg|xl|xxl))?-(?:start|end|center|baseline|stretch)$'),
+  new RegExp(
+    '^d(?:-(?:sm|md|lg|xl|xxl))?-(?:none|inline|inline-block|block|grid|table|table-row|table-cell|flex|inline-flex)$',
+  ),
+  new RegExp(
+    '^flex(?:-(?:sm|md|lg|xl|xxl))?-(?:row|column|row-reverse|column-reverse|wrap|nowrap|wrap-reverse|fill|grow-0|grow-1|shrink-0|shrink-1)$',
+  ),
+  new RegExp(
+    '^justify-content(?:-(?:sm|md|lg|xl|xxl))?-(?:start|end|center|between|around|evenly)$',
+  ),
+  new RegExp(
+    '^align-(?:items|content|self)(?:-(?:sm|md|lg|xl|xxl))?-(?:start|end|center|baseline|stretch)$',
+  ),
   /^position-(?:static|relative|absolute|fixed|sticky)$/,
   /^(?:top|bottom|start|end)-(?:0|50|100)$/,
   /^translate-middle(?:-[xy])?$/,
@@ -184,14 +189,19 @@ export function detectCrossSheetClassConflicts(
     if (defs.length < 2) continue
     const keptCssPaths = new Set(defs[0].cascades.flatMap((c) => c.linkedCssPaths))
     for (const def of defs.slice(1)) {
-      const sources = [...new Set(
-        def.cascades
-          .flatMap((c) => c.linkedCssPaths)
-          .filter((cssPath) =>
-            !keptCssPaths.has(cssPath)
-            && (rulesByCssPath.get(cssPath) ?? []).some((r) => r.kind === 'class' && r.name === name),
-          ),
-      )]
+      const sources = [
+        ...new Set(
+          def.cascades
+            .flatMap((c) => c.linkedCssPaths)
+            .filter(
+              (cssPath) =>
+                !keptCssPaths.has(cssPath) &&
+                (rulesByCssPath.get(cssPath) ?? []).some(
+                  (r) => r.kind === 'class' && r.name === name,
+                ),
+            ),
+        ),
+      ]
       conflicts.push({
         desiredName: name,
         definitionId: hashText(def.contentKey),
@@ -237,9 +247,7 @@ export function applyCrossSheetClassResolutions(
     const affectedPages = new Set(conflict.pageSources)
     const affectedCascadePaths = orderedCascadePaths(pages, affectedPages)
     const otherCascadePaths = new Set(
-      pages
-        .filter((p) => !affectedPages.has(p.source))
-        .flatMap((p) => p.linkedCssPaths),
+      pages.filter((p) => !affectedPages.has(p.source)).flatMap((p) => p.linkedCssPaths),
     )
     const exclusivePaths = new Set(affectedCascadePaths.filter((p) => !otherCascadePaths.has(p)))
 
@@ -393,7 +401,10 @@ export function normalizeBindableClassRules(plan: ImportPlan): ImportPlan {
 // ---------------------------------------------------------------------------
 
 /** Ordered union of the affected pages' cascades (first page's order wins). */
-function orderedCascadePaths(pages: readonly PagePlan[], affectedPages: ReadonlySet<string>): string[] {
+function orderedCascadePaths(
+  pages: readonly PagePlan[],
+  affectedPages: ReadonlySet<string>,
+): string[] {
   const ordered: string[] = []
   const seen = new Set<string>()
   for (const page of pages) {

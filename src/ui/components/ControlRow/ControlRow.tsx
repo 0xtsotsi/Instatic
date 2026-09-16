@@ -82,9 +82,7 @@ export function ControlRow({
         </div>
       )}
       {children}
-      {description && (
-        <span className={styles.description}>{description}</span>
-      )}
+      {description && <span className={styles.description}>{description}</span>}
     </div>
   )
 }

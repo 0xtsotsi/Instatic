@@ -20,9 +20,7 @@
  */
 import type { ComponentType } from 'react'
 import { registry } from '@core/module-engine'
-import type {
-  ModuleComponentProps,
-} from '@core/module-engine'
+import type { ModuleComponentProps } from '@core/module-engine'
 import type { PluginManifest } from '@core/plugin-sdk'
 import type {
   PluginEditorRuntime,
@@ -164,8 +162,16 @@ export interface SandboxedModulePack {
     /** Optional iframe-backed editor preview source. */
     editorRuntime?: PluginEditorRuntime
   }>
-  render(moduleId: string, props: Record<string, unknown>, children: string[]): { html: string; css?: string; js?: string }
-  preview(moduleId: string, props: Record<string, unknown>, children: string[]): { html: string; css?: string; js?: string }
+  render(
+    moduleId: string,
+    props: Record<string, unknown>,
+    children: string[],
+  ): { html: string; css?: string; js?: string }
+  preview(
+    moduleId: string,
+    props: Record<string, unknown>,
+    children: string[],
+  ): { html: string; css?: string; js?: string }
   dispose(): void
 }
 

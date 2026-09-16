@@ -70,9 +70,7 @@ export function FormField({
       <label className={cn(styles.inlineEnd, className)}>
         <span className={styles.labelStack}>
           {label && <span className={styles.label}>{label}</span>}
-          {description && (
-            <span className={styles.description}>{description}</span>
-          )}
+          {description && <span className={styles.description}>{description}</span>}
         </span>
         {children}
       </label>
@@ -85,9 +83,7 @@ export function FormField({
         {children}
         <span className={styles.labelStack}>
           {label && <span className={styles.label}>{label}</span>}
-          {description && (
-            <span className={styles.description}>{description}</span>
-          )}
+          {description && <span className={styles.description}>{description}</span>}
         </span>
       </label>
     )

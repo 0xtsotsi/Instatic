@@ -32,7 +32,12 @@ describe('parseStyleRule — contextStyles', () => {
 
   it('round-trips the current contextStyles shape', () => {
     const rule = parseStyleRule(
-      baseRaw({ contextStyles: { tablet: { color: 'blue' }, 'media:(orientation: landscape)': { gap: '8px' } } }),
+      baseRaw({
+        contextStyles: {
+          tablet: { color: 'blue' },
+          'media:(orientation: landscape)': { gap: '8px' },
+        },
+      }),
     )
     expect(rule!.contextStyles).toEqual({
       tablet: { color: 'blue' },
@@ -49,9 +54,24 @@ describe('parseStyleRule — contextStyles', () => {
     const rule = parseStyleRule(
       baseRaw({
         conditionalLayers: [
-          { id: 'm1', condition: { kind: 'media', query: '(orientation: landscape)' }, styles: { color: 'blue' }, order: 0 },
-          { id: 'c1', condition: { kind: 'container', name: 'sidebar', query: 'min-width: 400px' }, styles: { display: 'grid' }, order: 1 },
-          { id: 's1', condition: { kind: 'supports', query: '(display: grid)' }, styles: { gap: '8px' }, order: 2 },
+          {
+            id: 'm1',
+            condition: { kind: 'media', query: '(orientation: landscape)' },
+            styles: { color: 'blue' },
+            order: 0,
+          },
+          {
+            id: 'c1',
+            condition: { kind: 'container', name: 'sidebar', query: 'min-width: 400px' },
+            styles: { display: 'grid' },
+            order: 1,
+          },
+          {
+            id: 's1',
+            condition: { kind: 'supports', query: '(display: grid)' },
+            styles: { gap: '8px' },
+            order: 2,
+          },
         ],
       }),
     )
@@ -59,12 +79,14 @@ describe('parseStyleRule — contextStyles', () => {
   })
 
   it('drops rules missing current selector metadata', () => {
-    expect(parseStyleRule({
-      id: 'x',
-      name: 'legacy-name',
-      styles: { color: 'red' },
-      createdAt: 0,
-      updatedAt: 0,
-    })).toBeNull()
+    expect(
+      parseStyleRule({
+        id: 'x',
+        name: 'legacy-name',
+        styles: { color: 'red' },
+        createdAt: 0,
+        updatedAt: 0,
+      }),
+    ).toBeNull()
   })
 })

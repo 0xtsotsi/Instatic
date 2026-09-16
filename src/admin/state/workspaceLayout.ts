@@ -23,10 +23,7 @@ interface WorkspaceLayoutState {
   setLeftSidebarWidth: (width: number) => void
   setRightPanel: (patch: Partial<WorkspacePanelState>) => void
   setDataSidebarCollapsed: (collapsed: boolean) => void
-  hydrateWorkspaceLayout: (
-    workspace: EditorWorkspaceId,
-    layout: StoredWorkspaceLayout,
-  ) => void
+  hydrateWorkspaceLayout: (workspace: EditorWorkspaceId, layout: StoredWorkspaceLayout) => void
 }
 
 function boolOrCurrent(value: unknown, current: boolean): boolean {
@@ -42,10 +39,9 @@ export function clampSidebarWidth(width: number): number {
 }
 
 function leftSidebarWidth(layout: StoredWorkspaceLayout, currentWidth: number): number {
-  return clampSidebarWidth(finiteNumberOrCurrent(
-    layout.leftWidth,
-    currentWidth || LEFT_SIDEBAR_DEFAULT_WIDTH,
-  ))
+  return clampSidebarWidth(
+    finiteNumberOrCurrent(layout.leftWidth, currentWidth || LEFT_SIDEBAR_DEFAULT_WIDTH),
+  )
 }
 
 function rightPanelWidth(layout: StoredWorkspaceLayout, currentWidth: number): number {
@@ -56,16 +52,12 @@ function initialNonSiteLayout(): Pick<
   WorkspaceLayoutState,
   'leftSidebarWidth' | 'rightPanel' | 'dataSidebarCollapsed'
 > {
-  const workspace = typeof window !== 'undefined'
-    ? workspaceFromPathname(window.location.pathname)
-    : null
-  const layout = workspace && workspace !== 'site'
-    ? readWorkspaceLayout(workspace)
-    : {}
+  const workspace =
+    typeof window !== 'undefined' ? workspaceFromPathname(window.location.pathname) : null
+  const layout = workspace && workspace !== 'site' ? readWorkspaceLayout(workspace) : {}
   const rightOpen = boolOrCurrent(layout.rightOpen, true)
-  const dataSidebarCollapsed = workspace === 'data' && typeof layout.leftOpen === 'boolean'
-    ? !layout.leftOpen
-    : false
+  const dataSidebarCollapsed =
+    workspace === 'data' && typeof layout.leftOpen === 'boolean' ? !layout.leftOpen : false
 
   return {
     leftSidebarWidth: leftSidebarWidth(layout, LEFT_SIDEBAR_DEFAULT_WIDTH),
@@ -91,14 +83,12 @@ export const useWorkspaceLayout = create<WorkspaceLayoutState>((set, get) => ({
     const next: WorkspacePanelState = {
       ...current,
       ...patch,
-      width: patch.width === undefined
-        ? current.width
-        : finiteNumberOrCurrent(patch.width, current.width),
+      width:
+        patch.width === undefined
+          ? current.width
+          : finiteNumberOrCurrent(patch.width, current.width),
     }
-    if (
-      Object.is(current.collapsed, next.collapsed) &&
-      Object.is(current.width, next.width)
-    ) {
+    if (Object.is(current.collapsed, next.collapsed) && Object.is(current.width, next.width)) {
       return
     }
     set({ rightPanel: next })
@@ -116,9 +106,10 @@ export const useWorkspaceLayout = create<WorkspaceLayoutState>((set, get) => ({
       collapsed: !boolOrCurrent(layout.rightOpen, !current.rightPanel.collapsed),
       width: rightPanelWidth(layout, current.rightPanel.width),
     }
-    const nextDataSidebarCollapsed = workspace === 'data' && typeof layout.leftOpen === 'boolean'
-      ? !layout.leftOpen
-      : current.dataSidebarCollapsed
+    const nextDataSidebarCollapsed =
+      workspace === 'data' && typeof layout.leftOpen === 'boolean'
+        ? !layout.leftOpen
+        : current.dataSidebarCollapsed
 
     if (
       Object.is(current.leftSidebarWidth, nextLeftWidth) &&

@@ -36,8 +36,7 @@ export function withPluginCacheBuster(url: string, cacheKey: string): string {
   // `import.meta.env.DEV` is set to `true` by Vite at dev-build time
   // and `false` after `vite build`. Falls back to `false` if undefined
   // (e.g. when this code runs in tests outside the Vite pipeline).
-  const inDev =
-    typeof import.meta.env !== 'undefined' && import.meta.env.DEV === true
+  const inDev = typeof import.meta.env !== 'undefined' && import.meta.env.DEV === true
   const v = inDev ? Date.now().toString() : cacheKey
   return `${url}${sep}v=${encodeURIComponent(v)}`
 }

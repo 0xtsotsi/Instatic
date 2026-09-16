@@ -45,7 +45,9 @@ export function DocumentSwitcher({ current }: { current: DocumentSwitcherCurrent
   const isCurrentPage = (id: string) => current.kind === 'page' && current.id === id
   const isCurrentVc = (id: string) => current.kind === 'component' && current.id === id
 
-  const regularPages = (pages ?? EMPTY_PAGES).filter((p) => !isTemplatePage(p) && !isCurrentPage(p.id))
+  const regularPages = (pages ?? EMPTY_PAGES).filter(
+    (p) => !isTemplatePage(p) && !isCurrentPage(p.id),
+  )
   const templates = (pages ?? EMPTY_PAGES).filter((p) => isTemplatePage(p) && !isCurrentPage(p.id))
   const vcs = (components ?? EMPTY_PAGES).filter((c) => !isCurrentVc(c.id))
 
@@ -61,10 +63,14 @@ export function DocumentSwitcher({ current }: { current: DocumentSwitcherCurrent
     }
   }
 
-  const triggerWidth = Math.min(measureToolbarValueWidth(current.label), MAX_SWITCHER_PX) + CHEVRON_ALLOWANCE_PX
+  const triggerWidth =
+    Math.min(measureToolbarValueWidth(current.label), MAX_SWITCHER_PX) + CHEVRON_ALLOWANCE_PX
 
   return (
-    <span className={styles.switcher} style={{ '--doc-switcher-w': `${triggerWidth}px` } as CSSProperties}>
+    <span
+      className={styles.switcher}
+      style={{ '--doc-switcher-w': `${triggerWidth}px` } as CSSProperties}
+    >
       <Select
         fieldSize="sm"
         emphasis="strong"
@@ -79,21 +85,27 @@ export function DocumentSwitcher({ current }: { current: DocumentSwitcherCurrent
         {regularPages.length > 0 && (
           <optgroup label="Pages">
             {regularPages.map((p) => (
-              <option key={p.id} value={`page:${p.id}`}>{p.title || p.slug || 'Untitled page'}</option>
+              <option key={p.id} value={`page:${p.id}`}>
+                {p.title || p.slug || 'Untitled page'}
+              </option>
             ))}
           </optgroup>
         )}
         {templates.length > 0 && (
           <optgroup label="Templates">
             {templates.map((p) => (
-              <option key={p.id} value={`page:${p.id}`}>{p.title || p.slug || 'Untitled template'}</option>
+              <option key={p.id} value={`page:${p.id}`}>
+                {p.title || p.slug || 'Untitled template'}
+              </option>
             ))}
           </optgroup>
         )}
         {vcs.length > 0 && (
           <optgroup label="Components">
             {vcs.map((c) => (
-              <option key={c.id} value={`vc:${c.id}`}>{c.name}</option>
+              <option key={c.id} value={`vc:${c.id}`}>
+                {c.name}
+              </option>
             ))}
           </optgroup>
         )}

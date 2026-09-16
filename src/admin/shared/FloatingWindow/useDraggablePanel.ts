@@ -46,10 +46,7 @@ export function clampFloatingPanelPosition(
   }
 }
 
-function clampToViewport(
-  position: PanelPosition,
-  panel: HTMLElement | null = null,
-): PanelPosition {
+function clampToViewport(position: PanelPosition, panel: HTMLElement | null = null): PanelPosition {
   // A hidden always-mounted panel has no measurable width. Preserve the old
   // conservative fallback until ResizeObserver sees its real open size.
   const panelWidth = panel?.getBoundingClientRect().width || window.innerWidth
@@ -135,20 +132,26 @@ export function useDraggablePanel(
 
   function onPointerMove(event: React.PointerEvent<HTMLDivElement>): void {
     if (!dragRef.current) return
-    const clamped = clampToViewport({
-      x: dragRef.current.startPanelX + event.clientX - dragRef.current.startClientX,
-      y: dragRef.current.startPanelY + event.clientY - dragRef.current.startClientY,
-    }, panelRef.current)
+    const clamped = clampToViewport(
+      {
+        x: dragRef.current.startPanelX + event.clientX - dragRef.current.startClientX,
+        y: dragRef.current.startPanelY + event.clientY - dragRef.current.startClientY,
+      },
+      panelRef.current,
+    )
     panelRef.current?.style.setProperty('--panel-x', `${clamped.x}px`)
     panelRef.current?.style.setProperty('--panel-y', `${clamped.y}px`)
   }
 
   function commitDragEnd(clientX: number, clientY: number): void {
     if (!dragRef.current) return
-    const clamped = clampToViewport({
-      x: dragRef.current.startPanelX + clientX - dragRef.current.startClientX,
-      y: dragRef.current.startPanelY + clientY - dragRef.current.startClientY,
-    }, panelRef.current)
+    const clamped = clampToViewport(
+      {
+        x: dragRef.current.startPanelX + clientX - dragRef.current.startClientX,
+        y: dragRef.current.startPanelY + clientY - dragRef.current.startClientY,
+      },
+      panelRef.current,
+    )
     dragRef.current = null
     positionRef.current = clamped
     setPosition(clamped)

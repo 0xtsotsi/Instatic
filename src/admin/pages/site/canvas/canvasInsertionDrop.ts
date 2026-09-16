@@ -2,14 +2,8 @@ import type { CSSProperties } from 'react'
 import type { Page } from '@core/page-tree'
 import { registry } from '@core/module-engine'
 import type { InsertLocation } from '@site/store/insertLocation'
-import {
-  getViewportLocalPoint,
-  measureCanvasDropCandidates,
-} from './canvasDomGeometry'
-import {
-  resolveCanvasInsertionTarget,
-  type CanvasInsertionTarget,
-} from './canvasDnd'
+import { getViewportLocalPoint, measureCanvasDropCandidates } from './canvasDomGeometry'
+import { resolveCanvasInsertionTarget, type CanvasInsertionTarget } from './canvasDnd'
 
 const CANVAS_VIEWPORT_SELECTOR = '[data-breakpoint-id]'
 
@@ -35,10 +29,7 @@ interface ResolveCanvasPointerInsertionDropInput {
   label: string
 }
 
-export function findCanvasViewportAtPoint(
-  clientX: number,
-  clientY: number,
-): HTMLElement | null {
+export function findCanvasViewportAtPoint(clientX: number, clientY: number): HTMLElement | null {
   const viewports = document.querySelectorAll<HTMLElement>(CANVAS_VIEWPORT_SELECTOR)
   for (const viewport of viewports) {
     const rect = viewport.getBoundingClientRect()

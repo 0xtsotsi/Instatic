@@ -45,9 +45,8 @@ export function visualComponentFromRow(row: DataRow): VisualComponent | null {
       ? cells.classIds.filter((x): x is string => typeof x === 'string')
       : [],
     // Convert ISO datetime string to epoch milliseconds.
-    createdAt: typeof row.createdAt === 'string'
-      ? (Date.parse(row.createdAt) || Date.now())
-      : Date.now(),
+    createdAt:
+      typeof row.createdAt === 'string' ? Date.parse(row.createdAt) || Date.now() : Date.now(),
   }
 
   return parseVisualComponent(rawVC)

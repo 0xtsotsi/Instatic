@@ -14,16 +14,9 @@ import { nanoid } from 'nanoid'
 import { INTERRUPTED_TOOL_RESULT_ERROR, aiToolError } from '@core/ai'
 import { Type, type Static } from '@core/utils/typeboxHelpers'
 import { apiRequest, isAbortError } from '@core/http'
-import {
-  AI_CONVERSATIONS_PATH,
-  AI_DEFAULTS_PATH,
-} from './agentConfig'
+import { AI_CONVERSATIONS_PATH, AI_DEFAULTS_PATH } from './agentConfig'
 import type { ConversationDetail } from '@admin/ai/api'
-import type {
-  AgentMessage,
-  AgentToolCall,
-  AgentToolScope,
-} from './types'
+import type { AgentMessage, AgentToolCall, AgentToolScope } from './types'
 
 // ---------------------------------------------------------------------------
 // Conversation bootstrap
@@ -43,9 +36,7 @@ import type {
  * preceding tool-call block's `result` so the UI renders the same way fresh
  * messages would).
  */
-export function rehydrateMessages(
-  records: ConversationDetail['messages'],
-): AgentMessage[] {
+export function rehydrateMessages(records: ConversationDetail['messages']): AgentMessage[] {
   const out: AgentMessage[] = []
   // Only calls still awaiting a persisted role:tool row remain here. Loading a
   // conversation never resumes its old browser bridge, so anything left after
@@ -112,9 +103,10 @@ export function rehydrateMessages(
           id: nanoid(),
           externalId: block.toolCallId,
           actionType: block.toolName,
-          params: (block.input && typeof block.input === 'object' && !Array.isArray(block.input)
-            ? (block.input as Record<string, unknown>)
-            : {}),
+          params:
+            block.input && typeof block.input === 'object' && !Array.isArray(block.input)
+              ? (block.input as Record<string, unknown>)
+              : {},
           result: null,
           status: 'pending',
         }

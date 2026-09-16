@@ -35,7 +35,10 @@ export function AgentImageGallery({
     })
   }
 
-  function openKeyboardMenu(image: AgentPreviewImage, event: KeyboardEvent<HTMLButtonElement>): void {
+  function openKeyboardMenu(
+    image: AgentPreviewImage,
+    event: KeyboardEvent<HTMLButtonElement>,
+  ): void {
     if (!isContextMenuKey(event.nativeEvent)) return
     event.preventDefault()
     event.stopPropagation()

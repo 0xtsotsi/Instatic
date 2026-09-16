@@ -11,9 +11,4 @@ export {
   VisualComponentSchema,
   parseVisualComponent,
 } from '../visualComponents/schemas'
-export type {
-  VCNode,
-  VCParam,
-  VCParamType,
-  VisualComponent,
-} from '../visualComponents/schemas'
+export type { VCNode, VCParam, VCParamType, VisualComponent } from '../visualComponents/schemas'

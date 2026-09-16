@@ -41,8 +41,7 @@ export function rewriteInternalLinks(
 
     for (const [id, node] of Object.entries(plan.nodeFragment.nodes)) {
       const href = node.props?.href
-      const ref =
-        typeof href === 'string' ? hrefToPageRef(href, plan.source, pageIdBySource) : null
+      const ref = typeof href === 'string' ? hrefToPageRef(href, plan.source, pageIdBySource) : null
       if (ref === null) {
         nodes[id] = node
         continue

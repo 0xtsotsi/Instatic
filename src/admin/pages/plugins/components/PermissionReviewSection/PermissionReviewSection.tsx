@@ -30,11 +30,7 @@
  * decision.
  */
 import { Button } from '@ui/components/Button'
-import {
-  permissionDescription,
-  type PluginManifest,
-  type PluginPermission,
-} from '@core/plugin-sdk'
+import { permissionDescription, type PluginManifest, type PluginPermission } from '@core/plugin-sdk'
 import { permissionLabel } from '@core/plugins/manifest'
 import {
   computePermissionDiff,
@@ -113,10 +109,7 @@ export function PermissionReviewSection({
 }: PermissionReviewSectionProps) {
   const isUpgrade = Boolean(pending.upgradeFromVersion)
   const rows: PermissionDiffRow[] = isUpgrade
-    ? computePermissionDiff(
-        pending.manifest.permissions,
-        pending.previouslyGrantedPermissions,
-      )
+    ? computePermissionDiff(pending.manifest.permissions, pending.previouslyGrantedPermissions)
     : pending.manifest.permissions.map<PermissionDiffRow>((permission) => ({
         permission,
         // For fresh installs we still annotate "new" so the row styling
@@ -135,15 +128,10 @@ export function PermissionReviewSection({
   const hasEditorEntrypoint = Boolean(pending.manifest.entrypoints?.editor)
 
   return (
-    <section
-      className={styles.review}
-      aria-labelledby="plugin-permissions-title"
-    >
+    <section className={styles.review} aria-labelledby="plugin-permissions-title">
       <div>
         <h2 id="plugin-permissions-title">
-          {isUpgrade
-            ? `Update ${pending.manifest.name}`
-            : `Review ${pending.manifest.name}`}
+          {isUpgrade ? `Update ${pending.manifest.name}` : `Review ${pending.manifest.name}`}
         </h2>
         <p>
           {isUpgrade
@@ -161,24 +149,26 @@ export function PermissionReviewSection({
           data-testid="unsandboxed-code-alert"
         >
           <span>
-            This plugin runs its own JavaScript <strong>directly in the admin
-            window, outside the plugin sandbox</strong>
+            This plugin runs its own JavaScript{' '}
+            <strong>directly in the admin window, outside the plugin sandbox</strong>
             {hasEditorEntrypoint && hasAppPages
               ? ' (an editor entrypoint and admin app pages)'
               : hasAppPages
                 ? ' (admin app pages)'
                 : ' (an editor entrypoint)'}
-            . That code has the same access as the admin UI itself — your
-            admin session, every admin API, and this browser tab. Only
-            continue if you trust the plugin author.
+            . That code has the same access as the admin UI itself — your admin session, every admin
+            API, and this browser tab. Only continue if you trust the plugin author.
           </span>
         </div>
       )}
 
       {isUpgrade && newCount > 0 && (
         <div className={styles.alert} role="alert" data-testid="permission-diff-alert">
-          This update requests <strong>{newCount} new permission{newCount === 1 ? '' : 's'}</strong>.
-          Review the highlighted rows below before continuing.
+          This update requests{' '}
+          <strong>
+            {newCount} new permission{newCount === 1 ? '' : 's'}
+          </strong>
+          . Review the highlighted rows below before continuing.
         </div>
       )}
 
@@ -190,8 +180,8 @@ export function PermissionReviewSection({
 
       {rows.length === 0 && (
         <div className={styles.empty} role="status" data-testid="permission-review-empty">
-          No permissions requested — this plugin is purely declarative and
-          gets no access to CMS data, editor state, or the network.
+          No permissions requested — this plugin is purely declarative and gets no access to CMS
+          data, editor state, or the network.
         </div>
       )}
 
@@ -212,9 +202,7 @@ export function PermissionReviewSection({
                   </span>
                 )}
               </div>
-              <span className={styles.description}>
-                {permissionDescription(row.permission)}
-              </span>
+              <span className={styles.description}>{permissionDescription(row.permission)}</span>
             </li>
           ))}
         </ul>
@@ -228,15 +216,12 @@ export function PermissionReviewSection({
         )
         if (hostRows.length === 0) return null
         return (
-          <div
-            className={styles.networkSection}
-            data-testid="permission-review-network-hosts"
-          >
+          <div className={styles.networkSection} data-testid="permission-review-network-hosts">
             <div className={styles.networkHeader}>
               <strong>External hosts</strong>
               <span className={styles.description}>
-                The plugin will connect to these hosts from the server and
-                from published pages. Hosts not listed here are blocked.
+                The plugin will connect to these hosts from the server and from published pages.
+                Hosts not listed here are blocked.
               </span>
             </div>
             <ul className={styles.list}>
@@ -263,19 +248,10 @@ export function PermissionReviewSection({
       })()}
 
       <div className={styles.actions}>
-        <Button
-          variant="secondary"
-          size="sm"
-          onClick={onCancel}
-        >
+        <Button variant="secondary" size="sm" onClick={onCancel}>
           <span>Cancel</span>
         </Button>
-        <Button
-          variant="primary"
-          size="sm"
-          disabled={uploading}
-          onClick={onConfirm}
-        >
+        <Button variant="primary" size="sm" disabled={uploading} onClick={onConfirm}>
           <span>
             {uploading
               ? isUpgrade

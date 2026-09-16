@@ -71,9 +71,7 @@ function resolveInitialWidth(tableId: string | null): number {
  * (`react.dev/learn/you-might-not-need-an-effect#adjusting-some-state-when-a-prop-changes`)
  * — both setStates fire in the same render and React batches them.
  */
-export function usePrimaryColumnWidth(
-  tableId: string | null,
-): [number, (next: number) => void] {
+export function usePrimaryColumnWidth(tableId: string | null): [number, (next: number) => void] {
   const [width, setWidth] = useState<number>(() => resolveInitialWidth(tableId))
   const [prevTableId, setPrevTableId] = useState<string | null>(tableId)
 

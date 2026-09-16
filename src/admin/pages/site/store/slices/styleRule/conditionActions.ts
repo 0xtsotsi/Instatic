@@ -57,7 +57,10 @@ export function createConditionActions({ get, mutateSite }: SiteSliceHelpers): C
           if (condId in cls.contextStyles) {
             delete cls.contextStyles[condId]
             delete cls.contextStylePriorities?.[condId]
-            if (cls.contextStylePriorities && Object.keys(cls.contextStylePriorities).length === 0) {
+            if (
+              cls.contextStylePriorities &&
+              Object.keys(cls.contextStylePriorities).length === 0
+            ) {
               delete cls.contextStylePriorities
             }
             cls.updatedAt = Date.now()
@@ -135,8 +138,8 @@ export function createConditionActions({ get, mutateSite }: SiteSliceHelpers): C
         delete draftClass.contextStyles[contextId]
         delete draftClass.contextStylePriorities?.[contextId]
         if (
-          draftClass.contextStylePriorities
-          && Object.keys(draftClass.contextStylePriorities).length === 0
+          draftClass.contextStylePriorities &&
+          Object.keys(draftClass.contextStylePriorities).length === 0
         ) {
           delete draftClass.contextStylePriorities
         }

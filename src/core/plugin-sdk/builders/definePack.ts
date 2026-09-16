@@ -97,7 +97,9 @@ function isExpandedEntry(value: ClassPackEntry): value is {
   description?: string
   tags?: string[]
 } {
-  return Boolean(value) && typeof value === 'object' && 'styles' in (value as Record<string, unknown>)
+  return (
+    Boolean(value) && typeof value === 'object' && 'styles' in (value as Record<string, unknown>)
+  )
 }
 
 export function definePack(config: DefinePackConfig): PluginPackContents {

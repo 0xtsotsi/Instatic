@@ -70,7 +70,13 @@ function makeTable(id: string, name: string, slug: string) {
       { type: 'text', id: 'title', label: 'Title', required: true, builtIn: true },
       { type: 'text', id: 'slug', label: 'Slug', required: true, builtIn: true },
       { type: 'richText', id: 'body', label: 'Body', format: 'markdown', builtIn: true },
-      { type: 'media', id: 'featuredMedia', label: 'Featured media', mediaKind: 'image', builtIn: true },
+      {
+        type: 'media',
+        id: 'featuredMedia',
+        label: 'Featured media',
+        mediaKind: 'image',
+        builtIn: true,
+      },
       { type: 'text', id: 'seoTitle', label: 'SEO title', builtIn: true },
       { type: 'longText', id: 'seoDescription', label: 'SEO description', builtIn: true },
     ],
@@ -157,7 +163,9 @@ describe('capability-aware admin UI', () => {
   it('hides admin sections that the current user cannot access', () => {
     render(
       <MemoryRouter initialEntries={['/admin/content']}>
-        <AdminSessionProvider user={currentUser(['content.create', 'content.edit.own', 'content.publish.own'])}>
+        <AdminSessionProvider
+          user={currentUser(['content.create', 'content.edit.own', 'content.publish.own'])}
+        >
           <AdminSectionNavigation section="content" />
         </AdminSessionProvider>
       </MemoryRouter>,
@@ -181,15 +189,28 @@ describe('capability-aware admin UI', () => {
       }
       if (url === '/admin/api/cms/data/tables/posts/rows' && method === 'GET') {
         return json({
-          rows: [makeRow('entry_1', 'posts', {
-            title: 'Own draft',
-            slug: 'own-draft',
-          }, {
-            authorUserId: 'editor_1',
-            author: { id: 'editor_1', email: 'editor@example.com', displayName: 'Editor', roleSlug: 'editor', roleName: 'Editor' },
-            createdByUserId: 'editor_1',
-            updatedByUserId: 'editor_1',
-          })],
+          rows: [
+            makeRow(
+              'entry_1',
+              'posts',
+              {
+                title: 'Own draft',
+                slug: 'own-draft',
+              },
+              {
+                authorUserId: 'editor_1',
+                author: {
+                  id: 'editor_1',
+                  email: 'editor@example.com',
+                  displayName: 'Editor',
+                  roleSlug: 'editor',
+                  roleName: 'Editor',
+                },
+                createdByUserId: 'editor_1',
+                updatedByUserId: 'editor_1',
+              },
+            ),
+          ],
         })
       }
       if (url === '/admin/api/cms/media') return json({ assets: [] })
@@ -201,7 +222,9 @@ describe('capability-aware admin UI', () => {
 
     render(
       <MemoryRouter>
-        <AdminSessionProvider user={currentUser(['content.create', 'content.edit.own', 'content.publish.own'])}>
+        <AdminSessionProvider
+          user={currentUser(['content.create', 'content.edit.own', 'content.publish.own'])}
+        >
           <StepUpProvider>
             <ContentPage />
           </StepUpProvider>
@@ -237,33 +260,57 @@ describe('capability-aware admin UI', () => {
 
       if (url === '/admin/api/cms/data/tables/posts/rows' && method === 'GET') {
         return json({
-          rows: [makeRow('entry_1', 'posts', {
-            title: 'Publishable draft',
-            slug: 'publishable-draft',
-          }, {
-            authorUserId: 'editor_1',
-            author: { id: 'editor_1', email: 'editor@example.com', displayName: 'Editor', roleSlug: 'editor', roleName: 'Editor' },
-            createdByUserId: 'editor_1',
-            updatedByUserId: 'editor_1',
-          })],
+          rows: [
+            makeRow(
+              'entry_1',
+              'posts',
+              {
+                title: 'Publishable draft',
+                slug: 'publishable-draft',
+              },
+              {
+                authorUserId: 'editor_1',
+                author: {
+                  id: 'editor_1',
+                  email: 'editor@example.com',
+                  displayName: 'Editor',
+                  roleSlug: 'editor',
+                  roleName: 'Editor',
+                },
+                createdByUserId: 'editor_1',
+                updatedByUserId: 'editor_1',
+              },
+            ),
+          ],
         })
       }
 
       if (url === '/admin/api/cms/data/rows/entry_1/publish' && method === 'POST') {
         return json({
-          row: makeRow('entry_1', 'posts', {
-            title: 'Publishable draft',
-            slug: 'publishable-draft',
-          }, {
-            status: 'published',
-            authorUserId: 'editor_1',
-            author: { id: 'editor_1', email: 'editor@example.com', displayName: 'Editor', roleSlug: 'editor', roleName: 'Editor' },
-            createdByUserId: 'editor_1',
-            updatedByUserId: 'editor_1',
-            publishedByUserId: 'editor_1',
-            updatedAt: now,
-            publishedAt: now,
-          }),
+          row: makeRow(
+            'entry_1',
+            'posts',
+            {
+              title: 'Publishable draft',
+              slug: 'publishable-draft',
+            },
+            {
+              status: 'published',
+              authorUserId: 'editor_1',
+              author: {
+                id: 'editor_1',
+                email: 'editor@example.com',
+                displayName: 'Editor',
+                roleSlug: 'editor',
+                roleName: 'Editor',
+              },
+              createdByUserId: 'editor_1',
+              updatedByUserId: 'editor_1',
+              publishedByUserId: 'editor_1',
+              updatedAt: now,
+              publishedAt: now,
+            },
+          ),
         })
       }
 

@@ -2,12 +2,12 @@
  * callback (used as a fallback when the chart isn't rendered). Inlined into
  * the FrameworkScalePanel step rows. */
 .previewBar {
-    display: inline-block;
-    height: 6px;
-    border-radius: var(--radius-sm);
-    background: var(--text);
-    opacity: 0.7;
-    max-width: 100%;
+  display: inline-block;
+  height: 6px;
+  border-radius: var(--radius-sm);
+  background: var(--text);
+  opacity: 0.7;
+  max-width: 100%;
 }
 
 /* ─── Bar chart (DIV-based, 1px = 1px) ──────────────────────────────────── */
@@ -25,31 +25,31 @@
  *      centerline (mirror of desktop).
  */
 .barChart {
-    position: relative;
-    display: grid;
-    grid-template-columns: minmax(0, 1fr);
-    row-gap: 0;
-    padding: var(--space-3xs) 0 0;
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  row-gap: 0;
+  padding: var(--space-3xs) 0 0;
 }
 
 .barChartIcon {
-    position: absolute;
-    left: var(--space-3xs);
-    z-index: 2;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    pointer-events: none;
+  position: absolute;
+  left: var(--space-3xs);
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
 }
 
-.barChartIcon[data-side="desktop"] {
-    top: 0;
-    color: var(--chart-series-max);
+.barChartIcon[data-side='desktop'] {
+  top: 0;
+  color: var(--chart-series-max);
 }
 
-.barChartIcon[data-side="mobile"] {
-    bottom: 0;
-    color: var(--chart-series-min);
+.barChartIcon[data-side='mobile'] {
+  bottom: 0;
+  color: var(--chart-series-min);
 }
 
 /* Each row owns its full px-tall area. The SVG below fills the bar half
@@ -57,19 +57,19 @@
  * overlay is absolutely positioned over the same area so the labels can
  * be translated to ride each bar's tip. */
 .barChartRow {
-    grid-column: 1;
-    position: relative;
-    width: 100%;
-    padding: 0 var(--space-3xs);
-    min-height: 4px;
+  grid-column: 1;
+  position: relative;
+  width: 100%;
+  padding: 0 var(--space-3xs);
+  min-height: 4px;
 }
 
-.barChartRow[data-side="desktop"] {
-    grid-row: 1;
+.barChartRow[data-side='desktop'] {
+  grid-row: 1;
 }
 
-.barChartRow[data-side="mobile"] {
-    grid-row: 3;
+.barChartRow[data-side='mobile'] {
+  grid-row: 3;
 }
 
 /* Baseline-step highlight — a single vertical bar in the base step's
@@ -86,30 +86,30 @@
  *
  * Sits BEHIND everything else (rendered first in DOM, no z-index needed). */
 .barChartBaseHighlight {
-    grid-column: 1;
-    /* Span all three explicit chart rows (desktop, center, mobile). We use
+  grid-column: 1;
+  /* Span all three explicit chart rows (desktop, center, mobile). We use
      * `span 3` instead of `1 / -1` because `.barChart` has no
      * `grid-template-rows`, so its row tracks are implicit and `-1` would
      * resolve to the end of just the first explicit track (= row 1 only). */
-    grid-row: 1 / span 3;
-    align-self: stretch;
-    display: flex;
-    align-items: stretch;
-    gap: var(--space-4xs);
-    padding: 0 var(--space-3xs);
-    pointer-events: none;
+  grid-row: 1 / span 3;
+  align-self: stretch;
+  display: flex;
+  align-items: stretch;
+  gap: var(--space-4xs);
+  padding: 0 var(--space-3xs);
+  pointer-events: none;
 }
 
 .barChartBaseHighlightCell {
-    flex: 1;
-    min-width: 0;
+  flex: 1;
+  min-width: 0;
 }
 
-.barChartBaseHighlightCell[data-base="true"] {
-    /* Overlay (additive) rather than a surface tone so the base marker stays
+.barChartBaseHighlightCell[data-base='true'] {
+  /* Overlay (additive) rather than a surface tone so the base marker stays
        visible when the Home card lifts its background on hover. */
-    background: var(--overlay-10);
-    border-radius: 12px;
+  background: var(--overlay-10);
+  border-radius: 12px;
 }
 
 /* Bar grid — one column per step, equal-width, anchored to the
@@ -119,38 +119,38 @@
  * and a small inter-bar gap. The grid template matches the label
  * overlay so labels and bars share columns 1:1. */
 .barChartBars {
-    position: absolute;
-    left: 4px;
-    right: 4px;
-    height: calc(100% - 12px); /* leave VALUE_LABEL_RESERVE_PX for labels */
-    display: grid;
-    grid-auto-flow: column;
-    grid-auto-columns: minmax(0, 1fr);
-    gap: var(--space-4xs);
-    pointer-events: none;
+  position: absolute;
+  left: 4px;
+  right: 4px;
+  height: calc(100% - 12px); /* leave VALUE_LABEL_RESERVE_PX for labels */
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(0, 1fr);
+  gap: var(--space-4xs);
+  pointer-events: none;
 }
 
-.barChartRow[data-side="desktop"] .barChartBars {
-    bottom: 0;
-    align-items: end;
+.barChartRow[data-side='desktop'] .barChartBars {
+  bottom: 0;
+  align-items: end;
 }
 
-.barChartRow[data-side="mobile"] .barChartBars {
-    top: 0;
-    align-items: start;
+.barChartRow[data-side='mobile'] .barChartBars {
+  top: 0;
+  align-items: start;
 }
 
 .barChartBar {
-    width: 100%;
-    border-radius: 12px;
+  width: 100%;
+  border-radius: 12px;
 }
 
 .barChartBarMax {
-    background: var(--chart-series-max);
+  background: var(--chart-series-max);
 }
 
 .barChartBarMin {
-    background: var(--chart-series-min);
+  background: var(--chart-series-min);
 }
 
 /* Floating value labels overlay — one cell per bar column, equally spaced
@@ -158,71 +158,63 @@
  * so it lands right at the bar tip. The grid template (incl. gap) MUST
  * match `.barChartBars` so each label cell sits over its bar. */
 .barChartLabelOverlay {
-    position: absolute;
-    inset: 0 4px;
-    display: grid;
-    grid-auto-flow: column;
-    grid-auto-columns: minmax(0, 1fr);
-    gap: var(--space-4xs);
-    pointer-events: none;
+  position: absolute;
+  inset: 0 4px;
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(0, 1fr);
+  gap: var(--space-4xs);
+  pointer-events: none;
 }
 
 .barChartLabelCell {
-    position: relative;
-    display: flex;
-    align-items: flex-start;
-    justify-content: center;
-    pointer-events: none;
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  pointer-events: none;
 }
 
-.barChartRow[data-side="desktop"] .barChartLabelCell {
-    align-items: flex-start;
+.barChartRow[data-side='desktop'] .barChartLabelCell {
+  align-items: flex-start;
 }
 
-.barChartRow[data-side="mobile"] .barChartLabelCell {
-    align-items: flex-end;
-    /* Mobile labels sit at the bottom of the row by default; per-bar
+.barChartRow[data-side='mobile'] .barChartLabelCell {
+  align-items: flex-end;
+  /* Mobile labels sit at the bottom of the row by default; per-bar
      * translateY pushes them up to ride the bar tip. */
 }
 
 /* Base value labels read brighter / bolder so the eye finds the anchor. */
-.barValueLabel[data-base="true"][data-series="max"] {
-    color: var(--chart-series-max);
-    font-weight: 700;
+.barValueLabel[data-base='true'][data-series='max'] {
+  color: var(--chart-series-max);
+  font-weight: 700;
 }
 
-.barValueLabel[data-base="true"][data-series="min"] {
-    color: var(--chart-series-min);
-    font-weight: 700;
+.barValueLabel[data-base='true'][data-series='min'] {
+  color: var(--chart-series-min);
+  font-weight: 700;
 }
 
 .barValueLabel {
-    overflow: hidden;
-    color: var(--text-subtle);
-    font-size: var(--text-3xs);
-    font-variant-numeric: tabular-nums;
-    line-height: 1.1;
-    letter-spacing: 0.02em;
-    text-align: center;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    max-width: 100%;
+  overflow: hidden;
+  color: var(--text-subtle);
+  font-size: var(--text-3xs);
+  font-variant-numeric: tabular-nums;
+  line-height: 1.1;
+  letter-spacing: 0.02em;
+  text-align: center;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 100%;
 }
 
-.barValueLabel[data-series="max"] {
-    color: color-mix(
-        in srgb,
-        var(--chart-series-max) 70%,
-        var(--text-subtle)
-    );
+.barValueLabel[data-series='max'] {
+  color: color-mix(in srgb, var(--chart-series-max) 70%, var(--text-subtle));
 }
 
-.barValueLabel[data-series="min"] {
-    color: color-mix(
-        in srgb,
-        var(--chart-series-min) 70%,
-        var(--text-subtle)
-    );
+.barValueLabel[data-series='min'] {
+  color: color-mix(in srgb, var(--chart-series-min) 70%, var(--text-subtle));
 }
 
 /* Centerline — spans the full chart width but lays its inner content out
@@ -232,44 +224,44 @@
  * is rendered as a `::before` pseudo-element so it cannot push the label
  * grid around. */
 .barChartCenter {
-    grid-column: 1 / -1;
-    grid-row: 2;
-    position: relative;
-    display: grid;
-    grid-template-columns: minmax(0, 1fr);
-    align-items: center;
-    margin: var(--space-4xs) 0;
+  grid-column: 1 / -1;
+  grid-row: 2;
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  align-items: center;
+  margin: var(--space-4xs) 0;
 }
 
 /* Same grid template as the bar rows (1fr per column, 3px gap, 4px side
  * padding) — keeps the step labels aligned with the bars above/below. */
 .barChartStepLabels {
-    grid-column: 1;
-    position: relative;
-    z-index: 1;
-    display: grid;
-    grid-auto-flow: column;
-    grid-auto-columns: minmax(0, 1fr);
-    align-items: center;
-    gap: var(--space-4xs);
-    padding: 0 var(--space-3xs);
+  grid-column: 1;
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(0, 1fr);
+  align-items: center;
+  gap: var(--space-4xs);
+  padding: 0 var(--space-3xs);
 }
 
 .barChartStepLabel {
-    padding: 0 var(--space-3xs);
-    color: var(--text-subtle);
-    font-size: var(--text-3xs);
-    font-weight: 700;
-    letter-spacing: 0.06em;
-    line-height: 1.4;
-    text-align: center;
-    text-transform: uppercase;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+  padding: 0 var(--space-3xs);
+  color: var(--text-subtle);
+  font-size: var(--text-3xs);
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  line-height: 1.4;
+  text-align: center;
+  text-transform: uppercase;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
-.barChartStepLabel[data-base="true"] {
-    color: var(--text);
-    font-weight: 800;
+.barChartStepLabel[data-base='true'] {
+  color: var(--text);
+  font-weight: 800;
 }

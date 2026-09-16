@@ -70,16 +70,13 @@ describe("user's full flow: create VC → drop ref → insert text → edit text
     })
 
     // 4. Insert a slot-outlet into the VC tree at the root.
-    const vcRootId = useEditorStore.getState().site!.visualComponents.find(
-      (v) => v.id === vcId,
-    )!.tree.rootNodeId
+    const vcRootId = useEditorStore.getState().site!.visualComponents.find((v) => v.id === vcId)!
+      .tree.rootNodeId
     let slotOutletId = ''
     act(() => {
-      slotOutletId = useEditorStore.getState().insertNode(
-        'base.slot-outlet',
-        { slotName: 'children' },
-        vcRootId,
-      )!
+      slotOutletId = useEditorStore
+        .getState()
+        .insertNode('base.slot-outlet', { slotName: 'children' }, vcRootId)!
     })
     expect(slotOutletId).toBeTruthy()
 
@@ -107,11 +104,9 @@ describe("user's full flow: create VC → drop ref → insert text → edit text
     // 7. Insert a text into the slot-instance.
     let textId = ''
     act(() => {
-      textId = useEditorStore.getState().insertNode(
-        'base.text',
-        { text: 'Initial text' },
-        slotInstId,
-      )!
+      textId = useEditorStore
+        .getState()
+        .insertNode('base.text', { text: 'Initial text' }, slotInstId)!
     })
 
     // Verify it landed in the slot-instance.
@@ -143,9 +138,7 @@ describe("user's full flow: create VC → drop ref → insert text → edit text
     })
 
     // 11. Both store AND canvas DOM must reflect the new value.
-    expect(
-      useEditorStore.getState().site!.pages[0].nodes[textId].props.text,
-    ).toBe('Edited text')
+    expect(useEditorStore.getState().site!.pages[0].nodes[textId].props.text).toBe('Edited text')
 
     expect(await screen.findAllByText('Edited text')).not.toHaveLength(0)
     expect(screen.queryByText('Initial text')).toBeNull()

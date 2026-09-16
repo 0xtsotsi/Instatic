@@ -35,16 +35,31 @@ function pageRow(page: Page, extraCells: Record<string, unknown> = {}) {
       body: { nodes: page.nodes, rootNodeId: page.rootNodeId },
       ...extraCells,
     },
-    author_user_id: null, author_email: null, author_display_name: null,
-    author_role_slug: null, author_role_name: null,
-    created_by_user_id: null, created_by_email: null, created_by_display_name: null,
-    created_by_role_slug: null, created_by_role_name: null,
-    updated_by_user_id: null, updated_by_email: null, updated_by_display_name: null,
-    updated_by_role_slug: null, updated_by_role_name: null,
-    published_by_user_id: null, published_by_email: null, published_by_display_name: null,
-    published_by_role_slug: null, published_by_role_name: null,
-    created_at: rowDate('2026-01-01'), updated_at: rowDate('2026-01-01'),
-    published_at: null, scheduled_publish_at: null, deleted_at: null,
+    author_user_id: null,
+    author_email: null,
+    author_display_name: null,
+    author_role_slug: null,
+    author_role_name: null,
+    created_by_user_id: null,
+    created_by_email: null,
+    created_by_display_name: null,
+    created_by_role_slug: null,
+    created_by_role_name: null,
+    updated_by_user_id: null,
+    updated_by_email: null,
+    updated_by_display_name: null,
+    updated_by_role_slug: null,
+    updated_by_role_name: null,
+    published_by_user_id: null,
+    published_by_email: null,
+    published_by_display_name: null,
+    published_by_role_slug: null,
+    published_by_role_name: null,
+    created_at: rowDate('2026-01-01'),
+    updated_at: rowDate('2026-01-01'),
+    published_at: null,
+    scheduled_publish_at: null,
+    deleted_at: null,
   }
 }
 
@@ -52,23 +67,37 @@ function buildFakeDb(layout: Page, about: Page) {
   return createFakeDb(async (sql: string, params: unknown[]): Promise<DbResult> => {
     const s = sql.replace(/\s+/g, ' ').trim().toLowerCase()
 
-    if (s.startsWith('select id, name, version, enabled, lifecycle_status')) return { rows: [], rowCount: 0 }
+    if (s.startsWith('select id, name, version, enabled, lifecycle_status'))
+      return { rows: [], rowCount: 0 }
 
     if (s.includes('from site') && s.includes('select id')) {
       return {
-        rows: [{
-          id: 'proj-1', name: 'Test Site',
-          settings_json: { metaTitle: 'Test Site', shortcuts: {} },
-          files_json: [], classes_json: {},
-          breakpoints_json: [{ id: 'desktop', label: 'Desktop', width: 1440, icon: 'monitor' }],
-          runtime_json: { dependencyLock: { version: 1, packages: {}, updatedAt: 0 }, scripts: {} },
-          version: 1, created_at: rowDate('2026-01-01'), updated_at: rowDate('2026-01-01'),
-        }],
+        rows: [
+          {
+            id: 'proj-1',
+            name: 'Test Site',
+            settings_json: { metaTitle: 'Test Site', shortcuts: {} },
+            files_json: [],
+            classes_json: {},
+            breakpoints_json: [{ id: 'desktop', label: 'Desktop', width: 1440, icon: 'monitor' }],
+            runtime_json: {
+              dependencyLock: { version: 1, packages: {}, updatedAt: 0 },
+              scripts: {},
+            },
+            version: 1,
+            created_at: rowDate('2026-01-01'),
+            updated_at: rowDate('2026-01-01'),
+          },
+        ],
         rowCount: 1,
       }
     }
 
-    if (s.includes('select data_rows.id') && s.includes('from data_rows') && s.includes('order by')) {
+    if (
+      s.includes('select data_rows.id') &&
+      s.includes('from data_rows') &&
+      s.includes('order by')
+    ) {
       if (params[0] === 'pages') {
         return {
           rows: [
@@ -85,11 +114,14 @@ function buildFakeDb(layout: Page, about: Page) {
       return { rows: [], rowCount: 0 }
     }
 
-    if (s.includes('coalesce(max(version_number), 0) + 1')) return { rows: [{ next_version: 1 }], rowCount: 1 }
+    if (s.includes('coalesce(max(version_number), 0) + 1'))
+      return { rows: [{ next_version: 1 }], rowCount: 1 }
     if (s.includes('insert into data_row_versions')) return { rows: [], rowCount: 1 }
     if (s.includes('insert into runtime_assets')) return { rows: [], rowCount: 0 }
-    if (s.includes('select count') && s.includes('from runtime_assets')) return { rows: [{ count: 0 }], rowCount: 1 }
-    if (s.includes('update data_rows') && s.includes("status = 'published'")) return { rows: [], rowCount: 1 }
+    if (s.includes('select count') && s.includes('from runtime_assets'))
+      return { rows: [{ count: 0 }], rowCount: 1 }
+    if (s.includes('update data_rows') && s.includes("status = 'published'"))
+      return { rows: [], rowCount: 1 }
     if (s.includes('from active_media_storage_adapter')) return { rows: [], rowCount: 0 }
     if (s.includes('count(*) as count from site')) return { rows: [{ count: 1 }], rowCount: 1 }
 

@@ -235,4 +235,3 @@ class MediaStorageRegistry {
 }
 
 export const mediaStorageRegistry = new MediaStorageRegistry()
-

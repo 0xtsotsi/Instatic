@@ -47,11 +47,8 @@ async function saveScope(
     setStatusByScope((prev) => ({ ...prev, [scope]: 'Saved.' }))
     refresh()
   } catch (err) {
-    const message = err instanceof ApiError
-      ? err.message
-      : err instanceof Error
-        ? err.message
-        : 'Failed to save.'
+    const message =
+      err instanceof ApiError ? err.message : err instanceof Error ? err.message : 'Failed to save.'
     setStatusByScope((prev) => ({ ...prev, [scope]: message }))
   } finally {
     setSavingScope(null)
@@ -72,11 +69,12 @@ async function clearScope(
     refresh()
     return true
   } catch (err) {
-    const message = err instanceof ApiError
-      ? err.message
-      : err instanceof Error
+    const message =
+      err instanceof ApiError
         ? err.message
-        : 'Failed to clear.'
+        : err instanceof Error
+          ? err.message
+          : 'Failed to clear.'
     setStatusByScope((prev) => ({ ...prev, [scope]: message }))
     return false
   } finally {
@@ -86,7 +84,8 @@ async function clearScope(
 
 export function DefaultsTab() {
   const { data, loading, error, refresh } = useAsyncResource(
-    () => Promise.all([listCredentials(), listDefaults()]).then(([creds, defs]) => ({ creds, defs })),
+    () =>
+      Promise.all([listCredentials(), listDefaults()]).then(([creds, defs]) => ({ creds, defs })),
     [],
     { fallbackError: 'Failed to load defaults.' },
   )
@@ -100,11 +99,18 @@ export function DefaultsTab() {
       <div className={styles.sectionHeader}>
         <div>
           <h2>Per-scope defaults</h2>
-          <p>Pick which credential + model each AI surface uses by default. Users can override in the chat picker.</p>
+          <p>
+            Pick which credential + model each AI surface uses by default. Users can override in the
+            chat picker.
+          </p>
         </div>
       </div>
 
-      {error && <p role="alert" className={styles.errorAlert}>{error}</p>}
+      {error && (
+        <p role="alert" className={styles.errorAlert}>
+          {error}
+        </p>
+      )}
 
       {loading ? (
         <div className={styles.emptyState}>Loading…</div>
@@ -122,7 +128,9 @@ export function DefaultsTab() {
               current={defaults[scope]}
               busy={savingScope === scope}
               status={statusByScope[scope]}
-              onSave={(credentialId, modelId) => saveScope(scope, credentialId, modelId, refresh, setSavingScope, setStatusByScope)}
+              onSave={(credentialId, modelId) =>
+                saveScope(scope, credentialId, modelId, refresh, setSavingScope, setStatusByScope)
+              }
               onClear={() => clearScope(scope, refresh, setSavingScope, setStatusByScope)}
             />
           ))}

@@ -72,11 +72,7 @@ import { useDashboardWidgets } from './hooks/useDashboardWidgets'
 import { useOnboardingState } from './hooks/useOnboardingState'
 import { registerFirstPartyDashboardWidgets } from './widgets'
 import { OnboardingPanel } from './components/OnboardingPanel'
-import {
-  BlockLibrary,
-  LIBRARY_DRAG_PREFIX,
-  LIBRARY_DROP_ID,
-} from './components/BlockLibrary'
+import { BlockLibrary, LIBRARY_DRAG_PREFIX, LIBRARY_DROP_ID } from './components/BlockLibrary'
 import { DashboardGrid } from './components/DashboardGrid'
 import { RangeTabs } from '@ui/components/RangeTabs'
 import styles from './DashboardPage.module.css'
@@ -174,7 +170,6 @@ export function DashboardPage() {
     return () => clearTimeout(id)
   }, [])
 
-
   /**
    * Opening the block library forces customize mode on. Without that
    * the grid stays at its compact 1px-gap layout with no extra drop
@@ -208,19 +203,16 @@ export function DashboardPage() {
    * "into empty space", so a hidden ghost is the visual signal that
    * the current target is invalid.
    */
-  const [dropTarget, setDropTarget] = useState<
-    | {
-        col: number
-        row: number
-        size: number
-        rows: number
-        leftPx: number
-        topPx: number
-        widthPx: number
-        heightPx: number
-      }
-    | null
-  >(null)
+  const [dropTarget, setDropTarget] = useState<{
+    col: number
+    row: number
+    size: number
+    rows: number
+    leftPx: number
+    topPx: number
+    widthPx: number
+    heightPx: number
+  } | null>(null)
 
   /**
    * Proximity scale for the DragOverlay child — drops the dragged tile
@@ -240,14 +232,12 @@ export function DashboardPage() {
    */
   const [proximityScale, setProximityScale] = useState(1)
 
-  const sensors = useSensors(
-    useSensor(PointerSensor, { activationConstraint: { distance: 6 } }),
-  )
+  const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 6 } }))
 
   // Bridge the registry array into a stable Map keyed by id for O(1)
   // lookups inside the grid + library.
   const definitionsById = (() => {
-    const map = new Map<string, typeof widgets[number]>()
+    const map = new Map<string, (typeof widgets)[number]>()
     for (const w of widgets) map.set(w.id, w)
     return map
   })()
@@ -318,9 +308,7 @@ export function DashboardPage() {
    * drags mirror the existing tile's current size + rows so the preview
    * lines up 1:1 with the dragged tile.
    */
-  function resolveDragFootprint(
-    rawId: string,
-  ): { size: number; rows: number } | null {
+  function resolveDragFootprint(rawId: string): { size: number; rows: number } | null {
     if (rawId.startsWith(LIBRARY_DRAG_PREFIX)) {
       const widgetId = rawId.slice(LIBRARY_DRAG_PREFIX.length)
       const def = definitionsById.get(widgetId)
@@ -411,12 +399,7 @@ export function DashboardPage() {
       return
     }
     const overGrid = event.over?.id === GRID_DROP_ID
-    const next = resolveDropTarget(
-      String(event.active.id),
-      grid,
-      draggedRect,
-      overGrid,
-    )
+    const next = resolveDropTarget(String(event.active.id), grid, draggedRect, overGrid)
     setDropTarget((prev) => {
       // Avoid React re-renders when nothing actually changed (the
       // pointer moved within the same cell). React would otherwise
@@ -500,7 +483,7 @@ export function DashboardPage() {
       workspace="dashboard"
       title={greetingFor(currentUser.displayName)}
       description="Your site at a glance — content, activity, storage and plugins. Configure the grid to surface exactly what you watch."
-      actions={(
+      actions={
         <>
           <Button variant="ghost" size="sm">
             <ZapSolidIcon size={11} aria-hidden="true" /> Publish all
@@ -509,7 +492,7 @@ export function DashboardPage() {
             <PlusIcon size={12} aria-hidden="true" /> New page
           </Button>
         </>
-      )}
+      }
     >
       <div className={styles.crumbs}>
         <span>Admin</span>
@@ -518,7 +501,11 @@ export function DashboardPage() {
       </div>
 
       {mounted && showOnboarding && (
-        <OnboardingPanel facts={facts} onDismiss={dismissOnboarding} onFrameworkImported={refreshOnboarding} />
+        <OnboardingPanel
+          facts={facts}
+          onDismiss={dismissOnboarding}
+          onFrameworkImported={refreshOnboarding}
+        />
       )}
 
       <div className={styles.gridHeader}>
@@ -608,9 +595,7 @@ export function DashboardPage() {
           <BlockLibrary
             panelOpen={libraryOpen}
             dragging={activeId !== null}
-            draggingFromGrid={
-              activeId !== null && !activeId.startsWith(LIBRARY_DRAG_PREFIX)
-            }
+            draggingFromGrid={activeId !== null && !activeId.startsWith(LIBRARY_DRAG_PREFIX)}
             availableWidgets={availableWidgets}
             height={layout.libraryHeight}
             onHeightChange={setLibraryHeight}
@@ -634,28 +619,24 @@ export function DashboardPage() {
           component would render nothing visible but still allocate its
           portal root + animation state. Deferring it spares the first
           reconciliation pass. */}
-      {mounted && <FloatingActionBar
-        open={editing && !libraryOpen && activeId === null}
-        ariaLabel="Customize dashboard"
-        label={<><strong>Customize mode</strong> — drag, resize, or add blocks.</>}
-      >
-        <Button
-          variant="ghost"
-          size="sm"
-          shape="pill"
-          onClick={() => setLibraryOpen(true)}
+      {mounted && (
+        <FloatingActionBar
+          open={editing && !libraryOpen && activeId === null}
+          ariaLabel="Customize dashboard"
+          label={
+            <>
+              <strong>Customize mode</strong> — drag, resize, or add blocks.
+            </>
+          }
         >
-          <PlusIcon size={11} aria-hidden="true" /> Add block
-        </Button>
-        <Button
-          variant="ghost"
-          size="sm"
-          shape="pill"
-          onClick={() => setEditing(false)}
-        >
-          Done
-        </Button>
-      </FloatingActionBar>}
+          <Button variant="ghost" size="sm" shape="pill" onClick={() => setLibraryOpen(true)}>
+            <PlusIcon size={11} aria-hidden="true" /> Add block
+          </Button>
+          <Button variant="ghost" size="sm" shape="pill" onClick={() => setEditing(false)}>
+            Done
+          </Button>
+        </FloatingActionBar>
+      )}
     </AdminPageLayout>
   )
 }

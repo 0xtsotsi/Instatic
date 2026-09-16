@@ -60,7 +60,11 @@ function resetStore(vcs: VisualComponent[] = []) {
     slug: 'index',
     rootNodeId: 'root-home',
     nodes: {
-      'root-home': makeNode({ id: 'root-home', moduleId: 'base.body', children: ['container-node'] }),
+      'root-home': makeNode({
+        id: 'root-home',
+        moduleId: 'base.body',
+        children: ['container-node'],
+      }),
       'container-node': makeNode({ id: 'container-node', moduleId: 'base.container' }),
     },
   })
@@ -129,9 +133,9 @@ describe('LayerNodeContextMenu — Insert module here', () => {
     openInsertSubmenu()
 
     const submenu = screen.getByRole('menu', { name: 'Insert module here' })
-    const textOption = within(submenu).getAllByRole('menuitem').find(
-      (el) => el.getAttribute('data-module-id') === 'base.text',
-    )
+    const textOption = within(submenu)
+      .getAllByRole('menuitem')
+      .find((el) => el.getAttribute('data-module-id') === 'base.text')
     expect(textOption).toBeDefined()
     fireEvent.click(textOption!)
 
@@ -346,9 +350,9 @@ describe('LayerNodeContextMenu — slot-instance lock-down', () => {
     openInsertSubmenu()
 
     const submenu = screen.getByRole('menu', { name: 'Insert module here' })
-    const textOption = within(submenu).getAllByRole('menuitem').find(
-      (el) => el.getAttribute('data-module-id') === 'base.text',
-    )
+    const textOption = within(submenu)
+      .getAllByRole('menuitem')
+      .find((el) => el.getAttribute('data-module-id') === 'base.text')
     expect(textOption).toBeDefined()
     fireEvent.click(textOption!)
 
@@ -380,7 +384,11 @@ describe('LayerNodeContextMenu — orphan slot-instance is NOT locked', () => {
       rootNodeId: 'root-home',
       nodes: {
         // Orphan slot-instance: parent is base.body, NOT base.visual-component-ref.
-        'root-home': makeNode({ id: 'root-home', moduleId: 'base.body', children: ['orphan-slot'] }),
+        'root-home': makeNode({
+          id: 'root-home',
+          moduleId: 'base.body',
+          children: ['orphan-slot'],
+        }),
         'orphan-slot': makeNode({
           id: 'orphan-slot',
           moduleId: 'base.slot-instance',
@@ -494,23 +502,17 @@ describe('LayerNodeContextMenu — "Insert module here" sibling fallback on leaf
 
   it('"Insert module here" IS shown for a base.container node', () => {
     renderMenuFor('ctr')
-    expect(
-      screen.getByRole('menuitem', { name: /insert module here/i }),
-    ).toBeDefined()
+    expect(screen.getByRole('menuitem', { name: /insert module here/i })).toBeDefined()
   })
 
   it('"Insert module here" IS shown for a base.text node (leaf — places as sibling)', () => {
     renderMenuFor('txt')
-    expect(
-      screen.getByRole('menuitem', { name: /insert module here/i }),
-    ).toBeDefined()
+    expect(screen.getByRole('menuitem', { name: /insert module here/i })).toBeDefined()
   })
 
   it('"Insert module here" IS shown for a base.button node (leaf — places as sibling)', () => {
     renderMenuFor('btn')
-    expect(
-      screen.getByRole('menuitem', { name: /insert module here/i }),
-    ).toBeDefined()
+    expect(screen.getByRole('menuitem', { name: /insert module here/i })).toBeDefined()
   })
 
   it('inserts a module as the NEXT SIBLING when the target is a leaf', () => {
@@ -519,9 +521,9 @@ describe('LayerNodeContextMenu — "Insert module here" sibling fallback on leaf
     fireEvent.mouseEnter(trigger)
 
     const submenu = screen.getByRole('menu', { name: 'Insert module here' })
-    const buttonOption = within(submenu).getAllByRole('menuitem').find(
-      (el) => el.getAttribute('data-module-id') === 'base.button',
-    )
+    const buttonOption = within(submenu)
+      .getAllByRole('menuitem')
+      .find((el) => el.getAttribute('data-module-id') === 'base.button')
     expect(buttonOption).toBeDefined()
     fireEvent.click(buttonOption!)
 
@@ -544,12 +546,13 @@ describe('LayerNodeContextMenu — "Insert module here" sibling fallback on leaf
     const vc = makeVC('vc-sibling', 'Hero')
     setupPageWithMixedNodes()
     // Re-set site with the VC available.
-    useEditorStore.setState((s) => ({
-      ...s,
-      site: s.site
-        ? { ...s.site, visualComponents: [vc] }
-        : s.site,
-    }) as Parameters<typeof useEditorStore.setState>[0])
+    useEditorStore.setState(
+      (s) =>
+        ({
+          ...s,
+          site: s.site ? { ...s.site, visualComponents: [vc] } : s.site,
+        }) as Parameters<typeof useEditorStore.setState>[0],
+    )
 
     render(
       <LayerNodeContextMenu
@@ -648,9 +651,9 @@ describe('LayerNodeContextMenu — "Insert module here" sibling fallback on leaf
     fireEvent.mouseEnter(trigger)
 
     const submenu = screen.getByRole('menu', { name: 'Insert module here' })
-    const textOption = within(submenu).getAllByRole('menuitem').find(
-      (el) => el.getAttribute('data-module-id') === 'base.text',
-    )
+    const textOption = within(submenu)
+      .getAllByRole('menuitem')
+      .find((el) => el.getAttribute('data-module-id') === 'base.text')
     expect(textOption).toBeDefined()
     fireEvent.click(textOption!)
 
@@ -831,7 +834,9 @@ describe('LayerNodeContextMenu — multi-delete confirmation', () => {
           x={100}
           y={200}
           nodeId="b"
-          onClose={() => { closed = true }}
+          onClose={() => {
+            closed = true
+          }}
           onDelete={noop}
           onDuplicate={noop}
           onRename={noop}

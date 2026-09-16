@@ -144,7 +144,12 @@ export function LiquidProgressRing({ value, total, size = 112 }: LiquidProgressR
   }
 
   return (
-    <div className={styles.ring} style={containerStyle} role="img" aria-label={`${value} of ${total} steps complete`}>
+    <div
+      className={styles.ring}
+      style={containerStyle}
+      role="img"
+      aria-label={`${value} of ${total} steps complete`}
+    >
       <svg
         width={size}
         height={size}
@@ -208,25 +213,13 @@ export function LiquidProgressRing({ value, total, size = 112 }: LiquidProgressR
               above the front wave's troughs, reading as a darker
               undertow / sea-floor silhouette through the lighter
               liquid above. */}
-          <path
-            d={wavePathDeep}
-            fill={`url(#${liquidGradDeep})`}
-            className={styles.waveDeep}
-          />
+          <path d={wavePathDeep} fill={`url(#${liquidGradDeep})`} className={styles.waveDeep} />
 
           {/* Back wave (slower, more transparent — parallax depth). */}
-          <path
-            d={wavePathBack}
-            fill={`url(#${liquidGradBack})`}
-            className={styles.waveBack}
-          />
+          <path d={wavePathBack} fill={`url(#${liquidGradBack})`} className={styles.waveBack} />
 
           {/* Front wave (primary liquid body). */}
-          <path
-            d={wavePath}
-            fill={`url(#${liquidGrad})`}
-            className={styles.waveFront}
-          />
+          <path d={wavePath} fill={`url(#${liquidGrad})`} className={styles.waveFront} />
 
           {/* Thin surface highlight — sits on the front wave's crest to
               suggest light catching the liquid's meniscus. */}
@@ -243,22 +236,23 @@ export function LiquidProgressRing({ value, total, size = 112 }: LiquidProgressR
               pops (scale-up + fade-out). Bubbles are hidden when the
               bottle is essentially empty so they don't float in mid-air
               above the liquid surface. */}
-          {pct > 0.05 && BUBBLES.map((bubble, i) => (
-            <circle
-              key={i}
-              cx={bubble.cx}
-              cy={96}
-              r={bubble.r}
-              fill="rgba(255, 255, 255, 0.7)"
-              stroke="rgba(255, 255, 255, 0.4)"
-              strokeWidth="0.3"
-              className={styles.bubble}
-              style={{
-                animationDelay: `${bubble.delay}s`,
-                animationDuration: `${bubble.duration}s`,
-              }}
-            />
-          ))}
+          {pct > 0.05 &&
+            BUBBLES.map((bubble, i) => (
+              <circle
+                key={i}
+                cx={bubble.cx}
+                cy={96}
+                r={bubble.r}
+                fill="rgba(255, 255, 255, 0.7)"
+                stroke="rgba(255, 255, 255, 0.4)"
+                strokeWidth="0.3"
+                className={styles.bubble}
+                style={{
+                  animationDelay: `${bubble.delay}s`,
+                  animationDuration: `${bubble.duration}s`,
+                }}
+              />
+            ))}
         </g>
 
         {/* Outer ring outline — sits over everything so the bottle

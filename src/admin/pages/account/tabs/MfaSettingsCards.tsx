@@ -172,9 +172,13 @@ function TotpSetupDialog({
   onCodeChange,
 }: TotpSetupDialogProps) {
   const currentTotpQrDataUrl =
-    state.totpSetup && state.totpQrCode?.otpauthUrl === state.totpSetup.otpauthUrl ? state.totpQrCode.dataUrl : null
+    state.totpSetup && state.totpQrCode?.otpauthUrl === state.totpSetup.otpauthUrl
+      ? state.totpQrCode.dataUrl
+      : null
   const currentTotpQrError =
-    state.totpSetup && state.totpQrError?.otpauthUrl === state.totpSetup.otpauthUrl ? state.totpQrError.message : null
+    state.totpSetup && state.totpQrError?.otpauthUrl === state.totpSetup.otpauthUrl
+      ? state.totpQrError.message
+      : null
 
   return (
     <Dialog
@@ -223,14 +227,19 @@ function TotpSetupDialog({
                   </span>
                 )}
               </div>
-              {currentTotpQrError && <p className={styles.error} role="alert">{currentTotpQrError}</p>}
+              {currentTotpQrError && (
+                <p className={styles.error} role="alert">
+                  {currentTotpQrError}
+                </p>
+              )}
             </div>
 
             <div className={styles.mfaSetupContent}>
               <div className={styles.mfaStep}>
                 <h3>Scan the QR code</h3>
                 <p className={styles.secondaryText}>
-                  Use Google Authenticator, 1Password, Microsoft Authenticator, Authy, or any TOTP app.
+                  Use Google Authenticator, 1Password, Microsoft Authenticator, Authy, or any TOTP
+                  app.
                 </p>
               </div>
 
@@ -254,7 +263,9 @@ function TotpSetupDialog({
               </a>
 
               <div className={styles.dialogField}>
-                <label htmlFor={totpCodeId} className={styles.dialogLabel}>Authentication code</label>
+                <label htmlFor={totpCodeId} className={styles.dialogLabel}>
+                  Authentication code
+                </label>
                 <Input
                   id={totpCodeId}
                   inputMode="numeric"
@@ -266,7 +277,11 @@ function TotpSetupDialog({
               </div>
             </div>
           </div>
-          {state.mfaError && <p className={styles.error} role="alert">{state.mfaError}</p>}
+          {state.mfaError && (
+            <p className={styles.error} role="alert">
+              {state.mfaError}
+            </p>
+          )}
         </form>
       )}
     </Dialog>
@@ -332,7 +347,9 @@ export function MfaSettingsCards({
     let cancelled = false
 
     void renderQrCode(setup, () => cancelled, dispatch)
-    return () => { cancelled = true }
+    return () => {
+      cancelled = true
+    }
   }, [state.totpSetup])
 
   async function handleCopySecret(): Promise<void> {
@@ -379,7 +396,9 @@ export function MfaSettingsCards({
     setError(null)
     setStatus(null)
     try {
-      const result = await runStepUp(() => enableCurrentUserTotp({ secret: setup.secret, code: state.totpCode }))
+      const result = await runStepUp(() =>
+        enableCurrentUserTotp({ secret: setup.secret, code: state.totpCode }),
+      )
       setSessionUser(result.user)
       dispatch({ type: 'resetSetup' })
       dispatch({ type: 'setRecoveryCodes', recoveryCodes: result.recoveryCodes })

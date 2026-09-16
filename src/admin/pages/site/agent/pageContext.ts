@@ -27,7 +27,10 @@ export function buildCurrentPageContext(get: () => EditorStore): SiteAgentSnapsh
   })
 }
 
-function resolveCurrentDocument(state: EditorStore, activePage: NonNullable<EditorStore['site']>['pages'][number]): AgentDocumentRef {
+function resolveCurrentDocument(
+  state: EditorStore,
+  activePage: NonNullable<EditorStore['site']>['pages'][number],
+): AgentDocumentRef {
   if (state.activeDocument?.kind === 'visualComponent') {
     return { type: 'visualComponent', id: state.activeDocument.vcId }
   }

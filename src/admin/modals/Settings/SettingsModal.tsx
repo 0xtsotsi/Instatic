@@ -38,13 +38,13 @@ import s from './SettingsModal.module.css'
 // Inserter rail uses for its section icons.
 
 const NAV_ITEMS = [
-  { id: 'general',     label: 'General',     icon: SettingsCogSolidIcon,  accent: 'lilac' },
-  { id: 'shortcuts',   label: 'Shortcuts',   icon: CommandIcon,           accent: 'sky'   },
-  { id: 'publishing',  label: 'Publishing',  icon: UploadIcon,            accent: 'mint'  },
+  { id: 'general', label: 'General', icon: SettingsCogSolidIcon, accent: 'lilac' },
+  { id: 'shortcuts', label: 'Shortcuts', icon: CommandIcon, accent: 'sky' },
+  { id: 'publishing', label: 'Publishing', icon: UploadIcon, accent: 'mint' },
   { id: 'preferences', label: 'Preferences', icon: SlidersHorizontalIcon, accent: 'peach' },
 ] as const
 
-type SectionId = typeof NAV_ITEMS[number]['id']
+type SectionId = (typeof NAV_ITEMS)[number]['id']
 
 // ─── SettingsModal ────────────────────────────────────────────────────────────
 
@@ -121,7 +121,7 @@ export function SettingsModal() {
     if (focusable.length === 0) return
 
     const first = focusable[0]
-    const last  = focusable[focusable.length - 1]
+    const last = focusable[focusable.length - 1]
 
     if (e.shiftKey) {
       if (document.activeElement === first) {
@@ -141,11 +141,7 @@ export function SettingsModal() {
   return (
     <>
       {/* Backdrop */}
-      <div
-        aria-hidden="true"
-        onClick={handleClose}
-        className={s.backdrop}
-      />
+      <div aria-hidden="true" onClick={handleClose} className={s.backdrop} />
 
       {/* Dialog centering wrapper */}
       <div
@@ -171,11 +167,7 @@ export function SettingsModal() {
               Settings
             </h2>
 
-            <nav
-              ref={navRef}
-              aria-label="Settings sections"
-              className={s.sectionList}
-            >
+            <nav ref={navRef} aria-label="Settings sections" className={s.sectionList}>
               {NAV_ITEMS.map((item) => (
                 <SettingsNavButton
                   key={item.id}
@@ -203,14 +195,10 @@ export function SettingsModal() {
               <h3 className={s.sectionTitle}>{activeItem.label}</h3>
             </header>
 
-            <div
-              role="region"
-              aria-label={activeItem.label}
-              className={s.content}
-            >
-              {activeSection === 'general'     && <GeneralSection />}
-              {activeSection === 'shortcuts'   && <ShortcutsSection />}
-              {activeSection === 'publishing'  && <PublishingSection />}
+            <div role="region" aria-label={activeItem.label} className={s.content}>
+              {activeSection === 'general' && <GeneralSection />}
+              {activeSection === 'shortcuts' && <ShortcutsSection />}
+              {activeSection === 'publishing' && <PublishingSection />}
               {activeSection === 'preferences' && <PreferencesSection />}
             </div>
           </div>

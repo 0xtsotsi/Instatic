@@ -110,13 +110,16 @@ export async function updateCmsPluginResourceRecord(
   fetchImpl: FetchLike = globalThis.fetch.bind(globalThis),
   basePath = '/admin/api/cms',
 ): Promise<PluginRecord> {
-  const body = await apiRequest(`${recordsPath(basePath, pluginId, resourceId)}/${encodeURIComponent(recordId)}`, {
-    method: 'PATCH',
-    body: { data },
-    schema: RecordEnvelope,
-    fetchImpl,
-    fallbackMessage: 'CMS plugin record update failed',
-  })
+  const body = await apiRequest(
+    `${recordsPath(basePath, pluginId, resourceId)}/${encodeURIComponent(recordId)}`,
+    {
+      method: 'PATCH',
+      body: { data },
+      schema: RecordEnvelope,
+      fetchImpl,
+      fallbackMessage: 'CMS plugin record update failed',
+    },
+  )
   if (!body.record) throw new Error('CMS plugin record update response was missing record')
   return body.record
 }
@@ -128,9 +131,12 @@ export async function deleteCmsPluginResourceRecord(
   fetchImpl: FetchLike = globalThis.fetch.bind(globalThis),
   basePath = '/admin/api/cms',
 ): Promise<void> {
-  await apiRequest(`${recordsPath(basePath, pluginId, resourceId)}/${encodeURIComponent(recordId)}`, {
-    method: 'DELETE',
-    fetchImpl,
-    fallbackMessage: 'CMS plugin record delete failed',
-  })
+  await apiRequest(
+    `${recordsPath(basePath, pluginId, resourceId)}/${encodeURIComponent(recordId)}`,
+    {
+      method: 'DELETE',
+      fetchImpl,
+      fallbackMessage: 'CMS plugin record delete failed',
+    },
+  )
 }

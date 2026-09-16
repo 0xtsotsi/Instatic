@@ -1,10 +1,5 @@
 import { describe, expect, it } from 'bun:test'
-import {
-  compareVariants,
-  formatVariant,
-  parseVariant,
-  variantsToCss2Axis,
-} from '@core/fonts'
+import { compareVariants, formatVariant, parseVariant, variantsToCss2Axis } from '@core/fonts'
 
 describe('parseVariant', () => {
   it('parses upright weights', () => {

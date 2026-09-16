@@ -40,9 +40,7 @@ import { useDraggablePanel } from '@admin/shared/FloatingWindow'
 import { cn } from '@ui/cn'
 import { ConversationHistory } from './ConversationHistory'
 import { AgentComposer, type ComposerLockReason } from './AgentComposer'
-import {
-  AgentImageGallery,
-} from './AgentImageGallery'
+import { AgentImageGallery } from './AgentImageGallery'
 import { AgentImageContextMenu } from './AgentImageContextMenu'
 import { AgentImagePreview } from './AgentImagePreview'
 import type {
@@ -86,11 +84,9 @@ export function AgentPanel({ variant = 'floating' }: { variant?: PanelVariant })
   const activeModelId = useAgentStore((s) => s.agentActiveModelId)
   const [previewImage, setPreviewImage] = useState<AgentPreviewImage | null>(null)
   const [imageMenu, setImageMenu] = useState<AgentImageMenuRequest | null>(null)
-  const credentialsResource = useAsyncResource(
-    (signal) => listCredentials(signal),
-    [],
-    { swallowErrors: true },
-  )
+  const credentialsResource = useAsyncResource((signal) => listCredentials(signal), [], {
+    swallowErrors: true,
+  })
   const credentials = credentialsResource.data ?? []
   const credentialsLoaded = credentialsResource.data !== null || !credentialsResource.loading
   const noCredentials = credentialsLoaded && credentials.length === 0
@@ -119,15 +115,10 @@ export function AgentPanel({ variant = 'floating' }: { variant?: PanelVariant })
 
   // ── Draggable panel position ───────────────────────────────────────────────
   // Default to bottom-right corner.
-  const { setPanelRef, headerDragProps, panelPositionStyle } = useDraggablePanel(
-    'agent',
-    () => ({
-      x: typeof window !== 'undefined' ? window.innerWidth - PANEL_WIDTH - 16 : 16,
-      y: typeof window !== 'undefined'
-        ? window.innerHeight - PANEL_HEIGHT - 16
-        : 200,
-    }),
-  )
+  const { setPanelRef, headerDragProps, panelPositionStyle } = useDraggablePanel('agent', () => ({
+    x: typeof window !== 'undefined' ? window.innerWidth - PANEL_WIDTH - 16 : 16,
+    y: typeof window !== 'undefined' ? window.innerHeight - PANEL_HEIGHT - 16 : 200,
+  }))
 
   // Auto-scroll to bottom when new messages arrive
   useEffect(() => {
@@ -143,15 +134,19 @@ export function AgentPanel({ variant = 'floating' }: { variant?: PanelVariant })
     if (isOpen) void loadScopeDefault()
   }, [isOpen, loadScopeDefault])
 
-  useEffect(() => agentStore.subscribe((state, previous) => {
-    if (
-      (previous.isAgentOpen && !state.isAgentOpen)
-      || previous.agentComposerEpoch !== state.agentComposerEpoch
-    ) {
-      setPreviewImage(null)
-      setImageMenu(null)
-    }
-  }), [agentStore])
+  useEffect(
+    () =>
+      agentStore.subscribe((state, previous) => {
+        if (
+          (previous.isAgentOpen && !state.isAgentOpen) ||
+          previous.agentComposerEpoch !== state.agentComposerEpoch
+        ) {
+          setPreviewImage(null)
+          setImageMenu(null)
+        }
+      }),
+    [agentStore],
+  )
 
   function openImageMenu(request: AgentImageMenuRequest): void {
     setImageMenu(request)
@@ -206,93 +201,90 @@ export function AgentPanel({ variant = 'floating' }: { variant?: PanelVariant })
         !isOpen && styles.floatPanelClosed,
       )}
     >
-    <div
-      data-testid="agent-panel"
-      className={styles.panel}
-    >
-      {/* ── Shared Panel Header — drag handle + close + clear actions ──────── */}
-      <PanelHeader
-        panelId="agent"
-        title="AI Assistant"
-        onClose={closeAgent}
-        dragHandleProps={variant === 'floating' ? headerDragProps : undefined}
-      >
-        {/* History popover — list past chats, start a new one, delete. */}
-        <ConversationHistory />
-        {/* "New chat" — start a fresh conversation directly from the header. */}
-        <Button
-          variant="ghost"
-          size="xs"
-          iconOnly
-          disabled={isStreaming || conversationPending || providerPending}
-          onClick={startNewAgentConversation}
-          tooltip="New chat"
-          aria-label="New chat"
-          data-testid="agent-new-chat-header-button"
+      <div data-testid="agent-panel" className={styles.panel}>
+        {/* ── Shared Panel Header — drag handle + close + clear actions ──────── */}
+        <PanelHeader
+          panelId="agent"
+          title="AI Assistant"
+          onClose={closeAgent}
+          dragHandleProps={variant === 'floating' ? headerDragProps : undefined}
         >
-          <EditSolidIcon size={14} />
-        </Button>
-        {isStreaming && (
-          <span className={styles.streamingBadge}>
-            <span className={styles.streamingDot} aria-hidden="true" />
-            Working…
-          </span>
-        )}
-        {/* "AI settings" — always available; routes to /admin/ai. */}
-        <AgentSettingsButton
-          variant="header"
-          label="AI settings"
-          data-testid="agent-settings-header-button"
-        />
-      </PanelHeader>
+          {/* History popover — list past chats, start a new one, delete. */}
+          <ConversationHistory />
+          {/* "New chat" — start a fresh conversation directly from the header. */}
+          <Button
+            variant="ghost"
+            size="xs"
+            iconOnly
+            disabled={isStreaming || conversationPending || providerPending}
+            onClick={startNewAgentConversation}
+            tooltip="New chat"
+            aria-label="New chat"
+            data-testid="agent-new-chat-header-button"
+          >
+            <EditSolidIcon size={14} />
+          </Button>
+          {isStreaming && (
+            <span className={styles.streamingBadge}>
+              <span className={styles.streamingDot} aria-hidden="true" />
+              Working…
+            </span>
+          )}
+          {/* "AI settings" — always available; routes to /admin/ai. */}
+          <AgentSettingsButton
+            variant="header"
+            label="AI settings"
+            data-testid="agent-settings-header-button"
+          />
+        </PanelHeader>
 
-      {/* ── Message thread ──────────────────────────────────────────────────── */}
-      <div
-        ref={threadRef}
-        role="log"
-        aria-live="polite"
-        aria-atomic="false"
-        aria-relevant="additions text"
-        aria-label="Conversation"
-        aria-busy={isStreaming}
-        className={styles.thread}
-      >
-        {messages.length === 0 ? (
-          <AgentEmptyState mode={lockReason ?? 'prompt'} />
-        ) : (
-          <>
-            {lockReason && <AgentCredentialAlert mode={lockReason} />}
-            {groupConsecutiveMessages(messages).map((group) => (
-              <MessageBubble
-                key={group.id}
-                group={group}
-                onOpenImage={openImagePreview}
-                onOpenImageMenu={openImageMenu}
-              />
-            ))}
-          </>
-        )}
+        {/* ── Message thread ──────────────────────────────────────────────────── */}
+        <div
+          ref={threadRef}
+          role="log"
+          aria-live="polite"
+          aria-atomic="false"
+          aria-relevant="additions text"
+          aria-label="Conversation"
+          aria-busy={isStreaming}
+          className={styles.thread}
+        >
+          {messages.length === 0 ? (
+            <AgentEmptyState mode={lockReason ?? 'prompt'} />
+          ) : (
+            <>
+              {lockReason && <AgentCredentialAlert mode={lockReason} />}
+              {groupConsecutiveMessages(messages).map((group) => (
+                <MessageBubble
+                  key={group.id}
+                  group={group}
+                  onOpenImage={openImagePreview}
+                  onOpenImageMenu={openImageMenu}
+                />
+              ))}
+            </>
+          )}
 
-        {/* Generic error banner — only show when it's NOT the dedicated
+          {/* Generic error banner — only show when it's NOT the dedicated
             no-credential message (which renders via the setup empty state). */}
-        {agentError && !noProviderError && (
-          <div role="alert" className={styles.errorBanner}>
-            {agentError}
-          </div>
-        )}
-      </div>
+          {agentError && !noProviderError && (
+            <div role="alert" className={styles.errorBanner}>
+              {agentError}
+            </div>
+          )}
+        </div>
 
-      <AgentComposer
-        key={composerEpoch}
-        composerLocked={composerLocked}
-        lockReason={lockReason}
-        credentials={credentials}
-        credentialsLoaded={credentialsLoaded}
-        onRefreshCredentials={credentialsResource.refresh}
-        onOpenImage={openImagePreview}
-        onOpenImageMenu={openImageMenu}
-      />
-    </div>
+        <AgentComposer
+          key={composerEpoch}
+          composerLocked={composerLocked}
+          lockReason={lockReason}
+          credentials={credentials}
+          credentialsLoaded={credentialsLoaded}
+          onRefreshCredentials={credentialsResource.refresh}
+          onOpenImage={openImagePreview}
+          onOpenImageMenu={openImageMenu}
+        />
+      </div>
       <AgentImagePreview
         image={isOpen ? previewImage : null}
         imageMenuOpen={imageMenu !== null}
@@ -456,15 +448,16 @@ function MessageImageGallery({
   const galleryImages = images.map((image, index): AgentPreviewImage => ({
     id: image.key,
     src: image.src,
-    alt: images.length === 1
-      ? isUser ? 'Attachment from you' : 'Image from assistant'
-      : isUser
-        ? `Attachment ${index + 1} of ${images.length} from you`
-        : `Image ${index + 1} of ${images.length} from assistant`,
+    alt:
+      images.length === 1
+        ? isUser
+          ? 'Attachment from you'
+          : 'Image from assistant'
+        : isUser
+          ? `Attachment ${index + 1} of ${images.length} from you`
+          : `Image ${index + 1} of ${images.length} from assistant`,
     title: isUser ? 'Your attachment' : 'Assistant image',
-    filename: isUser
-      ? `your-attachment-${index + 1}`
-      : `assistant-image-${index + 1}`,
+    filename: isUser ? `your-attachment-${index + 1}` : `assistant-image-${index + 1}`,
   }))
 
   return (

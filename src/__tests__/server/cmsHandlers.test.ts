@@ -3,7 +3,11 @@ import { handleCmsRequest } from '../../../server/handlers/cms'
 import type { DbClient, DbResult } from '../../../server/db'
 import { SESSION_COOKIE_NAME } from '../../../server/auth/tokens'
 import { loginRateLimit } from '../../../server/auth/rateLimit'
-import { configurePublicOrigins, resetPublicOrigins, stampSocketIp } from '../../../server/auth/security'
+import {
+  configurePublicOrigins,
+  resetPublicOrigins,
+  stampSocketIp,
+} from '../../../server/auth/security'
 
 afterEach(() => {
   resetPublicOrigins()
@@ -121,11 +125,13 @@ function makeFakeDb() {
     if (normalized.includes('count(*) as count from site')) {
       return { rows: [{ count: site.length } as Row], rowCount: 1 }
     }
-    if (normalized.includes('count(*) as count') && normalized.includes('from users') && normalized.includes('role_id')) {
-      const count = users.filter((user) =>
-        user.role_id === 'owner' &&
-        user.status === 'active' &&
-        user.deleted_at == null
+    if (
+      normalized.includes('count(*) as count') &&
+      normalized.includes('from users') &&
+      normalized.includes('role_id')
+    ) {
+      const count = users.filter(
+        (user) => user.role_id === 'owner' && user.status === 'active' && user.deleted_at == null,
       ).length
       return { rows: [{ count } as Row], rowCount: 1 }
     }
@@ -159,16 +165,23 @@ function makeFakeDb() {
     }
     // recordFailedLoginAttempt — increments counter and sets locked_until.
     // Bind shape: values[0]=lockedUntil (Date|null), values[1]=userId.
-    if (normalized.includes('update users') && normalized.includes('failed_login_count = failed_login_count + 1')) {
+    if (
+      normalized.includes('update users') &&
+      normalized.includes('failed_login_count = failed_login_count + 1')
+    ) {
       const lockedUntil = values[0] as Date | null
       const userId = values[1]
-      const user = users.find((candidate) => candidate.id === userId && candidate.deleted_at == null)
+      const user = users.find(
+        (candidate) => candidate.id === userId && candidate.deleted_at == null,
+      )
       if (!user) return { rows: [], rowCount: 0 }
       user.failed_login_count = Number(user.failed_login_count ?? 0) + 1
       user.locked_until = lockedUntil ? lockedUntil.toISOString() : null
       user.updated_at = new Date().toISOString()
       return {
-        rows: [{ failed_login_count: user.failed_login_count, locked_until: user.locked_until } as Row],
+        rows: [
+          { failed_login_count: user.failed_login_count, locked_until: user.locked_until } as Row,
+        ],
         rowCount: 1,
       }
     }
@@ -235,13 +248,23 @@ function makeFakeDb() {
         rowCount: pages.length,
       }
     }
-    if (normalized.includes('from users') && normalized.includes('join roles') && normalized.includes('where users.email_normalized')) {
+    if (
+      normalized.includes('from users') &&
+      normalized.includes('join roles') &&
+      normalized.includes('where users.email_normalized')
+    ) {
       const rows = users
-        .filter((user) => String(user.email_normalized) === String(values[0]) && user.deleted_at == null)
+        .filter(
+          (user) => String(user.email_normalized) === String(values[0]) && user.deleted_at == null,
+        )
         .map(joinedUser)
       return { rows: rows as Row[], rowCount: rows.length }
     }
-    if (normalized.includes('from users') && normalized.includes('join roles') && normalized.includes('where users.id')) {
+    if (
+      normalized.includes('from users') &&
+      normalized.includes('join roles') &&
+      normalized.includes('where users.id')
+    ) {
       const userId = values[0] ?? users[users.length - 1]?.id
       const rows = users
         .filter((user) => String(user.id) === String(userId) && user.deleted_at == null)
@@ -261,13 +284,13 @@ function makeFakeDb() {
         created_at: new Date().toISOString(),
         last_seen_at: new Date().toISOString(),
         revoked_at: null,
-        step_up_expires_at: hasStepUpColumn ? values[7] ?? null : null,
+        step_up_expires_at: hasStepUpColumn ? (values[7] ?? null) : null,
       })
       return { rows: [], rowCount: 1 }
     }
     if (normalized.includes('select user_id') && normalized.includes('from sessions')) {
-      const session = sessions.find((candidate) =>
-        candidate.id_hash === values[0] && candidate.revoked_at == null,
+      const session = sessions.find(
+        (candidate) => candidate.id_hash === values[0] && candidate.revoked_at == null,
       )
       return {
         rows: session ? [session as Row] : [],
@@ -277,8 +300,8 @@ function makeFakeDb() {
     // getSessionStepUpExpiresAt — `select step_up_expires_at from sessions
     // where id_hash = $1 and revoked_at is null`. Bind: values[0] = idHash.
     if (normalized.includes('select step_up_expires_at') && normalized.includes('from sessions')) {
-      const session = sessions.find((candidate) =>
-        candidate.id_hash === values[0] && candidate.revoked_at == null,
+      const session = sessions.find(
+        (candidate) => candidate.id_hash === values[0] && candidate.revoked_at == null,
       )
       const row = session ? { step_up_expires_at: session.step_up_expires_at ?? null } : null
       return { rows: row ? [row as Row] : [], rowCount: row ? 1 : 0 }
@@ -287,23 +310,32 @@ function makeFakeDb() {
     // where id_hash = $2 and revoked_at is null`. Bind: values[0] = expiresAt,
     // values[1] = idHash.
     if (normalized.includes('update sessions') && normalized.includes('step_up_expires_at')) {
-      const session = sessions.find((candidate) =>
-        candidate.id_hash === values[1] && candidate.revoked_at == null,
+      const session = sessions.find(
+        (candidate) => candidate.id_hash === values[1] && candidate.revoked_at == null,
       )
       if (!session) return { rows: [], rowCount: 0 }
-      session.step_up_expires_at = values[0] instanceof Date
-        ? values[0].toISOString()
-        : (values[0] as string | null)
+      session.step_up_expires_at =
+        values[0] instanceof Date ? values[0].toISOString() : (values[0] as string | null)
       return { rows: [], rowCount: 1 }
     }
     if (normalized.includes('from sessions') && normalized.includes('join users')) {
-      const session = sessions.find((candidate) => candidate.id_hash === values[0] && candidate.revoked_at == null)
-      const user = session ? users.find((candidate) => candidate.id === session.user_id && candidate.status === 'active') : null
-      const rows = user ? [{
-        ...joinedUser(user),
-        session_mfa_passed_at: session.mfa_passed_at ?? null,
-        avatar_public_path: null,
-      }] : []
+      const session = sessions.find(
+        (candidate) => candidate.id_hash === values[0] && candidate.revoked_at == null,
+      )
+      const user = session
+        ? users.find(
+            (candidate) => candidate.id === session.user_id && candidate.status === 'active',
+          )
+        : null
+      const rows = user
+        ? [
+            {
+              ...joinedUser(user),
+              session_mfa_passed_at: session.mfa_passed_at ?? null,
+              avatar_public_path: null,
+            },
+          ]
+        : []
       return { rows: rows as Row[], rowCount: rows.length }
     }
     if (normalized.includes('update sessions') && normalized.includes('last_seen_at')) {
@@ -314,7 +346,11 @@ function makeFakeDb() {
       if (normalized.includes('where user_id = $1') && normalized.includes('id_hash != $2')) {
         let count = 0
         for (const session of sessions) {
-          if (session.user_id === values[0] && session.id_hash !== values[1] && session.revoked_at == null) {
+          if (
+            session.user_id === values[0] &&
+            session.id_hash !== values[1] &&
+            session.revoked_at == null
+          ) {
             session.revoked_at = now
             count += 1
           }
@@ -340,7 +376,9 @@ function makeFakeDb() {
     // clause of this SQL also mentions `last_login_at`.
     if (normalized.includes('update users') && normalized.includes('set email =')) {
       const userId = values[7]
-      const user = users.find((candidate) => candidate.id === userId && candidate.deleted_at == null)
+      const user = users.find(
+        (candidate) => candidate.id === userId && candidate.deleted_at == null,
+      )
       if (!user) return { rows: [], rowCount: 0 }
       Object.assign(user, {
         email: values[0],
@@ -355,7 +393,9 @@ function makeFakeDb() {
       return { rows: [user as Row], rowCount: 1 }
     }
     if (normalized.includes('update users') && normalized.includes('set deleted_at')) {
-      const user = users.find((candidate) => candidate.id === values[0] && candidate.deleted_at == null)
+      const user = users.find(
+        (candidate) => candidate.id === values[0] && candidate.deleted_at == null,
+      )
       if (!user) return { rows: [], rowCount: 0 }
       user.deleted_at = new Date().toISOString()
       return { rows: [], rowCount: 1 }
@@ -364,9 +404,7 @@ function makeFakeDb() {
       // Bind shape now: values[0]=null (for locked_until clear), values[1]=userId.
       // Match by trying each value as a candidate user id; production code passes
       // userId last but tests should not depend on which slot it occupies.
-      const user = users.find((candidate) =>
-        values.some((v) => v === candidate.id),
-      )
+      const user = users.find((candidate) => values.some((v) => v === candidate.id))
       if (user) {
         user.last_login_at = new Date().toISOString()
         user.failed_login_count = 0
@@ -403,7 +441,15 @@ function makeFakeDb() {
   handle.transaction = async <T>(cb: (tx: DbClient) => Promise<T>): Promise<T> =>
     cb(handle as unknown as DbClient)
 
-  return Object.assign(handle as DbClient, { site, users, roles, sessions, pages, auditEvents, loginAttempts })
+  return Object.assign(handle as DbClient, {
+    site,
+    users,
+    roles,
+    sessions,
+    pages,
+    auditEvents,
+    loginAttempts,
+  })
 }
 
 async function json(res: Response) {
@@ -431,9 +477,17 @@ async function completeStepUp(
 describe('CMS handlers', () => {
   it('reports setup status', async () => {
     const db = makeFakeDb()
-    const res = await handleCmsRequest(new Request('http://localhost/admin/api/cms/setup/status'), db)
+    const res = await handleCmsRequest(
+      new Request('http://localhost/admin/api/cms/setup/status'),
+      db,
+    )
     expect(res.status).toBe(200)
-    expect(await json(res)).toEqual({ hasSite: false, hasAdmin: false, hasOwner: false, needsSetup: true })
+    expect(await json(res)).toEqual({
+      hasSite: false,
+      hasAdmin: false,
+      hasOwner: false,
+      needsSetup: true,
+    })
   })
 
   it('creates the first site and owner account', async () => {
@@ -441,16 +495,27 @@ describe('CMS handlers', () => {
     // home page seed will be added back in Step 3 as a data_row in the
     // seeded 'pages' data table. For now setup creates the site + owner only.
     const db = makeFakeDb()
-    const res = await handleCmsRequest(new Request('http://localhost/admin/api/cms/setup', {
-      method: 'POST',
-      body: JSON.stringify({ siteName: 'Example', email: 'owner@example.com', password: 'long-enough-password' }),
-      headers: { 'content-type': 'application/json' },
-    }), db)
+    const res = await handleCmsRequest(
+      new Request('http://localhost/admin/api/cms/setup', {
+        method: 'POST',
+        body: JSON.stringify({
+          siteName: 'Example',
+          email: 'owner@example.com',
+          password: 'long-enough-password',
+        }),
+        headers: { 'content-type': 'application/json' },
+      }),
+      db,
+    )
     expect(res.status).toBe(201)
     expect(await json(res)).toMatchObject({ ok: true })
     expect(db.site).toHaveLength(1)
     expect(db.users).toHaveLength(1)
-    expect(db.users[0]).toMatchObject({ email_normalized: 'owner@example.com', role_id: 'owner', status: 'active' })
+    expect(db.users[0]).toMatchObject({
+      email_normalized: 'owner@example.com',
+      role_id: 'owner',
+      status: 'active',
+    })
     expect(db.auditEvents[0]?.ip_address).toBeNull()
   })
 
@@ -470,21 +535,35 @@ describe('CMS handlers', () => {
       updated_at: new Date().toISOString(),
       deleted_at: null,
     })
-    const res = await handleCmsRequest(new Request('http://localhost/admin/api/cms/setup', {
-      method: 'POST',
-      body: JSON.stringify({ siteName: 'Example', email: 'new@example.com', password: 'long-enough-password' }),
-      headers: { 'content-type': 'application/json' },
-    }), db)
+    const res = await handleCmsRequest(
+      new Request('http://localhost/admin/api/cms/setup', {
+        method: 'POST',
+        body: JSON.stringify({
+          siteName: 'Example',
+          email: 'new@example.com',
+          password: 'long-enough-password',
+        }),
+        headers: { 'content-type': 'application/json' },
+      }),
+      db,
+    )
     expect(res.status).toBe(409)
   })
 
   it('logs in and sets an HttpOnly session cookie', async () => {
     const db = makeFakeDb()
-    await handleCmsRequest(new Request('http://localhost/admin/api/cms/setup', {
-      method: 'POST',
-      body: JSON.stringify({ siteName: 'Example', email: 'owner@example.com', password: 'long-enough-password' }),
-      headers: { 'content-type': 'application/json' },
-    }), db)
+    await handleCmsRequest(
+      new Request('http://localhost/admin/api/cms/setup', {
+        method: 'POST',
+        body: JSON.stringify({
+          siteName: 'Example',
+          email: 'owner@example.com',
+          password: 'long-enough-password',
+        }),
+        headers: { 'content-type': 'application/json' },
+      }),
+      db,
+    )
     const loginReq = new Request('http://localhost/admin/api/cms/login', {
       method: 'POST',
       body: JSON.stringify({ email: 'owner@example.com', password: 'long-enough-password' }),
@@ -510,18 +589,27 @@ describe('CMS handlers', () => {
     const db = makeFakeDb()
     const email = 'me-owner@example.com'
     loginRateLimit.reset(`unknown|${email}`)
-    await handleCmsRequest(new Request('http://localhost/admin/api/cms/setup', {
-      method: 'POST',
-      body: JSON.stringify({ siteName: 'Example', email, password: 'long-enough-password' }),
-      headers: { 'content-type': 'application/json' },
-    }), db)
-    const loginRes = await handleCmsRequest(new Request('http://localhost/admin/api/cms/login', {
-      method: 'POST',
-      body: JSON.stringify({ email, password: 'long-enough-password' }),
-      headers: { 'content-type': 'application/json' },
-    }), db)
+    await handleCmsRequest(
+      new Request('http://localhost/admin/api/cms/setup', {
+        method: 'POST',
+        body: JSON.stringify({ siteName: 'Example', email, password: 'long-enough-password' }),
+        headers: { 'content-type': 'application/json' },
+      }),
+      db,
+    )
+    const loginRes = await handleCmsRequest(
+      new Request('http://localhost/admin/api/cms/login', {
+        method: 'POST',
+        body: JSON.stringify({ email, password: 'long-enough-password' }),
+        headers: { 'content-type': 'application/json' },
+      }),
+      db,
+    )
     expect(loginRes.status).toBe(200)
-    const cookie = await completeStepUp(db, (loginRes.headers.get('set-cookie') ?? '').split(';')[0])
+    const cookie = await completeStepUp(
+      db,
+      (loginRes.headers.get('set-cookie') ?? '').split(';')[0],
+    )
 
     const meReq = new Request('http://localhost/admin/api/cms/me', {
       method: 'GET',
@@ -542,17 +630,30 @@ describe('CMS handlers', () => {
 
   it('keeps owner setup-only when managing users', async () => {
     const db = makeFakeDb()
-    await handleCmsRequest(new Request('http://localhost/admin/api/cms/setup', {
-      method: 'POST',
-      body: JSON.stringify({ siteName: 'Example', email: 'owner-only@example.com', password: 'long-enough-password' }),
-      headers: { 'content-type': 'application/json' },
-    }), db)
-    const loginRes = await handleCmsRequest(new Request('http://localhost/admin/api/cms/login', {
-      method: 'POST',
-      body: JSON.stringify({ email: 'owner-only@example.com', password: 'long-enough-password' }),
-      headers: { 'content-type': 'application/json' },
-    }), db)
-    const cookie = await completeStepUp(db, (loginRes.headers.get('set-cookie') ?? '').split(';')[0])
+    await handleCmsRequest(
+      new Request('http://localhost/admin/api/cms/setup', {
+        method: 'POST',
+        body: JSON.stringify({
+          siteName: 'Example',
+          email: 'owner-only@example.com',
+          password: 'long-enough-password',
+        }),
+        headers: { 'content-type': 'application/json' },
+      }),
+      db,
+    )
+    const loginRes = await handleCmsRequest(
+      new Request('http://localhost/admin/api/cms/login', {
+        method: 'POST',
+        body: JSON.stringify({ email: 'owner-only@example.com', password: 'long-enough-password' }),
+        headers: { 'content-type': 'application/json' },
+      }),
+      db,
+    )
+    const cookie = await completeStepUp(
+      db,
+      (loginRes.headers.get('set-cookie') ?? '').split(';')[0],
+    )
     const createReq = new Request('http://localhost/admin/api/cms/users', {
       method: 'POST',
       body: JSON.stringify({
@@ -574,17 +675,30 @@ describe('CMS handlers', () => {
 
   it('prevents assigning the owner role after setup and prevents owner self-demotion', async () => {
     const db = makeFakeDb()
-    await handleCmsRequest(new Request('http://localhost/admin/api/cms/setup', {
-      method: 'POST',
-      body: JSON.stringify({ siteName: 'Example', email: 'owner-role@example.com', password: 'long-enough-password' }),
-      headers: { 'content-type': 'application/json' },
-    }), db)
-    const loginRes = await handleCmsRequest(new Request('http://localhost/admin/api/cms/login', {
-      method: 'POST',
-      body: JSON.stringify({ email: 'owner-role@example.com', password: 'long-enough-password' }),
-      headers: { 'content-type': 'application/json' },
-    }), db)
-    const cookie = await completeStepUp(db, (loginRes.headers.get('set-cookie') ?? '').split(';')[0])
+    await handleCmsRequest(
+      new Request('http://localhost/admin/api/cms/setup', {
+        method: 'POST',
+        body: JSON.stringify({
+          siteName: 'Example',
+          email: 'owner-role@example.com',
+          password: 'long-enough-password',
+        }),
+        headers: { 'content-type': 'application/json' },
+      }),
+      db,
+    )
+    const loginRes = await handleCmsRequest(
+      new Request('http://localhost/admin/api/cms/login', {
+        method: 'POST',
+        body: JSON.stringify({ email: 'owner-role@example.com', password: 'long-enough-password' }),
+        headers: { 'content-type': 'application/json' },
+      }),
+      db,
+    )
+    const cookie = await completeStepUp(
+      db,
+      (loginRes.headers.get('set-cookie') ?? '').split(';')[0],
+    )
 
     const createReq = new Request('http://localhost/admin/api/cms/users', {
       method: 'POST',
@@ -599,7 +713,7 @@ describe('CMS handlers', () => {
     createReq.headers.set('cookie', cookie)
     const createRes = await handleCmsRequest(createReq, db)
     expect(createRes.status).toBe(201)
-    const created = await createRes.json() as { user: { id: string } }
+    const created = (await createRes.json()) as { user: { id: string } }
 
     const assignOwnerReq = new Request(`http://localhost/admin/api/cms/users/${created.user.id}`, {
       method: 'PATCH',
@@ -629,17 +743,30 @@ describe('CMS handlers', () => {
     // primitive) or DELETE it. Only the Owner themself may mutate the Owner
     // row.
     const db = makeFakeDb()
-    await handleCmsRequest(new Request('http://localhost/admin/api/cms/setup', {
-      method: 'POST',
-      body: JSON.stringify({ siteName: 'Example', email: 'real-owner@example.com', password: 'long-enough-password' }),
-      headers: { 'content-type': 'application/json' },
-    }), db)
-    const ownerLogin = await handleCmsRequest(new Request('http://localhost/admin/api/cms/login', {
-      method: 'POST',
-      body: JSON.stringify({ email: 'real-owner@example.com', password: 'long-enough-password' }),
-      headers: { 'content-type': 'application/json' },
-    }), db)
-    const ownerCookie = await completeStepUp(db, (ownerLogin.headers.get('set-cookie') ?? '').split(';')[0])
+    await handleCmsRequest(
+      new Request('http://localhost/admin/api/cms/setup', {
+        method: 'POST',
+        body: JSON.stringify({
+          siteName: 'Example',
+          email: 'real-owner@example.com',
+          password: 'long-enough-password',
+        }),
+        headers: { 'content-type': 'application/json' },
+      }),
+      db,
+    )
+    const ownerLogin = await handleCmsRequest(
+      new Request('http://localhost/admin/api/cms/login', {
+        method: 'POST',
+        body: JSON.stringify({ email: 'real-owner@example.com', password: 'long-enough-password' }),
+        headers: { 'content-type': 'application/json' },
+      }),
+      db,
+    )
+    const ownerCookie = await completeStepUp(
+      db,
+      (ownerLogin.headers.get('set-cookie') ?? '').split(';')[0],
+    )
 
     // Owner creates an admin co-worker.
     const createAdminReq = new Request('http://localhost/admin/api/cms/users', {
@@ -656,11 +783,14 @@ describe('CMS handlers', () => {
     const createAdminRes = await handleCmsRequest(createAdminReq, db)
     expect(createAdminRes.status).toBe(201)
 
-    const adminLogin = await handleCmsRequest(new Request('http://localhost/admin/api/cms/login', {
-      method: 'POST',
-      body: JSON.stringify({ email: 'rogue-admin@example.com', password: 'rogue-admin-phrase' }),
-      headers: { 'content-type': 'application/json' },
-    }), db)
+    const adminLogin = await handleCmsRequest(
+      new Request('http://localhost/admin/api/cms/login', {
+        method: 'POST',
+        body: JSON.stringify({ email: 'rogue-admin@example.com', password: 'rogue-admin-phrase' }),
+        headers: { 'content-type': 'application/json' },
+      }),
+      db,
+    )
     const adminCookie = await completeStepUp(
       db,
       (adminLogin.headers.get('set-cookie') ?? '').split(';')[0],
@@ -679,7 +809,9 @@ describe('CMS handlers', () => {
     passwordPatchReq.headers.set('cookie', adminCookie)
     const passwordPatchRes = await handleCmsRequest(passwordPatchReq, db)
     expect(passwordPatchRes.status).toBe(403)
-    expect(await json(passwordPatchRes)).toEqual({ error: 'Only the owner can modify the owner account' })
+    expect(await json(passwordPatchRes)).toEqual({
+      error: 'Only the owner can modify the owner account',
+    })
 
     // Owner's password_hash must not have been touched.
     expect(db.users.find((user) => user.role_id === 'owner')?.password_hash).toBe(ownerHashBefore)
@@ -729,16 +861,26 @@ describe('CMS handlers', () => {
   describe('session cookie Secure flag', () => {
     async function loginThen(): Promise<string> {
       const db = makeFakeDb()
-      await handleCmsRequest(new Request('http://localhost/admin/api/cms/setup', {
-        method: 'POST',
-        body: JSON.stringify({ siteName: 'Example', email: 'o@example.com', password: 'long-enough-password' }),
-        headers: { 'content-type': 'application/json' },
-      }), db)
-      const res = await handleCmsRequest(new Request('http://localhost/admin/api/cms/login', {
-        method: 'POST',
-        body: JSON.stringify({ email: 'o@example.com', password: 'long-enough-password' }),
-        headers: { 'content-type': 'application/json' },
-      }), db)
+      await handleCmsRequest(
+        new Request('http://localhost/admin/api/cms/setup', {
+          method: 'POST',
+          body: JSON.stringify({
+            siteName: 'Example',
+            email: 'o@example.com',
+            password: 'long-enough-password',
+          }),
+          headers: { 'content-type': 'application/json' },
+        }),
+        db,
+      )
+      const res = await handleCmsRequest(
+        new Request('http://localhost/admin/api/cms/login', {
+          method: 'POST',
+          body: JSON.stringify({ email: 'o@example.com', password: 'long-enough-password' }),
+          headers: { 'content-type': 'application/json' },
+        }),
+        db,
+      )
       expect(res.status).toBe(200)
       return res.headers.get('set-cookie') ?? ''
     }
@@ -764,16 +906,26 @@ describe('CMS handlers', () => {
 
     it('ignores a spoofed X-Forwarded-Proto: https when no https public origin is configured', async () => {
       const db = makeFakeDb()
-      await handleCmsRequest(new Request('http://localhost/admin/api/cms/setup', {
-        method: 'POST',
-        body: JSON.stringify({ siteName: 'Example', email: 'o@example.com', password: 'long-enough-password' }),
-        headers: { 'content-type': 'application/json' },
-      }), db)
-      const res = await handleCmsRequest(new Request('http://localhost/admin/api/cms/login', {
-        method: 'POST',
-        body: JSON.stringify({ email: 'o@example.com', password: 'long-enough-password' }),
-        headers: { 'content-type': 'application/json', 'x-forwarded-proto': 'https' },
-      }), db)
+      await handleCmsRequest(
+        new Request('http://localhost/admin/api/cms/setup', {
+          method: 'POST',
+          body: JSON.stringify({
+            siteName: 'Example',
+            email: 'o@example.com',
+            password: 'long-enough-password',
+          }),
+          headers: { 'content-type': 'application/json' },
+        }),
+        db,
+      )
+      const res = await handleCmsRequest(
+        new Request('http://localhost/admin/api/cms/login', {
+          method: 'POST',
+          body: JSON.stringify({ email: 'o@example.com', password: 'long-enough-password' }),
+          headers: { 'content-type': 'application/json', 'x-forwarded-proto': 'https' },
+        }),
+        db,
+      )
       expect(res.status).toBe(200)
       expect(res.headers.get('set-cookie') ?? '').not.toContain('Secure')
     })
@@ -781,26 +933,38 @@ describe('CMS handlers', () => {
     it('logout cookie also gets Secure when an https public origin is configured', async () => {
       configurePublicOrigins(['https://cms.example.com'])
       const db = makeFakeDb()
-      await handleCmsRequest(new Request('http://localhost/admin/api/cms/setup', {
-        method: 'POST',
-        body: JSON.stringify({ siteName: 'Example', email: 'o@example.com', password: 'long-enough-password' }),
-        headers: { 'content-type': 'application/json' },
-      }), db)
-      const loginRes = await handleCmsRequest(new Request('http://localhost/admin/api/cms/login', {
-        method: 'POST',
-        body: JSON.stringify({ email: 'o@example.com', password: 'long-enough-password' }),
-        headers: { 'content-type': 'application/json' },
-      }), db)
-      const sessionCookie = (loginRes.headers.get('set-cookie') ?? '')
-        .split(';')[0] // just `instatic_admin_session=<token>`
+      await handleCmsRequest(
+        new Request('http://localhost/admin/api/cms/setup', {
+          method: 'POST',
+          body: JSON.stringify({
+            siteName: 'Example',
+            email: 'o@example.com',
+            password: 'long-enough-password',
+          }),
+          headers: { 'content-type': 'application/json' },
+        }),
+        db,
+      )
+      const loginRes = await handleCmsRequest(
+        new Request('http://localhost/admin/api/cms/login', {
+          method: 'POST',
+          body: JSON.stringify({ email: 'o@example.com', password: 'long-enough-password' }),
+          headers: { 'content-type': 'application/json' },
+        }),
+        db,
+      )
+      const sessionCookie = (loginRes.headers.get('set-cookie') ?? '').split(';')[0] // just `instatic_admin_session=<token>`
 
-      const logoutRes = await handleCmsRequest(new Request('http://localhost/admin/api/cms/logout', {
-        method: 'POST',
-        headers: {
-          'content-type': 'application/json',
-          cookie: sessionCookie,
-        },
-      }), db)
+      const logoutRes = await handleCmsRequest(
+        new Request('http://localhost/admin/api/cms/logout', {
+          method: 'POST',
+          headers: {
+            'content-type': 'application/json',
+            cookie: sessionCookie,
+          },
+        }),
+        db,
+      )
       expect(logoutRes.status).toBe(200)
       const cookie = logoutRes.headers.get('set-cookie') ?? ''
       expect(cookie).toContain('Max-Age=0')
@@ -836,11 +1000,18 @@ describe('CMS handlers', () => {
 
     async function makeDbWithAdmin() {
       const db = makeFakeDb()
-      await handleCmsRequest(new Request('http://localhost/admin/api/cms/setup', {
-        method: 'POST',
-        body: JSON.stringify({ siteName: 'X', email: 'owner@example.com', password: 'long-enough-password' }),
-        headers: { 'content-type': 'application/json' },
-      }), db)
+      await handleCmsRequest(
+        new Request('http://localhost/admin/api/cms/setup', {
+          method: 'POST',
+          body: JSON.stringify({
+            siteName: 'X',
+            email: 'owner@example.com',
+            password: 'long-enough-password',
+          }),
+          headers: { 'content-type': 'application/json' },
+        }),
+        db,
+      )
       return db
     }
 
@@ -853,20 +1024,14 @@ describe('CMS handlers', () => {
       const db = await makeDbWithAdmin()
 
       for (let i = 0; i < 5; i++) {
-        const res = await handleCmsRequest(
-          loginRequest(email, 'wrong-password', xff),
-          db,
-        )
+        const res = await handleCmsRequest(loginRequest(email, 'wrong-password', xff), db)
         expect(res.status).toBe(401)
       }
 
-      const blocked = await handleCmsRequest(
-        loginRequest(email, 'wrong-password', xff),
-        db,
-      )
+      const blocked = await handleCmsRequest(loginRequest(email, 'wrong-password', xff), db)
       expect(blocked.status).toBe(429)
       expect(blocked.headers.get('retry-after')).toBeTruthy()
-      const body = await blocked.json() as { error: string }
+      const body = (await blocked.json()) as { error: string }
       expect(body.error).toMatch(/too many/i)
 
       // Cleanup so the bucket doesn't leak into other tests.
@@ -882,20 +1047,14 @@ describe('CMS handlers', () => {
 
       // Three failed attempts.
       for (let i = 0; i < 3; i++) {
-        const res = await handleCmsRequest(
-          loginRequest(email, 'wrong-password', xff),
-          db,
-        )
+        const res = await handleCmsRequest(loginRequest(email, 'wrong-password', xff), db)
         expect(res.status).toBe(401)
       }
 
       // Successful login resets BOTH the rate-limit bucket and the
       // per-account failed-login counter (markUserLoggedIn sets the column to
       // 0 and clears locked_until).
-      const ok = await handleCmsRequest(
-        loginRequest(email, 'long-enough-password', xff),
-        db,
-      )
+      const ok = await handleCmsRequest(loginRequest(email, 'long-enough-password', xff), db)
       expect(ok.status).toBe(200)
 
       // Now four more wrong attempts must still be allowed (rate-limit
@@ -903,10 +1062,7 @@ describe('CMS handlers', () => {
       // attempt would trigger the per-account lockout — that's a separate
       // concern covered by authLockoutLogin.test.ts.
       for (let i = 0; i < 4; i++) {
-        const res = await handleCmsRequest(
-          loginRequest(email, 'wrong-password', xff),
-          db,
-        )
+        const res = await handleCmsRequest(loginRequest(email, 'wrong-password', xff), db)
         expect(res.status).toBe(401)
       }
 
@@ -927,7 +1083,7 @@ describe('CMS handlers', () => {
         db,
       )
       expect(res.status).toBe(401)
-      const body = await res.json() as { error: string }
+      const body = (await res.json()) as { error: string }
       expect(body.error).toBe('Invalid email or password')
 
       // Wrong password for an existing email should produce the EXACT same
@@ -937,7 +1093,7 @@ describe('CMS handlers', () => {
         db,
       )
       expect(res2.status).toBe(401)
-      const body2 = await res2.json() as { error: string }
+      const body2 = (await res2.json()) as { error: string }
       expect(body2.error).toBe('Invalid email or password')
 
       loginRateLimit.reset(`${xff}|${unknownEmail}`)
@@ -946,13 +1102,18 @@ describe('CMS handlers', () => {
 
     it('rejects state-changing requests with a foreign Origin (CSRF defense)', async () => {
       const db = await makeDbWithAdmin()
-      const probe = loginRequest('owner@example.com', 'long-enough-password', '203.0.113.99', 'https://evil.example.com')
+      const probe = loginRequest(
+        'owner@example.com',
+        'long-enough-password',
+        '203.0.113.99',
+        'https://evil.example.com',
+      )
       // Sanity-assert that the test fixture builds the request we expect.
       expect(probe.headers.get('origin')).toBe('https://evil.example.com')
       expect(probe.method).toBe('POST')
       const res = await handleCmsRequest(probe, db)
       expect(res.status).toBe(403)
-      const body = await res.json() as { error: string }
+      const body = (await res.json()) as { error: string }
       expect(body.error).toMatch(/origin/i)
     })
 

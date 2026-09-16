@@ -136,14 +136,19 @@ export function ContentSettingsPanel({
   onEditFeaturedMedia,
 }: ContentSettingsPanelProps) {
   const setRightPanel = useWorkspaceLayout((s) => s.setRightPanel)
-  const seoEnabled = selectedCollection ? dataTableHasField(selectedCollection, POST_TYPE_FIELD_SEO_TITLE) : false
-  const featuredMediaEnabled = selectedCollection ? dataTableHasField(selectedCollection, POST_TYPE_FIELD_FEATURED_MEDIA) : false
+  const seoEnabled = selectedCollection
+    ? dataTableHasField(selectedCollection, POST_TYPE_FIELD_SEO_TITLE)
+    : false
+  const featuredMediaEnabled = selectedCollection
+    ? dataTableHasField(selectedCollection, POST_TYPE_FIELD_FEATURED_MEDIA)
+    : false
   const customFields = selectedCollection?.fields.filter(isEditableCustomField) ?? []
   const authorRoleLabel = selectedEntry ? contentAuthorRoleLabel(selectedEntry) : null
   const selectedAuthor = selectedEntry ? contentAuthor(selectedEntry) : null
-  const authorOptions = selectedAuthor && !authors.some((author) => author.id === selectedAuthor.id)
-    ? [selectedAuthor, ...authors]
-    : authors
+  const authorOptions =
+    selectedAuthor && !authors.some((author) => author.id === selectedAuthor.id)
+      ? [selectedAuthor, ...authors]
+      : authors
   const canEditSelectedEntry = Boolean(selectedEntry && canEditEntry)
   const canMoveSelectedEntry = Boolean(selectedEntry && canMoveEntry)
   const canChangeStatus = Boolean(selectedEntry && (canEditEntry || canPublishEntry))
@@ -152,7 +157,8 @@ export function ContentSettingsPanel({
     { value: 'scheduled', label: 'Scheduled', enabled: false },
     { value: 'published', label: 'Published', enabled: canPublishEntry },
     { value: 'unpublished', label: 'Unpublished', enabled: canEditEntry },
-  ].filter((option) => option.enabled || option.value === selectedEntry?.status)
+  ]
+    .filter((option) => option.enabled || option.value === selectedEntry?.status)
     .map(({ value, label, enabled }) => ({ value, label, disabled: !enabled }))
 
   return (
@@ -166,12 +172,12 @@ export function ContentSettingsPanel({
       <PanelHeader
         panelId="content-settings"
         title="Settings"
-        titleContent={(
+        titleContent={
           <span className={propertiesStyles.headerNodeTitle}>
             <Settings2SolidIcon size={13} aria-hidden="true" />
             <span className={propertiesStyles.headerNodeLabel}>Settings</span>
           </span>
-        )}
+        }
         onClose={() => setRightPanel({ collapsed: true })}
       />
 
@@ -285,7 +291,11 @@ export function ContentSettingsPanel({
                   onEdit={featuredMediaAsset ? onEditFeaturedMedia : undefined}
                   onClear={featuredMediaId ? onClearFeaturedMedia : undefined}
                 />
-                {mediaError && <p className={styles.error} role="alert">{mediaError}</p>}
+                {mediaError && (
+                  <p className={styles.error} role="alert">
+                    {mediaError}
+                  </p>
+                )}
               </div>
             )}
             {selectedEntry && customFields.length > 0 && (

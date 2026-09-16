@@ -3,7 +3,10 @@ import { FilePlusSolidIcon } from 'pixel-art-icons/icons/file-plus-solid'
 import { PaintBucketSolidIcon } from 'pixel-art-icons/icons/paint-bucket-solid'
 import { CodeIcon } from 'pixel-art-icons/icons/code'
 import type { SiteExplorerSectionId } from '@core/page-tree'
-import { SiteExplorerTreeSection, type SiteExplorerInlineRenameTarget } from './SiteExplorerTreeSection'
+import {
+  SiteExplorerTreeSection,
+  type SiteExplorerInlineRenameTarget,
+} from './SiteExplorerTreeSection'
 import type { SiteExplorerDndState } from './SiteExplorerDndScope'
 import type {
   SiteExplorerStructuralSectionModel,
@@ -11,7 +14,11 @@ import type {
   SiteExplorerTreeItem,
   SiteExplorerTreeSectionModel,
 } from './siteExplorerModel'
-import type { SiteExplorerContextTarget, SiteExplorerAnySectionModel, SiteExplorerSectionGroup } from './siteExplorerPanelTypes'
+import type {
+  SiteExplorerContextTarget,
+  SiteExplorerAnySectionModel,
+  SiteExplorerSectionGroup,
+} from './siteExplorerPanelTypes'
 
 interface SiteExplorerPanelSectionsProps {
   /** Which group of sections to render — `site` (pages/templates/components)
@@ -28,7 +35,9 @@ interface SiteExplorerPanelSectionsProps {
   componentCount: number
   styleCount: number
   scriptCount: number
-  inlineRenameTargetForSection: (sectionId: SiteExplorerSectionId) => SiteExplorerInlineRenameTarget | null
+  inlineRenameTargetForSection: (
+    sectionId: SiteExplorerSectionId,
+  ) => SiteExplorerInlineRenameTarget | null
   selectedItemIdsForSection: (sectionId: SiteExplorerSectionId) => readonly string[]
   onCreatePage: () => void
   onCreateTemplate: () => void

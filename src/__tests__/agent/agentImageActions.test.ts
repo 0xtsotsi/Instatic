@@ -37,19 +37,23 @@ function restoreProperty(
 describe('agent image actions', () => {
   it('reads only non-empty image responses and derives a MIME-correct safe filename', async () => {
     const blob = await readAgentImageBlob(image(), {
-      fetchImpl: async () => new Response(new Uint8Array([1, 2, 3]), {
-        headers: { 'content-type': 'image/jpeg' },
-      }),
+      fetchImpl: async () =>
+        new Response(new Uint8Array([1, 2, 3]), {
+          headers: { 'content-type': 'image/jpeg' },
+        }),
     })
 
     expect(blob.type).toBe('image/jpeg')
     expect(agentImageFilename(image(), blob)).toBe('Reference-source.jpg')
 
-    await expect(readAgentImageBlob(image(), {
-      fetchImpl: async () => new Response('not an image', {
-        headers: { 'content-type': 'text/plain' },
+    await expect(
+      readAgentImageBlob(image(), {
+        fetchImpl: async () =>
+          new Response('not an image', {
+            headers: { 'content-type': 'text/plain' },
+          }),
       }),
-    })).rejects.toThrow('not an image')
+    ).rejects.toThrow('not an image')
   })
 
   it('passes promised PNG bytes to the clipboard in the initiating call stack', async () => {
@@ -89,9 +93,12 @@ describe('agent image actions', () => {
         callback(new Blob([new Uint8Array([4, 5, 6])], { type: 'image/png' }))
       },
     })
-    globalThis.fetch = mock(async () => new Response(new Uint8Array([1, 2, 3]), {
-      headers: { 'content-type': 'image/jpeg' },
-    })) as typeof fetch
+    globalThis.fetch = mock(
+      async () =>
+        new Response(new Uint8Array([1, 2, 3]), {
+          headers: { 'content-type': 'image/jpeg' },
+        }),
+    ) as typeof fetch
 
     try {
       await copyAgentImageToClipboard(image())
@@ -138,9 +145,12 @@ describe('agent image actions', () => {
         return 1
       },
     })
-    globalThis.fetch = mock(async () => new Response(new Uint8Array([1, 2, 3]), {
-      headers: { 'content-type': 'image/webp' },
-    })) as typeof fetch
+    globalThis.fetch = mock(
+      async () =>
+        new Response(new Uint8Array([1, 2, 3]), {
+          headers: { 'content-type': 'image/webp' },
+        }),
+    ) as typeof fetch
 
     try {
       await downloadAgentImage(image())
@@ -186,20 +196,25 @@ describe('agent image actions', () => {
     await new Promise((resolve) => setTimeout(resolve, 0))
     expect(sourceReads).toBe(1)
     expect(uploads).toBe(1)
-    resolveUpload(new Response(JSON.stringify({
-      asset: {
-        id: 'saved-once',
-        filename: 'Reference-source.jpg',
-        mimeType: 'image/jpeg',
-        sizeBytes: 4,
-        publicPath: '/uploads/reference-source.jpg',
-        uploadedByUserId: null,
-        createdAt: '2026-07-11T10:00:00.000Z',
-      },
-    }), {
-      status: 201,
-      headers: { 'content-type': 'application/json' },
-    }))
+    resolveUpload(
+      new Response(
+        JSON.stringify({
+          asset: {
+            id: 'saved-once',
+            filename: 'Reference-source.jpg',
+            mimeType: 'image/jpeg',
+            sizeBytes: 4,
+            publicPath: '/uploads/reference-source.jpg',
+            uploadedByUserId: null,
+            createdAt: '2026-07-11T10:00:00.000Z',
+          },
+        }),
+        {
+          status: 201,
+          headers: { 'content-type': 'application/json' },
+        },
+      ),
+    )
 
     const [firstAsset, secondAsset] = await Promise.all([first, second])
     expect(firstAsset.id).toBe('saved-once')

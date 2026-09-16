@@ -87,7 +87,9 @@ export function defineModule<const TDefaults extends Record<string, unknown>>(
   config: DefineModuleConfig<TDefaults>,
 ): PluginModuleDefinition {
   if (typeof config.id !== 'string' || !config.id.includes('.')) {
-    throw new Error(`[plugin-sdk] Module id "${config.id}" must be namespaced as "<pluginId>.<name>".`)
+    throw new Error(
+      `[plugin-sdk] Module id "${config.id}" must be namespaced as "<pluginId>.<name>".`,
+    )
   }
   // The host already validates `<pluginId>.` prefix at registration; we only
   // shape-check the basics here so the build phase fails fast.
@@ -103,8 +105,7 @@ export function defineModule<const TDefaults extends Record<string, unknown>>(
     htmlTag: config.htmlTag,
     ...(config.dependencies ? { dependencies: config.dependencies } : {}),
     ...(config.editorRuntime ? { editorRuntime: config.editorRuntime } : {}),
-    render: (props, children) =>
-      config.render({ props: props as TDefaults, children }),
+    render: (props, children) => config.render({ props: props as TDefaults, children }),
     ...(config.preview
       ? { preview: (props, children) => config.preview!({ props: props as TDefaults, children }) }
       : {}),

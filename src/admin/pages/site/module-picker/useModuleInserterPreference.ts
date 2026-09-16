@@ -7,10 +7,7 @@ import {
 } from '@core/persistence/userPreferences'
 import { ApiError } from '@core/http'
 import { getErrorMessage } from '@core/utils/errorMessage'
-import {
-  dedupeModuleInserterRefs,
-  recentKey,
-} from './moduleInserterModel'
+import { dedupeModuleInserterRefs, recentKey } from './moduleInserterModel'
 
 interface ModuleInserterPreferenceApi {
   favorites: ModuleInserterItemRef[]

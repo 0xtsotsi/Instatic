@@ -119,9 +119,7 @@ export function TagPill({
           {labelContent}
         </Button>
       ) : (
-        <span className={styles.staticContent}>
-          {labelContent}
-        </span>
+        <span className={styles.staticContent}>{labelContent}</span>
       )}
       {removable && (
         <Button

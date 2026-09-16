@@ -77,7 +77,9 @@ describe('site runtime build', () => {
       priority: 10,
     })
     expect(result.runtimeAssets.scripts[0].src).toStartWith('/_instatic/assets/runtime/')
-    const entryAsset = result.files.find((file) => file.publicPath === result.runtimeAssets.scripts[0].src)
+    const entryAsset = result.files.find(
+      (file) => file.publicPath === result.runtimeAssets.scripts[0].src,
+    )
     expect(entryAsset?.content).toContain('hello-runtime')
   })
 
@@ -133,7 +135,12 @@ describe('site runtime build', () => {
     await mkdir(join(nodeModulesDir, 'fake-runtime-package'), { recursive: true })
     await writeFile(
       join(nodeModulesDir, 'fake-runtime-package', 'package.json'),
-      JSON.stringify({ name: 'fake-runtime-package', version: '1.0.0', type: 'module', main: './index.js' }),
+      JSON.stringify({
+        name: 'fake-runtime-package',
+        version: '1.0.0',
+        type: 'module',
+        main: './index.js',
+      }),
       'utf8',
     )
     await writeFile(

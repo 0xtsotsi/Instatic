@@ -58,12 +58,12 @@ function totpCode(secret: string, now = Date.now()): string {
   counterBytes.writeBigUInt64BE(BigInt(counter))
   const digest = createHmac('sha1', decodeBase32(secret)).update(counterBytes).digest()
   const offset = digest[digest.length - 1]! & 0x0f
-  const value = (
-    ((digest[offset]! & 0x7f) << 24)
-    | ((digest[offset + 1]! & 0xff) << 16)
-    | ((digest[offset + 2]! & 0xff) << 8)
-    | (digest[offset + 3]! & 0xff)
-  ) % 1_000_000
+  const value =
+    (((digest[offset]! & 0x7f) << 24) |
+      ((digest[offset + 1]! & 0xff) << 16) |
+      ((digest[offset + 2]! & 0xff) << 8) |
+      (digest[offset + 3]! & 0xff)) %
+    1_000_000
   return value.toString().padStart(6, '0')
 }
 
@@ -94,7 +94,7 @@ async function login(
   const setCookie = res.headers.get('set-cookie') ?? ''
   const cookie = setCookie.split(';')[0]
   expect(cookie.startsWith(`${SESSION_COOKIE_NAME}=`)).toBe(true)
-  return { cookie, body: await res.json() as Record<string, unknown> }
+  return { cookie, body: (await res.json()) as Record<string, unknown> }
 }
 
 function cookieFromSetCookie(res: Response): string {
@@ -127,7 +127,7 @@ async function enableMfa(
   startReq.headers.set('cookie', steppedCookie)
   const startRes = await handleCmsRequest(startReq, db)
   expect(startRes.status).toBe(200)
-  const startBody = await startRes.json() as { secret: string; otpauthUrl: string }
+  const startBody = (await startRes.json()) as { secret: string; otpauthUrl: string }
   expect(startBody.secret).toMatch(/^[A-Z2-7]+$/)
   expect(startBody.otpauthUrl).toContain(encodeURIComponent(EMAIL))
 
@@ -139,7 +139,7 @@ async function enableMfa(
   enableReq.headers.set('cookie', steppedCookie)
   const enableRes = await handleCmsRequest(enableReq, db)
   expect(enableRes.status).toBe(200)
-  const enableBody = await enableRes.json() as {
+  const enableBody = (await enableRes.json()) as {
     user: { mfaEnabled: boolean; mfaRecoveryCodesRemaining: number }
     recoveryCodes: string[]
   }
@@ -203,7 +203,7 @@ describe('Account security endpoints', () => {
     updateReq.headers.set('cookie', steppedCookie)
     const updateRes = await handleCmsRequest(updateReq, db)
     expect(updateRes.status).toBe(200)
-    const body = await updateRes.json() as {
+    const body = (await updateRes.json()) as {
       user: { displayName: string; email: string; gravatarHash: string }
     }
     expect(body.user.displayName).toBe('Owner Renamed')
@@ -231,7 +231,7 @@ describe('Account security endpoints', () => {
     updateReq.headers.set('cookie', steppedCookie)
     const updateRes = await handleCmsRequest(updateReq, db)
     expect(updateRes.status).toBe(200)
-    const body = await updateRes.json() as {
+    const body = (await updateRes.json()) as {
       user: { displayName: string; email: string; gravatarHash: string }
     }
     expect(body.user.displayName).toBe(displayName)
@@ -345,7 +345,7 @@ describe('Account security endpoints', () => {
     removeReq.headers.set('cookie', cookie)
     const removeRes = await handleCmsRequest(removeReq, db)
     expect(removeRes.status).toBe(200)
-    const removeBody = await removeRes.json() as {
+    const removeBody = (await removeRes.json()) as {
       user: { avatarMediaId: string | null; avatarUrl: string | null; gravatarHash: string }
     }
     expect(removeBody.user.avatarMediaId).toBeNull()
@@ -379,12 +379,15 @@ describe('Account security endpoints', () => {
       const uploadRes = await handleCmsRequest(uploadReq, db)
       expect(uploadRes.status).toBe(503)
       expect(await uploadRes.json()).toEqual({
-        error: 'Elected media storage adapter "missing.avatar" is not currently available for role "avatar". The plugin that provides it may be disabled.',
+        error:
+          'Elected media storage adapter "missing.avatar" is not currently available for role "avatar". The plugin that provides it may be disabled.',
       })
 
       const after = await findUserByEmail(db, EMAIL)
       expect(after?.avatarMediaId).toBeNull()
-      const { rows } = await db<{ count: number | string }>`select count(*) as count from media_assets`
+      const { rows } = await db<{
+        count: number | string
+      }>`select count(*) as count from media_assets`
       expect(Number(rows[0]?.count ?? 0)).toBe(0)
     } finally {
       mediaStorageRegistry.__reset()
@@ -425,7 +428,7 @@ describe('Account security endpoints', () => {
     changeReq.headers.set('cookie', steppedCookie)
     const changeRes = await handleCmsRequest(changeReq, db)
     expect(changeRes.status).toBe(200)
-    const body = await changeRes.json() as { user: { passwordUpdatedAt: string } }
+    const body = (await changeRes.json()) as { user: { passwordUpdatedAt: string } }
     expect(Date.parse(body.user.passwordUpdatedAt)).not.toBeNaN()
 
     const updated = await findUserByEmail(db, EMAIL)
@@ -461,7 +464,7 @@ describe('Account security endpoints', () => {
     updateReq.headers.set('cookie', steppedCookie)
     const updateRes = await handleCmsRequest(updateReq, db)
     expect(updateRes.status).toBe(200)
-    const updateBody = await updateRes.json() as {
+    const updateBody = (await updateRes.json()) as {
       user: { stepUpAuthMode: string; stepUpWindowMinutes: number }
     }
     expect(updateBody.user.stepUpAuthMode).toBe('disabled')
@@ -539,7 +542,7 @@ describe('Account security endpoints', () => {
     secondStepUpReq.headers.set('cookie', steppedCookie)
     const secondStepUpRes = await handleCmsRequest(secondStepUpReq, db)
     expect(secondStepUpRes.status).toBe(200)
-    const body = await secondStepUpRes.json() as { stepUpExpiresAt: string }
+    const body = (await secondStepUpRes.json()) as { stepUpExpiresAt: string }
     const expiresAt = Date.parse(body.stepUpExpiresAt)
     const thirtyMinutesMs = 30 * 60 * 1000
     expect(expiresAt).toBeGreaterThanOrEqual(before + thirtyMinutesMs - 1000)
@@ -551,11 +554,12 @@ describe('Account security endpoints', () => {
     const { cookie } = await login(db)
     const { secret } = await enableMfa(db, cookie)
 
-    const schemaRows = db.dialect === 'sqlite'
-      ? await db.unsafe<{ name: string }>("select name from pragma_table_info('users')")
-      : await db.unsafe<{ name: string }>(
-        "select column_name as name from information_schema.columns where table_name = 'users'",
-      )
+    const schemaRows =
+      db.dialect === 'sqlite'
+        ? await db.unsafe<{ name: string }>("select name from pragma_table_info('users')")
+        : await db.unsafe<{ name: string }>(
+            "select column_name as name from information_schema.columns where table_name = 'users'",
+          )
     const userColumns = schemaRows.rows.map((row) => row.name)
     expect(userColumns).not.toContain('mfa_totp_secret')
 

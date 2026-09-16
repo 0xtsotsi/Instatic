@@ -67,7 +67,10 @@ export function SiteExplorerPathConfirmDialog({
           <p className={styles.groupTitle}>Warnings</p>
           <ul className={styles.list}>
             {plan.warnings.map((warning) => (
-              <li key={`${warning.code}:${warning.sourcePath ?? warning.message}`} className={styles.listItem}>
+              <li
+                key={`${warning.code}:${warning.sourcePath ?? warning.message}`}
+                className={styles.listItem}
+              >
                 <span>{warning.message}</span>
                 {warning.sourcePath && <code className={styles.path}>{warning.sourcePath}</code>}
               </li>

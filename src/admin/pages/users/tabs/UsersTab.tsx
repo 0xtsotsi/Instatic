@@ -29,23 +29,14 @@ import { PlusIcon } from 'pixel-art-icons/icons/plus'
 import { PowerIcon } from 'pixel-art-icons/icons/power'
 import { PowerOffIcon } from 'pixel-art-icons/icons/power-off'
 import { SaveSolidIcon } from 'pixel-art-icons/icons/save-solid'
-import {
-  createCmsUser,
-  deleteCmsUser,
-  updateCmsUser,
-  type CmsCurrentUser,
-} from '@core/persistence'
+import { createCmsUser, deleteCmsUser, updateCmsUser, type CmsCurrentUser } from '@core/persistence'
 import { StepUpCancelledMessage, useStepUp } from '@admin/shared/StepUp'
 import { UserAvatar } from '@admin/shared/UserAvatar'
 import { Badge } from '../components/Badge'
 import { RowActionMenu } from '../components/RowActionMenu'
 import { UserDialog } from '../components/UserDialog'
 import { displayUserName, formatDateTime, isOwnerUser, statusLabel } from '../utils/format'
-import {
-  emptyUserForm,
-  type UserDialogMode,
-  type UserFormState,
-} from '../types'
+import { emptyUserForm, type UserDialogMode, type UserFormState } from '../types'
 import type { UsersPageData } from '../hooks/useUsersPageData'
 import styles from '../UsersPage.module.css'
 import { getErrorMessage } from '@core/utils/errorMessage'
@@ -79,21 +70,27 @@ async function saveUser(
       await runStepUp(() => updateCmsUser(editingUserId, { password: userForm.password }))
     } else if (dialogMode === 'edit') {
       if (!editingUserId) throw new Error('No user selected')
-      const user = await runStepUp(() => updateCmsUser(editingUserId, {
-        email: userForm.email,
-        displayName: userForm.displayName,
-        roleId: userForm.roleId,
-        status: userForm.status,
-        ...(userForm.password ? { password: userForm.password } : {}),
-      }))
-      setUsers((current) => current.map((candidate) => candidate.id === user.id ? user : candidate))
+      const user = await runStepUp(() =>
+        updateCmsUser(editingUserId, {
+          email: userForm.email,
+          displayName: userForm.displayName,
+          roleId: userForm.roleId,
+          status: userForm.status,
+          ...(userForm.password ? { password: userForm.password } : {}),
+        }),
+      )
+      setUsers((current) =>
+        current.map((candidate) => (candidate.id === user.id ? user : candidate)),
+      )
     } else {
-      const user = await runStepUp(() => createCmsUser({
-        email: userForm.email,
-        displayName: userForm.displayName,
-        password: userForm.password,
-        roleId: userForm.roleId,
-      }))
+      const user = await runStepUp(() =>
+        createCmsUser({
+          email: userForm.email,
+          displayName: userForm.displayName,
+          password: userForm.password,
+          roleId: userForm.roleId,
+        }),
+      )
       setUsers((current) => [...current, user])
     }
     closeDialog()
@@ -118,10 +115,14 @@ async function toggleUserStatus(
   setBusy(true)
   setError(null)
   try {
-    const updated = await runStepUp(() => updateCmsUser(userId, {
-      status: currentStatus === 'active' ? 'suspended' : 'active',
-    }))
-    setUsers((current) => current.map((candidate) => candidate.id === updated.id ? updated : candidate))
+    const updated = await runStepUp(() =>
+      updateCmsUser(userId, {
+        status: currentStatus === 'active' ? 'suspended' : 'active',
+      }),
+    )
+    setUsers((current) =>
+      current.map((candidate) => (candidate.id === updated.id ? updated : candidate)),
+    )
     void refresh()
   } catch (err) {
     if (err instanceof Error && err.message === StepUpCancelledMessage) return
@@ -235,11 +236,24 @@ export function UsersTab({ data, canManageUsers }: UsersTabProps) {
   async function handleSave(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
     if (!canManageUsers || !dialogMode) return
-    if ((dialogMode === 'create' || dialogMode === 'reset' || userForm.password) && userForm.password.length < 12) {
+    if (
+      (dialogMode === 'create' || dialogMode === 'reset' || userForm.password) &&
+      userForm.password.length < 12
+    ) {
       setError('Password must be at least 12 characters')
       return
     }
-    await saveUser(dialogMode, editingUserId, userForm, runStepUp, setUsers, closeDialog, refresh, setBusy, setError)
+    await saveUser(
+      dialogMode,
+      editingUserId,
+      userForm,
+      runStepUp,
+      setUsers,
+      closeDialog,
+      refresh,
+      setBusy,
+      setError,
+    )
   }
 
   async function toggleStatus(user: CmsCurrentUser) {
@@ -286,7 +300,9 @@ export function UsersTab({ data, canManageUsers }: UsersTabProps) {
               <DataTableHeader scope="col">User</DataTableHeader>
               <DataTableHeader scope="col">Access</DataTableHeader>
               <DataTableHeader scope="col">Last login</DataTableHeader>
-              <DataTableHeader scope="col" className={styles.actionsHeader}>Actions</DataTableHeader>
+              <DataTableHeader scope="col" className={styles.actionsHeader}>
+                Actions
+              </DataTableHeader>
             </DataTableRow>
           </DataTableHead>
           <DataTableBody>
@@ -324,7 +340,9 @@ export function UsersTab({ data, canManageUsers }: UsersTabProps) {
               <DataTableHeader scope="col">User</DataTableHeader>
               <DataTableHeader scope="col">Access</DataTableHeader>
               <DataTableHeader scope="col">Last login</DataTableHeader>
-              <DataTableHeader scope="col" className={styles.actionsHeader}>Actions</DataTableHeader>
+              <DataTableHeader scope="col" className={styles.actionsHeader}>
+                Actions
+              </DataTableHeader>
             </DataTableRow>
           </DataTableHead>
           <DataTableBody>
@@ -371,9 +389,12 @@ export function UsersTab({ data, canManageUsers }: UsersTabProps) {
                           },
                           {
                             label: user.status === 'active' ? 'Suspend' : 'Activate',
-                            icon: user.status === 'active'
-                              ? <PowerOffIcon size={12} aria-hidden="true" />
-                              : <PowerIcon size={12} aria-hidden="true" />,
+                            icon:
+                              user.status === 'active' ? (
+                                <PowerOffIcon size={12} aria-hidden="true" />
+                              ) : (
+                                <PowerIcon size={12} aria-hidden="true" />
+                              ),
                             onSelect: () => void toggleStatus(user),
                           },
                           {

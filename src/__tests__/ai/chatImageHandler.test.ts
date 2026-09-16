@@ -1,7 +1,10 @@
 import { afterEach, beforeEach, describe, expect, it } from 'bun:test'
 import sharp from 'sharp'
 import { AI_CHAT_MAX_REQUEST_BYTES, AI_USER_IMAGE_MAX_PER_MESSAGE } from '@core/ai'
-import { createCapabilityTestHarness, type CapabilityTestHarness } from '../helpers/capabilityHarness'
+import {
+  createCapabilityTestHarness,
+  type CapabilityTestHarness,
+} from '../helpers/capabilityHarness'
 import {
   appendMessage,
   createConversationForUser,
@@ -134,11 +137,14 @@ describe('AI chat user-image boundary', () => {
       }
       if (url === 'http://ollama.test/v1/chat/completions') {
         providerRequest = String(init?.body ?? '')
-        return new Response([
-          'data: {"choices":[{"delta":{"content":"Looks good."},"finish_reason":null}]}\n\n',
-          'data: {"choices":[{"delta":{},"finish_reason":"stop"}],"usage":{"prompt_tokens":10,"completion_tokens":2}}\n\n',
-          'data: [DONE]\n\n',
-        ].join(''), { headers: { 'content-type': 'text/event-stream' } })
+        return new Response(
+          [
+            'data: {"choices":[{"delta":{"content":"Looks good."},"finish_reason":null}]}\n\n',
+            'data: {"choices":[{"delta":{},"finish_reason":"stop"}],"usage":{"prompt_tokens":10,"completion_tokens":2}}\n\n',
+            'data: [DONE]\n\n',
+          ].join(''),
+          { headers: { 'content-type': 'text/event-stream' } },
+        )
       }
       throw new Error(`Unexpected fetch: ${url}`)
     }
@@ -199,10 +205,14 @@ describe('AI chat user-image boundary', () => {
     const responses = await Promise.all([firstRequest, secondRequest])
     expect(responses.map((response) => response.status).sort()).toEqual([200, 409])
 
-    providerResponse.resolve(new Response([
-      'data: {"choices":[{"delta":{},"finish_reason":"stop"}]}\n\n',
-      'data: [DONE]\n\n',
-    ].join(''), { headers: { 'content-type': 'text/event-stream' } }))
+    providerResponse.resolve(
+      new Response(
+        ['data: {"choices":[{"delta":{},"finish_reason":"stop"}]}\n\n', 'data: [DONE]\n\n'].join(
+          '',
+        ),
+        { headers: { 'content-type': 'text/event-stream' } },
+      ),
+    )
     const accepted = responses.find((response) => response.status === 200)
     await accepted?.text()
 
@@ -240,10 +250,12 @@ describe('AI chat user-image boundary', () => {
           else signal.addEventListener('abort', onAbort, { once: true })
         })
       }
-      return new Response([
-        'data: {"choices":[{"delta":{},"finish_reason":"stop"}]}\n\n',
-        'data: [DONE]\n\n',
-      ].join(''), { headers: { 'content-type': 'text/event-stream' } })
+      return new Response(
+        ['data: {"choices":[{"delta":{},"finish_reason":"stop"}]}\n\n', 'data: [DONE]\n\n'].join(
+          '',
+        ),
+        { headers: { 'content-type': 'text/event-stream' } },
+      )
     }
 
     const response = await harness.ai('/admin/api/ai/chat/site', {
@@ -326,10 +338,12 @@ describe('AI chat user-image boundary', () => {
       }
       if (url === 'http://ollama.test/v1/chat/completions') {
         providerRequest = String(init?.body ?? '')
-        return new Response([
-          'data: {"choices":[{"delta":{},"finish_reason":"stop"}]}\n\n',
-          'data: [DONE]\n\n',
-        ].join(''), { headers: { 'content-type': 'text/event-stream' } })
+        return new Response(
+          ['data: {"choices":[{"delta":{},"finish_reason":"stop"}]}\n\n', 'data: [DONE]\n\n'].join(
+            '',
+          ),
+          { headers: { 'content-type': 'text/event-stream' } },
+        )
       }
       throw new Error(`Unexpected fetch: ${url}`)
     }
@@ -347,20 +361,25 @@ describe('AI chat user-image boundary', () => {
       .flatMap((message) => message.content)
       .filter((block) => block.kind === 'image')
     expect(userImages).toHaveLength(AI_USER_IMAGE_MAX_PER_MESSAGE + 2)
-    expect(providerRequest.match(/data:image\/jpeg;base64,/g))
-      .toHaveLength(AI_USER_IMAGE_MAX_PER_MESSAGE + 2)
+    expect(providerRequest.match(/data:image\/jpeg;base64,/g)).toHaveLength(
+      AI_USER_IMAGE_MAX_PER_MESSAGE + 2,
+    )
   })
 })
 
 async function jpegBlock() {
-  const data = (await sharp({
-    create: {
-      width: 8,
-      height: 8,
-      channels: 3,
-      background: { r: 30, g: 60, b: 90 },
-    },
-  }).jpeg().toBuffer()).toString('base64')
+  const data = (
+    await sharp({
+      create: {
+        width: 8,
+        height: 8,
+        channels: 3,
+        background: { r: 30, g: 60, b: 90 },
+      },
+    })
+      .jpeg()
+      .toBuffer()
+  ).toString('base64')
   return { kind: 'image' as const, mimeType: 'image/jpeg' as const, data }
 }
 
@@ -378,7 +397,9 @@ function jsonResponse(body: unknown): Response {
 
 function deferred<T>() {
   let resolve!: (value: T | PromiseLike<T>) => void
-  const promise = new Promise<T>((done) => { resolve = done })
+  const promise = new Promise<T>((done) => {
+    resolve = done
+  })
   return { promise, resolve }
 }
 
@@ -388,10 +409,7 @@ async function withTimeout<T>(promise: Promise<T>, timeoutMs: number): Promise<T
     return await Promise.race([
       promise,
       new Promise<never>((_resolve, reject) => {
-        timer = setTimeout(
-          () => reject(new Error(`Timed out after ${timeoutMs}ms.`)),
-          timeoutMs,
-        )
+        timer = setTimeout(() => reject(new Error(`Timed out after ${timeoutMs}ms.`)), timeoutMs)
       }),
     ])
   } finally {

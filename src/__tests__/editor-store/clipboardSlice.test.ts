@@ -17,10 +17,7 @@
 
 import { afterEach, beforeEach, describe, expect, it } from 'bun:test'
 import { useEditorStore } from '@site/store/store'
-import {
-  CLIPBOARD_STORAGE_KEY,
-  readClipboardPayload,
-} from '@site/store/clipboard/clipboardStorage'
+import { CLIPBOARD_STORAGE_KEY, readClipboardPayload } from '@site/store/clipboard/clipboardStorage'
 import '@modules/base/index'
 
 function freshStore() {
@@ -195,9 +192,7 @@ describe('clipboardSlice.pasteNode — class handling', () => {
     const pasted = state.site!.pages[0].nodes[newIds![0]]
     expect(pasted.classIds).toContain(cls.id)
     // The class itself is reused — no duplicate added to the registry.
-    const matches = Object.values(state.site!.styleRules).filter(
-      (c) => c.name === 'shared-style',
-    )
+    const matches = Object.values(state.site!.styleRules).filter((c) => c.name === 'shared-style')
     expect(matches.length).toBe(1)
   })
 

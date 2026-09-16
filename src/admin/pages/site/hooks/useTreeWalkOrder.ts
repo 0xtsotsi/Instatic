@@ -8,9 +8,7 @@ export function getAncestorIds(
   targetId: string,
 ): string[] {
   // BFS to find path from root to targetId
-  const queue: Array<{ nodeId: string; path: string[] }> = [
-    { nodeId: rootNodeId, path: [] },
-  ]
+  const queue: Array<{ nodeId: string; path: string[] }> = [{ nodeId: rootNodeId, path: [] }]
   while (queue.length > 0) {
     const { nodeId, path } = queue.shift()!
     if (nodeId === targetId) return path

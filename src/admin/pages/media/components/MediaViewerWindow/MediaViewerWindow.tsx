@@ -37,7 +37,11 @@ import { TrashSolidIcon } from 'pixel-art-icons/icons/trash-solid'
 import { VideoSolidIcon } from 'pixel-art-icons/icons/video-solid'
 import { PanelHeader } from '@admin/shared/PanelHeader'
 import { useDraggablePanel } from '@admin/shared/FloatingWindow'
-import type { CmsMediaAsset, CmsMediaFolder, UpdateCmsMediaAssetInput } from '@core/persistence/cmsMedia'
+import type {
+  CmsMediaAsset,
+  CmsMediaFolder,
+  UpdateCmsMediaAssetInput,
+} from '@core/persistence/cmsMedia'
 import { bucketForMime } from '../../utils/filters'
 import { useDebouncedSave } from '../../hooks/useDebouncedSave'
 import { TagEditor } from '../TagEditor/TagEditor'
@@ -291,9 +295,7 @@ function ViewerForAsset({ editor, onClose }: ViewerForAssetProps) {
                 <Detail label="Duration" value={`${(asset.durationMs / 1000).toFixed(1)}s`} />
               )}
               <Detail label="Uploaded" value={formatDate(asset.createdAt)} />
-              {asset.replacedAt && (
-                <Detail label="Replaced" value={formatDate(asset.replacedAt)} />
-              )}
+              {asset.replacedAt && <Detail label="Replaced" value={formatDate(asset.replacedAt)} />}
             </dl>
           </Section>
 
@@ -303,7 +305,9 @@ function ViewerForAsset({ editor, onClose }: ViewerForAssetProps) {
             ) : (
               <ul className={styles.folderList} aria-label="Asset folders">
                 {folderNames.map((name) => (
-                  <li key={name} className={styles.folderChip}>{name}</li>
+                  <li key={name} className={styles.folderChip}>
+                    {name}
+                  </li>
                 ))}
               </ul>
             )}

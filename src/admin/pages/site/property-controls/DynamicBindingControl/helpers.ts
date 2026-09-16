@@ -133,11 +133,7 @@ export function resolveBindingLabel(
   // System sources first — checked by `binding.source`, not by field id
   // alone, because the same field id ('id', 'slug') can exist on
   // multiple system sources.
-  if (
-    binding.source === 'page' ||
-    binding.source === 'site' ||
-    binding.source === 'route'
-  ) {
+  if (binding.source === 'page' || binding.source === 'site' || binding.source === 'route') {
     const system = SYSTEM_SOURCES.find((s) => s.id === binding.source)
     if (system) {
       const field = system.fields.find((f) => f.id === binding.field)

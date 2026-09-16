@@ -31,18 +31,14 @@ describe('isCuratedProperty', () => {
 describe('getCustomProperties', () => {
   it('returns only set, uncurated properties, sorted', () => {
     const styles = {
-      fontSize: '16px',          // curated → excluded
-      gridAutoFlow: 'dense',     // uncurated → included
+      fontSize: '16px', // curated → excluded
+      gridAutoFlow: 'dense', // uncurated → included
       fontFeatureSettings: '"liga"', // uncurated → included
-      '--brand': '#2563eb',      // custom prop → included
-      color: '',                 // empty → excluded even though curated
-      listStyleType: '',         // empty → excluded
+      '--brand': '#2563eb', // custom prop → included
+      color: '', // empty → excluded even though curated
+      listStyleType: '', // empty → excluded
     }
-    expect(getCustomProperties(styles)).toEqual([
-      '--brand',
-      'fontFeatureSettings',
-      'gridAutoFlow',
-    ])
+    expect(getCustomProperties(styles)).toEqual(['--brand', 'fontFeatureSettings', 'gridAutoFlow'])
   })
 
   it('returns [] when every set property is curated', () => {

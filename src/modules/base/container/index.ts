@@ -17,10 +17,7 @@ import {
   resolveHtmlTag,
   VOID_HTML_ELEMENTS,
 } from '@modules/base/utils/htmlTag'
-import {
-  htmlAttributesAttr,
-  htmlAttributesControl,
-} from '@modules/base/shared/htmlAttributes'
+import { htmlAttributesAttr, htmlAttributesControl } from '@modules/base/shared/htmlAttributes'
 import { Value } from '@core/utils/typeboxHelpers'
 import { ContainerEditor } from './ContainerEditor'
 import { ContainerPropsSchema, type ContainerStoredProps } from './props'

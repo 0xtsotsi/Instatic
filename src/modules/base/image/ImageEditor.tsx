@@ -33,7 +33,11 @@ import { shouldUseBlurPlaceholder } from './placeholder'
 // initial `src`.
 const CANVAS_CSS_WIDTH = 320
 
-export const ImageEditor: React.FC<ModuleComponentProps<ImageStoredProps>> = ({ props, mcClassName, nodeWrapperProps }) => {
+export const ImageEditor: React.FC<ModuleComponentProps<ImageStoredProps>> = ({
+  props,
+  mcClassName,
+  nodeWrapperProps,
+}) => {
   // Resolve the asset row server-side metadata is cached in a module-
   // level map, so dozens of image modules on one page share a single
   // round trip. `null` until the cache is populated — render shows the

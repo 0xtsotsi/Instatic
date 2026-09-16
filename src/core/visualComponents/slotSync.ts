@@ -177,9 +177,7 @@ export function syncSlotInstances(
     const child = treeNodes[childId]
     if (child?.moduleId === 'base.slot-instance') {
       const slotName =
-        typeof child.props.slotName === 'string' && child.props.slotName
-          ? child.props.slotName
-          : ''
+        typeof child.props.slotName === 'string' && child.props.slotName ? child.props.slotName : ''
       existingSlotInstances.push({ nodeId: childId, slotName })
     } else {
       // Non-slot-instance child: drop it (invalid under a VC ref)

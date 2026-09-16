@@ -21,10 +21,7 @@ export interface ConfirmVCDeletionRequest {
   commit: () => void
 }
 
-const vcDeletionConfirm = createConfirmContext<
-  ConfirmVCDeletionRequest,
-  VCDeletionImpact
->()
+const vcDeletionConfirm = createConfirmContext<ConfirmVCDeletionRequest, VCDeletionImpact>()
 
 export const VCDeletionConfirmContext = vcDeletionConfirm.Context
 export const useVCDeletionConfirmController = vcDeletionConfirm.useConfirmController

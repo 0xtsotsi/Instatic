@@ -31,11 +31,11 @@ interface ManualSeed {
 
 /** Verbatim from Core Framework TYPOGRAPHY_INITIAL_STATE.groups[0].manualSizes. */
 const TYPOGRAPHY_MANUAL_SEED: ManualSeed[] = [
-  { name: 'text-xs',  min: 12.64, max: 10.13 },
-  { name: 'text-s',   min: 14.22, max: 13.5 },
-  { name: 'text-m',   min: 16,    max: 18 },
-  { name: 'text-l',   min: 18,    max: 23.99 },
-  { name: 'text-xl',  min: 20.25, max: 31.98 },
+  { name: 'text-xs', min: 12.64, max: 10.13 },
+  { name: 'text-s', min: 14.22, max: 13.5 },
+  { name: 'text-m', min: 16, max: 18 },
+  { name: 'text-l', min: 18, max: 23.99 },
+  { name: 'text-xl', min: 20.25, max: 31.98 },
   { name: 'text-2xl', min: 22.78, max: 42.63 },
   { name: 'text-3xl', min: 25.63, max: 56.83 },
   { name: 'text-4xl', min: 28.83, max: 75.76 },
@@ -43,14 +43,14 @@ const TYPOGRAPHY_MANUAL_SEED: ManualSeed[] = [
 
 /** Verbatim from Core Framework SPACING_CALCULATOR_INITIAL_STATE.groups[0].manualSizes. */
 const SPACING_MANUAL_SEED: ManualSeed[] = [
-  { name: 'space-4xs', min: 5.24,  max: 4.95 },
-  { name: 'space-3xs', min: 6.55,  max: 7 },
-  { name: 'space-2xs', min: 8.19,  max: 9.9 },
-  { name: 'space-xs',  min: 10.24, max: 14 },
-  { name: 'space-s',   min: 12.8,  max: 19.8 },
-  { name: 'space-m',   min: 16,    max: 28 },
-  { name: 'space-l',   min: 20,    max: 39.59 },
-  { name: 'space-xl',  min: 25,    max: 55.98 },
+  { name: 'space-4xs', min: 5.24, max: 4.95 },
+  { name: 'space-3xs', min: 6.55, max: 7 },
+  { name: 'space-2xs', min: 8.19, max: 9.9 },
+  { name: 'space-xs', min: 10.24, max: 14 },
+  { name: 'space-s', min: 12.8, max: 19.8 },
+  { name: 'space-m', min: 16, max: 28 },
+  { name: 'space-l', min: 20, max: 39.59 },
+  { name: 'space-xl', min: 25, max: 55.98 },
   { name: 'space-2xl', min: 31.25, max: 79.16 },
   { name: 'space-3xl', min: 39.06, max: 111.93 },
   { name: 'space-4xl', min: 48.83, max: 158.27 },
@@ -97,9 +97,7 @@ export function buildDefaultSpacingGroup(order = 0): FrameworkSpacingGroup {
 }
 
 function buildDefaultTypographyClassGenerators(tabId: string): FrameworkTypographyClassGenerator[] {
-  return [
-    { id: nanoid(), tabId, name: 'text-*', property: ['font-size'] },
-  ]
+  return [{ id: nanoid(), tabId, name: 'text-*', property: ['font-size'] }]
 }
 
 /** Verbatim from Core Framework SPACING_CALCULATOR_INITIAL_STATE.classes (sans the leading dot). */
@@ -116,20 +114,20 @@ function buildDefaultSpacingClassGenerators(tabId: string): FrameworkSpacingClas
   // publisher then collapses them back into a `padding: var(--space-md);`
   // shorthand at emission time.
   return [
-    make('padding-*',            ['padding-top', 'padding-right', 'padding-bottom', 'padding-left']),
-    make('padding-left-*',       ['padding-left']),
-    make('padding-right-*',      ['padding-right']),
-    make('padding-top-*',        ['padding-top']),
-    make('padding-bottom-*',     ['padding-bottom']),
+    make('padding-*', ['padding-top', 'padding-right', 'padding-bottom', 'padding-left']),
+    make('padding-left-*', ['padding-left']),
+    make('padding-right-*', ['padding-right']),
+    make('padding-top-*', ['padding-top']),
+    make('padding-bottom-*', ['padding-bottom']),
     make('padding-horizontal-*', ['padding-left', 'padding-right']),
-    make('padding-vertical-*',   ['padding-top', 'padding-bottom']),
-    make('margin-*',             ['margin-top', 'margin-right', 'margin-bottom', 'margin-left']),
-    make('margin-left-*',        ['margin-left']),
-    make('margin-right-*',       ['margin-right']),
-    make('margin-top-*',         ['margin-top']),
-    make('margin-bottom-*',      ['margin-bottom']),
-    make('margin-horizontal-*',  ['margin-left', 'margin-right']),
-    make('margin-vertical-*',    ['margin-top', 'margin-bottom']),
+    make('padding-vertical-*', ['padding-top', 'padding-bottom']),
+    make('margin-*', ['margin-top', 'margin-right', 'margin-bottom', 'margin-left']),
+    make('margin-left-*', ['margin-left']),
+    make('margin-right-*', ['margin-right']),
+    make('margin-top-*', ['margin-top']),
+    make('margin-bottom-*', ['margin-bottom']),
+    make('margin-horizontal-*', ['margin-left', 'margin-right']),
+    make('margin-vertical-*', ['margin-top', 'margin-bottom']),
     make('gap-*', ['gap']),
   ]
 }
@@ -151,25 +149,37 @@ export function buildDefaultSpacingSettings(): FrameworkSpacingSettings {
 }
 
 /** Generate the next "Typography N" / variable "text-N" pair for a fresh tab. */
-export function nextTypographyTabValues(existing: FrameworkTypographyGroup[]): { name: string; varName: string } {
+export function nextTypographyTabValues(existing: FrameworkTypographyGroup[]): {
+  name: string
+  varName: string
+} {
   const count =
-    existing.filter((g) => g.name.toLowerCase().startsWith(NEW_TYPOGRAPHY_TAB_NAME.toLowerCase())).length + 1
+    existing.filter((g) => g.name.toLowerCase().startsWith(NEW_TYPOGRAPHY_TAB_NAME.toLowerCase()))
+      .length + 1
   return {
     name: `${NEW_TYPOGRAPHY_TAB_NAME} ${count}`,
     varName: `${NEW_TYPOGRAPHY_VAR_NAME}-${count}`,
   }
 }
 
-export function nextSpacingTabValues(existing: FrameworkSpacingGroup[]): { name: string; varName: string } {
+export function nextSpacingTabValues(existing: FrameworkSpacingGroup[]): {
+  name: string
+  varName: string
+} {
   const count =
-    existing.filter((g) => g.name.toLowerCase().startsWith(NEW_SPACING_TAB_NAME.toLowerCase())).length + 1
+    existing.filter((g) => g.name.toLowerCase().startsWith(NEW_SPACING_TAB_NAME.toLowerCase()))
+      .length + 1
   return {
     name: `${NEW_SPACING_TAB_NAME} ${count}`,
     varName: `${NEW_SPACING_VAR_NAME}-${count}`,
   }
 }
 
-export function makeFreshTypographyGroup(name: string, varName: string, order: number): FrameworkTypographyGroup {
+export function makeFreshTypographyGroup(
+  name: string,
+  varName: string,
+  order: number,
+): FrameworkTypographyGroup {
   const base = buildDefaultTypographyGroup(order)
   return {
     ...base,
@@ -184,7 +194,11 @@ export function makeFreshTypographyGroup(name: string, varName: string, order: n
   }
 }
 
-export function makeFreshSpacingGroup(name: string, varName: string, order: number): FrameworkSpacingGroup {
+export function makeFreshSpacingGroup(
+  name: string,
+  varName: string,
+  order: number,
+): FrameworkSpacingGroup {
   const base = buildDefaultSpacingGroup(order)
   return {
     ...base,

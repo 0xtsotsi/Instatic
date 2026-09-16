@@ -43,7 +43,9 @@ export function shouldStartCanvasPointerPan(
   event: PointerPanEvent,
   { spaceHeld }: PointerPanOptions,
 ): boolean {
-  return event.button === MIDDLE_MOUSE_BUTTON || (spaceHeld && event.button === PRIMARY_MOUSE_BUTTON)
+  return (
+    event.button === MIDDLE_MOUSE_BUTTON || (spaceHeld && event.button === PRIMARY_MOUSE_BUTTON)
+  )
 }
 
 export function isCanvasPointerPanActive(

@@ -1,14 +1,7 @@
 import type { CSSProperties } from 'react'
 import { cn } from '@ui/cn'
-import type {
-  CanvasOverlayMeasureSession,
-  CanvasOverlayRect,
-} from './canvasOverlayGeometry'
-import type {
-  CanvasDropAxis,
-  CanvasDropTarget,
-  CanvasRect,
-} from './canvasDnd'
+import type { CanvasOverlayMeasureSession, CanvasOverlayRect } from './canvasOverlayGeometry'
+import type { CanvasDropAxis, CanvasDropTarget, CanvasRect } from './canvasDnd'
 import styles from './BreakpointSelectionOverlay.module.css'
 
 const TOOLBAR_VERTICAL_OFFSET = 30

@@ -13,11 +13,9 @@
 
 export { cssToStyleRules } from './cssToStyleRules'
 
-
 // ── Phase 2 — input ingestion ─────────────────────────────────────────────────
 
 export { ingestInput } from './ingestInput'
-
 
 // ── Phase 2 — file classification ────────────────────────────────────────────
 
@@ -26,7 +24,6 @@ export { classifyFiles } from './classifyFiles'
 // ── Phase 2 — HTML page planning ──────────────────────────────────────────────
 
 export { makeHtmlPagePlan, deriveSlug, prettifyTitle, resolveHref } from './htmlPagePlan'
-
 
 // ── Phase 2 — asset collection + URL normalisation ───────────────────────────
 
@@ -52,7 +49,6 @@ export { extractRootColorTokens, isCssColorValue } from './colorTokens'
 // ── Phase 2 — conflict detection + resolution ─────────────────────────────────
 
 export { detectConflicts, applyConflictResolutions } from './conflicts'
-
 
 // ── Phase 2 — adapter interfaces ─────────────────────────────────────────────
 

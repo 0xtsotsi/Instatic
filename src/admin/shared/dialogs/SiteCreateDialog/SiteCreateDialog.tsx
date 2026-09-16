@@ -35,12 +35,7 @@ const COPY: Record<SiteCreateKind, { title: string; placeholder: string }> = {
 
 const FORM_ID = 'site-create-form'
 
-export function SiteCreateDialog({
-  kind,
-  pages = [],
-  onCancel,
-  onCreate,
-}: SiteCreateDialogProps) {
+export function SiteCreateDialog({ kind, pages = [], onCancel, onCreate }: SiteCreateDialogProps) {
   const [name, setName] = useState('')
   const [slug, setSlug] = useState('')
   const [slugTouched, setSlugTouched] = useState(false)
@@ -52,9 +47,10 @@ export function SiteCreateDialog({
   const isPage = kind === 'page'
   const generatedSlug = isPage && trimmedName ? createUniquePageSlug(trimmedName, pages) : ''
   const pageSlug = slugTouched ? slug : generatedSlug
-  const slugError = isPage && trimmedName
-    ? pageSlugError(pageSlug) || pageSlugDuplicateError(pageSlug, pages)
-    : null
+  const slugError =
+    isPage && trimmedName
+      ? pageSlugError(pageSlug) || pageSlugDuplicateError(pageSlug, pages)
+      : null
 
   // Focus the name field on mount. Dialog's first-focusable would otherwise
   // pick the close (X) button in the header.
@@ -98,7 +94,9 @@ export function SiteCreateDialog({
     >
       <form id={FORM_ID} className={styles.form} onSubmit={handleSubmit}>
         <div className={styles.field}>
-          <label htmlFor={nameInputId} className={styles.label}>Name</label>
+          <label htmlFor={nameInputId} className={styles.label}>
+            Name
+          </label>
           <Input
             id={nameInputId}
             ref={inputRef}
@@ -113,7 +111,9 @@ export function SiteCreateDialog({
 
         {isPage && (
           <div className={styles.field}>
-            <label htmlFor={slugInputId} className={styles.label}>Slug</label>
+            <label htmlFor={slugInputId} className={styles.label}>
+              Slug
+            </label>
             <Input
               id={slugInputId}
               fieldSize="sm"

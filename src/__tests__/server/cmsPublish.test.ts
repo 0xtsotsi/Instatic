@@ -3,10 +3,7 @@ import type { SiteDocument, SiteShell } from '@core/page-tree'
 import { normalizeSiteRuntimeConfig } from '@core/site-runtime'
 import type { DbResult } from '../../../server/db'
 import { saveDraftSite } from '../../../server/repositories/site'
-import {
-  getDraftPublishStatus,
-  getPublishedPageBySlug,
-} from '../../../server/repositories/publish'
+import { getDraftPublishStatus, getPublishedPageBySlug } from '../../../server/repositories/publish'
 import { publishDraftSite } from '../../../server/publish/publishSite'
 import { createDataRow, saveDataRowDraft } from '../../../server/repositories/data'
 import { pageToCells } from '../../../src/core/data/pageFromRow'
@@ -169,15 +166,18 @@ function createPublishFakeDb() {
         ? state.siteSnapshots.find((s) => s.id === version.site_snapshot_id)
         : null
       return {
-        rows: version && snap
-          ? [{
-              row_id: version.row_id,
-              site_json: snap.site_json,
-              runtime_assets_json: version.runtime_assets_json,
-              importmap_body: snap.importmap_body,
-              importmap_sha256: snap.importmap_sha256,
-            }]
-          : [],
+        rows:
+          version && snap
+            ? [
+                {
+                  row_id: version.row_id,
+                  site_json: snap.site_json,
+                  runtime_assets_json: version.runtime_assets_json,
+                  importmap_body: snap.importmap_body,
+                  importmap_sha256: snap.importmap_sha256,
+                },
+              ]
+            : [],
         rowCount: version && snap ? 1 : 0,
       }
     }
@@ -187,14 +187,14 @@ function createPublishFakeDb() {
         .filter((r) => r.status === 'published' && r.active_version_id && !r.deleted_at)
         .map((r) => {
           const ver = state.dataRowVersions.find((v) => v.id === r.active_version_id)
-          const snap = ver
-            ? state.siteSnapshots.find((s) => s.id === ver.site_snapshot_id)
+          const snap = ver ? state.siteSnapshots.find((s) => s.id === ver.site_snapshot_id) : null
+          return ver && snap
+            ? {
+                row_id: r.id,
+                content_hash: snap.content_hash,
+                published_at: ver.published_at,
+              }
             : null
-          return ver && snap ? {
-            row_id: r.id,
-            content_hash: snap.content_hash,
-            published_at: ver.published_at,
-          } : null
         })
         .filter(Boolean)
       return { rows, rowCount: rows.length }
@@ -249,19 +249,20 @@ function makeHomePage(text: string) {
   }
 }
 
-async function seedSiteAndPage(
-  db: ReturnType<typeof createPublishFakeDb>['db'],
-  text: string,
-) {
+async function seedSiteAndPage(db: ReturnType<typeof createPublishFakeDb>['db'], text: string) {
   const shell = makeSiteShell()
   await saveDraftSite(db, shell)
   const page = makeHomePage(text)
-  await createDataRow(db, {
-    id: page.id,
-    tableId: 'pages',
-    cells: pageToCells(page),
-    slug: page.slug,
-  }, 'admin_1')
+  await createDataRow(
+    db,
+    {
+      id: page.id,
+      tableId: 'pages',
+      cells: pageToCells(page),
+      slug: page.slug,
+    },
+    'admin_1',
+  )
 }
 
 describe('CMS publishing', () => {
@@ -283,10 +284,15 @@ describe('CMS publishing', () => {
     await publishDraftSite(db, 'admin_1')
 
     // Update the draft page text
-    await saveDataRowDraft(db, 'page_home', {
-      cells: pageToCells({ ...makeHomePage('Draft only') }),
-      slug: 'index',
-    }, 'admin_1')
+    await saveDataRowDraft(
+      db,
+      'page_home',
+      {
+        cells: pageToCells({ ...makeHomePage('Draft only') }),
+        slug: 'index',
+      },
+      'admin_1',
+    )
     const published = await getPublishedPageBySlug(db, 'index')
 
     expect(published?.site.pages[0].nodes.text_1.props.text).toBe('Public version')
@@ -314,10 +320,15 @@ describe('CMS publishing', () => {
     await publishDraftSite(db, 'admin_1')
 
     // Update the draft to create mismatch
-    await saveDataRowDraft(db, 'page_home', {
-      cells: pageToCells({ ...makeHomePage('Draft only') }),
-      slug: 'index',
-    }, 'admin_1')
+    await saveDataRowDraft(
+      db,
+      'page_home',
+      {
+        cells: pageToCells({ ...makeHomePage('Draft only') }),
+        slug: 'index',
+      },
+      'admin_1',
+    )
 
     const status = await getDraftPublishStatus(db)
 
@@ -353,12 +364,16 @@ describe('CMS publishing', () => {
     })
     await saveDraftSite(db, shell)
     const page = makeHomePage('Runtime page')
-    await createDataRow(db, {
-      id: page.id,
-      tableId: 'pages',
-      cells: pageToCells(page),
-      slug: page.slug,
-    }, 'admin_1')
+    await createDataRow(
+      db,
+      {
+        id: page.id,
+        tableId: 'pages',
+        cells: pageToCells(page),
+        slug: page.slug,
+      },
+      'admin_1',
+    )
 
     await publishDraftSite(db, 'admin_1')
     const published = await getPublishedPageBySlug(db, 'index')

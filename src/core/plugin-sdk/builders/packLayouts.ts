@@ -80,9 +80,7 @@ export function compilePackLayout(pluginId: string, entry: LayoutPackEntry): Sav
   let ambientIndex = 0
   for (const rule of parsedRules) {
     const id =
-      rule.kind === 'class'
-        ? `${layoutId}/${rule.name}`
-        : `${layoutId}/ambient-${ambientIndex++}`
+      rule.kind === 'class' ? `${layoutId}/${rule.name}` : `${layoutId}/ambient-${ambientIndex++}`
     if (rule.kind === 'class') classIdByName.set(rule.name, id)
     classes[id] = { ...rule, id, createdAt: 0, updatedAt: 0 }
   }

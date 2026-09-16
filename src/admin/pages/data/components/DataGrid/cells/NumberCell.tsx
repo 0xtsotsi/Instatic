@@ -49,7 +49,9 @@ export function NumberCell({
         }
       }}
       onBlur={() => onCommit?.()}
-      onKeyDown={(e) => { if (e.key === 'Enter') onCommit?.() }}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter') onCommit?.()
+      }}
     />
   )
 }

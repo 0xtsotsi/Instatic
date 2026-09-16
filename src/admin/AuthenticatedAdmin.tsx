@@ -146,17 +146,25 @@ const SiteExportModal = lazy(() =>
 // the `requestIdleCallback` background-preload effect fires below.
 if (typeof window !== 'undefined') {
   const pathname = window.location.pathname
-  const activePage =
-    pathname.startsWith('/admin/site') ? SitePage :
-    pathname.startsWith('/admin/content') ? ContentPage :
-    pathname.startsWith('/admin/data') ? DataPage :
-    pathname.startsWith('/admin/media') ? MediaPage :
-    pathname.startsWith('/admin/plugins/') ? PluginPage :
-    pathname.startsWith('/admin/plugins') ? PluginsPage :
-    pathname.startsWith('/admin/users') ? UsersPage :
-    pathname.startsWith('/admin/ai') ? AiPage :
-    pathname.startsWith('/admin/account') ? AccountPage :
-    DashboardPage
+  const activePage = pathname.startsWith('/admin/site')
+    ? SitePage
+    : pathname.startsWith('/admin/content')
+      ? ContentPage
+      : pathname.startsWith('/admin/data')
+        ? DataPage
+        : pathname.startsWith('/admin/media')
+          ? MediaPage
+          : pathname.startsWith('/admin/plugins/')
+            ? PluginPage
+            : pathname.startsWith('/admin/plugins')
+              ? PluginsPage
+              : pathname.startsWith('/admin/users')
+                ? UsersPage
+                : pathname.startsWith('/admin/ai')
+                  ? AiPage
+                  : pathname.startsWith('/admin/account')
+                    ? AccountPage
+                    : DashboardPage
   void activePage.preload().catch(() => {
     // Cold-render retry will re-fire preload via prewarmedLazy's throw.
   })
@@ -188,18 +196,25 @@ const ALL_WORKSPACE_PAGES = [
 ]
 
 function pageForSection(section: AdminWorkspace) {
-  return (
-    section === 'site' ? SitePage :
-    section === 'content' ? ContentPage :
-    section === 'data' ? DataPage :
-    section === 'media' ? MediaPage :
-    section === 'plugins' ? PluginsPage :
-    section === 'users' ? UsersPage :
-    section === 'ai' ? AiPage :
-    section === 'pluginPage' ? PluginPage :
-    section === 'account' ? AccountPage :
-    DashboardPage
-  )
+  return section === 'site'
+    ? SitePage
+    : section === 'content'
+      ? ContentPage
+      : section === 'data'
+        ? DataPage
+        : section === 'media'
+          ? MediaPage
+          : section === 'plugins'
+            ? PluginsPage
+            : section === 'users'
+              ? UsersPage
+              : section === 'ai'
+                ? AiPage
+                : section === 'pluginPage'
+                  ? PluginPage
+                  : section === 'account'
+                    ? AccountPage
+                    : DashboardPage
 }
 
 export default function AuthenticatedAdmin({ section, currentUser }: AuthenticatedAdminProps) {
@@ -308,17 +323,29 @@ export default function AuthenticatedAdmin({ section, currentUser }: Authenticat
                   legitimately lazy because the editor surfaces are large and
                   shouldn't ship until needed. */}
           <Suspense fallback={<AppLoadingScreen />}>
-            {section === 'dashboard' ? <DashboardPage /> :
-              section === 'site' ? <SitePage /> :
-              section === 'content' ? <ContentPage /> :
-              section === 'data' ? <DataPage /> :
-              section === 'media' ? <MediaPage /> :
-              section === 'plugins' ? <PluginsPage /> :
-              section === 'users' ? <UsersPage /> :
-              section === 'ai' ? <AiPage /> :
-              section === 'pluginPage' ? <PluginPage /> :
-              section === 'account' ? <AccountPage /> :
-              <DashboardPage />}
+            {section === 'dashboard' ? (
+              <DashboardPage />
+            ) : section === 'site' ? (
+              <SitePage />
+            ) : section === 'content' ? (
+              <ContentPage />
+            ) : section === 'data' ? (
+              <DataPage />
+            ) : section === 'media' ? (
+              <MediaPage />
+            ) : section === 'plugins' ? (
+              <PluginsPage />
+            ) : section === 'users' ? (
+              <UsersPage />
+            ) : section === 'ai' ? (
+              <AiPage />
+            ) : section === 'pluginPage' ? (
+              <PluginPage />
+            ) : section === 'account' ? (
+              <AccountPage />
+            ) : (
+              <DashboardPage />
+            )}
           </Suspense>
           {siteImportOpen && (
             <Suspense fallback={null}>

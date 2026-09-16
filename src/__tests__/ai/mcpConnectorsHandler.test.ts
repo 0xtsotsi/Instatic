@@ -84,7 +84,9 @@ describe('MCP connector handler', () => {
   it('forbids connector management without ai.providers.manage', async () => {
     await harness.setupOwner()
     const { cookie } = await harness.createRoleUser({
-      name: 'Editor', slug: 'editor', capabilities: ['ai.chat', 'content.manage'],
+      name: 'Editor',
+      slug: 'editor',
+      capabilities: ['ai.chat', 'content.manage'],
     })
     const res = await harness.ai(BASE, {
       method: 'POST',
@@ -98,7 +100,9 @@ describe('MCP connector handler', () => {
     await harness.setupOwner()
     // A manager who can configure AI but holds no site-edit capability.
     const { cookie } = await harness.createRoleUser({
-      name: 'AI Manager', slug: 'ai-manager', capabilities: ['ai.providers.manage', 'ai.chat'],
+      name: 'AI Manager',
+      slug: 'ai-manager',
+      capabilities: ['ai.providers.manage', 'ai.chat'],
     })
     const res = await harness.ai(BASE, {
       method: 'POST',

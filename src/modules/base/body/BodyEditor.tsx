@@ -16,7 +16,10 @@
  * re-running module registration.
  */
 import { use, useEffect } from 'react'
-import type { ModuleComponentProps, NodeWrapperProps as NodeWrapperPropsType } from '@core/module-engine'
+import type {
+  ModuleComponentProps,
+  NodeWrapperProps as NodeWrapperPropsType,
+} from '@core/module-engine'
 import { applyIframeBodyPresentation } from '@site/canvas/iframeBodyPresentation'
 import { htmlAttributesForReact } from '@modules/base/shared/htmlAttributes'
 import { CanvasDocumentContext } from '@site/canvas/CanvasContexts'
@@ -96,10 +99,22 @@ function applyEditorAttrsToBody(
     body.addEventListener(name, wrapped)
     handlers.push([name, wrapped])
   }
-  addListener('click', nodeWrapperProps?.onClick as unknown as ((e: MouseEvent) => void) | undefined)
-  addListener('dblclick', nodeWrapperProps?.onDoubleClick as unknown as ((e: MouseEvent) => void) | undefined)
-  addListener('contextmenu', nodeWrapperProps?.onContextMenu as unknown as ((e: MouseEvent) => void) | undefined)
-  addListener('keydown', nodeWrapperProps?.onKeyDown as unknown as ((e: KeyboardEvent) => void) | undefined)
+  addListener(
+    'click',
+    nodeWrapperProps?.onClick as unknown as ((e: MouseEvent) => void) | undefined,
+  )
+  addListener(
+    'dblclick',
+    nodeWrapperProps?.onDoubleClick as unknown as ((e: MouseEvent) => void) | undefined,
+  )
+  addListener(
+    'contextmenu',
+    nodeWrapperProps?.onContextMenu as unknown as ((e: MouseEvent) => void) | undefined,
+  )
+  addListener(
+    'keydown',
+    nodeWrapperProps?.onKeyDown as unknown as ((e: KeyboardEvent) => void) | undefined,
+  )
   const onMouseEnter = nodeWrapperProps?.onMouseEnter
   if (onMouseEnter) {
     const wrapped = () => onMouseEnter()

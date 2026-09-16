@@ -76,7 +76,10 @@ export function BreakpointFrame({
   // when the iframe mounts.
   const [iframeEl, setIframeEl] = useState<HTMLIFrameElement | null>(null)
   const [activationHintPoint, setActivationHintPoint] = useState<CursorTooltipPoint | null>(null)
-  const [readonlyHint, setReadonlyHint] = useState<{ text: string; point: CursorTooltipPoint } | null>(null)
+  const [readonlyHint, setReadonlyHint] = useState<{
+    text: string
+    point: CursorTooltipPoint
+  } | null>(null)
 
   // Opening the source of a read-only composed region (template chrome,
   // inlined component, outlet preview) on double-click.
@@ -137,7 +140,9 @@ export function BreakpointFrame({
     const region = closestReadonlyRegion(event.target)
     const label = region?.getAttribute('data-instatic-readonly-label') ?? null
     setReadonlyHint(
-      label ? { text: `Part of ${label} — double-click to edit`, point: clientPointToEditorDoc(event) } : null,
+      label
+        ? { text: `Part of ${label} — double-click to edit`, point: clientPointToEditorDoc(event) }
+        : null,
     )
   }
 
@@ -189,8 +194,12 @@ export function BreakpointFrame({
             iconOnly
             pressed={isCollapsed}
             onClick={handleToggleCollapsed}
-            tooltip={isCollapsed ? `Show ${breakpoint.label} frame` : `Collapse ${breakpoint.label} frame`}
-            aria-label={isCollapsed ? `Show ${breakpoint.label} frame` : `Collapse ${breakpoint.label} frame`}
+            tooltip={
+              isCollapsed ? `Show ${breakpoint.label} frame` : `Collapse ${breakpoint.label} frame`
+            }
+            aria-label={
+              isCollapsed ? `Show ${breakpoint.label} frame` : `Collapse ${breakpoint.label} frame`
+            }
             aria-pressed={isCollapsed}
             data-testid={`canvas-frame-collapse-${breakpoint.id}`}
           >
@@ -213,45 +222,41 @@ export function BreakpointFrame({
           dropped entirely so this breakpoint isn't rendered alongside the
           others. */}
       {!isCollapsed && (
-      <div
-        ref={viewportRef}
-        data-breakpoint-id={breakpoint.id}
-        className={styles.viewport}
-      >
-        <IframeFrameSurface
-          ref={handleIframeRef}
-          breakpointId={breakpoint.id}
-          width={breakpoint.width}
-          onClick={handleEmptyFrameClick}
-          onCursorMove={handleFrameCursorMove}
-          onCursorLeave={handleFrameCursorLeave}
-          onReadonlyOpen={handleReadonlyOpen}
-          runtimeScripts={runtimeScripts}
-        >
-          <CanvasTemplateContext.Provider value={templateContext}>
-            <CanvasBreakpointContext.Provider value={breakpoint.id}>
-              <CanvasComposedTree page={page} />
-            </CanvasBreakpointContext.Provider>
-          </CanvasTemplateContext.Provider>
-        </IframeFrameSurface>
+        <div ref={viewportRef} data-breakpoint-id={breakpoint.id} className={styles.viewport}>
+          <IframeFrameSurface
+            ref={handleIframeRef}
+            breakpointId={breakpoint.id}
+            width={breakpoint.width}
+            onClick={handleEmptyFrameClick}
+            onCursorMove={handleFrameCursorMove}
+            onCursorLeave={handleFrameCursorLeave}
+            onReadonlyOpen={handleReadonlyOpen}
+            runtimeScripts={runtimeScripts}
+          >
+            <CanvasTemplateContext.Provider value={templateContext}>
+              <CanvasBreakpointContext.Provider value={breakpoint.id}>
+                <CanvasComposedTree page={page} />
+              </CanvasBreakpointContext.Provider>
+            </CanvasTemplateContext.Provider>
+          </IframeFrameSurface>
 
-        {/* Selection / hover rings — rendered in the parent document but
+          {/* Selection / hover rings — rendered in the parent document but
             positioned over the iframe. The overlay handles the iframe-rect
             → editor-viewport coordinate translation. */}
-        <BreakpointSelectionOverlay
-          breakpointId={breakpoint.id}
-          viewportRef={viewportRef}
-          iframeElement={iframeEl}
-        />
-        <CursorTooltip
-          content={`Click to activate ${breakpoint.label} breakpoint`}
-          point={inactiveFrameActivates ? activationHintPoint : null}
-        />
-        <CursorTooltip
-          content={readonlyHint?.text ?? ''}
-          point={readonlyHint ? readonlyHint.point : null}
-        />
-      </div>
+          <BreakpointSelectionOverlay
+            breakpointId={breakpoint.id}
+            viewportRef={viewportRef}
+            iframeElement={iframeEl}
+          />
+          <CursorTooltip
+            content={`Click to activate ${breakpoint.label} breakpoint`}
+            point={inactiveFrameActivates ? activationHintPoint : null}
+          />
+          <CursorTooltip
+            content={readonlyHint?.text ?? ''}
+            point={readonlyHint ? readonlyHint.point : null}
+          />
+        </div>
       )}
     </div>
   )

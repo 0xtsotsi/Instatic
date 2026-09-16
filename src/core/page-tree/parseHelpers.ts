@@ -30,7 +30,11 @@ export function asPlainObject(raw: unknown): Record<string, unknown> | null {
  * if absent or not a string — callers bubble the path so validate.ts can
  * report the exact invalid location.
  */
-export function requireStringField(r: Record<string, unknown>, field: string, path: string): string {
+export function requireStringField(
+  r: Record<string, unknown>,
+  field: string,
+  path: string,
+): string {
   const v = r[field]
   if (typeof v !== 'string') throw new Error(`${path}.${field}: Expected string`)
   return v
@@ -40,7 +44,11 @@ export function requireStringField(r: Record<string, unknown>, field: string, pa
  * Read a required array field, throwing a path-prefixed error if absent or
  * not an array. Returns the raw array; callers filter / coerce as needed.
  */
-export function requireArrayField(r: Record<string, unknown>, field: string, path: string): unknown[] {
+export function requireArrayField(
+  r: Record<string, unknown>,
+  field: string,
+  path: string,
+): unknown[] {
   const v = r[field]
   if (!Array.isArray(v)) throw new Error(`${path}.${field}: Expected array`)
   return v

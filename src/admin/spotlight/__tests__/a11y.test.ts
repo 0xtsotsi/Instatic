@@ -34,13 +34,7 @@ describe('Spotlight row ids', () => {
 
 describe('computeHighlightedRowId()', () => {
   it('returns null for no match or out-of-range highlight', () => {
-    const result = computeHighlightedRowId(
-      'xyzzy-no-match-zznm-999',
-      null,
-      0,
-      'root',
-      {},
-    )
+    const result = computeHighlightedRowId('xyzzy-no-match-zznm-999', null, 0, 'root', {})
     expect(result).toBeNull()
     expect(computeHighlightedRowId('save', null, 9999, 'root', {})).toBeNull()
   })
@@ -58,6 +52,8 @@ describe('Spotlight markup source smoke', () => {
     expect(readSrc('Spotlight.tsx')).toEqual(expect.stringContaining('aria-controls={listboxId}'))
     expect(readSrc('SpotlightResults.tsx')).toEqual(expect.stringContaining('role="listbox"'))
     expect(readSrc('SpotlightRow.tsx')).toEqual(expect.stringContaining('role="option"'))
-    expect(readSrc('SpotlightRow.tsx')).toEqual(expect.stringContaining('aria-selected={isHighlighted}'))
+    expect(readSrc('SpotlightRow.tsx')).toEqual(
+      expect.stringContaining('aria-selected={isHighlighted}'),
+    )
   })
 })

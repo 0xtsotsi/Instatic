@@ -43,7 +43,7 @@ export function buildStyle(styles: Record<string, string | number | undefined | 
     .filter(([, v]) => v !== undefined && v !== null && v !== '')
     .flatMap(([k, v]) => {
       const sanitised = sanitiseCssValue(v as string | number)
-      if (sanitised === null) return []  // drop dangerous values
+      if (sanitised === null) return [] // drop dangerous values
       // Convert camelCase to kebab-case
       const prop = k.replace(/([A-Z])/g, '-$1').toLowerCase()
       return [`${prop}:${sanitised}`]

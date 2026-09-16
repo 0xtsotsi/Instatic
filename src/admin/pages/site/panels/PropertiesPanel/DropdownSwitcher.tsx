@@ -130,11 +130,7 @@ export function DropdownSwitcher({
   // ── Other-value state — full-width chip + close button ───────────────────
   if (isOtherValue) {
     return (
-      <div
-        className={styles.displayRow}
-        data-testid={testId}
-        {...{ [dataValueAttr]: value ?? '' }}
-      >
+      <div className={styles.displayRow} data-testid={testId} {...{ [dataValueAttr]: value ?? '' }}>
         <div className={styles.displayChipGroup}>
           <Button
             ref={triggerRef}
@@ -171,11 +167,7 @@ export function DropdownSwitcher({
 
   // ── Unset / primary value — segmented control ────────────────────────────
   return (
-    <div
-      className={styles.displayRow}
-      data-testid={testId}
-      {...{ [dataValueAttr]: value ?? '' }}
-    >
+    <div className={styles.displayRow} data-testid={testId} {...{ [dataValueAttr]: value ?? '' }}>
       <SegmentedControl
         fullWidth
         aria-label={capitalized}

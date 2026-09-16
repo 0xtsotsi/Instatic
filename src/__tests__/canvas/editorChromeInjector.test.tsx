@@ -16,11 +16,23 @@ afterEach(cleanup)
 
 /** A detached document whose :root carries admin typography and spacing tokens. */
 function makeParentDoc(): Document {
-  document.documentElement.style.setProperty('--font-sans', '"Inter Variable", system-ui, sans-serif')
-  document.documentElement.style.setProperty('--text-xs', 'clamp(10px, calc(9.629px + 0.095vw), 11px)')
-  document.documentElement.style.setProperty('--text-s', 'clamp(11px, calc(10.629px + 0.095vw), 12px)')
+  document.documentElement.style.setProperty(
+    '--font-sans',
+    '"Inter Variable", system-ui, sans-serif',
+  )
+  document.documentElement.style.setProperty(
+    '--text-xs',
+    'clamp(10px, calc(9.629px + 0.095vw), 11px)',
+  )
+  document.documentElement.style.setProperty(
+    '--text-s',
+    'clamp(11px, calc(10.629px + 0.095vw), 12px)',
+  )
   document.documentElement.style.setProperty('--space-s', 'clamp(6px, calc(5.257px + 0.19vw), 8px)')
-  document.documentElement.style.setProperty('--space-xl', 'clamp(12px, calc(11.257px + 0.19vw), 14px)')
+  document.documentElement.style.setProperty(
+    '--space-xl',
+    'clamp(12px, calc(11.257px + 0.19vw), 14px)',
+  )
   return document
 }
 

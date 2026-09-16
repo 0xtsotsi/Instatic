@@ -134,35 +134,42 @@ describe('Content collection step-up flow', () => {
       }
 
       // Initial selected collection rows + any newly-created collection rows.
-      if (url.includes('/admin/api/cms/data/tables/') && url.endsWith('/rows') && init?.method === 'GET') {
+      if (
+        url.includes('/admin/api/cms/data/tables/') &&
+        url.endsWith('/rows') &&
+        init?.method === 'GET'
+      ) {
         return json({ rows: [] })
       }
 
       if (url === '/admin/api/cms/data/tables' && init?.method === 'POST') {
         createAttempts += 1
         if (createAttempts === 1) return json({ error: 'step_up_required' }, 401)
-        return json({
-          table: {
-            id: 'products',
-            name: 'Products',
-            slug: 'products',
-            kind: 'postType',
-            routeBase: '/products',
-            singularLabel: 'Product',
-            pluralLabel: 'Products',
-            primaryFieldId: 'title',
-            fields: [
-              { type: 'text', id: 'title', label: 'Title', required: true, builtIn: true },
-              { type: 'text', id: 'slug', label: 'Slug', required: true, builtIn: true },
-            ],
-            system: false,
-            rowCount: 0,
-            createdByUserId: 'content-admin',
-            updatedByUserId: 'content-admin',
-            createdAt: now,
-            updatedAt: now,
+        return json(
+          {
+            table: {
+              id: 'products',
+              name: 'Products',
+              slug: 'products',
+              kind: 'postType',
+              routeBase: '/products',
+              singularLabel: 'Product',
+              pluralLabel: 'Products',
+              primaryFieldId: 'title',
+              fields: [
+                { type: 'text', id: 'title', label: 'Title', required: true, builtIn: true },
+                { type: 'text', id: 'slug', label: 'Slug', required: true, builtIn: true },
+              ],
+              system: false,
+              rowCount: 0,
+              createdByUserId: 'content-admin',
+              updatedByUserId: 'content-admin',
+              createdAt: now,
+              updatedAt: now,
+            },
           },
-        }, 201)
+          201,
+        )
       }
 
       if (url === '/admin/api/cms/auth/step-up' && init?.method === 'POST') {

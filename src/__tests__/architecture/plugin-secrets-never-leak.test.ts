@@ -28,9 +28,7 @@ const REPO_ROOT = join(import.meta.dir, '../../../')
 const HANDLERS_DIR = join(REPO_ROOT, 'server/handlers')
 
 /** The only module allowed to import the plaintext runtime projection. */
-const RUNTIME_RESOLUTION_ALLOWLIST = new Set([
-  'server/plugins/settingsCache.ts',
-])
+const RUNTIME_RESOLUTION_ALLOWLIST = new Set(['server/plugins/settingsCache.ts'])
 
 function listFilesRecursive(dir: string): string[] {
   const out: string[] = []
@@ -58,7 +56,10 @@ describe('plugin-secrets-never-leak gate', () => {
         // `\.iv\b` is too noisy (matches `.invoke` etc.). Require an
         // ASCII boundary specifically after the `iv` field.
         { name: '.iv member access', re: /\.iv(?=[\s,;)\]}.])/ },
-        { name: 'import of resolvePluginSecretsForRuntime (plaintext projection)', re: /resolvePluginSecretsForRuntime/ },
+        {
+          name: 'import of resolvePluginSecretsForRuntime (plaintext projection)',
+          re: /resolvePluginSecretsForRuntime/,
+        },
       ]
 
       for (const pattern of PATTERNS) {
@@ -71,8 +72,8 @@ describe('plugin-secrets-never-leak gate', () => {
     if (violations.length > 0) {
       throw new Error(
         `[plugin-secrets-never-leak] handler files touch plugin secret material:\n` +
-        violations.map((v) => `  ${v.file} → ${v.finding}`).join('\n') +
-        `\n\nProject plugin_secrets rows through listPluginSecretStates() / projectSecretSettings() before serialising.`,
+          violations.map((v) => `  ${v.file} → ${v.finding}`).join('\n') +
+          `\n\nProject plugin_secrets rows through listPluginSecretStates() / projectSecretSettings() before serialising.`,
       )
     }
     expect(violations).toHaveLength(0)
@@ -97,10 +98,7 @@ describe('plugin-secrets-never-leak gate', () => {
   })
 
   it('plugin handler responses funnel through the wire-safe secret projection', () => {
-    const sharedSrc = readFileSync(
-      join(REPO_ROOT, 'server/handlers/cms/plugins/shared.ts'),
-      'utf8',
-    )
+    const sharedSrc = readFileSync(join(REPO_ROOT, 'server/handlers/cms/plugins/shared.ts'), 'utf8')
     const settingsSrc = readFileSync(
       join(REPO_ROOT, 'server/handlers/cms/plugins/settings.ts'),
       'utf8',

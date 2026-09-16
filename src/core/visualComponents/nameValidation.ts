@@ -37,17 +37,13 @@ export function vcSlugFromName(name: string): string {
 // NameError codes — one per failure reason
 // ---------------------------------------------------------------------------
 
-type NameError =
-  | 'EMPTY'
-  | 'PROJECT_DUPLICATE'
+type NameError = 'EMPTY' | 'PROJECT_DUPLICATE'
 
 // ---------------------------------------------------------------------------
 // ParamError codes — for validateParamName()
 // ---------------------------------------------------------------------------
 
-type ParamError =
-  | 'EMPTY'
-  | 'DUPLICATE'
+type ParamError = 'EMPTY' | 'DUPLICATE'
 
 // ---------------------------------------------------------------------------
 // validateComponentName
@@ -88,9 +84,10 @@ export function validateComponentName(
     return {
       ok: false,
       error: 'PROJECT_DUPLICATE',
-      reason: duplicate.name === trimmed
-        ? `Another component is already named "${trimmed}".`
-        : `"${trimmed}" conflicts with the existing component "${duplicate.name}" — both store as "${slug}".`,
+      reason:
+        duplicate.name === trimmed
+          ? `Another component is already named "${trimmed}".`
+          : `"${trimmed}" conflicts with the existing component "${duplicate.name}" — both store as "${slug}".`,
     }
   }
 

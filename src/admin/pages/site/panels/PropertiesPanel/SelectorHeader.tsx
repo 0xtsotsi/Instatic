@@ -97,7 +97,9 @@ export function SelectorHeader({ cls, usage, onRename, onDelete }: SelectorHeade
   return (
     <>
       <div className={styles.headerNodeTitle}>
-        <h2 className={styles.headerNodeLabel} title={selectorLabel}>{selectorLabel}</h2>
+        <h2 className={styles.headerNodeLabel} title={selectorLabel}>
+          {selectorLabel}
+        </h2>
         {canEditSelector && (
           <>
             <Button

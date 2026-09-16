@@ -26,7 +26,11 @@ interface InlineStyleComposerProps {
   styleQuery: string
 }
 
-export function InlineStyleComposer({ nodeId, inlineStyles, styleQuery }: InlineStyleComposerProps) {
+export function InlineStyleComposer({
+  nodeId,
+  inlineStyles,
+  styleQuery,
+}: InlineStyleComposerProps) {
   const setNodeInlineStyles = useEditorStore((s) => s.setNodeInlineStyles)
   const removeNodeInlineStyleProperty = useEditorStore((s) => s.removeNodeInlineStyleProperty)
 

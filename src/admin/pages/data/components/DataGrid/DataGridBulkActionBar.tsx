@@ -33,7 +33,11 @@ export function DataGridBulkActionBar({
     <FloatingActionBar
       open={selectedCount > 0}
       ariaLabel="Bulk row actions"
-      label={<><strong>{selectedCount}</strong> selected</>}
+      label={
+        <>
+          <strong>{selectedCount}</strong> selected
+        </>
+      }
       onClose={onClearSelection}
       closeLabel="Clear selection"
     >

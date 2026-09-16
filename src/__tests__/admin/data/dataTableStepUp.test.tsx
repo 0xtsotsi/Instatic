@@ -103,23 +103,25 @@ describe('Data table step-up flow', () => {
 
       if (url === '/admin/api/cms/data/tables' && init?.method !== 'POST') {
         return json({
-          tables: [{
-            id: 'components',
-            name: 'Components',
-            slug: 'components',
-            kind: 'component',
-            routeBase: '',
-            singularLabel: 'Component',
-            pluralLabel: 'Components',
-            primaryFieldId: 'name',
-            fields: [{ type: 'text', id: 'name', label: 'Name', required: true }],
-            system: true,
-            rowCount: 0,
-            createdByUserId: null,
-            updatedByUserId: null,
-            createdAt: now,
-            updatedAt: now,
-          }],
+          tables: [
+            {
+              id: 'components',
+              name: 'Components',
+              slug: 'components',
+              kind: 'component',
+              routeBase: '',
+              singularLabel: 'Component',
+              pluralLabel: 'Components',
+              primaryFieldId: 'name',
+              fields: [{ type: 'text', id: 'name', label: 'Name', required: true }],
+              system: true,
+              rowCount: 0,
+              createdByUserId: null,
+              updatedByUserId: null,
+              createdAt: now,
+              updatedAt: now,
+            },
+          ],
         })
       }
 
@@ -134,24 +136,27 @@ describe('Data table step-up flow', () => {
       if (url === '/admin/api/cms/data/tables' && init?.method === 'POST') {
         createAttempts += 1
         if (createAttempts === 1) return json({ error: 'step_up_required' }, 401)
-        return json({
-          table: {
-            id: 'custom-table',
-            name: 'custom table',
-            slug: 'custom-table',
-            kind: 'data',
-            routeBase: '',
-            singularLabel: 'custom table',
-            pluralLabel: 'custom tables',
-            primaryFieldId: 'name',
-            fields: [{ type: 'text', id: 'name', label: 'Name', required: true }],
-            system: false,
-            createdByUserId: 'data-admin',
-            updatedByUserId: 'data-admin',
-            createdAt: now,
-            updatedAt: now,
+        return json(
+          {
+            table: {
+              id: 'custom-table',
+              name: 'custom table',
+              slug: 'custom-table',
+              kind: 'data',
+              routeBase: '',
+              singularLabel: 'custom table',
+              pluralLabel: 'custom tables',
+              primaryFieldId: 'name',
+              fields: [{ type: 'text', id: 'name', label: 'Name', required: true }],
+              system: false,
+              createdByUserId: 'data-admin',
+              updatedByUserId: 'data-admin',
+              createdAt: now,
+              updatedAt: now,
+            },
           },
-        }, 201)
+          201,
+        )
       }
 
       if (url === '/admin/api/cms/auth/step-up' && init?.method === 'POST') {

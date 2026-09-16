@@ -19,7 +19,11 @@ function resetStore() {
     slug: 'index',
     rootNodeId: 'root-home',
     nodes: {
-      'root-home': makeNode({ id: 'root-home', moduleId: 'base.body', children: ['container-node'] }),
+      'root-home': makeNode({
+        id: 'root-home',
+        moduleId: 'base.body',
+        children: ['container-node'],
+      }),
       'container-node': makeNode({ id: 'container-node', moduleId: 'base.container' }),
     },
   })

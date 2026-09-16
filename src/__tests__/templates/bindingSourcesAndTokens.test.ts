@@ -16,17 +16,16 @@
  */
 
 import { describe, expect, it } from 'bun:test'
-import { resolveDynamicProps, type TemplateRenderDataContext } from '@core/templates/dynamicBindings'
+import {
+  resolveDynamicProps,
+  type TemplateRenderDataContext,
+} from '@core/templates/dynamicBindings'
 import {
   containsTokens,
   interpolateTokens,
   parseTokenString,
 } from '@core/templates/tokenInterpolation'
-import {
-  buildPageFrame,
-  buildSiteFrame,
-  buildRouteFrame,
-} from '@core/templates/contextFrames'
+import { buildPageFrame, buildSiteFrame, buildRouteFrame } from '@core/templates/contextFrames'
 import type { Page, SiteDocument } from '@core/page-tree'
 
 // ---------------------------------------------------------------------------
@@ -128,9 +127,7 @@ describe('resolveDynamicProps — system sources', () => {
       { text: '-' },
       { text: { source: 'currentEntry', field: 'nested.deep' } },
       ctx({
-        entryStack: [
-          { id: 'r1', fields: { nested: { deep: 'OK' } } },
-        ],
+        entryStack: [{ id: 'r1', fields: { nested: { deep: 'OK' } } }],
       }),
     )
     expect(props.text).toBe('OK')
@@ -141,9 +138,7 @@ describe('resolveDynamicProps — system sources', () => {
       { text: 'Static' },
       { text: { source: 'currentEntry', field: 'tags.0' } },
       ctx({
-        entryStack: [
-          { id: 'r1', fields: { tags: ['a', 'b'] } },
-        ],
+        entryStack: [{ id: 'r1', fields: { tags: ['a', 'b'] } }],
       }),
     )
     expect(props.text).toBe('Static')
@@ -204,7 +199,12 @@ describe('parseTokenString', () => {
   it('parses dotted field paths', () => {
     const segs = parseTokenString('{currentEntry.author.name}')
     expect(segs).toEqual([
-      { kind: 'token', source: 'currentEntry', field: 'author.name', raw: '{currentEntry.author.name}' },
+      {
+        kind: 'token',
+        source: 'currentEntry',
+        field: 'author.name',
+        raw: '{currentEntry.author.name}',
+      },
     ])
   })
 
@@ -280,9 +280,7 @@ describe('interpolateTokens', () => {
 
   it('emits the fallback when the value is missing', () => {
     const c = ctx({ entryStack: [] })
-    expect(interpolateTokens('Welcome, {currentEntry.title|guest}!', c)).toBe(
-      'Welcome, guest!',
-    )
+    expect(interpolateTokens('Welcome, {currentEntry.title|guest}!', c)).toBe('Welcome, guest!')
   })
 
   it('emits the fallback when the value resolves to an empty string', () => {
@@ -320,11 +318,7 @@ describe('resolveDynamicProps — token interpolation', () => {
   })
 
   it('leaves non-string props untouched', () => {
-    const props = resolveDynamicProps(
-      { text: 'Hello {site.name}', count: 7 },
-      undefined,
-      ctx(),
-    )
+    const props = resolveDynamicProps({ text: 'Hello {site.name}', count: 7 }, undefined, ctx())
     expect(props.text).toBe('Hello Acme')
     expect(props.count).toBe(7)
   })
@@ -360,7 +354,11 @@ describe('frame builders', () => {
   it('buildPageFrame derives permalink with index normalisation', () => {
     const home = buildPageFrame({ id: 'p_index', slug: '/index', title: 'Home' } as unknown as Page)
     expect(home.permalink).toBe('/')
-    const inner = buildPageFrame({ id: 'p_about', slug: 'about', title: 'About' } as unknown as Page)
+    const inner = buildPageFrame({
+      id: 'p_about',
+      slug: 'about',
+      title: 'About',
+    } as unknown as Page)
     expect(inner.permalink).toBe('/about')
   })
 

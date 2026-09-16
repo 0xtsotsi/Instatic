@@ -89,7 +89,8 @@ export function parseCssSourceIntoPlan(
   }
   const { rules: rulesAfterFontTokens, fontTokens } = extractRootFontTokens(rulesAfterColors)
   for (const token of fontTokens) {
-    if (!state.fontTokensByVariable.has(token.variable)) state.fontTokensByVariable.set(token.variable, token)
+    if (!state.fontTokensByVariable.has(token.variable))
+      state.fontTokensByVariable.set(token.variable, token)
   }
 
   state.cssFileResults.push({ cssPath, rules: rulesAfterFontTokens, assetRefs, fontFaces })

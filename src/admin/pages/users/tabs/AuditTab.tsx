@@ -52,10 +52,18 @@ export function AuditTab({ data }: { data: UsersPageData }) {
           <DataTableBody>
             {Array.from({ length: 4 }, (_, i) => (
               <DataTableRow key={`skeleton-${i}`}>
-                <DataTableCell><Skeleton width={180} height={13} /></DataTableCell>
-                <DataTableCell><Skeleton width={120} height={12} /></DataTableCell>
-                <DataTableCell><Skeleton width={80} height={18} radius={999} /></DataTableCell>
-                <DataTableCell><Skeleton width={100} height={12} /></DataTableCell>
+                <DataTableCell>
+                  <Skeleton width={180} height={13} />
+                </DataTableCell>
+                <DataTableCell>
+                  <Skeleton width={120} height={12} />
+                </DataTableCell>
+                <DataTableCell>
+                  <Skeleton width={80} height={18} radius={999} />
+                </DataTableCell>
+                <DataTableCell>
+                  <Skeleton width={100} height={12} />
+                </DataTableCell>
               </DataTableRow>
             ))}
           </DataTableBody>
@@ -74,7 +82,9 @@ export function AuditTab({ data }: { data: UsersPageData }) {
             {events.map((event) => (
               <DataTableRow key={event.id}>
                 <DataTableCell>
-                  <strong className={styles.auditTitle}>{auditTitle(event, usersById, rolesById)}</strong>
+                  <strong className={styles.auditTitle}>
+                    {auditTitle(event, usersById, rolesById)}
+                  </strong>
                 </DataTableCell>
                 <DataTableCell>
                   <span className={styles.secondaryText}>{auditActor(event, usersById)}</span>

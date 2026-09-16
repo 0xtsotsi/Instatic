@@ -17,7 +17,9 @@
   background: var(--bg-surface);
   cursor: default;
   text-align: center;
-  transition: background 80ms ease-out, border-color 80ms ease-out;
+  transition:
+    background 80ms ease-out,
+    border-color 80ms ease-out;
 }
 
 .dropZone[data-dragging='true'] {

@@ -20,7 +20,6 @@ import { RelationCell } from './RelationCell'
 import { PageTreeCell } from './PageTreeCell'
 import { FieldSchemaCell } from './FieldSchemaCell'
 
-
 /**
  * Additional props that are only meaningful for specific cell types but are
  * threaded through the renderer so callers don't have to special-case them.

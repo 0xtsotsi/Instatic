@@ -49,7 +49,7 @@ export function PublishButton({ enabled = true, onSave, saveStatus }: PublishBut
   const [scheduleDialogOpen, setScheduleDialogOpen] = useState(false)
   const statusTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const isStatusSaving = saveStatus?.state === 'saving'
-  const saveError = saveStatus?.state === 'error' ? saveStatus.message ?? 'Save failed' : null
+  const saveError = saveStatus?.state === 'error' ? (saveStatus.message ?? 'Save failed') : null
 
   useEffect(() => {
     return () => {
@@ -75,7 +75,9 @@ export function PublishButton({ enabled = true, onSave, saveStatus }: PublishBut
     }
 
     void loadPublishStatus()
-    return () => { cancelled = true }
+    return () => {
+      cancelled = true
+    }
   }, [enabled, siteId])
 
   useEffect(() => {
@@ -155,36 +157,42 @@ export function PublishButton({ enabled = true, onSave, saveStatus }: PublishBut
 
   const isPublishing = state === 'publishing'
   const disabled = !site || !enabled || isPublishing
-  const label =
-    isPublishing ? 'Publishing' :
-    state === 'published' ? 'Published' :
-    state === 'error' ? 'Retry publish' :
-    'Publish'
+  const label = isPublishing
+    ? 'Publishing'
+    : state === 'published'
+      ? 'Published'
+      : state === 'error'
+        ? 'Retry publish'
+        : 'Publish'
 
-  const status =
-    saveError ? {
-      label: 'Draft save failed',
-      tone: 'danger' as const,
-      ariaLabel: saveError,
-    } :
-    isStatusSaving || isSaving ? {
-      label: 'Saving draft',
-      tone: 'neutral' as const,
-    } :
-    hasUnsavedChanges ? {
-      label: 'Unsaved draft',
-      tone: 'warning' as const,
-    } :
-    {
-      label: 'Draft saved',
-      tone: 'success' as const,
-    }
+  const status = saveError
+    ? {
+        label: 'Draft save failed',
+        tone: 'danger' as const,
+        ariaLabel: saveError,
+      }
+    : isStatusSaving || isSaving
+      ? {
+          label: 'Saving draft',
+          tone: 'neutral' as const,
+        }
+      : hasUnsavedChanges
+        ? {
+            label: 'Unsaved draft',
+            tone: 'warning' as const,
+          }
+        : {
+            label: 'Draft saved',
+            tone: 'success' as const,
+          }
 
-  const PublishIcon =
-    isPublishing ? LoaderIcon :
-    state === 'published' ? CheckIcon :
-    state === 'error' ? CircleAlertSolidIcon :
-    CloudUploadSolidIcon
+  const PublishIcon = isPublishing
+    ? LoaderIcon
+    : state === 'published'
+      ? CheckIcon
+      : state === 'error'
+        ? CircleAlertSolidIcon
+        : CloudUploadSolidIcon
 
   const menuItems: PublishActionMenuItem[] = [
     {
@@ -236,10 +244,14 @@ export function PublishButton({ enabled = true, onSave, saveStatus }: PublishBut
         publishIcon={PublishIcon}
         onPublish={handlePublish}
         menuItems={menuItems}
-        toast={message ? {
-          tone: state === 'error' ? 'alert' : 'status',
-          message,
-        } : null}
+        toast={
+          message
+            ? {
+                tone: state === 'error' ? 'alert' : 'status',
+                message,
+              }
+            : null
+        }
       />
       {activePage && (
         <SchedulePublishDialog

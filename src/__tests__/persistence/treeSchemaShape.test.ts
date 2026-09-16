@@ -83,7 +83,10 @@ describe('NodeTree<T> — generic type parameter', () => {
     }
     const tree: NodeTree<PageNodeLike> = {
       nodes: {
-        root: { ...baseNode('root', 'base.body'), dynamicBindings: { x: { source: 'currentEntry' } } },
+        root: {
+          ...baseNode('root', 'base.body'),
+          dynamicBindings: { x: { source: 'currentEntry' } },
+        },
       },
       rootNodeId: 'root',
     }

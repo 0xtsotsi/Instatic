@@ -61,9 +61,7 @@ export function DataTableControl({
           placeholder={loading ? 'Loading tables...' : 'Choose table'}
           onChange={(event) => onChange(propKey, event.target.value)}
         >
-          <option value="">
-            {loading ? 'Loading tables...' : 'Choose table'}
-          </option>
+          <option value="">{loading ? 'Loading tables...' : 'Choose table'}</option>
           {(tables ?? []).map((table) => (
             <option key={table.id} value={table.id}>
               {table.label}

@@ -29,9 +29,7 @@ export function SecurityCard({
       </div>
       <p
         className={
-          statusActive
-            ? `${styles.cardStatus} ${styles.cardStatusActive}`
-            : styles.cardStatus
+          statusActive ? `${styles.cardStatus} ${styles.cardStatusActive}` : styles.cardStatus
         }
         role="status"
       >

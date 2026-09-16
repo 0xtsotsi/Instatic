@@ -75,16 +75,20 @@ export function useContentWorkspace({
   // rendered the newly selected collection and run the old effect's cleanup.
   const entriesLoadEpochRef = useRef(0)
 
-  const selectedCollection = collections.find((collection) => collection.id === selectedCollectionId) ?? null
+  const selectedCollection =
+    collections.find((collection) => collection.id === selectedCollectionId) ?? null
   const contentLoading = loading || entriesLoading
 
   // Exception #1: referenced in deep-link effect B's dependency array, so it
   // needs a stable identity for react-hooks/exhaustive-deps.
-  const selectEntry = useCallback((entry: DataRow | null) => {
-    selectedEntryRef.current = entry
-    setSelectedEntry(entry)
-    if (entry) setRightPanel({ collapsed: false })
-  }, [setRightPanel])
+  const selectEntry = useCallback(
+    (entry: DataRow | null) => {
+      selectedEntryRef.current = entry
+      setSelectedEntry(entry)
+      if (entry) setRightPanel({ collapsed: false })
+    },
+    [setRightPanel],
+  )
 
   useEffect(() => {
     let cancelled = false
@@ -109,7 +113,9 @@ export function useContentWorkspace({
     }
 
     void fetchAuthors()
-    return () => { cancelled = true }
+    return () => {
+      cancelled = true
+    }
   }, [shouldLoadAuthors])
 
   const updateSelectedEntry = (entry: DataRow) => {
@@ -151,7 +157,9 @@ export function useContentWorkspace({
     }
 
     void loadCollections()
-    return () => { cancelled = true }
+    return () => {
+      cancelled = true
+    }
   }, [])
 
   useEffect(() => {
@@ -163,7 +171,9 @@ export function useContentWorkspace({
           setEntriesLoading(false)
         }
       })
-      return () => { cancelled = true }
+      return () => {
+        cancelled = true
+      }
     }
     const tableId = selectedCollectionId
     const selectedAtLoadStart = selectedEntryRef.current
@@ -182,15 +192,17 @@ export function useContentWorkspace({
         const currentIsInTable = current?.tableId === tableId
         const currentChangedDuringLoad = currentIsInTable && current !== selectedAtLoadStart
         const serverSelected = currentIsInTable
-          ? nextEntries.find((entry) => entry.id === current.id) ?? null
+          ? (nextEntries.find((entry) => entry.id === current.id) ?? null)
           : null
         const nextSelected = currentChangedDuringLoad
           ? current
-          : serverSelected ?? nextEntries[0] ?? null
+          : (serverSelected ?? nextEntries[0] ?? null)
         selectedEntryRef.current = nextSelected
-        setEntries(currentChangedDuringLoad && nextSelected
-          ? updateRowList(nextEntries, nextSelected)
-          : nextEntries)
+        setEntries(
+          currentChangedDuringLoad && nextSelected
+            ? updateRowList(nextEntries, nextSelected)
+            : nextEntries,
+        )
         setSelectedEntry(nextSelected)
       } catch (err) {
         if (!cancelled && loadEpoch === entriesLoadEpochRef.current) {
@@ -204,7 +216,9 @@ export function useContentWorkspace({
     }
 
     void loadEntries()
-    return () => { cancelled = true }
+    return () => {
+      cancelled = true
+    }
   }, [selectedCollectionId])
 
   // Deep-link effect A: once collections finish loading, resolve ?table= in the
@@ -288,9 +302,11 @@ export function useContentWorkspace({
       setSelectedCollectionId(entry.tableId)
       setEntries([entry])
     } else {
-      setEntries((current) => current.every((candidate) => candidate.tableId === entry.tableId)
-        ? updateRowList(current, entry)
-        : [entry])
+      setEntries((current) =>
+        current.every((candidate) => candidate.tableId === entry.tableId)
+          ? updateRowList(current, entry)
+          : [entry],
+      )
     }
 
     selectEntry(entry)
@@ -345,18 +361,15 @@ export function useContentWorkspace({
     return collection
   }
 
-  const updateCollection = async (
-    tableId: string,
-    input: UpdateDataTableInput,
-  ) => {
+  const updateCollection = async (tableId: string, input: UpdateDataTableInput) => {
     setError(null)
     const collection = await updateCmsDataTable(tableId, input)
-    setTables((current) => current.map((candidate) =>
-      candidate.id === collection.id ? collection : candidate
-    ))
-    setCollections((current) => current.map((candidate) =>
-      candidate.id === collection.id ? collection : candidate
-    ))
+    setTables((current) =>
+      current.map((candidate) => (candidate.id === collection.id ? collection : candidate)),
+    )
+    setCollections((current) =>
+      current.map((candidate) => (candidate.id === collection.id ? collection : candidate)),
+    )
     return collection
   }
 
@@ -366,9 +379,8 @@ export function useContentWorkspace({
 
     setTables((current) => current.filter((table) => table.id !== tableId))
     const nextCollections = collections.filter((collection) => collection.id !== tableId)
-    const nextSelectedCollectionId = selectedCollectionId === tableId
-      ? nextCollections[0]?.id ?? null
-      : selectedCollectionId
+    const nextSelectedCollectionId =
+      selectedCollectionId === tableId ? (nextCollections[0]?.id ?? null) : selectedCollectionId
     setCollections(nextCollections)
 
     if (selectedCollectionId === tableId) {
@@ -381,10 +393,7 @@ export function useContentWorkspace({
     }
   }
 
-  const renameEntry = async (
-    row: DataRow,
-    input: { title: string; slug: string },
-  ) => {
+  const renameEntry = async (row: DataRow, input: { title: string; slug: string }) => {
     setError(null)
     const updatedRow = await saveCmsDataRowDraft(row.id, {
       cells: {
@@ -407,9 +416,8 @@ export function useContentWorkspace({
     await deleteCmsDataRow(entry.id)
 
     const nextEntries = entries.filter((candidate) => candidate.id !== entry.id)
-    const nextSelectedEntry = selectedEntry?.id === entry.id
-      ? nextEntries[0] ?? null
-      : selectedEntry
+    const nextSelectedEntry =
+      selectedEntry?.id === entry.id ? (nextEntries[0] ?? null) : selectedEntry
     setEntries(nextEntries)
 
     if (selectedEntry?.id === entry.id) {
@@ -440,10 +448,7 @@ export function useContentWorkspace({
     return updatedRow
   }
 
-  const updateEntryAuthor = async (
-    entry: DataRow,
-    authorUserId: string,
-  ) => {
+  const updateEntryAuthor = async (entry: DataRow, authorUserId: string) => {
     if (entry.authorUserId === authorUserId) return entry
     setError(null)
     const updatedRow = await updateCmsDataRowAuthor(entry.id, authorUserId)
@@ -452,10 +457,7 @@ export function useContentWorkspace({
     return updatedRow
   }
 
-  const moveEntryToCollection = async (
-    entry: DataRow,
-    tableId: string,
-  ) => {
+  const moveEntryToCollection = async (entry: DataRow, tableId: string) => {
     if (entry.tableId === tableId) return entry
     setError(null)
     const updatedRow = await updateCmsDataRowTable(entry.id, tableId)

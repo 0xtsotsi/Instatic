@@ -45,7 +45,9 @@ export const MediaNode = Node.create({
         default: 'image' as ContentMediaType,
         parseHTML: (element: HTMLElement) =>
           (element.getAttribute('data-media-type') as ContentMediaType | null) ?? 'image',
-        renderHTML: (attrs: Record<string, unknown>) => ({ 'data-media-type': String(attrs.mediaType) }),
+        renderHTML: (attrs: Record<string, unknown>) => ({
+          'data-media-type': String(attrs.mediaType),
+        }),
       },
       src: {
         default: '',
@@ -66,24 +68,25 @@ export const MediaNode = Node.create({
 
   renderHTML({ HTMLAttributes, node }) {
     const attrs = node.attrs as MediaAttributes
-    const inner = attrs.mediaType === 'video'
-      ? ['video', { controls: '', src: attrs.src }]
-      : ['img', { src: attrs.src, alt: attrs.alt }]
-    return [
-      'figure',
-      mergeAttributes(HTMLAttributes, { 'data-instatic-media': '' }),
-      inner,
-    ]
+    const inner =
+      attrs.mediaType === 'video'
+        ? ['video', { controls: '', src: attrs.src }]
+        : ['img', { src: attrs.src, alt: attrs.alt }]
+    return ['figure', mergeAttributes(HTMLAttributes, { 'data-instatic-media': '' }), inner]
   },
 
   addCommands() {
     return {
-      insertMedia: (attributes) => ({ commands }) => {
-        return commands.insertContent({ type: this.name, attrs: attributes })
-      },
-      updateMediaAttributes: (attributes) => ({ commands }) => {
-        return commands.updateAttributes(this.name, attributes)
-      },
+      insertMedia:
+        (attributes) =>
+        ({ commands }) => {
+          return commands.insertContent({ type: this.name, attrs: attributes })
+        },
+      updateMediaAttributes:
+        (attributes) =>
+        ({ commands }) => {
+          return commands.updateAttributes(this.name, attributes)
+        },
     }
   },
 })

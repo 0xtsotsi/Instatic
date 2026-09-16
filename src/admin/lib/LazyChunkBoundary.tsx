@@ -1,10 +1,4 @@
-import {
-  Fragment,
-  Suspense,
-  useEffect,
-  useState,
-  type ReactNode,
-} from 'react'
+import { Fragment, Suspense, useEffect, useState, type ReactNode } from 'react'
 import { ErrorBoundary } from '@ui/components/ErrorBoundary'
 import { Button } from '@ui/components/Button'
 import { ReloadIcon } from 'pixel-art-icons/icons/reload'
@@ -53,14 +47,14 @@ export function LazyChunkBoundary({
       )}
     >
       <Suspense
-        fallback={(
+        fallback={
           <LazyChunkPendingFallback
             key={`${attempt}:${timeoutMs}`}
             fallback={fallback}
             timeoutMs={timeoutMs}
             onRetry={() => retry()}
           />
-        )}
+        }
       >
         <LazyChunkAttempt key={attempt}>{children}</LazyChunkAttempt>
       </Suspense>
@@ -113,13 +107,11 @@ function LazyChunkFailure({
   onRetry: () => void
 }) {
   return (
-    <section
-      className={styles.chunkFailure}
-      role="alert"
-      aria-labelledby={titleId}
-    >
+    <section className={styles.chunkFailure} role="alert" aria-labelledby={titleId}>
       <div className={styles.panel}>
-        <h2 id={titleId} className={styles.title}>{title}</h2>
+        <h2 id={titleId} className={styles.title}>
+          {title}
+        </h2>
         <p className={styles.message}>{message}</p>
         <div className={styles.actions}>
           <Button variant="secondary" size="sm" onClick={onRetry}>

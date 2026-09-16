@@ -26,12 +26,20 @@ import { useEditorStore, selectActiveCanvasPage } from '@site/store/store'
 import { resolveProps } from '@core/page-tree'
 import { registry } from '@core/module-engine'
 import type { NodeWrapperProps as NodeWrapperPropsType } from '@core/module-engine'
-import { resolveDynamicProps, effectiveNodeBindings, type TemplateRenderDataContext } from '@core/templates/dynamicBindings'
+import {
+  resolveDynamicProps,
+  effectiveNodeBindings,
+  type TemplateRenderDataContext,
+} from '@core/templates/dynamicBindings'
 import type { PageNode } from '@core/page-tree'
 import { WarningDiamondSolidIcon } from 'pixel-art-icons/icons/warning-diamond-solid'
 import { ErrorBoundary } from '@ui/components/ErrorBoundary'
 import { ModuleSandboxFrame } from './ModuleSandboxFrame'
-import { CanvasBreakpointContext, CanvasSelectionContext, CanvasTemplateContext } from './CanvasContexts'
+import {
+  CanvasBreakpointContext,
+  CanvasSelectionContext,
+  CanvasTemplateContext,
+} from './CanvasContexts'
 import {
   addEditorFormPreviewProps,
   resolveEditorFormPreviewState,
@@ -100,17 +108,20 @@ export const NodeRenderer = memo(function NodeRenderer({ nodeId }: NodeRendererP
   const endInlineEdit = useEditorStore((s) => s.endInlineEdit)
   const cancelInlineEdit = useEditorStore((s) => s.cancelInlineEdit)
   const editableRef = useRef<HTMLElement | null>(null)
-  const previewClassAssignment = useEditorStore(
-    (s) => s.previewClassAssignment?.nodeId === nodeId ? s.previewClassAssignment : null,
+  const previewClassAssignment = useEditorStore((s) =>
+    s.previewClassAssignment?.nodeId === nodeId ? s.previewClassAssignment : null,
   )
   const editorFormPreviewState = useEditorStore((s) => resolveEditorFormPreviewState(s, nodeId))
-  const editorFormPreviewSuccessMessage = useEditorStore((s) => resolveEditorFormPreviewSuccessMessage(s, nodeId))
+  const editorFormPreviewSuccessMessage = useEditorStore((s) =>
+    resolveEditorFormPreviewSuccessMessage(s, nodeId),
+  )
   const mcClassName = useEditorStore((s) => {
     const canvasNode = selectActiveCanvasPage(s)?.nodes[nodeId]
     const preview = s.previewClassAssignment?.nodeId === nodeId ? s.previewClassAssignment : null
     return getCanvasNodeClassName(canvasNode?.classIds, preview, nodeId, s.site?.styleRules)
   })
-  const { onNodeClick, onNodeHover, onNodeContextMenu, onNodeDoubleClick } = use(CanvasSelectionContext)
+  const { onNodeClick, onNodeHover, onNodeContextMenu, onNodeDoubleClick } =
+    use(CanvasSelectionContext)
 
   const handleNodeClick = (clickedNodeId: string, e: React.MouseEvent) => {
     // B3 — VC lock-down: redirect clicks inside inlined VC bodies to the ref node.
@@ -234,9 +245,9 @@ export const NodeRenderer = memo(function NodeRenderer({ nodeId }: NodeRendererP
   const effectiveProps = addEditorFormPreviewProps(
     node.moduleId,
     resolveDynamicProps(
-    resolveProps(node, breakpointId, definition.schema),
-    effectiveNodeBindings(node),
-    templateContext,
+      resolveProps(node, breakpointId, definition.schema),
+      effectiveNodeBindings(node),
+      templateContext,
     ),
     editorFormPreviewState,
     editorFormPreviewSuccessMessage,
@@ -361,7 +372,8 @@ export const NodeRenderer = memo(function NodeRenderer({ nodeId }: NodeRendererP
   const inlineEditBinding: InlineEditBinding | undefined = isInlineEditing
     ? {
         ref: editableRef,
-        onInput: (e) => applyInlineEditValue(readInlineEditableText(e.currentTarget as HTMLElement)),
+        onInput: (e) =>
+          applyInlineEditValue(readInlineEditableText(e.currentTarget as HTMLElement)),
         onKeyDown: (e) => {
           if (e.key === 'Escape') {
             e.preventDefault()
@@ -399,11 +411,7 @@ export const NodeRenderer = memo(function NodeRenderer({ nodeId }: NodeRendererP
   // silentToast: the canvas-level boundary already toasts; 100 nodes with
   // one bad module would otherwise produce 100 identical toasts per render.
   return (
-    <ErrorBoundary
-      location="node-renderer"
-      resetKeys={[node.moduleId, nodeId]}
-      silentToast
-    >
+    <ErrorBoundary location="node-renderer" resetKeys={[node.moduleId, nodeId]} silentToast>
       {shouldRenderSandbox ? (
         <ModuleSandboxFrame
           moduleDefinition={definition}
@@ -522,7 +530,11 @@ function isElementLike(value: EventTarget | null): value is Element {
 function isEditableTextTarget(target: EventTarget | null): boolean {
   if (!isElementLike(target)) return false
   if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA') return true
-  return target.closest('[contenteditable="true"], [contenteditable="plaintext-only"], [contenteditable=""]') !== null
+  return (
+    target.closest(
+      '[contenteditable="true"], [contenteditable="plaintext-only"], [contenteditable=""]',
+    ) !== null
+  )
 }
 
 function isClosestCanvasNodeTarget(

@@ -10,19 +10,13 @@
 import { Type, type Static } from '@sinclair/typebox'
 import { withFallback, filterArray } from '@core/utils/typeboxHelpers'
 import { compiledCheck } from '@core/utils/typeboxCompiler'
-import {
-  normalizeFontTokenVariable,
-  sanitizeFontFallbackStack,
-} from './tokenStrings'
+import { normalizeFontTokenVariable, sanitizeFontFallbackStack } from './tokenStrings'
 
 // ---------------------------------------------------------------------------
 // FontSource
 // ---------------------------------------------------------------------------
 
-const FontSourceSchema = Type.Union([
-  Type.Literal('google'),
-  Type.Literal('custom'),
-])
+const FontSourceSchema = Type.Union([Type.Literal('google'), Type.Literal('custom')])
 
 type FontSource = Static<typeof FontSourceSchema>
 
@@ -239,7 +233,9 @@ function parseFontToken(raw: unknown): FontToken | null {
   const createdAt = typeof r.createdAt === 'number' ? r.createdAt : Date.now()
   const updatedAt = typeof r.updatedAt === 'number' ? r.updatedAt : Date.now()
   const order = typeof r.order === 'number' && Number.isFinite(r.order) ? r.order : 0
-  const fallback = sanitizeFontFallbackStack(typeof r.fallback === 'string' ? r.fallback : undefined)
+  const fallback = sanitizeFontFallbackStack(
+    typeof r.fallback === 'string' ? r.fallback : undefined,
+  )
 
   return {
     id: r.id,

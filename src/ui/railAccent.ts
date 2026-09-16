@@ -20,7 +20,7 @@ export const RAIL_ACCENTS = [
   'coral',
 ] as const
 
-export type RailAccent = typeof RAIL_ACCENTS[number]
+export type RailAccent = (typeof RAIL_ACCENTS)[number]
 
 const DEFAULT_RAIL_ACCENT: RailAccent = 'mint'
 const RAIL_ACCENT_TOKEN: Record<RailAccent, string> = {

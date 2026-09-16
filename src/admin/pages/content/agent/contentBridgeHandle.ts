@@ -101,10 +101,7 @@ export interface ContentBridgeHandle {
    * field values land on the draft before save. Returns the new
    * document's id; the editor auto-switches to it.
    */
-  createDocument(args: {
-    tableId: string
-    fields?: Record<string, unknown>
-  }): Promise<string>
+  createDocument(args: { tableId: string; fields?: Record<string, unknown> }): Promise<string>
 
   /** Soft-delete a document by id. */
   deleteDocument(documentId: string): Promise<void>
@@ -122,23 +119,13 @@ export interface ContentBridgeHandle {
   }): Promise<void>
 
   /** Write one field on a document. `value` shape depends on the field type. */
-  setDocumentField(args: {
-    documentId: string
-    fieldId: string
-    value: unknown
-  }): Promise<void>
+  setDocumentField(args: { documentId: string; fieldId: string; value: unknown }): Promise<void>
 
   /** Batch-write multiple fields on a document in one save. */
-  setDocumentFields(args: {
-    documentId: string
-    fields: Record<string, unknown>
-  }): Promise<void>
+  setDocumentFields(args: { documentId: string; fields: Record<string, unknown> }): Promise<void>
 
   /** Reassign the document author. Requires content.edit.any server-side. */
-  setDocumentAuthor(args: {
-    documentId: string
-    userId: string
-  }): Promise<void>
+  setDocumentAuthor(args: { documentId: string; userId: string }): Promise<void>
 }
 
 // ---------------------------------------------------------------------------
@@ -155,7 +142,7 @@ export function getContentBridgeHandle(): ContentBridgeHandle {
   if (!registered) {
     throw new Error(
       '[contentBridge] No handle registered. ContentPage must mount before ' +
-      'the content-scope agent can dispatch tool calls.',
+        'the content-scope agent can dispatch tool calls.',
     )
   }
   return registered

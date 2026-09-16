@@ -47,15 +47,17 @@ import type * as ReactJsxDevRuntimeNs from 'react/jsx-dev-runtime'
 import type * as ReactDOMNs from 'react-dom'
 
 declare global {
-  var __instatic: {
-    React: typeof ReactNs
-    ReactJsxRuntime: typeof ReactJsxRuntimeNs
-    ReactJsxDevRuntime: typeof ReactJsxDevRuntimeNs
-    ReactDOM: typeof ReactDOMNs
-    hostUi: Record<string, unknown>
-    hostHooks: Record<string, unknown>
-    pluginSdk: Record<string, unknown>
-  } | undefined
+  var __instatic:
+    | {
+        React: typeof ReactNs
+        ReactJsxRuntime: typeof ReactJsxRuntimeNs
+        ReactJsxDevRuntime: typeof ReactJsxDevRuntimeNs
+        ReactDOM: typeof ReactDOMNs
+        hostUi: Record<string, unknown>
+        hostHooks: Record<string, unknown>
+        pluginSdk: Record<string, unknown>
+      }
+    | undefined
 }
 
 /** The frozen runtime shape we publish on `globalThis.__instatic`. */
@@ -121,8 +123,8 @@ async function doInstall(): Promise<void> {
     // accidentally bundled their own React.
     throw new Error(
       '[@instatic/runtime] Detected a second React instance during plugin runtime bootstrap. ' +
-      `Host React: ${React.version}; existing React: ${globalThis.__instatic.React.version}. ` +
-      'Plugin authors must build with `instatic-plugin build` so React is externalized.',
+        `Host React: ${React.version}; existing React: ${globalThis.__instatic.React.version}. ` +
+        'Plugin authors must build with `instatic-plugin build` so React is externalized.',
     )
   }
 

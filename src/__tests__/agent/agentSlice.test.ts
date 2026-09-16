@@ -75,7 +75,9 @@ const noopTextSink: AgentTextStreamSink = {
 
 function getToolCallBlocks(message: AgentMessage): AgentToolCall[] {
   return message.blocks
-    .filter((block): block is { kind: 'toolCall'; toolCall: AgentToolCall } => block.kind === 'toolCall')
+    .filter(
+      (block): block is { kind: 'toolCall'; toolCall: AgentToolCall } => block.kind === 'toolCall',
+    )
     .map((block) => block.toolCall)
 }
 
@@ -91,15 +93,15 @@ interface InterceptedFetch {
  * any unexpected call instead of hanging.
  */
 function captureFetchByRoute(
-  routes: Record<string, (call: number, init: RequestInit | undefined) => Response | Promise<Response>>,
+  routes: Record<
+    string,
+    (call: number, init: RequestInit | undefined) => Response | Promise<Response>
+  >,
 ): { restore: () => void; calls: InterceptedFetch[] } {
   const original = globalThis.fetch
   const calls: InterceptedFetch[] = []
   const perRouteCount: Record<string, number> = {}
-  globalThis.fetch = (async (
-    input: RequestInfo | URL,
-    init?: RequestInit,
-  ) => {
+  globalThis.fetch = (async (input: RequestInfo | URL, init?: RequestInit) => {
     const url = typeof input === 'string' ? input : input.toString()
     const method = (init?.method ?? 'GET').toUpperCase()
     calls.push({ url, body: String(init?.body ?? ''), method })
@@ -110,7 +112,7 @@ function captureFetchByRoute(
     if (!key) {
       return new Response('Not found', { status: 404 })
     }
-    const idx = (perRouteCount[key] ?? 0)
+    const idx = perRouteCount[key] ?? 0
     perRouteCount[key] = idx + 1
     return routes[key]!(idx, init)
   }) as typeof fetch
@@ -132,15 +134,17 @@ function ndjsonResponse(events: object[]): Response {
 
 const defaultsResponse = () =>
   new Response(
-    JSON.stringify({ defaults: { site: { credentialId: 'cred-1', modelId: 'claude-sonnet-4-6' } } }),
+    JSON.stringify({
+      defaults: { site: { credentialId: 'cred-1', modelId: 'claude-sonnet-4-6' } },
+    }),
     { status: 200, headers: { 'Content-Type': 'application/json' } },
   )
 
 const conversationCreateResponse = (id: string) =>
-  new Response(
-    JSON.stringify({ conversation: { id } }),
-    { status: 201, headers: { 'Content-Type': 'application/json' } },
-  )
+  new Response(JSON.stringify({ conversation: { id } }), {
+    status: 201,
+    headers: { 'Content-Type': 'application/json' },
+  })
 
 const conversationDetailMessagesResponse = (
   id: string,
@@ -150,41 +154,51 @@ const conversationDetailMessagesResponse = (
     modelId: 'claude-sonnet-4-6',
   },
 ) =>
-  new Response(JSON.stringify({
-    conversation: {
-      id,
-      scope: 'site',
-      title: 'Image',
-      credentialId: selection.credentialId,
-      modelId: selection.modelId,
-      promptTokensTotal: 0,
-      completionTokensTotal: 0,
-      costUsdTotal: 0,
-      cacheReadTokensTotal: 0,
-      cacheCreationTokensTotal: 0,
-      contextTokens: 0,
-      createdAt: '2026-07-11T10:00:00.000Z',
-      updatedAt: '2026-07-11T10:00:00.000Z',
-      messages,
+  new Response(
+    JSON.stringify({
+      conversation: {
+        id,
+        scope: 'site',
+        title: 'Image',
+        credentialId: selection.credentialId,
+        modelId: selection.modelId,
+        promptTokensTotal: 0,
+        completionTokensTotal: 0,
+        costUsdTotal: 0,
+        cacheReadTokensTotal: 0,
+        cacheCreationTokensTotal: 0,
+        contextTokens: 0,
+        createdAt: '2026-07-11T10:00:00.000Z',
+        updatedAt: '2026-07-11T10:00:00.000Z',
+        messages,
+      },
+    }),
+    {
+      status: 200,
+      headers: { 'Content-Type': 'application/json' },
     },
-  }), {
-    status: 200,
-    headers: { 'Content-Type': 'application/json' },
-  })
+  )
 
 const conversationDetailResponse = (
   id: string,
   content: unknown[],
   selection?: { credentialId: string; modelId: string },
-) => conversationDetailMessagesResponse(id, [{
-  id: 'message-image',
-  position: 0,
-  role: 'user',
-  content,
-  toolCallId: null,
-  toolName: null,
-  createdAt: '2026-07-11T10:00:00.000Z',
-}], selection)
+) =>
+  conversationDetailMessagesResponse(
+    id,
+    [
+      {
+        id: 'message-image',
+        position: 0,
+        role: 'user',
+        content,
+        toolCallId: null,
+        toolName: null,
+        createdAt: '2026-07-11T10:00:00.000Z',
+      },
+    ],
+    selection,
+  )
 
 const toolResultAckResponse = () =>
   new Response(JSON.stringify({ ok: true }), {
@@ -196,7 +210,9 @@ const textContent = (text: string): AiUserContentBlock[] => [{ kind: 'text', tex
 
 function deferred<T>() {
   let resolve!: (value: T | PromiseLike<T>) => void
-  const promise = new Promise<T>((done) => { resolve = done })
+  const promise = new Promise<T>((done) => {
+    resolve = done
+  })
   return { promise, resolve }
 }
 
@@ -565,11 +581,12 @@ describe('sendAgentMessage — request lifecycle', () => {
     const intercept = captureFetchByRoute({
       '/admin/api/ai/defaults': defaultsResponse,
       '/admin/api/ai/conversations': () => conversationCreateResponse('conv-1'),
-      '/admin/api/ai/chat/site': () => ndjsonResponse([
-        { type: 'bridgeReady', bridgeId: 'b-1' },
-        { type: 'text', text: 'Inserting hero…' },
-        { type: 'done' },
-      ]),
+      '/admin/api/ai/chat/site': () =>
+        ndjsonResponse([
+          { type: 'bridgeReady', bridgeId: 'b-1' },
+          { type: 'text', text: 'Inserting hero…' },
+          { type: 'done' },
+        ]),
     })
 
     let result: { accepted: boolean } | undefined
@@ -605,9 +622,8 @@ describe('sendAgentMessage — request lifecycle', () => {
         createStarted.resolve()
         return new Promise<Response>((_resolve, reject) => {
           const signal = init?.signal
-          const rejectAbort = () => reject(
-            signal?.reason ?? new DOMException('The operation was aborted.', 'AbortError'),
-          )
+          const rejectAbort = () =>
+            reject(signal?.reason ?? new DOMException('The operation was aborted.', 'AbortError'))
           if (signal?.aborted) rejectAbort()
           else signal?.addEventListener('abort', rejectAbort, { once: true })
         })
@@ -643,10 +659,8 @@ describe('sendAgentMessage — request lifecycle', () => {
     const intercept = captureFetchByRoute({
       '/admin/api/ai/defaults': defaultsResponse,
       '/admin/api/ai/conversations': () => conversationCreateResponse('conv-image'),
-      '/admin/api/ai/chat/site': () => ndjsonResponse([
-        { type: 'bridgeReady', bridgeId: 'b-image' },
-        { type: 'done' },
-      ]),
+      '/admin/api/ai/chat/site': () =>
+        ndjsonResponse([{ type: 'bridgeReady', bridgeId: 'b-image' }, { type: 'done' }]),
     })
 
     let result: { accepted: boolean } | undefined
@@ -663,12 +677,16 @@ describe('sendAgentMessage — request lifecycle', () => {
       conversationId: 'conv-image',
       content: [image],
     })
-    const userMessage = useEditorStore.getState().agentMessages.find((message) => message.role === 'user')
-    expect(userMessage?.blocks).toEqual([{
-      kind: 'image',
-      mimeType: 'image/jpeg',
-      src: 'data:image/jpeg;base64,QUJD',
-    }])
+    const userMessage = useEditorStore
+      .getState()
+      .agentMessages.find((message) => message.role === 'user')
+    expect(userMessage?.blocks).toEqual([
+      {
+        kind: 'image',
+        mimeType: 'image/jpeg',
+        src: 'data:image/jpeg;base64,QUJD',
+      },
+    ])
   })
 
   it('reuses the same conversation id on follow-up sends', async () => {
@@ -682,10 +700,8 @@ describe('sendAgentMessage — request lifecycle', () => {
     const intercept = captureFetchByRoute({
       '/admin/api/ai/defaults': defaultsResponse,
       '/admin/api/ai/conversations': () => conversationCreateResponse('conv-99'),
-      '/admin/api/ai/chat/site': () => ndjsonResponse([
-        { type: 'bridgeReady', bridgeId: 'b-1' },
-        { type: 'done' },
-      ]),
+      '/admin/api/ai/chat/site': () =>
+        ndjsonResponse([{ type: 'bridgeReady', bridgeId: 'b-1' }, { type: 'done' }]),
     })
 
     try {
@@ -715,16 +731,17 @@ describe('sendAgentMessage — request lifecycle', () => {
     const intercept = captureFetchByRoute({
       '/admin/api/ai/defaults': defaultsResponse,
       '/admin/api/ai/conversations': () => conversationCreateResponse('conv-7'),
-      '/admin/api/ai/chat/site': () => ndjsonResponse([
-        { type: 'bridgeReady', bridgeId: 'b-3' },
-        {
-          type: 'toolRequest',
-          requestId: 'req-7',
-          toolName: 'site_apply_css',
-          input: { operation: 'merge', css: '.pricing-card { padding: 24px; }' },
-        },
-        { type: 'done' },
-      ]),
+      '/admin/api/ai/chat/site': () =>
+        ndjsonResponse([
+          { type: 'bridgeReady', bridgeId: 'b-3' },
+          {
+            type: 'toolRequest',
+            requestId: 'req-7',
+            toolName: 'site_apply_css',
+            input: { operation: 'merge', css: '.pricing-card { padding: 24px; }' },
+          },
+          { type: 'done' },
+        ]),
       '/admin/api/ai/tool-result': toolResultAckResponse,
     })
 
@@ -759,37 +776,38 @@ describe('sendAgentMessage — request lifecycle', () => {
     const intercept = captureFetchByRoute({
       '/admin/api/ai/defaults': defaultsResponse,
       '/admin/api/ai/conversations': () => conversationCreateResponse('conv-tool-result-failure'),
-      '/admin/api/ai/chat/site': () => ndjsonResponse([
-        { type: 'bridgeReady', bridgeId: 'bridge-tool-result-failure' },
-        {
-          type: 'toolCall',
-          toolCallId: 'call-tool-result-failure',
-          toolName: 'site_apply_css',
-          input: { css: '.failure-test { display: block; }' },
-          status: 'pending',
-        },
-        {
-          type: 'toolRequest',
-          requestId: 'request-tool-result-failure',
-          toolName: 'site_apply_css',
-          input: { css: '.failure-test { display: block; }' },
-        },
-        { type: 'done' },
-      ]),
+      '/admin/api/ai/chat/site': () =>
+        ndjsonResponse([
+          { type: 'bridgeReady', bridgeId: 'bridge-tool-result-failure' },
+          {
+            type: 'toolCall',
+            toolCallId: 'call-tool-result-failure',
+            toolName: 'site_apply_css',
+            input: { css: '.failure-test { display: block; }' },
+            status: 'pending',
+          },
+          {
+            type: 'toolRequest',
+            requestId: 'request-tool-result-failure',
+            toolName: 'site_apply_css',
+            input: { css: '.failure-test { display: block; }' },
+          },
+          { type: 'done' },
+        ]),
       '/admin/api/ai/tool-result': (_call, init) => {
         toolResultSignal = init?.signal ?? null
-        return new Response(
-          JSON.stringify({ error: 'The active tool bridge no longer exists.' }),
-          { status: 404, headers: { 'Content-Type': 'application/json' } },
-        )
+        return new Response(JSON.stringify({ error: 'The active tool bridge no longer exists.' }), {
+          status: 404,
+          headers: { 'Content-Type': 'application/json' },
+        })
       },
     })
 
     let result: { accepted: boolean }
     try {
-      result = await useEditorStore.getState().sendAgentMessage(
-        textContent('Apply a class, then continue.'),
-      )
+      result = await useEditorStore
+        .getState()
+        .sendAgentMessage(textContent('Apply a class, then continue.'))
     } finally {
       intercept.restore()
     }
@@ -805,7 +823,10 @@ describe('sendAgentMessage — request lifecycle', () => {
     expect(calls).toHaveLength(1)
     expect(calls[0]).toMatchObject({
       status: 'error',
-      result: { ok: false, error: expect.stringContaining('The active tool bridge no longer exists.') },
+      result: {
+        ok: false,
+        error: expect.stringContaining('The active tool bridge no longer exists.'),
+      },
     })
   })
 
@@ -817,16 +838,17 @@ describe('sendAgentMessage — request lifecycle', () => {
     const intercept = captureFetchByRoute({
       '/admin/api/ai/defaults': defaultsResponse,
       '/admin/api/ai/conversations': () => conversationCreateResponse('conv-active-abort'),
-      '/admin/api/ai/chat/site': () => ndjsonResponse([
-        { type: 'bridgeReady', bridgeId: 'bridge-active-abort' },
-        {
-          type: 'toolRequest',
-          requestId: 'request-active-abort',
-          toolName: 'site_apply_css',
-          input: { css: '.active-abort { display: block; }' },
-        },
-        { type: 'done' },
-      ]),
+      '/admin/api/ai/chat/site': () =>
+        ndjsonResponse([
+          { type: 'bridgeReady', bridgeId: 'bridge-active-abort' },
+          {
+            type: 'toolRequest',
+            requestId: 'request-active-abort',
+            toolName: 'site_apply_css',
+            input: { css: '.active-abort { display: block; }' },
+          },
+          { type: 'done' },
+        ]),
       '/admin/api/ai/tool-result': (_call, init) => {
         toolResultSignal = init?.signal ?? null
         const error = new Error('Tool-result delivery was aborted upstream.')
@@ -836,9 +858,11 @@ describe('sendAgentMessage — request lifecycle', () => {
     })
 
     try {
-      expect(await useEditorStore.getState().sendAgentMessage(
-        textContent('Apply a class, then continue.'),
-      )).toEqual({ accepted: true })
+      expect(
+        await useEditorStore
+          .getState()
+          .sendAgentMessage(textContent('Apply a class, then continue.')),
+      ).toEqual({ accepted: true })
     } finally {
       intercept.restore()
     }
@@ -857,10 +881,11 @@ describe('sendAgentMessage — request lifecycle', () => {
 
     const intercept = captureFetchByRoute({
       // Empty defaults — no site default configured.
-      '/admin/api/ai/defaults': () => new Response(
-        JSON.stringify({ defaults: {} }),
-        { status: 200, headers: { 'Content-Type': 'application/json' } },
-      ),
+      '/admin/api/ai/defaults': () =>
+        new Response(JSON.stringify({ defaults: {} }), {
+          status: 200,
+          headers: { 'Content-Type': 'application/json' },
+        }),
     })
 
     try {
@@ -899,11 +924,13 @@ describe('loadAgentConversation — rehydration', () => {
     expect(state.agentConversationId).toBe('conv-image')
     expect(state.agentComposerEpoch).toBe(1)
     expect(state.agentMessages).toHaveLength(1)
-    expect(state.agentMessages[0]?.blocks).toEqual([{
-      kind: 'image',
-      mimeType: 'image/jpeg',
-      src: image.url,
-    }])
+    expect(state.agentMessages[0]?.blocks).toEqual([
+      {
+        kind: 'image',
+        mimeType: 'image/jpeg',
+        src: image.url,
+      },
+    ])
   })
 
   it('blocks Send until an in-flight conversation load commits', async () => {
@@ -929,13 +956,14 @@ describe('loadAgentConversation — rehydration', () => {
       const loading = useEditorStore.getState().loadAgentConversation('conv-new')
       await loadStarted.promise
       expect(useEditorStore.getState().isAgentConversationPending).toBe(true)
-      expect(await useEditorStore.getState().sendAgentMessage(textContent('Wait')))
-        .toEqual({ accepted: false })
+      expect(await useEditorStore.getState().sendAgentMessage(textContent('Wait'))).toEqual({
+        accepted: false,
+      })
       expect(intercept.calls.some((call) => call.url === '/admin/api/ai/chat/site')).toBe(false)
 
-      loadResponse.resolve(conversationDetailResponse('conv-new', [
-        { kind: 'text', text: 'Loaded' },
-      ]))
+      loadResponse.resolve(
+        conversationDetailResponse('conv-new', [{ kind: 'text', text: 'Loaded' }]),
+      )
       await loading
       expect(useEditorStore.getState().agentConversationId).toBe('conv-new')
       expect(useEditorStore.getState().isAgentConversationPending).toBe(false)
@@ -967,12 +995,14 @@ describe('loadAgentConversation — rehydration', () => {
             id: 'snapshot-call',
             position: 1,
             role: 'assistant',
-            content: [{
-              kind: 'toolCall',
-              toolCallId: 'snapshot-interrupted',
-              toolName: 'site_render_snapshot',
-              input: { breakpointId: 'desktop' },
-            }],
+            content: [
+              {
+                kind: 'toolCall',
+                toolCallId: 'snapshot-interrupted',
+                toolName: 'site_render_snapshot',
+                input: { breakpointId: 'desktop' },
+              },
+            ],
             toolCallId: 'snapshot-interrupted',
             toolName: 'site_render_snapshot',
             createdAt: '2026-07-11T10:00:01.000Z',
@@ -1030,7 +1060,9 @@ describe('conversation reset key-set', () => {
     freshAgentState()
     useEditorStore.setState({
       isAgentStreaming: false,
-      agentMessages: [{ id: 'm1', role: 'user', blocks: [{ kind: 'text', text: 'hi' }], timestamp: 1 }],
+      agentMessages: [
+        { id: 'm1', role: 'user', blocks: [{ kind: 'text', text: 'hi' }], timestamp: 1 },
+      ],
       agentError: 'AI server is not running. Start it with: bun run dev',
       agentConversationId: 'conv-dirty',
       agentActiveCredentialId: 'cred-1',
@@ -1086,8 +1118,7 @@ describe('conversation reset key-set', () => {
     })
 
     const intercept = captureFetchByRoute({
-      '/admin/api/ai/conversations/conv-dirty': () =>
-        new Response(null, { status: 204 }),
+      '/admin/api/ai/conversations/conv-dirty': () => new Response(null, { status: 204 }),
     })
 
     try {
@@ -1111,16 +1142,17 @@ describe('sendAgentMessage — streaming + error surfacing', () => {
     const intercept = captureFetchByRoute({
       '/admin/api/ai/defaults': defaultsResponse,
       '/admin/api/ai/conversations': () => conversationCreateResponse('conv-truncated'),
-      '/admin/api/ai/chat/site': () => ndjsonResponse([
-        { type: 'bridgeReady', bridgeId: 'b-truncated' },
-        {
-          type: 'toolCall',
-          toolCallId: 'snapshot-truncated',
-          toolName: 'site_render_snapshot',
-          input: { breakpointId: 'desktop' },
-          status: 'pending',
-        },
-      ]),
+      '/admin/api/ai/chat/site': () =>
+        ndjsonResponse([
+          { type: 'bridgeReady', bridgeId: 'b-truncated' },
+          {
+            type: 'toolCall',
+            toolCallId: 'snapshot-truncated',
+            toolName: 'site_render_snapshot',
+            input: { breakpointId: 'desktop' },
+            status: 'pending',
+          },
+        ]),
     })
 
     try {
@@ -1147,12 +1179,13 @@ describe('sendAgentMessage — streaming + error surfacing', () => {
     const intercept = captureFetchByRoute({
       '/admin/api/ai/defaults': defaultsResponse,
       '/admin/api/ai/conversations': () => conversationCreateResponse('conv-mid'),
-      '/admin/api/ai/chat/site': () => ndjsonResponse([
-        { type: 'bridgeReady', bridgeId: 'b-1' },
-        { type: 'text', text: 'Working…' },
-        { type: 'error', message: 'Provider rate limit exceeded.' },
-        { type: 'done' },
-      ]),
+      '/admin/api/ai/chat/site': () =>
+        ndjsonResponse([
+          { type: 'bridgeReady', bridgeId: 'b-1' },
+          { type: 'text', text: 'Working…' },
+          { type: 'error', message: 'Provider rate limit exceeded.' },
+          { type: 'done' },
+        ]),
     })
 
     try {
@@ -1163,7 +1196,9 @@ describe('sendAgentMessage — streaming + error surfacing', () => {
 
     // Text event dispatched into the assistant message.
     const assistant = useEditorStore.getState().agentMessages.find((m) => m.role === 'assistant')!
-    expect(assistant.blocks.some((b) => b.kind === 'text' && b.text.includes('Working…'))).toBe(true)
+    expect(assistant.blocks.some((b) => b.kind === 'text' && b.text.includes('Working…'))).toBe(
+      true,
+    )
     // The error event's message is surfaced verbatim (once).
     expect(useEditorStore.getState().agentError).toBe('Provider rate limit exceeded.')
     // Streaming flag resolved cleanly in the finally block.
@@ -1206,10 +1241,8 @@ describe('sendAgentMessage — streaming + error surfacing', () => {
     const intercept = captureFetchByRoute({
       '/admin/api/ai/defaults': defaultsResponse,
       '/admin/api/ai/conversations': () => conversationCreateResponse('conv-staged'),
-      '/admin/api/ai/chat/site': () => ndjsonResponse([
-        { type: 'bridgeReady', bridgeId: 'b-1' },
-        { type: 'done' },
-      ]),
+      '/admin/api/ai/chat/site': () =>
+        ndjsonResponse([{ type: 'bridgeReady', bridgeId: 'b-1' }, { type: 'done' }]),
     })
 
     try {
@@ -1296,10 +1329,11 @@ describe('loadScopeDefault', () => {
     })
 
     const intercept = captureFetchByRoute({
-      '/admin/api/ai/defaults': () => new Response(
-        JSON.stringify({ defaults: {} }),
-        { status: 200, headers: { 'Content-Type': 'application/json' } },
-      ),
+      '/admin/api/ai/defaults': () =>
+        new Response(JSON.stringify({ defaults: {} }), {
+          status: 200,
+          headers: { 'Content-Type': 'application/json' },
+        }),
     })
 
     try {
@@ -1391,32 +1425,39 @@ describe('setAgentProvider', () => {
       const changingModel = useEditorStore.getState().setAgentProvider('cred-new', 'model-new')
       await updateStarted.promise
       expect(useEditorStore.getState().isAgentProviderPending).toBe(true)
-      expect(await useEditorStore.getState().sendAgentMessage(textContent('Use the new model')))
-        .toEqual({ accepted: false })
+      expect(
+        await useEditorStore.getState().sendAgentMessage(textContent('Use the new model')),
+      ).toEqual({ accepted: false })
       expect(intercept.calls.some((call) => call.url === '/admin/api/ai/chat/site')).toBe(false)
 
-      updateResponse.resolve(new Response(JSON.stringify({
-        conversation: {
-          id: 'conv-switch',
-          scope: 'site',
-          title: 'Conversation',
-          credentialId: 'cred-new',
-          modelId: 'model-new',
-          promptTokensTotal: 0,
-          completionTokensTotal: 0,
-          costUsdTotal: 0,
-          cacheReadTokensTotal: 0,
-          cacheCreationTokensTotal: 0,
-          contextTokens: 0,
-          createdAt: '2026-07-11T10:00:00.000Z',
-          updatedAt: '2026-07-11T10:00:00.000Z',
-        },
-      }), { headers: { 'content-type': 'application/json' } }))
+      updateResponse.resolve(
+        new Response(
+          JSON.stringify({
+            conversation: {
+              id: 'conv-switch',
+              scope: 'site',
+              title: 'Conversation',
+              credentialId: 'cred-new',
+              modelId: 'model-new',
+              promptTokensTotal: 0,
+              completionTokensTotal: 0,
+              costUsdTotal: 0,
+              cacheReadTokensTotal: 0,
+              cacheCreationTokensTotal: 0,
+              contextTokens: 0,
+              createdAt: '2026-07-11T10:00:00.000Z',
+              updatedAt: '2026-07-11T10:00:00.000Z',
+            },
+          }),
+          { headers: { 'content-type': 'application/json' } },
+        ),
+      )
 
       await changingModel
       expect(useEditorStore.getState().isAgentProviderPending).toBe(false)
-      expect(await useEditorStore.getState().sendAgentMessage(textContent('Use the new model')))
-        .toEqual({ accepted: true })
+      expect(
+        await useEditorStore.getState().sendAgentMessage(textContent('Use the new model')),
+      ).toEqual({ accepted: true })
       expect(intercept.calls.map((call) => call.url)).toEqual([
         '/admin/api/ai/conversations/conv-switch',
         '/admin/api/ai/chat/site',
@@ -1456,10 +1497,12 @@ describe('setAgentProvider', () => {
       const changingModel = useEditorStore.getState().setAgentProvider('cred-new', 'model-new')
       await updateStarted.promise
       const sending = useEditorStore.getState().sendAgentMessage(textContent('Do not misroute me'))
-      updateResponse.resolve(new Response(JSON.stringify({ error: 'update failed' }), {
-        status: 400,
-        headers: { 'content-type': 'application/json' },
-      }))
+      updateResponse.resolve(
+        new Response(JSON.stringify({ error: 'update failed' }), {
+          status: 400,
+          headers: { 'content-type': 'application/json' },
+        }),
+      )
 
       const [, result] = await Promise.all([changingModel, sending])
       expect(result).toEqual({ accepted: false })
@@ -1501,8 +1544,9 @@ describe('setAgentProvider', () => {
       expect(state.agentActiveModelId).toBe('model-new')
       expect(state.agentError).toBeNull()
       expect(state.isAgentProviderPending).toBe(false)
-      expect(await state.sendAgentMessage(textContent('Use the committed model')))
-        .toEqual({ accepted: true })
+      expect(await state.sendAgentMessage(textContent('Use the committed model'))).toEqual({
+        accepted: true,
+      })
       expect(intercept.calls.map((call) => call.method)).toEqual(['PUT', 'GET', 'POST'])
     } finally {
       intercept.restore()
@@ -1541,8 +1585,9 @@ describe('setAgentProvider', () => {
       expect(state.agentActiveCredentialId).toBeNull()
       expect(state.agentActiveModelId).toBeNull()
       expect(state.agentError).toContain('server state could not be confirmed')
-      expect(await state.sendAgentMessage(textContent('Never route against stale state')))
-        .toEqual({ accepted: false })
+      expect(await state.sendAgentMessage(textContent('Never route against stale state'))).toEqual({
+        accepted: false,
+      })
       expect(intercept.calls.some((call) => call.url === '/admin/api/ai/chat/site')).toBe(false)
     } finally {
       intercept.restore()

@@ -39,17 +39,17 @@ function src(relPath: string): string {
 // ---------------------------------------------------------------------------
 
 describe('Gate 1 — mutations.ts has no VC mode branch', () => {
-  it('src/core/page-tree/mutations.ts does NOT contain `kind === \'visualComponent\'`', () => {
+  it("src/core/page-tree/mutations.ts does NOT contain `kind === 'visualComponent'`", () => {
     const content = src('src/core/page-tree/mutations.ts')
     const found = content.includes("kind === 'visualComponent'")
     if (found) {
       throw new Error(
         '[no-vc-mode-branches-in-mutations] src/core/page-tree/mutations.ts contains ' +
-        "`kind === 'visualComponent'`. Mutations must be tree-agnostic — they take a " +
-        '`NodeTree<TNode>` and know nothing about page vs. VC mode. Move any routing ' +
-        'logic to `mutateActiveTree` in site/helpers.ts.\n\n' +
-        'Reference: docs/superpowers/plans/2026-05-06-tree-unification.md, ' +
-        'CLAUDE.md §"Mutation API"',
+          "`kind === 'visualComponent'`. Mutations must be tree-agnostic — they take a " +
+          '`NodeTree<TNode>` and know nothing about page vs. VC mode. Move any routing ' +
+          'logic to `mutateActiveTree` in site/helpers.ts.\n\n' +
+          'Reference: docs/superpowers/plans/2026-05-06-tree-unification.md, ' +
+          'CLAUDE.md §"Mutation API"',
       )
     }
     expect(found).toBe(false)
@@ -127,8 +127,8 @@ describe('Gate 2 — named tree-mutation actions in site/nodeActions.ts have no 
       if (body === '') {
         throw new Error(
           `[no-vc-mode-branches-in-mutations] Could not find action "${actionName}" in ` +
-          `${NODE_ACTIONS_PATH}. Either the action was renamed or its indentation ` +
-          'changed. Update this gate to match.',
+            `${NODE_ACTIONS_PATH}. Either the action was renamed or its indentation ` +
+            'changed. Update this gate to match.',
         )
       }
 
@@ -136,12 +136,12 @@ describe('Gate 2 — named tree-mutation actions in site/nodeActions.ts have no 
       if (found) {
         throw new Error(
           `[no-vc-mode-branches-in-mutations] ${NODE_ACTIONS_PATH} action "${actionName}" ` +
-          `contains \`kind === 'visualComponent'\` for tree routing. ` +
-          'This routing must live ONLY in `mutateActiveTree` (site/helpers.ts). ' +
-          'Refactor the action to call `mutateActiveTree(fn)` and let the helper ' +
-          'route to the correct tree.\n\n' +
-          'Reference: docs/superpowers/plans/2026-05-06-tree-unification.md, ' +
-          'CLAUDE.md §"Mutation API"',
+            `contains \`kind === 'visualComponent'\` for tree routing. ` +
+            'This routing must live ONLY in `mutateActiveTree` (site/helpers.ts). ' +
+            'Refactor the action to call `mutateActiveTree(fn)` and let the helper ' +
+            'route to the correct tree.\n\n' +
+            'Reference: docs/superpowers/plans/2026-05-06-tree-unification.md, ' +
+            'CLAUDE.md §"Mutation API"',
         )
       }
       expect(found).toBe(false)
@@ -178,12 +178,12 @@ describe('Gate 3 — `childNodes` does not appear in core schema files', () => {
 
         throw new Error(
           `[no-vc-mode-branches-in-mutations] "${relPath}" still contains "childNodes".\n` +
-          '`childNodes` is dead — there is exactly one tree representation in this repo ' +
-          '(`NodeTree<TNode>`). Remove all references to `childNodes` from this schema file ' +
-          '(including comments).\n\n' +
-          `Occurrences:\n${matches}\n\n` +
-          'Reference: docs/superpowers/plans/2026-05-06-tree-unification.md, ' +
-          'CLAUDE.md §"Mutation API"',
+            '`childNodes` is dead — there is exactly one tree representation in this repo ' +
+            '(`NodeTree<TNode>`). Remove all references to `childNodes` from this schema file ' +
+            '(including comments).\n\n' +
+            `Occurrences:\n${matches}\n\n` +
+            'Reference: docs/superpowers/plans/2026-05-06-tree-unification.md, ' +
+            'CLAUDE.md §"Mutation API"',
         )
       }
       expect(found).toBe(false)

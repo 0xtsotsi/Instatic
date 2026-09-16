@@ -57,11 +57,7 @@ export function StyleRuleComposer({
   const activeTab = getActiveStyleTab(activeBreakpointId)
 
   // The active context key: a condition id, a breakpoint id, or none (base).
-  const activeContextId = onCondition
-    ? activeConditionId
-    : activeTab !== 'base'
-      ? activeTab
-      : null
+  const activeContextId = onCondition ? activeConditionId : activeTab !== 'base' ? activeTab : null
 
   const storedStyles: Record<string, unknown> = activeContextId
     ? (cls.contextStyles[activeContextId] ?? {})

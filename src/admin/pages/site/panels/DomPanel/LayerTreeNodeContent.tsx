@@ -40,19 +40,11 @@ export function LayerTreeNodeContent({
 }: LayerTreeNodeContentProps) {
   return (
     <>
-      <TreeChevron
-        onClick={onToggle}
-        expanded={expanded}
-        visible={hasChildren && !isRoot}
-      />
+      <TreeChevron onClick={onToggle} expanded={expanded} visible={hasChildren && !isRoot} />
 
       {showIcon && (
         <TreeIconSlot iconSize={11} iconColor="var(--text-disabled)">
-          <ModuleIcon
-            moduleId={moduleId}
-            size={11}
-            color="var(--text-disabled)"
-          />
+          <ModuleIcon moduleId={moduleId} size={11} color="var(--text-disabled)" />
         </TreeIconSlot>
       )}
 
@@ -67,9 +59,7 @@ export function LayerTreeNodeContent({
               className={styles.tagPill}
             />
           )}
-          <TreeLabel>
-            {displayName}
-          </TreeLabel>
+          <TreeLabel>{displayName}</TreeLabel>
           {showClasses && classSelectorChip && (
             <TagPill
               label={classSelectorChip}

@@ -5,10 +5,7 @@ import type {
   PluginModulesEntrypointModule,
 } from '@core/plugin-sdk'
 import { activateEditorPlugin, pluginRuntime } from './runtime'
-import {
-  activatePluginModulePack,
-  resetPluginModulePacks,
-} from './modulePackLoader'
+import { activatePluginModulePack, resetPluginModulePacks } from './modulePackLoader'
 import type { PluginModuleComponentFactory } from './moduleAdapter'
 import { pluginCacheKey, withPluginCacheBuster } from './cacheBuster'
 
@@ -82,7 +79,9 @@ const defaultImportEditorModule: ImportEditorModule = async (url, cacheKey) => {
 }
 
 const defaultImportModulePack: ImportModulePack = async (url, cacheKey) =>
-  await import(/* @vite-ignore */ withPluginCacheBuster(url, cacheKey ?? '')) as PluginModulesEntrypointModule
+  (await import(
+    /* @vite-ignore */ withPluginCacheBuster(url, cacheKey ?? '')
+  )) as PluginModulesEntrypointModule
 
 function joinAssetPath(assetBasePath: string, entrypoint: string): string {
   return `${assetBasePath.replace(/\/+$/g, '')}/${entrypoint.replace(/^\/+/g, '')}`
@@ -172,7 +171,7 @@ export async function activateInstalledEditorPlugins(
           pluginId: plugin.id,
           error: new Error(
             'Editor entrypoint was not loaded: the "editor.code" permission is not granted. ' +
-            'Editor entrypoints run unsandboxed in the admin window and require it.',
+              'Editor entrypoints run unsandboxed in the admin window and require it.',
           ),
         })
       } else {

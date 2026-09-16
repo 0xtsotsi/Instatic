@@ -45,9 +45,11 @@ function isLayerShortcutSurface(event: KeyboardEvent): boolean {
   if (targetElement?.closest(LAYER_TREE_SELECTOR)) return true
 
   const activeElement = eventDocument(event)?.activeElement
-  return isElementLike(activeElement) &&
+  return (
+    isElementLike(activeElement) &&
     (Boolean(activeElement.closest(CANVAS_ROOT_SELECTOR)) ||
       Boolean(activeElement.closest(LAYER_TREE_SELECTOR)))
+  )
 }
 
 function shouldIgnoreEditableTarget(commandId: string): boolean {
@@ -65,7 +67,8 @@ export function findMatchingShortcutCommand(
     if (COMPONENT_OWNED_SHORTCUTS.has(binding.commandId)) continue
     if (binding.scope === 'canvas' && context.editor?.activeInlineEdit) continue
     if (binding.scope === 'canvas' && !isLayerShortcutSurface(event)) continue
-    if (shouldIgnoreEditableTarget(binding.commandId) && isEditableShortcutTarget(event.target)) continue
+    if (shouldIgnoreEditableTarget(binding.commandId) && isEditableShortcutTarget(event.target))
+      continue
     if (!binding.match(event as KeyEventLike)) continue
 
     const command = commands.find((candidate) => candidate.id === binding.commandId)

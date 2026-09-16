@@ -70,9 +70,7 @@ export function Sparkline({
   const w = 300
   const h = height
   const stepX = w / (data.length - 1)
-  const pts = data
-    .map((v, i) => `${i * stepX},${h - ((v - min) / range) * (h - 6) - 3}`)
-    .join(' ')
+  const pts = data.map((v, i) => `${i * stepX},${h - ((v - min) / range) * (h - 6) - 3}`).join(' ')
   const areaPts = `0,${h} ${pts} ${w},${h}`
 
   return (

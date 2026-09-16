@@ -21,7 +21,6 @@ export { getReferencedComponentIds, wouldCreateCycle } from './recursionGuard'
 
 export { forEachVCRef, collectVCRefs } from './vcRefs'
 
-
 export { collectSlotOutletNames, syncSlotInstances, applySlotSyncResult } from './slotSync'
 
 export { previewVCDeletion } from './deletionImpact'

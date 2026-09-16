@@ -95,15 +95,13 @@ export function MediaExplorerPanel({
   // viewer is the same MediaViewerWindow the Media page uses, so editing
   // (alt text, caption, tags, replace file, …) works identically here.
   const [viewerAssetId, setViewerAssetId] = useState<string | null>(null)
-  const viewerAsset =
-    cmsAssets.find((asset) => asset.id === viewerAssetId) ?? null
+  const viewerAsset = cmsAssets.find((asset) => asset.id === viewerAssetId) ?? null
   const viewerEditor = useStandaloneMediaEditor({
     asset: viewerAsset,
     assets: cmsAssets,
     onAssetChanged: (asset) =>
-      setCmsAssets((current) => current.map((item) => item.id === asset.id ? asset : item)),
-    onAssetRemoved: (id) =>
-      setCmsAssets((current) => current.filter((item) => item.id !== id)),
+      setCmsAssets((current) => current.map((item) => (item.id === asset.id ? asset : item))),
+    onAssetRemoved: (id) => setCmsAssets((current) => current.filter((item) => item.id !== id)),
   })
   const openMediaAssetPreview = (asset: CmsMediaAsset) => {
     setViewerAssetId(asset.id)
@@ -126,11 +124,7 @@ export function MediaExplorerPanel({
   const panelRef = useRef<HTMLElement>(null)
 
   const cmsBuckets = groupCmsMediaAssets(cmsAssets)
-  const visibleCmsBuckets = filterCmsMediaBuckets(
-    cmsBuckets,
-    mediaFilter,
-    searchQuery,
-  )
+  const visibleCmsBuckets = filterCmsMediaBuckets(cmsBuckets, mediaFilter, searchQuery)
   const counts = visibleCmsBuckets
   const hasFilters = searchQuery.trim().length > 0 || mediaFilter !== 'all'
   const emptyLabel = mediaError ?? (hasFilters ? 'No matching media' : 'None yet')
@@ -195,13 +189,17 @@ export function MediaExplorerPanel({
     }
   }, [isOpen])
 
-  useEffect(() => subscribeCmsMediaAssetCreated((asset) => {
-    const externallyCreatedAssets = externalAssetBuffer(externallyCreatedAssetsRef)
-    if (mediaListActiveRef.current) {
-      externallyCreatedAssets.set(asset.id, asset)
-    }
-    setCmsAssets((assets) => [asset, ...assets.filter((item) => item.id !== asset.id)])
-  }), [])
+  useEffect(
+    () =>
+      subscribeCmsMediaAssetCreated((asset) => {
+        const externallyCreatedAssets = externalAssetBuffer(externallyCreatedAssetsRef)
+        if (mediaListActiveRef.current) {
+          externallyCreatedAssets.set(asset.id, asset)
+        }
+        setCmsAssets((assets) => [asset, ...assets.filter((item) => item.id !== asset.id)])
+      }),
+    [],
+  )
 
   if (!isOpen) return null
 
@@ -260,7 +258,7 @@ export function MediaExplorerPanel({
     if (!renameTarget) return
 
     const asset = await renameCmsMediaAsset(renameTarget.id, payload.value)
-    setCmsAssets((assets) => assets.map((item) => item.id === asset.id ? asset : item))
+    setCmsAssets((assets) => assets.map((item) => (item.id === asset.id ? asset : item)))
     // Viewer reads the asset by id from `cmsAssets`, so the rename surfaces
     // automatically — no separate openMediaAssetPreview re-trigger needed.
     setRenameTarget(null)
@@ -329,7 +327,9 @@ export function MediaExplorerPanel({
 
     items.push({
       label: 'Copy URL',
-      action: () => { void copyTargetUrl(target) },
+      action: () => {
+        void copyTargetUrl(target)
+      },
       icon: <Copy2SolidIcon size={13} />,
     })
 
@@ -352,10 +352,12 @@ export function MediaExplorerPanel({
         onClose={closePanel}
       >
         <FilterBar<MediaFilter>
-          items={(['all', 'images', 'videos'] as MediaFilter[]).map<FilterBarItem<MediaFilter>>((filter) => ({
-            value: filter,
-            label: filter === 'all' ? 'All' : BUCKET_LABELS[filter],
-          }))}
+          items={(['all', 'images', 'videos'] as MediaFilter[]).map<FilterBarItem<MediaFilter>>(
+            (filter) => ({
+              value: filter,
+              label: filter === 'all' ? 'All' : BUCKET_LABELS[filter],
+            }),
+          )}
           value={mediaFilter}
           onValueChange={setMediaFilter}
           search={{
@@ -449,7 +451,9 @@ export function MediaExplorerPanel({
             setRenameTarget(contextMenu.target)
             setContextMenu(null)
           }}
-          onDelete={() => { void handleDelete(contextMenu.target) }}
+          onDelete={() => {
+            void handleDelete(contextMenu.target)
+          }}
           extraItems={contextMenuItems(contextMenu.target)}
         />
       )}

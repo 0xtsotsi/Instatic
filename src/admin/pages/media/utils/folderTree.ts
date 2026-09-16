@@ -24,9 +24,7 @@ export function childFoldersForParent(
   folders: CmsMediaFolder[],
   parentId: string | null,
 ): CmsMediaFolder[] {
-  return folders
-    .filter((folder) => folder.parentId === parentId)
-    .sort(compareFolders)
+  return folders.filter((folder) => folder.parentId === parentId).sort(compareFolders)
 }
 
 export function isFolderDescendant(
@@ -57,9 +55,7 @@ export function buildFolderTree(folders: CmsMediaFolder[]): MediaFolderNode[] {
 
   const childMap = new Map<string | null, CmsMediaFolder[]>()
   for (const folder of folders) {
-    const parentKey = folder.parentId !== null && byId.has(folder.parentId)
-      ? folder.parentId
-      : null
+    const parentKey = folder.parentId !== null && byId.has(folder.parentId) ? folder.parentId : null
     const bucket = childMap.get(parentKey) ?? []
     bucket.push(folder)
     childMap.set(parentKey, bucket)

@@ -44,7 +44,11 @@ import { styleRuleSelector, type ConditionDef, type StyleRule } from '@core/page
 import { collectBackgroundImagePaths, collectSiteStyleBackgroundImagePaths } from '@core/publisher'
 import { useResponsiveEditorMediaAssets } from '@admin/pages/media/hooks/useResponsiveBackgroundStyle'
 import { selectorStatePseudo } from '@site/cssStatePseudo'
-import { generateCanvasClassCSS, generateForcedStateCSS, generatePreviewClassCSS } from './canvasClassCss'
+import {
+  generateCanvasClassCSS,
+  generateForcedStateCSS,
+  generatePreviewClassCSS,
+} from './canvasClassCss'
 import { resolveViewportUnitsForCanvas, type CanvasViewport } from './resolveViewportUnits'
 
 interface ClassStyleInjectorProps {
@@ -98,7 +102,9 @@ export function ClassStyleInjector({ targetDocument, viewport }: ClassStyleInjec
   const frameworkColors = useEditorStore((s) => s.site?.settings.framework?.colors ?? null)
   const frameworkTypography = useEditorStore((s) => s.site?.settings.framework?.typography ?? null)
   const frameworkSpacing = useEditorStore((s) => s.site?.settings.framework?.spacing ?? null)
-  const frameworkPreferences = useEditorStore((s) => s.site?.settings.framework?.preferences ?? null)
+  const frameworkPreferences = useEditorStore(
+    (s) => s.site?.settings.framework?.preferences ?? null,
+  )
   const fonts = useEditorStore((s) => s.site?.settings.fonts ?? null)
   const previewClassStyles = useEditorStore((s) => s.previewClassStyles)
   const activeClassId = useEditorStore((s) => s.activeClassId)
@@ -107,10 +113,8 @@ export function ClassStyleInjector({ targetDocument, viewport }: ClassStyleInjec
     ...collectSiteStyleBackgroundImagePaths({ styleRules: classes ?? EMPTY_STYLE_RULES }),
     ...collectBackgroundImagePaths(previewClassStyles?.styles.backgroundImage),
   ]
-  const {
-    mediaAssets: responsiveMediaAssets,
-    signature: responsiveMediaSignature,
-  } = useResponsiveEditorMediaAssets(backgroundPaths)
+  const { mediaAssets: responsiveMediaAssets, signature: responsiveMediaSignature } =
+    useResponsiveEditorMediaAssets(backgroundPaths)
 
   useEffect(() => {
     const targetDoc = targetDocument ?? document
@@ -125,7 +129,8 @@ export function ClassStyleInjector({ targetDocument, viewport }: ClassStyleInjec
 
     // Pin viewport units to the frame viewport (canvas-only) so class styles
     // using `vh`/`vmax`/… don't feed the iframe's grow-to-content height loop.
-    const forCanvas = (css: string) => (viewport ? resolveViewportUnitsForCanvas(css, viewport) : css)
+    const forCanvas = (css: string) =>
+      viewport ? resolveViewportUnitsForCanvas(css, viewport) : css
 
     const generated = generateCanvasClassCSS(
       classes ?? EMPTY_STYLE_RULES,
@@ -145,9 +150,7 @@ export function ClassStyleInjector({ targetDocument, viewport }: ClassStyleInjec
     // within the layer). User CSS (also @layer user-authored) still wins over the
     // zero-specificity :where() publisher reset — same as before.
     const css = forCanvas(generated)
-    styleEl.textContent = css
-      ? `@layer user-authored {\n${css}\n}`
-      : '/* no classes */'
+    styleEl.textContent = css ? `@layer user-authored {\n${css}\n}` : '/* no classes */'
   }, [
     targetDocument,
     viewport,
@@ -187,11 +190,17 @@ export function ClassStyleInjector({ targetDocument, viewport }: ClassStyleInjec
       previewEl.textContent = ''
       return
     }
-    const previewCss = generatePreviewClassCSS(cls, {
-      breakpointId: previewClassStyles.breakpointId ?? null,
-      styles: previewClassStyles.styles,
-    }, { mediaAssets: responsiveMediaAssets })
-    const resolvedPreviewCss = viewport ? resolveViewportUnitsForCanvas(previewCss, viewport) : previewCss
+    const previewCss = generatePreviewClassCSS(
+      cls,
+      {
+        breakpointId: previewClassStyles.breakpointId ?? null,
+        styles: previewClassStyles.styles,
+      },
+      { mediaAssets: responsiveMediaAssets },
+    )
+    const resolvedPreviewCss = viewport
+      ? resolveViewportUnitsForCanvas(previewCss, viewport)
+      : previewCss
     // Keep in the same @layer so the doubled-selector preview rule still wins
     // over the regular class rule within the layer (higher specificity).
     previewEl.textContent = resolvedPreviewCss
@@ -209,7 +218,8 @@ export function ClassStyleInjector({ targetDocument, viewport }: ClassStyleInjec
     const targetDoc = targetDocument ?? document
     let forceEl = targetDoc.getElementById(FORCE_STATE_STYLE_TAG_ID) as HTMLStyleElement | null
     const rule = activeClassId ? classes?.[activeClassId] : null
-    const isStateRule = !!rule && rule.kind === 'ambient' && selectorStatePseudo(styleRuleSelector(rule)) !== null
+    const isStateRule =
+      !!rule && rule.kind === 'ambient' && selectorStatePseudo(styleRuleSelector(rule)) !== null
 
     if (!rule || !isStateRule || !selectedNodeId) {
       if (forceEl) forceEl.textContent = ''
@@ -224,9 +234,10 @@ export function ClassStyleInjector({ targetDocument, viewport }: ClassStyleInjec
 
     // Overlay an in-flight edit to the same rule into the context it targets so
     // dragging a control updates the forced preview live, at the right breakpoint.
-    const inflight = previewClassStyles?.classId === activeClassId
-      ? { contextId: previewClassStyles.breakpointId ?? null, styles: previewClassStyles.styles }
-      : null
+    const inflight =
+      previewClassStyles?.classId === activeClassId
+        ? { contextId: previewClassStyles.breakpointId ?? null, styles: previewClassStyles.styles }
+        : null
     const forcedCss = generateForcedStateCSS(
       selectedNodeId,
       rule,

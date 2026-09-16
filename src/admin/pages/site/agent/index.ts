@@ -9,11 +9,7 @@
 
 // Slice factory + its public contract.
 export { createAgentSlice } from './agentSlice'
-export type {
-  AgentConversationUsage,
-  AgentSlice,
-  AgentSliceConfig,
-} from './agentSliceTypes'
+export type { AgentConversationUsage, AgentSlice, AgentSliceConfig } from './agentSliceTypes'
 
 // Site-editor wiring (scope, snapshot, dispatcher) handed to the factory.
 export { siteAgentSliceConfig } from './agentSliceConfig.site'
@@ -39,7 +35,6 @@ export { renderMarkdownToHtml } from './markdown'
 
 // Store handle wiring.
 export { setAgentStoreApi } from './storeRef'
-
 
 // Shared message/wire/context types and network path constants.
 export * from './types'

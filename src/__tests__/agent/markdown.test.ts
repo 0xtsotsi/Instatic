@@ -47,9 +47,7 @@ describe('renderMarkdownToHtml', () => {
     // event handlers on tags like <img onerror> are covered separately by
     // executor.test.ts which exercises sanitizeRichtext directly; they pass
     // in a real browser even when happy-dom's DOM parsing is permissive.
-    const html = renderMarkdownToHtml(
-      'innocent text <script>alert(1)</script> trailing text',
-    )
+    const html = renderMarkdownToHtml('innocent text <script>alert(1)</script> trailing text')
     expect(html).not.toContain('<script>')
     expect(html).not.toContain('alert(1)')
     expect(html).toContain('innocent text')

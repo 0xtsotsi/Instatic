@@ -166,9 +166,7 @@ interface Violation {
 // ---------------------------------------------------------------------------
 
 function scanForViolations(): Violation[] {
-  const files = SCAN_ROOTS.flatMap((root) => walk(root)).filter(
-    (f) => !ALLOWLISTED.has(f),
-  )
+  const files = SCAN_ROOTS.flatMap((root) => walk(root)).filter((f) => !ALLOWLISTED.has(f))
   const violations: Violation[] = []
 
   for (const file of files) {
@@ -235,12 +233,8 @@ describe('Postgres-ism isolation — DbClient-consuming server files', () => {
   test('scanner finds at least one DbClient-importing file (sanity check that the gate runs)', () => {
     // After excluding the allowlist, there must be at least one DbClient consumer
     // left to scan — otherwise the loop body never executes and the gate is a no-op.
-    const files = SCAN_ROOTS.flatMap((root) => walk(root)).filter(
-      (f) => !ALLOWLISTED.has(f),
-    )
-    const dbConsumers = files.filter((f) =>
-      readFileSync(f, 'utf8').includes('DbClient'),
-    )
+    const files = SCAN_ROOTS.flatMap((root) => walk(root)).filter((f) => !ALLOWLISTED.has(f))
+    const dbConsumers = files.filter((f) => readFileSync(f, 'utf8').includes('DbClient'))
     expect(dbConsumers.length).toBeGreaterThan(0)
   })
 
@@ -253,9 +247,7 @@ describe('Postgres-ism isolation — DbClient-consuming server files', () => {
     }
 
     const lines = violations.map(
-      (v) =>
-        `  ${v.file}:${v.line} — [${v.pattern}]\n` +
-        `    matched: ${JSON.stringify(v.match)}`,
+      (v) => `  ${v.file}:${v.line} — [${v.pattern}]\n` + `    matched: ${JSON.stringify(v.match)}`,
     )
 
     throw new Error(

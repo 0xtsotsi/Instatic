@@ -1,5 +1,9 @@
 import { afterEach, beforeEach, describe, expect, it } from 'bun:test'
-import { createCapabilityTestHarness, readJson, type CapabilityTestHarness } from '../helpers/capabilityHarness'
+import {
+  createCapabilityTestHarness,
+  readJson,
+  type CapabilityTestHarness,
+} from '../helpers/capabilityHarness'
 import { __resetMasterKeyCacheForTesting } from '../../../server/secrets/masterKey'
 
 describe('AI credential handler', () => {
@@ -18,20 +22,20 @@ describe('AI credential handler', () => {
     originalSecretKey = process.env.INSTATIC_SECRET_KEY
     __resetMasterKeyCacheForTesting()
     globalThis.fetch = async (input, init) => {
-      const url = typeof input === 'string'
-        ? input
-        : input instanceof URL
-          ? input.toString()
-          : input.url
+      const url =
+        typeof input === 'string' ? input : input instanceof URL ? input.toString() : input.url
 
       if (url === 'https://api.openai.com/v1/models') {
-        return new Response(JSON.stringify({
-          object: 'list',
-          data: [{ id: 'gpt-4.1' }],
-        }), {
-          status: 200,
-          headers: { 'content-type': 'application/json' },
-        })
+        return new Response(
+          JSON.stringify({
+            object: 'list',
+            data: [{ id: 'gpt-4.1' }],
+          }),
+          {
+            status: 200,
+            headers: { 'content-type': 'application/json' },
+          },
+        )
       }
 
       return originalFetch(input, init)
@@ -104,11 +108,8 @@ describe('AI credential handler', () => {
     }
     console.error = () => {}
     globalThis.fetch = async (input) => {
-      const url = typeof input === 'string'
-        ? input
-        : input instanceof URL
-          ? input.toString()
-          : input.url
+      const url =
+        typeof input === 'string' ? input : input instanceof URL ? input.toString() : input.url
       if (url === 'http://127.0.0.1:1/api/tags') {
         throw new Error('ollama offline')
       }
@@ -220,11 +221,8 @@ describe('AI credential handler', () => {
     const cookie = await harness.setupOwner()
     console.warn = () => {}
     globalThis.fetch = async (input) => {
-      const url = typeof input === 'string'
-        ? input
-        : input instanceof URL
-          ? input.toString()
-          : input.url
+      const url =
+        typeof input === 'string' ? input : input instanceof URL ? input.toString() : input.url
       if (url === 'https://bad.example/v1/models') {
         return new Response(JSON.stringify({ error: 'bad key' }), { status: 401 })
       }

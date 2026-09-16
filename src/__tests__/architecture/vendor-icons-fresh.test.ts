@@ -33,19 +33,10 @@ import { extname, join } from 'path'
 const PROJECT_ROOT = join(import.meta.dir, '../../../')
 const SRC_DIR = join(PROJECT_ROOT, 'src')
 const VENDOR_ICONS_DIR = join(PROJECT_ROOT, 'vendor/pixel-art-icons/icons')
-const VENDOR_DIST_ICONS_DIR = join(
-  PROJECT_ROOT,
-  'vendor/pixel-art-icons/dist/icons',
-)
+const VENDOR_DIST_ICONS_DIR = join(PROJECT_ROOT, 'vendor/pixel-art-icons/dist/icons')
 const VENDOR_TYPES_FILE = join(PROJECT_ROOT, 'vendor/pixel-art-icons/types.ts')
-const VENDOR_DIST_TYPES_FILE = join(
-  PROJECT_ROOT,
-  'vendor/pixel-art-icons/dist/types.js',
-)
-const VENDOR_PACKAGE_JSON = join(
-  PROJECT_ROOT,
-  'vendor/pixel-art-icons/package.json',
-)
+const VENDOR_DIST_TYPES_FILE = join(PROJECT_ROOT, 'vendor/pixel-art-icons/dist/types.js')
+const VENDOR_PACKAGE_JSON = join(PROJECT_ROOT, 'vendor/pixel-art-icons/package.json')
 
 const SCAN_EXTS = new Set(['.ts', '.tsx', '.js', '.jsx', '.mts', '.mjs'])
 const IMPORT_RE = /from\s+["']pixel-art-icons\/icons\/([a-z0-9-]+)["']/g
@@ -111,8 +102,7 @@ function assertNotIgnoredByGit(path: string): void {
   }
 }
 
-const FIX_HINT =
-  '\n  Fix: run `bun run icons:sync` to refresh vendor/pixel-art-icons/.'
+const FIX_HINT = '\n  Fix: run `bun run icons:sync` to refresh vendor/pixel-art-icons/.'
 
 describe('vendor/pixel-art-icons — freshness gate', () => {
   it('vendor package skeleton exists', () => {

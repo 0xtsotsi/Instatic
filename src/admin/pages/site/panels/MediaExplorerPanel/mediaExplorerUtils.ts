@@ -25,26 +25,9 @@ export function writeStoredViewMode(mode: 'list' | 'grid') {
   }
 }
 
-const IMAGE_EXTENSIONS = new Set([
-  'apng',
-  'avif',
-  'gif',
-  'jpeg',
-  'jpg',
-  'png',
-  'svg',
-  'webp',
-])
+const IMAGE_EXTENSIONS = new Set(['apng', 'avif', 'gif', 'jpeg', 'jpg', 'png', 'svg', 'webp'])
 
-const VIDEO_EXTENSIONS = new Set([
-  'avi',
-  'm4v',
-  'mov',
-  'mp4',
-  'mpeg',
-  'ogv',
-  'webm',
-])
+const VIDEO_EXTENSIONS = new Set(['avi', 'm4v', 'mov', 'mp4', 'mpeg', 'ogv', 'webm'])
 
 function fileName(path: string) {
   return path.split('/').pop() ?? path
@@ -116,7 +99,9 @@ export function filterCmsMediaBuckets(
 
   for (const bucket of Object.keys(next) as MediaBucket[]) {
     if (filter !== 'all' && filter !== bucket) continue
-    next[bucket] = buckets[bucket].filter((asset) => matchesSearch(query, asset.filename, asset.publicPath, asset.mimeType))
+    next[bucket] = buckets[bucket].filter((asset) =>
+      matchesSearch(query, asset.filename, asset.publicPath, asset.mimeType),
+    )
   }
 
   return next

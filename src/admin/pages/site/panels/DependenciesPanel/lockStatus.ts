@@ -56,4 +56,3 @@ export function evaluateDependencyLockStatus(
 
   return { kind: 'stale', missing, mismatched, orphan }
 }
-

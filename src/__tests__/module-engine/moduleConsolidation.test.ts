@@ -126,7 +126,9 @@ describe('F8 VOID_HTML_ELEMENTS', () => {
     const container = registry.getOrThrow('base.container')
     // Void tags reach the container through the custom-tag escape hatch.
     expect(container.render({ tag: 'custom', customTag: 'br' }, ['x']).html).toBe('<br>')
-    expect(container.render({ tag: 'section', customTag: '' }, ['x']).html).toBe('<section>x</section>')
+    expect(container.render({ tag: 'section', customTag: '' }, ['x']).html).toBe(
+      '<section>x</section>',
+    )
   })
 })
 
@@ -196,11 +198,15 @@ describe('F2 publishBehavior dispatch', () => {
 
   it('resolveSpecialRenderer returns the impl for special modules, undefined for standard', () => {
     expect(typeof resolveSpecialRenderer(registry.getOrThrow('base.loop'))).toBe('function')
-    expect(resolveSpecialRenderer(makeModule('test.standard') as AnyModuleDefinition)).toBeUndefined()
+    expect(
+      resolveSpecialRenderer(makeModule('test.standard') as AnyModuleDefinition),
+    ).toBeUndefined()
   })
 
   it('declaring special without a registered impl throws (forgotten renderer fails loudly)', () => {
-    const orphan = makeModule('test.special-orphan', { publishBehavior: 'special' }) as AnyModuleDefinition
+    const orphan = makeModule('test.special-orphan', {
+      publishBehavior: 'special',
+    }) as AnyModuleDefinition
     expect(() => resolveSpecialRenderer(orphan)).toThrow(/no specialised renderer/)
   })
 

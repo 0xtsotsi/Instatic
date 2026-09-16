@@ -63,17 +63,13 @@ export const PluginContentFieldSchema = Type.Union([
     type: Type.Literal('select'),
     id: Type.String(),
     label: Type.String(),
-    options: Type.Array(
-      Type.Object({ value: Type.String(), label: Type.String() }),
-    ),
+    options: Type.Array(Type.Object({ value: Type.String(), label: Type.String() })),
   }),
   Type.Object({
     type: Type.Literal('multiSelect'),
     id: Type.String(),
     label: Type.String(),
-    options: Type.Array(
-      Type.Object({ value: Type.String(), label: Type.String() }),
-    ),
+    options: Type.Array(Type.Object({ value: Type.String(), label: Type.String() })),
   }),
   Type.Object({
     type: Type.Literal('url'),

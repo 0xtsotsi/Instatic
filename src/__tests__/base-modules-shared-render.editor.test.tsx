@@ -62,16 +62,30 @@ describe('LinkEditor canvas DOM matches the shared helpers', () => {
 
 describe('ButtonEditor canvas DOM matches resolveButtonAnchor', () => {
   it('renders <a> for a real href and <button> for "#"/empty — same as the publisher', () => {
-    expect(renderEditor(ButtonModule, { href: 'https://e.com', label: 'Go' }).container.querySelector('a')?.getAttribute('href')).toBe('https://e.com')
+    expect(
+      renderEditor(ButtonModule, { href: 'https://e.com', label: 'Go' })
+        .container.querySelector('a')
+        ?.getAttribute('href'),
+    ).toBe('https://e.com')
     // "#" collapses to a <button> on BOTH paths now — the old editor showed an
     // <a href="#"> the publisher would never emit.
-    expect(renderEditor(ButtonModule, { href: '#', label: 'Go' }).container.querySelector('a')).toBeNull()
-    expect(renderEditor(ButtonModule, { href: '#', label: 'Go' }).container.querySelector('button')).not.toBeNull()
-    expect(renderEditor(ButtonModule, { href: '', label: 'Go' }).container.querySelector('button')).not.toBeNull()
+    expect(
+      renderEditor(ButtonModule, { href: '#', label: 'Go' }).container.querySelector('a'),
+    ).toBeNull()
+    expect(
+      renderEditor(ButtonModule, { href: '#', label: 'Go' }).container.querySelector('button'),
+    ).not.toBeNull()
+    expect(
+      renderEditor(ButtonModule, { href: '', label: 'Go' }).container.querySelector('button'),
+    ).not.toBeNull()
   })
 
   it('emits rel for a _blank anchor (== anchorRel)', () => {
-    const blank = renderEditor(ButtonModule, { href: 'https://e.com', target: '_blank', label: 'Go' })
+    const blank = renderEditor(ButtonModule, {
+      href: 'https://e.com',
+      target: '_blank',
+      label: 'Go',
+    })
     expect(blank.container.querySelector('a')?.getAttribute('rel')).toBe(anchorRel('_blank'))
   })
 })
@@ -85,8 +99,12 @@ describe('ListEditor canvas DOM matches parseItems', () => {
   })
 
   it('renders <ol> for ordered, <ul> for unordered (== publisher tag)', () => {
-    expect(renderEditor(ListModule, { listType: 'ordered', items: 'A' }).container.querySelector('ol')).not.toBeNull()
-    expect(renderEditor(ListModule, { listType: 'unordered', items: 'A' }).container.querySelector('ul')).not.toBeNull()
+    expect(
+      renderEditor(ListModule, { listType: 'ordered', items: 'A' }).container.querySelector('ol'),
+    ).not.toBeNull()
+    expect(
+      renderEditor(ListModule, { listType: 'unordered', items: 'A' }).container.querySelector('ul'),
+    ).not.toBeNull()
   })
 })
 

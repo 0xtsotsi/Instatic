@@ -57,9 +57,7 @@ export interface ResolvePluginDevConfigInput {
   env?: NodeJS.ProcessEnv
 }
 
-export function resolvePluginDevConfig(
-  input: ResolvePluginDevConfigInput,
-): PluginDevTargets {
+export function resolvePluginDevConfig(input: ResolvePluginDevConfigInput): PluginDevTargets {
   const env = input.env ?? process.env
 
   if (input.uploadsDirFlag) {
@@ -74,9 +72,7 @@ export function resolvePluginDevConfig(
   const envUploads = env.INSTATIC_UPLOADS_DIR
   if (envUploads && envUploads.trim()) {
     return {
-      uploadsDir: isAbsolute(envUploads)
-        ? envUploads
-        : resolve(input.pluginDir, envUploads),
+      uploadsDir: isAbsolute(envUploads) ? envUploads : resolve(input.pluginDir, envUploads),
       source: 'env',
     }
   }

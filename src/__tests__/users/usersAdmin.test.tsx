@@ -19,7 +19,15 @@ const roles = [
     name: 'Owner',
     description: 'Permanent first-site owner with full system access.',
     isSystem: true,
-    capabilities: ['site.read', 'site.structure.edit','site.content.edit','site.style.edit', 'users.manage', 'roles.manage', 'audit.read'],
+    capabilities: [
+      'site.read',
+      'site.structure.edit',
+      'site.content.edit',
+      'site.style.edit',
+      'users.manage',
+      'roles.manage',
+      'audit.read',
+    ],
     createdAt: now,
     updatedAt: now,
   },
@@ -29,7 +37,19 @@ const roles = [
     name: 'Admin',
     description: 'Full admin access.',
     isSystem: true,
-    capabilities: ['site.read', 'site.structure.edit','site.content.edit','site.style.edit', 'plugins.read', 'plugins.configure', 'plugins.install', 'plugins.lifecycle', 'users.manage', 'roles.manage', 'audit.read'],
+    capabilities: [
+      'site.read',
+      'site.structure.edit',
+      'site.content.edit',
+      'site.style.edit',
+      'plugins.read',
+      'plugins.configure',
+      'plugins.install',
+      'plugins.lifecycle',
+      'users.manage',
+      'roles.manage',
+      'audit.read',
+    ],
     createdAt: now,
     updatedAt: now,
   },
@@ -169,13 +189,7 @@ function ambientFetchFallback(url: string): Response | undefined {
   return undefined
 }
 
-function Wrapper({
-  user,
-  children,
-}: {
-  user: CmsCurrentUser
-  children: ReactNode
-}) {
+function Wrapper({ user, children }: { user: CmsCurrentUser; children: ReactNode }) {
   return (
     <MemoryRouter>
       <AdminSessionProvider user={user}>
@@ -253,7 +267,8 @@ beforeEach(() => {
     const url = String(input)
     if (url === '/admin/api/cms/users' && init?.method === 'GET') return json({ users })
     if (url === '/admin/api/cms/roles' && init?.method === 'GET') return json({ roles })
-    if (url === '/admin/api/cms/audit' && init?.method === 'GET') return json({ events: auditEvents })
+    if (url === '/admin/api/cms/audit' && init?.method === 'GET')
+      return json({ events: auditEvents })
     const ambient = ambientFetchFallback(url)
     if (ambient) return ambient
     return json({ error: `Unhandled ${url}` }, 500)
@@ -273,7 +288,8 @@ describe('UsersPage', () => {
       calls.push(`${init?.method ?? 'GET'} ${url}`)
       if (url === '/admin/api/cms/users' && init?.method === 'GET') return json({ users })
       if (url === '/admin/api/cms/roles' && init?.method === 'GET') return json({ roles })
-      if (url === '/admin/api/cms/audit' && init?.method === 'GET') return json({ events: auditEvents })
+      if (url === '/admin/api/cms/audit' && init?.method === 'GET')
+        return json({ events: auditEvents })
       const ambient = ambientFetchFallback(url)
       if (ambient) return ambient
       return json({ error: `Unhandled ${url}` }, 500)
@@ -302,7 +318,8 @@ describe('UsersPage', () => {
       calls.push(`${init?.method ?? 'GET'} ${url}`)
       if (url === '/admin/api/cms/users' && init?.method === 'GET') return json({ users })
       if (url === '/admin/api/cms/roles' && init?.method === 'GET') return json({ roles })
-      if (url === '/admin/api/cms/audit' && init?.method === 'GET') return json({ events: auditEvents })
+      if (url === '/admin/api/cms/audit' && init?.method === 'GET')
+        return json({ events: auditEvents })
       const ambient = ambientFetchFallback(url)
       if (ambient) return ambient
       return json({ error: `Unhandled ${url}` }, 500)
@@ -331,7 +348,8 @@ describe('UsersPage', () => {
       calls.push(`${init?.method ?? 'GET'} ${url}`)
       if (url === '/admin/api/cms/users' && init?.method === 'GET') return json({ users })
       if (url === '/admin/api/cms/roles' && init?.method === 'GET') return json({ roles })
-      if (url === '/admin/api/cms/audit' && init?.method === 'GET') return json({ events: auditEvents })
+      if (url === '/admin/api/cms/audit' && init?.method === 'GET')
+        return json({ events: auditEvents })
       const ambient = ambientFetchFallback(url)
       if (ambient) return ambient
       return json({ error: `Unhandled ${url}` }, 500)
@@ -429,7 +447,9 @@ describe('UsersPage', () => {
     expect(within(userRow).getByText('Active').getAttribute('data-accent')).toBeTruthy()
     expect(within(userRow).getByText('Member').getAttribute('data-accent')).toBeTruthy()
     expect(within(userRow).queryByRole('button', { name: /edit tester one/i })).toBeNull()
-    expect(within(userRow).queryByRole('button', { name: /reset password for tester one/i })).toBeNull()
+    expect(
+      within(userRow).queryByRole('button', { name: /reset password for tester one/i }),
+    ).toBeNull()
     expect(within(userRow).queryByRole('button', { name: /suspend tester one/i })).toBeNull()
     expect(within(userRow).queryByRole('button', { name: /delete tester one/i })).toBeNull()
 
@@ -515,7 +535,9 @@ describe('UsersPage', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Create Role' }))
     const createRoleDialog = screen.getByRole('dialog', { name: 'Create Role' })
     expect(within(createRoleDialog).getByText('Site')).toBeDefined()
-    expect(within(createRoleDialog).getByRole('button', { name: 'Select all Site capabilities' })).toBeDefined()
+    expect(
+      within(createRoleDialog).getByRole('button', { name: 'Select all Site capabilities' }),
+    ).toBeDefined()
   })
 
   it('renders audit events as human-readable activity rows', async () => {

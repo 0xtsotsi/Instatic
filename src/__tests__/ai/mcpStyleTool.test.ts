@@ -1,5 +1,8 @@
 import { afterEach, beforeEach, describe, expect, it } from 'bun:test'
-import { createCapabilityTestHarness, type CapabilityTestHarness } from '../helpers/capabilityHarness'
+import {
+  createCapabilityTestHarness,
+  type CapabilityTestHarness,
+} from '../helpers/capabilityHarness'
 import { styleMcpTools } from '../../../server/ai/mcp/tools/styleTools'
 import { getDraftSite, saveDraftSite } from '../../../server/repositories/site'
 import type { ToolContext } from '../../../server/ai/runtime/types'
@@ -47,11 +50,16 @@ describe('read_styles (headless design-system read)', () => {
     harness = await createCapabilityTestHarness()
     await harness.setupOwner() // creates the default site shell
   })
-  afterEach(() => { console.error = originalError })
+  afterEach(() => {
+    console.error = originalError
+  })
 
   it('returns a seeded class as CSS without needing a snapshot', async () => {
     await seedClass(harness)
-    const out = (await readStyles.handler!({}, ctxFor(harness))) as { css: string; classCount: number }
+    const out = (await readStyles.handler!({}, ctxFor(harness))) as {
+      css: string
+      classCount: number
+    }
     expect(typeof out.css).toBe('string')
     expect(out.classCount).toBe(1)
     expect(out.css).toContain('.test-card')
@@ -60,7 +68,9 @@ describe('read_styles (headless design-system read)', () => {
 
   it('can scope output to a single class by name', async () => {
     await seedClass(harness)
-    const out = (await readStyles.handler!({ className: 'test-card' }, ctxFor(harness))) as { css: string }
+    const out = (await readStyles.handler!({ className: 'test-card' }, ctxFor(harness))) as {
+      css: string
+    }
     expect(out.css).toContain('.test-card')
   })
 
@@ -68,8 +78,15 @@ describe('read_styles (headless design-system read)', () => {
     const site = await getDraftSite(harness.db)
     const now = Date.now()
     site!.styleRules['r_tok'] = {
-      id: 'r_tok', name: 'tok-card', kind: 'class', selector: '.tok-card', order: 0,
-      styles: { color: 'var(--ist-accent)', padding: '8px' }, contextStyles: {}, createdAt: now, updatedAt: now,
+      id: 'r_tok',
+      name: 'tok-card',
+      kind: 'class',
+      selector: '.tok-card',
+      order: 0,
+      styles: { color: 'var(--ist-accent)', padding: '8px' },
+      contextStyles: {},
+      createdAt: now,
+      updatedAt: now,
     }
     await saveDraftSite(harness.db, site!)
     const out = (await readStyles.handler!({ format: 'summary' }, ctxFor(harness))) as {

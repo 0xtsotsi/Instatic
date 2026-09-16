@@ -29,7 +29,11 @@ describe('ProvidersTab', () => {
     mockEmptyCredentials()
 
     render(<ProvidersTab />)
-    await waitFor(() => expect(screen.getByText('No credentials yet. Add one to start using AI features.')).toBeDefined())
+    await waitFor(() =>
+      expect(
+        screen.getByText('No credentials yet. Add one to start using AI features.'),
+      ).toBeDefined(),
+    )
 
     fireEvent.click(screen.getByRole('button', { name: 'Add credential' }))
 
@@ -43,7 +47,11 @@ describe('ProvidersTab', () => {
     mockEmptyCredentials()
 
     render(<ProvidersTab />)
-    await waitFor(() => expect(screen.getByText('No credentials yet. Add one to start using AI features.')).toBeDefined())
+    await waitFor(() =>
+      expect(
+        screen.getByText('No credentials yet. Add one to start using AI features.'),
+      ).toBeDefined(),
+    )
 
     fireEvent.click(screen.getByRole('button', { name: 'Add credential' }))
 

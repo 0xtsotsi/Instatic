@@ -3,7 +3,12 @@ import type { Page, PageNode } from '@core/page-tree'
 import { reindexNodeParents } from '@core/page-tree'
 import { derivePageFormSnapshots } from '@core/forms'
 
-function node(id: string, moduleId: string, props: Record<string, unknown>, children: string[] = []): PageNode {
+function node(
+  id: string,
+  moduleId: string,
+  props: Record<string, unknown>,
+  children: string[] = [],
+): PageNode {
   return {
     id,
     moduleId,
@@ -21,13 +26,18 @@ const page: Page = {
   rootNodeId: 'body',
   nodes: {
     body: node('body', 'base.body', {}, ['form', 'outside-input']),
-    form: node('form', 'base.form', {
-      mode: 'cms',
-      formId: 'newsletter',
-      targetTableId: 'newsletter_submissions',
-      honeypotName: 'company',
-      minSubmitSeconds: 2,
-    }, ['field', 'submit', 'message']),
+    form: node(
+      'form',
+      'base.form',
+      {
+        mode: 'cms',
+        formId: 'newsletter',
+        targetTableId: 'newsletter_submissions',
+        honeypotName: 'company',
+        minSubmitSeconds: 2,
+      },
+      ['field', 'submit', 'message'],
+    ),
     field: node('field', 'base.container', {}, ['label', 'input']),
     label: node('label', 'base.label', { text: 'Email', targetMode: 'auto', targetId: '' }),
     input: node('input', 'base.input', {
@@ -73,15 +83,9 @@ describe('derivePageFormSnapshots', () => {
   it('infers labels, submit buttons, and messages from nearest form structure', () => {
     const [snapshot] = derivePageFormSnapshots(page)
 
-    expect(snapshot.labels).toEqual([
-      { nodeId: 'label', targetNodeId: 'input', text: 'Email' },
-    ])
-    expect(snapshot.submits).toEqual([
-      { nodeId: 'submit', label: 'Subscribe' },
-    ])
-    expect(snapshot.messages).toEqual([
-      { nodeId: 'message', kind: 'success', text: 'Thanks' },
-    ])
+    expect(snapshot.labels).toEqual([{ nodeId: 'label', targetNodeId: 'input', text: 'Email' }])
+    expect(snapshot.submits).toEqual([{ nodeId: 'submit', label: 'Subscribe' }])
+    expect(snapshot.messages).toEqual([{ nodeId: 'message', kind: 'success', text: 'Thanks' }])
   })
 
   it('normalizes form identifiers before matching related form nodes', () => {
@@ -89,11 +93,16 @@ describe('derivePageFormSnapshots', () => {
       ...page,
       nodes: {
         ...page.nodes,
-        form: node('form', 'base.form', {
-          mode: 'cms',
-          formId: 'Contact Form',
-          targetTableId: 'newsletter_submissions',
-        }, ['submit', 'message']),
+        form: node(
+          'form',
+          'base.form',
+          {
+            mode: 'cms',
+            formId: 'Contact Form',
+            targetTableId: 'newsletter_submissions',
+          },
+          ['submit', 'message'],
+        ),
         submit: node('submit', 'base.submit', { label: 'Send', formId: 'Contact Form' }),
         message: node('message', 'base.form-message', {
           formId: 'Contact Form',

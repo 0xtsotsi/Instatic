@@ -6,12 +6,7 @@
  * the raw `rows` array into the shape the grid renders. Keeping it out of the
  * component body keeps `DataGrid.tsx` focused on wiring + interaction state.
  */
-import type {
-  DataField,
-  DataRow,
-  DataRowStatus,
-  DataTable,
-} from '@core/data/schemas'
+import type { DataField, DataRow, DataRowStatus, DataTable } from '@core/data/schemas'
 
 // ---------------------------------------------------------------------------
 // View-filter model
@@ -50,10 +45,10 @@ export interface StatusViewChip {
 export type StatusCounts = Record<StatusFilter, number>
 
 export const STATUS_VIEW_ORDER_DEFAULT: StatusViewChip[] = [
-  { key: 'all',         label: 'All' },
-  { key: 'published',   label: 'Published' },
-  { key: 'scheduled',   label: 'Scheduled' },
-  { key: 'draft',       label: 'Drafts' },
+  { key: 'all', label: 'All' },
+  { key: 'published', label: 'Published' },
+  { key: 'scheduled', label: 'Scheduled' },
+  { key: 'draft', label: 'Drafts' },
   { key: 'unpublished', label: 'Archived' },
 ]
 
@@ -61,12 +56,12 @@ export const STATUS_VIEW_ORDER_DEFAULT: StatusViewChip[] = [
  *  the base 'All' chip and the status chips so the eye reads them as a
  *  scope refinement before drilling into status. */
 export const STATUS_VIEW_ORDER_PAGES: StatusViewChip[] = [
-  { key: 'all',         label: 'All' },
-  { key: 'pages',       label: 'Pages' },
-  { key: 'templates',   label: 'Templates' },
-  { key: 'published',   label: 'Published' },
-  { key: 'scheduled',   label: 'Scheduled' },
-  { key: 'draft',       label: 'Drafts' },
+  { key: 'all', label: 'All' },
+  { key: 'pages', label: 'Pages' },
+  { key: 'templates', label: 'Templates' },
+  { key: 'published', label: 'Published' },
+  { key: 'scheduled', label: 'Scheduled' },
+  { key: 'draft', label: 'Drafts' },
   { key: 'unpublished', label: 'Archived' },
 ]
 
@@ -74,11 +69,7 @@ export const STATUS_VIEW_ORDER_PAGES: StatusViewChip[] = [
 // Column sizing
 // ---------------------------------------------------------------------------
 
-export function getColumnWidth(
-  field: DataField,
-  isPrimary: boolean,
-  primaryWidth: number,
-): string {
+export function getColumnWidth(field: DataField, isPrimary: boolean, primaryWidth: number): string {
   if (isPrimary) return `${primaryWidth}px`
   switch (field.type) {
     case 'number':
@@ -116,14 +107,9 @@ export function getSubtitleFieldId(table: DataTable): string | null {
 }
 
 /** Primary field first, then the rest minus the collapsed subtitle field. */
-export function getOrderedFields(
-  table: DataTable,
-  subtitleFieldId: string | null,
-): DataField[] {
+export function getOrderedFields(table: DataTable, subtitleFieldId: string | null): DataField[] {
   const primary = table.fields.find((f) => f.id === table.primaryFieldId)
-  const rest = table.fields.filter(
-    (f) => f.id !== table.primaryFieldId && f.id !== subtitleFieldId,
-  )
+  const rest = table.fields.filter((f) => f.id !== table.primaryFieldId && f.id !== subtitleFieldId)
   return primary == null ? rest : [primary, ...rest]
 }
 
@@ -224,7 +210,12 @@ export function groupRowsByStatus(
   if (buckets.draft.length > 0)
     out.push({ key: 'draft', label: 'Drafts', status: 'draft', rows: buckets.draft })
   if (buckets.unpublished.length > 0)
-    out.push({ key: 'unpublished', label: 'Archived', status: 'unpublished', rows: buckets.unpublished })
+    out.push({
+      key: 'unpublished',
+      label: 'Archived',
+      status: 'unpublished',
+      rows: buckets.unpublished,
+    })
   return out
 }
 

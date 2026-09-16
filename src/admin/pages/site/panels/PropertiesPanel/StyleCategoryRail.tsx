@@ -106,7 +106,6 @@ export function StyleCategoryRail({
       aria-label="Style categories"
       data-testid="style-category-rail"
     >
-
       {/* ── Module button — first, always enabled ─────────────────────── */}
       {definition != null && (
         <ModuleRailButton

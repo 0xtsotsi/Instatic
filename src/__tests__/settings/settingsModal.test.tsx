@@ -65,7 +65,9 @@ function resetStore() {
 function openModal(section = 'general', withSite = false) {
   if (withSite) {
     const site = makeSite({ pages: [makePage()] })
-    useEditorStore.setState({ site, activePageId: 'page-1' } as Parameters<typeof useEditorStore.setState>[0])
+    useEditorStore.setState({ site, activePageId: 'page-1' } as Parameters<
+      typeof useEditorStore.setState
+    >[0])
   }
   useEditorStore.setState({
     isSettingsOpen: true,
@@ -97,7 +99,9 @@ describe('SettingsModal — render gating', () => {
     const { unmount } = render(<SettingsModal />)
     expect(document.querySelector('[role="dialog"]')).not.toBeNull()
     act(() => {
-      useEditorStore.setState({ isSettingsOpen: false } as Parameters<typeof useEditorStore.setState>[0])
+      useEditorStore.setState({ isSettingsOpen: false } as Parameters<
+        typeof useEditorStore.setState
+      >[0])
     })
     unmount()
     expect(document.querySelector('[role="dialog"]')).toBeNull()
@@ -444,7 +448,9 @@ describe('SettingsModal — PreferencesSection toggles', () => {
     fireEvent.click(previewToggle)
 
     expect(previewToggle.getAttribute('aria-checked')).toBe('false')
-    expect(JSON.parse(localStorage.getItem('instatic-editor-prefs') ?? '{}').hoverPreview).toBe(false)
+    expect(JSON.parse(localStorage.getItem('instatic-editor-prefs') ?? '{}').hoverPreview).toBe(
+      false,
+    )
   })
 
   it('toggle labels are linked via htmlFor / id (label accessibility)', () => {
@@ -499,7 +505,9 @@ describe('SettingsButton + settingsSlice — section ID alignment (source enforc
   })
 
   it('settingsSlice activeSection default is a valid section ID', () => {
-    expect(settingsSliceSrc).toMatch(/DEFAULT_SECTION: SettingsSection = '(general|preferences|shortcuts|publishing)'/)
+    expect(settingsSliceSrc).toMatch(
+      /DEFAULT_SECTION: SettingsSection = '(general|preferences|shortcuts|publishing)'/,
+    )
   })
 })
 

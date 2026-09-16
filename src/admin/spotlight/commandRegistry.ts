@@ -86,10 +86,7 @@ export function filterCommands(commands: Command[], ctx: CommandContext): Comman
   return commands.filter((cmd) => {
     // Workspace gate
     if (cmd.workspaces && cmd.workspaces.length > 0) {
-      if (
-        !cmd.workspaces.includes('any') &&
-        !cmd.workspaces.includes(ctx.workspace)
-      ) {
+      if (!cmd.workspaces.includes('any') && !cmd.workspaces.includes(ctx.workspace)) {
         return false
       }
     }

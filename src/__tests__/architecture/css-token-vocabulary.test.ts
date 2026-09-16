@@ -13,11 +13,7 @@ import { extname, join, relative } from 'path'
 
 const SRC_ROOT = join(import.meta.dir, '../..')
 const REPO_ROOT = join(SRC_ROOT, '..')
-const SCAN_ROOTS = [
-  join(SRC_ROOT, 'admin'),
-  join(SRC_ROOT, 'styles'),
-  join(SRC_ROOT, 'ui'),
-]
+const SCAN_ROOTS = [join(SRC_ROOT, 'admin'), join(SRC_ROOT, 'styles'), join(SRC_ROOT, 'ui')]
 const DOC_FILES = [
   join(REPO_ROOT, 'docs/design.md'),
   join(REPO_ROOT, 'docs/reference/design-tokens.md'),
@@ -45,9 +41,7 @@ function collectFiles(dir: string): string[] {
 }
 
 function stripSourceComments(source: string): string {
-  return source
-    .replace(/\/\*[\s\S]*?\*\//g, '')
-    .replace(/^\s*\/\/.*$/gm, '')
+  return source.replace(/\/\*[\s\S]*?\*\//g, '').replace(/^\s*\/\/.*$/gm, '')
 }
 
 function lineNumber(source: string, index: number): number {

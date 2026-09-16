@@ -25,10 +25,7 @@ function safeJson(value: unknown): string {
 }
 
 function escapeHtmlText(value: string): string {
-  return value
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
+  return value.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
 }
 
 function escapeStyleContent(css: string): string {

@@ -14,24 +14,14 @@
  * and any post-insert side effects.
  */
 
-import {
-  Fragment,
-  useEffect,
-  useRef,
-  useState,
-  type KeyboardEvent,
-  type RefObject,
-} from 'react'
+import { Fragment, useEffect, useRef, useState, type KeyboardEvent, type RefObject } from 'react'
 import { useEditorStore } from '@site/store/store'
 import { registry } from '@core/module-engine'
 import type { AnyModuleDefinition } from '@core/module-engine'
 import type { VisualComponent } from '@core/visualComponents'
 import { BracesIcon } from 'pixel-art-icons/icons/braces'
 import { SearchBar } from '@ui/components/SearchBar'
-import {
-  ContextMenuItem,
-  ContextMenuSeparator,
-} from '@ui/components/ContextMenu'
+import { ContextMenuItem, ContextMenuSeparator } from '@ui/components/ContextMenu'
 import { ModuleIcon } from '@site/ui/ModuleIcon'
 import { moduleAvailability } from './moduleInserterModel'
 import { useModuleInsertionContext } from './useModuleInsertionContext'
@@ -64,9 +54,7 @@ export function ModulePicker({
   const searchRef = useRef<HTMLInputElement>(null)
 
   const insertionContext = useModuleInsertionContext()
-  const visualComponents = useEditorStore(
-    (s) => s.site?.visualComponents ?? EMPTY_VCS,
-  )
+  const visualComponents = useEditorStore((s) => s.site?.visualComponents ?? EMPTY_VCS)
 
   // ─── Auto-focus search on mount ──────────────────────────────────────────
   useEffect(() => {
@@ -82,9 +70,7 @@ export function ModulePicker({
   // Outlet outside a template) with a reason rendered as a tooltip.
   const moduleGroups: AnyModuleDefinition[][] = []
   for (const mods of Object.values(registry.listByCategory())) {
-    const visible = mods.filter(
-      (m) => moduleAvailability(m, insertionContext).kind !== 'hidden',
-    )
+    const visible = mods.filter((m) => moduleAvailability(m, insertionContext).kind !== 'hidden')
     if (visible.length > 0) moduleGroups.push(visible)
   }
 
@@ -103,28 +89,21 @@ export function ModulePicker({
 
   const filteredVcs = !trimmedQuery
     ? visualComponents
-    : visualComponents.filter((vc) =>
-        vc.name.toLowerCase().includes(trimmedQuery),
-      )
+    : visualComponents.filter((vc) => vc.name.toLowerCase().includes(trimmedQuery))
 
-  const isEmpty =
-    filteredModuleGroups.length === 0 &&
-    filteredVcs.length === 0
+  const isEmpty = filteredModuleGroups.length === 0 && filteredVcs.length === 0
 
   // ─── Keyboard navigation: ArrowDown from search jumps to first row ───────
   const handleSearchKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
     if (e.key !== 'ArrowDown') return
     e.preventDefault()
-    const first =
-      containerRef?.current?.querySelector<HTMLElement>('[role="menuitem"]')
+    const first = containerRef?.current?.querySelector<HTMLElement>('[role="menuitem"]')
     first?.focus()
   }
 
   // Render groups separated by ContextMenuSeparator. VCs get their own group
   // at the end so they're visually distinguishable from base modules.
-  const groupCount =
-    filteredModuleGroups.length +
-    (filteredVcs.length > 0 ? 1 : 0)
+  const groupCount = filteredModuleGroups.length + (filteredVcs.length > 0 ? 1 : 0)
 
   return (
     <>
@@ -184,11 +163,7 @@ export function ModulePicker({
         <>
           {groupCount > 1 && <ContextMenuSeparator />}
           {filteredVcs.map((vc) => (
-            <ContextMenuItem
-              key={vc.id}
-              data-vc-id={vc.id}
-              onClick={() => onSelectVC(vc.id)}
-            >
+            <ContextMenuItem key={vc.id} data-vc-id={vc.id} onClick={() => onSelectVC(vc.id)}>
               <span aria-hidden="true">
                 <BracesIcon size={13} />
               </span>

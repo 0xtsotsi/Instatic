@@ -9,10 +9,7 @@ import {
   type RenderAccumulators,
 } from '@core/publisher'
 import type { ModuleDefinition, PropertySchema } from '@core/module-engine'
-import {
-  frameworkColorClassId,
-  generateFrameworkColorUtilityClasses,
-} from '@core/framework'
+import { frameworkColorClassId, generateFrameworkColorUtilityClasses } from '@core/framework'
 import { makeModule, makeRegistry, makePage, makeSite, makeAccumulators } from './helpers'
 
 // Render a node with a throwaway accumulator bag. Tests that need to inspect
@@ -31,9 +28,7 @@ function render(
 
 describe('escapeHtml', () => {
   it('escapes & < > " \'', () => {
-    expect(escapeHtml('<script>alert(1)</script>')).toBe(
-      '&lt;script&gt;alert(1)&lt;/script&gt;',
-    )
+    expect(escapeHtml('<script>alert(1)</script>')).toBe('&lt;script&gt;alert(1)&lt;/script&gt;')
     expect(escapeHtml('say "hello" & \'world\'')).toBe(
       'say &quot;hello&quot; &amp; &#x27;world&#x27;',
     )
@@ -57,8 +52,8 @@ describe('isSafeUrl', () => {
   it('blocks javascript: URLs', () => {
     expect(isSafeUrl('javascript:alert(1)')).toBe(false)
     expect(isSafeUrl('  javascript:alert(1)')).toBe(false) // leading whitespace
-    expect(isSafeUrl('JAVASCRIPT:alert(1)')).toBe(false)   // case insensitive
-    expect(isSafeUrl('\tjavascript:void(0)')).toBe(false)  // tab prefix
+    expect(isSafeUrl('JAVASCRIPT:alert(1)')).toBe(false) // case insensitive
+    expect(isSafeUrl('\tjavascript:void(0)')).toBe(false) // tab prefix
   })
 
   it('blocks vbscript: URLs', () => {
@@ -115,16 +110,15 @@ describe('escapeProps', () => {
   it('allows safe url-typed values, unescaped (& survives for safeUrl)', () => {
     expect(escapeProps({ href: 'https://example.com' }, schema).href).toBe('https://example.com')
     expect(escapeProps({ src: '/images/logo.png' }, schema).src).toBe('/images/logo.png')
-    expect(escapeProps({ href: 'https://x.com/?a=1&b=2' }, schema).href).toBe('https://x.com/?a=1&b=2')
+    expect(escapeProps({ href: 'https://x.com/?a=1&b=2' }, schema).href).toBe(
+      'https://x.com/?a=1&b=2',
+    )
   })
 
   it('routes richtext-typed props by TYPE even when the name misses the old suffix', () => {
     // `pageBody` does NOT end in html/richtext — the old name heuristic would
     // have HTML-escaped it (breaking markup AND leaving stored XSS unsanitised).
-    const result = escapeProps(
-      { pageBody: '<p>ok</p><script>alert(1)</script>' },
-      schema,
-    )
+    const result = escapeProps({ pageBody: '<p>ok</p><script>alert(1)</script>' }, schema)
     expect(result.pageBody).not.toContain('<script>')
     expect(result.pageBody).not.toContain('&lt;p&gt;') // sanitised, not escaped
     expect(result.pageBody).toContain('<p>ok</p>')
@@ -139,10 +133,7 @@ describe('escapeProps', () => {
   })
 
   it('routes svg-typed props by TYPE even when the name is not exactly "svg"', () => {
-    const result = escapeProps(
-      { diagram: '<svg onload="evil()"><rect/></svg>' },
-      schema,
-    )
+    const result = escapeProps({ diagram: '<svg onload="evil()"><rect/></svg>' }, schema)
     expect(result.diagram).not.toContain('onload')
     expect(result.diagram).toContain('<svg') // sanitised SVG, not escaped literal
   })
@@ -169,27 +160,21 @@ describe('escapeProps', () => {
 // ---------------------------------------------------------------------------
 
 describe('renderNode', () => {
-  const headingDef: ModuleDefinition<{ text: string; level: number }> = makeModule(
-    'base.text',
-    {
-      canHaveChildren: false,
-      render: (props, _children) => ({
-        html: `<h${props.level}>${props.text}</h${props.level}>`,
-        css: 'h1,h2,h3,h4,h5,h6 { font-family: sans-serif; }',
-      }),
-    },
-  )
+  const headingDef: ModuleDefinition<{ text: string; level: number }> = makeModule('base.text', {
+    canHaveChildren: false,
+    render: (props, _children) => ({
+      html: `<h${props.level}>${props.text}</h${props.level}>`,
+      css: 'h1,h2,h3,h4,h5,h6 { font-family: sans-serif; }',
+    }),
+  })
 
-  const containerDef: ModuleDefinition<{ className: string }> = makeModule(
-    'base.container',
-    {
-      canHaveChildren: true,
-      render: (props, children) => ({
-        html: `<div class="${props.className}">${children.join('')}</div>`,
-        css: '.instatic-container { display: block; }',
-      }),
-    },
-  )
+  const containerDef: ModuleDefinition<{ className: string }> = makeModule('base.container', {
+    canHaveChildren: true,
+    render: (props, children) => ({
+      html: `<div class="${props.className}">${children.join('')}</div>`,
+      css: '.instatic-container { display: block; }',
+    }),
+  })
 
   const registry = makeRegistry({
     'base.text': headingDef,
@@ -220,9 +205,7 @@ describe('renderNode', () => {
       c2: { moduleId: 'base.text', props: { text: 'B', level: 3 } },
     })
     const c = ctx(page)
-    expect(render('root', c)).toBe(
-      '<div class="wrapper"><h2>A</h2><h3>B</h3></div>',
-    )
+    expect(render('root', c)).toBe('<div class="wrapper"><h2>A</h2><h3>B</h3></div>')
   })
 
   it('deduplicates CSS by moduleId — 3 heading nodes → 1 CSS entry', () => {
@@ -390,10 +373,16 @@ describe('renderNode', () => {
       },
     })
     const htmlDesktop = render('root', {
-      page, site, registry: responsiveRegistry, breakpointId: undefined,
+      page,
+      site,
+      registry: responsiveRegistry,
+      breakpointId: undefined,
     })
     const htmlMobile = render('root', {
-      page, site, registry: responsiveRegistry, breakpointId: 'mobile',
+      page,
+      site,
+      registry: responsiveRegistry,
+      breakpointId: 'mobile',
     })
 
     expect(htmlDesktop).toBe('<h1>Desktop</h1>')
@@ -463,7 +452,10 @@ describe('renderNode', () => {
         p1: { moduleId: 'base.text', props: { text: 'Hi' }, classIds: ['tprim-id'] },
       })
       const html = render('root', {
-        page, site: siteDoc, registry: bareReg, breakpointId: undefined,
+        page,
+        site: siteDoc,
+        registry: bareReg,
+        breakpointId: undefined,
       })
 
       expect(html).toBe('<div class="row"><p class="text-primary">Hi</p></div>')
@@ -509,21 +501,31 @@ describe('renderNode', () => {
           },
         },
       })
-      const page = makePage({
-        outer: {
-          moduleId: 'base.container',
-          classIds: ['bg-id'],
-          children: ['inner'],
+      const page = makePage(
+        {
+          outer: {
+            moduleId: 'base.container',
+            classIds: ['bg-id'],
+            children: ['inner'],
+          },
+          inner: {
+            moduleId: 'base.container',
+            classIds: ['row-id'],
+            children: ['p1'],
+          },
+          p1: {
+            moduleId: 'base.text',
+            props: { text: 'Vamos a la playa' },
+            classIds: ['tprim-id'],
+          },
         },
-        inner: {
-          moduleId: 'base.container',
-          classIds: ['row-id'],
-          children: ['p1'],
-        },
-        p1: { moduleId: 'base.text', props: { text: 'Vamos a la playa' }, classIds: ['tprim-id'] },
-      }, 'outer')
+        'outer',
+      )
       const html = render('outer', {
-        page, site: siteDoc, registry: bareReg, breakpointId: undefined,
+        page,
+        site: siteDoc,
+        registry: bareReg,
+        breakpointId: undefined,
       })
 
       expect(html).toBe(
@@ -561,7 +563,10 @@ describe('renderNode', () => {
         root: { moduleId: 'base.classed', classIds: ['cta-id'] },
       })
       const html = render('root', {
-        page, site: siteDoc, registry: reg, breakpointId: undefined,
+        page,
+        site: siteDoc,
+        registry: reg,
+        breakpointId: undefined,
       })
 
       expect(html).toBe('<button class="cta instatic-btn">Click</button>')
@@ -591,7 +596,10 @@ describe('renderNode', () => {
         root: { moduleId: 'base.wrapped', classIds: ['h-id'] },
       })
       const html = render('root', {
-        page, site: siteDoc, registry: reg, breakpointId: undefined,
+        page,
+        site: siteDoc,
+        registry: reg,
+        breakpointId: undefined,
       })
 
       expect(html).toBe('<!-- marker --><section class="hero"><p>x</p></section>')
@@ -617,7 +625,10 @@ describe('renderNode', () => {
         },
       })
       const html = render('root', {
-        page, site, registry: reg, breakpointId: undefined,
+        page,
+        site,
+        registry: reg,
+        breakpointId: undefined,
       })
       // Single-quotes in the url() are escaped for the double-quoted attribute.
       expect(html).toContain('style="')
@@ -633,7 +644,10 @@ describe('renderNode', () => {
         },
       })
       const html = render('root', {
-        page, site, registry: reg, breakpointId: undefined,
+        page,
+        site,
+        registry: reg,
+        breakpointId: undefined,
       })
       expect(html).not.toContain('expression')
       expect(html).toContain('display: block')
@@ -659,7 +673,10 @@ describe('renderNode', () => {
         root: { moduleId: 'base.container', classIds: ['c-id'], inlineStyles: { color: 'blue' } },
       })
       const html = render('root', {
-        page, site: siteDoc, registry: reg, breakpointId: undefined,
+        page,
+        site: siteDoc,
+        registry: reg,
+        breakpointId: undefined,
       })
       expect(html).toContain('class="card"')
       expect(html).toContain('style="color: blue"')
@@ -762,10 +779,30 @@ describe('publishPage', () => {
   it('emits four <link> tags pointing at the site bundle in external mode', () => {
     const page = makePage({ root: { moduleId: 'base.text', props: { text: 'Hi' } } })
     const cssBundle = {
-      reset: { bundle: 'reset' as const, filename: 'reset-aaaaaaaaaaaa.css', hash: 'aaaaaaaaaaaa', content: ':where(*) { margin: 0; }' },
-      framework: { bundle: 'framework' as const, filename: 'framework-bbbbbbbbbbbb.css', hash: 'bbbbbbbbbbbb', content: ':root { --x: 1; }' },
-      style: { bundle: 'style' as const, filename: 'style-cccccccccccc.css', hash: 'cccccccccccc', content: '.foo { color: red; }' },
-      userStyles: { bundle: 'userStyles' as const, filename: 'userStyles-dddddddddddd.css', hash: 'dddddddddddd', content: 'body { background: tomato; }' },
+      reset: {
+        bundle: 'reset' as const,
+        filename: 'reset-aaaaaaaaaaaa.css',
+        hash: 'aaaaaaaaaaaa',
+        content: ':where(*) { margin: 0; }',
+      },
+      framework: {
+        bundle: 'framework' as const,
+        filename: 'framework-bbbbbbbbbbbb.css',
+        hash: 'bbbbbbbbbbbb',
+        content: ':root { --x: 1; }',
+      },
+      style: {
+        bundle: 'style' as const,
+        filename: 'style-cccccccccccc.css',
+        hash: 'cccccccccccc',
+        content: '.foo { color: red; }',
+      },
+      userStyles: {
+        bundle: 'userStyles' as const,
+        filename: 'userStyles-dddddddddddd.css',
+        hash: 'dddddddddddd',
+        content: 'body { background: tomato; }',
+      },
     }
     const { html } = publishPage(page, site, registry, {
       cssEmission: 'external',
@@ -773,9 +810,13 @@ describe('publishPage', () => {
     })
 
     expect(html).toContain('<link rel="stylesheet" href="/_instatic/css/reset-aaaaaaaaaaaa.css">')
-    expect(html).toContain('<link rel="stylesheet" href="/_instatic/css/framework-bbbbbbbbbbbb.css">')
+    expect(html).toContain(
+      '<link rel="stylesheet" href="/_instatic/css/framework-bbbbbbbbbbbb.css">',
+    )
     expect(html).toContain('<link rel="stylesheet" href="/_instatic/css/style-cccccccccccc.css">')
-    expect(html).toContain('<link rel="stylesheet" href="/_instatic/css/userStyles-dddddddddddd.css">')
+    expect(html).toContain(
+      '<link rel="stylesheet" href="/_instatic/css/userStyles-dddddddddddd.css">',
+    )
 
     // No inline <style> block for site-wide CSS in external mode.
     expect(html).not.toMatch(/<style>\s*\n[^<]*:where\(\*\)/)
@@ -793,12 +834,32 @@ describe('publishPage', () => {
   it('skips empty bundle files in external mode (no zero-byte <link> requests)', () => {
     const page = makePage({ root: { moduleId: 'base.text', props: { text: 'Hi' } } })
     const cssBundle = {
-      reset: { bundle: 'reset' as const, filename: 'reset-aaaaaaaaaaaa.css', hash: 'aaaaaaaaaaaa', content: ':where(*) { margin: 0; }' },
+      reset: {
+        bundle: 'reset' as const,
+        filename: 'reset-aaaaaaaaaaaa.css',
+        hash: 'aaaaaaaaaaaa',
+        content: ':where(*) { margin: 0; }',
+      },
       // Empty framework + style + userStyles on a fresh site (no framework,
       // no classes, no user-authored CSS files).
-      framework: { bundle: 'framework' as const, filename: 'framework-bbbbbbbbbbbb.css', hash: 'bbbbbbbbbbbb', content: '' },
-      style: { bundle: 'style' as const, filename: 'style-cccccccccccc.css', hash: 'cccccccccccc', content: '' },
-      userStyles: { bundle: 'userStyles' as const, filename: 'userStyles-dddddddddddd.css', hash: 'dddddddddddd', content: '' },
+      framework: {
+        bundle: 'framework' as const,
+        filename: 'framework-bbbbbbbbbbbb.css',
+        hash: 'bbbbbbbbbbbb',
+        content: '',
+      },
+      style: {
+        bundle: 'style' as const,
+        filename: 'style-cccccccccccc.css',
+        hash: 'cccccccccccc',
+        content: '',
+      },
+      userStyles: {
+        bundle: 'userStyles' as const,
+        filename: 'userStyles-dddddddddddd.css',
+        hash: 'dddddddddddd',
+        content: '',
+      },
     }
     const { html } = publishPage(page, site, registry, {
       cssEmission: 'external',
@@ -814,10 +875,30 @@ describe('publishPage', () => {
   it('uses a custom cssAssetBaseUrl when provided', () => {
     const page = makePage({ root: { moduleId: 'base.text', props: { text: 'Hi' } } })
     const cssBundle = {
-      reset: { bundle: 'reset' as const, filename: 'reset-aaaaaaaaaaaa.css', hash: 'aaaaaaaaaaaa', content: 'x' },
-      framework: { bundle: 'framework' as const, filename: 'framework-bbbbbbbbbbbb.css', hash: 'bbbbbbbbbbbb', content: 'x' },
-      style: { bundle: 'style' as const, filename: 'style-cccccccccccc.css', hash: 'cccccccccccc', content: 'x' },
-      userStyles: { bundle: 'userStyles' as const, filename: 'userStyles-dddddddddddd.css', hash: 'dddddddddddd', content: 'x' },
+      reset: {
+        bundle: 'reset' as const,
+        filename: 'reset-aaaaaaaaaaaa.css',
+        hash: 'aaaaaaaaaaaa',
+        content: 'x',
+      },
+      framework: {
+        bundle: 'framework' as const,
+        filename: 'framework-bbbbbbbbbbbb.css',
+        hash: 'bbbbbbbbbbbb',
+        content: 'x',
+      },
+      style: {
+        bundle: 'style' as const,
+        filename: 'style-cccccccccccc.css',
+        hash: 'cccccccccccc',
+        content: 'x',
+      },
+      userStyles: {
+        bundle: 'userStyles' as const,
+        filename: 'userStyles-dddddddddddd.css',
+        hash: 'dddddddddddd',
+        content: 'x',
+      },
     }
     const { html } = publishPage(page, site, registry, {
       cssEmission: 'external',

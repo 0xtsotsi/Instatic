@@ -12,11 +12,7 @@
 import { describe, it, expect } from 'bun:test'
 // Self-registers all base modules with the global registry so importHtml works
 import '@modules/base'
-import {
-  buildImportPlan,
-  commitImportPlan,
-  applyConflictResolutions,
-} from '@core/siteImport'
+import { buildImportPlan, commitImportPlan, applyConflictResolutions } from '@core/siteImport'
 import type {
   SiteImportAdapter,
   SiteImportTransaction,
@@ -193,7 +189,9 @@ describe('buildImportPlan — structure', () => {
           mimeType: 'text/css',
         },
         'css/components/hero.css': {
-          bytes: encoder.encode(`.hero { min-height: 640px; background-image: url('../img/hero.png'); }`),
+          bytes: encoder.encode(
+            `.hero { min-height: 640px; background-image: url('../img/hero.png'); }`,
+          ),
           mimeType: 'text/css',
         },
         'css/img/hero.png': { bytes: new Uint8Array([1, 2, 3]), mimeType: 'image/png' },
@@ -273,11 +271,15 @@ describe('buildImportPlan — structure', () => {
       fileMap: {
         files: {
           'index.html': {
-            bytes: encoder.encode(`<!doctype html><html><body><script type="module" src="./motion.js"></script></body></html>`),
+            bytes: encoder.encode(
+              `<!doctype html><html><body><script type="module" src="./motion.js"></script></body></html>`,
+            ),
             mimeType: 'text/html',
           },
           'motion.js': {
-            bytes: encoder.encode(`import { Motion } from 'https://esm.sh/@motion.page/sdk@1.2.4';\nwindow.Motion = Motion;`),
+            bytes: encoder.encode(
+              `import { Motion } from 'https://esm.sh/@motion.page/sdk@1.2.4';\nwindow.Motion = Motion;`,
+            ),
             mimeType: 'application/javascript',
           },
         },
@@ -302,19 +304,24 @@ describe('buildImportPlan — structure', () => {
       fileMap: {
         files: {
           'index.html': { bytes: encoder.encode(html), mimeType: 'text/html' },
-          'scripts/app.js': { bytes: encoder.encode('duration = parseInt(duration, 10);'), mimeType: 'text/javascript' },
+          'scripts/app.js': {
+            bytes: encoder.encode('duration = parseInt(duration, 10);'),
+            mimeType: 'text/javascript',
+          },
         },
       },
       currentSite,
     })
 
-    expect(p.scripts.map((s) => ({
-      path: s.path,
-      content: s.content,
-      format: s.format,
-      pageSources: s.pageSources,
-      priority: s.priority,
-    }))).toEqual([
+    expect(
+      p.scripts.map((s) => ({
+        path: s.path,
+        content: s.content,
+        format: s.format,
+        pageSources: s.pageSources,
+        priority: s.priority,
+      })),
+    ).toEqual([
       {
         path: 'index.html-inline-script-1.js',
         content: "var duration='500',easing='swing';",
@@ -347,7 +354,9 @@ describe('buildImportPlan — structure', () => {
 
     expect(p.styleRules.find((rule) => rule.selector === '.used-class')?.kind).toBe('class')
     expect(p.styleRules.find((rule) => rule.selector === '.runtime-created')?.kind).toBe('ambient')
-    expect(p.conflicts.rules.some((conflict) => conflict.desiredName === 'runtime-created')).toBe(false)
+    expect(p.conflicts.rules.some((conflict) => conflict.desiredName === 'runtime-created')).toBe(
+      false,
+    )
   })
 
   it('preserves Bootstrap utility fragments as ambient rules even when nodes use them', () => {
@@ -386,7 +395,9 @@ describe('buildImportPlan — structure', () => {
     expect(rowRules.every((rule) => rule.kind === 'ambient')).toBe(true)
     expect(p.styleRules.find((rule) => rule.selector === '.row > *')?.kind).toBe('ambient')
     expect(p.styleRules.find((rule) => rule.selector === '.col-xl-3')?.kind).toBe('ambient')
-    expect(p.styleRules.find((rule) => rule.selector === '.align-items-stretch')?.kind).toBe('ambient')
+    expect(p.styleRules.find((rule) => rule.selector === '.align-items-stretch')?.kind).toBe(
+      'ambient',
+    )
     expect(p.styleRules.find((rule) => rule.selector === '.custom-row')?.kind).toBe('class')
 
     const rowNode = Object.values(p.pages[0].nodeFragment.nodes).find((node) =>
@@ -434,7 +445,10 @@ describe('buildImportPlan — structure', () => {
     const withUnused: FileMap = {
       files: {
         ...fileMap.files,
-        'styles/unused.css': { bytes: new TextEncoder().encode('.u { display: none }'), mimeType: 'text/css' },
+        'styles/unused.css': {
+          bytes: new TextEncoder().encode('.u { display: none }'),
+          mimeType: 'text/css',
+        },
       },
     }
     const p = buildImportPlan({ fileMap: withUnused, currentSite })
@@ -465,7 +479,9 @@ describe('buildImportPlan — structure', () => {
     ])
     const root = p.styleRules.find((rule) => rule.selector === ':root')
     expect(root?.styles).toEqual({ '--font-size-base': '16px' })
-    expect(p.styleRules.find((rule) => rule.selector === 'h1')?.styles.fontFamily).toBe('var(--font-display)')
+    expect(p.styleRules.find((rule) => rule.selector === 'h1')?.styles.fontFamily).toBe(
+      'var(--font-display)',
+    )
   })
 
   it('plans Google Fonts @import as installed font requests', () => {
@@ -524,7 +540,10 @@ describe('buildImportPlan — structure', () => {
 
 describe('buildImportPlan — slug derivation', () => {
   it('derives correct slugs from HTML filenames', () => {
-    const plan = buildImportPlan({ fileMap: makeSampleFileMap(), currentSite: makeEmptySiteDocument() })
+    const plan = buildImportPlan({
+      fileMap: makeSampleFileMap(),
+      currentSite: makeEmptySiteDocument(),
+    })
     const slugs = plan.pages.map((p) => p.slug).sort()
     expect(slugs).toContain('index')
     expect(slugs).toContain('about')
@@ -535,10 +554,22 @@ describe('buildImportPlan — slug derivation', () => {
     const encoder = new TextEncoder()
     const fileMap: FileMap = {
       files: {
-        'index.html': { bytes: encoder.encode('<html><body>Home</body></html>'), mimeType: 'text/html' },
-        'documentation/index.html': { bytes: encoder.encode('<html><body>Docs</body></html>'), mimeType: 'text/html' },
-        'download-version/index.html': { bytes: encoder.encode('<html><body>Download</body></html>'), mimeType: 'text/html' },
-        'guides/install/quick-start.html': { bytes: encoder.encode('<html><body>Quick start</body></html>'), mimeType: 'text/html' },
+        'index.html': {
+          bytes: encoder.encode('<html><body>Home</body></html>'),
+          mimeType: 'text/html',
+        },
+        'documentation/index.html': {
+          bytes: encoder.encode('<html><body>Docs</body></html>'),
+          mimeType: 'text/html',
+        },
+        'download-version/index.html': {
+          bytes: encoder.encode('<html><body>Download</body></html>'),
+          mimeType: 'text/html',
+        },
+        'guides/install/quick-start.html': {
+          bytes: encoder.encode('<html><body>Quick start</body></html>'),
+          mimeType: 'text/html',
+        },
       },
     }
 
@@ -570,7 +601,16 @@ describe('buildImportPlan — conflict detection', () => {
           title: 'About',
           slug: 'about',
           rootNodeId: 'r',
-          nodes: { r: { id: 'r', moduleId: 'base.body', props: {}, breakpointOverrides: {}, children: [], classIds: [] } },
+          nodes: {
+            r: {
+              id: 'r',
+              moduleId: 'base.body',
+              props: {},
+              breakpointOverrides: {},
+              children: [],
+              classIds: [],
+            },
+          },
         },
       ],
     }
@@ -613,7 +653,10 @@ describe('buildImportPlan — conflict detection', () => {
 
 describe('commitImportPlan — happy path', () => {
   it('uploads all assets', async () => {
-    const plan = buildImportPlan({ fileMap: makeSampleFileMap(), currentSite: makeEmptySiteDocument() })
+    const plan = buildImportPlan({
+      fileMap: makeSampleFileMap(),
+      currentSite: makeEmptySiteDocument(),
+    })
     const adapter = makeMockAdapter()
     await commitImportPlan(plan, adapter)
     // hero.png and logo.png should be uploaded
@@ -622,7 +665,10 @@ describe('commitImportPlan — happy path', () => {
   })
 
   it('calls addPage for each non-conflicting page', async () => {
-    const plan = buildImportPlan({ fileMap: makeSampleFileMap(), currentSite: makeEmptySiteDocument() })
+    const plan = buildImportPlan({
+      fileMap: makeSampleFileMap(),
+      currentSite: makeEmptySiteDocument(),
+    })
     const adapter = makeMockAdapter()
     await commitImportPlan(plan, adapter)
     const addPageOps = adapter.ops.filter((o) => o.type === 'addPage')
@@ -630,7 +676,10 @@ describe('commitImportPlan — happy path', () => {
   })
 
   it('calls addStyleRule for each non-conflicting rule', async () => {
-    const plan = buildImportPlan({ fileMap: makeSampleFileMap(), currentSite: makeEmptySiteDocument() })
+    const plan = buildImportPlan({
+      fileMap: makeSampleFileMap(),
+      currentSite: makeEmptySiteDocument(),
+    })
     const adapter = makeMockAdapter()
     await commitImportPlan(plan, adapter)
     const addRuleOps = adapter.ops.filter((o) => o.type === 'addStyleRule')
@@ -638,27 +687,39 @@ describe('commitImportPlan — happy path', () => {
   })
 
   it('commits linked scripts with resolved page scope', async () => {
-    const plan = buildImportPlan({ fileMap: makeSampleFileMap(), currentSite: makeEmptySiteDocument() })
+    const plan = buildImportPlan({
+      fileMap: makeSampleFileMap(),
+      currentSite: makeEmptySiteDocument(),
+    })
     const adapter = makeMockAdapter()
     await commitImportPlan(plan, adapter)
 
     const addPageOps = adapter.ops.filter((o) => o.type === 'addPage')
-    const indexPageId = (addPageOps.find((op) => (op.args as { title: string }).title === 'Home Page')?.args as { id?: string } | undefined)?.id
+    const indexPageId = (
+      addPageOps.find((op) => (op.args as { title: string }).title === 'Home Page')?.args as
+        { id?: string } | undefined
+    )?.id
     const addScriptsOp = adapter.ops.find((o) => o.type === 'addScripts')
     expect(indexPageId).toBeDefined()
     expect(addScriptsOp).toBeDefined()
-    const scripts = (addScriptsOp!.args as { scripts: Array<{
-      path: string
-      format: string
-      pageIds?: string[]
-      priority: number
-    }> }).scripts
-    expect(scripts.map((script) => ({
-      path: script.path,
-      format: script.format,
-      pageIds: script.pageIds,
-      priority: script.priority,
-    }))).toEqual([
+    const scripts = (
+      addScriptsOp!.args as {
+        scripts: Array<{
+          path: string
+          format: string
+          pageIds?: string[]
+          priority: number
+        }>
+      }
+    ).scripts
+    expect(
+      scripts.map((script) => ({
+        path: script.path,
+        format: script.format,
+        pageIds: script.pageIds,
+        priority: script.priority,
+      })),
+    ).toEqual([
       { path: 'scripts/vendor.js', format: 'classic', pageIds: [indexPageId], priority: 100 },
       { path: 'scripts/app.js', format: 'module', pageIds: [indexPageId], priority: 101 },
     ])
@@ -688,12 +749,16 @@ describe('commitImportPlan — happy path', () => {
     const pageId = (addPageOp?.args as { id?: string } | undefined)?.id
     const addStylesheetsOp = adapter.ops.find((o) => o.type === 'addStylesheets')
     expect(addStylesheetsOp).toBeDefined()
-    const stylesheets = (addStylesheetsOp!.args as { stylesheets: Array<{
-      path: string
-      content: string
-      pageIds?: string[]
-      priority: number
-    }> }).stylesheets
+    const stylesheets = (
+      addStylesheetsOp!.args as {
+        stylesheets: Array<{
+          path: string
+          content: string
+          pageIds?: string[]
+          priority: number
+        }>
+      }
+    ).stylesheets
     expect(stylesheets).toHaveLength(1)
     expect(stylesheets[0].path).toBe('css/style.css')
     expect(stylesheets[0].content).toContain('color: red')
@@ -735,7 +800,10 @@ describe('commitImportPlan — happy path', () => {
   })
 
   it('returns ImportResult with correct shape', async () => {
-    const plan = buildImportPlan({ fileMap: makeSampleFileMap(), currentSite: makeEmptySiteDocument() })
+    const plan = buildImportPlan({
+      fileMap: makeSampleFileMap(),
+      currentSite: makeEmptySiteDocument(),
+    })
     const adapter = makeMockAdapter()
     const result = await commitImportPlan(plan, adapter)
     expect(result.pages).toHaveLength(3)
@@ -789,7 +857,10 @@ describe('commitImportPlan — happy path', () => {
   })
 
   it('rewrites asset URLs in the committed pages', async () => {
-    const plan = buildImportPlan({ fileMap: makeSampleFileMap(), currentSite: makeEmptySiteDocument() })
+    const plan = buildImportPlan({
+      fileMap: makeSampleFileMap(),
+      currentSite: makeEmptySiteDocument(),
+    })
     const adapter = makeMockAdapter()
     await commitImportPlan(plan, adapter)
 
@@ -815,7 +886,10 @@ describe('commitImportPlan — happy path', () => {
 
 describe('commitImportPlan — conflict: skip', () => {
   it('skips a page when resolution is "skip"', async () => {
-    const plan = buildImportPlan({ fileMap: makeSampleFileMap(), currentSite: makeEmptySiteDocument() })
+    const plan = buildImportPlan({
+      fileMap: makeSampleFileMap(),
+      currentSite: makeEmptySiteDocument(),
+    })
     // Manually inject a conflict with skip resolution
     const pageToSkip = plan.pages[0]
     const planWithConflict: ImportPlan = {
@@ -845,7 +919,10 @@ describe('commitImportPlan — conflict: skip', () => {
 
 describe('commitImportPlan — conflict: overwrite', () => {
   it('calls overwritePage when resolution is "overwrite"', async () => {
-    const plan = buildImportPlan({ fileMap: makeSampleFileMap(), currentSite: makeEmptySiteDocument() })
+    const plan = buildImportPlan({
+      fileMap: makeSampleFileMap(),
+      currentSite: makeEmptySiteDocument(),
+    })
     const pageToOverwrite = plan.pages[0]
     const planWithConflict: ImportPlan = {
       ...plan,
@@ -871,7 +948,10 @@ describe('commitImportPlan — conflict: overwrite', () => {
 
 describe('commitImportPlan — conflict: auto-rename', () => {
   it('uses resolvedSlug when resolution is "auto-rename"', async () => {
-    const plan = buildImportPlan({ fileMap: makeSampleFileMap(), currentSite: makeEmptySiteDocument() })
+    const plan = buildImportPlan({
+      fileMap: makeSampleFileMap(),
+      currentSite: makeEmptySiteDocument(),
+    })
     const pageToRename = plan.pages[0]
     const planWithConflict: ImportPlan = {
       ...plan,
@@ -905,7 +985,10 @@ describe('commitImportPlan — conflict: auto-rename', () => {
 
 describe('commitImportPlan — per-asset upload failure recovery', () => {
   it('continues past upload failures, records them as warnings, and still commits the store mutation', async () => {
-    const plan = buildImportPlan({ fileMap: makeSampleFileMap(), currentSite: makeEmptySiteDocument() })
+    const plan = buildImportPlan({
+      fileMap: makeSampleFileMap(),
+      currentSite: makeEmptySiteDocument(),
+    })
     const adapter = makeMockAdapter({ uploadFail: true })
 
     // Per-asset failures used to throw and abort the whole commit. The new
@@ -930,11 +1013,17 @@ describe('buildImportPlan — unused CSS', () => {
     const enc = new TextEncoder()
     const fileMapWithOrphan: FileMap = {
       files: {
-        'index.html': { bytes: enc.encode('<html><head></head><body><p>Hi</p></body></html>'), mimeType: 'text/html' },
+        'index.html': {
+          bytes: enc.encode('<html><head></head><body><p>Hi</p></body></html>'),
+          mimeType: 'text/html',
+        },
         'styles/orphan.css': { bytes: enc.encode('.foo { color: red }'), mimeType: 'text/css' },
       },
     }
-    const plan = buildImportPlan({ fileMap: fileMapWithOrphan, currentSite: makeEmptySiteDocument() })
+    const plan = buildImportPlan({
+      fileMap: fileMapWithOrphan,
+      currentSite: makeEmptySiteDocument(),
+    })
     expect(plan.unusedCss).toContain('styles/orphan.css')
     // orphan CSS rules should NOT appear in styleRules
     expect(plan.styleRules.find((r) => r.name === 'foo')).toBeUndefined()
@@ -947,7 +1036,10 @@ describe('buildImportPlan — unused CSS', () => {
 
 describe('commitImportPlan — token conflict: overwrite', () => {
   it('routes an overwrite colour token to overwriteColorTokens, not addColorTokens', async () => {
-    const plan = buildImportPlan({ fileMap: makeSampleFileMap(), currentSite: makeEmptySiteDocument() })
+    const plan = buildImportPlan({
+      fileMap: makeSampleFileMap(),
+      currentSite: makeEmptySiteDocument(),
+    })
     const planWithToken: ImportPlan = {
       ...plan,
       colors: [{ slug: 'bg', value: '#123456' }],
@@ -976,7 +1068,10 @@ describe('commitImportPlan — token conflict: overwrite', () => {
   })
 
   it('routes an overwrite font token to overwriteFontTokens, not addFontTokens', async () => {
-    const plan = buildImportPlan({ fileMap: makeSampleFileMap(), currentSite: makeEmptySiteDocument() })
+    const plan = buildImportPlan({
+      fileMap: makeSampleFileMap(),
+      currentSite: makeEmptySiteDocument(),
+    })
     const fontToken = { name: 'Primary', variable: 'font-primary', fallback: 'sans-serif' }
     const planWithToken: ImportPlan = {
       ...plan,
@@ -998,14 +1093,17 @@ describe('commitImportPlan — token conflict: overwrite', () => {
 
     const overwrite = adapter.ops.find((o) => o.type === 'overwriteFontTokens')
     expect(overwrite).toBeDefined()
-    expect((overwrite!.args as { items: { existingTokenId: string }[] }).items[0].existingTokenId).toBe(
-      'existing-font-id',
-    )
+    expect(
+      (overwrite!.args as { items: { existingTokenId: string }[] }).items[0].existingTokenId,
+    ).toBe('existing-font-id')
     expect(adapter.ops.some((o) => o.type === 'addFontTokens')).toBe(false)
   })
 
   it('adds a non-conflicting colour token via addColorTokens', async () => {
-    const plan = buildImportPlan({ fileMap: makeSampleFileMap(), currentSite: makeEmptySiteDocument() })
+    const plan = buildImportPlan({
+      fileMap: makeSampleFileMap(),
+      currentSite: makeEmptySiteDocument(),
+    })
     const planWithToken: ImportPlan = {
       ...plan,
       colors: [{ slug: 'brand', value: '#abcdef' }],

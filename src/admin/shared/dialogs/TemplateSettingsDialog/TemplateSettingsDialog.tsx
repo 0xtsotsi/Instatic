@@ -1,11 +1,7 @@
 import { useEffect, useId, useRef, useState, type FormEvent } from 'react'
 import { useAsyncResource } from '@admin/lib/useAsyncResource'
 import type { Page, PageTemplateConfig, TemplateTarget } from '@core/page-tree'
-import {
-  normalizePageSlug,
-  pageSlugDuplicateError,
-  pageSlugError,
-} from '@core/page-tree'
+import { normalizePageSlug, pageSlugDuplicateError, pageSlugError } from '@core/page-tree'
 import { listCmsDataTables } from '@core/persistence/cmsData'
 import type { DataTable } from '@core/data/schemas'
 import { Button } from '@ui/components/Button'
@@ -28,22 +24,24 @@ interface TemplateSettingsDialogProps {
   onSave: (payload: TemplateSettingsPayload) => void
 }
 
-const FALLBACK_COLLECTIONS: DataTable[] = [{
-  id: 'posts',
-  name: 'Posts',
-  slug: 'posts',
-  kind: 'postType',
-  routeBase: '/posts',
-  singularLabel: 'Post',
-  pluralLabel: 'Posts',
-  primaryFieldId: 'title',
-  system: false,
-  fields: [],
-  createdByUserId: null,
-  updatedByUserId: null,
-  createdAt: '',
-  updatedAt: '',
-}]
+const FALLBACK_COLLECTIONS: DataTable[] = [
+  {
+    id: 'posts',
+    name: 'Posts',
+    slug: 'posts',
+    kind: 'postType',
+    routeBase: '/posts',
+    singularLabel: 'Post',
+    pluralLabel: 'Posts',
+    primaryFieldId: 'title',
+    system: false,
+    fields: [],
+    createdByUserId: null,
+    updatedByUserId: null,
+    createdAt: '',
+    updatedAt: '',
+  },
+]
 
 const FORM_ID = 'template-settings-form'
 
@@ -62,7 +60,9 @@ export function TemplateSettingsDialog({
   const initialTarget = page.template?.target
   const [title, setTitle] = useState(page.title)
   const [slug, setSlug] = useState(page.slug)
-  const [targetKind, setTargetKind] = useState<TemplateTarget['kind']>(initialTarget?.kind ?? 'everywhere')
+  const [targetKind, setTargetKind] = useState<TemplateTarget['kind']>(
+    initialTarget?.kind ?? 'everywhere',
+  )
   const [selectedSlugs, setSelectedSlugs] = useState<string[]>(
     initialTarget?.kind === 'postTypes' ? initialTarget.tableSlugs : [],
   )
@@ -90,14 +90,12 @@ export function TemplateSettingsDialog({
   const trimmedTitle = title.trim()
   const normalizedSlug = normalizePageSlug(slug)
   const priorityNumber = Number(priority)
-  const slugValidation = pageSlugError(normalizedSlug) || pageSlugDuplicateError(normalizedSlug, pages, page.id)
+  const slugValidation =
+    pageSlugError(normalizedSlug) || pageSlugDuplicateError(normalizedSlug, pages, page.id)
   const priorityInvalid = !Number.isFinite(priorityNumber)
   const postTypesEmpty = targetKind === 'postTypes' && selectedSlugs.length === 0
 
-  const saveDisabled = !trimmedTitle
-    || Boolean(slugValidation)
-    || priorityInvalid
-    || postTypesEmpty
+  const saveDisabled = !trimmedTitle || Boolean(slugValidation) || priorityInvalid || postTypesEmpty
 
   useEffect(() => {
     requestAnimationFrame(() => inputRef.current?.select())
@@ -113,9 +111,10 @@ export function TemplateSettingsDialog({
     event.preventDefault()
     if (saveDisabled) return
 
-    const target: TemplateTarget = targetKind === 'postTypes'
-      ? { kind: 'postTypes', tableSlugs: selectedSlugs }
-      : { kind: targetKind }
+    const target: TemplateTarget =
+      targetKind === 'postTypes'
+        ? { kind: 'postTypes', tableSlugs: selectedSlugs }
+        : { kind: targetKind }
 
     onSave({
       title: trimmedTitle,
@@ -140,13 +139,7 @@ export function TemplateSettingsDialog({
           <Button variant="secondary" size="sm" type="button" onClick={onCancel}>
             Cancel
           </Button>
-          <Button
-            variant="primary"
-            size="sm"
-            type="submit"
-            form={FORM_ID}
-            disabled={saveDisabled}
-          >
+          <Button variant="primary" size="sm" type="submit" form={FORM_ID} disabled={saveDisabled}>
             Save
           </Button>
         </>
@@ -154,7 +147,9 @@ export function TemplateSettingsDialog({
     >
       <form id={FORM_ID} className={dialogStyles.form} onSubmit={handleSubmit}>
         <div className={dialogStyles.field}>
-          <label htmlFor={nameInputId} className={dialogStyles.label}>Name</label>
+          <label htmlFor={nameInputId} className={dialogStyles.label}>
+            Name
+          </label>
           <Input
             id={nameInputId}
             ref={inputRef}
@@ -167,7 +162,9 @@ export function TemplateSettingsDialog({
         </div>
 
         <div className={dialogStyles.field}>
-          <label htmlFor={slugInputId} className={dialogStyles.label}>Slug</label>
+          <label htmlFor={slugInputId} className={dialogStyles.label}>
+            Slug
+          </label>
           <Input
             id={slugInputId}
             fieldSize="sm"
@@ -178,12 +175,16 @@ export function TemplateSettingsDialog({
             invalid={Boolean(slugValidation)}
           />
           {slugValidation && (
-            <p role="alert" className={dialogStyles.errorText}>{slugValidation}</p>
+            <p role="alert" className={dialogStyles.errorText}>
+              {slugValidation}
+            </p>
           )}
         </div>
 
         <div className={dialogStyles.field}>
-          <label htmlFor={targetSelectId} className={dialogStyles.label}>Applies to</label>
+          <label htmlFor={targetSelectId} className={dialogStyles.label}>
+            Applies to
+          </label>
           <Select
             id={targetSelectId}
             aria-label="Applies to"
@@ -208,13 +209,17 @@ export function TemplateSettingsDialog({
               </label>
             ))}
             {postTypesEmpty && (
-              <p role="alert" className={dialogStyles.errorText}>Select at least one post type.</p>
+              <p role="alert" className={dialogStyles.errorText}>
+                Select at least one post type.
+              </p>
             )}
           </div>
         )}
 
         <div className={dialogStyles.field}>
-          <label htmlFor={priorityInputId} className={dialogStyles.label}>Priority</label>
+          <label htmlFor={priorityInputId} className={dialogStyles.label}>
+            Priority
+          </label>
           <Input
             id={priorityInputId}
             aria-label="Priority"

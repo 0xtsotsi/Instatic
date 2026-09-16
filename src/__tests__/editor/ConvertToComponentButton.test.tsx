@@ -58,7 +58,12 @@ function setupPageWithNode(): { nodeId: string; rootId: string } {
   const rootId = 'root-1'
   const nodeId = 'text-1'
   const rootNode = makeNode({ id: rootId, moduleId: 'base.body', children: [nodeId] })
-  const textNode = makeNode({ id: nodeId, moduleId: 'base.text', props: { text: 'Hello' }, children: [] })
+  const textNode = makeNode({
+    id: nodeId,
+    moduleId: 'base.text',
+    props: { text: 'Hello' },
+    children: [],
+  })
   const page = makePage({
     id: 'page-1',
     rootNodeId: rootId,
@@ -125,15 +130,25 @@ describe('CTB-3 — invalid name shows alert and does not create a VC', () => {
     const existingVc = {
       id: 'vc-existing',
       name: 'Taken',
-      rootNode: { id: 'r', moduleId: 'base.body', props: {}, children: [], breakpointOverrides: {}, classIds: [] },
+      rootNode: {
+        id: 'r',
+        moduleId: 'base.body',
+        props: {},
+        children: [],
+        breakpointOverrides: {},
+        classIds: [],
+      },
       params: [],
       breakpoints: [],
       classIds: [],
       createdAt: 1,
     }
-    useEditorStore.setState((s) => ({
-      site: { ...s.site!, visualComponents: [existingVc] },
-    }) as Parameters<typeof useEditorStore.setState>[0])
+    useEditorStore.setState(
+      (s) =>
+        ({
+          site: { ...s.site!, visualComponents: [existingVc] },
+        }) as Parameters<typeof useEditorStore.setState>[0],
+    )
 
     render(<ConvertToComponentButton nodeId={nodeId} />)
 
@@ -232,15 +247,25 @@ describe('CTB-5 — Escape key cancels back to idle', () => {
     const existingVc = {
       id: 'vc-existing',
       name: 'Taken',
-      rootNode: { id: 'r', moduleId: 'base.body', props: {}, children: [], breakpointOverrides: {}, classIds: [] },
+      rootNode: {
+        id: 'r',
+        moduleId: 'base.body',
+        props: {},
+        children: [],
+        breakpointOverrides: {},
+        classIds: [],
+      },
       params: [],
       breakpoints: [],
       classIds: [],
       createdAt: 1,
     }
-    useEditorStore.setState((s) => ({
-      site: { ...s.site!, visualComponents: [existingVc] },
-    }) as Parameters<typeof useEditorStore.setState>[0])
+    useEditorStore.setState(
+      (s) =>
+        ({
+          site: { ...s.site!, visualComponents: [existingVc] },
+        }) as Parameters<typeof useEditorStore.setState>[0],
+    )
 
     render(<ConvertToComponentButton nodeId={nodeId} />)
 
@@ -280,15 +305,25 @@ describe('CTB-6 — Cancel button returns to idle', () => {
     const existingVc = {
       id: 'vc-existing',
       name: 'Taken',
-      rootNode: { id: 'r', moduleId: 'base.body', props: {}, children: [], breakpointOverrides: {}, classIds: [] },
+      rootNode: {
+        id: 'r',
+        moduleId: 'base.body',
+        props: {},
+        children: [],
+        breakpointOverrides: {},
+        classIds: [],
+      },
       params: [],
       breakpoints: [],
       classIds: [],
       createdAt: 1,
     }
-    useEditorStore.setState((s) => ({
-      site: { ...s.site!, visualComponents: [existingVc] },
-    }) as Parameters<typeof useEditorStore.setState>[0])
+    useEditorStore.setState(
+      (s) =>
+        ({
+          site: { ...s.site!, visualComponents: [existingVc] },
+        }) as Parameters<typeof useEditorStore.setState>[0],
+    )
 
     render(<ConvertToComponentButton nodeId={nodeId} />)
 

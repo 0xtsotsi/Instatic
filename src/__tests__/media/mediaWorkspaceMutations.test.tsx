@@ -76,9 +76,7 @@ async function mountWorkspace(initialAssets: Record<string, unknown>[]) {
 
 describe('useMediaWorkspace mutation envelope (assetMut)', () => {
   it('a thrown op sets the error and returns null without throwing', async () => {
-    routeFetch([assetRow()], () =>
-      jsonResponse({ error: 'Filename already taken' }, 409),
-    )
+    routeFetch([assetRow()], () => jsonResponse({ error: 'Filename already taken' }, 409))
     const view = await mountWorkspace([assetRow()])
 
     let returned: unknown = 'untouched'
@@ -93,9 +91,7 @@ describe('useMediaWorkspace mutation envelope (assetMut)', () => {
   })
 
   it('a successful op clears the error and updates the cache', async () => {
-    routeFetch([assetRow()], () =>
-      jsonResponse({ asset: assetRow({ filename: 'renamed.png' }) }),
-    )
+    routeFetch([assetRow()], () => jsonResponse({ asset: assetRow({ filename: 'renamed.png' }) }))
     const view = await mountWorkspace([assetRow()])
 
     // Seed a sticky error so we can prove a successful op clears it.
@@ -105,9 +101,9 @@ describe('useMediaWorkspace mutation envelope (assetMut)', () => {
 
     let returned: { filename: string } | null = null
     await act(async () => {
-      returned = (await view.result.current.renameAsset('asset_1', 'renamed.png')) as
-        | { filename: string }
-        | null
+      returned = (await view.result.current.renameAsset('asset_1', 'renamed.png')) as {
+        filename: string
+      } | null
     })
 
     expect(returned).not.toBeNull()

@@ -79,8 +79,7 @@ interface AdminCanvasEditorBodyProps {
 }
 
 const AdminCanvasEditorBody = prewarmedLazy<AdminCanvasEditorBodyProps>(
-  () =>
-    import('./AdminCanvasEditorBody').then((m) => ({ default: m.AdminCanvasEditorBody })),
+  () => import('./AdminCanvasEditorBody').then((m) => ({ default: m.AdminCanvasEditorBody })),
   { displayName: 'AdminCanvasEditorBody' },
 )
 
@@ -188,9 +187,10 @@ export function AdminCanvasLayout() {
   // on every render).
   const appearance = useEditorAppearancePreferences()
 
-  const loadError = !site && persistence.saveStatus.state === 'error'
-    ? persistence.saveStatus.message ?? 'Reload the admin page and try again.'
-    : null
+  const loadError =
+    !site && persistence.saveStatus.state === 'error'
+      ? (persistence.saveStatus.message ?? 'Reload the admin page and try again.')
+      : null
 
   const loadEditorBody = usePostPaintEditorBodyGate()
   async function saveBeforeWorkspaceNavigation(): Promise<void> {
@@ -216,19 +216,21 @@ export function AdminCanvasLayout() {
           siteName={siteName}
           faviconUrl={faviconUrl}
           section="site"
-          adminNavigationSlot={(
+          adminNavigationSlot={
             <AdminSectionNavigation
               section="site"
               currentUser={currentUser}
               onWorkspaceNavigateStart={canSaveSite ? saveBeforeWorkspaceNavigation : undefined}
             />
-          )}
-          overlay={previewOpen && (
-            <Suspense fallback={null}>
-              <PreviewOverlay />
-            </Suspense>
-          )}
-          rightSlot={(
+          }
+          overlay={
+            previewOpen && (
+              <Suspense fallback={null}>
+                <PreviewOverlay />
+              </Suspense>
+            )
+          }
+          rightSlot={
             <>
               <ZoomControls />
               <PublishButton
@@ -237,7 +239,7 @@ export function AdminCanvasLayout() {
                 saveStatus={persistence.saveStatus}
               />
             </>
-          )}
+          }
         />
 
         {loadEditorBody ? (
@@ -266,7 +268,6 @@ export function AdminCanvasLayout() {
             <SettingsModal />
           </Suspense>
         )}
-
       </div>
     </EditorPermissionsProvider>
   )
@@ -316,10 +317,7 @@ function AdminCanvasEditorBodyLoading() {
           >
             <div className={styles.canvasBootstrapLayer} aria-hidden="true">
               {DEFAULT_CANVAS_FRAME_SKELETON_BREAKPOINTS.map((breakpoint) => (
-                <CanvasFrameSkeletonFrame
-                  key={breakpoint.id}
-                  breakpoint={breakpoint}
-                />
+                <CanvasFrameSkeletonFrame key={breakpoint.id} breakpoint={breakpoint} />
               ))}
             </div>
           </section>

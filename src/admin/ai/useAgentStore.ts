@@ -23,9 +23,7 @@ export interface AgentStoreApi {
   getState(): AgentSlice
   getInitialState(): AgentSlice
   setState(
-    partial:
-      | Partial<AgentSlice>
-      | ((state: AgentSlice) => AgentSlice | Partial<AgentSlice>),
+    partial: Partial<AgentSlice> | ((state: AgentSlice) => AgentSlice | Partial<AgentSlice>),
     replace?: false,
   ): void
   subscribe(listener: (state: AgentSlice, prevState: AgentSlice) => void): () => void
@@ -45,7 +43,7 @@ export function useAgentStoreApi(): AgentStoreApi {
   if (!api) {
     throw new Error(
       '[AgentStoreContext] No AgentStoreProvider in tree. ' +
-      'Wrap the AgentPanel mount in <AgentStoreProvider store={...}>.',
+        'Wrap the AgentPanel mount in <AgentStoreProvider store={...}>.',
     )
   }
   return api

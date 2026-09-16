@@ -36,11 +36,13 @@ export function usePluginEventBridge(enabled = true): void {
     // Initial fetch — populate the in-error set at admin mount, before any
     // event arrives. This is what gives the nav badge its initial state on
     // a hard page load.
-    void listCmsPlugins().then((payload) => {
-      setPluginsInErrorFromList(payload.plugins)
-    }).catch((err: unknown) => {
-      console.error('[plugin-event-bridge] initial plugin list fetch failed:', err)
-    })
+    void listCmsPlugins()
+      .then((payload) => {
+        setPluginsInErrorFromList(payload.plugins)
+      })
+      .catch((err: unknown) => {
+        console.error('[plugin-event-bridge] initial plugin list fetch failed:', err)
+      })
 
     const unsubscribe = subscribePluginEvents((event) => {
       void handlePluginEvent(event)

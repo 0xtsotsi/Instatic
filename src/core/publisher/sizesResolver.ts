@@ -164,9 +164,7 @@ function pxOrZero(value: unknown): number {
 // ---------------------------------------------------------------------------
 
 type GridTrack =
-  | { kind: 'px'; value: number }
-  | { kind: 'pct'; value: number }
-  | { kind: 'fr'; value: number }
+  { kind: 'px'; value: number } | { kind: 'pct'; value: number } | { kind: 'fr'; value: number }
 
 /**
  * Parse a `grid-template-columns` track list into px / % / fr tracks.
@@ -178,8 +176,10 @@ function parseGridTracks(value: unknown): GridTrack[] | null {
   if (typeof value !== 'string' || !value.trim()) return null
   // Expand literal repeat(N, tracks) — nested functions inside repeat() are
   // unsupported and fail the token parse below.
-  const expanded = value.replace(/repeat\(\s*(\d+)\s*,([^)]*)\)/g, (_m, count: string, inner: string) =>
-    Array.from({ length: Number(count) }, () => inner.trim()).join(' '),
+  const expanded = value.replace(
+    /repeat\(\s*(\d+)\s*,([^)]*)\)/g,
+    (_m, count: string, inner: string) =>
+      Array.from({ length: Number(count) }, () => inner.trim()).join(' '),
   )
   if (/repeat|minmax|auto|\(/.test(expanded)) return null
   const tokens = expanded.trim().split(/\s+/)
@@ -239,14 +239,14 @@ function effectiveBag(
   const classes = (node.classIds ?? [])
     .map((classId) => site.styleRules[classId])
     .filter((cls) => cls !== undefined)
-    .sort((a, b) => (typeof a.order === 'number' ? a.order : 0) - (typeof b.order === 'number' ? b.order : 0))
+    .sort(
+      (a, b) =>
+        (typeof a.order === 'number' ? a.order : 0) - (typeof b.order === 'number' ? b.order : 0),
+    )
   for (const cls of classes) {
     applyLayer(cls.styles, cls.stylePriorities)
     if (breakpointId) {
-      applyLayer(
-        cls.contextStyles?.[breakpointId],
-        cls.contextStylePriorities?.[breakpointId],
-      )
+      applyLayer(cls.contextStyles?.[breakpointId], cls.contextStylePriorities?.[breakpointId])
     }
   }
   // Normal inline declarations outrank normal class declarations, but an
@@ -328,7 +328,9 @@ function childAvailableWidth(
     const tracks = parseGridTracks(parentBag.gridTemplateColumns)
     if (!tracks) return { cands, floor }
 
-    const equalTracks = tracks.every((t) => t.kind === tracks[0].kind && t.value === tracks[0].value)
+    const equalTracks = tracks.every(
+      (t) => t.kind === tracks[0].kind && t.value === tracks[0].value,
+    )
     // Hidden siblings render nothing and occupy no grid cell.
     const visibleChildren = parent.children.filter((id) => !ctx.page.nodes[id]?.hidden)
     const index = visibleChildren.indexOf(child.id)
@@ -377,7 +379,8 @@ function applyOwnWidth(state: WidthState, bag: Record<string, unknown>): WidthSt
   // entirely rather than under-estimate.
   if (bag.minWidth !== undefined) {
     const parsed = parseLength(bag.minWidth)
-    const isNone = typeof bag.minWidth === 'string' && /^(0(px)?|none|auto)$/.test(bag.minWidth.trim())
+    const isNone =
+      typeof bag.minWidth === 'string' && /^(0(px)?|none|auto)$/.test(bag.minWidth.trim())
     if (!parsed && !isNone) return state
     if (parsed && parsed.unit !== 'px') return state
   }
@@ -464,8 +467,7 @@ function renderWidth(state: WidthState): string {
 
   // The floor only matters when some candidate can dip below it (any
   // viewport-dependent term, or a constant smaller than the floor).
-  const floorMatters = state.floor > 0
-    && safe.some((c) => c.vw > 0 || c.px < state.floor)
+  const floorMatters = state.floor > 0 && safe.some((c) => c.vw > 0 || c.px < state.floor)
   return floorMatters ? `max(${fmtNumber(state.floor)}px, ${inner})` : inner
 }
 
@@ -481,11 +483,7 @@ function isSafeSizesMediaQuery(query: string): boolean {
  * Resolve the `sizes` string for the image at `nodeId`, or `null` when the
  * layout doesn't constrain it at any tier (caller falls back to `100vw`).
  */
-export function resolveAutoSizes(
-  nodeId: string,
-  page: Page,
-  site: SiteDocument,
-): string | null {
+export function resolveAutoSizes(nodeId: string, page: Page, site: SiteDocument): string | null {
   const chain = chainRootToNode(nodeId, page)
   if (!chain.length) return null
 
@@ -500,9 +498,15 @@ export function resolveAutoSizes(
   for (const { breakpoint } of tiers) {
     const query = breakpointMediaQuery(breakpoint)
     if (!isSafeSizesMediaQuery(query)) continue
-    entries.push({ query, value: renderWidth(tierWidth(chain, { page, site, breakpointId: breakpoint.id })) })
+    entries.push({
+      query,
+      value: renderWidth(tierWidth(chain, { page, site, breakpointId: breakpoint.id })),
+    })
   }
-  entries.push({ query: null, value: renderWidth(tierWidth(chain, { page, site, breakpointId: null })) })
+  entries.push({
+    query: null,
+    value: renderWidth(tierWidth(chain, { page, site, breakpointId: null })),
+  })
 
   // Collapse runs only when the queries are uniformly nested (all default
   // `max-width` or all `min-width`): there, the next emitted tier's range is

@@ -4,7 +4,9 @@ import type { HostPluginRecord } from '../../../server/plugins/host/types'
 
 const runCaptureMock = mock(async () => ({ ok: true, html: '<main>captured</main>' }))
 const createPlaywrightFetcherMock = mock(async () => ({
-  fetch: async () => { throw new Error('test fetcher should not run') },
+  fetch: async () => {
+    throw new Error('test fetcher should not run')
+  },
   close: async () => {},
 }))
 const assetFetcher = { fetch: async () => ({ ok: false, error: 'not used' }) }
@@ -22,7 +24,8 @@ mock.module('../../../server/ai/mcp/capture/core/safeFetcher', () => ({
 }))
 
 const { dispatchApiCall } = await import('../../../server/plugins/host/apiDispatch')
-const { hostPlugins, setPluginWorkerDbClient } = await import('../../../server/plugins/host/registry')
+const { hostPlugins, setPluginWorkerDbClient } =
+  await import('../../../server/plugins/host/registry')
 const { workers } = await import('../../../server/plugins/host/workerState')
 const { parseApiCall } = await import('../../../server/plugins/protocol/parser')
 

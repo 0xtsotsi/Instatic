@@ -22,7 +22,7 @@
  * Internal files import each other via relative paths.
  */
 
-export type {  ImportFragment, ImportResult } from './walkAndMap'
+export type { ImportFragment, ImportResult } from './walkAndMap'
 
 export { parseHtml } from './parseHtml'
 export { stripUnsafe } from './stripUnsafe'

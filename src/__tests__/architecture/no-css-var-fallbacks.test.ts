@@ -27,11 +27,7 @@ import { existsSync, readdirSync, readFileSync, statSync } from 'fs'
 import { extname, join, relative } from 'path'
 
 const SRC_ROOT = join(import.meta.dir, '../..')
-const SCAN_ROOTS = [
-  join(SRC_ROOT, 'admin'),
-  join(SRC_ROOT, 'editor'),
-  join(SRC_ROOT, 'ui'),
-]
+const SCAN_ROOTS = [join(SRC_ROOT, 'admin'), join(SRC_ROOT, 'editor'), join(SRC_ROOT, 'ui')]
 const GLOBALS_CSS = join(SRC_ROOT, 'styles/globals.css')
 
 /**
@@ -77,9 +73,7 @@ function findVarFallbackHits(source: string): Array<{ line: number; snippet: str
 
 /** Strip `/* ... *\/` block comments and `// ...` line comments. */
 function stripComments(source: string): string {
-  return source
-    .replace(/\/\*[\s\S]*?\*\//g, '')
-    .replace(/^\s*\/\/.*$/gm, '')
+  return source.replace(/\/\*[\s\S]*?\*\//g, '').replace(/^\s*\/\/.*$/gm, '')
 }
 
 function collectFiles(dir: string, exts: ReadonlyArray<string>): string[] {

@@ -51,8 +51,20 @@ export const CUSTOM_HTML_TAG_VALUE = 'custom'
  * are self-closing.
  */
 export const VOID_HTML_ELEMENTS: ReadonlySet<string> = new Set([
-  'area', 'base', 'br', 'col', 'embed', 'hr', 'img', 'input',
-  'link', 'meta', 'param', 'source', 'track', 'wbr',
+  'area',
+  'base',
+  'br',
+  'col',
+  'embed',
+  'hr',
+  'img',
+  'input',
+  'link',
+  'meta',
+  'param',
+  'source',
+  'track',
+  'wbr',
 ])
 
 const BUILTIN_HTML_TAG_SET: ReadonlySet<string> = new Set(BUILTIN_HTML_TAGS)
@@ -70,8 +82,17 @@ const CUSTOM_TAG_PATTERN = /^[a-z][a-z0-9-]{0,31}$/i
  * embeds — it only stops a container/loop/outlet author typing a dangerous tag.
  */
 const FORBIDDEN_CUSTOM_HTML_TAGS: ReadonlySet<string> = new Set([
-  'script', 'iframe', 'frame', 'frameset', 'object', 'embed',
-  'applet', 'base', 'link', 'meta', 'style',
+  'script',
+  'iframe',
+  'frame',
+  'frameset',
+  'object',
+  'embed',
+  'applet',
+  'base',
+  'link',
+  'meta',
+  'style',
 ])
 
 /**

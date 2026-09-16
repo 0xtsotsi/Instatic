@@ -15,10 +15,7 @@
  * inline message + the dialog stays open so the user can retry.
  */
 import { useState } from 'react'
-import {
-  scheduleCmsDataRowPublish,
-  cancelCmsDataRowSchedule,
-} from '@core/persistence'
+import { scheduleCmsDataRowPublish, cancelCmsDataRowSchedule } from '@core/persistence'
 import type { DataRow } from '@core/data/schemas'
 import { Dialog } from '@ui/components/Dialog'
 import { Button } from '@ui/components/Button'
@@ -141,21 +138,13 @@ export function SchedulePublishDialog({
       />
       {isAlreadyScheduled && (
         <div className={styles.cancelRow}>
-          <Button
-            variant="ghost"
-            size="sm"
-            disabled={busy}
-            onClick={handleCancelSchedule}
-          >
+          <Button variant="ghost" size="sm" disabled={busy} onClick={handleCancelSchedule}>
             Cancel current schedule
           </Button>
         </div>
       )}
       {error && (
-        <p
-          role="alert"
-          className={styles.error}
-        >
+        <p role="alert" className={styles.error}>
           {error}
         </p>
       )}

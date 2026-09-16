@@ -86,10 +86,18 @@ export function DropStep({ busy, errorMessage, onFilesReady, onZipReady }: DropS
         className={styles.dropZone}
         data-dragging={dragging ? 'true' : undefined}
         data-disabled={busy ? 'true' : undefined}
-        onDragOver={(e) => { e.preventDefault(); if (!busy) setDragging(true) }}
-        onDragEnter={(e) => { e.preventDefault(); if (!busy) setDragging(true) }}
+        onDragOver={(e) => {
+          e.preventDefault()
+          if (!busy) setDragging(true)
+        }}
+        onDragEnter={(e) => {
+          e.preventDefault()
+          if (!busy) setDragging(true)
+        }}
         onDragLeave={() => setDragging(false)}
-        onDrop={(e) => { void handleDrop(e) }}
+        onDrop={(e) => {
+          void handleDrop(e)
+        }}
         aria-label="Drop site files, a folder, a CMS bundle, or a .zip archive here"
       >
         <UploadIcon size={28} aria-hidden="true" className={styles.dropIcon} />

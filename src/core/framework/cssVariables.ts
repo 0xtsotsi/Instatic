@@ -29,9 +29,7 @@ export function formatCssVariableBlock(
  * unlike the publisher's declaration-block context, where `;` is valid inside a
  * quoted `url("data:…;base64,…")` and therefore left to `sanitiseCssValue`.
  */
-function formatCssVariableDeclarations(
-  variables: ReadonlyArray<CssVariableDeclaration>,
-): string {
+function formatCssVariableDeclarations(variables: ReadonlyArray<CssVariableDeclaration>): string {
   const lines: string[] = []
   for (const variable of variables) {
     const safe = sanitiseCssValue(variable.value)

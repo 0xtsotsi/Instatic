@@ -33,10 +33,7 @@ function collectTsFiles(dir: string): string[] {
 }
 
 // Direct setState call patterns that are forbidden in commands/
-const FORBIDDEN_PATTERNS = [
-  /useEditorStore\.setState\s*\(/,
-  /useEditorStore\.subscribe\s*\(/,
-]
+const FORBIDDEN_PATTERNS = [/useEditorStore\.setState\s*\(/, /useEditorStore\.subscribe\s*\(/]
 
 // Store-internal import paths (slices, helpers) that commands must not import
 // Commands may only use the public useEditorStore from @site/store/store

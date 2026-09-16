@@ -40,7 +40,12 @@ function resetStore() {
     rootNodeId: 'root',
     nodes: {
       root: makeNode({ id: 'root', moduleId: 'base.body', children: ['hero'] }),
-      hero: makeNode({ id: 'hero', moduleId: 'base.text', props: { text: 'Hero', tag: 'h1' }, classIds: [] }),
+      hero: makeNode({
+        id: 'hero',
+        moduleId: 'base.text',
+        props: { text: 'Hero', tag: 'h1' },
+        classIds: [],
+      }),
     },
   })
   useEditorStore.setState({
@@ -102,7 +107,9 @@ describe('generated utility classes in editor panels', () => {
     const panel = screen.getByTestId('properties-panel')
     expect(within(panel).getByText('Generated utility')).toBeDefined()
     expect(within(panel).getByText(/utility classes have a single purpose/i)).toBeDefined()
-    expect(within(panel).queryByRole('searchbox', { name: /search class style properties to add/i })).toBeNull()
+    expect(
+      within(panel).queryByRole('searchbox', { name: /search class style properties to add/i }),
+    ).toBeNull()
   })
 
   it('shows the locked state when a generated utility is opened from the selectors panel', () => {
@@ -111,7 +118,7 @@ describe('generated utility classes in editor panels', () => {
     // rendered an editable StyleRuleComposer instead of the locked state.
     useEditorStore.setState({
       selectedNodeId: null,
-    selectedNodeIds: [],
+      selectedNodeIds: [],
       activeClassId: GENERATED_CLASS_ID,
       selectedSelectorClassId: GENERATED_CLASS_ID,
     } as Parameters<typeof useEditorStore.setState>[0])
@@ -121,7 +128,9 @@ describe('generated utility classes in editor panels', () => {
     const panel = screen.getByTestId('properties-panel')
     expect(within(panel).getByText('Generated utility')).toBeDefined()
     expect(within(panel).getByText(/utility classes have a single purpose/i)).toBeDefined()
-    expect(within(panel).queryByRole('searchbox', { name: /search class style properties to add/i })).toBeNull()
+    expect(
+      within(panel).queryByRole('searchbox', { name: /search class style properties to add/i }),
+    ).toBeNull()
   })
 
   it('hides selector edit actions in the selector header for generated utilities', () => {
@@ -135,8 +144,12 @@ describe('generated utility classes in editor panels', () => {
     render(<PropertiesPanel variant="docked" />)
 
     const panel = screen.getByTestId('properties-panel')
-    expect(within(panel).queryByRole('button', { name: /rename selector \.text-primary/i })).toBeNull()
-    expect(within(panel).queryByRole('button', { name: /delete selector \.text-primary/i })).toBeNull()
+    expect(
+      within(panel).queryByRole('button', { name: /rename selector \.text-primary/i }),
+    ).toBeNull()
+    expect(
+      within(panel).queryByRole('button', { name: /delete selector \.text-primary/i }),
+    ).toBeNull()
   })
 
   it('marks generated utilities in the selectors panel and disables editing actions', () => {

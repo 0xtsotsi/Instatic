@@ -149,9 +149,9 @@ export async function processStreamEvent(
           const msg = state.agentMessages.find((m) => m.id === assistantId)
           const block = msg?.blocks.find(
             (b): b is { kind: 'toolCall'; toolCall: AgentToolCall } =>
-              b.kind === 'toolCall'
-              && b.toolCall.actionType === event.toolName
-              && b.toolCall.status === 'pending',
+              b.kind === 'toolCall' &&
+              b.toolCall.actionType === event.toolName &&
+              b.toolCall.status === 'pending',
           )
           if (block) block.toolCall.previewImages = previewImages
         })
@@ -174,9 +174,10 @@ export async function processStreamEvent(
       set((state) => {
         const msg = state.agentMessages.find((m) => m.id === assistantId)
         if (!msg) return
-        const inputAsRecord = event.input && typeof event.input === 'object'
-          ? (event.input as Record<string, unknown>)
-          : null
+        const inputAsRecord =
+          event.input && typeof event.input === 'object'
+            ? (event.input as Record<string, unknown>)
+            : null
         const existing = msg.blocks.find(
           (block): block is { kind: 'toolCall'; toolCall: AgentToolCall } =>
             block.kind === 'toolCall' && block.toolCall.externalId === event.toolCallId,
@@ -218,7 +219,7 @@ export async function processStreamEvent(
         block.toolCall.status = event.ok ? 'success' : 'error'
         block.toolCall.result = {
           ok: event.ok,
-          error: event.ok ? undefined : event.error ?? 'Tool call failed.',
+          error: event.ok ? undefined : (event.error ?? 'Tool call failed.'),
         }
       })
       break
@@ -233,9 +234,7 @@ export async function processStreamEvent(
         state.agentUsage.completionTokens += event.completionTokens
         state.agentUsage.cacheReadTokens += event.cacheReadTokens ?? 0
         state.agentUsage.cacheCreationTokens += event.cacheCreationTokens ?? 0
-        state.agentUsage.costUsd = Number(
-          (state.agentUsage.costUsd + event.costUsd).toFixed(6),
-        )
+        state.agentUsage.costUsd = Number((state.agentUsage.costUsd + event.costUsd).toFixed(6))
       })
       break
     }

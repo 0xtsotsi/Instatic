@@ -29,30 +29,56 @@ const CSSPropertyBagSchema = Type.Object({
   fontStyle: Type.Optional(Type.Union([Type.Literal('normal'), Type.Literal('italic')])),
   letterSpacing: Type.Optional(Type.String()),
   lineHeight: Type.Optional(Type.String()),
-  textAlign: Type.Optional(Type.Union([
-    Type.Literal('left'), Type.Literal('center'), Type.Literal('right'), Type.Literal('justify'),
-  ])),
+  textAlign: Type.Optional(
+    Type.Union([
+      Type.Literal('left'),
+      Type.Literal('center'),
+      Type.Literal('right'),
+      Type.Literal('justify'),
+    ]),
+  ),
   textDecoration: Type.Optional(Type.String()),
-  textTransform: Type.Optional(Type.Union([
-    Type.Literal('none'), Type.Literal('uppercase'), Type.Literal('lowercase'), Type.Literal('capitalize'),
-  ])),
-  whiteSpace: Type.Optional(Type.Union([
-    Type.Literal('normal'), Type.Literal('nowrap'), Type.Literal('pre'),
-    Type.Literal('pre-wrap'), Type.Literal('pre-line'), Type.Literal('break-spaces'),
-  ])),
+  textTransform: Type.Optional(
+    Type.Union([
+      Type.Literal('none'),
+      Type.Literal('uppercase'),
+      Type.Literal('lowercase'),
+      Type.Literal('capitalize'),
+    ]),
+  ),
+  whiteSpace: Type.Optional(
+    Type.Union([
+      Type.Literal('normal'),
+      Type.Literal('nowrap'),
+      Type.Literal('pre'),
+      Type.Literal('pre-wrap'),
+      Type.Literal('pre-line'),
+      Type.Literal('break-spaces'),
+    ]),
+  ),
   color: Type.Optional(Type.String()),
   textShadow: Type.Optional(Type.String()),
 
   // Layout
-  display: Type.Optional(Type.Union([
-    Type.Literal('block'), Type.Literal('flex'), Type.Literal('grid'),
-    Type.Literal('inline'), Type.Literal('inline-block'), Type.Literal('inline-flex'),
-    Type.Literal('none'),
-  ])),
-  flexDirection: Type.Optional(Type.Union([
-    Type.Literal('row'), Type.Literal('column'),
-    Type.Literal('row-reverse'), Type.Literal('column-reverse'),
-  ])),
+  display: Type.Optional(
+    Type.Union([
+      Type.Literal('block'),
+      Type.Literal('flex'),
+      Type.Literal('grid'),
+      Type.Literal('inline'),
+      Type.Literal('inline-block'),
+      Type.Literal('inline-flex'),
+      Type.Literal('none'),
+    ]),
+  ),
+  flexDirection: Type.Optional(
+    Type.Union([
+      Type.Literal('row'),
+      Type.Literal('column'),
+      Type.Literal('row-reverse'),
+      Type.Literal('column-reverse'),
+    ]),
+  ),
   flexWrap: Type.Optional(Type.Union([Type.Literal('nowrap'), Type.Literal('wrap')])),
   alignItems: Type.Optional(Type.String()),
   justifyContent: Type.Optional(Type.String()),
@@ -93,10 +119,15 @@ const CSSPropertyBagSchema = Type.Object({
   paddingLeft: Type.Optional(Type.String()),
 
   // Position
-  position: Type.Optional(Type.Union([
-    Type.Literal('static'), Type.Literal('relative'), Type.Literal('absolute'),
-    Type.Literal('fixed'), Type.Literal('sticky'),
-  ])),
+  position: Type.Optional(
+    Type.Union([
+      Type.Literal('static'),
+      Type.Literal('relative'),
+      Type.Literal('absolute'),
+      Type.Literal('fixed'),
+      Type.Literal('sticky'),
+    ]),
+  ),
   top: Type.Optional(Type.String()),
   right: Type.Optional(Type.String()),
   bottom: Type.Optional(Type.String()),
@@ -110,10 +141,15 @@ const CSSPropertyBagSchema = Type.Object({
   backgroundSize: Type.Optional(Type.String()),
   backgroundPosition: Type.Optional(Type.String()),
   backgroundRepeat: Type.Optional(Type.String()),
-  objectFit: Type.Optional(Type.Union([
-    Type.Literal('contain'), Type.Literal('cover'), Type.Literal('fill'),
-    Type.Literal('none'), Type.Literal('scale-down'),
-  ])),
+  objectFit: Type.Optional(
+    Type.Union([
+      Type.Literal('contain'),
+      Type.Literal('cover'),
+      Type.Literal('fill'),
+      Type.Literal('none'),
+      Type.Literal('scale-down'),
+    ]),
+  ),
   objectPosition: Type.Optional(Type.String()),
   opacity: Type.Optional(Type.Number()),
   overflow: Type.Optional(Type.String()),

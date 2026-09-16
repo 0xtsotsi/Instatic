@@ -55,9 +55,27 @@ function resolvedMedia(path = '/uploads/hero.png'): RenderResolvedMedia {
     altText: '',
     blurHash: null,
     variants: [
-      { width: 320, height: 160, format: 'webp', path: '/uploads/hero-w320.webp', sizeBytes: 12_000 },
-      { width: 1024, height: 512, format: 'webp', path: '/uploads/hero-w1024.webp', sizeBytes: 82_000 },
-      { width: 2048, height: 1024, format: 'webp', path: '/uploads/hero-w2048.webp', sizeBytes: 190_000 },
+      {
+        width: 320,
+        height: 160,
+        format: 'webp',
+        path: '/uploads/hero-w320.webp',
+        sizeBytes: 12_000,
+      },
+      {
+        width: 1024,
+        height: 512,
+        format: 'webp',
+        path: '/uploads/hero-w1024.webp',
+        sizeBytes: 82_000,
+      },
+      {
+        width: 2048,
+        height: 1024,
+        format: 'webp',
+        path: '/uploads/hero-w2048.webp',
+        sizeBytes: 190_000,
+      },
     ],
     posterPath: null,
   }
@@ -74,11 +92,7 @@ describe('bagToCSS', () => {
   })
 
   it('emits sparse declaration priority separately from the property value', () => {
-    const css = bagToCSS(
-      { color: 'red', display: 'block' },
-      {},
-      { color: 'important' },
-    )
+    const css = bagToCSS({ color: 'red', display: 'block' }, {}, { color: 'important' })
     expect(css).toContain('color: red !important;')
     expect(css).toContain('display: block;')
     expect(css).not.toContain('display: block !important')
@@ -277,11 +291,7 @@ describe('bagToCSS', () => {
       fontSize: '14px',
     })
     const lines = css.split('\n')
-    expect(lines).toEqual([
-      '  color: #fff;',
-      '  padding: 20px 0;',
-      '  font-size: 14px;',
-    ])
+    expect(lines).toEqual(['  color: #fff;', '  padding: 20px 0;', '  font-size: 14px;'])
   })
 
   it('collapses CSS variable values (var(--space-md)) into the shorthand', () => {
@@ -318,12 +328,16 @@ describe('bagToCSS', () => {
       paddingBottom: '8px',
       paddingLeft: '8px',
     }
-    const allImportant = bagToCSS(styles, {}, {
-      paddingTop: 'important',
-      paddingRight: 'important',
-      paddingBottom: 'important',
-      paddingLeft: 'important',
-    })
+    const allImportant = bagToCSS(
+      styles,
+      {},
+      {
+        paddingTop: 'important',
+        paddingRight: 'important',
+        paddingBottom: 'important',
+        paddingLeft: 'important',
+      },
+    )
     expect(allImportant).toBe('  padding: 8px !important;')
 
     const mixed = bagToCSS(styles, {}, { paddingTop: 'important' })
@@ -358,17 +372,29 @@ describe('bagToCSS', () => {
 
 describe('generateClassCSS — custom conditions (unified contextStyles)', () => {
   const mediaCond = makeConditionDef({ kind: 'media', query: '(orientation: landscape)' })
-  const containerCond = makeConditionDef({ kind: 'container', name: 'sidebar', query: 'min-width: 400px' })
+  const containerCond = makeConditionDef({
+    kind: 'container',
+    name: 'sidebar',
+    query: 'min-width: 400px',
+  })
   const supportsCond = makeConditionDef({ kind: 'supports', query: '(display: grid)' })
 
   it('emits @media / @container / @supports, then width-breakpoint @media', () => {
-    const rule = makeClass('foo', { color: 'red' }, {
-      mobile: { color: 'green' },
-      [mediaCond.id]: { color: 'blue' },
-      [containerCond.id]: { display: 'grid' },
-      [supportsCond.id]: { gap: '8px' },
-    })
-    const css = generateClassCSS({ foo: rule }, [{ id: 'mobile', width: 375 }], [mediaCond, containerCond, supportsCond])
+    const rule = makeClass(
+      'foo',
+      { color: 'red' },
+      {
+        mobile: { color: 'green' },
+        [mediaCond.id]: { color: 'blue' },
+        [containerCond.id]: { display: 'grid' },
+        [supportsCond.id]: { gap: '8px' },
+      },
+    )
+    const css = generateClassCSS(
+      { foo: rule },
+      [{ id: 'mobile', width: 375 }],
+      [mediaCond, containerCond, supportsCond],
+    )
 
     expect(css).toContain('@media (orientation: landscape) {')
     expect(css).toContain('@container sidebar (min-width: 400px) {')
@@ -405,7 +431,11 @@ describe('generateClassCSS — custom conditions (unified contextStyles)', () =>
   })
 
   it('drops a container condition with an unsafe container name', () => {
-    const cond = makeConditionDef({ kind: 'container', name: 'evil {} body', query: 'min-width: 1px' })
+    const cond = makeConditionDef({
+      kind: 'container',
+      name: 'evil {} body',
+      query: 'min-width: 1px',
+    })
     const rule = makeClass('foo', { color: 'red' }, { [cond.id]: { color: 'blue' } })
     const css = generateClassCSS({ foo: rule }, [], [cond])
     expect(css).not.toContain('color: blue')
@@ -431,9 +461,13 @@ describe('generateClassCSS', () => {
   })
 
   it('emits base and context priorities from the style rule metadata', () => {
-    const rule = makeClass('notice', { color: 'red' }, {
-      mobile: { color: 'blue' },
-    })
+    const rule = makeClass(
+      'notice',
+      { color: 'red' },
+      {
+        mobile: { color: 'blue' },
+      },
+    )
     rule.stylePriorities = { color: 'important' }
     rule.contextStylePriorities = { mobile: { color: 'important' } }
 
@@ -464,9 +498,13 @@ describe('generateClassCSS', () => {
 
   it('emits @media block for breakpoint override', () => {
     const classes = {
-      btn: makeClass('btn', { fontSize: '16px' }, {
-        mobile: { fontSize: '12px' },
-      }),
+      btn: makeClass(
+        'btn',
+        { fontSize: '16px' },
+        {
+          mobile: { fontSize: '12px' },
+        },
+      ),
     }
     const css = generateClassCSS(classes, BREAKPOINTS)
     expect(css).toContain('@media (max-width: 375px)')
@@ -476,9 +514,13 @@ describe('generateClassCSS', () => {
 
   it('uses a viewport context media query instead of forcing max-width', () => {
     const classes = {
-      btn: makeClass('btn', { fontSize: '16px' }, {
-        tablet: { fontSize: '18px' },
-      }),
+      btn: makeClass(
+        'btn',
+        { fontSize: '16px' },
+        {
+          tablet: { fontSize: '18px' },
+        },
+      ),
     }
     const css = generateClassCSS(classes, [
       { id: 'tablet', width: 768, mediaQuery: '(min-width: 768px)' },
@@ -489,10 +531,14 @@ describe('generateClassCSS', () => {
 
   it('emits separate @media blocks for multiple breakpoints', () => {
     const classes = {
-      hero: makeClass('hero', { fontSize: '24px' }, {
-        mobile: { fontSize: '14px' },
-        tablet: { fontSize: '18px' },
-      }),
+      hero: makeClass(
+        'hero',
+        { fontSize: '24px' },
+        {
+          mobile: { fontSize: '14px' },
+          tablet: { fontSize: '18px' },
+        },
+      ),
     }
     const css = generateClassCSS(classes, BREAKPOINTS)
     expect(css).toContain('@media (max-width: 375px)')
@@ -501,9 +547,13 @@ describe('generateClassCSS', () => {
 
   it('skips breakpoint block when the breakpoint ID is not in the breakpoints list', () => {
     const classes = {
-      btn: makeClass('btn', { fontSize: '16px' }, {
-        'unknown-bp': { fontSize: '10px' },
-      }),
+      btn: makeClass(
+        'btn',
+        { fontSize: '16px' },
+        {
+          'unknown-bp': { fontSize: '10px' },
+        },
+      ),
     }
     const css = generateClassCSS(classes, BREAKPOINTS)
     expect(css).not.toContain('unknown-bp')
@@ -511,9 +561,13 @@ describe('generateClassCSS', () => {
 
   it('skips breakpoint block when override styles are empty', () => {
     const classes = {
-      btn: makeClass('btn', { fontSize: '16px' }, {
-        mobile: {},
-      }),
+      btn: makeClass(
+        'btn',
+        { fontSize: '16px' },
+        {
+          mobile: {},
+        },
+      ),
     }
     const css = generateClassCSS(classes, BREAKPOINTS)
     expect(css).not.toContain('@media')
@@ -541,7 +595,8 @@ describe('generateClassCSS', () => {
         order: 0,
         styles: {},
         contextStyles: {},
-        rawCss: '@keyframes pulse {\n  0% {\n    opacity: 0;\n  }\n  100% {\n    opacity: 1;\n  }\n}',
+        rawCss:
+          '@keyframes pulse {\n  0% {\n    opacity: 0;\n  }\n  100% {\n    opacity: 1;\n  }\n}',
         createdAt: 0,
         updatedAt: 0,
       },
@@ -607,11 +662,15 @@ describe('generateClassCSS', () => {
       { id: 'desktop', width: 1440 },
     ]
     const classes = {
-      hero: makeClass('hero', { fontSize: '24px' }, {
-        mobile: { fontSize: '14px' },
-        desktop: { fontSize: '32px' },
-        tablet: { fontSize: '18px' },
-      }),
+      hero: makeClass(
+        'hero',
+        { fontSize: '24px' },
+        {
+          mobile: { fontSize: '14px' },
+          desktop: { fontSize: '32px' },
+          tablet: { fontSize: '18px' },
+        },
+      ),
     }
     const css = generateClassCSS(classes, breakpoints)
     const desktopIdx = css.indexOf('@media (max-width: 1440px)')
@@ -629,11 +688,15 @@ describe('generateClassCSS', () => {
       { id: 'desktop', width: 1440, mediaQuery: '(min-width: 1440px)' },
     ]
     const classes = {
-      hero: makeClass('hero', { fontSize: '14px' }, {
-        mobile: { fontSize: '16px' },
-        desktop: { fontSize: '32px' },
-        tablet: { fontSize: '24px' },
-      }),
+      hero: makeClass(
+        'hero',
+        { fontSize: '14px' },
+        {
+          mobile: { fontSize: '16px' },
+          desktop: { fontSize: '32px' },
+          tablet: { fontSize: '24px' },
+        },
+      ),
     }
     const css = generateClassCSS(classes, breakpoints)
     const mobileIdx = css.indexOf('@media (min-width: 375px)')
@@ -713,7 +776,12 @@ describe('collectClassCSS', () => {
   it('emits user-authored CSS but skips framework-generated CSS', () => {
     const userClass = makeClass('user-class', { color: 'green' })
     const frameworkClass: StyleRule = {
-      ...makeClass('framework:color:primary-token:base:text', { color: 'var(--primary)' }, {}, 'text-primary'),
+      ...makeClass(
+        'framework:color:primary-token:base:text',
+        { color: 'var(--primary)' },
+        {},
+        'text-primary',
+      ),
       generated: {
         origin: 'framework',
         family: 'color',

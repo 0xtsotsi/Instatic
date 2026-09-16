@@ -22,34 +22,40 @@ describe('createSiteImportAdapter', () => {
       const url = String(input)
 
       if (url === '/admin/api/cms/media') {
-        return jsonResponse({
-          asset: {
-            id: 'asset/one',
-            filename: 'hero.png',
-            mimeType: 'image/png',
-            sizeBytes: 12,
-            publicPath: '/uploads/hero.png',
-            uploadedByUserId: null,
-            createdAt: '2026-01-03T00:00:00.000Z',
+        return jsonResponse(
+          {
+            asset: {
+              id: 'asset/one',
+              filename: 'hero.png',
+              mimeType: 'image/png',
+              sizeBytes: 12,
+              publicPath: '/uploads/hero.png',
+              uploadedByUserId: null,
+              createdAt: '2026-01-03T00:00:00.000Z',
+            },
           },
-        }, 201)
+          201,
+        )
       }
 
       if (url === '/admin/api/cms/media/folders') {
         if (init?.method === 'GET') {
           return jsonResponse({ folders: [] })
         }
-        return jsonResponse({
-          folder: {
-            id: 'folder-hero',
-            name: 'images',
-            slug: 'images',
-            parentId: null,
-            sortOrder: 0,
-            createdByUserId: null,
-            createdAt: '2026-01-03T00:00:00.000Z',
+        return jsonResponse(
+          {
+            folder: {
+              id: 'folder-hero',
+              name: 'images',
+              slug: 'images',
+              parentId: null,
+              sortOrder: 0,
+              createdByUserId: null,
+              createdAt: '2026-01-03T00:00:00.000Z',
+            },
           },
-        }, 201)
+          201,
+        )
       }
 
       if (url === '/admin/api/cms/media/asset%2Fone/folders') {
@@ -71,11 +77,13 @@ describe('createSiteImportAdapter', () => {
     }
 
     const adapter = createSiteImportAdapter({ sessionId: 'test-session' })
-    await expect(adapter.uploadAsset({
-      path: 'images/hero.png',
-      bytes: new Uint8Array([1, 2, 3]),
-      mimeType: 'image/png',
-    })).resolves.toBe('/uploads/hero.png')
+    await expect(
+      adapter.uploadAsset({
+        path: 'images/hero.png',
+        bytes: new Uint8Array([1, 2, 3]),
+        mimeType: 'image/png',
+      }),
+    ).resolves.toBe('/uploads/hero.png')
 
     expect(calls).toHaveLength(4)
     expect(calls.map((call) => String(call.input))).toEqual([

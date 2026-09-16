@@ -101,10 +101,7 @@ export function stripPostTypeBuiltInCells(cells: DataRowCells): DataRowCells {
  * result — the schema validates the base shape which is structurally
  * compatible.
  */
-export function readNodeTreeCell(
-  cells: DataRowCells,
-  fieldId: string,
-): NodeTree<BaseNode> | null {
+export function readNodeTreeCell(cells: DataRowCells, fieldId: string): NodeTree<BaseNode> | null {
   const raw = cells[fieldId]
   if (!raw) return null
   const result = safeParseValue(NodeTreeSchema, raw)
@@ -116,10 +113,7 @@ export function readNodeTreeCell(
  * silently dropping any that fail validation. Returns an empty array when the
  * cell is missing or not an array.
  */
-export function readFieldSchemaCell(
-  cells: DataRowCells,
-  fieldId: string,
-): DataField[] {
+export function readFieldSchemaCell(cells: DataRowCells, fieldId: string): DataField[] {
   const raw = cells[fieldId]
   if (!Array.isArray(raw)) return []
   return raw.flatMap((item) => {

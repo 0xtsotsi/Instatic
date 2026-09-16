@@ -101,7 +101,10 @@ export function ActivityTab() {
       <div className={styles.sectionHeader}>
         <div>
           <h2 id="account-activity-title">Sign-in history</h2>
-          <p>Recent sign-in attempts on your account, including failures and lockouts. To revoke a current session, use Active devices.</p>
+          <p>
+            Recent sign-in attempts on your account, including failures and lockouts. To revoke a
+            current session, use Active devices.
+          </p>
         </div>
         {failedIn24h > 0 && (
           <span
@@ -113,14 +116,22 @@ export function ActivityTab() {
         )}
       </div>
 
-      {error && <p className={styles.error} role="alert">{error}</p>}
+      {error && (
+        <p className={styles.error} role="alert">
+          {error}
+        </p>
+      )}
 
       {showSuspiciousBanner && (
-        <div className={styles.suspiciousBanner} role="status" data-testid="account-activity-suspicious">
+        <div
+          className={styles.suspiciousBanner}
+          role="status"
+          data-testid="account-activity-suspicious"
+        >
           <CircleAlertSolidIcon size={14} aria-hidden="true" />
           <span>
-            Suspicious activity in the last 24 hours. Review the entries below — if any are unfamiliar,
-            consider changing your password once that lands.
+            Suspicious activity in the last 24 hours. Review the entries below — if any are
+            unfamiliar, consider changing your password once that lands.
           </span>
         </div>
       )}
@@ -146,7 +157,9 @@ export function ActivityTab() {
                   <span className={styles.secondaryText}>{formatDateTime(event.attemptedAt)}</span>
                 </DataTableCell>
                 <DataTableCell>
-                  <span className={styles.secondaryText}>{event.deviceLabel || 'Unknown device'}</span>
+                  <span className={styles.secondaryText}>
+                    {event.deviceLabel || 'Unknown device'}
+                  </span>
                 </DataTableCell>
                 <DataTableCell>
                   <span className={styles.secondaryText}>{event.ipAddress ?? 'unknown'}</span>

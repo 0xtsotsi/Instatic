@@ -26,7 +26,11 @@ describe('dynamic template model', () => {
     const site = makeSite()
     const page = site.pages[0]
     const root = page.nodes[page.rootNodeId]
-    page.template = { enabled: true, target: { kind: 'postTypes', tableSlugs: ['posts'] }, priority: 100 }
+    page.template = {
+      enabled: true,
+      target: { kind: 'postTypes', tableSlugs: ['posts'] },
+      priority: 100,
+    }
     root.props = { text: 'Static fallback' }
     root.dynamicBindings = {
       text: { source: 'currentEntry', field: 'title', format: 'plain', fallback: 'static' },
@@ -51,7 +55,11 @@ describe('dynamic template model', () => {
     const site = makeSite()
     const page = site.pages[0]
     const root = page.nodes[page.rootNodeId]
-    page.template = { enabled: true, target: { kind: 'postTypes', tableSlugs: ['posts'] }, priority: 100 }
+    page.template = {
+      enabled: true,
+      target: { kind: 'postTypes', tableSlugs: ['posts'] },
+      priority: 100,
+    }
     root.dynamicBindings = {
       text: { source: 'currentEntry', field: 'title' },
     }
@@ -87,12 +95,18 @@ describe('dynamic template model', () => {
       field: 'title',
     })
 
-    expect(useEditorStore.getState().site?.pages[0].nodes[root.id].props.text).toBe('Static fallback')
-    expect(useEditorStore.getState().site?.pages[0].nodes[root.id].dynamicBindings?.text?.field).toBe('title')
+    expect(useEditorStore.getState().site?.pages[0].nodes[root.id].props.text).toBe(
+      'Static fallback',
+    )
+    expect(
+      useEditorStore.getState().site?.pages[0].nodes[root.id].dynamicBindings?.text?.field,
+    ).toBe('title')
 
     useEditorStore.getState().clearNodeDynamicBinding(root.id, 'text')
 
-    expect(useEditorStore.getState().site?.pages[0].nodes[root.id].props.text).toBe('Static fallback')
+    expect(useEditorStore.getState().site?.pages[0].nodes[root.id].props.text).toBe(
+      'Static fallback',
+    )
     expect(useEditorStore.getState().site?.pages[0].nodes[root.id].dynamicBindings).toBeUndefined()
   })
 })

@@ -41,18 +41,19 @@ function planWith(
         },
       },
     ],
-    styleRules: cssStyles && Object.keys(cssStyles).length > 0
-      ? [
-          {
-            name: 'body',
-            kind: 'ambient',
-            selector: 'body',
-            order: 0,
-            styles: cssStyles,
-            contextStyles: {},
-          },
-        ]
-      : [],
+    styleRules:
+      cssStyles && Object.keys(cssStyles).length > 0
+        ? [
+            {
+              name: 'body',
+              kind: 'ambient',
+              selector: 'body',
+              order: 0,
+              styles: cssStyles,
+              contextStyles: {},
+            },
+          ]
+        : [],
     styleRuleSources: cssStyles && Object.keys(cssStyles).length > 0 ? ['styles.css'] : [],
     fonts: [],
     googleFonts: [],
@@ -313,9 +314,7 @@ describe('applyAssetRewrites — end-to-end via buildImportPlan', () => {
           // No value should still match an original sourcePath
           for (const src of Object.keys(rewriteMap)) {
             if (val === src) {
-              throw new Error(
-                `Node prop ${key} still contains source path "${src}" after rewrite`,
-              )
+              throw new Error(`Node prop ${key} still contains source path "${src}" after rewrite`)
             }
           }
         }
@@ -326,7 +325,7 @@ describe('applyAssetRewrites — end-to-end via buildImportPlan', () => {
     for (const rule of rewritten.styleRules) {
       const allBags = [
         rule.styles as Record<string, string>,
-        ...Object.values(rule.contextStyles) as Record<string, string>[],
+        ...(Object.values(rule.contextStyles) as Record<string, string>[]),
       ]
       for (const bag of allBags) {
         for (const [, val] of Object.entries(bag)) {

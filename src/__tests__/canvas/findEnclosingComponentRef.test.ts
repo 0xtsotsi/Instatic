@@ -45,7 +45,7 @@ describe('findEnclosingComponentRef', () => {
   // ── Null cases ─────────────────────────────────────────────────────────────
 
   it('returns null for a plain page node (no _owningRefId annotation)', () => {
-    const nodes = { 'n1': makeNode('n1') }
+    const nodes = { n1: makeNode('n1') }
     expect(findEnclosingComponentRef(nodes, 'n1')).toBeNull()
   })
 
@@ -56,7 +56,7 @@ describe('findEnclosingComponentRef', () => {
   it('returns null for a ref node that is itself a plain page node', () => {
     // The ref node placed on the page has no _owningRefId
     const nodes = {
-      'ref1': makeNode('ref1', { moduleId: 'base.visual-component-ref' }),
+      ref1: makeNode('ref1', { moduleId: 'base.visual-component-ref' }),
     }
     expect(findEnclosingComponentRef(nodes, 'ref1')).toBeNull()
   })
@@ -65,7 +65,7 @@ describe('findEnclosingComponentRef', () => {
 
   it('returns refId with isInsideSlotContent: false for a VC body node', () => {
     const nodes = {
-      'ref1': makeNode('ref1', { moduleId: 'base.visual-component-ref' }),
+      ref1: makeNode('ref1', { moduleId: 'base.visual-component-ref' }),
       'vc-body-node': makeNode('vc-body-node', { owningRefId: 'ref1', fromSlotContent: false }),
     }
     const result = findEnclosingComponentRef(nodes, 'vc-body-node')
@@ -76,7 +76,7 @@ describe('findEnclosingComponentRef', () => {
 
   it('returns refId with isInsideSlotContent: true for a slot content node', () => {
     const nodes = {
-      'ref1': makeNode('ref1', { moduleId: 'base.visual-component-ref' }),
+      ref1: makeNode('ref1', { moduleId: 'base.visual-component-ref' }),
       'slot-node': makeNode('slot-node', { owningRefId: 'ref1', fromSlotContent: true }),
     }
     const result = findEnclosingComponentRef(nodes, 'slot-node')

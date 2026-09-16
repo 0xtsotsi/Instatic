@@ -43,7 +43,7 @@ describe('ai-tools-typebox-only gate', () => {
     if (violations.length > 0) {
       throw new Error(
         `[ai-tools-typebox-only] tools import zod (must use TypeBox):\n` +
-        violations.map((v) => `  ${relative(REPO_ROOT, v).replaceAll('\\', '/')}`).join('\n'),
+          violations.map((v) => `  ${relative(REPO_ROOT, v).replaceAll('\\', '/')}`).join('\n'),
       )
     }
     expect(violations).toHaveLength(0)
@@ -67,12 +67,14 @@ describe('ai-tools-typebox-only gate', () => {
     // leaf is itself TypeBox-only, and zod stays banned by the test above.
     const missingTypeBox = toolFiles.filter((f) => {
       const src = readFileSync(f, 'utf8')
-      return !/from\s+['"]@core\/utils\/typeboxHelpers['"]|from\s+['"]@sinclair\/typebox['"]|from\s+['"]@core\/ai['"]/.test(src)
+      return !/from\s+['"]@core\/utils\/typeboxHelpers['"]|from\s+['"]@sinclair\/typebox['"]|from\s+['"]@core\/ai['"]/.test(
+        src,
+      )
     })
     if (missingTypeBox.length > 0) {
       throw new Error(
         `[ai-tools-typebox-only] tool files declare \`inputSchema:\` but don't import TypeBox:\n` +
-        missingTypeBox.map((v) => `  ${relative(REPO_ROOT, v).replaceAll('\\', '/')}`).join('\n'),
+          missingTypeBox.map((v) => `  ${relative(REPO_ROOT, v).replaceAll('\\', '/')}`).join('\n'),
       )
     }
     expect(missingTypeBox).toHaveLength(0)

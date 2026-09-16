@@ -77,10 +77,9 @@ async function runApplyPlan(
         patch.altText = plan.altText
       }
       if (plan.addTags.length > 0 || plan.removeTags.length > 0) {
-        const nextTags = Array.from(new Set([
-          ...asset.tags.filter((tag) => !plan.removeTags.includes(tag)),
-          ...plan.addTags,
-        ])).sort()
+        const nextTags = Array.from(
+          new Set([...asset.tags.filter((tag) => !plan.removeTags.includes(tag)), ...plan.addTags]),
+        ).sort()
         patch.tags = nextTags
       }
       if (Object.keys(patch).length > 0) {
@@ -196,8 +195,8 @@ export function BulkEditWindow({ workspace, open, onClose }: BulkEditWindowProps
       testId="media-bulk-edit"
     >
       <p className={styles.help}>
-        Edits apply to all <strong>{count}</strong> selected items. Tag changes are union/diff
-        — adds merge with each asset's existing tags, removes only drop matching tags.
+        Edits apply to all <strong>{count}</strong> selected items. Tag changes are union/diff —
+        adds merge with each asset's existing tags, removes only drop matching tags.
       </p>
 
       {!canWrite && (
@@ -285,7 +284,9 @@ export function BulkEditWindow({ workspace, open, onClose }: BulkEditWindowProps
               onClick={() => void applyPlan()}
               disabled={busy || !planHasChanges(plan)}
             >
-              {busy && progress ? `Applying ${progress.done}/${progress.total}…` : (
+              {busy && progress ? (
+                `Applying ${progress.done}/${progress.total}…`
+              ) : (
                 <>
                   <CheckIcon size={13} />
                   <span>Apply to {count}</span>

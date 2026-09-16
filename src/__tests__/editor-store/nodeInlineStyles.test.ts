@@ -43,7 +43,9 @@ function nodeInline(nodeId: string): Record<string, unknown> | undefined {
 describe('setNodeInlineStyles', () => {
   it('sets inline style properties on the node', () => {
     const id = setup()
-    useEditorStore.getState().setNodeInlineStyles(id, { backgroundImage: `url('/uploads/x.png')`, color: 'red' })
+    useEditorStore
+      .getState()
+      .setNodeInlineStyles(id, { backgroundImage: `url('/uploads/x.png')`, color: 'red' })
     expect(nodeInline(id)).toEqual({ backgroundImage: `url('/uploads/x.png')`, color: 'red' })
   })
 

@@ -10,11 +10,11 @@
  */
 
 .searchHeader {
-    position: sticky;
-    top: 0;
-    z-index: 1;
-    padding-bottom: var(--space-3xs);
-    background: var(--bg-surface-4);
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  padding-bottom: var(--space-3xs);
+  background: var(--bg-surface-4);
 }
 
 /* The shared SearchBar uses `direct transparent background`, which works on dark
@@ -29,13 +29,13 @@
  * SearchBar wrapper — that's why descendant selectors (input, svg) work
  * even though the SearchBar's own classes are hashed. */
 .searchField {
-    background: var(--bg-surface-2);
+  background: var(--bg-surface-2);
 }
 
 .searchField input::placeholder {
-    color: var(--text-subtle);
+  color: var(--text-subtle);
 }
 
 .searchField svg {
-    fill: var(--text-subtle);
+  fill: var(--text-subtle);
 }

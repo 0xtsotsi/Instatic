@@ -6,10 +6,7 @@
  * SiteDocument, visual components, layouts, publisher, or the module registry.
  */
 
-export {
-  BaseNodeSchema,
-  parseBaseNodeFields,
-} from '../page-tree/baseNode'
+export { BaseNodeSchema, parseBaseNodeFields } from '../page-tree/baseNode'
 export type { BaseNode } from '../page-tree/baseNode'
 
 export { asPlainObject } from '../page-tree/parseHelpers'
@@ -17,19 +14,13 @@ export { asPlainObject } from '../page-tree/parseHelpers'
 export { NodeTreeSchema } from '../page-tree/treeSchema'
 export type { NodeTree } from '../page-tree/treeSchema'
 
-export {
-  PageNodeSchema,
-  parsePageNode,
-} from '../page-tree/pageNode'
+export { PageNodeSchema, parsePageNode } from '../page-tree/pageNode'
 export type { PageNode } from '../page-tree/pageNode'
 
 export { PageSchema, parsePage } from '../page-tree/page'
 export type { Page } from '../page-tree/page'
 
-export {
-  StyleRuleSchema,
-  parseStyleRule,
-} from '../page-tree/styleRule'
+export { StyleRuleSchema, parseStyleRule } from '../page-tree/styleRule'
 export type { StyleRule } from '../page-tree/styleRule'
 
 export { reindexNodeParents } from '../page-tree/parentIndex'

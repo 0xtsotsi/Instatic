@@ -517,15 +517,19 @@ export function AnalyzeStep({
           sub="Installed families and root font variables"
           count={includedFontCount + includedFontTokenCount}
           total={plan.fonts.length + plan.googleFonts.length + plan.fontTokens.length}
-          onAll={() => patch({
-            fontsIncluded: new Set([
-              ...plan.fonts.map((f) => f.family),
-              ...plan.googleFonts.map((f) => f.family),
-            ]),
-          })}
+          onAll={() =>
+            patch({
+              fontsIncluded: new Set([
+                ...plan.fonts.map((f) => f.family),
+                ...plan.googleFonts.map((f) => f.family),
+              ]),
+            })
+          }
           onNone={() => patch({ fontsIncluded: new Set() })}
         />
-        {plan.fonts.length === 0 && plan.googleFonts.length === 0 && plan.fontTokens.length === 0 ? (
+        {plan.fonts.length === 0 &&
+        plan.googleFonts.length === 0 &&
+        plan.fontTokens.length === 0 ? (
           <p className={styles.empty}>No installable fonts or font tokens in this import.</p>
         ) : (
           <div className={styles.rows}>
@@ -556,7 +560,8 @@ export function AnalyzeStep({
                 <div className={styles.info}>
                   <span className={styles.title}>{f.family}</span>
                   <span className={styles.meta}>
-                    Google font · {f.variants.length} {f.variants.length === 1 ? 'variant' : 'variants'} · {f.subsets.join(', ')}
+                    Google font · {f.variants.length}{' '}
+                    {f.variants.length === 1 ? 'variant' : 'variants'} · {f.subsets.join(', ')}
                   </span>
                 </div>
                 <Switch

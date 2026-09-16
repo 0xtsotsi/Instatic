@@ -64,12 +64,16 @@ describe('runtime script import analysis', () => {
   it('collects package usage and reports missing or dev-only runtime dependencies', () => {
     const analysis = analyzeRuntimeScriptImports(
       [
-        scriptFile('confetti', 'src/scripts/confetti.ts', `
+        scriptFile(
+          'confetti',
+          'src/scripts/confetti.ts',
+          `
           import confetti from 'canvas-confetti'
           import { animate } from 'motion'
           import '@scope/pkg/register'
           import vite from 'vite'
-        `),
+        `,
+        ),
       ],
       {
         dependencies: {
@@ -121,7 +125,13 @@ describe('runtime script import analysis', () => {
 
   it('rejects Node builtin imports in browser runtime scripts', () => {
     const analysis = analyzeRuntimeScriptImports(
-      [scriptFile('node-api', 'src/scripts/node-api.ts', `import fs from 'node:fs'; import path from 'path'`)],
+      [
+        scriptFile(
+          'node-api',
+          'src/scripts/node-api.ts',
+          `import fs from 'node:fs'; import path from 'path'`,
+        ),
+      ],
       { dependencies: {}, devDependencies: {} },
     )
 

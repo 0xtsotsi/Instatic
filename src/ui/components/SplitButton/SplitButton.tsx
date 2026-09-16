@@ -109,8 +109,7 @@ export function SplitButton({
     void item.onSelect()
   }
 
-  const resolvedAriaLabel =
-    primaryAriaLabel ?? (typeof label === 'string' ? label : undefined)
+  const resolvedAriaLabel = primaryAriaLabel ?? (typeof label === 'string' ? label : undefined)
 
   return (
     <div className={cn(styles.group, className)}>
@@ -127,11 +126,7 @@ export function SplitButton({
         data-testid={primaryTestId}
       >
         {PrimaryIcon && (
-          <PrimaryIcon
-            size={13}
-            className={cn(busy && styles.spinIcon)}
-            aria-hidden="true"
-          />
+          <PrimaryIcon size={13} className={cn(busy && styles.spinIcon)} aria-hidden="true" />
         )}
         <span>{label}</span>
       </Button>
@@ -153,41 +148,43 @@ export function SplitButton({
         <ChevronDown2Icon size={13} aria-hidden="true" />
       </Button>
 
-      {menuOpen && typeof document !== 'undefined' && createPortal(
-        <ContextMenu
-          id={menuId}
-          anchorRef={triggerRef}
-          side="auto"
-          align="end"
-          offset={MENU_GAP}
-          width={menuWidth}
-          minWidth={menuWidth}
-          zIndex={10000}
-          ariaLabel={menuLabel ?? menuTriggerLabel}
-          onClose={closeMenu}
-          data-testid={menuTestId}
-        >
-          {menuItems.map((item) => {
-            const ItemIcon = item.icon
-            return (
-              <ContextMenuItem
-                key={item.id}
-                disabled={item.disabled}
-                onClick={() => handleSelect(item)}
-                data-testid={item.testId}
-              >
-                {ItemIcon && (
-                  <span aria-hidden="true">
-                    <ItemIcon size={14} />
-                  </span>
-                )}
-                <span>{item.label}</span>
-              </ContextMenuItem>
-            )
-          })}
-        </ContextMenu>,
-        document.body,
-      )}
+      {menuOpen &&
+        typeof document !== 'undefined' &&
+        createPortal(
+          <ContextMenu
+            id={menuId}
+            anchorRef={triggerRef}
+            side="auto"
+            align="end"
+            offset={MENU_GAP}
+            width={menuWidth}
+            minWidth={menuWidth}
+            zIndex={10000}
+            ariaLabel={menuLabel ?? menuTriggerLabel}
+            onClose={closeMenu}
+            data-testid={menuTestId}
+          >
+            {menuItems.map((item) => {
+              const ItemIcon = item.icon
+              return (
+                <ContextMenuItem
+                  key={item.id}
+                  disabled={item.disabled}
+                  onClick={() => handleSelect(item)}
+                  data-testid={item.testId}
+                >
+                  {ItemIcon && (
+                    <span aria-hidden="true">
+                      <ItemIcon size={14} />
+                    </span>
+                  )}
+                  <span>{item.label}</span>
+                </ContextMenuItem>
+              )
+            })}
+          </ContextMenu>,
+          document.body,
+        )}
     </div>
   )
 }

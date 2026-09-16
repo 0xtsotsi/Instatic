@@ -3,10 +3,7 @@ import type { ImportResult as CmsImportResult } from '@core/data/bundleSchema'
 import type { ImportSelection } from './shared/importPlanning'
 import type { RunProgress } from './shared/importProgress'
 import type { CmsBundleState } from './shared/useCmsBundleImport'
-import {
-  selectedCmsMediaCount,
-  selectedCmsRowCount,
-} from './shared/cmsBundleFlow'
+import { selectedCmsMediaCount, selectedCmsRowCount } from './shared/cmsBundleFlow'
 import styles from './SiteImportModal.module.css'
 
 type Step = 'drop' | 'analyze' | 'conflicts' | 'run'
@@ -55,7 +52,10 @@ export function SiteImportFooter({
   if (step === 'analyze') {
     if (cmsBundleState) {
       const rowCount = selectedCmsRowCount(cmsBundleState.selection, cmsBundleState.bundle)
-      const mediaCount = selectedCmsMediaCount(cmsBundleState.selection, cmsBundleState.bundle.media?.length ?? 0)
+      const mediaCount = selectedCmsMediaCount(
+        cmsBundleState.selection,
+        cmsBundleState.bundle.media?.length ?? 0,
+      )
       return (
         <>
           <span className={styles.footNote}>
@@ -87,17 +87,13 @@ export function SiteImportFooter({
     return (
       <>
         <span className={styles.footNote}>
-          {pageCount} {pageCount === 1 ? 'page' : 'pages'} · {ruleCount} rules · {mediaCount} media selected
+          {pageCount} {pageCount === 1 ? 'page' : 'pages'} · {ruleCount} rules · {mediaCount} media
+          selected
         </span>
         <Button variant="secondary" type="button" onClick={onClose}>
           Cancel
         </Button>
-        <Button
-          variant="primary"
-          type="button"
-          disabled={pageCount === 0}
-          onClick={onAnalyzeNext}
-        >
+        <Button variant="primary" type="button" disabled={pageCount === 0} onClick={onAnalyzeNext}>
           Continue →
         </Button>
       </>
@@ -154,12 +150,7 @@ export function SiteImportFooter({
     return (
       <>
         <span className={styles.footNote}>Keep this window open while importing…</span>
-        <Button
-          variant="secondary"
-          type="button"
-          disabled={!canCancel}
-          onClick={onRunCancel}
-        >
+        <Button variant="secondary" type="button" disabled={!canCancel} onClick={onRunCancel}>
           Cancel
         </Button>
       </>

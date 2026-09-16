@@ -90,7 +90,11 @@ describe('previewVCDeletion', () => {
 
     // Other VC that contains a ref to TARGET_VC_ID
     const otherVcRoot = makeVCNode({ id: 'vc-root', moduleId: 'base.body', children: ['r4'] })
-    const otherVcRef = makeVCNode({ id: 'r4', moduleId: 'base.visual-component-ref', props: { componentId: TARGET_VC_ID } })
+    const otherVcRef = makeVCNode({
+      id: 'r4',
+      moduleId: 'base.visual-component-ref',
+      props: { componentId: TARGET_VC_ID },
+    })
     const otherVc = makeVC({
       id: OTHER_VC_ID,
       name: 'Other',

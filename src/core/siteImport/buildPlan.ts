@@ -54,7 +54,11 @@ interface BuildImportPlanInput {
  * This is a pure, synchronous function. Call it before showing the import
  * wizard so the user can preview what will be imported and resolve conflicts.
  */
-export function buildImportPlan({ fileMap, currentSite, options }: BuildImportPlanInput): ImportPlan {
+export function buildImportPlan({
+  fileMap,
+  currentSite,
+  options,
+}: BuildImportPlanInput): ImportPlan {
   const mediaTolerance = options?.mediaTolerance ?? 10
   const warnings: ImportWarning[] = []
   const droppedAtRules: string[] = []
@@ -79,7 +83,9 @@ export function buildImportPlan({ fileMap, currentSite, options }: BuildImportPl
         googleFontsByFamily.set(key, font)
         continue
       }
-      existing.variants = [...new Set([...existing.variants, ...font.variants])].sort(compareVariants)
+      existing.variants = [...new Set([...existing.variants, ...font.variants])].sort(
+        compareVariants,
+      )
       existing.subsets = [...new Set([...existing.subsets, ...font.subsets])]
     }
   }
@@ -98,7 +104,12 @@ export function buildImportPlan({ fileMap, currentSite, options }: BuildImportPl
 
   // 2c. Expand @imports of the CONVERTED sheets into a flat, ordered list of
   //     CSS sources (kept sheets bypass conversion entirely).
-  const cssExpansion = expandConvertedCssSources(rawPagePlans, fileMap, keptStylesheetPaths, partition.usedCssPaths)
+  const cssExpansion = expandConvertedCssSources(
+    rawPagePlans,
+    fileMap,
+    keptStylesheetPaths,
+    partition.usedCssPaths,
+  )
   warnings.push(...cssExpansion.warnings)
   droppedAtRules.push(...cssExpansion.droppedAtRules)
   const { cssSourcesByPath, orderedCssPaths, allLinkedCssPaths } = cssExpansion
@@ -117,7 +128,11 @@ export function buildImportPlan({ fileMap, currentSite, options }: BuildImportPl
   //    the exact same parse → token → asset → conflict pipeline (planCss.ts).
   const cssPlan = createCssPlanState()
   const parseOptions = {
-    breakpoints: currentSite.breakpoints.map((bp) => ({ id: bp.id, width: bp.width, mediaQuery: bp.mediaQuery })),
+    breakpoints: currentSite.breakpoints.map((bp) => ({
+      id: bp.id,
+      width: bp.width,
+      mediaQuery: bp.mediaQuery,
+    })),
     mediaTolerance,
     collectGoogleFonts,
   }
@@ -157,8 +172,15 @@ export function buildImportPlan({ fileMap, currentSite, options }: BuildImportPl
 
   // 5. Build asset plan — normalises URLs in node props, CSS values, and kept
   //    stylesheet text; resolves @font-face blocks; collects assets to upload.
-  const { normalizedPagePlans, normalizedStyleRules, styleRuleSources, stylesheets, fonts, assets, warnings: assetWarnings } =
-    buildAssetPlan(rawPagePlans, publishableCssFileResults, fileMap, rawStylesheetSources)
+  const {
+    normalizedPagePlans,
+    normalizedStyleRules,
+    styleRuleSources,
+    stylesheets,
+    fonts,
+    assets,
+    warnings: assetWarnings,
+  } = buildAssetPlan(rawPagePlans, publishableCssFileResults, fileMap, rawStylesheetSources)
   warnings.push(...assetWarnings)
 
   // 6. Detect conflicts against the current site — pages, class rules, and
@@ -207,20 +229,27 @@ function collectHtmlPagePlans(classified: ClassifiedFile[], fileMap: FileMap): H
   const warnings: ImportWarning[] = []
   const rawPagePlans: PagePlan[] = []
   const inlineCssByPage = new Map<string, string>()
-  const scriptsByPath = new Map<string, {
-    path: string
-    content: string
-    format: ImportScript['format']
-    dependencies: ImportScript['dependencies']
-    pageSources: Set<string>
-    priority: number
-  }>()
+  const scriptsByPath = new Map<
+    string,
+    {
+      path: string
+      content: string
+      format: ImportScript['format']
+      dependencies: ImportScript['dependencies']
+      pageSources: Set<string>
+      priority: number
+    }
+  >()
   let nextScriptPriority = 100
 
   for (const f of classified) {
     if (f.role !== 'html') continue
     const htmlSource = decodeUtf8(f.bytes)
-    const { pagePlan, warnings: pageWarnings, inlineCss } = makeHtmlPagePlan(f.path, htmlSource, fileMap)
+    const {
+      pagePlan,
+      warnings: pageWarnings,
+      inlineCss,
+    } = makeHtmlPagePlan(f.path, htmlSource, fileMap)
     warnings.push(...pageWarnings)
     rawPagePlans.push(pagePlan)
     if (inlineCss.trim().length > 0) inlineCssByPage.set(pagePlan.source, inlineCss)
@@ -232,9 +261,10 @@ function collectHtmlPagePlans(classified: ClassifiedFile[], fileMap: FileMap): H
         continue
       }
 
-      const content = pageScript.kind === 'inline'
-        ? pageScript.content
-        : decodeExternalScript(fileMap, pageScript.path)
+      const content =
+        pageScript.kind === 'inline'
+          ? pageScript.content
+          : decodeExternalScript(fileMap, pageScript.path)
       if (content === null) continue
       const script = normalizeImportedScriptContent(content, pageScript.format)
 
@@ -290,7 +320,9 @@ function expandConvertedCssSources(
   for (const plan of rawPagePlans) {
     // Kept stylesheets bypass conversion entirely — only the converted sheets
     // join the page's cascade of parsed rules.
-    const convertedTopLevel = plan.linkedCssPaths.filter((cssPath) => !keptStylesheetPaths.has(cssPath))
+    const convertedTopLevel = plan.linkedCssPaths.filter(
+      (cssPath) => !keptStylesheetPaths.has(cssPath),
+    )
     const expanded = expandLinkedCssImports(convertedTopLevel, fileMap)
     warnings.push(...expanded.warnings)
     for (const w of expanded.warnings) {

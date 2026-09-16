@@ -27,11 +27,7 @@ import { useAdminUi, bindEditorSettingsBridge } from '@admin/state/adminUi'
 // Types
 // ---------------------------------------------------------------------------
 
-export type SettingsSection =
-  | 'general'
-  | 'preferences'
-  | 'shortcuts'
-  | 'publishing'
+export type SettingsSection = 'general' | 'preferences' | 'shortcuts' | 'publishing'
 
 export interface SettingsSlice {
   /** Whether the settings modal is currently open */
@@ -104,8 +100,7 @@ export const createSettingsSlice: EditorStoreSliceCreator<SettingsSlice> = (set)
     }
   },
 
-  setSettingsSection: (section) =>
-    set({ activeSection: section }),
+  setSettingsSection: (section) => set({ activeSection: section }),
 })
 
 // Reverse bridge: when adminUi.openSettings/closeSettings is called from
@@ -135,8 +130,7 @@ export function bindSettingsBridgeStoreApi(api: StoreApi<EditorStore>): void {
       editorStoreApi.setState((state) =>
         rawReturn({
           isSettingsOpen: open,
-          activeSection:
-            open && section ? (section as SettingsSection) : state.activeSection,
+          activeSection: open && section ? (section as SettingsSection) : state.activeSection,
         }),
       )
     } finally {

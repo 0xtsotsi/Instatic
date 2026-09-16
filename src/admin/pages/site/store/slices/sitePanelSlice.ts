@@ -157,7 +157,6 @@ interface SitePanelSlice {
    * don't pile up concurrent npm fetches against esm.sh.
    */
   resolveDependencyLock: () => Promise<void>
-
 }
 
 // ---------------------------------------------------------------------------
@@ -207,155 +206,156 @@ export const createSitePanelSlice: EditorStoreSliceCreator<SitePanelSlice> = (se
     dependencyResolveLockedCount: 0,
     dependencyResolveError: null,
 
-  setDependency: (name, version, dev = false) => {
-    if (!isSafePackageName(name)) return
-    const safeVersion = version.trim() || '*'
-    const current = get().packageJson
-    const bucket = dev ? 'devDependencies' : 'dependencies'
-    const otherBucket = dev ? 'dependencies' : 'devDependencies'
-    // No-op guard (Guideline #242): skip if value unchanged and no bucket move is needed.
-    if (Object.is(current[bucket][name], safeVersion) && !(name in current[otherBucket])) return
-    const nextBucket = { ...current[bucket], [name]: safeVersion }
-    const nextOtherBucket = { ...current[otherBucket] }
-    delete nextOtherBucket[name]
-    commitPackageJson({
-      ...current,
-      [bucket]: nextBucket,
-      [otherBucket]: nextOtherBucket,
-    })
-  },
-
-  removeDependency: (name) => {
-    const { dependencies, devDependencies } = get().packageJson
-    // No-op guard: package not present in either bucket
-    if (!(name in dependencies) && !(name in devDependencies)) return
-    const deps = { ...get().packageJson.dependencies }
-    const devDeps = { ...get().packageJson.devDependencies }
-    delete deps[name]
-    delete devDeps[name]
-    commitPackageJson({ ...get().packageJson, dependencies: deps, devDependencies: devDeps })
-  },
-
-  setScriptRuntimeConfig: (fileId, config) => {
-    const site = get().site
-    if (!site?.files.some((file) => file.id === fileId && file.type === 'script')) return
-
-    const currentRuntime = get().siteRuntime
-    const nextConfig = normalizeScriptRuntimeConfig(config)
-    const currentConfig = currentRuntime.scripts[fileId]
-    if (JSON.stringify(currentConfig) === JSON.stringify(nextConfig)) return
-
-    const nextRuntime = {
-      ...currentRuntime,
-      scripts: {
-        ...currentRuntime.scripts,
-        [fileId]: nextConfig,
-      },
-    }
-    commitSiteRuntime(nextRuntime, true)
-  },
-
-  patchScriptRuntimeConfig: (fileId, patch) => {
-    const current = get().siteRuntime.scripts[fileId] ?? normalizeScriptRuntimeConfig(undefined)
-    get().setScriptRuntimeConfig(fileId, {
-      ...current,
-      ...patch,
-    })
-  },
-
-  removeScriptRuntimeConfig: (fileId) => {
-    const currentRuntime = get().siteRuntime
-    if (!(fileId in currentRuntime.scripts)) return
-
-    const scripts = { ...currentRuntime.scripts }
-    delete scripts[fileId]
-    commitSiteRuntime({ ...currentRuntime, scripts }, true)
-  },
-
-  setStyleRuntimeConfig: (fileId, config) => {
-    const site = get().site
-    if (!site?.files.some((file) => file.id === fileId && file.type === 'style')) return
-
-    const currentRuntime = get().siteRuntime
-    const nextConfig = normalizeStyleRuntimeConfig(config)
-    const currentConfig = currentRuntime.styles[fileId]
-    if (JSON.stringify(currentConfig) === JSON.stringify(nextConfig)) return
-
-    const nextRuntime = {
-      ...currentRuntime,
-      styles: {
-        ...currentRuntime.styles,
-        [fileId]: nextConfig,
-      },
-    }
-    commitSiteRuntime(nextRuntime, true)
-  },
-
-  patchStyleRuntimeConfig: (fileId, patch) => {
-    const current = get().siteRuntime.styles[fileId] ?? normalizeStyleRuntimeConfig(undefined)
-    get().setStyleRuntimeConfig(fileId, {
-      ...current,
-      ...patch,
-    })
-  },
-
-  removeStyleRuntimeConfig: (fileId) => {
-    const currentRuntime = get().siteRuntime
-    if (!(fileId in currentRuntime.styles)) return
-
-    const styles = { ...currentRuntime.styles }
-    delete styles[fileId]
-    commitSiteRuntime({ ...currentRuntime, styles }, true)
-  },
-
-  setSiteDependencyLock: (lock, packageImportmap) => {
-    const normalized = normalizeSiteRuntimeConfig({
-      dependencyLock: lock,
-      packageImportmap,
-    })
-    const nextLock = normalized.dependencyLock
-    const nextImportmap = normalized.packageImportmap
-    const currentRuntime = get().siteRuntime
-    const lockUnchanged = JSON.stringify(currentRuntime.dependencyLock) === JSON.stringify(nextLock)
-    // `null` means "clear" — drop a stale map. Otherwise compare the
-    // normalized importmaps to decide whether anything changed.
-    const importmapUnchanged =
-      JSON.stringify(currentRuntime.packageImportmap ?? null) === JSON.stringify(nextImportmap ?? null)
-    if (lockUnchanged && importmapUnchanged) return
-
-    const baseRuntime = { ...currentRuntime, dependencyLock: nextLock }
-    const nextRuntime: SiteRuntimeConfig = nextImportmap
-      ? { ...baseRuntime, packageImportmap: nextImportmap }
-      : (() => {
-        const stripped = { ...baseRuntime }
-        delete stripped.packageImportmap
-        return stripped
-      })()
-    commitSiteRuntime(nextRuntime)
-  },
-
-  resolveDependencyLock: async () => {
-    // Concurrency guard — a second auto-resolve fired by a fresh edit
-    // mid-resolution would race the network call and the `setSiteDependencyLock`
-    // write. The trailing edit will re-trigger the auto-resolve hook
-    // (lockStatus stays out-of-sync) and we'll pick it up then.
-    if (get().dependencyResolveStatus === 'resolving') return
-
-    set({ dependencyResolveStatus: 'resolving', dependencyResolveError: null })
-
-    try {
-      const result = await resolveCmsRuntimeDependencies(get().packageJson)
-      get().setSiteDependencyLock(result.dependencyLock, result.packageImportmap ?? null)
-      set({
-        dependencyResolveStatus: 'resolved',
-        dependencyResolveLockedCount: Object.keys(result.dependencyLock.packages).length,
-        dependencyResolveError: null,
+    setDependency: (name, version, dev = false) => {
+      if (!isSafePackageName(name)) return
+      const safeVersion = version.trim() || '*'
+      const current = get().packageJson
+      const bucket = dev ? 'devDependencies' : 'dependencies'
+      const otherBucket = dev ? 'dependencies' : 'devDependencies'
+      // No-op guard (Guideline #242): skip if value unchanged and no bucket move is needed.
+      if (Object.is(current[bucket][name], safeVersion) && !(name in current[otherBucket])) return
+      const nextBucket = { ...current[bucket], [name]: safeVersion }
+      const nextOtherBucket = { ...current[otherBucket] }
+      delete nextOtherBucket[name]
+      commitPackageJson({
+        ...current,
+        [bucket]: nextBucket,
+        [otherBucket]: nextOtherBucket,
       })
-    } catch (err) {
-      const message = getErrorMessage(err, 'Dependency resolution failed')
-      set({ dependencyResolveStatus: 'error', dependencyResolveError: message })
-    }
-  },
+    },
 
+    removeDependency: (name) => {
+      const { dependencies, devDependencies } = get().packageJson
+      // No-op guard: package not present in either bucket
+      if (!(name in dependencies) && !(name in devDependencies)) return
+      const deps = { ...get().packageJson.dependencies }
+      const devDeps = { ...get().packageJson.devDependencies }
+      delete deps[name]
+      delete devDeps[name]
+      commitPackageJson({ ...get().packageJson, dependencies: deps, devDependencies: devDeps })
+    },
+
+    setScriptRuntimeConfig: (fileId, config) => {
+      const site = get().site
+      if (!site?.files.some((file) => file.id === fileId && file.type === 'script')) return
+
+      const currentRuntime = get().siteRuntime
+      const nextConfig = normalizeScriptRuntimeConfig(config)
+      const currentConfig = currentRuntime.scripts[fileId]
+      if (JSON.stringify(currentConfig) === JSON.stringify(nextConfig)) return
+
+      const nextRuntime = {
+        ...currentRuntime,
+        scripts: {
+          ...currentRuntime.scripts,
+          [fileId]: nextConfig,
+        },
+      }
+      commitSiteRuntime(nextRuntime, true)
+    },
+
+    patchScriptRuntimeConfig: (fileId, patch) => {
+      const current = get().siteRuntime.scripts[fileId] ?? normalizeScriptRuntimeConfig(undefined)
+      get().setScriptRuntimeConfig(fileId, {
+        ...current,
+        ...patch,
+      })
+    },
+
+    removeScriptRuntimeConfig: (fileId) => {
+      const currentRuntime = get().siteRuntime
+      if (!(fileId in currentRuntime.scripts)) return
+
+      const scripts = { ...currentRuntime.scripts }
+      delete scripts[fileId]
+      commitSiteRuntime({ ...currentRuntime, scripts }, true)
+    },
+
+    setStyleRuntimeConfig: (fileId, config) => {
+      const site = get().site
+      if (!site?.files.some((file) => file.id === fileId && file.type === 'style')) return
+
+      const currentRuntime = get().siteRuntime
+      const nextConfig = normalizeStyleRuntimeConfig(config)
+      const currentConfig = currentRuntime.styles[fileId]
+      if (JSON.stringify(currentConfig) === JSON.stringify(nextConfig)) return
+
+      const nextRuntime = {
+        ...currentRuntime,
+        styles: {
+          ...currentRuntime.styles,
+          [fileId]: nextConfig,
+        },
+      }
+      commitSiteRuntime(nextRuntime, true)
+    },
+
+    patchStyleRuntimeConfig: (fileId, patch) => {
+      const current = get().siteRuntime.styles[fileId] ?? normalizeStyleRuntimeConfig(undefined)
+      get().setStyleRuntimeConfig(fileId, {
+        ...current,
+        ...patch,
+      })
+    },
+
+    removeStyleRuntimeConfig: (fileId) => {
+      const currentRuntime = get().siteRuntime
+      if (!(fileId in currentRuntime.styles)) return
+
+      const styles = { ...currentRuntime.styles }
+      delete styles[fileId]
+      commitSiteRuntime({ ...currentRuntime, styles }, true)
+    },
+
+    setSiteDependencyLock: (lock, packageImportmap) => {
+      const normalized = normalizeSiteRuntimeConfig({
+        dependencyLock: lock,
+        packageImportmap,
+      })
+      const nextLock = normalized.dependencyLock
+      const nextImportmap = normalized.packageImportmap
+      const currentRuntime = get().siteRuntime
+      const lockUnchanged =
+        JSON.stringify(currentRuntime.dependencyLock) === JSON.stringify(nextLock)
+      // `null` means "clear" — drop a stale map. Otherwise compare the
+      // normalized importmaps to decide whether anything changed.
+      const importmapUnchanged =
+        JSON.stringify(currentRuntime.packageImportmap ?? null) ===
+        JSON.stringify(nextImportmap ?? null)
+      if (lockUnchanged && importmapUnchanged) return
+
+      const baseRuntime = { ...currentRuntime, dependencyLock: nextLock }
+      const nextRuntime: SiteRuntimeConfig = nextImportmap
+        ? { ...baseRuntime, packageImportmap: nextImportmap }
+        : (() => {
+            const stripped = { ...baseRuntime }
+            delete stripped.packageImportmap
+            return stripped
+          })()
+      commitSiteRuntime(nextRuntime)
+    },
+
+    resolveDependencyLock: async () => {
+      // Concurrency guard — a second auto-resolve fired by a fresh edit
+      // mid-resolution would race the network call and the `setSiteDependencyLock`
+      // write. The trailing edit will re-trigger the auto-resolve hook
+      // (lockStatus stays out-of-sync) and we'll pick it up then.
+      if (get().dependencyResolveStatus === 'resolving') return
+
+      set({ dependencyResolveStatus: 'resolving', dependencyResolveError: null })
+
+      try {
+        const result = await resolveCmsRuntimeDependencies(get().packageJson)
+        get().setSiteDependencyLock(result.dependencyLock, result.packageImportmap ?? null)
+        set({
+          dependencyResolveStatus: 'resolved',
+          dependencyResolveLockedCount: Object.keys(result.dependencyLock.packages).length,
+          dependencyResolveError: null,
+        })
+      } catch (err) {
+        const message = getErrorMessage(err, 'Dependency resolution failed')
+        set({ dependencyResolveStatus: 'error', dependencyResolveError: message })
+      }
+    },
   }
 }

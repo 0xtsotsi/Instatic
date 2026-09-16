@@ -67,9 +67,7 @@ function buildAdapterOptions(
   role: MediaAssetRole,
   adapters: ReadonlyArray<CmsMediaAdapterSummary>,
 ): Array<{ value: string; label: string }> {
-  const opts: Array<{ value: string; label: string }> = [
-    { value: '', label: LOCAL_DISK_LABEL },
-  ]
+  const opts: Array<{ value: string; label: string }> = [{ value: '', label: LOCAL_DISK_LABEL }]
   for (const adapter of adapters) {
     if (adapter.isBuiltIn) continue
     if (!adapter.roles.includes(role)) continue
@@ -91,7 +89,14 @@ interface VerifyState {
  */
 type MigrationState =
   | { kind: 'idle' }
-  | { kind: 'running'; role: MigrationRole; migrated: number; failed: number; total: number; lastError: string | null }
+  | {
+      kind: 'running'
+      role: MigrationRole
+      migrated: number
+      failed: number
+      total: number
+      lastError: string | null
+    }
   | { kind: 'done'; role: MigrationRole; migrated: number; failed: number; total: number }
   | { kind: 'failed'; role: MigrationRole; message: string }
 
@@ -180,7 +185,13 @@ export function MediaStoragePanel() {
   const handleDelegate = async (delegateId: string | null) => {
     setPendingDelegate(true)
     setError(null)
-    await runDelegate(delegateId, electCmsMediaVariantDelegate, reload, setError, setPendingDelegate)
+    await runDelegate(
+      delegateId,
+      electCmsMediaVariantDelegate,
+      reload,
+      setError,
+      setPendingDelegate,
+    )
   }
 
   const handleVerify = async (adapterId: string) => {
@@ -219,17 +230,25 @@ export function MediaStoragePanel() {
       for await (const event of events) {
         finalEvent = event
         if (event.kind === 'started') {
-          setMigration({ kind: 'running', role, migrated: 0, failed: 0, total: event.total, lastError: null })
+          setMigration({
+            kind: 'running',
+            role,
+            migrated: 0,
+            failed: 0,
+            total: event.total,
+            lastError: null,
+          })
         } else if (event.kind === 'progress') {
-          setMigration((prev) => prev.kind === 'running'
-            ? {
-              ...prev,
-              migrated: event.migrated,
-              failed: prev.failed + (event.ok ? 0 : 1),
-              total: event.total,
-              lastError: event.ok ? prev.lastError : (event.error ?? 'Unknown error'),
-            }
-            : prev,
+          setMigration((prev) =>
+            prev.kind === 'running'
+              ? {
+                  ...prev,
+                  migrated: event.migrated,
+                  failed: prev.failed + (event.ok ? 0 : 1),
+                  total: event.total,
+                  lastError: event.ok ? prev.lastError : (event.error ?? 'Unknown error'),
+                }
+              : prev,
           )
         } else if (event.kind === 'done') {
           setMigration({
@@ -247,7 +266,11 @@ export function MediaStoragePanel() {
         // Server closed the stream without sending any frames. Surface
         // it as a generic failure so the UI doesn't get stuck in
         // 'running' forever.
-        setMigration({ kind: 'failed', role, message: 'Server closed the migration stream without progress.' })
+        setMigration({
+          kind: 'failed',
+          role,
+          message: 'Server closed the migration stream without progress.',
+        })
       }
     } catch (err) {
       const message = getErrorMessage(err, 'Migration request failed')
@@ -274,7 +297,9 @@ export function MediaStoragePanel() {
   return (
     <div className={styles.root}>
       {error && (
-        <div className={styles.errorBanner} role="alert">{error}</div>
+        <div className={styles.errorBanner} role="alert">
+          {error}
+        </div>
       )}
 
       {state && (
@@ -292,11 +317,7 @@ export function MediaStoragePanel() {
             pendingDelegate={pendingDelegate}
             onChange={handleDelegate}
           />
-          <AdaptersSection
-            state={state}
-            verify={verify}
-            onVerify={handleVerify}
-          />
+          <AdaptersSection state={state} verify={verify} onVerify={handleVerify} />
         </>
       )}
     </div>
@@ -329,8 +350,8 @@ function RoleSection({
         Backend per role
       </h3>
       <p className={styles.sectionDescription}>
-        Reads dispatch through the adapter that wrote each asset, so changing the
-        elected backend never strands existing rows.
+        Reads dispatch through the adapter that wrote each asset, so changing the elected backend
+        never strands existing rows.
       </p>
       <div className={styles.rows}>
         {state.roles.map((role) => {
@@ -346,9 +367,10 @@ function RoleSection({
           const backlog = isMigratableRole
             ? state.migrationBacklog[role as 'original' | 'variant']
             : 0
-          const rowMigration = isMigratableRole && migration.kind !== 'idle' && migration.role === role
-            ? migration
-            : null
+          const rowMigration =
+            isMigratableRole && migration.kind !== 'idle' && migration.role === role
+              ? migration
+              : null
           return (
             <div key={role} className={styles.row}>
               <div className={styles.rowHead}>
@@ -367,7 +389,8 @@ function RoleSection({
               />
               {!installed && adapterId !== '' ? (
                 <p className={styles.statusBad}>
-                  Adapter “{adapterId}” is no longer installed. Re-elect to keep new uploads working.
+                  Adapter “{adapterId}” is no longer installed. Re-elect to keep new uploads
+                  working.
                 </p>
               ) : (
                 <p className={styles.rowHint}>{ROLE_HINTS[role]}</p>
@@ -378,9 +401,7 @@ function RoleSection({
                   backlog={backlog}
                   migration={rowMigration}
                   // Disable migrate while another role's migration is running.
-                  otherMigrationRunning={
-                    migration.kind === 'running' && migration.role !== role
-                  }
+                  otherMigrationRunning={migration.kind === 'running' && migration.role !== role}
                   onMigrate={onMigrate}
                   onCancel={onCancelMigration}
                 />
@@ -425,13 +446,12 @@ function MigrationAffordance({
   // Terminal states: render the summary, then offer "Migrate" again if
   // any backlog remains (e.g. a retry after partial failure).
   if (migration?.kind === 'done') {
-    const failedNote = migration.failed > 0
-      ? `, ${migration.failed.toLocaleString()} failed`
-      : ''
+    const failedNote = migration.failed > 0 ? `, ${migration.failed.toLocaleString()} failed` : ''
     return (
       <div className={styles.migration}>
         <span className={styles.statusGood}>
-          Migrated {migration.migrated.toLocaleString()} / {migration.total.toLocaleString()}{failedNote}.
+          Migrated {migration.migrated.toLocaleString()} / {migration.total.toLocaleString()}
+          {failedNote}.
         </span>
         {backlog > 0 && (
           <Button
@@ -468,9 +488,12 @@ function MigrationAffordance({
     return (
       <div className={styles.migration}>
         <span className={styles.migrationProgress}>
-          Migrating… {migration.migrated.toLocaleString()} / {migration.total.toLocaleString()} ({ratio}%)
+          Migrating… {migration.migrated.toLocaleString()} / {migration.total.toLocaleString()} (
+          {ratio}%)
         </span>
-        <Button variant="ghost" size="sm" onClick={onCancel}>Cancel</Button>
+        <Button variant="ghost" size="sm" onClick={onCancel}>
+          Cancel
+        </Button>
         {migration.lastError && (
           <span className={styles.statusBad}>Last error: {migration.lastError}</span>
         )}
@@ -511,12 +534,10 @@ function DelegateSection({
     ...state.delegates.map((d) => ({ value: d.id, label: d.id })),
   ]
   const elected = state.electedDelegate
-  const electedRecord: CmsMediaVariantDelegateSummary | CmsMediaElectedVariantDelegate | null = elected
-    ? (state.delegates.find((d) => d.id === elected.delegateId) ?? elected)
-    : null
-  const template = electedRecord && 'variantUrlTemplate' in electedRecord
-    ? electedRecord.variantUrlTemplate
-    : null
+  const electedRecord: CmsMediaVariantDelegateSummary | CmsMediaElectedVariantDelegate | null =
+    elected ? (state.delegates.find((d) => d.id === elected.delegateId) ?? elected) : null
+  const template =
+    electedRecord && 'variantUrlTemplate' in electedRecord ? electedRecord.variantUrlTemplate : null
 
   return (
     <section className={styles.section} aria-labelledby="media-storage-delegate">
@@ -524,8 +545,8 @@ function DelegateSection({
         Variant delegate
       </h3>
       <p className={styles.sectionDescription}>
-        When elected, the host skips local image resizing and emits responsive
-        variant URLs from the delegate's template.
+        When elected, the host skips local image resizing and emits responsive variant URLs from the
+        delegate's template.
       </p>
       <div className={styles.rows}>
         <div className={styles.row}>
@@ -570,8 +591,8 @@ function AdaptersSection({
       </h3>
       {external.length === 0 ? (
         <p className={styles.empty}>
-          No external storage adapters installed. The built-in local-disk adapter
-          handles every role until a plugin (S3, R2, …) is installed.
+          No external storage adapters installed. The built-in local-disk adapter handles every role
+          until a plugin (S3, R2, …) is installed.
         </p>
       ) : (
         <div className={styles.rows}>
@@ -585,7 +606,9 @@ function AdaptersSection({
                 </div>
                 <div className={styles.adapterBadges}>
                   {adapter.roles.map((role) => (
-                    <span key={role} className={styles.badge}>{ROLE_LABELS[role]}</span>
+                    <span key={role} className={styles.badge}>
+                      {ROLE_LABELS[role]}
+                    </span>
                   ))}
                 </div>
                 <div className={styles.adapterMeta}>{adapter.id}</div>

@@ -20,10 +20,7 @@ import type { ModuleDefinition } from '@core/module-engine'
 import { BracesIcon } from 'pixel-art-icons/icons/braces'
 import { VisualComponentRefEditor } from './VisualComponentRefEditor'
 import { Value } from '@core/utils/typeboxHelpers'
-import {
-  VisualComponentRefPropsSchema,
-  type VisualComponentRefStoredProps,
-} from './props'
+import { VisualComponentRefPropsSchema, type VisualComponentRefStoredProps } from './props'
 
 export const VisualComponentRefModule: ModuleDefinition<VisualComponentRefStoredProps> = {
   id: 'base.visual-component-ref',

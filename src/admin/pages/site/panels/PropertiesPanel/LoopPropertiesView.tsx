@@ -77,10 +77,9 @@ export function LoopPropertiesView({ nodeId, props }: LoopPropertiesViewProps) {
   const orderOptions: PropertyControl = {
     type: 'select',
     label: 'Order by',
-    options:
-      source?.orderByOptions.map((o) => ({ label: o.label, value: o.id })) ?? [
-        { label: 'Default', value: '' },
-      ],
+    options: source?.orderByOptions.map((o) => ({ label: o.label, value: o.id })) ?? [
+      { label: 'Default', value: '' },
+    ],
   }
 
   function handleSourceChange(_key: string, value: unknown) {

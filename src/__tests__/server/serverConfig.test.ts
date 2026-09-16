@@ -7,7 +7,9 @@ describe('normalizeOrigin', () => {
   })
 
   it('strips path, query, and fragment', () => {
-    expect(normalizeOrigin('https://cms.example.com/admin?x=1#frag')).toBe('https://cms.example.com')
+    expect(normalizeOrigin('https://cms.example.com/admin?x=1#frag')).toBe(
+      'https://cms.example.com',
+    )
   })
 
   it('keeps an explicit non-default port', () => {

@@ -23,10 +23,7 @@ import { Value } from '@core/utils/typeboxHelpers'
 import { registry } from '@core/module-engine'
 import { ImageSolidIcon } from 'pixel-art-icons/icons/image-solid'
 import { escapeHtml, safeUrl } from '@modules/base/utils/escape'
-import {
-  htmlAttributesAttr,
-  htmlAttributesControl,
-} from '@modules/base/shared/htmlAttributes'
+import { htmlAttributesAttr, htmlAttributesControl } from '@modules/base/shared/htmlAttributes'
 import { buildMediaSrcset } from '@modules/base/utils/mediaAttrs'
 import { ImageEditor } from './ImageEditor'
 import { shouldUseBlurPlaceholder } from './placeholder'
@@ -98,7 +95,8 @@ function blurHashToCssBackground(hash: string): string | null {
   if (!hash || hash.length < 6) return null
   // BlurHash DC term decode: first 4 chars (after the size prefix) encode
   // the average sRGB color as a 24-bit integer in base83.
-  const base83 = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz#$%*+,-.:;=?@[]^_{|}~'
+  const base83 =
+    '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz#$%*+,-.:;=?@[]^_{|}~'
   function decodeBase83(str: string): number {
     let value = 0
     for (const c of str) {
@@ -187,10 +185,10 @@ export const ImageModule: ModuleDefinition<ImageProps> = {
     const alt = escapeHtml(media?.altText?.trim() ?? '')
 
     const loading = props.loading === 'eager' ? 'eager' : 'lazy'
-    const decoding = props.decoding === 'sync' ? 'sync' : props.decoding === 'auto' ? 'auto' : 'async'
-    const fetchPriority = props.fetchPriority === 'high'
-      ? 'high'
-      : props.fetchPriority === 'low' ? 'low' : 'auto'
+    const decoding =
+      props.decoding === 'sync' ? 'sync' : props.decoding === 'auto' ? 'auto' : 'async'
+    const fetchPriority =
+      props.fetchPriority === 'high' ? 'high' : props.fetchPriority === 'low' ? 'low' : 'auto'
 
     // `buildMediaSrcset` already runs each variant path through `safeUrl`
     // (which HTML-escapes + sanitises). No extra escape needed.
@@ -198,14 +196,13 @@ export const ImageModule: ModuleDefinition<ImageProps> = {
     // `_resolvedAutoSizes` comes from the publisher pre-pass and is a pure
     // attribute-safe string (numbers, media-query keywords, CSS math
     // functions), so no further escape is needed.
-    const sizes = srcset
-      ? resolveSizes(props._resolvedAutoSizes, loading === 'lazy')
-      : null
+    const sizes = srcset ? resolveSizes(props._resolvedAutoSizes, loading === 'lazy') : null
     const width = media?.width ?? null
     const height = media?.height ?? null
-    const blurBg = media?.blurHash && shouldUseBlurPlaceholder(media.blurHash, media.mimeType)
-      ? blurHashToCssBackground(media.blurHash)
-      : null
+    const blurBg =
+      media?.blurHash && shouldUseBlurPlaceholder(media.blurHash, media.mimeType)
+        ? blurHashToCssBackground(media.blurHash)
+        : null
 
     // Build the attribute string. Each attribute is conditionally appended
     // so the output is clean (no `width="null"` or empty `srcset=""`).
@@ -223,7 +220,9 @@ export const ImageModule: ModuleDefinition<ImageProps> = {
     // wants the real pixels ASAP, and the blur-then-flash effect is more
     // distracting than helpful at the top of the page.
     if (blurBg && loading === 'lazy') {
-      attrs.push(`style="background-image:${blurBg};background-size:cover;background-position:center"`)
+      attrs.push(
+        `style="background-image:${blurBg};background-size:cover;background-position:center"`,
+      )
     }
 
     return { html: `<img${htmlAttrs} ${attrs.join(' ')}>` }

@@ -33,25 +33,18 @@ afterEach(() => {
 // Helpers
 // ---------------------------------------------------------------------------
 
-function renderControl(
-  control: PropertyControl,
-  propKey = 'myProp',
-  value: unknown = '',
-): string {
+function renderControl(control: PropertyControl, propKey = 'myProp', value: unknown = ''): string {
   return renderToStaticMarkup(
     <PropertyControlRenderer
       propKey={propKey}
       control={control}
       value={value}
       onChange={() => {}}
-    />
+    />,
   )
 }
 
-function installMediaFetchStub(
-  assets: CmsMediaAsset[],
-  uploadAsset?: CmsMediaAsset,
-): () => void {
+function installMediaFetchStub(assets: CmsMediaAsset[], uploadAsset?: CmsMediaAsset): () => void {
   const originalFetch = globalThis.fetch
   globalThis.fetch = (async (input: RequestInfo | URL, init?: RequestInit) => {
     if (String(input).endsWith('/admin/api/cms/media')) {
@@ -121,7 +114,10 @@ describe('PropertyControlRenderer — wrapper (data-testid + minHeight)', () => 
   it('keeps the renderer shell separate from the concrete control layout wrapper', async () => {
     const { readFileSync } = await import('fs')
     const src = readFileSync(
-      new URL('../../admin/pages/site/property-controls/PropertyControlRenderer.tsx', import.meta.url),
+      new URL(
+        '../../admin/pages/site/property-controls/PropertyControlRenderer.tsx',
+        import.meta.url,
+      ),
       'utf-8',
     )
 
@@ -170,7 +166,11 @@ describe('PropertyControlRenderer — type dispatch', () => {
   })
 
   it('number → renders <input type="number"> with constraints', () => {
-    const html = renderControl({ type: 'number', label: 'Count', min: 0, max: 100, step: 1 }, 'count', 5)
+    const html = renderControl(
+      { type: 'number', label: 'Count', min: 0, max: 100, step: 1 },
+      'count',
+      5,
+    )
     expect(html).toContain('type="number"')
     expect(html).toContain('min="0"')
     expect(html).toContain('max="100"')
@@ -192,7 +192,7 @@ describe('PropertyControlRenderer — type dispatch', () => {
         control={{ type: 'color', label: 'Background' }}
         value="#ffffff"
         onChange={() => {}}
-      />
+      />,
     )
 
     const wrapper = screen.getByTestId('property-control-bgColor')
@@ -235,14 +235,18 @@ describe('PropertyControlRenderer — type dispatch', () => {
   })
 
   it('select → renders <select>', () => {
-    const html = renderControl({
-      type: 'select',
-      label: 'Variant',
-      options: [
-        { label: 'Primary', value: 'primary' },
-        { label: 'Secondary', value: 'secondary' },
-      ],
-    }, 'variant', 'primary')
+    const html = renderControl(
+      {
+        type: 'select',
+        label: 'Variant',
+        options: [
+          { label: 'Primary', value: 'primary' },
+          { label: 'Secondary', value: 'secondary' },
+        ],
+      },
+      'variant',
+      'primary',
+    )
     expect(html).toContain('<select')
     expect(html).toContain('Primary')
     expect(html).toContain('Secondary')
@@ -270,7 +274,7 @@ describe('PropertyControlRenderer — type dispatch', () => {
           control={{ type: 'image', label: 'Image Source' }}
           value=""
           onChange={() => {}}
-        />
+        />,
       )
       // The control surface is small: "No image selected" + a Browse button.
       // The grid + filename buttons live inside MediaPickerModal, opened on demand.
@@ -328,7 +332,7 @@ describe('PropertyControlRenderer — type dispatch', () => {
           control={{ type: 'image', label: 'Image Source' }}
           value=""
           onChange={(key, value) => changes.push({ key, value })}
-        />
+        />,
       )
 
       // Flip to URL mode via the segmented control, then type a URL.
@@ -352,7 +356,7 @@ describe('PropertyControlRenderer — type dispatch', () => {
           control={{ type: 'media', mediaKind: 'video', label: 'Video file' }}
           value=""
           onChange={() => {}}
-        />
+        />,
       )
 
       const browse = await screen.findByRole('button', { name: /browse video library/i })
@@ -377,7 +381,7 @@ describe('PropertyControlRenderer — type dispatch', () => {
           control={{ type: 'image', label: 'Image Source' }}
           value=""
           onChange={() => {}}
-        />
+        />,
       )
 
       expect(await screen.findByText('Sign in again to use CMS media.')).toBeDefined()
@@ -397,7 +401,6 @@ describe('PropertyControlRenderer — type dispatch', () => {
     const html = renderControl({ type: 'richtext', label: 'Content' }, 'content', '')
     expect(html).toBe('')
   })
-
 })
 
 describe('PropertyControlRenderer — compact field sizing', () => {
@@ -452,7 +455,7 @@ describe('PropertyControlRenderer — label accessibility', () => {
         value="24px"
         onChange={() => {}}
         isOverride={true}
-      />
+      />,
     )
     // Post-Task #399: override color is in ControlRow.module.css (.labelOverride class).
     // CSS module classes resolve to empty strings in renderToStaticMarkup test env.
@@ -470,7 +473,7 @@ describe('PropertyControlRenderer — numeric inputs', () => {
     const html = renderControl(
       { type: 'number', label: 'Border Radius', min: 0, max: 48, step: 1 },
       'borderRadius',
-      16
+      16,
     )
     expect(html).toContain('type="number"')
     expect(html).toContain('16')
@@ -480,7 +483,7 @@ describe('PropertyControlRenderer — numeric inputs', () => {
     const html = renderControl(
       { type: 'number', label: 'Opacity', min: 0, max: 100, step: 1 },
       'opacity',
-      50
+      50,
     )
     expect(html).toContain('min="0"')
     expect(html).toContain('max="100"')
@@ -490,7 +493,7 @@ describe('PropertyControlRenderer — numeric inputs', () => {
     const html = renderControl(
       { type: 'number', label: 'Size', min: 0, max: 48, step: 0.5 },
       'fontSize',
-      24
+      24,
     )
     expect(html).toContain('step="0.5"')
   })
@@ -499,7 +502,7 @@ describe('PropertyControlRenderer — numeric inputs', () => {
     const html = renderControl(
       { type: 'number', label: 'Padding', min: 0, max: 64, step: 1, unit: 'px' },
       'padding',
-      8
+      8,
     )
     expect(html).toContain('px<')
   })
@@ -507,8 +510,11 @@ describe('PropertyControlRenderer — numeric inputs', () => {
   it('does not import SliderControl in the properties renderer', async () => {
     const { readFileSync } = await import('fs')
     const src = readFileSync(
-      new URL('../../admin/pages/site/property-controls/PropertyControlRenderer.tsx', import.meta.url),
-      'utf-8'
+      new URL(
+        '../../admin/pages/site/property-controls/PropertyControlRenderer.tsx',
+        import.meta.url,
+      ),
+      'utf-8',
     )
     expect(src).not.toContain('SliderControl')
     expect(src).not.toContain("case 'slider'")
@@ -533,7 +539,7 @@ describe('GroupSection — collapse toggle', () => {
         }}
         value={{}}
         onChange={() => {}}
-      />
+      />,
     )
     const toggleBtn = screen.getByRole('button')
     expect(toggleBtn).toBeDefined()
@@ -553,7 +559,7 @@ describe('GroupSection — collapse toggle', () => {
         }}
         value={{}}
         onChange={() => {}}
-      />
+      />,
     )
     const toggleBtn = screen.getByRole('button')
     expect(toggleBtn.getAttribute('aria-expanded')).toBe('true')
@@ -579,7 +585,7 @@ describe('GroupSection — collapse toggle', () => {
         }}
         value={{}}
         onChange={() => {}}
-      />
+      />,
     )
     // Children are not rendered when collapsed
     expect(container.querySelector('[data-testid="property-control-zIndex"]')).toBeNull()
@@ -599,7 +605,7 @@ describe('GroupSection — collapse toggle', () => {
         }}
         value={{}}
         onChange={() => {}}
-      />
+      />,
     )
     expect(container.querySelector('[data-testid="property-control-opacity"]')).toBeDefined()
   })
@@ -620,10 +626,12 @@ describe('PropertyControlRenderer — layout variant', () => {
   })
 
   it('media/image/textarea control types default to stacked', () => {
-    expect(renderControl({ type: 'image', label: 'Image' }, 'src')).toContain('data-layout="stacked"')
-    expect(
-      renderControl({ type: 'media', mediaKind: 'video', label: 'Clip' }, 'video'),
-    ).toContain('data-layout="stacked"')
+    expect(renderControl({ type: 'image', label: 'Image' }, 'src')).toContain(
+      'data-layout="stacked"',
+    )
+    expect(renderControl({ type: 'media', mediaKind: 'video', label: 'Clip' }, 'video')).toContain(
+      'data-layout="stacked"',
+    )
     expect(renderControl({ type: 'textarea', label: 'Body' }, 'body')).toContain(
       'data-layout="stacked"',
     )
@@ -631,10 +639,7 @@ describe('PropertyControlRenderer — layout variant', () => {
 
   it('explicit schema layout overrides the per-type default', () => {
     // text would normally be inline → force stacked
-    const stackedText = renderControl(
-      { type: 'text', label: 'Alt text', layout: 'stacked' },
-      'alt',
-    )
+    const stackedText = renderControl({ type: 'text', label: 'Alt text', layout: 'stacked' }, 'alt')
     expect(stackedText).toContain('data-layout="stacked"')
 
     // textarea would normally be stacked → force inline
@@ -679,7 +684,7 @@ describe('PropertyControlRenderer — disabled prop', () => {
         value=""
         onChange={() => {}}
         disabled={true}
-      />
+      />,
     )
     // Post-Task #399: opacity is in ControlRow.module.css (.controlWrapperDisabled class).
     // CSS module classes resolve to empty strings in renderToStaticMarkup test env.
@@ -695,7 +700,7 @@ describe('PropertyControlRenderer — disabled prop', () => {
         value=""
         onChange={() => {}}
         disabled={true}
-      />
+      />,
     )
     expect(html).toContain('disabled')
   })

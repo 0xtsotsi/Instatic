@@ -103,10 +103,7 @@ export function useAsyncResource<T>(
   // static lint can see; the compiler's runtime memoization is invisible there.
   const refresh = useCallback(() => setReloadCount((n) => n + 1), [])
 
-  const runLoad = useEffectEvent(async (
-    signal: AbortSignal,
-    isCancelled: () => boolean,
-  ) => {
+  const runLoad = useEffectEvent(async (signal: AbortSignal, isCancelled: () => boolean) => {
     setLoading(true)
     setError(null)
     try {

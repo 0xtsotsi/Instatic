@@ -42,7 +42,10 @@ const SRC_ROOT = join(import.meta.dir, '../../')
 // File walker (shared pattern from no-anthropic-sdk.test.ts)
 // ---------------------------------------------------------------------------
 
-function collectFiles(dir: string, exts = ['.ts', '.tsx', '.js', '.jsx', '.mts', '.mjs']): string[] {
+function collectFiles(
+  dir: string,
+  exts = ['.ts', '.tsx', '.js', '.jsx', '.mts', '.mjs'],
+): string[] {
   const results: string[] = []
   if (!existsSync(dir)) return results
   for (const entry of readdirSync(dir)) {
@@ -59,9 +62,7 @@ function collectFiles(dir: string, exts = ['.ts', '.tsx', '.js', '.jsx', '.mts',
 
 // Scan production source only — not __tests__ (test files contain banned
 // strings as regex patterns and would false-positive).
-const PROD_DIRS = ['editor', 'core', 'modules', 'ui', 'app', 'lib'].map((d) =>
-  join(SRC_ROOT, d)
-)
+const PROD_DIRS = ['editor', 'core', 'modules', 'ui', 'app', 'lib'].map((d) => join(SRC_ROOT, d))
 
 function collectProdFiles(): string[] {
   return PROD_DIRS.flatMap((dir) => collectFiles(dir))
@@ -75,7 +76,9 @@ function collectProdFiles(): string[] {
 const BANNED_PACKAGES: { name: string; pattern: RegExp }[] = [
   {
     name: 'lucide' + '-react',
-    pattern: new RegExp(`from\\s+['"]lucide` + `-react['"]|require\\s*\\(\\s*['"]lucide` + `-react['"]\\s*\\)`),
+    pattern: new RegExp(
+      `from\\s+['"]lucide` + `-react['"]|require\\s*\\(\\s*['"]lucide` + `-react['"]\\s*\\)`,
+    ),
   },
   {
     name: '@heroicons' + '/react',
@@ -116,15 +119,19 @@ describe('Constraint #348 — No third-party icon libraries in production src/',
     const allFiles = collectProdFiles()
     const bannedPkg = BANNED_PACKAGES[0] // lucide-react
     const violations = allFiles.filter((f) => {
-      try { return bannedPkg.pattern.test(readFileSync(f, 'utf8')) } catch { return false }
+      try {
+        return bannedPkg.pattern.test(readFileSync(f, 'utf8'))
+      } catch {
+        return false
+      }
     })
     if (violations.length > 0) {
       const rel = violations.map((f) => f.replace(SRC_ROOT, 'src/'))
       throw new Error(
         `[Constraint #348] "${bannedPkg.name}" found in production source.\n` +
-        `Use pixel-art-icons from 'pixel-art-icons/icons/<name>'.\n` +
-        `Violating files:\n` +
-        rel.map((f) => `  ${f}`).join('\n')
+          `Use pixel-art-icons from 'pixel-art-icons/icons/<name>'.\n` +
+          `Violating files:\n` +
+          rel.map((f) => `  ${f}`).join('\n'),
       )
     }
     expect(violations).toHaveLength(0)
@@ -150,10 +157,10 @@ describe('Constraint #348 — No third-party icon libraries in production src/',
       const lines = allViolations.map((v) => `  ${v.file}  [imports: ${v.pkg}]`)
       throw new Error(
         `[Constraint #348] Third-party icon library imports found in production source.\n` +
-        `All icons must come from the 'pixel-art-icons' package.\n` +
-        `Use: import { <Name>Icon } from 'pixel-art-icons/icons/<kebab-name>'\n` +
-        `Violating files:\n` +
-        lines.join('\n')
+          `All icons must come from the 'pixel-art-icons' package.\n` +
+          `Use: import { <Name>Icon } from 'pixel-art-icons/icons/<kebab-name>'\n` +
+          `Violating files:\n` +
+          lines.join('\n'),
       )
     }
     expect(allViolations).toHaveLength(0)

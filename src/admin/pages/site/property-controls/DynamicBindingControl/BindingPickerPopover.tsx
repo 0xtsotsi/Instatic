@@ -37,11 +37,7 @@ import { getFieldIcon } from '@admin/pages/data/utils/fieldIcons'
 import { isFieldBindable, type PropertyControlKind } from '../bindingCompatibility'
 import { _cachedMeta, loadDataMeta } from './cache'
 import { SYSTEM_SOURCES, type SystemSourceId } from '../systemSources'
-import {
-  buildPageFrame,
-  buildSiteFrame,
-  buildRouteFrame,
-} from '@core/templates/contextFrames'
+import { buildPageFrame, buildSiteFrame, buildRouteFrame } from '@core/templates/contextFrames'
 import { getCmsDataTable, previewCmsDataLoopItems } from '@core/persistence/cmsData'
 import { dataTablePreviewToLoopItem } from '@core/templates/templatePreviewData'
 import { primaryTemplateTableSlug } from '@core/templates'
@@ -295,10 +291,7 @@ export function BindingPickerPopover({
         const tableFieldIds = new Set(scopedTable.fields.map((f) => f.id))
         const loopEntries: FieldEntry[] = availableFields
           .filter((f) => !tableFieldIds.has(f.id))
-          .filter(
-            (f) =>
-              scopedTable.kind === 'postType' || !POST_TYPE_ONLY_LOOP_FIELDS.has(f.id),
-          )
+          .filter((f) => scopedTable.kind === 'postType' || !POST_TYPE_ONLY_LOOP_FIELDS.has(f.id))
           .map((f) => ({ kind: 'loop' as const, field: f }))
         if (loopEntries.length > 0) {
           result.push({ label: 'Loop metadata', entries: loopEntries })
@@ -392,8 +385,7 @@ export function BindingPickerPopover({
 
   // ─── Auto-scope chip ───────────────────────────────────────────────────
   const isAutoScoped = scopedTable !== null
-  const isLoopTableScope =
-    isAutoScoped && Boolean(loopTableId) && scopedTable?.id === loopTableId
+  const isLoopTableScope = isAutoScoped && Boolean(loopTableId) && scopedTable?.id === loopTableId
   const autoScopeChipLabel = scopedTable
     ? isLoopTableScope
       ? `Loop row — ${scopedTable.name}`
@@ -437,7 +429,9 @@ export function BindingPickerPopover({
             <span className={styles.fieldRowText}>
               <span className={styles.fieldLabel}>{field.label}</span>
             </span>
-            <span className={styles.fieldValue} title={previewText}>{previewText}</span>
+            <span className={styles.fieldValue} title={previewText}>
+              {previewText}
+            </span>
           </span>
         </Button>
       )
@@ -473,7 +467,9 @@ export function BindingPickerPopover({
             <span className={styles.fieldRowText}>
               <span className={styles.fieldLabel}>{field.label}</span>
             </span>
-            <span className={styles.fieldValue} title={previewText}>{previewText}</span>
+            <span className={styles.fieldValue} title={previewText}>
+              {previewText}
+            </span>
           </span>
         </Button>
       )
@@ -509,7 +505,9 @@ export function BindingPickerPopover({
           <span className={styles.fieldRowText}>
             <span className={styles.fieldLabel}>{field.label}</span>
           </span>
-          <span className={styles.fieldValue} title={previewText}>{previewText}</span>
+          <span className={styles.fieldValue} title={previewText}>
+            {previewText}
+          </span>
         </span>
       </Button>
     )
@@ -523,11 +521,7 @@ export function BindingPickerPopover({
     if (metaError) {
       return (
         <div className={styles.pickerEmptyWrapper}>
-          <EmptyState
-            variant="centered"
-            title="Could not load tables"
-            description={metaError}
-          />
+          <EmptyState variant="centered" title="Could not load tables" description={metaError} />
         </div>
       )
     }
@@ -536,10 +530,7 @@ export function BindingPickerPopover({
       <>
         {/* Auto-scope chip — shown whenever we have a specific table scope */}
         {isAutoScoped && scopedTable && (
-          <div
-            className={styles.scopeChip}
-            aria-label={`Scoped to ${scopedTable.name}`}
-          >
+          <div className={styles.scopeChip} aria-label={`Scoped to ${scopedTable.name}`}>
             <span className={styles.scopeChipDot} aria-hidden="true" />
             {autoScopeChipLabel}
           </div>
@@ -555,9 +546,7 @@ export function BindingPickerPopover({
             <div key={group.label} className={styles.fieldGroup}>
               <div className={styles.fieldGroupHeader}>
                 <span className={styles.fieldGroupHeaderText}>{group.label}</span>
-                <span className={styles.fieldGroupHeaderCount}>
-                  {group.entries.length}
-                </span>
+                <span className={styles.fieldGroupHeaderCount}>{group.entries.length}</span>
               </div>
               {group.entries.map(renderFieldRow)}
             </div>
@@ -577,9 +566,7 @@ export function BindingPickerPopover({
     )
   }
 
-  const popoverLabel = insertMode
-    ? `Insert binding for ${label}`
-    : `Bind ${label}`
+  const popoverLabel = insertMode ? `Insert binding for ${label}` : `Bind ${label}`
 
   // The picker portals into <body> via ContextMenu and positions itself
   // below the anchor (the affordance wrapper). `triggerRef` keeps clicks

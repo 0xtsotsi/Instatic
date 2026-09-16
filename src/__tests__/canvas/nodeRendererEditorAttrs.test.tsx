@@ -11,7 +11,11 @@ import '@modules/base'
 const originalFetch = globalThis.fetch
 
 function renderCanvas() {
-  return render(<DndContext><CanvasRoot /></DndContext>)
+  return render(
+    <DndContext>
+      <CanvasRoot />
+    </DndContext>,
+  )
 }
 
 function setupImagePage(selectedNodeIds: string[] = []) {
@@ -92,7 +96,9 @@ describe('NodeRenderer editor attributes', () => {
 
 async function waitForCanvasImage(): Promise<HTMLElement> {
   for (let i = 0; i < 20; i += 1) {
-    const imageEl = queryCanvasElement<HTMLElement>('[data-canvas-module-placeholder][data-node-id="image"]')
+    const imageEl = queryCanvasElement<HTMLElement>(
+      '[data-canvas-module-placeholder][data-node-id="image"]',
+    )
     if (imageEl) return imageEl
     await act(async () => {
       await new Promise((resolve) => setTimeout(resolve, 10))

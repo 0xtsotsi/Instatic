@@ -9,23 +9,23 @@
  */
 
 .field {
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-xs);
-    min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+  min-width: 0;
 }
 
 /* Non-interactive tile (rare — used only when the caller wires no
  * `onBrowse`/`onEdit`, which isn't part of the current callers). Kept for
  * shape parity with .tileClickable. */
 .tile {
-    display: flex;
-    align-items: center;
-    gap: var(--space-m);
-    min-width: 0;
-    padding: var(--space-s);
-    border-radius: var(--input-radius);
-    background: var(--bg-surface);
+  display: flex;
+  align-items: center;
+  gap: var(--space-m);
+  min-width: 0;
+  padding: var(--space-s);
+  border-radius: var(--input-radius);
+  background: var(--bg-surface);
 }
 
 /*
@@ -36,79 +36,79 @@
  * shape stays consistent across states.
  */
 .tileClickable {
-    display: flex;
-    width: 100%;
-    height: auto;
-    align-items: center;
-    gap: var(--space-m);
-    padding: var(--space-s);
-    min-width: 0;
-    border-radius: var(--input-radius);
-    background: var(--bg-surface);
-    text-align: left;
-    cursor: pointer;
-    transition: background-color 90ms ease;
+  display: flex;
+  width: 100%;
+  height: auto;
+  align-items: center;
+  gap: var(--space-m);
+  padding: var(--space-s);
+  min-width: 0;
+  border-radius: var(--input-radius);
+  background: var(--bg-surface);
+  text-align: left;
+  cursor: pointer;
+  transition: background-color 90ms ease;
 }
 
 .tileClickable:hover,
 .tileClickable:focus-visible {
-    background: var(--bg-surface-2);
+  background: var(--bg-surface-2);
 }
 
 .thumb {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    flex: 0 0 44px;
-    width: 44px;
-    height: 44px;
-    overflow: hidden;
-    border-radius: calc(var(--input-radius) - 4px);
-    background: var(--bg-surface-2);
-    color: var(--text-subtle);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 44px;
+  width: 44px;
+  height: 44px;
+  overflow: hidden;
+  border-radius: calc(var(--input-radius) - 4px);
+  background: var(--bg-surface-2);
+  color: var(--text-subtle);
 }
 
 .thumb img,
 .thumb video {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 .meta {
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-4xs);
-    min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4xs);
+  min-width: 0;
 }
 
 .empty {
-    color: var(--text-subtle);
-    font-size: var(--text-s);
-    line-height: 1.3;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+  color: var(--text-subtle);
+  font-size: var(--text-s);
+  line-height: 1.3;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .name {
-    color: var(--text);
-    font-size: var(--text-s);
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+  color: var(--text);
+  font-size: var(--text-s);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .sub {
-    color: var(--text-subtle);
-    font-size: var(--text-2xs);
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+  color: var(--text-subtle);
+  font-size: var(--text-2xs);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .actions {
-    display: flex;
-    flex-wrap: wrap;
-    gap: var(--space-xs);
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-xs);
 }

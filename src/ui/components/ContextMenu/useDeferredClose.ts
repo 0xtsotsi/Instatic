@@ -51,8 +51,7 @@ export function useDeferredClose(
   const [prevKeys, setPrevKeys] = useState(resetKeys)
 
   const keysChanged =
-    resetKeys.length !== prevKeys.length ||
-    resetKeys.some((key, i) => !Object.is(key, prevKeys[i]))
+    resetKeys.length !== prevKeys.length || resetKeys.some((key, i) => !Object.is(key, prevKeys[i]))
   if (keysChanged) {
     setPrevKeys(resetKeys)
     if (closing) setClosing(false)

@@ -68,7 +68,9 @@ describe('Properties panel layer ladder', () => {
   it('opens from the leading layer icon and selects parent or child layers', () => {
     render(<PropertiesPanel variant="docked" />)
 
-    fireEvent.click(screen.getByRole('button', { name: /select parent or child layer for hero headline/i }))
+    fireEvent.click(
+      screen.getByRole('button', { name: /select parent or child layer for hero headline/i }),
+    )
 
     const menu = screen.getByRole('menu', { name: /select parent or child layer/i })
     expect(within(menu).getByRole('menuitem', { name: /hero section parent/i })).toBeTruthy()

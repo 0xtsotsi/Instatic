@@ -43,7 +43,10 @@ export function collectUserStylesheetCss(site: SiteDocument, page?: Page): strin
   const ordered = page
     ? collectAppliedStyles({ files: site.files, runtime, page })
     : site.files
-        .filter((file) => file.type === 'style' && typeof file.content === 'string' && file.content.length > 0)
+        .filter(
+          (file) =>
+            file.type === 'style' && typeof file.content === 'string' && file.content.length > 0,
+        )
         .map((file) => ({ file, config: runtime.styles[file.id] ?? DEFAULT_STYLE_RUNTIME_CONFIG }))
         .filter(({ config }) => config.enabled)
         .sort((a, b) => {

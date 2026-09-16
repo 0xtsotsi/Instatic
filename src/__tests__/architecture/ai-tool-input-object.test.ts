@@ -14,10 +14,9 @@ import { siteTools } from '../../../server/ai/tools/site'
 describe('AI tool input object gate', () => {
   it('every registered tool advertises an object-rooted input schema', () => {
     for (const tool of [...siteTools, ...contentTools]) {
-      expect(
-        tool.inputSchema.type,
-        `${tool.name} must expose a top-level JSON Schema object`,
-      ).toBe('object')
+      expect(tool.inputSchema.type, `${tool.name} must expose a top-level JSON Schema object`).toBe(
+        'object',
+      )
       expect(tool.inputSchema.anyOf, `${tool.name} cannot compose its schema root`).toBeUndefined()
       expect(tool.inputSchema.oneOf, `${tool.name} cannot compose its schema root`).toBeUndefined()
       expect(tool.inputSchema.allOf, `${tool.name} cannot compose its schema root`).toBeUndefined()

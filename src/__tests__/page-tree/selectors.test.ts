@@ -17,7 +17,11 @@ import {
 // Fixtures
 // ---------------------------------------------------------------------------
 
-function makeNode(id: string, children: string[] = [], props: Record<string, unknown> = {}): PageNode {
+function makeNode(
+  id: string,
+  children: string[] = [],
+  props: Record<string, unknown> = {},
+): PageNode {
   return {
     id,
     moduleId: 'base.div',
@@ -42,11 +46,11 @@ function makePage(nodes: Record<string, PageNode>, rootNodeId = 'root'): Page {
 // Tree:  root → [a, b]  b → [c, d]  c → [e]
 const TREE_PAGE = makePage({
   root: makeNode('root', ['a', 'b']),
-  a:    makeNode('a'),
-  b:    makeNode('b', ['c', 'd']),
-  c:    makeNode('c', ['e']),
-  d:    makeNode('d'),
-  e:    makeNode('e'),
+  a: makeNode('a'),
+  b: makeNode('b', ['c', 'd']),
+  c: makeNode('c', ['e']),
+  d: makeNode('d'),
+  e: makeNode('e'),
 })
 
 // ---------------------------------------------------------------------------
@@ -203,20 +207,52 @@ describe('evaluateCondition', () => {
   })
 
   it('evaluates and (all must be true)', () => {
-    expect(evaluateCondition({
-      and: [{ field: 'type', eq: 'link' }, { field: 'visible', eq: true }]
-    }, props)).toBe(true)
-    expect(evaluateCondition({
-      and: [{ field: 'type', eq: 'link' }, { field: 'visible', eq: false }]
-    }, props)).toBe(false)
+    expect(
+      evaluateCondition(
+        {
+          and: [
+            { field: 'type', eq: 'link' },
+            { field: 'visible', eq: true },
+          ],
+        },
+        props,
+      ),
+    ).toBe(true)
+    expect(
+      evaluateCondition(
+        {
+          and: [
+            { field: 'type', eq: 'link' },
+            { field: 'visible', eq: false },
+          ],
+        },
+        props,
+      ),
+    ).toBe(false)
   })
 
   it('evaluates or (at least one must be true)', () => {
-    expect(evaluateCondition({
-      or: [{ field: 'type', eq: 'image' }, { field: 'visible', eq: true }]
-    }, props)).toBe(true)
-    expect(evaluateCondition({
-      or: [{ field: 'type', eq: 'image' }, { field: 'visible', eq: false }]
-    }, props)).toBe(false)
+    expect(
+      evaluateCondition(
+        {
+          or: [
+            { field: 'type', eq: 'image' },
+            { field: 'visible', eq: true },
+          ],
+        },
+        props,
+      ),
+    ).toBe(true)
+    expect(
+      evaluateCondition(
+        {
+          or: [
+            { field: 'type', eq: 'image' },
+            { field: 'visible', eq: false },
+          ],
+        },
+        props,
+      ),
+    ).toBe(false)
   })
 })

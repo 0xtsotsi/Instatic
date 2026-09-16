@@ -9,15 +9,17 @@ import { renderMarkdownToHtml } from '@core/markdown/renderMarkdown'
 
 describe('content markdown ↔ ProseMirror document', () => {
   it('parses headings, paragraphs and a single-line image into a doc tree', () => {
-    const doc = markdownToProseMirrorDoc([
-      '## Intro',
-      '',
-      'A paragraph.',
-      '',
-      '![Hero](/uploads/hero.png)',
-      '',
-      '@[video](/uploads/movie.mp4)',
-    ].join('\n'))
+    const doc = markdownToProseMirrorDoc(
+      [
+        '## Intro',
+        '',
+        'A paragraph.',
+        '',
+        '![Hero](/uploads/hero.png)',
+        '',
+        '@[video](/uploads/movie.mp4)',
+      ].join('\n'),
+    )
 
     expect(doc).toMatchObject({
       type: 'doc',
@@ -40,7 +42,8 @@ describe('content markdown ↔ ProseMirror document', () => {
   })
 
   it('round-trips underline via inline <u> HTML, including when nested in bold / italic', () => {
-    const source = 'Hello <u>underlined</u> world and **bold <u>combo</u>** plus *italic <u>inside</u>* too.'
+    const source =
+      'Hello <u>underlined</u> world and **bold <u>combo</u>** plus *italic <u>inside</u>* too.'
     const doc = markdownToProseMirrorDoc(source)
     expect(proseMirrorDocToMarkdown(doc)).toBe(source)
     // Mark stacks must reflect both the wrapping mark and the nested
@@ -143,11 +146,15 @@ describe('publisher markdown renderer', () => {
 
 describe('firstMediaPathFromMarkdown', () => {
   it('returns the first image URL when present', () => {
-    expect(firstMediaPathFromMarkdown('intro\n\n![Alt](/uploads/a.png)\n\nrest')).toBe('/uploads/a.png')
+    expect(firstMediaPathFromMarkdown('intro\n\n![Alt](/uploads/a.png)\n\nrest')).toBe(
+      '/uploads/a.png',
+    )
   })
 
   it('returns the first video URL when no images precede it', () => {
-    expect(firstMediaPathFromMarkdown('intro\n\n@[video](/uploads/clip.mp4)')).toBe('/uploads/clip.mp4')
+    expect(firstMediaPathFromMarkdown('intro\n\n@[video](/uploads/clip.mp4)')).toBe(
+      '/uploads/clip.mp4',
+    )
   })
 
   it('returns null when no media is present', () => {

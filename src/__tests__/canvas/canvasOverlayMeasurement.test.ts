@@ -65,7 +65,10 @@ function fakeIframe(rect: RectInit, offsetWidth: number) {
 
 describe('createCanvasOverlayMeasureSession', () => {
   it('reads iframe and canvas-root geometry once per session, not per measured element', () => {
-    const { iframe, calls: iframeCalls } = fakeIframe({ left: 100, top: 50, width: 400, height: 300 }, 400)
+    const { iframe, calls: iframeCalls } = fakeIframe(
+      { left: 100, top: 50, width: 400, height: 300 },
+      400,
+    )
     const root = fakeMeasurable({ left: 10, top: 20, width: 800, height: 600 })
 
     const session = createCanvasOverlayMeasureSession(iframe, root.element)
@@ -83,7 +86,9 @@ describe('createCanvasOverlayMeasureSession', () => {
     const root = fakeMeasurable({ left: 10, top: 20, width: 800, height: 600 })
     const session = createCanvasOverlayMeasureSession(iframe, root.element)
 
-    const rect = session.measure(fakeMeasurable({ left: 40, top: 60, width: 80, height: 30 }).element)
+    const rect = session.measure(
+      fakeMeasurable({ left: 40, top: 60, width: 80, height: 30 }).element,
+    )
     expect(rect).toEqual({
       x: 100 + 40 * 0.5 - 10,
       y: 50 + 60 * 0.5 - 20,
@@ -106,7 +111,9 @@ describe('createCanvasOverlayMeasureSession', () => {
     const session = createCanvasOverlayMeasureSession(iframe, null)
     expect(session.measure(null)).toBeNull()
     expect(session.measure({} as HTMLElement)).toBeNull()
-    expect(session.measure(fakeMeasurable({ left: 1, top: 1, width: 0, height: 0 }).element)).toBeNull()
+    expect(
+      session.measure(fakeMeasurable({ left: 1, top: 1, width: 0, height: 0 }).element),
+    ).toBeNull()
   })
 
   it('matches the one-shot measureCanvasElementRect output', () => {
@@ -138,7 +145,10 @@ describe('unionCanvasOverlayRects', () => {
 
   it('returns the smallest rect containing both inputs', () => {
     expect(
-      unionCanvasOverlayRects({ x: 0, y: 0, width: 10, height: 10 }, { x: 5, y: -5, width: 20, height: 10 }),
+      unionCanvasOverlayRects(
+        { x: 0, y: 0, width: 10, height: 10 },
+        { x: 5, y: -5, width: 20, height: 10 },
+      ),
     ).toEqual({ x: 0, y: -5, width: 25, height: 15 })
   })
 })

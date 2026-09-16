@@ -43,7 +43,9 @@ export async function readPluginDefinition(sourceDir: string): Promise<PluginDef
   if (!existsSync(configPath)) {
     throw new Error(`instatic-plugin.config.ts not found at ${configPath}`)
   }
-  const mod = await import(pathToFileURL(configPath).href + `?ts=${Date.now()}`) as { default: PluginDefinition }
+  const mod = (await import(pathToFileURL(configPath).href + `?ts=${Date.now()}`)) as {
+    default: PluginDefinition
+  }
   if (!mod.default || typeof mod.default !== 'object') {
     throw new Error(`instatic-plugin.config.ts must default-export a definePlugin() result`)
   }
@@ -184,10 +186,9 @@ function generateSandboxFacade(entrypointAbsolutePath: string, kind: 'server' | 
       `globalThis.__plugin_exports = __isPluginModule(__default) ? __default : __plugin;`,
     ].join('\n')
   }
-  return [
-    `import __default from ${importPath};`,
-    `globalThis.__module_pack = __default;`,
-  ].join('\n')
+  return [`import __default from ${importPath};`, `globalThis.__module_pack = __default;`].join(
+    '\n',
+  )
 }
 
 async function bundleEntrypoint(
@@ -289,7 +290,9 @@ async function bundleEntrypoint(
  * `dist/` output. Authors who need multiple bundles ship multiple
  * top-level files.
  */
-async function listFrontendSources(sourceDir: string): Promise<Array<{ absolutePath: string; outputPath: string }>> {
+async function listFrontendSources(
+  sourceDir: string,
+): Promise<Array<{ absolutePath: string; outputPath: string }>> {
   const frontendDir = join(sourceDir, 'frontend')
   if (!existsSync(frontendDir)) return []
   const out: Array<{ absolutePath: string; outputPath: string }> = []
@@ -447,14 +450,10 @@ export async function buildPlugin(
     // host-served URLs at runtime, so multiple plugins share one copy.
     const runtimeExternals = collectRuntimeExternals(definition.modules)
     for (const entry of frontendSources) {
-      await bundleEntrypoint(
-        entry.absolutePath,
-        join(distDir, entry.outputPath),
-        {
-          frontendBundle: true,
-          ...(runtimeExternals.length > 0 ? { externalSpecifiers: runtimeExternals } : {}),
-        },
-      )
+      await bundleEntrypoint(entry.absolutePath, join(distDir, entry.outputPath), {
+        frontendBundle: true,
+        ...(runtimeExternals.length > 0 ? { externalSpecifiers: runtimeExternals } : {}),
+      })
     }
   }
 

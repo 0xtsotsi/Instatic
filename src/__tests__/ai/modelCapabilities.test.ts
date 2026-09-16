@@ -131,10 +131,14 @@ describe('resolveModelCapabilities', () => {
     })
 
     const first = await resolveModelCapabilities(driver, credentials, 'vision-model')
-    const rotated = await resolveModelCapabilities(driver, {
-      ...credentials,
-      apiKey: 'rotated-secret',
-    }, 'vision-model')
+    const rotated = await resolveModelCapabilities(
+      driver,
+      {
+        ...credentials,
+        apiKey: 'rotated-secret',
+      },
+      'vision-model',
+    )
 
     expect(first).toEqual(VISION)
     expect(rotated).toEqual(TEXT_ONLY)

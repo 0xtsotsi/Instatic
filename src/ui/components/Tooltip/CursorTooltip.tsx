@@ -1,11 +1,4 @@
-import {
-  useId,
-  useLayoutEffect,
-  useRef,
-  useState,
-  type CSSProperties,
-  type ReactNode,
-} from 'react'
+import { useId, useLayoutEffect, useRef, useState, type CSSProperties, type ReactNode } from 'react'
 import { createPortal } from 'react-dom'
 import { cn } from '@ui/cn'
 import { getTooltipRoot } from './tooltipPortal'
@@ -44,8 +37,16 @@ export function CursorTooltip({
 
     const bubbleRect = bubbleRef.current.getBoundingClientRect()
     setPosition({
-      x: clamp(pointX + offset, VIEWPORT_MARGIN, window.innerWidth - bubbleRect.width - VIEWPORT_MARGIN),
-      y: clamp(pointY + offset, VIEWPORT_MARGIN, window.innerHeight - bubbleRect.height - VIEWPORT_MARGIN),
+      x: clamp(
+        pointX + offset,
+        VIEWPORT_MARGIN,
+        window.innerWidth - bubbleRect.width - VIEWPORT_MARGIN,
+      ),
+      y: clamp(
+        pointY + offset,
+        VIEWPORT_MARGIN,
+        window.innerHeight - bubbleRect.height - VIEWPORT_MARGIN,
+      ),
     })
   }, [pointX, pointY, offset])
 

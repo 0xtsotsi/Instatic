@@ -95,10 +95,7 @@ describe('cross-sheet class conflicts', () => {
 
   it('does not flag identical definitions', () => {
     const plan = buildImportPlan({
-      fileMap: twoPageFileMap(
-        '.btn { border-radius: 4px; }',
-        '.btn { border-radius: 4px; }',
-      ),
+      fileMap: twoPageFileMap('.btn { border-radius: 4px; }', '.btn { border-radius: 4px; }'),
       currentSite: makeEmptySiteDocument(),
     })
 
@@ -124,10 +121,7 @@ describe('cross-sheet class conflicts', () => {
 
   it('preserves priority when materialising a renamed divergent definition', () => {
     const plan = buildImportPlan({
-      fileMap: twoPageFileMap(
-        '.btn { color: red; }',
-        '.btn { color: blue !important; }',
-      ),
+      fileMap: twoPageFileMap('.btn { color: red; }', '.btn { color: blue !important; }'),
       currentSite: makeEmptySiteDocument(),
     })
     const resolved = resolveWithDefaults(plan)
@@ -140,20 +134,22 @@ describe('cross-sheet class conflicts', () => {
 
   it('keep-first (skip) drops the divergent definition and binds its pages to the first', () => {
     const plan = buildImportPlan({
-      fileMap: twoPageFileMap(
-        '.btn { border-radius: 0; }',
-        '.btn { border-radius: 999px; }',
-      ),
+      fileMap: twoPageFileMap('.btn { border-radius: 0; }', '.btn { border-radius: 999px; }'),
       currentSite: makeEmptySiteDocument(),
     })
     const conflict = plan.conflicts.crossSheetClasses[0]
 
-    const resolved = applyConflictResolutions(plan, [], [], [], [
-      { ...conflict, defaultResolution: { action: 'skip' } },
-    ])
+    const resolved = applyConflictResolutions(
+      plan,
+      [],
+      [],
+      [],
+      [{ ...conflict, defaultResolution: { action: 'skip' } }],
+    )
 
-    const btnRules = resolved.styleRules.filter((r) =>
-      (r.kind === 'class' && r.name === 'btn') || (r.kind === 'ambient' && r.selector === '.btn'),
+    const btnRules = resolved.styleRules.filter(
+      (r) =>
+        (r.kind === 'class' && r.name === 'btn') || (r.kind === 'ambient' && r.selector === '.btn'),
     )
     expect(btnRules).toHaveLength(1)
     expect(btnRules[0].styles.borderTopLeftRadius).toBe('0px')
@@ -165,20 +161,22 @@ describe('cross-sheet class conflicts', () => {
 
   it('overwrite makes the divergent definition win the bare name', () => {
     const plan = buildImportPlan({
-      fileMap: twoPageFileMap(
-        '.btn { border-radius: 0; }',
-        '.btn { border-radius: 999px; }',
-      ),
+      fileMap: twoPageFileMap('.btn { border-radius: 0; }', '.btn { border-radius: 999px; }'),
       currentSite: makeEmptySiteDocument(),
     })
     const conflict = plan.conflicts.crossSheetClasses[0]
 
-    const resolved = applyConflictResolutions(plan, [], [], [], [
-      { ...conflict, defaultResolution: { action: 'overwrite' } },
-    ])
+    const resolved = applyConflictResolutions(
+      plan,
+      [],
+      [],
+      [],
+      [{ ...conflict, defaultResolution: { action: 'overwrite' } }],
+    )
 
-    const btnRules = resolved.styleRules.filter((r) =>
-      (r.kind === 'class' && r.name === 'btn') || (r.kind === 'ambient' && r.selector === '.btn'),
+    const btnRules = resolved.styleRules.filter(
+      (r) =>
+        (r.kind === 'class' && r.name === 'btn') || (r.kind === 'ambient' && r.selector === '.btn'),
     )
     expect(btnRules).toHaveLength(1)
     expect(btnRules[0].styles.borderTopLeftRadius).toBe('999px')
@@ -198,10 +196,7 @@ describe('cross-sheet class conflicts', () => {
       updatedAt: 0,
     }
     const plan = buildImportPlan({
-      fileMap: twoPageFileMap(
-        '.btn { color: red; }',
-        '.btn { color: blue; }',
-      ),
+      fileMap: twoPageFileMap('.btn { color: red; }', '.btn { color: blue; }'),
       currentSite: site,
     })
 
@@ -297,7 +292,10 @@ describe('stylesheet mode: file', () => {
     const plan = buildImportPlan({
       fileMap: fileModeMap('.spec-cell { color: red; }', {
         'two.html': { bytes: encoder.encode(pageTwo), mimeType: 'text/html' },
-        'css/other.css': { bytes: encoder.encode('.lead { font-size: 18px; }'), mimeType: 'text/css' },
+        'css/other.css': {
+          bytes: encoder.encode('.lead { font-size: 18px; }'),
+          mimeType: 'text/css',
+        },
       }),
       currentSite: makeEmptySiteDocument(),
       options: { stylesheetModes: { 'css/style.css': 'file' } },

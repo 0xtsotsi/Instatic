@@ -51,9 +51,7 @@ function collectModuleCss(dir: string): string[] {
 
 /** Strip `/* ... *\/` block comments and `// ...` line comments. */
 function stripComments(source: string): string {
-  return source
-    .replace(/\/\*[\s\S]*?\*\//g, '')
-    .replace(/^\s*\/\/.*$/gm, '')
+  return source.replace(/\/\*[\s\S]*?\*\//g, '').replace(/^\s*\/\/.*$/gm, '')
 }
 
 function findHardcodedFontSizes(filePath: string, source: string): string[] {

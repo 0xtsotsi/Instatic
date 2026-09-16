@@ -77,10 +77,7 @@ const RATCHET_SLACK = 30
  * Append-only ledgers — grow by design, exempt from the cap entirely.
  * (CLAUDE.md: every schema change appends a migration to BOTH files.)
  */
-const EXEMPT = new Set<string>([
-  'server/db/migrations-pg.ts',
-  'server/db/migrations-sqlite.ts',
-])
+const EXEMPT = new Set<string>(['server/db/migrations-pg.ts', 'server/db/migrations-sqlite.ts'])
 
 /**
  * Grandfathered hotspots: modules already over {@link CEILING} when this gate
@@ -151,9 +148,7 @@ function lineCount(repoRelPath: string): number {
   return n
 }
 
-const ALL_MODULES = SCAN_ROOTS.flatMap((root) =>
-  collectModules(join(REPO_ROOT, root)),
-)
+const ALL_MODULES = SCAN_ROOTS.flatMap((root) => collectModules(join(REPO_ROOT, root)))
 
 // ---------------------------------------------------------------------------
 // Tests
@@ -162,10 +157,7 @@ const ALL_MODULES = SCAN_ROOTS.flatMap((root) =>
 describe('Module size budgets', () => {
   it('no new module exceeds the ceiling', () => {
     const offenders = ALL_MODULES.filter(
-      (path) =>
-        !EXEMPT.has(path) &&
-        !(path in GRANDFATHERED) &&
-        lineCount(path) > CEILING,
+      (path) => !EXEMPT.has(path) && !(path in GRANDFATHERED) && lineCount(path) > CEILING,
     ).map((path) => `${path} (${lineCount(path)} lines)`)
 
     if (offenders.length > 0) {
@@ -193,9 +185,7 @@ describe('Module size budgets', () => {
       throw new Error(
         `[module-size-budgets] ${grown.length} grandfathered module(s) grew ` +
           `past their recorded cap:\n` +
-          grown
-            .map((g) => `  - ${g.path}: ${g.actual} lines (cap ${g.cap})`)
-            .join('\n') +
+          grown.map((g) => `  - ${g.path}: ${g.actual} lines (cap ${g.cap})`).join('\n') +
           `\n\nThese files are known debt and may only shrink. Extract the ` +
           `new code into its own module instead of adding lines here.`,
       )
@@ -243,9 +233,7 @@ describe('Module size budgets', () => {
   })
 
   it('the grandfathered ledger has no stale entries', () => {
-    const stale = Object.keys(GRANDFATHERED).filter(
-      (path) => !ALL_MODULES.includes(path),
-    )
+    const stale = Object.keys(GRANDFATHERED).filter((path) => !ALL_MODULES.includes(path))
 
     if (stale.length > 0) {
       throw new Error(

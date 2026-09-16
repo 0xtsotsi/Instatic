@@ -90,9 +90,7 @@ export function PropertiesPanelBody(props: PropertiesPanelBodyProps): React.Reac
   }
 
   if (selectedSelectorClass) {
-    return (
-      <SelectorInspector cls={selectedSelectorClass} activeBreakpointId={activeBreakpointId} />
-    )
+    return <SelectorInspector cls={selectedSelectorClass} activeBreakpointId={activeBreakpointId} />
   }
 
   if (isMultiSelect) {
@@ -170,9 +168,9 @@ export function PropertiesPanelBody(props: PropertiesPanelBodyProps): React.Reac
               ref={classPickerRef}
               nodeId={selectedNodeId!}
               trailingAction={
-                showConvertToComponent
-                  ? <ConvertToComponentButton nodeId={selectedNodeId!} />
-                  : undefined
+                showConvertToComponent ? (
+                  <ConvertToComponentButton nodeId={selectedNodeId!} />
+                ) : undefined
               }
             />
           ) : (

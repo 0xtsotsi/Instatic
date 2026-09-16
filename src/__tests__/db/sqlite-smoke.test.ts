@@ -16,7 +16,11 @@ describe('SQLite adapter smoke test', () => {
       // The migrations seed 'pages' as a system table; we can insert a row
       // into it to exercise the cells_json round-trip.
       const rowId = crypto.randomUUID()
-      const cells = { title: 'Test Page', slug: 'test-page', body: { nodes: {}, rootNodeId: 'root' } }
+      const cells = {
+        title: 'Test Page',
+        slug: 'test-page',
+        body: { nodes: {}, rootNodeId: 'root' },
+      }
 
       const { rows: insertedRows } = await db<{ id: string }>`
         insert into data_rows (id, table_id, slug, status, cells_json)

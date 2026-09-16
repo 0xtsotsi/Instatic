@@ -14,11 +14,7 @@
 
 import { describe, it, expect } from 'bun:test'
 import type { StyleRule, Page, SiteDocument } from '@core/page-tree'
-import {
-  cloneScopedClassesForNodeMap,
-  duplicateNode,
-  duplicatePage,
-} from '@core/page-tree'
+import { cloneScopedClassesForNodeMap, duplicateNode, duplicatePage } from '@core/page-tree'
 import { makeNode, makePage, makeSite } from '../fixtures'
 
 // ---------------------------------------------------------------------------
@@ -117,9 +113,9 @@ describe('cloneScopedClassesForNodeMap', () => {
       ['n2', 'n2-clone'],
     ])
     const classes: Record<string, StyleRule> = {
-      'c1': makeScopedClass('c1', 'n1'),
-      'c2': makeScopedClass('c2', 'n2'),
-      'c3': makeReusableClass('c3'),
+      c1: makeScopedClass('c1', 'n1'),
+      c2: makeScopedClass('c2', 'n2'),
+      c3: makeReusableClass('c3'),
     }
 
     const { added, classIdRemap } = cloneScopedClassesForNodeMap(idMap, classes)
@@ -140,8 +136,8 @@ describe('cloneScopedClassesForNodeMap', () => {
       ['n2', 'n2-clone'],
     ])
     const classes: Record<string, StyleRule> = {
-      'c1': makeScopedClass('c1', 'n1'),
-      'c2': makeScopedClass('c2', 'n2'),
+      c1: makeScopedClass('c1', 'n1'),
+      c2: makeScopedClass('c2', 'n2'),
     }
 
     const { added } = cloneScopedClassesForNodeMap(idMap, classes)
@@ -242,7 +238,7 @@ describe('duplicatePage — scoped-class cloning (F-0005)', () => {
     return { site, sourcePage, sourceNodeId, sourceClassId }
   }
 
-  it('clones the source page\'s scoped class with a fresh id and rewritten scope', () => {
+  it("clones the source page's scoped class with a fresh id and rewritten scope", () => {
     const { site, sourceClassId } = makeSiteWithScopedClass()
 
     const newPage = duplicatePage(site, 'p-source', 'Copy', 'copy')
@@ -282,7 +278,7 @@ describe('duplicatePage — scoped-class cloning (F-0005)', () => {
     expect(reusableCount).toBe(1)
   })
 
-  it('the new page\'s node references the cloned class id, not the source class id', () => {
+  it("the new page's node references the cloned class id, not the source class id", () => {
     const { site, sourceClassId } = makeSiteWithScopedClass()
 
     const newPage = duplicatePage(site, 'p-source', 'Copy', 'copy')
@@ -293,7 +289,7 @@ describe('duplicatePage — scoped-class cloning (F-0005)', () => {
     }
   })
 
-  it('source page\'s nodes still reference the original scoped class id (no mutation)', () => {
+  it("source page's nodes still reference the original scoped class id (no mutation)", () => {
     const { site, sourcePage, sourceNodeId, sourceClassId } = makeSiteWithScopedClass()
 
     duplicatePage(site, 'p-source', 'Copy', 'copy')

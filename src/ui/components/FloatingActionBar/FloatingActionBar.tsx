@@ -110,13 +110,9 @@ export function FloatingActionBar({
       role="toolbar"
       aria-label={ariaLabel}
     >
-      {hasLabel && (
-        <span className={styles.label}>{label}</span>
-      )}
+      {hasLabel && <span className={styles.label}>{label}</span>}
       {hasLabel && hasChildren && <span className={styles.sep} aria-hidden="true" />}
-      {hasChildren && (
-        <div className={styles.actions}>{children}</div>
-      )}
+      {hasChildren && <div className={styles.actions}>{children}</div>}
       {(hasChildren || hasLabel) && hasClose && <span className={styles.sep} aria-hidden="true" />}
       {hasClose && (
         <Button

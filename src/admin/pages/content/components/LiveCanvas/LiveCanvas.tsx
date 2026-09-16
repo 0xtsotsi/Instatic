@@ -55,10 +55,7 @@ import { TableCell } from '@tiptap/extension-table-cell'
 import { TextAlign } from '@tiptap/extension-text-align'
 import { SkeletonBlock } from '@ui/components/Skeleton'
 import type { DataTable, DataRow } from '@core/data/schemas'
-import {
-  markdownToProseMirrorDoc,
-  proseMirrorDocToMarkdown,
-} from '@core/markdown/markdownDocument'
+import { markdownToProseMirrorDoc, proseMirrorDocToMarkdown } from '@core/markdown/markdownDocument'
 import { MediaNode, type MediaAttributes } from '@content/nodes/MediaNode'
 import type { TiptapBodyEditorHandle } from '@content/TiptapBodyEditor'
 import { previewCmsDataRow } from '@core/persistence/cmsData'
@@ -180,9 +177,7 @@ function relaxLastChildCombinators(doc: Document): void {
     }
     for (const rule of snapshot) {
       const selectors = rule.selectorText.split(',').map((s) => s.trim())
-      const relaxed = selectors
-        .map(relaxLastChildCombinator)
-        .filter((s): s is string => s !== null)
+      const relaxed = selectors.map(relaxLastChildCombinator).filter((s): s is string => s !== null)
       if (relaxed.length === 0) continue
       const relaxedSelector = relaxed.join(', ')
       const declarations = rule.style.cssText
@@ -359,7 +354,9 @@ export function LiveCanvas({
       return null
     })
 
-    const target = iframe.contentDocument.querySelector<HTMLElement>('[data-instatic-content-region]')
+    const target = iframe.contentDocument.querySelector<HTMLElement>(
+      '[data-instatic-content-region]',
+    )
     if (!target) {
       // The template doesn't include a `base.outlet` module — fall
       // back to read-only preview without an inline editor.
@@ -639,8 +636,8 @@ export function LiveCanvas({
           <h2>Live preview unavailable</h2>
           <p>{preview.error ?? 'The preview pipeline could not render this entry.'}</p>
           <p className={styles.errorHint}>
-            Live mode needs at least one published version of the site so it
-            can resolve the entry template. Publish the site once and try again.
+            Live mode needs at least one published version of the site so it can resolve the entry
+            template. Publish the site once and try again.
           </p>
         </div>
       </div>
@@ -673,16 +670,8 @@ export function LiveCanvas({
       {editor && !readOnly && (
         <>
           <BodyBubbleMenu editor={editor} iframeEl={iframeEl} />
-          <BodyFloatingMenu
-            editor={editor}
-            onPickMedia={onPickMedia}
-            iframeEl={iframeEl}
-          />
-          <MediaNodeToolbar
-            editor={editor}
-            onPickMedia={onPickMedia}
-            iframeEl={iframeEl}
-          />
+          <BodyFloatingMenu editor={editor} onPickMedia={onPickMedia} iframeEl={iframeEl} />
+          <MediaNodeToolbar editor={editor} onPickMedia={onPickMedia} iframeEl={iframeEl} />
         </>
       )}
     </div>

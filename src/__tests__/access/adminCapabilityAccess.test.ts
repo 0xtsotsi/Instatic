@@ -140,7 +140,10 @@ describe('admin capability access helpers', () => {
     expect(canEditStructure(styleEditor)).toBe(false)
     expect(canSaveDraftSite(styleEditor)).toBe(true)
 
-    const structureWithoutPages = user('structure-without-pages', ['site.read', 'site.structure.edit'])
+    const structureWithoutPages = user('structure-without-pages', [
+      'site.read',
+      'site.structure.edit',
+    ])
     expect(canEditStructure(structureWithoutPages)).toBe(false)
     expect(canSaveDraftSite(structureWithoutPages)).toBe(true)
 

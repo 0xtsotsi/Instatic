@@ -17,8 +17,8 @@ type ConflictRowKind = 'page' | 'rule' | 'token'
 
 const ACTION_OPTIONS = [
   { value: 'auto-rename', label: 'Rename', tooltip: 'Rename with a numeric suffix' },
-  { value: 'skip',        label: 'Skip' },
-  { value: 'overwrite',   label: 'Overwrite' },
+  { value: 'skip', label: 'Skip' },
+  { value: 'overwrite', label: 'Overwrite' },
   { value: 'custom-rename', label: 'Custom' },
 ] satisfies ReadonlyArray<{ value: ResolutionAction; label: string; tooltip?: string }>
 
@@ -67,9 +67,16 @@ interface ConflictRowProps {
   onChange: (next: ConflictResolution) => void
 }
 
-export function ConflictRow({ kind, source, desired, current, canOverwrite = true, onChange }: ConflictRowProps) {
+export function ConflictRow({
+  kind,
+  source,
+  desired,
+  current,
+  canOverwrite = true,
+  onChange,
+}: ConflictRowProps) {
   const isCustom = current.action === 'custom-rename'
-  const resolutionLabel = kind === 'page' ? (source || desired) : desired
+  const resolutionLabel = kind === 'page' ? source || desired : desired
   const customValue = resolvedValue(kind, current) ?? desired
 
   function handleActionChange(action: ResolutionAction) {

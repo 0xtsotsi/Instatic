@@ -1,8 +1,4 @@
-import type {
-  PluginRecord,
-  StorageListOptions,
-  StorageListResult,
-} from '../storageSchemas'
+import type { PluginRecord, StorageListOptions, StorageListResult } from '../storageSchemas'
 import type {
   ContentEntry,
   ContentListOptions,
@@ -172,7 +168,10 @@ export interface ServerPluginApi {
         ) => Promise<ReadonlyArray<ContentEntry>>
         deleteMany: (entryIds: ReadonlyArray<string>) => Promise<{ deleted: number }>
       }
-      tree: (entryId: string, fieldId: string) => {
+      tree: (
+        entryId: string,
+        fieldId: string,
+      ) => {
         read: () => Promise<unknown>
         mutate: (operations: ReadonlyArray<ContentTreeOperation>) => Promise<TreeMutateResult>
         replace: (tree: unknown) => Promise<void>

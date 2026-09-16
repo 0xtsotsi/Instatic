@@ -63,51 +63,48 @@ describe('useEditorStore permission gate', () => {
   })
 
   it('throws a permission error (caught by the boundary) when editor.store.read is not granted', () => {
-    pluginRuntime.registerPanel(
-      manifestWithGrants(['editor.code', 'editor.panels']),
-      {
-        id: 'acme.workflow.review',
-        label: 'Review',
-        iconName: 'box-stack',
-        component: BreakpointPanel,
-      },
-    )
+    pluginRuntime.registerPanel(manifestWithGrants(['editor.code', 'editor.panels']), {
+      id: 'acme.workflow.review',
+      label: 'Review',
+      iconName: 'box-stack',
+      component: BreakpointPanel,
+    })
 
     render(<PluginEditorPanel panelId="acme.workflow.review" />)
 
     // No editor state leaked; the panel body shows the boundary fallback
     // instead of the plugin subtree.
     expect(screen.queryByText('breakpoint:desktop')).toBeNull()
-    expect(
-      (document.body.textContent ?? '').includes('failed to load'),
-    ).toBe(true)
+    expect((document.body.textContent ?? '').includes('failed to load')).toBe(true)
   })
 
   it('the thrown error names the plugin and the missing permission', () => {
-    pluginRuntime.registerPanel(
-      manifestWithGrants(['editor.code', 'editor.panels']),
-      {
-        id: 'acme.workflow.review',
-        label: 'Review',
-        iconName: 'box-stack',
-        component: BreakpointPanel,
-      },
-    )
+    pluginRuntime.registerPanel(manifestWithGrants(['editor.code', 'editor.panels']), {
+      id: 'acme.workflow.review',
+      label: 'Review',
+      iconName: 'box-stack',
+      component: BreakpointPanel,
+    })
 
     // Render the panel subtree without relying on the boundary fallback
     // copy (which is environment-dependent) — capture the boundary log.
     const errors: unknown[] = []
     const originalConsoleError = console.error
-    console.error = (...args: unknown[]) => { errors.push(args.join(' ')) }
+    console.error = (...args: unknown[]) => {
+      errors.push(args.join(' '))
+    }
     try {
       render(<PluginEditorPanel panelId="acme.workflow.review" />)
     } finally {
       console.error = originalConsoleError
     }
-    expect(errors.some((line) =>
-      String(line).includes('[plugin:acme.workflow]')
-      && String(line).includes('useEditorStore requires the "editor.store.read" permission'),
-    )).toBe(true)
+    expect(
+      errors.some(
+        (line) =>
+          String(line).includes('[plugin:acme.workflow]') &&
+          String(line).includes('useEditorStore requires the "editor.store.read" permission'),
+      ),
+    ).toBe(true)
   })
 
   it('throws when called outside any plugin surface', () => {

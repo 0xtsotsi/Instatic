@@ -67,10 +67,7 @@ const selectCanvasTransformSnapshot = (state: EditorStore): CanvasTransformSnaps
   state.panY,
 ]
 
-function areCanvasTransformSnapshotsEqual(
-  a: CanvasTransformSnapshot,
-  b: CanvasTransformSnapshot,
-) {
+function areCanvasTransformSnapshotsEqual(a: CanvasTransformSnapshot, b: CanvasTransformSnapshot) {
   return a[0] === b[0] && a[1] === b[1] && a[2] === b[2]
 }
 
@@ -117,36 +114,39 @@ export function useCanvas({ canvasRootRef, transformLayerRef, enabled }: UseCanv
    */
   // Exception #1: referenced in useEffect dep arrays (mount sync, external
   // store-subscription sync) — exhaustive-deps needs a stable identity here.
-  const applyTransformToDOM = useCallback((t: Transform, animated = false) => {
-    const el = transformLayerRef.current
-    if (!el) return
+  const applyTransformToDOM = useCallback(
+    (t: Transform, animated = false) => {
+      const el = transformLayerRef.current
+      if (!el) return
 
-    if (animatingTimerRef.current) {
-      clearTimeout(animatingTimerRef.current)
-      animatingTimerRef.current = null
-    }
-
-    // Use setAttribute / removeAttribute instead of `el.dataset.X = ...` and
-    // `delete el.dataset.X`. React Compiler treats DOM method calls as opaque
-    // side effects (acceptable) but flags direct property assignment on a
-    // value reached through a hook argument as a Rules-of-React violation.
-    // Functionally identical — same `data-animating` attribute, same CSS
-    // selector match in CanvasTransformLayer.module.css.
-    if (animated) {
-      el.setAttribute('data-animating', 'true')
-      animatingTimerRef.current = setTimeout(() => {
-        el.removeAttribute('data-animating')
+      if (animatingTimerRef.current) {
+        clearTimeout(animatingTimerRef.current)
         animatingTimerRef.current = null
-      }, ANIMATED_TRANSFORM_MS)
-    } else if (el.hasAttribute('data-animating')) {
-      // A new gesture frame interrupting an in-flight animation: drop the
-      // attribute so wheel/pinch/drag updates land instantly.
-      el.removeAttribute('data-animating')
-    }
+      }
 
-    // setProperty avoids the same property-assignment lint trip as above.
-    el.style.setProperty('transform', `translate(${t.panX}px, ${t.panY}px) scale(${t.zoom})`)
-  }, [transformLayerRef])
+      // Use setAttribute / removeAttribute instead of `el.dataset.X = ...` and
+      // `delete el.dataset.X`. React Compiler treats DOM method calls as opaque
+      // side effects (acceptable) but flags direct property assignment on a
+      // value reached through a hook argument as a Rules-of-React violation.
+      // Functionally identical — same `data-animating` attribute, same CSS
+      // selector match in CanvasTransformLayer.module.css.
+      if (animated) {
+        el.setAttribute('data-animating', 'true')
+        animatingTimerRef.current = setTimeout(() => {
+          el.removeAttribute('data-animating')
+          animatingTimerRef.current = null
+        }, ANIMATED_TRANSFORM_MS)
+      } else if (el.hasAttribute('data-animating')) {
+        // A new gesture frame interrupting an in-flight animation: drop the
+        // attribute so wheel/pinch/drag updates land instantly.
+        el.removeAttribute('data-animating')
+      }
+
+      // setProperty avoids the same property-assignment lint trip as above.
+      el.style.setProperty('transform', `translate(${t.panX}px, ${t.panY}px) scale(${t.zoom})`)
+    },
+    [transformLayerRef],
+  )
 
   // Sync from store on mount AND whenever the canvas re-becomes enabled
   // (preview→design transition). Reading via getState() (not subscriptions)
@@ -168,14 +168,17 @@ export function useCanvas({ canvasRootRef, transformLayerRef, enabled }: UseCanv
    */
   // Exception #1: transitive dep of updateTransform, which feeds the wheel
   // listener's useEffect dep array — needs a stable identity.
-  const scheduleTransformWrite = useCallback((t: Transform) => {
-    transformRef.current = t
-    if (rafRef.current !== null) return // already scheduled
-    rafRef.current = requestAnimationFrame(() => {
-      rafRef.current = null
-      applyTransformToDOM(transformRef.current)
-    })
-  }, [applyTransformToDOM])
+  const scheduleTransformWrite = useCallback(
+    (t: Transform) => {
+      transformRef.current = t
+      if (rafRef.current !== null) return // already scheduled
+      rafRef.current = requestAnimationFrame(() => {
+        rafRef.current = null
+        applyTransformToDOM(transformRef.current)
+      })
+    },
+    [applyTransformToDOM],
+  )
 
   /**
    * Debounced Zustand commit — fires 100ms after the last interaction event.
@@ -183,18 +186,24 @@ export function useCanvas({ canvasRootRef, transformLayerRef, enabled }: UseCanv
    */
   // Exception #1: transitive dep of updateTransform, which feeds the wheel
   // listener's useEffect dep array — needs a stable identity.
-  const scheduleStoreCommit = useCallback((t: Transform) => {
-    if (commitTimerRef.current) clearTimeout(commitTimerRef.current)
-    commitTimerRef.current = setTimeout(() => {
-      setCanvasTransform(t.zoom, t.panX, t.panY)
-    }, 100)
-  }, [setCanvasTransform])
+  const scheduleStoreCommit = useCallback(
+    (t: Transform) => {
+      if (commitTimerRef.current) clearTimeout(commitTimerRef.current)
+      commitTimerRef.current = setTimeout(() => {
+        setCanvasTransform(t.zoom, t.panX, t.panY)
+      }, 100)
+    },
+    [setCanvasTransform],
+  )
 
   // Exception #1: referenced in the native wheel listener's useEffect dep array.
-  const updateTransform = useCallback((t: Transform) => {
-    scheduleTransformWrite(t)
-    scheduleStoreCommit(t)
-  }, [scheduleTransformWrite, scheduleStoreCommit])
+  const updateTransform = useCallback(
+    (t: Transform) => {
+      scheduleTransformWrite(t)
+      scheduleStoreCommit(t)
+    },
+    [scheduleTransformWrite, scheduleStoreCommit],
+  )
 
   const panBy = (dx: number, dy: number) => {
     const t = transformRef.current
@@ -261,11 +270,8 @@ export function useCanvas({ canvasRootRef, transformLayerRef, enabled }: UseCanv
         // Don't intercept space in inputs/textareas. Inline-edit keystrokes
         // never reach here: IframeFrameSurface's key forwarding stands down
         // during a session, so no space clone is dispatched on this document.
-        if (
-          target.tagName === 'INPUT' ||
-          target.tagName === 'TEXTAREA' ||
-          target.isContentEditable
-        ) return
+        if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable)
+          return
         e.preventDefault()
         spaceActiveRef.current = true
         setCanvasSpacePanActive(document, 'parentDocument', true)
@@ -293,11 +299,8 @@ export function useCanvas({ canvasRootRef, transformLayerRef, enabled }: UseCanv
       if (!(e.metaKey || e.ctrlKey) || e.key !== '0') return
 
       const target = e.target as HTMLElement
-      if (
-        target.tagName === 'INPUT' ||
-        target.tagName === 'TEXTAREA' ||
-        target.isContentEditable
-      ) return
+      if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable)
+        return
 
       e.preventDefault()
       resetCanvasView()
@@ -328,10 +331,9 @@ export function useCanvas({ canvasRootRef, transformLayerRef, enabled }: UseCanv
     const target = e.target as HTMLElement | null
     if (
       target &&
-      (target.tagName === 'INPUT' ||
-        target.tagName === 'TEXTAREA' ||
-        target.isContentEditable)
-    ) return
+      (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable)
+    )
+      return
 
     // Zoom in/out with +/- keys — zoom around the canvas viewport center
     if (e.key === '=' || e.key === '+') {

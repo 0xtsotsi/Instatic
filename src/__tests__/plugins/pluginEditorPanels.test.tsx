@@ -13,10 +13,7 @@ import { afterEach, beforeEach, describe, expect, it } from 'bun:test'
 import { cleanup, fireEvent, render, screen } from '@testing-library/react'
 import { PluginEditorPanel } from '@site/panels/PluginEditorPanel'
 import { useEditorStore } from '@site/store/store'
-import {
-  activateEditorPlugin,
-  pluginRuntime,
-} from '@core/plugins/runtime'
+import { activateEditorPlugin, pluginRuntime } from '@core/plugins/runtime'
 import { definePluginPanel } from '@core/plugin-sdk'
 import type { PluginManifest } from '@core/plugin-sdk'
 
@@ -61,30 +58,36 @@ describe('definePluginPanel SDK builder', () => {
   })
 
   it('rejects panel ids that are not namespaced (no dot)', () => {
-    expect(() => definePluginPanel({
-      id: 'unscoped',
-      label: 'X',
-      iconName: 'box',
-      component: NoopPanel,
-    })).toThrow(/namespaced/)
+    expect(() =>
+      definePluginPanel({
+        id: 'unscoped',
+        label: 'X',
+        iconName: 'box',
+        component: NoopPanel,
+      }),
+    ).toThrow(/namespaced/)
   })
 
   it('rejects panel ids with invalid characters', () => {
-    expect(() => definePluginPanel({
-      id: 'Acme.Bad',
-      label: 'X',
-      iconName: 'box',
-      component: NoopPanel,
-    })).toThrow(/lowercase/)
+    expect(() =>
+      definePluginPanel({
+        id: 'Acme.Bad',
+        label: 'X',
+        iconName: 'box',
+        component: NoopPanel,
+      }),
+    ).toThrow(/lowercase/)
   })
 
   it('rejects empty iconName', () => {
-    expect(() => definePluginPanel({
-      id: 'acme.x.panel',
-      label: 'X',
-      iconName: '   ',
-      component: NoopPanel,
-    })).toThrow(/iconName/)
+    expect(() =>
+      definePluginPanel({
+        id: 'acme.x.panel',
+        label: 'X',
+        iconName: '   ',
+        component: NoopPanel,
+      }),
+    ).toThrow(/iconName/)
   })
 })
 
@@ -109,31 +112,38 @@ describe('pluginRuntime panel registry', () => {
   })
 
   it('throws when the plugin lacks the editor.panels permission', async () => {
-    const manifest = { ...baseManifest, grantedPermissions: [] satisfies PluginManifest['grantedPermissions'] }
-    await expect(activateEditorPlugin(manifest, {
-      activate(api) {
-        api.editor.panels.register({
-          id: 'acme.workflow.review',
-          label: 'Review',
-          iconName: 'box-stack',
-          component: NoopPanel,
-        })
-      },
-    })).rejects.toThrow(/editor\.panels/)
+    const manifest = {
+      ...baseManifest,
+      grantedPermissions: [] satisfies PluginManifest['grantedPermissions'],
+    }
+    await expect(
+      activateEditorPlugin(manifest, {
+        activate(api) {
+          api.editor.panels.register({
+            id: 'acme.workflow.review',
+            label: 'Review',
+            iconName: 'box-stack',
+            component: NoopPanel,
+          })
+        },
+      }),
+    ).rejects.toThrow(/editor\.panels/)
     expect(pluginRuntime.getPanels()).toEqual([])
   })
 
   it('rejects panel ids that escape the plugin namespace', async () => {
-    await expect(activateEditorPlugin(baseManifest, {
-      activate(api) {
-        api.editor.panels.register({
-          id: 'other.vendor.review',
-          label: 'X',
-          iconName: 'box',
-          component: NoopPanel,
-        })
-      },
-    })).rejects.toThrow(/id must start with/)
+    await expect(
+      activateEditorPlugin(baseManifest, {
+        activate(api) {
+          api.editor.panels.register({
+            id: 'other.vendor.review',
+            label: 'X',
+            iconName: 'box',
+            component: NoopPanel,
+          })
+        },
+      }),
+    ).rejects.toThrow(/id must start with/)
     expect(pluginRuntime.getPanels()).toEqual([])
   })
 
@@ -171,7 +181,9 @@ describe('pluginRuntime panel registry', () => {
       component: NoopPanel,
     })
     let emits = 0
-    const unsubscribe = pluginRuntime.subscribe(() => { emits += 1 })
+    const unsubscribe = pluginRuntime.subscribe(() => {
+      emits += 1
+    })
     pluginRuntime.reset()
     expect(pluginRuntime.getPanels()).toEqual([])
     expect(emits).toBeGreaterThanOrEqual(1)
@@ -192,7 +204,7 @@ describe('pluginRuntime panel registry', () => {
 })
 
 describe('PluginEditorPanel host mount', () => {
-  it('renders the plugin\'s React component inside host-owned chrome', () => {
+  it("renders the plugin's React component inside host-owned chrome", () => {
     function HelloPanel() {
       return <p>Hello from plugin</p>
     }
@@ -207,9 +219,7 @@ describe('PluginEditorPanel host mount', () => {
 
     // Host-rendered PanelHeader owns the title and close button.
     expect(screen.getByText('Review')).toBeDefined()
-    expect(
-      screen.getByRole('button', { name: 'Close Review panel' }),
-    ).toBeDefined()
+    expect(screen.getByRole('button', { name: 'Close Review panel' })).toBeDefined()
     // Plugin's body content is rendered alongside the header chrome.
     expect(screen.getByText('Hello from plugin')).toBeDefined()
   })

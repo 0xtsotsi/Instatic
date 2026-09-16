@@ -2,7 +2,11 @@ import { describe, expect, it } from 'bun:test'
 import { readFileSync } from 'fs'
 
 function cssRule(css: string, selector: string): string {
-  return css.match(new RegExp(`${selector.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\s*\\{[\\s\\S]*?\\}`))?.[0] ?? ''
+  return (
+    css.match(
+      new RegExp(`${selector.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\s*\\{[\\s\\S]*?\\}`),
+    )?.[0] ?? ''
+  )
 }
 
 function zIndexForRule(rule: string): number {
@@ -18,7 +22,10 @@ describe('CanvasContextSelector layering', () => {
       'utf-8',
     )
     const selectionOverlayCss = readFileSync(
-      new URL('../../admin/pages/site/canvas/BreakpointSelectionOverlay.module.css', import.meta.url),
+      new URL(
+        '../../admin/pages/site/canvas/BreakpointSelectionOverlay.module.css',
+        import.meta.url,
+      ),
       'utf-8',
     )
 

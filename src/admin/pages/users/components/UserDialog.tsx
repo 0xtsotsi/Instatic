@@ -51,7 +51,8 @@ export function UserDialog({
   onSubmit,
 }: UserDialogProps) {
   const title = mode === 'create' ? 'Create User' : mode === 'edit' ? 'Edit User' : 'Reset Password'
-  const submitLabel = mode === 'create' ? 'Create User' : mode === 'edit' ? 'Save User' : 'Reset Password'
+  const submitLabel =
+    mode === 'create' ? 'Create User' : mode === 'edit' ? 'Save User' : 'Reset Password'
   const emailId = useId()
   const displayNameId = useId()
   const passwordId = useId()
@@ -69,17 +70,28 @@ export function UserDialog({
             <span>Cancel</span>
           </Button>
           <Button type="submit" form={USER_FORM_ID} variant="primary" size="sm" disabled={busy}>
-            {mode === 'create' ? <PlusIcon size={14} aria-hidden="true" /> : <SaveSolidIcon size={14} aria-hidden="true" />}
+            {mode === 'create' ? (
+              <PlusIcon size={14} aria-hidden="true" />
+            ) : (
+              <SaveSolidIcon size={14} aria-hidden="true" />
+            )}
             <span>{submitLabel}</span>
           </Button>
         </>
       }
     >
-      <form id={USER_FORM_ID} className={dialogStyles.form} autoComplete="off" onSubmit={(event) => void onSubmit(event)}>
+      <form
+        id={USER_FORM_ID}
+        className={dialogStyles.form}
+        autoComplete="off"
+        onSubmit={(event) => void onSubmit(event)}
+      >
         {mode !== 'reset' && (
           <>
             <div className={dialogStyles.field}>
-              <label htmlFor={emailId} className={dialogStyles.label}>Email</label>
+              <label htmlFor={emailId} className={dialogStyles.label}>
+                Email
+              </label>
               <Input
                 id={emailId}
                 value={form.email}
@@ -93,7 +105,9 @@ export function UserDialog({
               />
             </div>
             <div className={dialogStyles.field}>
-              <label htmlFor={displayNameId} className={dialogStyles.label}>Display name</label>
+              <label htmlFor={displayNameId} className={dialogStyles.label}>
+                Display name
+              </label>
               <Input
                 id={displayNameId}
                 value={form.displayName}
@@ -105,7 +119,9 @@ export function UserDialog({
           </>
         )}
         <div className={dialogStyles.field}>
-          <label htmlFor={passwordId} className={dialogStyles.label}>{mode === 'create' ? 'Initial password' : 'New password'}</label>
+          <label htmlFor={passwordId} className={dialogStyles.label}>
+            {mode === 'create' ? 'Initial password' : 'New password'}
+          </label>
           <Input
             id={passwordId}
             value={form.password}
@@ -123,7 +139,9 @@ export function UserDialog({
         {mode !== 'reset' && (
           <>
             <div className={dialogStyles.field}>
-              <label htmlFor={roleId} className={dialogStyles.label}>Role</label>
+              <label htmlFor={roleId} className={dialogStyles.label}>
+                Role
+              </label>
               <Select
                 id={roleId}
                 value={form.roleId}
@@ -134,19 +152,30 @@ export function UserDialog({
             </div>
             {mode === 'edit' && (
               <div className={dialogStyles.field}>
-                <label htmlFor={statusId} className={dialogStyles.label}>Status</label>
+                <label htmlFor={statusId} className={dialogStyles.label}>
+                  Status
+                </label>
                 <Select
                   id={statusId}
                   value={form.status}
                   name="edited-user-status"
                   options={statusOptions}
-                  onChange={(event) => onChange({ ...form, status: event.currentTarget.value as CmsCurrentUser['status'] })}
+                  onChange={(event) =>
+                    onChange({
+                      ...form,
+                      status: event.currentTarget.value as CmsCurrentUser['status'],
+                    })
+                  }
                 />
               </div>
             )}
           </>
         )}
-        {error && <p role="alert" className={dialogStyles.errorText}>{error}</p>}
+        {error && (
+          <p role="alert" className={dialogStyles.errorText}>
+            {error}
+          </p>
+        )}
       </form>
     </Dialog>
   )

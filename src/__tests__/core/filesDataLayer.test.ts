@@ -186,7 +186,9 @@ describe('filesSlice.createFile', () => {
   it('accepts custom initial content', () => {
     setupSite()
     const id = getStore().createFile('src/foo.ts', 'script', 'export const x = 1')
-    expect(useEditorStore.getState().site!.files.find((f) => f.id === id)?.content).toBe('export const x = 1')
+    expect(useEditorStore.getState().site!.files.find((f) => f.id === id)?.content).toBe(
+      'export const x = 1',
+    )
   })
 
   it('does not set content for asset type', () => {
@@ -342,7 +344,9 @@ describe('filesSlice.updateFileContent', () => {
     setupSite()
     const id = getStore().createFile('src/foo.ts', 'script', '')
     getStore().updateFileContent(id, 'export const x = 42')
-    expect(useEditorStore.getState().site!.files.find((f) => f.id === id)?.content).toBe('export const x = 42')
+    expect(useEditorStore.getState().site!.files.find((f) => f.id === id)?.content).toBe(
+      'export const x = 42',
+    )
   })
 
   it('updates updatedAt on content change', () => {
@@ -441,11 +445,15 @@ describe('filesSlice — round-trip create → read → update → delete', () =
 
     // update content
     getStore().updateFileContent(id, '// updated')
-    expect(useEditorStore.getState().site!.files.find((f) => f.id === id)?.content).toBe('// updated')
+    expect(useEditorStore.getState().site!.files.find((f) => f.id === id)?.content).toBe(
+      '// updated',
+    )
 
     // rename
     getStore().renameFile(id, 'src/utils/helpers-v2.ts')
-    expect(useEditorStore.getState().site!.files.find((f) => f.id === id)?.path).toBe('src/utils/helpers-v2.ts')
+    expect(useEditorStore.getState().site!.files.find((f) => f.id === id)?.path).toBe(
+      'src/utils/helpers-v2.ts',
+    )
 
     // delete
     getStore().deleteFile(id)
@@ -512,7 +520,14 @@ describe('validateSite — files field', () => {
   it('normalizes dot-segments in file paths during validation', () => {
     const raw = minimalValidRaw()
     raw.files = [
-      { id: 'f1', path: 'src/./foo.ts', type: 'script', content: '', createdAt: 1000, updatedAt: 2000 },
+      {
+        id: 'f1',
+        path: 'src/./foo.ts',
+        type: 'script',
+        content: '',
+        createdAt: 1000,
+        updatedAt: 2000,
+      },
     ]
     const site = validateSite(raw)
     expect(site.files[0].path).toBe('src/foo.ts')
@@ -521,8 +536,22 @@ describe('validateSite — files field', () => {
   it('silently drops files with unsafe paths (does not reject the whole site)', () => {
     const raw = minimalValidRaw()
     raw.files = [
-      { id: 'bad', path: '../evil.ts', type: 'script', content: '', createdAt: 1000, updatedAt: 2000 },
-      { id: 'good', path: 'src/safe.ts', type: 'script', content: '', createdAt: 1000, updatedAt: 2000 },
+      {
+        id: 'bad',
+        path: '../evil.ts',
+        type: 'script',
+        content: '',
+        createdAt: 1000,
+        updatedAt: 2000,
+      },
+      {
+        id: 'good',
+        path: 'src/safe.ts',
+        type: 'script',
+        content: '',
+        createdAt: 1000,
+        updatedAt: 2000,
+      },
     ]
     const site = validateSite(raw)
     expect(site.files).toHaveLength(1)
@@ -532,8 +561,22 @@ describe('validateSite — files field', () => {
   it('silently drops files with invalid types', () => {
     const raw = minimalValidRaw()
     raw.files = [
-      { id: 'bad', path: 'src/foo.ts', type: 'invalid-type', content: '', createdAt: 1000, updatedAt: 2000 },
-      { id: 'good', path: 'src/bar.ts', type: 'component', content: '', createdAt: 1000, updatedAt: 2000 },
+      {
+        id: 'bad',
+        path: 'src/foo.ts',
+        type: 'invalid-type',
+        content: '',
+        createdAt: 1000,
+        updatedAt: 2000,
+      },
+      {
+        id: 'good',
+        path: 'src/bar.ts',
+        type: 'component',
+        content: '',
+        createdAt: 1000,
+        updatedAt: 2000,
+      },
     ]
     const site = validateSite(raw)
     expect(site.files).toHaveLength(1)
@@ -543,8 +586,22 @@ describe('validateSite — files field', () => {
   it('deduplicates files with the same path (keeps first occurrence)', () => {
     const raw = minimalValidRaw()
     raw.files = [
-      { id: 'f1', path: 'src/foo.ts', type: 'script', content: 'first', createdAt: 1000, updatedAt: 2000 },
-      { id: 'f2', path: 'src/foo.ts', type: 'script', content: 'second', createdAt: 1000, updatedAt: 2000 },
+      {
+        id: 'f1',
+        path: 'src/foo.ts',
+        type: 'script',
+        content: 'first',
+        createdAt: 1000,
+        updatedAt: 2000,
+      },
+      {
+        id: 'f2',
+        path: 'src/foo.ts',
+        type: 'script',
+        content: 'second',
+        createdAt: 1000,
+        updatedAt: 2000,
+      },
     ]
     const site = validateSite(raw)
     expect(site.files).toHaveLength(1)

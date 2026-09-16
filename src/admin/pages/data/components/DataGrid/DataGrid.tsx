@@ -21,11 +21,7 @@ import {
   type MouseEvent as ReactMouseEvent,
   type ReactElement,
 } from 'react'
-import type {
-  DataRow,
-  DataRowStatus,
-  DataTable,
-} from '@core/data/schemas'
+import type { DataRow, DataRowStatus, DataTable } from '@core/data/schemas'
 import { DataGridBulkActionBar } from './DataGridBulkActionBar'
 import { DataGridEmptyState } from './DataGridEmptyState'
 import { DataGridGroupHeader } from './DataGridGroupHeader'
@@ -122,9 +118,7 @@ export function DataGrid({
   const deferredQuery = useDeferredValue(query)
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('all')
   const [sort, setSort] = useState<SortState | null>(null)
-  const [collapsedGroups, setCollapsedGroups] = useState<Set<DataRowStatus>>(
-    () => new Set(),
-  )
+  const [collapsedGroups, setCollapsedGroups] = useState<Set<DataRowStatus>>(() => new Set())
   const [rowContextMenu, setRowContextMenu] = useState<RowContextMenuState | null>(null)
   const gridRef = useRef<HTMLDivElement | null>(null)
 
@@ -209,7 +203,8 @@ export function DataGrid({
     }
 
     currentGrid.addEventListener('contextmenu', handleNativeContextMenu, { capture: true })
-    return () => currentGrid.removeEventListener('contextmenu', handleNativeContextMenu, { capture: true })
+    return () =>
+      currentGrid.removeEventListener('contextmenu', handleNativeContextMenu, { capture: true })
   }, [onSelectRow])
 
   // ── Primary column resize ─────────────────────────────────────────────────
@@ -258,9 +253,7 @@ export function DataGrid({
   // [ checkbox 36px ] [ ...fields ] [ trailing actions minmax(min-content, 1fr) ]
   const columnWidths = [
     '36px',
-    ...orderedFields.map((f) =>
-      getColumnWidth(f, f.id === table.primaryFieldId, primaryWidth),
-    ),
+    ...orderedFields.map((f) => getColumnWidth(f, f.id === table.primaryFieldId, primaryWidth)),
     'minmax(min-content, 1fr)',
   ]
   const gridStyle = {
@@ -308,9 +301,8 @@ export function DataGrid({
     )
   }
 
-  const contextMenuRow = rowContextMenu === null
-    ? null
-    : rows.find((row) => row.id === rowContextMenu.rowId) ?? null
+  const contextMenuRow =
+    rowContextMenu === null ? null : (rows.find((row) => row.id === rowContextMenu.rowId) ?? null)
 
   // ── Render ────────────────────────────────────────────────────────────────
   return (
@@ -383,19 +375,20 @@ export function DataGrid({
             )}
 
             {/* ── Groups + rows ──────────────────────────────────────────── */}
-            {!loading && groups.map((group) => {
-              const collapsed = group.status != null && collapsedGroups.has(group.status)
-              return (
-                <Fragment key={group.key}>
-                  <DataGridGroupHeader
-                    group={group}
-                    collapsed={collapsed}
-                    onToggle={toggleGroupCollapsed}
-                  />
-                  {!collapsed && group.rows.map((row) => renderRow(row))}
-                </Fragment>
-              )
-            })}
+            {!loading &&
+              groups.map((group) => {
+                const collapsed = group.status != null && collapsedGroups.has(group.status)
+                return (
+                  <Fragment key={group.key}>
+                    <DataGridGroupHeader
+                      group={group}
+                      collapsed={collapsed}
+                      onToggle={toggleGroupCollapsed}
+                    />
+                    {!collapsed && group.rows.map((row) => renderRow(row))}
+                  </Fragment>
+                )
+              })}
           </div>
         </div>
       )}
@@ -404,8 +397,16 @@ export function DataGrid({
         selectedCount={selection.checkedIds.size}
         hasPublishWorkflow={hasPublishWorkflow}
         onClearSelection={selection.clearSelection}
-        onSetStatus={onSetRowStatus != null ? (status) => { void handleBulkSetStatus(status) } : undefined}
-        onExport={onExportRows != null ? () => onExportRows(Array.from(selection.checkedIds)) : undefined}
+        onSetStatus={
+          onSetRowStatus != null
+            ? (status) => {
+                void handleBulkSetStatus(status)
+              }
+            : undefined
+        }
+        onExport={
+          onExportRows != null ? () => onExportRows(Array.from(selection.checkedIds)) : undefined
+        }
         onDelete={onDeleteRow != null ? handleBulkDelete : undefined}
       />
 

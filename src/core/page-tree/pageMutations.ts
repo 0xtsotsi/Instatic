@@ -20,7 +20,6 @@ import { reindexNodeParents } from './parentIndex'
 import { cloneNodeWithRemap } from './cloneNode'
 import { createNode } from './mutations'
 
-
 export function addPage(site: SiteDocument, title: string, slug: string): Page {
   const rootNode = createNode('base.body')
   const page: Page = {
@@ -54,9 +53,7 @@ export function renamePage(site: SiteDocument, pageId: string, title: string, sl
     // 'index' is the homepage intent — set it verbatim (homepage swap is a
     // separate concern). Any other slug is made unique against sibling pages
     // (excluding this one) so a rename can't introduce a duplicate slug.
-    page.slug = normalized === 'index'
-      ? 'index'
-      : uniquePageSlug(slug, site.pages, pageId)
+    page.slug = normalized === 'index' ? 'index' : uniquePageSlug(slug, site.pages, pageId)
   }
 }
 

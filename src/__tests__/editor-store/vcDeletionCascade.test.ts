@@ -159,7 +159,9 @@ describe('deleteVisualComponent — cascade deletion', () => {
 
     useEditorStore.getState().deleteVisualComponent(TARGET_VC_ID)
 
-    const remainingVc = useEditorStore.getState().site!.visualComponents.find((v) => v.id === OTHER_VC_ID)
+    const remainingVc = useEditorStore
+      .getState()
+      .site!.visualComponents.find((v) => v.id === OTHER_VC_ID)
     expect(remainingVc).toBeDefined()
     expect(remainingVc!.tree.nodes['vc-ref']).toBeUndefined()
     expect(remainingVc!.tree.nodes['other-root'].children).toHaveLength(0)

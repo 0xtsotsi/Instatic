@@ -51,10 +51,7 @@ export function DataGridSkeletonRows({
               key={`skeleton-${rowIndex}-${fieldIndex}`}
               className={cn(styles.cell, styles.skeletonCell)}
             >
-              <Skeleton
-                width={`${40 + ((rowIndex + fieldIndex) % 5) * 12}%`}
-                height={12}
-              />
+              <Skeleton width={`${40 + ((rowIndex + fieldIndex) % 5) * 12}%`} height={12} />
             </div>
           ))}
           {/* Actions cell. */}

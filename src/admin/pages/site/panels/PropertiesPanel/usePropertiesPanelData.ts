@@ -18,19 +18,21 @@ import { useEditorStore, selectSelectedNode } from '@site/store/store'
 import { registry } from '@core/module-engine'
 import { getAncestors, resolveProps } from '@core/page-tree'
 import { loopSourceRegistry } from '@core/loops/registry'
-import { buildClassTokenUsageMap, buildSelectorUsageMap, resolveSelectorUsage } from '../selectorUsage'
-import type {
-  AnyModuleDefinition,
-} from '@core/module-engine'
-import type {
-  StyleRule,
-  DynamicPropBinding,
-  Page,
-  PageNode,
-} from '@core/page-tree'
+import {
+  buildClassTokenUsageMap,
+  buildSelectorUsageMap,
+  resolveSelectorUsage,
+} from '../selectorUsage'
+import type { AnyModuleDefinition } from '@core/module-engine'
+import type { StyleRule, DynamicPropBinding, Page, PageNode } from '@core/page-tree'
 import type { VisualComponent } from '@core/visualComponents'
 import type { LoopEntitySource } from '@core/loops/types'
-import type { ActiveDocument, PanelState, FocusedPanel, PropertiesPanelMode } from '../../store/slices/uiSlice'
+import type {
+  ActiveDocument,
+  PanelState,
+  FocusedPanel,
+  PropertiesPanelMode,
+} from '../../store/slices/uiSlice'
 
 const DEFAULT_WIDTH = 360
 const MIN_WIDTH = 280
@@ -127,12 +129,13 @@ export function usePropertiesPanelData(): PropertiesPanelData {
   const isSelectorMultiSelect = selectedSelectorClassIds.length > 0
 
   // Resolve active VC for ComponentParamsOverview (null when not in VC canvas mode).
-  const activeVc = activeDocument?.kind === 'visualComponent'
-    ? site?.visualComponents?.find((v) => v.id === activeDocument.vcId) ?? null
-    : null
+  const activeVc =
+    activeDocument?.kind === 'visualComponent'
+      ? (site?.visualComponents?.find((v) => v.id === activeDocument.vcId) ?? null)
+      : null
 
   const definition: AnyModuleDefinition | null = selectedNode
-    ? registry.get(selectedNode.moduleId) ?? null
+    ? (registry.get(selectedNode.moduleId) ?? null)
     : null
   const resolvedPropsForBreakpoint = selectedNode
     ? resolveProps(
@@ -150,7 +153,7 @@ export function usePropertiesPanelData(): PropertiesPanelData {
   const overrideKeys = resolveOverrideKeys(selectedNode, definition, activeBreakpointId)
 
   const selectedSelectorClass = selectedSelectorClassId
-    ? site?.styleRules[selectedSelectorClassId] ?? null
+    ? (site?.styleRules[selectedSelectorClassId] ?? null)
     : null
   // Ambient rules report "Unused" only when provably dead; class rules report
   // an exact reference count. `null` means "no badge" (unassessable ambient).
@@ -164,7 +167,7 @@ export function usePropertiesPanelData(): PropertiesPanelData {
     : null
   const activeClass =
     !selectedSelectorClass && activeClassId && selectedNode
-      ? site?.styleRules[activeClassId] ?? null
+      ? (site?.styleRules[activeClassId] ?? null)
       : null
   const activePage = site?.pages.find((page) => page.id === activePageId) ?? null
 
@@ -296,9 +299,7 @@ function resolveOverrideKeys(
   }
   const overrides = selectedNode.breakpointOverrides[activeBreakpointId] ?? {}
   return new Set(
-    Object.keys(overrides).filter(
-      (key) => definition.schema[key]?.breakpointOverridable === true,
-    ),
+    Object.keys(overrides).filter((key) => definition.schema[key]?.breakpointOverridable === true),
   )
 }
 
@@ -318,17 +319,14 @@ function resolveEnclosingLoopContext(
   const ancestors = getAncestors(activePage, selectedNodeId)
   // Closest enclosing loop wins — that's the one whose source defines the
   // available fields for `currentEntry` bindings inside this subtree.
-  const enclosingLoopNode = [...ancestors]
-    .reverse()
-    .find((a) => a.moduleId === 'base.loop')
+  const enclosingLoopNode = [...ancestors].reverse().find((a) => a.moduleId === 'base.loop')
 
   if (!enclosingLoopNode) {
     return { enclosingLoopSource: undefined, enclosingLoopTableId: null }
   }
 
-  const enclosingLoopSourceId = typeof enclosingLoopNode.props.sourceId === 'string'
-    ? enclosingLoopNode.props.sourceId
-    : null
+  const enclosingLoopSourceId =
+    typeof enclosingLoopNode.props.sourceId === 'string' ? enclosingLoopNode.props.sourceId : null
   const enclosingLoopSource = enclosingLoopSourceId
     ? loopSourceRegistry.get(enclosingLoopSourceId)
     : undefined

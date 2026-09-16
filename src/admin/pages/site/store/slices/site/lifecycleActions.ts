@@ -5,24 +5,15 @@
 import { findHomePage, reconcileSiteExplorerInPlace, reindexNodeParents } from '@core/page-tree'
 import type { SiteDocument } from '@core/page-tree'
 import { renderCache } from '@site/canvas/renderCache'
-import {
-  clonePackageJson,
-  DEFAULT_SITE_PACKAGE_JSON,
-} from '@core/site-dependencies/manifest'
-import {
-  cloneSiteRuntimeConfig,
-  DEFAULT_SITE_RUNTIME,
-} from '@core/site-runtime'
+import { clonePackageJson, DEFAULT_SITE_PACKAGE_JSON } from '@core/site-dependencies/manifest'
+import { cloneSiteRuntimeConfig, DEFAULT_SITE_RUNTIME } from '@core/site-runtime'
 import { clearCanvasSelectionDraft } from '../selectionSlice'
 import { createDefaultSiteDocument } from './defaults'
 import { emptyDirtyMarks } from './dirtyTracking'
 import { reconcileFrameworkClasses } from './framework/reconcile'
 import type { SiteSlice, SiteSliceHelpers } from './types'
 
-type LifecycleActions = Pick<
-  SiteSlice,
-  'createSite' | 'loadSite' | 'clearSite' | 'updateSiteName'
->
+type LifecycleActions = Pick<SiteSlice, 'createSite' | 'loadSite' | 'clearSite' | 'updateSiteName'>
 
 /**
  * Derive the `parentId` index for every page tree and Visual Component tree in
@@ -37,10 +28,7 @@ function reindexSiteTreeParents(site: SiteDocument): void {
   for (const layout of site.layouts ?? []) reindexNodeParents(layout.nodes)
 }
 
-export function createLifecycleActions({
-  set,
-  mutateSite,
-}: SiteSliceHelpers): LifecycleActions {
+export function createLifecycleActions({ set, mutateSite }: SiteSliceHelpers): LifecycleActions {
   return {
     createSite: (name) => {
       const site = createDefaultSiteDocument(name)

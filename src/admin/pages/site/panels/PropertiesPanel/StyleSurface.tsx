@@ -149,13 +149,16 @@ export function StyleSurface({
   const storedStyles: Record<string, unknown> = showInline
     ? (inlineStyles ?? {})
     : activeClass
-      ? (activeContextId ? (activeClass.contextStyles[activeContextId] ?? {}) : activeClass.styles)
+      ? activeContextId
+        ? (activeClass.contextStyles[activeContextId] ?? {})
+        : activeClass.styles
       : {}
   const sectionSetCounts = getClassStyleSectionSetCounts(storedStyles)
 
   // Module section visibility: always visible unless search has no match.
   const hasModuleContent = definition != null && moduleContent != null
-  const moduleVisible = hasModuleContent && (!styleQuery || moduleMatchesQuery(styleQuery, definition!))
+  const moduleVisible =
+    hasModuleContent && (!styleQuery || moduleMatchesQuery(styleQuery, definition!))
 
   // The search bar is bound to the active class — both its placeholder and
   // the rows it filters belong to that class. It only renders when the class
@@ -163,9 +166,8 @@ export function StyleSurface({
   //   - no active class selected → LockedStylePreview teaser is shown instead
   //   - active class is a locked generated utility → GeneratedUtilityLockedState
   //     is shown instead (no editable CSS rows to search)
-  const searchableClass = activeClass != null && !isGeneratedClassLocked(activeClass)
-    ? activeClass
-    : null
+  const searchableClass =
+    activeClass != null && !isGeneratedClassLocked(activeClass) ? activeClass : null
 
   // CSS area content. Branches in priority order:
   //  - caller lacks `site.style.edit`           → role-locked notice
@@ -226,7 +228,6 @@ export function StyleSurface({
     <div ref={scrollRef} className={styles.surface}>
       {/* ── Left column: search + module section + CSS area ─────────── */}
       <div className={styles.surfaceContent}>
-
         {/* Search bar — sticky at the top, searches both module and CSS.
             Hidden when no class is selected or the active class is a locked
             generated utility (no CSS rows to search in either state). */}
@@ -314,7 +315,9 @@ function LockedStylePreview({ onFocusClassPicker, onStyleInline }: LockedStylePr
               value={undefined}
               placeholder={getCSSPropertyDefaultValue(prop)}
               isSet={false}
-              onChange={noopChange as (p: keyof CSSPropertyBag, v: string | number | undefined) => void}
+              onChange={
+                noopChange as (p: keyof CSSPropertyBag, v: string | number | undefined) => void
+              }
               onRemove={noopRemove as (p: keyof CSSPropertyBag) => void}
             />
           ))}
@@ -324,15 +327,9 @@ function LockedStylePreview({ onFocusClassPicker, onStyleInline }: LockedStylePr
 
       {/* CTA — always visible below the teaser */}
       <div className={styles.lockedPreviewCta}>
-        <p className={styles.lockedPreviewCtaText}>
-          Add a class to start styling this element
-        </p>
+        <p className={styles.lockedPreviewCtaText}>Add a class to start styling this element</p>
         <div className={styles.lockedPreviewCtaActions}>
-          <Button
-            variant="secondary"
-            size="sm"
-            onClick={onFocusClassPicker}
-          >
+          <Button variant="secondary" size="sm" onClick={onFocusClassPicker}>
             Add class
           </Button>
           {onStyleInline && (
@@ -393,7 +390,10 @@ function moduleMatchesQuery(query: string, definition: AnyModuleDefinition): boo
   if (!q) return true
   if (definition.name.toLowerCase().includes(q)) return true
   return Object.keys(definition.schema).some((key) => {
-    const label = key.replace(/([A-Z])/g, ' $1').trim().toLowerCase()
+    const label = key
+      .replace(/([A-Z])/g, ' $1')
+      .trim()
+      .toLowerCase()
     return key.toLowerCase().includes(q) || label.includes(q)
   })
 }

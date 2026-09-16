@@ -62,7 +62,13 @@ function makeSnapshot(withNotFound: boolean): PublishedPageSnapshot {
           slug: 'index',
           rootNodeId: 'root',
           nodes: {
-            root: { id: 'root', moduleId: 'base.body', props: {}, breakpointOverrides: {}, children: [] },
+            root: {
+              id: 'root',
+              moduleId: 'base.body',
+              props: {},
+              breakpointOverrides: {},
+              children: [],
+            },
           },
         },
         ...(withNotFound ? [notFoundPage] : []),
@@ -93,13 +99,15 @@ function makeFakeDb(snapshot: PublishedPageSnapshot | null): DbClient {
     if (sql.includes('site_snapshots.site_json') && sql.includes('order by data_rows.created_at')) {
       return {
         rows: snapshot
-          ? [{
-              row_id: snapshot.pageRowId,
-              site_json: snapshot.site,
-              runtime_assets_json: snapshot.runtimeAssets ?? null,
-              importmap_body: null,
-              importmap_sha256: null,
-            } as unknown as Row]
+          ? [
+              {
+                row_id: snapshot.pageRowId,
+                site_json: snapshot.site,
+                runtime_assets_json: snapshot.runtimeAssets ?? null,
+                importmap_body: null,
+                importmap_sha256: null,
+              } as unknown as Row,
+            ]
           : [],
         rowCount: snapshot ? 1 : 0,
       }
@@ -173,7 +181,11 @@ describe('renderNotFoundResponse — Layer A baked artefact', () => {
       throw new Error('DB must not be queried on the Layer A path')
     }) as unknown as DbClient
 
-    const res = await renderNotFoundResponse(explodingDb, new URL('http://localhost/nope'), uploadsDir)
+    const res = await renderNotFoundResponse(
+      explodingDb,
+      new URL('http://localhost/nope'),
+      uploadsDir,
+    )
     expect(res?.status).toBe(404)
     expect(await res!.text()).toContain('baked 404')
     expect(res?.headers.get('content-type')).toContain('text/html')

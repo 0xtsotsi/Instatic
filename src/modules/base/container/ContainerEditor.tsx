@@ -79,6 +79,8 @@ export const ContainerEditor: React.FC<ModuleComponentProps<ContainerStoredProps
         icon={<ContainerSolidIcon size={16} color="currentColor" />}
         label="Empty container"
       />
-    ) : children,
+    ) : (
+      children
+    ),
   )
 }

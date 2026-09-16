@@ -41,7 +41,9 @@ describe('Non-site workspace editor-store boundary', () => {
     for (const file of files) {
       const source = readFileSync(file, 'utf8')
       for (const match of source.matchAll(FORBIDDEN_EDITOR_STORE_IMPORT_RE)) {
-        violations.push(`${file.replace(SRC_ROOT, 'src/')}:${lineNumberFor(source, match.index ?? 0)}`)
+        violations.push(
+          `${file.replace(SRC_ROOT, 'src/')}:${lineNumberFor(source, match.index ?? 0)}`,
+        )
       }
     }
 

@@ -40,7 +40,7 @@ export function useActiveLivePath(): void {
   const activePage = useEditorStore(selectActivePage)
   const sitePages = useEditorStore((s) => s.site?.pages ?? null)
   const selection = useEditorStore((s) =>
-    activePage ? s.templatePreviewSelection[activePage.id] ?? null : null,
+    activePage ? (s.templatePreviewSelection[activePage.id] ?? null) : null,
   )
 
   const isTemplate = activePage ? isTemplatePage(activePage) : false

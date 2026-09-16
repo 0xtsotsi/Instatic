@@ -13,7 +13,10 @@ import { join, extname } from 'path'
 
 const SRC_ROOT = join(import.meta.dir, '../../')
 
-function collectFiles(dir: string, exts = ['.ts', '.tsx', '.js', '.jsx', '.mts', '.mjs']): string[] {
+function collectFiles(
+  dir: string,
+  exts = ['.ts', '.tsx', '.js', '.jsx', '.mts', '.mjs'],
+): string[] {
   const results: string[] = []
   if (!existsSync(dir)) return results
   for (const entry of readdirSync(dir)) {
@@ -28,9 +31,7 @@ function collectFiles(dir: string, exts = ['.ts', '.tsx', '.js', '.jsx', '.mts',
   return results
 }
 
-const PROD_DIRS = ['editor', 'core', 'modules', 'ui', 'app', 'lib'].map((d) =>
-  join(SRC_ROOT, d),
-)
+const PROD_DIRS = ['editor', 'core', 'modules', 'ui', 'app', 'lib'].map((d) => join(SRC_ROOT, d))
 
 function collectProdFiles(): string[] {
   return PROD_DIRS.flatMap((dir) => collectFiles(dir))
@@ -44,10 +45,7 @@ describe('Direct icon imports — no lazy Icon wrapper in production UI', () => 
       const rel = filePath.replace(SRC_ROOT, 'src/')
 
       const source = readFileSync(filePath, 'utf8')
-      if (
-        /from\s+['"]pixel-art-icons\/Icon['"]/.test(source) ||
-        /<Icon\b/.test(source)
-      ) {
+      if (/from\s+['"]pixel-art-icons\/Icon['"]/.test(source) || /<Icon\b/.test(source)) {
         violations.push(rel)
       }
     }

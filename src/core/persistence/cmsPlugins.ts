@@ -78,10 +78,7 @@ export async function installCmsPluginManifest(
 ): Promise<{ plugin?: InstalledPlugin } & CmsPluginsPayload> {
   const body = await apiRequest(`${basePath}/plugins`, {
     method: 'POST',
-    body:
-      grantedPermissions.length > 0
-        ? { manifest, grantedPermissions }
-        : manifest,
+    body: grantedPermissions.length > 0 ? { manifest, grantedPermissions } : manifest,
     schema: PluginActionEnvelope,
     fetchImpl,
     fallbackMessage: 'CMS plugin install failed',
@@ -344,7 +341,11 @@ export async function pauseCmsPluginSchedule(
   basePath = '/admin/api/cms',
 ): Promise<void> {
   const url = `${basePath}/plugins/${encodeURIComponent(pluginId)}/schedules/${encodeURIComponent(scheduleId)}/pause`
-  await apiRequest(url, { method: 'POST', fetchImpl, fallbackMessage: 'CMS plugin schedule pause failed' })
+  await apiRequest(url, {
+    method: 'POST',
+    fetchImpl,
+    fallbackMessage: 'CMS plugin schedule pause failed',
+  })
 }
 
 export async function resumeCmsPluginSchedule(
@@ -354,5 +355,9 @@ export async function resumeCmsPluginSchedule(
   basePath = '/admin/api/cms',
 ): Promise<void> {
   const url = `${basePath}/plugins/${encodeURIComponent(pluginId)}/schedules/${encodeURIComponent(scheduleId)}/resume`
-  await apiRequest(url, { method: 'POST', fetchImpl, fallbackMessage: 'CMS plugin schedule resume failed' })
+  await apiRequest(url, {
+    method: 'POST',
+    fetchImpl,
+    fallbackMessage: 'CMS plugin schedule resume failed',
+  })
 }

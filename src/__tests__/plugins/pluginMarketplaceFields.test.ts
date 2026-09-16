@@ -45,55 +45,75 @@ describe('plugin manifest marketplace fields', () => {
   })
 
   it('rejects javascript: URLs in homepage / repository / author.url', () => {
-    expect(() => parsePluginManifest({
-      ...baseManifest,
-      homepage: 'javascript:alert(1)',
-    })).toThrow(/manifest/i)
-    expect(() => parsePluginManifest({
-      ...baseManifest,
-      author: { name: 'X', url: 'javascript:alert(1)' },
-    })).toThrow(/manifest/i)
-    expect(() => parsePluginManifest({
-      ...baseManifest,
-      repository: 'data:text/html,<script>alert(1)</script>',
-    })).toThrow(/manifest/i)
+    expect(() =>
+      parsePluginManifest({
+        ...baseManifest,
+        homepage: 'javascript:alert(1)',
+      }),
+    ).toThrow(/manifest/i)
+    expect(() =>
+      parsePluginManifest({
+        ...baseManifest,
+        author: { name: 'X', url: 'javascript:alert(1)' },
+      }),
+    ).toThrow(/manifest/i)
+    expect(() =>
+      parsePluginManifest({
+        ...baseManifest,
+        repository: 'data:text/html,<script>alert(1)</script>',
+      }),
+    ).toThrow(/manifest/i)
   })
 
   it('rejects icon paths with traversal or unsupported extensions', () => {
-    expect(() => parsePluginManifest({
-      ...baseManifest,
-      icon: '../../../etc/passwd.png',
-    })).toThrow(/manifest/i)
-    expect(() => parsePluginManifest({
-      ...baseManifest,
-      icon: 'icon.exe',
-    })).toThrow(/manifest/i)
-    expect(() => parsePluginManifest({
-      ...baseManifest,
-      icon: '/absolute/icon.png',
-    })).toThrow(/manifest/i)
+    expect(() =>
+      parsePluginManifest({
+        ...baseManifest,
+        icon: '../../../etc/passwd.png',
+      }),
+    ).toThrow(/manifest/i)
+    expect(() =>
+      parsePluginManifest({
+        ...baseManifest,
+        icon: 'icon.exe',
+      }),
+    ).toThrow(/manifest/i)
+    expect(() =>
+      parsePluginManifest({
+        ...baseManifest,
+        icon: '/absolute/icon.png',
+      }),
+    ).toThrow(/manifest/i)
   })
 
   it('rejects malformed author email + license slug', () => {
-    expect(() => parsePluginManifest({
-      ...baseManifest,
-      author: { name: 'X', email: 'not-an-email' },
-    })).toThrow(/manifest/i)
-    expect(() => parsePluginManifest({
-      ...baseManifest,
-      license: 'MIT some other text',
-    })).toThrow(/manifest/i)
+    expect(() =>
+      parsePluginManifest({
+        ...baseManifest,
+        author: { name: 'X', email: 'not-an-email' },
+      }),
+    ).toThrow(/manifest/i)
+    expect(() =>
+      parsePluginManifest({
+        ...baseManifest,
+        license: 'MIT some other text',
+      }),
+    ).toThrow(/manifest/i)
   })
 
   it('rejects keywords containing spaces or special chars', () => {
-    expect(() => parsePluginManifest({
-      ...baseManifest,
-      keywords: ['valid', 'has space'],
-    })).toThrow(/manifest/i)
-    expect(() => parsePluginManifest({
-      ...baseManifest,
-      keywords: ['valid', '<script>'],
-    })).toThrow(/manifest/i)
+    expect(() =>
+      parsePluginManifest({
+        ...baseManifest,
+        keywords: ['valid', 'has space'],
+      }),
+    ).toThrow(/manifest/i)
+    expect(() =>
+      parsePluginManifest({
+        ...baseManifest,
+        keywords: ['valid', '<script>'],
+      }),
+    ).toThrow(/manifest/i)
   })
 
   it('omits marketplace fields cleanly when absent', () => {

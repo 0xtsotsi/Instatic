@@ -37,21 +37,30 @@ function makeFakeDb() {
       if (!session) return { rows: [], rowCount: 0 }
       const admin = admins.find((a) => a.id === session.user_id)
       return {
-        rows: admin ? [{
-          ...admin,
-          email_normalized: admin.email,
-          display_name: 'Owner',
-          status: 'active',
-          role_id: 'owner',
-          last_login_at: null,
-          updated_at: admin.created_at,
-          deleted_at: null,
-          role_slug: 'owner',
-          role_name: 'Owner',
-          role_description: '',
-          role_is_system: true,
-          role_capabilities_json: ['plugins.read', 'plugins.configure', 'plugins.install', 'plugins.lifecycle'],
-        } as Row] : [],
+        rows: admin
+          ? [
+              {
+                ...admin,
+                email_normalized: admin.email,
+                display_name: 'Owner',
+                status: 'active',
+                role_id: 'owner',
+                last_login_at: null,
+                updated_at: admin.created_at,
+                deleted_at: null,
+                role_slug: 'owner',
+                role_name: 'Owner',
+                role_description: '',
+                role_is_system: true,
+                role_capabilities_json: [
+                  'plugins.read',
+                  'plugins.configure',
+                  'plugins.install',
+                  'plugins.lifecycle',
+                ],
+              } as Row,
+            ]
+          : [],
         rowCount: admin ? 1 : 0,
       }
     }
@@ -75,7 +84,10 @@ function makeFakeDb() {
       }
     }
     // getInstalledPlugin — single-row lookup by id
-    if (normalized.includes('select id, name, version, enabled') && normalized.includes('where id =')) {
+    if (
+      normalized.includes('select id, name, version, enabled') &&
+      normalized.includes('where id =')
+    ) {
       const row = plugins.find((plugin) => plugin.id === values[0])
       return { rows: row ? [row as Row] : [], rowCount: row ? 1 : 0 }
     }
@@ -84,7 +96,10 @@ function makeFakeDb() {
       return { rows: [...plugins] as Row[], rowCount: plugins.length }
     }
     // setPluginSettings — values[0]=settings_json, values[1]=id
-    if (normalized.includes('update installed_plugins') && normalized.includes('set settings_json')) {
+    if (
+      normalized.includes('update installed_plugins') &&
+      normalized.includes('set settings_json')
+    ) {
       const row = plugins.find((plugin) => plugin.id === values[1])
       if (!row) return { rows: [], rowCount: 0 }
       row.settings_json = values[0]
@@ -146,9 +161,7 @@ function makeFakeDb() {
     }
     // pluginSecrets upsert/seed — values[0..4]=pluginId, settingId, ciphertext, iv, fingerprint
     if (normalized.includes('insert into plugin_secrets')) {
-      const existing = secrets.find(
-        (s) => s.plugin_id === values[0] && s.setting_id === values[1],
-      )
+      const existing = secrets.find((s) => s.plugin_id === values[0] && s.setting_id === values[1])
       if (existing) {
         if (normalized.includes('do nothing')) return { rows: [], rowCount: 0 }
         existing.ciphertext = values[2]
@@ -192,8 +205,10 @@ function makeFakeDb() {
       return { rows: [row as Row], rowCount: 1 }
     }
     // listPluginCrashes — values[0]=pluginId, values[1]=limit
-    if (normalized.includes('select id, plugin_id, occurred_at, reason, stack')
-        && normalized.includes('from plugin_crash_events')) {
+    if (
+      normalized.includes('select id, plugin_id, occurred_at, reason, stack') &&
+      normalized.includes('from plugin_crash_events')
+    ) {
       const rows = crashEvents
         .filter((c) => c.plugin_id === values[0])
         .slice(0, Number(values[1] ?? 10))
@@ -248,7 +263,14 @@ function makeFakeDb() {
   handle.transaction = async <T>(cb: (tx: DbClient) => Promise<T>): Promise<T> =>
     cb(handle as unknown as DbClient)
 
-  return Object.assign(handle as DbClient, { admins, sessions, plugins, records, crashEvents, secrets })
+  return Object.assign(handle as DbClient, {
+    admins,
+    sessions,
+    plugins,
+    records,
+    crashEvents,
+    secrets,
+  })
 }
 
 async function createCookie(db: ReturnType<typeof makeFakeDb>): Promise<string> {
@@ -309,9 +331,9 @@ function cmsFormRequest(
 }
 
 function pluginZip(files: Record<string, string>): File {
-  const zipped = zipSync(Object.fromEntries(
-    Object.entries(files).map(([path, content]) => [path, strToU8(content)]),
-  ))
+  const zipped = zipSync(
+    Object.fromEntries(Object.entries(files).map(([path, content]) => [path, strToU8(content)])),
+  )
   return new File([zipped], 'workflow-tools.zip', { type: 'application/zip' })
 }
 
@@ -321,19 +343,21 @@ const mapManifest = {
   version: '1.0.0',
   apiVersion: 1,
   permissions: ['admin.navigation'],
-  adminPages: [{
-    id: 'overview',
-    title: 'Map Studio',
-    navLabel: 'Map',
-    icon: 'map',
-    content: {
-      kind: 'map',
-      heading: 'Store Map',
-      body: 'Track important locations.',
-      centerLabel: 'Prague',
-      pins: [{ label: 'HQ', detail: 'Main office', x: 42, y: 55 }],
+  adminPages: [
+    {
+      id: 'overview',
+      title: 'Map Studio',
+      navLabel: 'Map',
+      icon: 'map',
+      content: {
+        kind: 'map',
+        heading: 'Store Map',
+        body: 'Track important locations.',
+        centerLabel: 'Prague',
+        pins: [{ label: 'HQ', detail: 'Main office', x: 42, y: 55 }],
+      },
     },
-  }],
+  ],
 }
 
 describe('CMS plugin handlers', () => {
@@ -470,7 +494,9 @@ describe('CMS plugin handlers', () => {
     const row = secretRow()
     expect(row).toBeDefined()
     expect(row!.ciphertext).toBeInstanceOf(Uint8Array)
-    expect(Buffer.from(row!.ciphertext as Uint8Array).toString('latin1')).not.toContain('real-secret')
+    expect(Buffer.from(row!.ciphertext as Uint8Array).toString('latin1')).not.toContain(
+      'real-secret',
+    )
     // No plaintext anywhere in the stored plugin row either.
     expect(JSON.stringify(db.plugins[0])).not.toContain('real-secret')
 
@@ -481,7 +507,7 @@ describe('CMS plugin handlers', () => {
       db,
     )
     expect(list.status).toBe(200)
-    const listBody = await list.json() as {
+    const listBody = (await list.json()) as {
       plugins: Array<{ settings: Record<string, unknown> }>
       adminPages: Array<{ pluginSettings: Record<string, unknown> }>
     }
@@ -496,7 +522,7 @@ describe('CMS plugin handlers', () => {
       db,
     )
     expect(get.status).toBe(200)
-    const getBody = await get.json() as {
+    const getBody = (await get.json()) as {
       settings: Record<string, unknown>
       secretsNeedingReentry: string[]
     }
@@ -539,7 +565,7 @@ describe('CMS plugin handlers', () => {
       db,
     )
     expect(disable.status).toBe(200)
-    const disableBody = await disable.json() as {
+    const disableBody = (await disable.json()) as {
       plugin: { settings: Record<string, unknown> }
       plugins: Array<{ settings: Record<string, unknown> }>
     }
@@ -558,7 +584,7 @@ describe('CMS plugin handlers', () => {
       db,
     )
     expect(stale.status).toBe(200)
-    const staleBody = await stale.json() as {
+    const staleBody = (await stale.json()) as {
       settings: Record<string, unknown>
       secretsNeedingReentry: string[]
     }
@@ -608,7 +634,7 @@ describe('CMS plugin handlers', () => {
     )
 
     expect(res.status).toBe(201)
-    const body = await res.json() as { plugin: { manifest: { assetBasePath?: unknown } } }
+    const body = (await res.json()) as { plugin: { manifest: { assetBasePath?: unknown } } }
     expect(body.plugin.manifest.assetBasePath).toBeUndefined()
     expect(db.plugins).toHaveLength(1)
   })
@@ -637,7 +663,14 @@ describe('CMS plugin handlers', () => {
       ...mapManifest,
       id: 'acme.workflow',
       name: 'Workflow Tools',
-      permissions: ['admin.navigation', 'editor.code', 'editor.toolbar', 'editor.store.write', 'cms.routes', 'cms.storage'],
+      permissions: [
+        'admin.navigation',
+        'editor.code',
+        'editor.toolbar',
+        'editor.store.write',
+        'cms.routes',
+        'cms.storage',
+      ],
       entrypoints: {
         editor: 'editor/index.js',
         server: 'server/index.js',
@@ -648,7 +681,10 @@ describe('CMS plugin handlers', () => {
       cmsRequest('http://localhost/admin/api/cms/plugins', {
         method: 'POST',
         headers: { cookie, 'content-type': 'application/json' },
-        body: JSON.stringify({ manifest: privilegedManifest, grantedPermissions: ['editor.toolbar'] }),
+        body: JSON.stringify({
+          manifest: privilegedManifest,
+          grantedPermissions: ['editor.toolbar'],
+        }),
       }),
       db,
     )
@@ -683,8 +719,9 @@ describe('CMS plugin handlers', () => {
     })
     expect(typeof db.plugins[0].manifest_json).toBe('string')
     expect(typeof db.plugins[0].granted_permissions_json).toBe('string')
-    expect(JSON.parse(String(db.plugins[0].granted_permissions_json)))
-      .toEqual(privilegedManifest.permissions)
+    expect(JSON.parse(String(db.plugins[0].granted_permissions_json))).toEqual(
+      privilegedManifest.permissions,
+    )
   })
 
   it('rejects grants the manifest never declared (tampered client)', async () => {
@@ -728,25 +765,32 @@ describe('CMS plugin handlers', () => {
         server: 'server/index.js',
       },
       resources: [],
-      adminPages: [{
-        id: 'dashboard',
-        title: 'Workflow',
-        navLabel: 'Workflow',
-        content: {
-          kind: 'app',
-          heading: 'Workflow Dashboard',
-          entry: 'admin/dashboard.js',
+      adminPages: [
+        {
+          id: 'dashboard',
+          title: 'Workflow',
+          navLabel: 'Workflow',
+          content: {
+            kind: 'app',
+            heading: 'Workflow Dashboard',
+            entry: 'admin/dashboard.js',
+          },
         },
-      }],
+      ],
     }
 
     try {
       const formData = new FormData()
-      formData.set('file', pluginZip({
-        'plugin.json': JSON.stringify(manifest),
-        'server/index.js': 'export function activate(api) { api.cms.routes.get("/ping", "plugins.read", () => ({ ok: true })) }',
-        'admin/dashboard.js': 'export function render({ root }) { root.textContent = "Workflow" }',
-      }))
+      formData.set(
+        'file',
+        pluginZip({
+          'plugin.json': JSON.stringify(manifest),
+          'server/index.js':
+            'export function activate(api) { api.cms.routes.get("/ping", "plugins.read", () => ({ ok: true })) }',
+          'admin/dashboard.js':
+            'export function render({ root }) { root.textContent = "Workflow" }',
+        }),
+      )
       formData.set('grantedPermissions', JSON.stringify(manifest.permissions))
 
       const install = await handleCmsRequest(
@@ -767,18 +811,19 @@ describe('CMS plugin handlers', () => {
             assetBasePath: '/uploads/plugins/acme.workflow/1.0.0',
           },
         },
-        adminPages: [{
-          pluginId: 'acme.workflow',
-          content: {
-            kind: 'app',
-            assetPath: '/uploads/plugins/acme.workflow/1.0.0',
+        adminPages: [
+          {
+            pluginId: 'acme.workflow',
+            content: {
+              kind: 'app',
+              assetPath: '/uploads/plugins/acme.workflow/1.0.0',
+            },
           },
-        }],
+        ],
       })
-      await expect(readFile(
-        join(uploadsDir, 'plugins/acme.workflow/1.0.0/server/index.js'),
-        'utf-8',
-      )).resolves.toContain('activate')
+      await expect(
+        readFile(join(uploadsDir, 'plugins/acme.workflow/1.0.0/server/index.js'), 'utf-8'),
+      ).resolves.toContain('activate')
 
       const runtime = await handleCmsRequest(
         cmsRequest('http://localhost/admin/api/cms/plugins/acme.workflow/runtime/ping', {
@@ -812,13 +857,17 @@ describe('CMS plugin handlers', () => {
       permissions: ['cms.routes'],
       entrypoints: { server: 'server/index.js' },
     }
-    const pngBytes = new Uint8Array([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 0x00, 0xff, 0xfe, 0x7f])
+    const pngBytes = new Uint8Array([
+      0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 0x00, 0xff, 0xfe, 0x7f,
+    ])
 
     try {
       const formData = new FormData()
-      formData.set('file', pluginZip({
-        'plugin.json': JSON.stringify(manifest),
-        'server/index.js': `export function activate(api) {
+      formData.set(
+        'file',
+        pluginZip({
+          'plugin.json': JSON.stringify(manifest),
+          'server/index.js': `export function activate(api) {
           api.cms.routes.post('/echo', 'plugins.read', async (ctx) => {
             const file = ctx.body.file
             const bytes = new Uint8Array(await file.arrayBuffer())
@@ -830,7 +879,8 @@ describe('CMS plugin handlers', () => {
             }
           })
         }`,
-      }))
+        }),
+      )
       formData.set('grantedPermissions', JSON.stringify(manifest.permissions))
 
       const install = await handleCmsRequest(
@@ -847,14 +897,14 @@ describe('CMS plugin handlers', () => {
       const te = new TextEncoder()
       const head = te.encode(
         `--${boundary}\r\n` +
-        `Content-Disposition: form-data; name="file"; filename="pixel.png"\r\n` +
-        `Content-Type: image/png\r\n\r\n`,
+          `Content-Disposition: form-data; name="file"; filename="pixel.png"\r\n` +
+          `Content-Type: image/png\r\n\r\n`,
       )
       const tail = te.encode(
         `\r\n--${boundary}\r\n` +
-        `Content-Disposition: form-data; name="label"\r\n\r\n` +
-        `tiny png\r\n` +
-        `--${boundary}--\r\n`,
+          `Content-Disposition: form-data; name="label"\r\n\r\n` +
+          `tiny png\r\n` +
+          `--${boundary}--\r\n`,
       )
       const multipart = new Uint8Array(head.byteLength + pngBytes.byteLength + tail.byteLength)
       multipart.set(head, 0)
@@ -930,11 +980,13 @@ describe('CMS plugin handlers', () => {
       entrypoints: {
         server: 'server/index.js',
       },
-      resources: [{
-        id: 'events',
-        title: 'Events',
-        fields: [{ id: 'name', label: 'Name', type: 'text', required: true }],
-      }],
+      resources: [
+        {
+          id: 'events',
+          title: 'Events',
+          fields: [{ id: 'name', label: 'Name', type: 'text', required: true }],
+        },
+      ],
       adminPages: [],
     }
     const serverEntrypoint = `
@@ -959,10 +1011,13 @@ describe('CMS plugin handlers', () => {
 
     try {
       const formData = new FormData()
-      formData.set('file', pluginZip({
-        'plugin.json': JSON.stringify(manifest),
-        'server/index.js': serverEntrypoint,
-      }))
+      formData.set(
+        'file',
+        pluginZip({
+          'plugin.json': JSON.stringify(manifest),
+          'server/index.js': serverEntrypoint,
+        }),
+      )
       formData.set('grantedPermissions', JSON.stringify(manifest.permissions))
 
       const install = await handleCmsRequest(
@@ -971,10 +1026,7 @@ describe('CMS plugin handlers', () => {
         { uploadsDir },
       )
       expect(install.status).toBe(201)
-      expect(readMarkers()).toEqual([
-        'install:acme.lifecycle',
-        'activate:acme.lifecycle',
-      ])
+      expect(readMarkers()).toEqual(['install:acme.lifecycle', 'activate:acme.lifecycle'])
       expect(db.records).toHaveLength(1)
 
       attachListener()
@@ -1030,7 +1082,7 @@ describe('CMS plugin handlers', () => {
     }
   })
 
-  it('refuses to re-sync a disabled plugin\'s pack into the site', async () => {
+  it("refuses to re-sync a disabled plugin's pack into the site", async () => {
     // Regression: pre-fix, POST /admin/api/cms/plugins/:id/pack/install
     // would happily merge a disabled plugin's bundled VCs / pages / classes
     // into the user's draft site — the opposite of what "disabled" should
@@ -1082,16 +1134,12 @@ describe('CMS plugin handlers', () => {
   it('assertPathWithin rejects paths that escape the uploads root', () => {
     const root = '/srv/uploads'
     // Same root and a child below the root → ok.
-    expect(() => assertPathWithin(root, '/srv/uploads/plugins/atk.evil/1.0.0/x.js'))
-      .not.toThrow()
+    expect(() => assertPathWithin(root, '/srv/uploads/plugins/atk.evil/1.0.0/x.js')).not.toThrow()
     // path.join already normalised these, but we still re-check the resolved value.
-    expect(() => assertPathWithin(root, '/srv/etc'))
-      .toThrow('escapes root')
-    expect(() => assertPathWithin(root, '/srv/uploads/../etc'))
-      .toThrow('escapes root')
+    expect(() => assertPathWithin(root, '/srv/etc')).toThrow('escapes root')
+    expect(() => assertPathWithin(root, '/srv/uploads/../etc')).toThrow('escapes root')
     // The root itself is rejected — there is no legitimate plugin file at exactly the uploads root.
-    expect(() => assertPathWithin(root, '/srv/uploads'))
-      .toThrow('escapes root')
+    expect(() => assertPathWithin(root, '/srv/uploads')).toThrow('escapes root')
   })
 
   it('stores lifecycle errors for admin diagnostics without losing the plugin row', async () => {
@@ -1113,10 +1161,13 @@ describe('CMS plugin handlers', () => {
 
     try {
       const formData = new FormData()
-      formData.set('file', pluginZip({
-        'plugin.json': JSON.stringify(manifest),
-        'server/index.js': 'export function install() { throw new Error("install exploded") }',
-      }))
+      formData.set(
+        'file',
+        pluginZip({
+          'plugin.json': JSON.stringify(manifest),
+          'server/index.js': 'export function install() { throw new Error("install exploded") }',
+        }),
+      )
       formData.set('grantedPermissions', JSON.stringify([]))
 
       const install = await handleCmsRequest(
@@ -1164,13 +1215,16 @@ describe('CMS plugin handlers', () => {
 
     try {
       const formData = new FormData()
-      formData.set('file', pluginZip({
-        'plugin.json': JSON.stringify(manifest),
-        'server/index.js': `
+      formData.set(
+        'file',
+        pluginZip({
+          'plugin.json': JSON.stringify(manifest),
+          'server/index.js': `
           export function activate() {}
           export function uninstall() { throw new Error('uninstall exploded') }
         `,
-      }))
+        }),
+      )
       formData.set('grantedPermissions', JSON.stringify(['cms.routes']))
       const install = await handleCmsRequest(
         cmsFormRequest('http://localhost/admin/api/cms/plugins/package', formData, { cookie }),
@@ -1184,7 +1238,11 @@ describe('CMS plugin handlers', () => {
       // crash table has no FK to installed_plugins).
       await mkdir(join(uploadsDir, 'plugins/acme.stuck/0.9.0'), { recursive: true })
       const { recordPluginCrash } = await import('../../../server/repositories/plugins')
-      await recordPluginCrash(db, { id: 'crash_stuck', pluginId: 'acme.stuck', reason: 'old crash' })
+      await recordPluginCrash(db, {
+        id: 'crash_stuck',
+        pluginId: 'acme.stuck',
+        reason: 'old crash',
+      })
 
       // Normal uninstall — the throwing hook must NOT delete anything, and
       // the error must point at the force-remove escape hatch.
@@ -1197,7 +1255,7 @@ describe('CMS plugin handlers', () => {
         { uploadsDir },
       )
       expect(failed.status).toBe(400)
-      const failedBody = await failed.json() as { error: string }
+      const failedBody = (await failed.json()) as { error: string }
       expect(failedBody.error).toMatch(/uninstall hook failed/)
       expect(failedBody.error).toMatch(/uninstall exploded/)
       expect(failedBody.error).toMatch(/force-remove/)
@@ -1305,7 +1363,11 @@ describe('CMS plugin handlers', () => {
       hookBus.unregisterPlugin('test')
       // Plugin emits arrive force-namespaced as `plugin.<id>.<name>`.
       hookBus.on('test', 'plugin.acme.upgrade.upgrade.mark', async (payload: unknown) => {
-        if (payload && typeof payload === 'object' && typeof (payload as { line?: unknown }).line === 'string') {
+        if (
+          payload &&
+          typeof payload === 'object' &&
+          typeof (payload as { line?: unknown }).line === 'string'
+        ) {
           markers.push(String((payload as { line: string }).line))
         }
       })
@@ -1342,10 +1404,13 @@ describe('CMS plugin handlers', () => {
 
       // Fresh install of v1.
       const v1FormData = new FormData()
-      v1FormData.set('file', pluginZip({
-        'plugin.json': JSON.stringify(baseManifest('1.0.0')),
-        'server/index.js': v1,
-      }))
+      v1FormData.set(
+        'file',
+        pluginZip({
+          'plugin.json': JSON.stringify(baseManifest('1.0.0')),
+          'server/index.js': v1,
+        }),
+      )
       v1FormData.set('grantedPermissions', JSON.stringify(['cms.routes', 'cms.hooks']))
       const installV1 = await handleCmsRequest(
         cmsFormRequest('http://localhost/admin/api/cms/plugins/package', v1FormData, { cookie }),
@@ -1360,10 +1425,13 @@ describe('CMS plugin handlers', () => {
       // Upload v2 of the same plugin id.
       attachListener()
       const v2FormData = new FormData()
-      v2FormData.set('file', pluginZip({
-        'plugin.json': JSON.stringify(baseManifest('1.1.0')),
-        'server/index.js': v2,
-      }))
+      v2FormData.set(
+        'file',
+        pluginZip({
+          'plugin.json': JSON.stringify(baseManifest('1.1.0')),
+          'server/index.js': v2,
+        }),
+      )
       v2FormData.set('grantedPermissions', JSON.stringify(['cms.routes', 'cms.hooks']))
       const upgrade = await handleCmsRequest(
         cmsFormRequest('http://localhost/admin/api/cms/plugins/package', v2FormData, { cookie }),
@@ -1371,7 +1439,7 @@ describe('CMS plugin handlers', () => {
         { uploadsDir },
       )
       expect(upgrade.status).toBe(200)
-      const upgradeBody = await upgrade.json() as {
+      const upgradeBody = (await upgrade.json()) as {
         plugin: { version: string; lifecycleStatus: string }
         upgrade?: { fromVersion: string; toVersion: string }
       }
@@ -1380,21 +1448,15 @@ describe('CMS plugin handlers', () => {
       expect(upgradeBody.upgrade).toEqual({ fromVersion: '1.0.0', toVersion: '1.1.0' })
 
       // Lifecycle ordering: v1.activate → v1.deactivate → v2.migrate(1.0.0) → v2.activate
-      expect(markers).toEqual([
-        'v1.activate',
-        'v1.deactivate',
-        'v2.migrate:1.0.0',
-        'v2.activate',
-      ])
+      expect(markers).toEqual(['v1.activate', 'v1.deactivate', 'v2.migrate:1.0.0', 'v2.activate'])
 
       // installed_at preserved across the upgrade.
       expect(db.plugins[0].installed_at).toBe(installedAtBefore)
 
       // Old version's asset dir was deleted; new version's is on disk.
-      await expect(readFile(
-        join(uploadsDir, 'plugins/acme.upgrade/1.1.0/server/index.js'),
-        'utf-8',
-      )).resolves.toContain('migrate')
+      await expect(
+        readFile(join(uploadsDir, 'plugins/acme.upgrade/1.1.0/server/index.js'), 'utf-8'),
+      ).resolves.toContain('migrate')
       const { existsSync } = await import('node:fs')
       expect(existsSync(join(uploadsDir, 'plugins/acme.upgrade/1.0.0'))).toBe(false)
     } finally {
@@ -1403,7 +1465,7 @@ describe('CMS plugin handlers', () => {
     }
   })
 
-  it('rolls back to the prior version when the new version\'s activate hook throws', async () => {
+  it("rolls back to the prior version when the new version's activate hook throws", async () => {
     const uploadsDir = await mkdtemp(join(tmpdir(), 'instatic-rollback-'))
     const db = makeFakeDb()
     const cookie = await createCookie(db)
@@ -1424,10 +1486,13 @@ describe('CMS plugin handlers', () => {
       const v2 = `export function activate() { throw new Error('v2 activate exploded') }`
 
       const v1FormData = new FormData()
-      v1FormData.set('file', pluginZip({
-        'plugin.json': JSON.stringify(baseManifest('1.0.0')),
-        'server/index.js': v1,
-      }))
+      v1FormData.set(
+        'file',
+        pluginZip({
+          'plugin.json': JSON.stringify(baseManifest('1.0.0')),
+          'server/index.js': v1,
+        }),
+      )
       v1FormData.set('grantedPermissions', JSON.stringify(['cms.routes']))
       const installV1 = await handleCmsRequest(
         cmsFormRequest('http://localhost/admin/api/cms/plugins/package', v1FormData, { cookie }),
@@ -1437,10 +1502,13 @@ describe('CMS plugin handlers', () => {
       expect(installV1.status).toBe(201)
 
       const v2FormData = new FormData()
-      v2FormData.set('file', pluginZip({
-        'plugin.json': JSON.stringify(baseManifest('1.1.0')),
-        'server/index.js': v2,
-      }))
+      v2FormData.set(
+        'file',
+        pluginZip({
+          'plugin.json': JSON.stringify(baseManifest('1.1.0')),
+          'server/index.js': v2,
+        }),
+      )
       v2FormData.set('grantedPermissions', JSON.stringify(['cms.routes']))
       const upgrade = await handleCmsRequest(
         cmsFormRequest('http://localhost/admin/api/cms/plugins/package', v2FormData, { cookie }),
@@ -1448,7 +1516,10 @@ describe('CMS plugin handlers', () => {
         { uploadsDir },
       )
       expect(upgrade.status).toBe(400)
-      const body = await upgrade.json() as { error: string; plugins: { id: string; version: string; lifecycleStatus: string }[] }
+      const body = (await upgrade.json()) as {
+        error: string
+        plugins: { id: string; version: string; lifecycleStatus: string }[]
+      }
       expect(body.error).toMatch(/Upgrade failed/)
       expect(body.error).toMatch(/Rolled back to version 1\.0\.0/)
 
@@ -1481,10 +1552,13 @@ describe('CMS plugin handlers', () => {
 
     try {
       const v2FormData = new FormData()
-      v2FormData.set('file', pluginZip({
-        'plugin.json': JSON.stringify(baseManifest('2.0.0')),
-        'server/index.js': 'export function activate() {}',
-      }))
+      v2FormData.set(
+        'file',
+        pluginZip({
+          'plugin.json': JSON.stringify(baseManifest('2.0.0')),
+          'server/index.js': 'export function activate() {}',
+        }),
+      )
       v2FormData.set('grantedPermissions', JSON.stringify(['cms.routes']))
       const installV2 = await handleCmsRequest(
         cmsFormRequest('http://localhost/admin/api/cms/plugins/package', v2FormData, { cookie }),
@@ -1494,10 +1568,13 @@ describe('CMS plugin handlers', () => {
       expect(installV2.status).toBe(201)
 
       const v1FormData = new FormData()
-      v1FormData.set('file', pluginZip({
-        'plugin.json': JSON.stringify(baseManifest('1.0.0')),
-        'server/index.js': 'export function activate() {}',
-      }))
+      v1FormData.set(
+        'file',
+        pluginZip({
+          'plugin.json': JSON.stringify(baseManifest('1.0.0')),
+          'server/index.js': 'export function activate() {}',
+        }),
+      )
       v1FormData.set('grantedPermissions', JSON.stringify(['cms.routes']))
       const downgrade = await handleCmsRequest(
         cmsFormRequest('http://localhost/admin/api/cms/plugins/package', v1FormData, { cookie }),
@@ -1505,7 +1582,7 @@ describe('CMS plugin handlers', () => {
         { uploadsDir },
       )
       expect(downgrade.status).toBe(400)
-      const body = await downgrade.json() as { error: string }
+      const body = (await downgrade.json()) as { error: string }
       expect(body.error).toMatch(/refusing to downgrade/)
       // DB row unchanged.
       expect(db.plugins[0].version).toBe('2.0.0')
@@ -1535,16 +1612,15 @@ describe('CMS plugin handlers', () => {
       db,
     )
     expect(res.status).toBe(400)
-    expect((await res.json() as { error: string }).error).toMatch(/apiVersion 99/)
+    expect(((await res.json()) as { error: string }).error).toMatch(/apiVersion 99/)
     expect(db.plugins).toHaveLength(0)
   })
 
   // ─── Crash counter (sliding window) ───────────────────────────────────────
 
   it('crash counter respawns within budget then gives up after 3 crashes in 5min', async () => {
-    const { recordCrashAndDecide, clearPluginCrashCounter } = await import(
-      '../../../server/plugins/host/crashRecovery'
-    )
+    const { recordCrashAndDecide, clearPluginCrashCounter } =
+      await import('../../../server/plugins/host/crashRecovery')
     const id = `test.crash.${Date.now()}`
 
     // Use explicit `now` so the test is deterministic and doesn't rely on
@@ -1583,28 +1659,33 @@ describe('CMS plugin handlers', () => {
     function attachListener(): void {
       hookBus.unregisterPlugin('test')
       // Plugin emits arrive force-namespaced as `plugin.<id>.<name>`.
-      hookBus.on('test', 'plugin.test.restart.restart.mark', async () => { markers.push('activate') })
+      hookBus.on('test', 'plugin.test.restart.restart.mark', async () => {
+        markers.push('activate')
+      })
     }
     attachListener()
     try {
       const formData = new FormData()
-      formData.set('file', pluginZip({
-        'plugin.json': JSON.stringify({
-          id: 'test.restart',
-          name: 'Restart Demo',
-          version: '1.0.0',
-          apiVersion: 1,
-          permissions: ['cms.routes', 'cms.hooks'],
-          entrypoints: { server: 'server/index.js' },
-          resources: [],
-          adminPages: [],
-        }),
-        'server/index.js': `
+      formData.set(
+        'file',
+        pluginZip({
+          'plugin.json': JSON.stringify({
+            id: 'test.restart',
+            name: 'Restart Demo',
+            version: '1.0.0',
+            apiVersion: 1,
+            permissions: ['cms.routes', 'cms.hooks'],
+            entrypoints: { server: 'server/index.js' },
+            resources: [],
+            adminPages: [],
+          }),
+          'server/index.js': `
           export async function activate(api) {
             await api.cms.hooks.emit('restart.mark', {})
           }
         `,
-      }))
+        }),
+      )
       formData.set('grantedPermissions', JSON.stringify(['cms.routes', 'cms.hooks']))
       const install = await handleCmsRequest(
         cmsFormRequest('http://localhost/admin/api/cms/plugins/package', formData, { cookie }),
@@ -1619,9 +1700,21 @@ describe('CMS plugin handlers', () => {
       db.plugins[0].lifecycle_status = 'error'
       db.plugins[0].last_error = 'simulated crash'
       const { recordPluginCrash } = await import('../../../server/repositories/plugins')
-      await recordPluginCrash(db, { id: 'crash_1', pluginId: 'test.restart', reason: 'simulated 1' })
-      await recordPluginCrash(db, { id: 'crash_2', pluginId: 'test.restart', reason: 'simulated 2' })
-      await recordPluginCrash(db, { id: 'crash_3', pluginId: 'test.restart', reason: 'simulated 3' })
+      await recordPluginCrash(db, {
+        id: 'crash_1',
+        pluginId: 'test.restart',
+        reason: 'simulated 1',
+      })
+      await recordPluginCrash(db, {
+        id: 'crash_2',
+        pluginId: 'test.restart',
+        reason: 'simulated 2',
+      })
+      await recordPluginCrash(db, {
+        id: 'crash_3',
+        pluginId: 'test.restart',
+        reason: 'simulated 3',
+      })
 
       // POST /restart must reset state and bring the plugin back to active.
       attachListener()
@@ -1634,7 +1727,7 @@ describe('CMS plugin handlers', () => {
         { uploadsDir },
       )
       expect(restart.status).toBe(200)
-      const body = await restart.json() as {
+      const body = (await restart.json()) as {
         plugin: { lifecycleStatus: string; recentCrashes?: unknown[] }
         plugins: { id: string; recentCrashes?: unknown[] }[]
       }
@@ -1659,7 +1752,7 @@ describe('CMS plugin handlers', () => {
   // enough to take down its worker. The sibling plugin's worker must keep
   // serving routes — proving that crashes are isolated per pluginId.
 
-  it('crash in one plugin\'s worker does not affect a sibling plugin\'s worker', async () => {
+  it("crash in one plugin's worker does not affect a sibling plugin's worker", async () => {
     const uploadsDir = await mkdtemp(join(tmpdir(), 'instatic-crash-iso-'))
     const db = makeFakeDb()
     const cookie = await createCookie(db)
@@ -1680,14 +1773,17 @@ describe('CMS plugin handlers', () => {
     try {
       // Plugin A — a "well-behaved" plugin with a /ping route that just works.
       const goodFormData = new FormData()
-      goodFormData.set('file', pluginZip({
-        'plugin.json': JSON.stringify(manifestFor('acme.good')),
-        'server/index.js': `
+      goodFormData.set(
+        'file',
+        pluginZip({
+          'plugin.json': JSON.stringify(manifestFor('acme.good')),
+          'server/index.js': `
           export function activate(api) {
             api.cms.routes.get('/ping', 'plugins.read', () => ({ ok: true, who: 'good' }))
           }
         `,
-      }))
+        }),
+      )
       goodFormData.set('grantedPermissions', JSON.stringify(['cms.routes']))
       const installGood = await handleCmsRequest(
         cmsFormRequest('http://localhost/admin/api/cms/plugins/package', goodFormData, { cookie }),
@@ -1703,16 +1799,19 @@ describe('CMS plugin handlers', () => {
       // For a HARDER test we use a synchronous throw at the API boundary,
       // not just a route handler — same isolation guarantee should hold.
       const badFormData = new FormData()
-      badFormData.set('file', pluginZip({
-        'plugin.json': JSON.stringify(manifestFor('acme.bad')),
-        'server/index.js': `
+      badFormData.set(
+        'file',
+        pluginZip({
+          'plugin.json': JSON.stringify(manifestFor('acme.bad')),
+          'server/index.js': `
           export function activate(api) {
             api.cms.routes.get('/boom', 'plugins.read', () => {
               throw new Error('plugin boom')
             })
           }
         `,
-      }))
+        }),
+      )
       badFormData.set('grantedPermissions', JSON.stringify(['cms.routes']))
       const installBad = await handleCmsRequest(
         cmsFormRequest('http://localhost/admin/api/cms/plugins/package', badFormData, { cookie }),
@@ -1731,7 +1830,7 @@ describe('CMS plugin handlers', () => {
         { uploadsDir },
       )
       expect(boom.status).toBe(500)
-      expect((await boom.json() as { error: string }).error).toMatch(/plugin boom/)
+      expect(((await boom.json()) as { error: string }).error).toMatch(/plugin boom/)
 
       // Plugin A's /ping must STILL work after the sibling failure — proves
       // the isolation. Whether or not B's worker was terminated, A's worker

@@ -90,7 +90,16 @@ describe('detectConflicts — page slugs', () => {
           title: 'Existing 2',
           slug: 'existing-2',
           rootNodeId: 'r',
-          nodes: { r: { id: 'r', moduleId: 'base.body', props: {}, breakpointOverrides: {}, children: [], classIds: [] } },
+          nodes: {
+            r: {
+              id: 'r',
+              moduleId: 'base.body',
+              props: {},
+              breakpointOverrides: {},
+              children: [],
+              classIds: [],
+            },
+          },
         },
       ],
     }
@@ -266,11 +275,7 @@ describe('applyConflictResolutions', () => {
   it('auto-rename rule: remaps ambient selectors that reference the renamed class', () => {
     const plan = makePlan(
       [],
-      [
-        makeClassRule('btn'),
-        makeAmbientRule('.btn:hover'),
-        makeAmbientRule('.card .btn'),
-      ],
+      [makeClassRule('btn'), makeAmbientRule('.btn:hover'), makeAmbientRule('.card .btn')],
     )
     const res: RuleConflict = {
       source: '',
@@ -432,7 +437,13 @@ describe('detectConflicts — design tokens', () => {
   })
 
   it('detects a font-token variable collision with an existing font token', () => {
-    const { tokens } = detectConflicts(siteWithTokens(), [], [], [], [makeFontToken('font-primary')])
+    const { tokens } = detectConflicts(
+      siteWithTokens(),
+      [],
+      [],
+      [],
+      [makeFontToken('font-primary')],
+    )
     expect(tokens).toHaveLength(1)
     expect(tokens[0].kind).toBe('font')
     expect(tokens[0].desiredVariable).toBe('font-primary')

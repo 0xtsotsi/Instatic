@@ -46,7 +46,6 @@ const GeneratedColorClassMetadataSchema = Type.Object({
   locked: Type.Literal(true),
 })
 
-
 const GeneratedTypographyClassMetadataSchema = Type.Object({
   origin: Type.Literal('framework'),
   family: Type.Literal('typography'),
@@ -61,7 +60,6 @@ const GeneratedTypographyClassMetadataSchema = Type.Object({
   locked: Type.Literal(true),
 })
 
-
 const GeneratedSpacingClassMetadataSchema = Type.Object({
   origin: Type.Literal('framework'),
   family: Type.Literal('spacing'),
@@ -72,7 +70,6 @@ const GeneratedSpacingClassMetadataSchema = Type.Object({
   locked: Type.Literal(true),
 })
 
-
 /**
  * Discriminated union of all framework-generated class metadata.
  * Discriminator key: `family` (TypeBox infers from `Type.Literal` keys).
@@ -82,7 +79,6 @@ export const GeneratedClassMetadataSchema = Type.Union([
   GeneratedTypographyClassMetadataSchema,
   GeneratedSpacingClassMetadataSchema,
 ])
-
 
 // ---------------------------------------------------------------------------
 // FrameworkColorToken and FrameworkColorSettings
@@ -153,10 +149,7 @@ export type FrameworkColorSettings = Static<typeof FrameworkColorSettingsSchema>
 // FrameworkScaleMode
 // ---------------------------------------------------------------------------
 
-const FrameworkScaleModeSchema = Type.Union([
-  Type.Literal('fluid'),
-  Type.Literal('fluid_manual'),
-])
+const FrameworkScaleModeSchema = Type.Union([Type.Literal('fluid'), Type.Literal('fluid_manual')])
 
 export type FrameworkScaleMode = Static<typeof FrameworkScaleModeSchema>
 
@@ -176,20 +169,17 @@ const FrameworkScaleBreakpointConfigSchema = Type.Object({
   scaleRatioInputValue: Type.Optional(Type.Number()),
 })
 
-
 const FrameworkTypographyBreakpointConfigSchema = Type.Object({
   ...FrameworkScaleBreakpointConfigSchema.properties,
   /** Base font size at this breakpoint in px. */
   fontSize: Type.Number(),
 })
 
-
 const FrameworkSpacingBreakpointConfigSchema = Type.Object({
   ...FrameworkScaleBreakpointConfigSchema.properties,
   /** Base spacing size at this breakpoint in px. */
   size: Type.Number(),
 })
-
 
 // ---------------------------------------------------------------------------
 // FrameworkScaleManualSize
@@ -315,7 +305,9 @@ const FrameworkTypographyClassGeneratorSchema = Type.Object({
   isDisabled: Type.Optional(Type.Boolean()),
 })
 
-export type FrameworkTypographyClassGenerator = Static<typeof FrameworkTypographyClassGeneratorSchema>
+export type FrameworkTypographyClassGenerator = Static<
+  typeof FrameworkTypographyClassGeneratorSchema
+>
 
 // Spacing class generators are identical in shape to typography class generators.
 const FrameworkSpacingClassGeneratorSchema = FrameworkTypographyClassGeneratorSchema
@@ -394,4 +386,3 @@ export const FrameworkSettingsSchema = Type.Object({
 })
 
 export type FrameworkSettings = Static<typeof FrameworkSettingsSchema>
-

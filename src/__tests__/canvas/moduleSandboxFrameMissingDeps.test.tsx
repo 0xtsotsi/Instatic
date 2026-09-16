@@ -43,17 +43,17 @@ function seed(packageDeps: Record<string, string>, opts: { installed?: boolean }
   const baseRuntime = normalizeSiteRuntimeConfig(undefined)
   const runtime = opts.installed
     ? normalizeSiteRuntimeConfig({
-      ...baseRuntime,
-      packageImportmap: {
-        lockHash: 'test-hash',
-        imports: Object.fromEntries(
-          Object.keys(packageDeps).flatMap((name) => [
-            [name, `/_instatic/runtime/cache/test-hash/${name}/index.js`],
-            [`${name}/`, `/_instatic/runtime/cache/test-hash/${name}/`],
-          ]),
-        ),
-      },
-    })
+        ...baseRuntime,
+        packageImportmap: {
+          lockHash: 'test-hash',
+          imports: Object.fromEntries(
+            Object.keys(packageDeps).flatMap((name) => [
+              [name, `/_instatic/runtime/cache/test-hash/${name}/index.js`],
+              [`${name}/`, `/_instatic/runtime/cache/test-hash/${name}/`],
+            ]),
+          ),
+        },
+      })
     : baseRuntime
   useEditorStore.setState({
     site: makeSite({ packageJson, runtime }),

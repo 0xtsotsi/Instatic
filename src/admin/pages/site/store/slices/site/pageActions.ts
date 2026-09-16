@@ -26,11 +26,7 @@ type PageActions = Pick<
   | 'convertTemplateToPage'
 >
 
-export function createPageActions({
-  get,
-  set,
-  mutateSite,
-}: SiteSliceHelpers): PageActions {
+export function createPageActions({ get, set, mutateSite }: SiteSliceHelpers): PageActions {
   return {
     addPage: (title, slug) => {
       let newPage!: Page
@@ -55,7 +51,9 @@ export function createPageActions({
       })
       const { site, activePageId } = get()
       if (deleted && activePageId === pageId && site) {
-        set((state) => { state.activePageId = site.pages[0]?.id ?? null })
+        set((state) => {
+          state.activePageId = site.pages[0]?.id ?? null
+        })
       }
     },
 

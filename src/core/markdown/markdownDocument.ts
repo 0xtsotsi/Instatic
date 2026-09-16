@@ -172,7 +172,9 @@ function paragraphTokenToNode(token: Tokens.Paragraph): JSONNode | JSONNode[] {
 
   // Multiple inline tokens but the only non-text content is an image →
   // split the paragraph at the image boundary.
-  const onlyImagesAndText = inline.every((t) => t.type === 'image' || t.type === 'text' || t.type === 'space')
+  const onlyImagesAndText = inline.every(
+    (t) => t.type === 'image' || t.type === 'text' || t.type === 'space',
+  )
   if (onlyImagesAndText && inline.some((t) => t.type === 'image')) {
     const nodes: JSONNode[] = []
     let buffer: Token[] = []
@@ -389,7 +391,9 @@ function pushInline(out: JSONNode[], token: Token, marks: JSONMark[]): void {
       return
     }
     case 'codespan': {
-      out.push(textNode(decodeEntities((token as Tokens.Codespan).text), addMark(marks, { type: 'code' })))
+      out.push(
+        textNode(decodeEntities((token as Tokens.Codespan).text), addMark(marks, { type: 'code' })),
+      )
       return
     }
     case 'link': {
@@ -484,7 +488,10 @@ function sameMarks(a: JSONMark[] | undefined, b: JSONMark[] | undefined): boolea
 // ---------------------------------------------------------------------------
 
 function blockNodesToMarkdown(nodes: JSONNode[]): string {
-  return nodes.map(blockNodeToMarkdown).filter((line) => line.length > 0).join('\n\n')
+  return nodes
+    .map(blockNodeToMarkdown)
+    .filter((line) => line.length > 0)
+    .join('\n\n')
 }
 
 function blockNodeToMarkdown(node: JSONNode): string {
@@ -545,7 +552,11 @@ function listToMarkdown(node: JSONNode, marker: string): string {
       const prefix = marker
       const indent = ' '.repeat(prefix.length + 1)
       const lines = inner.split('\n')
-      return lines.map((line, index) => (index === 0 ? `${prefix} ${line}` : line.length > 0 ? `${indent}${line}` : '')).join('\n')
+      return lines
+        .map((line, index) =>
+          index === 0 ? `${prefix} ${line}` : line.length > 0 ? `${indent}${line}` : '',
+        )
+        .join('\n')
     })
     .join('\n')
 }

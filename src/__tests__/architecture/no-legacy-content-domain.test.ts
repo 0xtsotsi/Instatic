@@ -36,18 +36,13 @@ import { extname, join, relative } from 'path'
 
 const PROJECT_ROOT = join(import.meta.dir, '../../../')
 
-const SCAN_ROOTS = [
-  join(PROJECT_ROOT, 'src'),
-  join(PROJECT_ROOT, 'server'),
-]
+const SCAN_ROOTS = [join(PROJECT_ROOT, 'src'), join(PROJECT_ROOT, 'server')]
 
 /**
  * Exclude the test tree — those files are not production code.
  * Production source files under src/ and server/ are all in scope.
  */
-const EXCLUDED_PREFIXES = [
-  join(PROJECT_ROOT, 'src/__tests__/'),
-]
+const EXCLUDED_PREFIXES = [join(PROJECT_ROOT, 'src/__tests__/')]
 
 // ---------------------------------------------------------------------------
 // File walker — .ts / .tsx files only, recursive
@@ -178,9 +173,7 @@ interface Violation {
 // ---------------------------------------------------------------------------
 
 function scanForViolations(): Violation[] {
-  const files = SCAN_ROOTS
-    .flatMap((root) => walk(root))
-    .filter((f) => !isExcluded(f))
+  const files = SCAN_ROOTS.flatMap((root) => walk(root)).filter((f) => !isExcluded(f))
 
   const violations: Violation[] = []
 
@@ -227,9 +220,7 @@ function scanForViolations(): Violation[] {
 
 describe('Legacy content domain eradication', () => {
   test('SCAN_ROOTS resolve to production source files (sanity check)', () => {
-    const files = SCAN_ROOTS
-      .flatMap((root) => walk(root))
-      .filter((f) => !isExcluded(f))
+    const files = SCAN_ROOTS.flatMap((root) => walk(root)).filter((f) => !isExcluded(f))
     expect(files.length).toBeGreaterThan(0)
   })
 
@@ -242,9 +233,7 @@ describe('Legacy content domain eradication', () => {
     }
 
     const lines = violations.map(
-      (v) =>
-        `  ${v.file}:${v.line} — ${v.pattern}\n` +
-        `    matched: ${JSON.stringify(v.match)}`,
+      (v) => `  ${v.file}:${v.line} — ${v.pattern}\n` + `    matched: ${JSON.stringify(v.match)}`,
     )
 
     throw new Error(

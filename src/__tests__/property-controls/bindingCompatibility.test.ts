@@ -26,8 +26,19 @@ function metaField(
 describe('BINDING_COMPATIBILITY', () => {
   // All the known control kinds from propertySchema.ts
   const ALL_CONTROL_KINDS: PropertyControlKind[] = [
-    'text', 'textarea', 'number', 'color', 'select', 'toggle',
-    'image', 'media', 'url', 'dataTable', 'richtext', 'svg', 'group',
+    'text',
+    'textarea',
+    'number',
+    'color',
+    'select',
+    'toggle',
+    'image',
+    'media',
+    'url',
+    'dataTable',
+    'richtext',
+    'svg',
+    'group',
   ]
 
   it('has an entry for every PropertyControlKind', () => {
@@ -63,7 +74,12 @@ describe('isFieldBindable', () => {
   })
 
   it('image + media(allowMultiple) → false', () => {
-    expect(isFieldBindable('image', metaField('f', 'media', { mediaKind: 'image', allowMultiple: true }))).toBe(false)
+    expect(
+      isFieldBindable(
+        'image',
+        metaField('f', 'media', { mediaKind: 'image', allowMultiple: true }),
+      ),
+    ).toBe(false)
   })
 
   it('text + number → true', () => {
@@ -123,22 +139,28 @@ describe('getDynamicBindingMode', () => {
   })
 
   it('skips identifier-normalized text controls', () => {
-    expect(getDynamicBindingMode({ type: 'text', label: 'Form ID', normalize: 'identifier' })).toBeNull()
+    expect(
+      getDynamicBindingMode({ type: 'text', label: 'Form ID', normalize: 'identifier' }),
+    ).toBeNull()
   })
 
   it('uses structured mode for whole-prop value controls', () => {
     expect(getDynamicBindingMode({ type: 'image', label: 'Image' })).toBe('structured')
-    expect(getDynamicBindingMode({ type: 'media', mediaKind: 'video', label: 'Video' })).toBe('structured')
+    expect(getDynamicBindingMode({ type: 'media', mediaKind: 'video', label: 'Video' })).toBe(
+      'structured',
+    )
     expect(getDynamicBindingMode({ type: 'number', label: 'Rows' })).toBe('structured')
     expect(getDynamicBindingMode({ type: 'toggle', label: 'Required' })).toBe('structured')
   })
 
   it('skips fixed choices and structural controls', () => {
-    expect(getDynamicBindingMode({
-      type: 'select',
-      label: 'Loading',
-      options: [{ label: 'Lazy', value: 'lazy' }],
-    })).toBeNull()
+    expect(
+      getDynamicBindingMode({
+        type: 'select',
+        label: 'Loading',
+        options: [{ label: 'Lazy', value: 'lazy' }],
+      }),
+    ).toBeNull()
     expect(getDynamicBindingMode({ type: 'color', label: 'Color' })).toBeNull()
     expect(getDynamicBindingMode({ type: 'svg', label: 'SVG' })).toBeNull()
     expect(getDynamicBindingMode({ type: 'dataTable', label: 'Table' })).toBeNull()

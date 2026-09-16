@@ -74,7 +74,10 @@ describe('buildAssetPlan — @font-face → custom font family', () => {
     // src is still a FileMap key (rewritten to a media URL later by applyAssetRewrites).
     expect(fonts[0].files.find((f) => f.variant === '400')?.src).toBe('fonts/acme.woff2')
     // Both binaries are queued for upload.
-    expect(assets.map((a) => a.sourcePath).sort()).toEqual(['fonts/acme-bold.woff', 'fonts/acme.woff2'])
+    expect(assets.map((a) => a.sourcePath).sort()).toEqual([
+      'fonts/acme-bold.woff',
+      'fonts/acme.woff2',
+    ])
   })
 
   it('prefers woff2 when a face lists multiple fallback formats', () => {
@@ -86,7 +89,11 @@ describe('buildAssetPlan — @font-face → custom font family', () => {
         'a.woff2': { bytes: bytes('woff2'), mimeType: 'font/woff2' },
       },
     }
-    const { fonts } = buildAssetPlan([], [{ cssPath: 's.css', rules: [], assetRefs: [], fontFaces }], fileMap)
+    const { fonts } = buildAssetPlan(
+      [],
+      [{ cssPath: 's.css', rules: [], assetRefs: [], fontFaces }],
+      fileMap,
+    )
     expect(fonts[0].files[0].format).toBe('woff2')
     expect(fonts[0].files[0].src).toBe('a.woff2')
   })

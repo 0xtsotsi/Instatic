@@ -210,7 +210,9 @@ export function ParamRow({
             fieldSize="xs"
           >
             {(enumOptions ?? []).map((opt) => (
-              <option key={opt} value={opt}>{opt}</option>
+              <option key={opt} value={opt}>
+                {opt}
+              </option>
             ))}
           </Select>
         )
@@ -299,11 +301,7 @@ export function ParamRow({
           </div>
 
           <div className={styles.defaultFields}>
-            <ControlRow
-              propKey={`param-name-${paramKey}`}
-              label="Param name"
-              inputId={nameInputId}
-            >
+            <ControlRow propKey={`param-name-${paramKey}`} label="Param name" inputId={nameInputId}>
               <Input
                 id={nameInputId}
                 fieldSize="xs"
@@ -343,9 +341,7 @@ export function ParamRow({
           </div>
 
           {/* Value slot */}
-          <div className={styles.valueSlot}>
-            {renderValueControl()}
-          </div>
+          <div className={styles.valueSlot}>{renderValueControl()}</div>
 
           {/* Chip / action slot */}
           <div className={styles.chipSlot}>

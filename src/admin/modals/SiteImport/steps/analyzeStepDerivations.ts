@@ -30,7 +30,11 @@ export function buildRuleGroups(plan: ImportPlan): RuleGroup[] {
     }
     bucket.push(i)
   })
-  return order.map((source) => ({ source, label: basename(source), indices: bySource.get(source) ?? [] }))
+  return order.map((source) => ({
+    source,
+    label: basename(source),
+    indices: bySource.get(source) ?? [],
+  }))
 }
 
 const MEDIA_ORDER = ['Images', 'SVG', 'GIF', 'Video', 'Other']

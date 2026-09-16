@@ -56,10 +56,7 @@ export type StyleRuleKind = Static<typeof StyleRuleKindSchema>
  * property value. Keeping the metadata sparse preserves the scalar
  * CSSPropertyBag values consumed by editor controls and node inline styles.
  */
-export const CSSDeclarationPriorityBagSchema = Type.Record(
-  Type.String(),
-  Type.Literal('important'),
-)
+export const CSSDeclarationPriorityBagSchema = Type.Record(Type.String(), Type.Literal('important'))
 export type CSSDeclarationPriorityBag = Static<typeof CSSDeclarationPriorityBagSchema>
 
 export const StyleRuleSchema = Type.Object({
@@ -89,11 +86,13 @@ export const StyleRuleSchema = Type.Object({
    * Optional ownership scope. If the scope object does not match the exact
    * shape, it is silently dropped — handled in parseStyleRule.
    */
-  scope: Type.Optional(Type.Object({
-    type: Type.Literal('node'),
-    nodeId: Type.String(),
-    role: Type.Literal('module-style'),
-  })),
+  scope: Type.Optional(
+    Type.Object({
+      type: Type.Literal('node'),
+      nodeId: Type.String(),
+      role: Type.Literal('module-style'),
+    }),
+  ),
   /**
    * Base CSS styles — arbitrary string→unknown map at persistence boundary.
    * Falls back to {} when missing or invalid — handled in parseStyleRule.
@@ -117,7 +116,9 @@ export const StyleRuleSchema = Type.Object({
     {} as Record<string, Record<string, unknown>>,
   ),
   /** Sparse context id -> declaration-priority metadata. */
-  contextStylePriorities: Type.Optional(Type.Record(Type.String(), CSSDeclarationPriorityBagSchema)),
+  contextStylePriorities: Type.Optional(
+    Type.Record(Type.String(), CSSDeclarationPriorityBagSchema),
+  ),
   /** Sanitised raw CSS for supported stylesheet-level rules such as @keyframes. */
   rawCss: Type.Optional(Type.String()),
   /** Optional search/filter tags. Invalid items silently dropped — handled in parseStyleRule. */
@@ -131,22 +132,13 @@ export const StyleRuleSchema = Type.Object({
 export type StyleRule = Static<typeof StyleRuleSchema>
 
 export type SelectorCreateInput =
-  | { kind: 'class'; name: string }
-  | { kind: 'ambient'; selector: string }
-  | { kind: 'empty' }
+  { kind: 'class'; name: string } | { kind: 'ambient'; selector: string } | { kind: 'empty' }
 
 const SINGLE_CLASS_INPUT_RE = /^\.?[a-zA-Z_-][a-zA-Z0-9_-]*$/
 
 // Bare words are class-first. Heading tags are the common exception authors
 // expect to behave as element selectors rather than new class names.
-const HEADING_TAG_NAMES = new Set([
-  'h1',
-  'h2',
-  'h3',
-  'h4',
-  'h5',
-  'h6',
-])
+const HEADING_TAG_NAMES = new Set(['h1', 'h2', 'h3', 'h4', 'h5', 'h6'])
 
 /**
  * Build the canonical `.<escaped-name>` selector for a class-kind rule.
@@ -208,7 +200,8 @@ function parseContextStylePriorities(
 function parseStyleRuleScope(raw: unknown): StyleRule['scope'] {
   const s = asPlainObject(raw)
   if (!s) return undefined
-  if (s.type !== 'node' || typeof s.nodeId !== 'string' || s.role !== 'module-style') return undefined
+  if (s.type !== 'node' || typeof s.nodeId !== 'string' || s.role !== 'module-style')
+    return undefined
   return { type: 'node', nodeId: s.nodeId, role: 'module-style' }
 }
 
@@ -230,7 +223,10 @@ export function parseStyleRule(raw: unknown): StyleRule | null {
   const styles = parseStylesBag(r.styles)
   const contextStyles = parseContextStyles(r)
   const stylePriorities = parsePriorityBag(r.stylePriorities, styles)
-  const contextStylePriorities = parseContextStylePriorities(r.contextStylePriorities, contextStyles)
+  const contextStylePriorities = parseContextStylePriorities(
+    r.contextStylePriorities,
+    contextStyles,
+  )
   const generated = compiledCheck(GeneratedClassMetadataSchema, r.generated)
     ? (r.generated as StyleRule['generated'])
     : undefined

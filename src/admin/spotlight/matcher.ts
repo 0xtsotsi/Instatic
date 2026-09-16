@@ -129,7 +129,7 @@ function scoreCommand(
         if (titleLower.slice(i, i + token.length) === token && isWordStart(titleLower, i)) {
           score += 500
           allMatchRanges.push([i, i + token.length])
-          break  // only count once per token for word-start
+          break // only count once per token for word-start
         }
       }
 
@@ -157,10 +157,7 @@ function scoreCommand(
 
   // +25 workspace match
   if (command.workspaces) {
-    if (
-      command.workspaces.includes('any') ||
-      command.workspaces.includes(ctx.workspace)
-    ) {
+    if (command.workspaces.includes('any') || command.workspaces.includes(ctx.workspace)) {
       score += 25
     }
   }
@@ -237,4 +234,3 @@ export function rankCommands(
   scored.sort(compareScored)
   return scored.slice(0, MAX_RESULTS)
 }
-

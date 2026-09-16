@@ -47,9 +47,7 @@ export function applyIframeBodyPresentation(
   body: HTMLElement,
   presentation: IframeBodyPresentation,
 ): () => void {
-  const previousClassName = presentation.className === undefined
-    ? undefined
-    : body.className
+  const previousClassName = presentation.className === undefined ? undefined : body.className
 
   if (presentation.className !== undefined) {
     body.className = presentation.className
@@ -63,19 +61,18 @@ export function applyIframeBodyPresentation(
   // shorthand such as `background` can mutate its longhands, so interleaving
   // snapshot/apply would record already-mutated values for a later
   // `backgroundColor` entry and restore the wrong cascade on cleanup.
-  const previousStyles: PreviousInlineStyle[] = [...declarations.keys()].map(
-    (property) => ({
-      property,
-      value: body.style.getPropertyValue(property),
-      priority: body.style.getPropertyPriority(property),
-    }),
-  )
+  const previousStyles: PreviousInlineStyle[] = [...declarations.keys()].map((property) => ({
+    property,
+    value: body.style.getPropertyValue(property),
+    priority: body.style.getPropertyPriority(property),
+  }))
   for (const [property, value] of declarations) {
     body.style.setProperty(property, value)
   }
 
-  const attributes = Object.entries(presentation.attributes ?? {})
-    .filter(([name]) => !EDITOR_OWNED_BODY_ATTRIBUTES.has(name))
+  const attributes = Object.entries(presentation.attributes ?? {}).filter(
+    ([name]) => !EDITOR_OWNED_BODY_ATTRIBUTES.has(name),
+  )
   const previousAttributes: PreviousAttribute[] = attributes.map(([name]) => ({
     name,
     value: body.getAttribute(name),

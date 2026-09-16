@@ -1,9 +1,6 @@
 import { afterEach, describe, expect, it, mock } from 'bun:test'
 import sharp from 'sharp'
-import {
-  AI_USER_IMAGE_MAX_EDGE,
-  AI_USER_IMAGE_MAX_PIXELS,
-} from '@core/ai'
+import { AI_USER_IMAGE_MAX_EDGE, AI_USER_IMAGE_MAX_PIXELS } from '@core/ai'
 import {
   fitAgentImageSize,
   normaliseAgentImage,
@@ -20,10 +17,9 @@ interface BrowserImageMocks {
 
 let activeMocks: BrowserImageMocks | null = null
 
-function installBrowserImageMocks(blob: Blob | null = new Blob(
-  [new Uint8Array([1, 2, 3])],
-  { type: 'image/jpeg' },
-)): BrowserImageMocks {
+function installBrowserImageMocks(
+  blob: Blob | null = new Blob([new Uint8Array([1, 2, 3])], { type: 'image/jpeg' }),
+): BrowserImageMocks {
   activeMocks?.restore()
   const canvasPrototype = Object.getPrototypeOf(document.createElement('canvas')) as object
   const createBitmapDescriptor = Object.getOwnPropertyDescriptor(globalThis, 'createImageBitmap')
@@ -32,11 +28,14 @@ function installBrowserImageMocks(blob: Blob | null = new Blob(
   const close = mock(() => {})
   const drawImage = mock(() => {})
   const fillRect = mock(() => {})
-  const createImageBitmap = mock(async () => ({
-    width: 2000,
-    height: 1000,
-    close,
-  } as unknown as ImageBitmap))
+  const createImageBitmap = mock(
+    async () =>
+      ({
+        width: 2000,
+        height: 1000,
+        close,
+      }) as unknown as ImageBitmap,
+  )
 
   Object.defineProperty(globalThis, 'createImageBitmap', {
     configurable: true,
@@ -121,9 +120,11 @@ describe('agent image attachment preparation', () => {
 
   it('closes the decoded bitmap when browser encoding fails', async () => {
     const browser = installBrowserImageMocks(null)
-    await expect(normaliseAgentImage(
-      new File([pngHeader(2000, 1000)], 'reference.png', { type: 'image/png' }),
-    )).rejects.toThrow('This browser could not encode the pasted image.')
+    await expect(
+      normaliseAgentImage(
+        new File([pngHeader(2000, 1000)], 'reference.png', { type: 'image/png' }),
+      ),
+    ).rejects.toThrow('This browser could not encode the pasted image.')
     expect(browser.close).toHaveBeenCalledTimes(1)
   })
 
@@ -151,13 +152,15 @@ describe('agent image attachment preparation', () => {
   })
 
   it('reads bounded PNG dimensions before decoding and rejects decompression bombs', async () => {
-    expect(readAgentImageSourceSize(pngHeader(640, 480), 'image/png'))
-      .toEqual({ width: 640, height: 480 })
+    expect(readAgentImageSourceSize(pngHeader(640, 480), 'image/png')).toEqual({
+      width: 640,
+      height: 480,
+    })
     const browser = installBrowserImageMocks()
 
-    await expect(normaliseAgentImage(
-      new File([pngHeader(20_000, 20_000)], 'bomb.png', { type: 'image/png' }),
-    )).rejects.toThrow('Source image dimensions exceed')
+    await expect(
+      normaliseAgentImage(new File([pngHeader(20_000, 20_000)], 'bomb.png', { type: 'image/png' })),
+    ).rejects.toThrow('Source image dimensions exceed')
     expect(browser.createImageBitmap).not.toHaveBeenCalled()
   })
 
@@ -187,10 +190,12 @@ describe('agent image attachment preparation', () => {
         channels: 3,
         background: { r: 30, g: 60, b: 90 },
       },
-    }).jpeg().withMetadata({ orientation: 6 }).toBuffer()
+    })
+      .jpeg()
+      .withMetadata({ orientation: 6 })
+      .toBuffer()
 
-    expect(readAgentImageSourceSize(oriented, 'image/jpeg'))
-      .toEqual({ width: 300, height: 400 })
+    expect(readAgentImageSourceSize(oriented, 'image/jpeg')).toEqual({ width: 300, height: 400 })
   })
 
   it('rejects unsupported clipboard formats before decoding', async () => {
@@ -203,9 +208,11 @@ describe('agent image attachment preparation', () => {
       value: createImageBitmap,
     })
     try {
-      await expect(normaliseAgentImage(
-        new File([new Uint8Array([1])], 'animation.gif', { type: 'image/gif' }),
-      )).rejects.toThrow('Use a PNG, JPEG, or WebP image.')
+      await expect(
+        normaliseAgentImage(
+          new File([new Uint8Array([1])], 'animation.gif', { type: 'image/gif' }),
+        ),
+      ).rejects.toThrow('Use a PNG, JPEG, or WebP image.')
       expect(createImageBitmap).not.toHaveBeenCalled()
     } finally {
       restoreProperty(globalThis, 'createImageBitmap', descriptor)
@@ -225,6 +232,8 @@ function pngHeader(width: number, height: number): Uint8Array {
 
 function deferred<T>() {
   let resolve!: (value: T | PromiseLike<T>) => void
-  const promise = new Promise<T>((done) => { resolve = done })
+  const promise = new Promise<T>((done) => {
+    resolve = done
+  })
   return { promise, resolve }
 }

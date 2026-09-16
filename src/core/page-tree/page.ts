@@ -75,7 +75,8 @@ export function parsePage(raw: unknown, pageIndex: number): Page {
   if (typeof r.id !== 'string') throw new Error(`${pagePathPrefix}.id: Expected string`)
   if (typeof r.slug !== 'string') throw new Error(`${pagePathPrefix}.slug: Expected string`)
   if (typeof r.title !== 'string') throw new Error(`${pagePathPrefix}.title: Expected string`)
-  if (typeof r.rootNodeId !== 'string') throw new Error(`${pagePathPrefix}.rootNodeId: Expected string`)
+  if (typeof r.rootNodeId !== 'string')
+    throw new Error(`${pagePathPrefix}.rootNodeId: Expected string`)
   if (!r.nodes || typeof r.nodes !== 'object' || Array.isArray(r.nodes)) {
     throw new Error(`${pagePathPrefix}.nodes: Expected object`)
   }
@@ -97,7 +98,9 @@ export function parsePage(raw: unknown, pageIndex: number): Page {
     id: r.id,
     slug: r.slug,
     title: r.title,
-    ...(typeof r.ownerUserId === 'string' || r.ownerUserId === null ? { ownerUserId: r.ownerUserId } : {}),
+    ...(typeof r.ownerUserId === 'string' || r.ownerUserId === null
+      ? { ownerUserId: r.ownerUserId }
+      : {}),
     ...(typeof r.createdByUserId === 'string' || r.createdByUserId === null
       ? { createdByUserId: r.createdByUserId }
       : {}),

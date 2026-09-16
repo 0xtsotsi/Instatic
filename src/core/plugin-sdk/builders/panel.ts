@@ -42,10 +42,7 @@
  */
 
 import type { ComponentType } from 'react'
-import type {
-  PluginEditorPanel,
-  PluginEditorPanelAccent,
-} from '../types'
+import type { PluginEditorPanel, PluginEditorPanelAccent } from '../types'
 
 /**
  * Props passed to a plugin editor panel's React component on each render.
@@ -78,9 +75,7 @@ const PANEL_ID_PATTERN = /^[a-z0-9](?:[a-z0-9._-]*[a-z0-9])?$/
  * Identity wrapper — validates the id shape at definition time so authoring
  * errors surface during `instatic-plugin build`, not at editor activation.
  */
-export function definePluginPanel(
-  config: DefinePluginEditorPanelConfig,
-): PluginEditorPanel {
+export function definePluginPanel(config: DefinePluginEditorPanelConfig): PluginEditorPanel {
   if (!PANEL_ID_PATTERN.test(config.id)) {
     throw new Error(
       `[plugin-sdk] Editor panel id "${config.id}" must be a lowercase dotted/dashed identifier (e.g. "acme.workflow.review").`,

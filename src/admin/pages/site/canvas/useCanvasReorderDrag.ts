@@ -3,10 +3,7 @@ import { registry } from '@core/module-engine'
 import { selectActiveCanvasPage, useEditorStore } from '@site/store/store'
 import type { CanvasDropResolution } from './canvasDnd'
 import { resolveCanvasDropTarget } from './canvasDnd'
-import {
-  getViewportLocalPoint,
-  measureCanvasDropCandidates,
-} from './canvasDomGeometry'
+import { getViewportLocalPoint, measureCanvasDropCandidates } from './canvasDomGeometry'
 import { clearCanvasPointerRelay, markCanvasPointerRelay } from './canvasPointerRelay'
 
 interface UseCanvasReorderDragOptions {
@@ -91,25 +88,30 @@ export function useCanvasReorderDrag({
   }, [])
 
   // Exception #1: closure of `runAutoPan`, which feeds the `useEffect` dep array.
-  const resolveAtClientPoint = useCallback((clientX: number, clientY: number) => {
-    const session = sessionRef.current
-    const viewport = viewportRef.current
-    const tree = selectActiveCanvasPage(useEditorStore.getState())
-    if (!session || !viewport || !tree) {
-      setResolution({ target: null, invalid: null })
-      return
-    }
+  const resolveAtClientPoint = useCallback(
+    (clientX: number, clientY: number) => {
+      const session = sessionRef.current
+      const viewport = viewportRef.current
+      const tree = selectActiveCanvasPage(useEditorStore.getState())
+      if (!session || !viewport || !tree) {
+        setResolution({ target: null, invalid: null })
+        return
+      }
 
-    const point = getViewportLocalPoint(viewport, clientX, clientY)
-    setResolution(resolveCanvasDropTarget({
-      tree,
-      draggedId: session.draggedId,
-      draggedIds: session.draggedIds,
-      candidates: session.candidates,
-      point,
-      canHaveChildren,
-    }))
-  }, [setResolution, viewportRef])
+      const point = getViewportLocalPoint(viewport, clientX, clientY)
+      setResolution(
+        resolveCanvasDropTarget({
+          tree,
+          draggedId: session.draggedId,
+          draggedIds: session.draggedIds,
+          candidates: session.candidates,
+          point,
+          canHaveChildren,
+        }),
+      )
+    },
+    [setResolution, viewportRef],
+  )
 
   // Exception #1: referenced in the `useEffect` dep array below (syncs `runAutoPanRef`).
   const runAutoPan = useCallback(() => {
@@ -221,9 +223,10 @@ export function useCanvasReorderDrag({
     if (!viewport || !tree) return
 
     const draggedIds = resolveDraggedIds(tree, selectedNodeIds)
-    const draggedId = state.selectedNodeId && draggedIds.includes(state.selectedNodeId)
-      ? state.selectedNodeId
-      : draggedIds[draggedIds.length - 1]
+    const draggedId =
+      state.selectedNodeId && draggedIds.includes(state.selectedNodeId)
+        ? state.selectedNodeId
+        : draggedIds[draggedIds.length - 1]
 
     if (!draggedId || draggedIds.length === 0) return
 

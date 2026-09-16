@@ -109,13 +109,17 @@ describe('useInsertModule — single outlet guard', () => {
 
     // First outlet inserts normally.
     let firstId: string | null = null
-    act(() => { firstId = result.current(outletMod!) })
+    act(() => {
+      firstId = result.current(outletMod!)
+    })
     expect(firstId).toBeTruthy()
     expect(countOutlets()).toBe(1)
 
     // Second outlet is blocked: the hook returns null and the tree is unchanged.
     let secondId: string | null = 'sentinel'
-    act(() => { secondId = result.current(outletMod!) })
+    act(() => {
+      secondId = result.current(outletMod!)
+    })
     expect(secondId).toBeNull()
     expect(countOutlets()).toBe(1)
   })
@@ -180,7 +184,7 @@ describe('useInsertModule — VC ref redirect', () => {
       activePageId: 'page-vc',
       activeDocument: null,
       selectedNodeId: null,
-    selectedNodeIds: [],
+      selectedNodeIds: [],
       hoveredNodeId: null,
       propertiesPanel: { collapsed: true, x: 0, y: 0, width: 360 },
       packageJson: {},
@@ -194,14 +198,18 @@ describe('useInsertModule — VC ref redirect', () => {
 
   it('Test A: inserts into the first slot-instance when the selected node is a VC ref', () => {
     setupPageWithVcRef()
-    useEditorStore.setState({ selectedNodeId: 'vc-ref' } as Parameters<typeof useEditorStore.setState>[0])
+    useEditorStore.setState({ selectedNodeId: 'vc-ref' } as Parameters<
+      typeof useEditorStore.setState
+    >[0])
 
     const textMod = registry.get('base.text')
     expect(textMod).toBeTruthy()
 
     const { result } = renderHook(() => useInsertModule())
     let insertedId: string | null = null
-    act(() => { insertedId = result.current(textMod!) })
+    act(() => {
+      insertedId = result.current(textMod!)
+    })
 
     const state = useEditorStore.getState()
     const page = state.site!.pages.find((p) => p.id === 'page-vc')!
@@ -222,7 +230,9 @@ describe('useInsertModule — VC ref redirect', () => {
     const { result } = renderHook(() => useInsertModule())
     let insertedId: string | null = null
     // Pass the VC ref id as the explicit parent
-    act(() => { insertedId = result.current(textMod!, 'vc-ref') })
+    act(() => {
+      insertedId = result.current(textMod!, 'vc-ref')
+    })
 
     const state = useEditorStore.getState()
     const page = state.site!.pages.find((p) => p.id === 'page-vc')!
@@ -272,7 +282,9 @@ describe('useInsertModule — VC ref redirect', () => {
 
     const { result } = renderHook(() => useInsertModule())
     let insertedId: string | null | undefined
-    act(() => { insertedId = result.current(textMod!) })
+    act(() => {
+      insertedId = result.current(textMod!)
+    })
 
     // The hook must return the new node's id (insertion happened).
     expect(insertedId).toBeTruthy()
@@ -292,4 +304,3 @@ describe('useInsertModule — VC ref redirect', () => {
     expect(page.nodes[insertedId!].moduleId).toBe('base.text')
   })
 })
-

@@ -32,7 +32,10 @@ export function isDuplicateFontTokenVariable(
 ): boolean {
   const normalized = normalizeFontTokenVariable(variable)
   if (!normalized) return false
-  return tokens.some((token) => token.id !== ignoreTokenId && normalizeFontTokenVariable(token.variable) === normalized)
+  return tokens.some(
+    (token) =>
+      token.id !== ignoreTokenId && normalizeFontTokenVariable(token.variable) === normalized,
+  )
 }
 
 function fallbackForFontCategory(category: string | undefined): string {

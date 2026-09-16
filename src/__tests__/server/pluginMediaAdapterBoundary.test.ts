@@ -28,40 +28,48 @@ describe('plugin media adapter host boundary', () => {
   it('rejects plugin upload plans that try to use the host-only LOCAL transport', async () => {
     workerValue = {
       storagePath: 'uploads/pwn.png',
-      steps: [{
-        method: 'LOCAL',
-        url: 'file:///tmp/pwn.png',
-        headers: {},
-      }],
+      steps: [
+        {
+          method: 'LOCAL',
+          url: 'file:///tmp/pwn.png',
+          headers: {},
+        },
+      ],
       expiresAt: Date.now() + 60_000,
     }
 
-    await expect(adapter().beginWrite({
-      mimeType: 'image/png',
-      suggestedStoragePath: 'uploads/pwn.png',
-      contentHash: '0'.repeat(64),
-      sizeBytes: 1,
-      role: 'original',
-    })).rejects.toThrow(/malformed upload plan/i)
+    await expect(
+      adapter().beginWrite({
+        mimeType: 'image/png',
+        suggestedStoragePath: 'uploads/pwn.png',
+        contentHash: '0'.repeat(64),
+        sizeBytes: 1,
+        role: 'original',
+      }),
+    ).rejects.toThrow(/malformed upload plan/i)
   })
 
   it('rejects malformed plugin upload plans instead of casting worker output', async () => {
     workerValue = {
       storagePath: 'uploads/pwn.png',
-      steps: [{
-        method: 'PUT',
-        url: 'https://storage.example/upload',
-        headers: [],
-      }],
+      steps: [
+        {
+          method: 'PUT',
+          url: 'https://storage.example/upload',
+          headers: [],
+        },
+      ],
       expiresAt: Date.now() + 60_000,
     }
 
-    await expect(adapter().beginWrite({
-      mimeType: 'image/png',
-      suggestedStoragePath: 'uploads/pwn.png',
-      contentHash: '0'.repeat(64),
-      sizeBytes: 1,
-      role: 'original',
-    })).rejects.toThrow(/malformed upload plan/i)
+    await expect(
+      adapter().beginWrite({
+        mimeType: 'image/png',
+        suggestedStoragePath: 'uploads/pwn.png',
+        contentHash: '0'.repeat(64),
+        sizeBytes: 1,
+        role: 'original',
+      }),
+    ).rejects.toThrow(/malformed upload plan/i)
   })
 })

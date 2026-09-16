@@ -34,7 +34,9 @@ describe('LoopSourceRegistry', () => {
 
   it('rejects double-registration without registerOrReplace', () => {
     loopSourceRegistry.register(makeStubSource('test.alpha'))
-    expect(() => loopSourceRegistry.register(makeStubSource('test.alpha'))).toThrow(/already registered/i)
+    expect(() => loopSourceRegistry.register(makeStubSource('test.alpha'))).toThrow(
+      /already registered/i,
+    )
     loopSourceRegistry.unregister('test.alpha')
   })
 

@@ -58,7 +58,10 @@ describe('ai-credentials-never-leak gate', () => {
         // ASCII boundary specifically after the `iv` field.
         { name: '.iv member access', re: /\.iv(?=[\s,;)\]}.])/ },
         // Defensive: prevent direct serialisation of credential rows.
-        { name: 'JSON.stringify of credential record', re: /JSON\.stringify\s*\(\s*\w*[Cc]redential/ },
+        {
+          name: 'JSON.stringify of credential record',
+          re: /JSON\.stringify\s*\(\s*\w*[Cc]redential/,
+        },
       ]
 
       for (const pattern of PATTERNS) {
@@ -74,8 +77,8 @@ describe('ai-credentials-never-leak gate', () => {
     if (violations.length > 0) {
       throw new Error(
         `[ai-credentials-never-leak] handler files touch encryption material:\n` +
-        violations.map((v) => `  ${v.file} → ${v.finding}`).join('\n') +
-        `\n\nProject CredentialRecord → CredentialView via toCredentialView() before serialising.`,
+          violations.map((v) => `  ${v.file} → ${v.finding}`).join('\n') +
+          `\n\nProject CredentialRecord → CredentialView via toCredentialView() before serialising.`,
       )
     }
     expect(violations).toHaveLength(0)

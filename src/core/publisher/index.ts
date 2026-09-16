@@ -31,7 +31,6 @@ export {
   setCspDirective,
 } from './cspPlan'
 
-
 export { escapeHtml, isSafeUrl, safeUrl, sanitiseCssValue } from './utils'
 
 export {
@@ -42,11 +41,7 @@ export {
   generateClassCSS,
   isEmittableProperty,
 } from './classCss'
-export type {
-  StyleRuleCssEmitter,
-  StyleRuleDeclarationLayers,
-  ViewportContext,
-} from './classCss'
+export type { StyleRuleCssEmitter, StyleRuleDeclarationLayers, ViewportContext } from './classCss'
 
 export {
   collectBackgroundImagePaths,

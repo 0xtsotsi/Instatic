@@ -87,9 +87,7 @@ describe('JSON column naming — _json suffix required on all jsonb columns', ()
       return
     }
 
-    const lines = violations.map(
-      (c) => `  ${c.name}  (declared in migration ${c.migrationId})`,
-    )
+    const lines = violations.map((c) => `  ${c.name}  (declared in migration ${c.migrationId})`)
 
     throw new Error(
       `[db-json-column-naming] ${violations.length} jsonb column(s) in migrations-pg.ts ` +

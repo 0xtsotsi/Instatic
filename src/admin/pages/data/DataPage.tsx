@@ -63,10 +63,9 @@ export function DataPage() {
 
   useEffect(() => {
     function refreshAfterBundleImport() {
-      void Promise.all([workspace.refreshTables(), workspace.refreshRows()])
-        .catch((err) => {
-          console.error('[DataPage] Refresh after import failed:', err)
-        })
+      void Promise.all([workspace.refreshTables(), workspace.refreshRows()]).catch((err) => {
+        console.error('[DataPage] Refresh after import failed:', err)
+      })
     }
 
     window.addEventListener(CMS_SITE_BUNDLE_IMPORTED_EVENT, refreshAfterBundleImport)
@@ -115,11 +114,12 @@ export function DataPage() {
   function handleDeleteRow(rowId: string): void {
     const table = workspace.selectedTable
     const row = workspace.rows.find((r) => r.id === rowId)
-    const primaryValue = row && table
-      ? (typeof row.cells[table.primaryFieldId] === 'string'
+    const primaryValue =
+      row && table
+        ? typeof row.cells[table.primaryFieldId] === 'string'
           ? (row.cells[table.primaryFieldId] as string)
-          : null)
-      : null
+          : null
+        : null
     const label = primaryValue || 'row'
 
     confirmDelete({
@@ -155,9 +155,10 @@ export function DataPage() {
 
     confirmDelete({
       title: `Delete table "${table.pluralLabel}"?`,
-      description: table.rowCount > 0
-        ? `This table still has ${table.rowCount} row${table.rowCount === 1 ? '' : 's'}. Delete the rows first.`
-        : 'This cannot be undone.',
+      description:
+        table.rowCount > 0
+          ? `This table still has ${table.rowCount} row${table.rowCount === 1 ? '' : 's'}. Delete the rows first.`
+          : 'This cannot be undone.',
       confirmLabel: 'Delete table',
       commit: () => {
         runStepUp(() => workspace.deleteTable(tableId)).catch((err) => {
@@ -199,7 +200,9 @@ export function DataPage() {
   // Schema management is kind-aware: custom tables need `data.custom.tables.manage`,
   // system tables need `data.system.tables.manage`. Deletion is never allowed on
   // a system table (the server blocks it; the UI hides the affordance).
-  const canManageSchema = selectedTable ? canManageTable(permissionUser, selectedTable) : canManageCustomTables
+  const canManageSchema = selectedTable
+    ? canManageTable(permissionUser, selectedTable)
+    : canManageCustomTables
   const canDeleteTable = Boolean(selectedTable) && canManageSchema && !selectedTable?.system
 
   const rightPanel = selectedTable ? (
@@ -233,7 +236,7 @@ export function DataPage() {
     <>
       <AdminWorkspaceCanvasLayout
         workspace="data"
-        contentSidebar={(
+        contentSidebar={
           <DataSidebar
             tables={workspace.tables}
             loading={workspace.loadingTables}
@@ -243,18 +246,20 @@ export function DataPage() {
             onOpenTableSettings={handleOpenTableSettings}
             onDeleteTable={(table) => handleDeleteTable(table.id)}
             onCreateTable={() => setNewTableDialogOpen(true)}
-            onOpenExport={() => openSiteExport({
-              activeTableId: workspace.selectedTableId,
-              initialScope: 'all',
-            })}
+            onOpenExport={() =>
+              openSiteExport({
+                activeTableId: workspace.selectedTableId,
+                initialScope: 'all',
+              })
+            }
             onOpenImport={openSiteImport}
             canCreateTable={canManageCustomTables}
             canManage={canManageCustomTables}
             canExport={canExport}
             canImport={canImport}
           />
-        )}
-        contentCanvas={(
+        }
+        contentCanvas={
           <DataCanvas
             table={selectedTable}
             tables={workspace.tables}
@@ -271,17 +276,19 @@ export function DataPage() {
             onOpenInSiteEditor={handleOpenInSiteEditor}
             onOpenRow={handleOpenRow}
             onSetRowStatus={handleSetRowStatus}
-            onExportRows={(rowIds) => openSiteExport({
-              activeTableId: workspace.selectedTableId,
-              selectedRowIds: rowIds,
-              initialScope: 'selected',
-            })}
+            onExportRows={(rowIds) =>
+              openSiteExport({
+                activeTableId: workspace.selectedTableId,
+                selectedRowIds: rowIds,
+                initialScope: 'selected',
+              })
+            }
             canCreate={canCreateRows}
             canEdit={canEditRows}
             canDelete={canDeleteRows}
             canExport={canExport}
           />
-        )}
+        }
         contentRightPanel={rightPanel}
       />
 
@@ -295,7 +302,6 @@ export function DataPage() {
           }}
         />
       )}
-
     </>
   )
 }

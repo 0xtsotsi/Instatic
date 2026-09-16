@@ -127,9 +127,7 @@ export function addImportedFontTokens(
       normalizeFontTokenVariable(input.variable),
       fontTokens,
     )
-    const familyId = input.family
-      ? familyIdByName.get(input.family.toLowerCase())
-      : undefined
+    const familyId = input.family ? familyIdByName.get(input.family.toLowerCase()) : undefined
     const now = Date.now()
     const token: FontToken = {
       id: nanoid(),
@@ -174,9 +172,7 @@ export function overwriteImportedFontTokens(
   for (const { existingTokenId, token: input } of items) {
     const existing = fontTokens.find((t) => t.id === existingTokenId)
     if (!existing) continue
-    const familyId = input.family
-      ? familyIdByName.get(input.family.toLowerCase())
-      : undefined
+    const familyId = input.family ? familyIdByName.get(input.family.toLowerCase()) : undefined
     existing.fallback = sanitizeFontFallbackStack(input.fallback)
     if (familyId) existing.familyId = familyId
     else delete existing.familyId

@@ -47,10 +47,7 @@ describe('nextDataRowVersionNumber', () => {
 })
 
 describe('single version allocator across publish paths', () => {
-  const publishPaths = [
-    'server/publish/publishSite.ts',
-    'server/repositories/data/publish.ts',
-  ]
+  const publishPaths = ['server/publish/publishSite.ts', 'server/repositories/data/publish.ts']
 
   it('both publish modules call the shared allocator', () => {
     for (const path of publishPaths) {
@@ -65,7 +62,9 @@ describe('single version allocator across publish paths', () => {
       const src = read(path).replace(/\s+/g, ' ').toLowerCase()
       expect(src).not.toContain('coalesce(max(version_number)')
     }
-    const allocator = read('server/repositories/data/versions.ts').replace(/\s+/g, ' ').toLowerCase()
+    const allocator = read('server/repositories/data/versions.ts')
+      .replace(/\s+/g, ' ')
+      .toLowerCase()
     expect(allocator).toContain('coalesce(max(version_number), 0) + 1')
   })
 })

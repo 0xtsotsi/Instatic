@@ -1,4 +1,12 @@
-import { forwardRef, lazy, Suspense, useLayoutEffect, useRef, type KeyboardEvent, type Ref } from 'react'
+import {
+  forwardRef,
+  lazy,
+  Suspense,
+  useLayoutEffect,
+  useRef,
+  type KeyboardEvent,
+  type Ref,
+} from 'react'
 import { Button } from '@ui/components/Button'
 import { Textarea } from '@ui/components/Input'
 import { SkeletonBlock } from '@ui/components/Skeleton'
@@ -80,7 +88,9 @@ export const ContentDocumentCanvas = forwardRef<TiptapBodyEditorHandle, ContentD
     } = props
 
     const titleFieldRef = useRef<HTMLTextAreaElement | null>(null)
-    const bodyEnabled = selectedCollection ? dataTableHasField(selectedCollection, POST_TYPE_FIELD_BODY) : false
+    const bodyEnabled = selectedCollection
+      ? dataTableHasField(selectedCollection, POST_TYPE_FIELD_BODY)
+      : false
     const editorEnabled = Boolean(selectedEntry && canEditEntry)
     const showInsertNotch = bodyEnabled && (editorEnabled || (!selectedEntry && canCreateEntry))
     const singularLabel = selectedCollection?.singularLabel.toLowerCase() ?? 'entry'
@@ -123,11 +133,7 @@ export const ContentDocumentCanvas = forwardRef<TiptapBodyEditorHandle, ContentD
         {/* The insertion notch is meaningful only in Write mode — Live
             mode has its own block affordances inside the iframe. */}
         {showInsertNotch && contentMode === 'write' && (
-          <CanvasNotch
-            actions={notchActions}
-            addControl={null}
-            showHistoryControls={false}
-          />
+          <CanvasNotch actions={notchActions} addControl={null} showHistoryControls={false} />
         )}
 
         <div className={styles.documentScroll}>
@@ -186,7 +192,12 @@ export const ContentDocumentCanvas = forwardRef<TiptapBodyEditorHandle, ContentD
             <div className={styles.emptyState}>
               <h2>Create the first {singularLabel}</h2>
               <p>Select a collection and create an entry to start writing.</p>
-              <Button variant="primary" size="md" onClick={onCreateEntry} disabled={!selectedCollection || !canCreateEntry}>
+              <Button
+                variant="primary"
+                size="md"
+                onClick={onCreateEntry}
+                disabled={!selectedCollection || !canCreateEntry}
+              >
                 <FilePlusSolidIcon size={15} aria-hidden="true" />
                 <span>New {selectedCollection?.singularLabel ?? 'Entry'}</span>
               </Button>

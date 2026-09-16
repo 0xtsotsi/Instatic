@@ -50,15 +50,11 @@ describe('Undo / Redo — basic lifecycle', () => {
     const nodesBefore = Object.keys(site.pages[0].nodes).length
 
     useEditorStore.getState().insertNode('base.text', {}, rootId)
-    const nodesAfter = Object.keys(
-      useEditorStore.getState().site!.pages[0].nodes
-    ).length
+    const nodesAfter = Object.keys(useEditorStore.getState().site!.pages[0].nodes).length
     expect(nodesAfter).toBe(nodesBefore + 1)
 
     useEditorStore.getState().undo()
-    const nodesAfterUndo = Object.keys(
-      useEditorStore.getState().site!.pages[0].nodes
-    ).length
+    const nodesAfterUndo = Object.keys(useEditorStore.getState().site!.pages[0].nodes).length
     expect(nodesAfterUndo).toBe(nodesBefore)
   })
 
@@ -68,16 +64,12 @@ describe('Undo / Redo — basic lifecycle', () => {
     const rootId = site.pages[0].rootNodeId
 
     useEditorStore.getState().insertNode('base.text', {}, rootId)
-    const nodesBeforeUndo = Object.keys(
-      useEditorStore.getState().site!.pages[0].nodes
-    ).length
+    const nodesBeforeUndo = Object.keys(useEditorStore.getState().site!.pages[0].nodes).length
 
     useEditorStore.getState().undo()
     useEditorStore.getState().redo()
 
-    const nodesAfterRedo = Object.keys(
-      useEditorStore.getState().site!.pages[0].nodes
-    ).length
+    const nodesAfterRedo = Object.keys(useEditorStore.getState().site!.pages[0].nodes).length
     expect(nodesAfterRedo).toBe(nodesBeforeUndo)
   })
 
@@ -295,7 +287,9 @@ describe('Undo / Redo — patch correctness', () => {
   it('undo restores the EXACT prior prop value (not just node count)', () => {
     const site = getStore().createSite('Test SiteDocument')
     const rootId = site.pages[0].rootNodeId
-    const nodeId = useEditorStore.getState().insertNode('base.text', { text: 'original', tag: 'p' }, rootId)
+    const nodeId = useEditorStore
+      .getState()
+      .insertNode('base.text', { text: 'original', tag: 'p' }, rootId)
 
     // Two distinct, non-coalescing prop edits (different keys → separate entries).
     useEditorStore.getState().updateNodeProps(nodeId, { tag: 'h1' })

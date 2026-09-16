@@ -21,16 +21,8 @@ import type { EditorStoreSliceCreator } from '@site/store/types'
 import { ApiError, isAbortError, responseErrorMessage } from '@core/http'
 import type { AiChatRequestBody } from '@core/ai'
 import { pushToast } from '@ui/components/Toast'
-import {
-  listConversations,
-  getConversation,
-  deleteConversation,
-} from '@admin/ai/api'
-import {
-  createConversationForScope,
-  fetchScopeDefault,
-  rehydrateMessages,
-} from './agentApi'
+import { listConversations, getConversation, deleteConversation } from '@admin/ai/api'
+import { createConversationForScope, fetchScopeDefault, rehydrateMessages } from './agentApi'
 import { readNdjsonStream } from '@admin/ai/ndjsonStream'
 import { processStreamEvent, ServerStreamEventSchema } from './streamEvents'
 import type {
@@ -40,16 +32,8 @@ import type {
   AgentSliceGet,
   EditorStoreSet,
 } from './agentSliceTypes'
-export type {
-  AgentConversationUsage,
-  AgentSlice,
-  AgentSliceConfig,
-} from './agentSliceTypes'
-import type {
-  AgentBridgeRuntime,
-  AgentMessage,
-  AgentTextStreamSink,
-} from './types'
+export type { AgentConversationUsage, AgentSlice, AgentSliceConfig } from './agentSliceTypes'
+import type { AgentBridgeRuntime, AgentMessage, AgentTextStreamSink } from './types'
 import { getErrorMessage } from '@core/utils/errorMessage'
 import {
   persistConversationProvider,
@@ -162,7 +146,9 @@ function emptyConversationUsage(): AgentConversationUsage {
   }
 }
 
-function conversationResetState(agentComposerEpoch: number): Pick<AgentSlice, ConversationResetKeys> {
+function conversationResetState(
+  agentComposerEpoch: number,
+): Pick<AgentSlice, ConversationResetKeys> {
   return {
     agentMessages: [],
     agentError: null,
@@ -208,488 +194,490 @@ function surfaceAssistantError(
  * (see `contentAgentStore.ts`) — both at compile time and at runtime the
  * slice only touches AgentSlice keys, so wider stores compose cleanly.
  */
-export function createAgentSlice(
-  config: AgentSliceConfig,
-): EditorStoreSliceCreator<AgentSlice> {
+export function createAgentSlice(config: AgentSliceConfig): EditorStoreSliceCreator<AgentSlice> {
   return (set, get) => {
-  // AbortController held in closure (not reactive — intentional, not needed in UI)
-  let _abortController: AbortController | null = null
-  let _conversationLoadEpoch = 0
-  // Provider changes for an existing conversation are ordered so rapid picks
-  // cannot land in the database out of order. Sending awaits the same queue.
-  let _providerUpdateQueue: Promise<void> = Promise.resolve()
-  let _confirmedProviderSelection: ConfirmedProviderSelection | null = null
+    // AbortController held in closure (not reactive — intentional, not needed in UI)
+    let _abortController: AbortController | null = null
+    let _conversationLoadEpoch = 0
+    // Provider changes for an existing conversation are ordered so rapid picks
+    // cannot land in the database out of order. Sending awaits the same queue.
+    let _providerUpdateQueue: Promise<void> = Promise.resolve()
+    let _confirmedProviderSelection: ConfirmedProviderSelection | null = null
 
-  // rAF-buffered text accumulation (Guideline #254). Pending deltas are
-  // flushed once per animation frame, OR explicitly before any tool-call
-  // block is added so chronological ordering is preserved.
-  let _pendingText = ''
-  let _pendingAssistantId = ''
-  let _rafHandle = 0
+    // rAF-buffered text accumulation (Guideline #254). Pending deltas are
+    // flushed once per animation frame, OR explicitly before any tool-call
+    // block is added so chronological ordering is preserved.
+    let _pendingText = ''
+    let _pendingAssistantId = ''
+    let _rafHandle = 0
 
-  /**
-   * Append `text` to the last text block of `msg`, or push a new text block
-   * if the trailing block is a tool call. This is what keeps text/tool
-   * ordering chronological — text that arrives after a tool call goes into
-   * its own block AFTER the tool, not concatenated into earlier text.
-   */
-  function appendTextToBlocks(msg: AgentMessage, text: string): void {
-    const last = msg.blocks[msg.blocks.length - 1]
-    if (last && last.kind === 'text') {
-      last.text += text
-    } else {
-      msg.blocks.push({ kind: 'text', text })
+    /**
+     * Append `text` to the last text block of `msg`, or push a new text block
+     * if the trailing block is a tool call. This is what keeps text/tool
+     * ordering chronological — text that arrives after a tool call goes into
+     * its own block AFTER the tool, not concatenated into earlier text.
+     */
+    function appendTextToBlocks(msg: AgentMessage, text: string): void {
+      const last = msg.blocks[msg.blocks.length - 1]
+      if (last && last.kind === 'text') {
+        last.text += text
+      } else {
+        msg.blocks.push({ kind: 'text', text })
+      }
     }
-  }
 
-  function flushPendingText() {
-    _rafHandle = 0
-    if (!_pendingText || !_pendingAssistantId) return
-    const text = _pendingText
-    const id = _pendingAssistantId
-    _pendingText = ''
-    set((state) => {
-      const msg = state.agentMessages.find((m) => m.id === id)
-      if (msg) appendTextToBlocks(msg, text)
-    })
-  }
-
-  function scheduleFlush() {
-    if (_rafHandle === 0) {
-      _rafHandle = requestAnimationFrame(flushPendingText)
-    }
-  }
-
-  function appendTextDelta(assistantId: string, text: string) {
-    _pendingAssistantId = assistantId
-    _pendingText += text
-    scheduleFlush()
-  }
-
-  // Single text-stream sink passed into processStreamEvent. The sink's
-  // `flush()` is called from the toolCall/toolResult handlers to drain any
-  // pending text deltas BEFORE a tool-call block is added — that's what keeps
-  // the visual order in the panel chronologically correct.
-  const textSink: AgentTextStreamSink = {
-    append: appendTextDelta,
-    flush: flushPendingText,
-  }
-
-  return {
-    // ── State ────────────────────────────────────────────────────────────────
-    isAgentOpen: false,
-    isAgentStreaming: false,
-    agentMessages: [],
-    agentError: null,
-    agentConversationId: null,
-    agentActiveCredentialId: null,
-    agentActiveModelId: null,
-    agentConversations: [],
-    agentUsage: emptyConversationUsage(),
-    isAgentConversationPending: false,
-    isAgentProviderPending: false,
-    agentComposerEpoch: 0,
-
-    // ── UI actions ───────────────────────────────────────────────────────────
-    openAgent() {
-      set({ isAgentOpen: true })
-    },
-
-    closeAgent() {
-      set({ isAgentOpen: false })
-    },
-
-    toggleAgent() {
-      set((s) => {
-        s.isAgentOpen = !s.isAgentOpen
-      })
-    },
-
-    abortAgent() {
-      if (_abortController) _abortController.abort()
-      else set({ isAgentStreaming: false })
-    },
-
-    clearAgentMessages() {
-      _conversationLoadEpoch += 1
-      _confirmedProviderSelection = null
+    function flushPendingText() {
+      _rafHandle = 0
+      if (!_pendingText || !_pendingAssistantId) return
+      const text = _pendingText
+      const id = _pendingAssistantId
+      _pendingText = ''
       set((state) => {
-        Object.assign(state, conversationResetState(state.agentComposerEpoch + 1))
-        state.isAgentConversationPending = false
-        state.isAgentProviderPending = false
+        const msg = state.agentMessages.find((m) => m.id === id)
+        if (msg) appendTextToBlocks(msg, text)
       })
-    },
+    }
 
-    startNewAgentConversation() {
-      if (
-        get().isAgentStreaming
-        || get().isAgentConversationPending
-        || get().isAgentProviderPending
-      ) return
-      // Reset to a fresh conversation, then re-apply the scope default so the
-      // composer stays ready (provider + model picked) instead of dropping to
-      // the "choose a model" lock. `loadScopeDefault` only fills the gap when
-      // nothing is chosen — exactly the post-reset state.
-      get().clearAgentMessages()
-      void get().loadScopeDefault()
-    },
-
-    async loadAgentConversations() {
-      try {
-        const conversations = await listConversations(config.scope)
-        set({ agentConversations: conversations })
-      } catch (err) {
-        console.error('[AgentSlice] Failed to load conversations:', err)
-        pushToast({
-          kind: 'error',
-          title: "Couldn't load conversations",
-          body: getErrorMessage(err, 'Failed to load your conversations.'),
-          location: 'site-editor',
-        })
+    function scheduleFlush() {
+      if (_rafHandle === 0) {
+        _rafHandle = requestAnimationFrame(flushPendingText)
       }
-    },
+    }
 
-    async loadAgentConversation(id: string) {
-      if (
-        get().isAgentStreaming
-        || get().isAgentConversationPending
-        || get().isAgentProviderPending
-      ) return
-      const loadEpoch = ++_conversationLoadEpoch
-      set({ isAgentConversationPending: true })
-      try {
-        const conv = await getConversation(id)
-        if (loadEpoch !== _conversationLoadEpoch) return
-        _confirmedProviderSelection = {
-          conversationId: conv.id,
-          credentialId: conv.credentialId,
-          modelId: conv.modelId,
-        }
+    function appendTextDelta(assistantId: string, text: string) {
+      _pendingAssistantId = assistantId
+      _pendingText += text
+      scheduleFlush()
+    }
+
+    // Single text-stream sink passed into processStreamEvent. The sink's
+    // `flush()` is called from the toolCall/toolResult handlers to drain any
+    // pending text deltas BEFORE a tool-call block is added — that's what keeps
+    // the visual order in the panel chronologically correct.
+    const textSink: AgentTextStreamSink = {
+      append: appendTextDelta,
+      flush: flushPendingText,
+    }
+
+    return {
+      // ── State ────────────────────────────────────────────────────────────────
+      isAgentOpen: false,
+      isAgentStreaming: false,
+      agentMessages: [],
+      agentError: null,
+      agentConversationId: null,
+      agentActiveCredentialId: null,
+      agentActiveModelId: null,
+      agentConversations: [],
+      agentUsage: emptyConversationUsage(),
+      isAgentConversationPending: false,
+      isAgentProviderPending: false,
+      agentComposerEpoch: 0,
+
+      // ── UI actions ───────────────────────────────────────────────────────────
+      openAgent() {
+        set({ isAgentOpen: true })
+      },
+
+      closeAgent() {
+        set({ isAgentOpen: false })
+      },
+
+      toggleAgent() {
+        set((s) => {
+          s.isAgentOpen = !s.isAgentOpen
+        })
+      },
+
+      abortAgent() {
+        if (_abortController) _abortController.abort()
+        else set({ isAgentStreaming: false })
+      },
+
+      clearAgentMessages() {
+        _conversationLoadEpoch += 1
+        _confirmedProviderSelection = null
         set((state) => {
-          state.agentConversationId = conv.id
-          state.agentActiveCredentialId = conv.credentialId
-          state.agentActiveModelId = conv.modelId
-          state.agentMessages = rehydrateMessages(conv.messages)
-          state.agentError = null
-          state.agentUsage = {
-            contextTokens: conv.contextTokens > 0 ? conv.contextTokens : null,
-            contextCredentialId: conv.contextTokens > 0 ? conv.credentialId : null,
-            contextModelId: conv.contextTokens > 0 ? conv.modelId : null,
-            promptTokens: conv.promptTokensTotal,
-            completionTokens: conv.completionTokensTotal,
-            cacheReadTokens: conv.cacheReadTokensTotal,
-            cacheCreationTokens: conv.cacheCreationTokensTotal,
-            costUsd: conv.costUsdTotal,
-          }
-          state.agentComposerEpoch += 1
+          Object.assign(state, conversationResetState(state.agentComposerEpoch + 1))
+          state.isAgentConversationPending = false
+          state.isAgentProviderPending = false
         })
-      } catch (err) {
-        if (loadEpoch !== _conversationLoadEpoch) return
-        console.error('[AgentSlice] Failed to load conversation:', err)
-        set({
-          agentError: err instanceof ApiError ? err.message : 'Failed to load conversation.',
-        })
-      } finally {
-        if (loadEpoch === _conversationLoadEpoch) {
-          set({ isAgentConversationPending: false })
-        }
-      }
-    },
+      },
 
-    async deleteAgentConversation(id: string) {
-      if (get().isAgentConversationPending || get().isAgentProviderPending) return
-      if (get().isAgentStreaming && get().agentConversationId === id) return
-      set({ isAgentConversationPending: true })
-      try {
-        await deleteConversation(id)
-        const wasActive = get().agentConversationId === id
-        if (wasActive) _conversationLoadEpoch += 1
-        if (wasActive) _confirmedProviderSelection = null
-        set((state) => {
-          state.agentConversations = state.agentConversations.filter((c) => c.id !== id)
-          // Deleting the active conversation resets it through the same key-set
-          // as clearAgentMessages — including agentError, so a stuck 502/error
-          // banner doesn't survive the delete.
-          if (state.agentConversationId === id) {
-            Object.assign(
-              state,
-              conversationResetState(state.agentComposerEpoch + 1),
-            )
-          }
-        })
-        // If the active chat was the one deleted, re-apply the scope default so
-        // the panel stays ready instead of dropping to the "choose a model" lock.
-        if (wasActive) void get().loadScopeDefault()
-      } catch (err) {
-        console.error('[AgentSlice] Failed to delete conversation:', err)
-        pushToast({
-          kind: 'error',
-          title: "Couldn't delete conversation",
-          body: getErrorMessage(err, 'Failed to delete the conversation.'),
-          location: 'site-editor',
-        })
-      } finally {
-        set({ isAgentConversationPending: false })
-      }
-    },
+      startNewAgentConversation() {
+        if (
+          get().isAgentStreaming ||
+          get().isAgentConversationPending ||
+          get().isAgentProviderPending
+        )
+          return
+        // Reset to a fresh conversation, then re-apply the scope default so the
+        // composer stays ready (provider + model picked) instead of dropping to
+        // the "choose a model" lock. `loadScopeDefault` only fills the gap when
+        // nothing is chosen — exactly the post-reset state.
+        get().clearAgentMessages()
+        void get().loadScopeDefault()
+      },
 
-    async setAgentProvider(credentialId: string, modelId: string) {
-      if (
-        get().isAgentStreaming
-        || get().isAgentConversationPending
-        || get().isAgentProviderPending
-      ) return
-      const currentId = get().agentConversationId
-      if (currentId && _confirmedProviderSelection?.conversationId !== currentId) {
-        _confirmedProviderSelection = {
-          conversationId: currentId,
-          credentialId: get().agentActiveCredentialId,
-          modelId: get().agentActiveModelId,
-        }
-      }
-      // Always reflect the picker selection locally so the dropdown's
-      // displayed value updates immediately. Clearing agentError is essential:
-      // a prior send with no configured default leaves a sticky "no provider
-      // configured" error that keeps the composer disabled — picking a model
-      // IS configuring a provider, so the composer must re-enable. The prior
-      // context snapshot keeps its owner IDs; the view renders the new model's
-      // meter indeterminate until the next response re-measures it.
-      set({
-        agentActiveCredentialId: credentialId,
-        agentActiveModelId: modelId,
-        agentError: null,
-      })
-      if (!currentId) return  // staged for the next conversation-create call
-      set({ isAgentProviderPending: true })
-
-      const handledUpdate = _providerUpdateQueue.then(async () => {
-        const result = await persistConversationProvider(currentId, credentialId, modelId)
-
-        // A replacement conversation owns the UI now; this request must not
-        // mutate its selection or pending state.
-        if (get().agentConversationId !== currentId) return
-
-        _confirmedProviderSelection = result.selection
-        set({
-          agentActiveCredentialId: result.selection?.credentialId ?? null,
-          agentActiveModelId: result.selection?.modelId ?? null,
-          agentError: result.kind === 'rejected' ? result.message : null,
-        })
-        if (result.kind === 'rejected') {
+      async loadAgentConversations() {
+        try {
+          const conversations = await listConversations(config.scope)
+          set({ agentConversations: conversations })
+        } catch (err) {
+          console.error('[AgentSlice] Failed to load conversations:', err)
           pushToast({
             kind: 'error',
-            title: "Couldn't change model",
-            body: result.message,
+            title: "Couldn't load conversations",
+            body: getErrorMessage(err, 'Failed to load your conversations.'),
             location: 'site-editor',
           })
         }
-      })
-      // Later selections and Send wait until rollback/error handling finishes,
-      // while this action still resolves after surfacing the operation failure.
-      _providerUpdateQueue = handledUpdate
-      await handledUpdate
-      if (get().agentConversationId === currentId) {
-        set({ isAgentProviderPending: false })
-      }
-    },
+      },
 
-    async loadScopeDefault() {
-      // Only fill the "nothing chosen yet" gap — never clobber an active
-      // conversation's provider or an explicit user pick.
-      if (get().agentConversationId) return
-      if (get().agentActiveCredentialId && get().agentActiveModelId) return
-      let creds: ResolvedCredentials | null
-      try {
-        creds = await resolveScopeCredentials(get, config)
-      } catch (err) {
-        // A failed defaults lookup is soft: leave the picker empty so the user
-        // can pick a model. The send-time path still surfaces the actionable
-        // no-provider error if they send without choosing.
-        console.error('[AgentSlice] Failed to load scope default:', err)
-        return
-      }
-      // The request may have been in flight while the user picked a model or
-      // opened a conversation. A late default must never overwrite that newer
-      // explicit state.
-      if (get().agentConversationId) return
-      if (get().agentActiveCredentialId && get().agentActiveModelId) return
-      // No default configured for this scope: leave the picker empty (shows
-      // its "Choose a model" placeholder) and let the user pick one.
-      if (!creds) return
-      set({
-        agentActiveCredentialId: creds.credentialId,
-        agentActiveModelId: creds.modelId,
-        agentError: null,
-      })
-    },
-
-    // ── sendAgentMessage ─────────────────────────────────────────────────────
-    async sendAgentMessage(content) {
-      if (
-        get().isAgentStreaming
-        || get().isAgentConversationPending
-        || get().isAgentProviderPending
-        || content.length === 0
-      ) return { accepted: false }
-
-      const intendedConversationId = get().agentConversationId
-      const intendedCredentialId = get().agentActiveCredentialId
-      const intendedModelId = get().agentActiveModelId
-
-      const userMsg: AgentMessage = {
-        id: nanoid(),
-        role: 'user',
-        blocks: content.map((block) => block.kind === 'image'
-          ? {
-              kind: 'image',
-              mimeType: block.mimeType,
-              src: `data:${block.mimeType};base64,${block.data}`,
-            }
-          : { ...block }),
-        timestamp: Date.now(),
-      }
-
-      const assistantId = nanoid()
-      const assistantMsg: AgentMessage = {
-        id: assistantId,
-        role: 'assistant',
-        blocks: [],
-        timestamp: Date.now(),
-      }
-
-      set({ agentError: null, isAgentStreaming: true })
-
-      const controller = new AbortController()
-      _abortController = controller
-      const bridge: AgentBridgeRuntime = { bridgeId: null }
-      let accepted = false
-
-      try {
-        // A model picked immediately before Send must reach the conversation
-        // row before the chat handler resolves its capability.
-        const providerReady = await waitForProviderUpdate(
-          _providerUpdateQueue,
-          controller.signal,
-        )
-        if (!providerReady) return { accepted: false }
+      async loadAgentConversation(id: string) {
         if (
-          intendedConversationId
-          && (
-            _confirmedProviderSelection?.conversationId !== intendedConversationId
-            || _confirmedProviderSelection.credentialId !== intendedCredentialId
-            || _confirmedProviderSelection.modelId !== intendedModelId
-          )
-        ) return { accepted: false }
-        const snapshot = config.buildSnapshot()
-
-        // Lazily create the conversation row (staged picker values or scope
-        // default). Null means no provider is configured for this scope.
-        const conversationId = await ensureConversationId(
-          get,
-          set,
-          config,
-          controller.signal,
+          get().isAgentStreaming ||
+          get().isAgentConversationPending ||
+          get().isAgentProviderPending
         )
-        if (!conversationId) {
-          const message = config.noProviderMessage
-            ?? `No AI provider configured for the "${config.scope}" scope. Open /admin/ai/providers to add a credential, then /admin/ai/defaults to pick one.`
-          set({ agentError: message })
-          pushToast({ kind: 'error', title: "Couldn't send message", body: message })
-          return { accepted: false }
-        }
-        if (_confirmedProviderSelection?.conversationId !== conversationId) {
+          return
+        const loadEpoch = ++_conversationLoadEpoch
+        set({ isAgentConversationPending: true })
+        try {
+          const conv = await getConversation(id)
+          if (loadEpoch !== _conversationLoadEpoch) return
           _confirmedProviderSelection = {
-            conversationId,
+            conversationId: conv.id,
+            credentialId: conv.credentialId,
+            modelId: conv.modelId,
+          }
+          set((state) => {
+            state.agentConversationId = conv.id
+            state.agentActiveCredentialId = conv.credentialId
+            state.agentActiveModelId = conv.modelId
+            state.agentMessages = rehydrateMessages(conv.messages)
+            state.agentError = null
+            state.agentUsage = {
+              contextTokens: conv.contextTokens > 0 ? conv.contextTokens : null,
+              contextCredentialId: conv.contextTokens > 0 ? conv.credentialId : null,
+              contextModelId: conv.contextTokens > 0 ? conv.modelId : null,
+              promptTokens: conv.promptTokensTotal,
+              completionTokens: conv.completionTokensTotal,
+              cacheReadTokens: conv.cacheReadTokensTotal,
+              cacheCreationTokens: conv.cacheCreationTokensTotal,
+              costUsd: conv.costUsdTotal,
+            }
+            state.agentComposerEpoch += 1
+          })
+        } catch (err) {
+          if (loadEpoch !== _conversationLoadEpoch) return
+          console.error('[AgentSlice] Failed to load conversation:', err)
+          set({
+            agentError: err instanceof ApiError ? err.message : 'Failed to load conversation.',
+          })
+        } finally {
+          if (loadEpoch === _conversationLoadEpoch) {
+            set({ isAgentConversationPending: false })
+          }
+        }
+      },
+
+      async deleteAgentConversation(id: string) {
+        if (get().isAgentConversationPending || get().isAgentProviderPending) return
+        if (get().isAgentStreaming && get().agentConversationId === id) return
+        set({ isAgentConversationPending: true })
+        try {
+          await deleteConversation(id)
+          const wasActive = get().agentConversationId === id
+          if (wasActive) _conversationLoadEpoch += 1
+          if (wasActive) _confirmedProviderSelection = null
+          set((state) => {
+            state.agentConversations = state.agentConversations.filter((c) => c.id !== id)
+            // Deleting the active conversation resets it through the same key-set
+            // as clearAgentMessages — including agentError, so a stuck 502/error
+            // banner doesn't survive the delete.
+            if (state.agentConversationId === id) {
+              Object.assign(state, conversationResetState(state.agentComposerEpoch + 1))
+            }
+          })
+          // If the active chat was the one deleted, re-apply the scope default so
+          // the panel stays ready instead of dropping to the "choose a model" lock.
+          if (wasActive) void get().loadScopeDefault()
+        } catch (err) {
+          console.error('[AgentSlice] Failed to delete conversation:', err)
+          pushToast({
+            kind: 'error',
+            title: "Couldn't delete conversation",
+            body: getErrorMessage(err, 'Failed to delete the conversation.'),
+            location: 'site-editor',
+          })
+        } finally {
+          set({ isAgentConversationPending: false })
+        }
+      },
+
+      async setAgentProvider(credentialId: string, modelId: string) {
+        if (
+          get().isAgentStreaming ||
+          get().isAgentConversationPending ||
+          get().isAgentProviderPending
+        )
+          return
+        const currentId = get().agentConversationId
+        if (currentId && _confirmedProviderSelection?.conversationId !== currentId) {
+          _confirmedProviderSelection = {
+            conversationId: currentId,
             credentialId: get().agentActiveCredentialId,
             modelId: get().agentActiveModelId,
           }
         }
-
-        const body: AiChatRequestBody = { conversationId, content: [...content], snapshot }
-        const res = await fetch(`/admin/api/ai/chat/${config.scope}`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(body),
-          signal: controller.signal,
+        // Always reflect the picker selection locally so the dropdown's
+        // displayed value updates immediately. Clearing agentError is essential:
+        // a prior send with no configured default leaves a sticky "no provider
+        // configured" error that keeps the composer disabled — picking a model
+        // IS configuring a provider, so the composer must re-enable. The prior
+        // context snapshot keeps its owner IDs; the view renders the new model's
+        // meter indeterminate until the next response re-measures it.
+        set({
+          agentActiveCredentialId: credentialId,
+          agentActiveModelId: modelId,
+          agentError: null,
         })
+        if (!currentId) return // staged for the next conversation-create call
+        set({ isAgentProviderPending: true })
 
-        if (!res.ok) {
-          const fallback = res.status === 502
-            ? 'AI server is not running. Start it with: bun run dev'
-            : `Agent request failed: ${res.status} ${res.statusText}`
-          throw new ApiError(await responseErrorMessage(res, fallback), res.status)
-        }
+        const handledUpdate = _providerUpdateQueue.then(async () => {
+          const result = await persistConversationProvider(currentId, credentialId, modelId)
 
-        accepted = true
-        set((state) => {
-          state.agentMessages.push(userMsg)
-          state.agentMessages.push(assistantMsg)
-        })
-        if (!res.body) throw new Error('Agent response has no body')
+          // A replacement conversation owns the UI now; this request must not
+          // mutate its selection or pending state.
+          if (get().agentConversationId !== currentId) return
 
-        let terminalEventSeen = false
-        for await (const event of readNdjsonStream(res.body.getReader(), ServerStreamEventSchema)) {
-          if (event.type === 'done' || event.type === 'error') terminalEventSeen = true
-          await processStreamEvent(
-            event,
-            assistantId,
-            textSink,
-            set,
-            bridge,
-            controller.signal,
-            config.dispatchTool,
-            config.buildSnapshot,
-          )
-        }
-        if (!terminalEventSeen) {
-          throw new Error(
-            'AI response ended before the turn completed. The server may have restarted; send the message again.',
-          )
-        }
-
-        flushPendingText()
-        return { accepted: true }
-      } catch (err) {
-        // Abort the fetch so any in-flight MCP tool handler on the server
-        // rejects cleanly (via destroyBridge in the stream's finally block)
-        // instead of waiting forever for a tool-result that won't arrive.
-        const requestWasAlreadyAborted = controller.signal.aborted
-        controller.abort()
-
-        // Only an AbortError caused by our already-aborted controller is an
-        // intentional Stop/teardown. An AbortError raised while the request
-        // was active (for example a failed tool-result delivery) is a real
-        // operation failure and must remain visible with retry guidance.
-        if (requestWasAlreadyAborted && isAbortError(err)) {
-          if (accepted) {
-            flushPendingText()
-            set((state) => {
-              const message = state.agentMessages.find((item) => item.id === assistantId)
-              failPendingToolCalls(message)
+          _confirmedProviderSelection = result.selection
+          set({
+            agentActiveCredentialId: result.selection?.credentialId ?? null,
+            agentActiveModelId: result.selection?.modelId ?? null,
+            agentError: result.kind === 'rejected' ? result.message : null,
+          })
+          if (result.kind === 'rejected') {
+            pushToast({
+              kind: 'error',
+              title: "Couldn't change model",
+              body: result.message,
+              location: 'site-editor',
             })
           }
-        } else {
-          // Admin-only surface (capability gated) — show the actual
-          // failure cause so the operator can act. Network / unexpected
-          // throws still get a prefix so they're distinguishable from
-          // server-classified driver errors.
-          const detail = getErrorMessage(err, String(err))
-          console.error('[AgentSlice] sendAgentMessage error:', err)
-          if (accepted) {
-            surfaceAssistantError(set, assistantId, `Agent request failed: ${detail}`, '_(agent error)_')
+        })
+        // Later selections and Send wait until rollback/error handling finishes,
+        // while this action still resolves after surfacing the operation failure.
+        _providerUpdateQueue = handledUpdate
+        await handledUpdate
+        if (get().agentConversationId === currentId) {
+          set({ isAgentProviderPending: false })
+        }
+      },
+
+      async loadScopeDefault() {
+        // Only fill the "nothing chosen yet" gap — never clobber an active
+        // conversation's provider or an explicit user pick.
+        if (get().agentConversationId) return
+        if (get().agentActiveCredentialId && get().agentActiveModelId) return
+        let creds: ResolvedCredentials | null
+        try {
+          creds = await resolveScopeCredentials(get, config)
+        } catch (err) {
+          // A failed defaults lookup is soft: leave the picker empty so the user
+          // can pick a model. The send-time path still surfaces the actionable
+          // no-provider error if they send without choosing.
+          console.error('[AgentSlice] Failed to load scope default:', err)
+          return
+        }
+        // The request may have been in flight while the user picked a model or
+        // opened a conversation. A late default must never overwrite that newer
+        // explicit state.
+        if (get().agentConversationId) return
+        if (get().agentActiveCredentialId && get().agentActiveModelId) return
+        // No default configured for this scope: leave the picker empty (shows
+        // its "Choose a model" placeholder) and let the user pick one.
+        if (!creds) return
+        set({
+          agentActiveCredentialId: creds.credentialId,
+          agentActiveModelId: creds.modelId,
+          agentError: null,
+        })
+      },
+
+      // ── sendAgentMessage ─────────────────────────────────────────────────────
+      async sendAgentMessage(content) {
+        if (
+          get().isAgentStreaming ||
+          get().isAgentConversationPending ||
+          get().isAgentProviderPending ||
+          content.length === 0
+        )
+          return { accepted: false }
+
+        const intendedConversationId = get().agentConversationId
+        const intendedCredentialId = get().agentActiveCredentialId
+        const intendedModelId = get().agentActiveModelId
+
+        const userMsg: AgentMessage = {
+          id: nanoid(),
+          role: 'user',
+          blocks: content.map((block) =>
+            block.kind === 'image'
+              ? {
+                  kind: 'image',
+                  mimeType: block.mimeType,
+                  src: `data:${block.mimeType};base64,${block.data}`,
+                }
+              : { ...block },
+          ),
+          timestamp: Date.now(),
+        }
+
+        const assistantId = nanoid()
+        const assistantMsg: AgentMessage = {
+          id: assistantId,
+          role: 'assistant',
+          blocks: [],
+          timestamp: Date.now(),
+        }
+
+        set({ agentError: null, isAgentStreaming: true })
+
+        const controller = new AbortController()
+        _abortController = controller
+        const bridge: AgentBridgeRuntime = { bridgeId: null }
+        let accepted = false
+
+        try {
+          // A model picked immediately before Send must reach the conversation
+          // row before the chat handler resolves its capability.
+          const providerReady = await waitForProviderUpdate(_providerUpdateQueue, controller.signal)
+          if (!providerReady) return { accepted: false }
+          if (
+            intendedConversationId &&
+            (_confirmedProviderSelection?.conversationId !== intendedConversationId ||
+              _confirmedProviderSelection.credentialId !== intendedCredentialId ||
+              _confirmedProviderSelection.modelId !== intendedModelId)
+          )
+            return { accepted: false }
+          const snapshot = config.buildSnapshot()
+
+          // Lazily create the conversation row (staged picker values or scope
+          // default). Null means no provider is configured for this scope.
+          const conversationId = await ensureConversationId(get, set, config, controller.signal)
+          if (!conversationId) {
+            const message =
+              config.noProviderMessage ??
+              `No AI provider configured for the "${config.scope}" scope. Open /admin/ai/providers to add a credential, then /admin/ai/defaults to pick one.`
+            set({ agentError: message })
+            pushToast({ kind: 'error', title: "Couldn't send message", body: message })
+            return { accepted: false }
+          }
+          if (_confirmedProviderSelection?.conversationId !== conversationId) {
+            _confirmedProviderSelection = {
+              conversationId,
+              credentialId: get().agentActiveCredentialId,
+              modelId: get().agentActiveModelId,
+            }
+          }
+
+          const body: AiChatRequestBody = { conversationId, content: [...content], snapshot }
+          const res = await fetch(`/admin/api/ai/chat/${config.scope}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(body),
+            signal: controller.signal,
+          })
+
+          if (!res.ok) {
+            const fallback =
+              res.status === 502
+                ? 'AI server is not running. Start it with: bun run dev'
+                : `Agent request failed: ${res.status} ${res.statusText}`
+            throw new ApiError(await responseErrorMessage(res, fallback), res.status)
+          }
+
+          accepted = true
+          set((state) => {
+            state.agentMessages.push(userMsg)
+            state.agentMessages.push(assistantMsg)
+          })
+          if (!res.body) throw new Error('Agent response has no body')
+
+          let terminalEventSeen = false
+          for await (const event of readNdjsonStream(
+            res.body.getReader(),
+            ServerStreamEventSchema,
+          )) {
+            if (event.type === 'done' || event.type === 'error') terminalEventSeen = true
+            await processStreamEvent(
+              event,
+              assistantId,
+              textSink,
+              set,
+              bridge,
+              controller.signal,
+              config.dispatchTool,
+              config.buildSnapshot,
+            )
+          }
+          if (!terminalEventSeen) {
+            throw new Error(
+              'AI response ended before the turn completed. The server may have restarted; send the message again.',
+            )
+          }
+
+          flushPendingText()
+          return { accepted: true }
+        } catch (err) {
+          // Abort the fetch so any in-flight MCP tool handler on the server
+          // rejects cleanly (via destroyBridge in the stream's finally block)
+          // instead of waiting forever for a tool-result that won't arrive.
+          const requestWasAlreadyAborted = controller.signal.aborted
+          controller.abort()
+
+          // Only an AbortError caused by our already-aborted controller is an
+          // intentional Stop/teardown. An AbortError raised while the request
+          // was active (for example a failed tool-result delivery) is a real
+          // operation failure and must remain visible with retry guidance.
+          if (requestWasAlreadyAborted && isAbortError(err)) {
+            if (accepted) {
+              flushPendingText()
+              set((state) => {
+                const message = state.agentMessages.find((item) => item.id === assistantId)
+                failPendingToolCalls(message)
+              })
+            }
           } else {
-            set({ agentError: detail })
-            pushToast({ kind: 'error', title: "Couldn't send message", body: detail })
+            // Admin-only surface (capability gated) — show the actual
+            // failure cause so the operator can act. Network / unexpected
+            // throws still get a prefix so they're distinguishable from
+            // server-classified driver errors.
+            const detail = getErrorMessage(err, String(err))
+            console.error('[AgentSlice] sendAgentMessage error:', err)
+            if (accepted) {
+              surfaceAssistantError(
+                set,
+                assistantId,
+                `Agent request failed: ${detail}`,
+                '_(agent error)_',
+              )
+            } else {
+              set({ agentError: detail })
+              pushToast({ kind: 'error', title: "Couldn't send message", body: detail })
+            }
+          }
+          return { accepted }
+        } finally {
+          if (_abortController === controller) {
+            _abortController = null
+            set({ isAgentStreaming: false })
           }
         }
-        return { accepted }
-      } finally {
-        if (_abortController === controller) {
-          _abortController = null
-          set({ isAgentStreaming: false })
-        }
-      }
-    },
-  }
+      },
+    }
   }
 }

@@ -78,7 +78,9 @@ describe('cssToStyleRules — substitution declarations survive verbatim', () =>
   it('blocks a security-denied property even when its value uses var()', () => {
     const { rules, warnings } = cssToStyleRules(`.x { behavior: var(--evil); }`)
     expect(rules[0]?.styles?.behavior).toBeUndefined()
-    expect(warnings.some((w) => w.kind === 'blocked-property' && w.property === 'behavior')).toBe(true)
+    expect(warnings.some((w) => w.kind === 'blocked-property' && w.property === 'behavior')).toBe(
+      true,
+    )
   })
 
   it('keeps @keyframes raw CSS free of encode markers', () => {
@@ -89,7 +91,9 @@ describe('cssToStyleRules — substitution declarations survive verbatim', () =>
     const keyframes = rules.find((r) => typeof r.rawCss === 'string')
     expect(keyframes).toBeDefined()
     expect(keyframes!.rawCss).not.toContain(SUBSTITUTION_PROP_MARKER)
-    expect(rules.find((r) => r.selector === '.x')?.styles.animation).toBe('pulse 1s var(--easing) infinite')
+    expect(rules.find((r) => r.selector === '.x')?.styles.animation).toBe(
+      'pulse 1s var(--easing) infinite',
+    )
   })
 })
 

@@ -8,10 +8,7 @@
  * split convention everywhere.
  */
 import type { ReactNode } from 'react'
-import {
-  EditorPermissionsContext,
-  type EditorPermissions,
-} from './editorPermissionsContext'
+import { EditorPermissionsContext, type EditorPermissions } from './editorPermissionsContext'
 
 export function EditorPermissionsProvider({
   value,
@@ -21,8 +18,6 @@ export function EditorPermissionsProvider({
   children: ReactNode
 }) {
   return (
-    <EditorPermissionsContext.Provider value={value}>
-      {children}
-    </EditorPermissionsContext.Provider>
+    <EditorPermissionsContext.Provider value={value}>{children}</EditorPermissionsContext.Provider>
   )
 }

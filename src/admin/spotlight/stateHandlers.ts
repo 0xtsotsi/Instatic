@@ -14,17 +14,10 @@
  */
 
 import type { Command } from './types'
-import type {
-  SpotlightAction,
-  SpotlightOpenState,
-  SpotlightState,
-} from './stateTypes'
+import type { SpotlightAction, SpotlightOpenState, SpotlightState } from './stateTypes'
 
 /** Action variants that are only valid while `state.phase === 'open'`. */
-type OpenOnlyAction = Exclude<
-  SpotlightAction,
-  { type: 'OPEN' | 'CLOSE' | 'TOGGLE' }
->
+type OpenOnlyAction = Exclude<SpotlightAction, { type: 'OPEN' | 'CLOSE' | 'TOGGLE' }>
 
 // ─── Query / highlight ────────────────────────────────────────────────────────
 
@@ -71,10 +64,7 @@ function pushScope(
     ...state,
     query: '',
     highlightedIndex: 0,
-    scopeStack: [
-      ...state.scopeStack,
-      { scopeId, pendingArgs: pendingArgs ?? {} },
-    ],
+    scopeStack: [...state.scopeStack, { scopeId, pendingArgs: pendingArgs ?? {} }],
     argMode: null,
     pendingConfirm: null,
     // Clear async state on scope change so stale results from the previous
@@ -177,10 +167,7 @@ function exitArgMode(state: SpotlightOpenState): SpotlightState {
 
 // ─── Destructive confirm ──────────────────────────────────────────────────────
 
-function setPendingConfirm(
-  state: SpotlightOpenState,
-  commandId: string,
-): SpotlightState {
+function setPendingConfirm(state: SpotlightOpenState, commandId: string): SpotlightState {
   return { ...state, pendingConfirm: commandId }
 }
 
@@ -195,29 +182,39 @@ function clearPendingConfirm(state: SpotlightOpenState): SpotlightState {
  * `state.phase === 'open'` before calling this, so handlers can assume an
  * open state. New actions: add a case here and a matching handler above.
  */
-export function applyOpenAction(
-  state: SpotlightOpenState,
-  action: OpenOnlyAction,
-): SpotlightState {
+export function applyOpenAction(state: SpotlightOpenState, action: OpenOnlyAction): SpotlightState {
   switch (action.type) {
-    case 'SET_QUERY': return setQuery(state, action.query)
-    case 'SET_HIGHLIGHTED': return setHighlighted(state, action.index)
-    case 'HIGHLIGHT_NEXT': return shiftHighlight(state, +1)
-    case 'HIGHLIGHT_PREV': return shiftHighlight(state, -1)
-    case 'PUSH_SCOPE': return pushScope(state, action.scopeId, action.pendingArgs)
-    case 'POP_SCOPE': return popScope(state)
+    case 'SET_QUERY':
+      return setQuery(state, action.query)
+    case 'SET_HIGHLIGHTED':
+      return setHighlighted(state, action.index)
+    case 'HIGHLIGHT_NEXT':
+      return shiftHighlight(state, +1)
+    case 'HIGHLIGHT_PREV':
+      return shiftHighlight(state, -1)
+    case 'PUSH_SCOPE':
+      return pushScope(state, action.scopeId, action.pendingArgs)
+    case 'POP_SCOPE':
+      return popScope(state)
     case 'SET_ASYNC_RESULTS':
       return setAsyncResults(state, action.providerId, action.results)
     case 'SET_LOADING_PROVIDER':
       return setLoadingProvider(state, action.providerId, action.loading)
-    case 'ASYNC_RESET': return asyncReset(state)
-    case 'RESULT_COUNT_CHANGED': return clampHighlight(state, action.count)
-    case 'ENTER_ARG_MODE': return enterArgMode(state, action.command)
+    case 'ASYNC_RESET':
+      return asyncReset(state)
+    case 'RESULT_COUNT_CHANGED':
+      return clampHighlight(state, action.count)
+    case 'ENTER_ARG_MODE':
+      return enterArgMode(state, action.command)
     case 'SAVE_ARG_AND_ADVANCE':
       return saveArgAndAdvance(state, action.argId, action.value)
-    case 'BACK_ARG': return backArg(state)
-    case 'EXIT_ARG_MODE': return exitArgMode(state)
-    case 'SET_PENDING_CONFIRM': return setPendingConfirm(state, action.commandId)
-    case 'CLEAR_PENDING_CONFIRM': return clearPendingConfirm(state)
+    case 'BACK_ARG':
+      return backArg(state)
+    case 'EXIT_ARG_MODE':
+      return exitArgMode(state)
+    case 'SET_PENDING_CONFIRM':
+      return setPendingConfirm(state, action.commandId)
+    case 'CLEAR_PENDING_CONFIRM':
+      return clearPendingConfirm(state)
   }
 }

@@ -204,7 +204,10 @@ function sameItems(a: readonly LoopItem[], b: readonly LoopItem[]): boolean {
  * Runs inside a Zustand selector on every store set, so the steady-state
  * path is two identity checks; the recompute path is O(pages log pages).
  */
-export function selectSitePagesLoopItems(node: PageNode, pages: readonly Page[] | null): LoopItem[] {
+export function selectSitePagesLoopItems(
+  node: PageNode,
+  pages: readonly Page[] | null,
+): LoopItem[] {
   if (!pages) return EMPTY_ITEMS
 
   const cached = sitePagesItemsCache.get(node)

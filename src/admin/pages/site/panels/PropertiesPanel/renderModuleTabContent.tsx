@@ -22,15 +22,8 @@
  */
 import { PropertyControlRenderer } from '@site/property-controls/PropertyControlRenderer'
 import { evaluateCondition } from '@core/page-tree'
-import type {
-  AnyModuleDefinition,
-  PropertyControl,
-} from '@core/module-engine'
-import type {
-  DynamicPropBinding,
-  Page,
-  PageNode,
-} from '@core/page-tree'
+import type { AnyModuleDefinition, PropertyControl } from '@core/module-engine'
+import type { DynamicPropBinding, Page, PageNode } from '@core/page-tree'
 import type { LoopEntitySource } from '@core/loops/types'
 import type { ActiveDocument } from '../../store/slices/uiSlice'
 import { LoopPropertiesView } from './LoopPropertiesView'
@@ -89,12 +82,9 @@ export function renderModuleTabContent(args: ModuleTabContentArgs): React.ReactN
   // to render against.
   if (!definition || !selectedNode || !resolvedPropsForBreakpoint) return null
 
-  const inVisualComponent =
-    activeDocument?.kind === 'visualComponent' && selectedNodeId !== null
+  const inVisualComponent = activeDocument?.kind === 'visualComponent' && selectedNodeId !== null
   const showFormSettings =
-    activePage !== null &&
-    selectedNodeId !== null &&
-    isFormSettingsModule(selectedNode.moduleId)
+    activePage !== null && selectedNodeId !== null && isFormSettingsModule(selectedNode.moduleId)
 
   return (
     <>
@@ -112,7 +102,10 @@ export function renderModuleTabContent(args: ModuleTabContentArgs): React.ReactN
         // binding target the author never edits.
         if (control.hidden) return null
         if (isPromotedFormProperty(selectedNode, key)) return null
-        if (control.condition && !evaluateCondition(control.condition, resolvedPropsForBreakpoint)) {
+        if (
+          control.condition &&
+          !evaluateCondition(control.condition, resolvedPropsForBreakpoint)
+        ) {
           return null
         }
 
@@ -139,14 +132,18 @@ export function renderModuleTabContent(args: ModuleTabContentArgs): React.ReactN
             value={resolvedPropsForBreakpoint[key]}
             onChange={updateModuleProp}
             isOverride={overrideKeys.has(key)}
-            dynamicBinding={dynamicBindingsEnabled && selectedNodeId ? {
-              binding: selectedNode.dynamicBindings?.[key],
-              onSet: (binding) => onSetDynamicBinding(key, binding),
-              onClear: () => onClearDynamicBinding(key),
-              availableFields: enclosingLoopSource?.fields,
-              sourceLabel: enclosingLoopSource?.label,
-              loopTableId: enclosingLoopTableId,
-            } : undefined}
+            dynamicBinding={
+              dynamicBindingsEnabled && selectedNodeId
+                ? {
+                    binding: selectedNode.dynamicBindings?.[key],
+                    onSet: (binding) => onSetDynamicBinding(key, binding),
+                    onClear: () => onClearDynamicBinding(key),
+                    availableFields: enclosingLoopSource?.fields,
+                    sourceLabel: enclosingLoopSource?.label,
+                    loopTableId: enclosingLoopTableId,
+                  }
+                : undefined
+            }
           />
         )
       })}

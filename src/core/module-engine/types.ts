@@ -56,13 +56,7 @@ interface ModuleEditorRuntime {
  * pipeline instead).
  */
 export type CspDirective =
-  | 'frame-src'
-  | 'script-src'
-  | 'img-src'
-  | 'media-src'
-  | 'connect-src'
-  | 'style-src'
-  | 'font-src'
+  'frame-src' | 'script-src' | 'img-src' | 'media-src' | 'connect-src' | 'style-src' | 'font-src'
 
 /**
  * A single CSP source requirement declared by a module's render() output.

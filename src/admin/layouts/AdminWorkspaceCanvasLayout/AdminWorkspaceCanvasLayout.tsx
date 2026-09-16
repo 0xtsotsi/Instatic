@@ -8,7 +8,14 @@
  * without downloading the instatic graph on first paint.
  */
 
-import { lazy, Suspense, useRef, type CSSProperties, type ReactNode, type SyntheticEvent } from 'react'
+import {
+  lazy,
+  Suspense,
+  useRef,
+  type CSSProperties,
+  type ReactNode,
+  type SyntheticEvent,
+} from 'react'
 import { Toolbar } from '@site/toolbar/Toolbar'
 import { AdminSectionNavigation } from '@admin/shared/AdminSectionNavigation'
 import { ConfirmDeleteProvider } from '@admin/shared/dialogs/ConfirmDeleteDialog'
@@ -80,12 +87,9 @@ export function AdminWorkspaceCanvasLayout({
         siteName={adminUiSiteName}
         faviconUrl={adminUiFaviconUrl}
         section={workspace}
-        adminNavigationSlot={(
-          <AdminSectionNavigation
-            section={workspace}
-            currentUser={currentUser}
-          />
-        )}
+        adminNavigationSlot={
+          <AdminSectionNavigation section={workspace} currentUser={currentUser} />
+        }
         rightSlot={toolbarRightSlot}
       />
 
@@ -93,7 +97,10 @@ export function AdminWorkspaceCanvasLayout({
         <div className={styles.editorBody}>
           {contentSidebar ?? null}
           <div
-            className={cn(styles.canvasStage, hasRightSidebar && styles.canvasStageRightSidebarOpen)}
+            className={cn(
+              styles.canvasStage,
+              hasRightSidebar && styles.canvasStageRightSidebarOpen,
+            )}
             data-right-sidebar-expanded={hasRightSidebar ? 'true' : 'false'}
           >
             <div className={styles.canvasContent} key={workspace}>
@@ -106,10 +113,7 @@ export function AdminWorkspaceCanvasLayout({
               />
             )}
           </div>
-          <WorkspaceRightSidebar
-            hidden={!rightPanelAvailable}
-            contentPanel={contentRightPanel}
-          />
+          <WorkspaceRightSidebar hidden={!rightPanelAvailable} contentPanel={contentRightPanel} />
         </div>
       </ConfirmDeleteProvider>
 
@@ -197,10 +201,7 @@ function WorkspaceRightSidebar({ hidden, contentPanel }: WorkspaceRightSidebarPr
       )}
 
       {isExpanded && contentPanel && (
-        <div
-          className={rightSidebarStyles.panelSlot}
-          data-testid="right-sidebar-panel-slot"
-        >
+        <div className={rightSidebarStyles.panelSlot} data-testid="right-sidebar-panel-slot">
           {contentPanel}
         </div>
       )}

@@ -157,7 +157,7 @@ export function SelectorsPanel({ variant = 'docked' }: SelectorsPanelProps) {
   const visibleClasses = filteredClasses.slice(0, effectiveVisibleCount)
   const hasMore = filteredClasses.length > visibleClasses.length
   const selectedClass = reusableClasses.find((cls) => cls.id === selectedSelectorClassId) ?? null
-  const contextClass = contextMenu ? site?.styleRules[contextMenu.classId] ?? null : null
+  const contextClass = contextMenu ? (site?.styleRules[contextMenu.classId] ?? null) : null
 
   // The selector the Properties panel is currently editing. Mirrors that
   // panel's priority: an explicitly-selected selector wins, otherwise it's the
@@ -247,9 +247,10 @@ export function SelectorsPanel({ variant = 'docked' }: SelectorsPanelProps) {
     if (intent.kind === 'empty') return
     // createClass/createAmbientRule throw on invalid input; the dialog catches
     // and surfaces the message inline so the user can fix and retry.
-    const rule = intent.kind === 'ambient'
-      ? createAmbientRule({ selector: intent.selector })
-      : createClass(intent.name)
+    const rule =
+      intent.kind === 'ambient'
+        ? createAmbientRule({ selector: intent.selector })
+        : createClass(intent.name)
     openSelectorInProperties(rule.id)
     setCreateDialogOpen(false)
   }
@@ -308,90 +309,90 @@ export function SelectorsPanel({ variant = 'docked' }: SelectorsPanelProps) {
         onClose={() => setSelectorsPanelOpen(false)}
       >
         <FilterBar<SelectorFilter>
-            items={SELECTOR_FILTER_ITEMS}
-            value={filter}
-            onValueChange={setFilter}
-            search={{
-              value: query,
-              onValueChange: setQuery,
-              onClear: () => setQuery(''),
-              placeholder: 'Search selectors',
-              ariaLabel: 'Search selectors',
-            }}
-            searchTrailing={
-              <Button
-                variant="secondary"
-                size="sm"
-                iconOnly
-                aria-label="Create selector"
-                tooltip="Create selector"
-                onClick={() => setCreateDialogOpen(true)}
-              >
-                <PlusIcon size={13} aria-hidden="true" />
+          items={SELECTOR_FILTER_ITEMS}
+          value={filter}
+          onValueChange={setFilter}
+          search={{
+            value: query,
+            onValueChange: setQuery,
+            onClear: () => setQuery(''),
+            placeholder: 'Search selectors',
+            ariaLabel: 'Search selectors',
+          }}
+          searchTrailing={
+            <Button
+              variant="secondary"
+              size="sm"
+              iconOnly
+              aria-label="Create selector"
+              tooltip="Create selector"
+              onClick={() => setCreateDialogOpen(true)}
+            >
+              <PlusIcon size={13} aria-hidden="true" />
+            </Button>
+          }
+          groupLabel="Selector type"
+        />
+
+        {showSkeleton ? (
+          <SelectorRowsSkeleton />
+        ) : reusableClasses.length === 0 ? (
+          <EmptyState
+            title="No reusable selectors yet."
+            action={
+              <Button variant="secondary" size="sm" onClick={() => setCreateDialogOpen(true)}>
+                Create selector
               </Button>
             }
-            groupLabel="Selector type"
           />
+        ) : filteredClasses.length === 0 ? (
+          <EmptyState title={getEmptyFilterMessage(filter, query)} />
+        ) : (
+          <div
+            className={cn(styles.rows, selecting && styles.rowsSelecting)}
+            aria-label="Reusable selectors"
+          >
+            {visibleClasses.map((cls) => (
+              <SelectorRow
+                key={cls.id}
+                cls={cls}
+                active={activeSelectorClassId === cls.id}
+                selected={selectedIdSet.has(cls.id)}
+                selecting={selecting}
+                usage={resolveSelectorUsage(cls, usageMap, classTokenUsage).label}
+                summary={getSelectorStyleSummary(cls)}
+                onSelect={() => openSelectorInProperties(cls.id)}
+                onToggleSelect={() => handleToggleSelect(cls.id)}
+                onContextMenu={(event) => openContextMenu(cls.id, event)}
+                onKeyDown={(event) => openKeyboardContextMenu(cls.id, event)}
+                onHighlight={() => setHighlightedSelectorClassId(cls.id)}
+                onClearHighlight={() => setHighlightedSelectorClassId(null)}
+              />
+            ))}
+            {hasMore && <div ref={sentinelRef} className={styles.sentinel} aria-hidden="true" />}
+          </div>
+        )}
 
-          {showSkeleton ? (
-            <SelectorRowsSkeleton />
-          ) : reusableClasses.length === 0 ? (
-            <EmptyState
-              title="No reusable selectors yet."
-              action={
-                <Button variant="secondary" size="sm" onClick={() => setCreateDialogOpen(true)}>
-                  Create selector
-                </Button>
-              }
-            />
-          ) : filteredClasses.length === 0 ? (
-            <EmptyState title={getEmptyFilterMessage(filter, query)} />
-          ) : (
-            <div
-              className={cn(styles.rows, selecting && styles.rowsSelecting)}
-              aria-label="Reusable selectors"
-            >
-              {visibleClasses.map((cls) => (
-                <SelectorRow
-                  key={cls.id}
-                  cls={cls}
-                  active={activeSelectorClassId === cls.id}
-                  selected={selectedIdSet.has(cls.id)}
-                  selecting={selecting}
-                  usage={resolveSelectorUsage(cls, usageMap, classTokenUsage).label}
-                  summary={getSelectorStyleSummary(cls)}
-                  onSelect={() => openSelectorInProperties(cls.id)}
-                  onToggleSelect={() => handleToggleSelect(cls.id)}
-                  onContextMenu={(event) => openContextMenu(cls.id, event)}
-                  onKeyDown={(event) => openKeyboardContextMenu(cls.id, event)}
-                  onHighlight={() => setHighlightedSelectorClassId(cls.id)}
-                  onClearHighlight={() => setHighlightedSelectorClassId(null)}
-                />
-              ))}
-              {hasMore && <div ref={sentinelRef} className={styles.sentinel} aria-hidden="true" />}
+        {selecting && (
+          <div className={styles.selectionBar} role="group" aria-label="Selection actions">
+            <span className={styles.selectionCount}>
+              {selectedSelectorClassIds.length} selected
+            </span>
+            <div className={styles.selectionActions}>
+              <Button
+                variant="ghost"
+                size="xs"
+                onClick={handleSelectAllFiltered}
+                disabled={allFilteredSelected}
+              >
+                Select all
+              </Button>
+              <Button variant="ghost" size="xs" onClick={clearSelectorMultiSelect}>
+                Deselect all
+              </Button>
             </div>
-          )}
-
-          {selecting && (
-            <div className={styles.selectionBar} role="group" aria-label="Selection actions">
-              <span className={styles.selectionCount}>
-                {selectedSelectorClassIds.length} selected
-              </span>
-              <div className={styles.selectionActions}>
-                <Button
-                  variant="ghost"
-                  size="xs"
-                  onClick={handleSelectAllFiltered}
-                  disabled={allFilteredSelected}
-                >
-                  Select all
-                </Button>
-                <Button variant="ghost" size="xs" onClick={clearSelectorMultiSelect}>
-                  Deselect all
-                </Button>
-              </div>
-            </div>
-          )}
+          </div>
+        )}
       </Panel>
 
       {contextMenu && contextClass && (
@@ -436,9 +437,7 @@ export function SelectorsPanel({ variant = 'docked' }: SelectorsPanelProps) {
         <SelectorNameDialog
           title="Rename selector"
           initialValue={
-            renameTarget.kind === 'ambient'
-              ? styleRuleSelector(renameTarget)
-              : renameTarget.name
+            renameTarget.kind === 'ambient' ? styleRuleSelector(renameTarget) : renameTarget.name
           }
           submitLabel="Save"
           onCancel={() => setRenameTarget(null)}
@@ -495,9 +494,7 @@ function SelectorRow({
   // `.<escaped-name>`; for ambient rules it is whatever selector the user or
   // CSS importer wrote (e.g. `h1 > span`, `.hero .title`, `a:hover`).
   const selectorLabel = styleRuleSelector(cls)
-  const kindLabel = cls.kind === 'ambient'
-    ? 'Ambient'
-    : generatedClassKindLabel(cls)
+  const kindLabel = cls.kind === 'ambient' ? 'Ambient' : generatedClassKindLabel(cls)
 
   // The leading slot is a paint-bucket icon at rest; on row hover (or whenever a
   // multi-selection is in progress) it becomes a checkbox so the user can build

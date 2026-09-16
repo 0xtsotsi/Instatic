@@ -73,8 +73,16 @@ const COLOR_PROPERTIES = new Set<keyof CSSPropertyBag>([
 // fallback property surface.
 // ---------------------------------------------------------------------------
 const BORDER_STYLE_KEYWORDS = [
-  'none', 'hidden', 'solid', 'dashed', 'dotted', 'double',
-  'groove', 'ridge', 'inset', 'outset',
+  'none',
+  'hidden',
+  'solid',
+  'dashed',
+  'dotted',
+  'double',
+  'groove',
+  'ridge',
+  'inset',
+  'outset',
 ]
 
 // ---------------------------------------------------------------------------
@@ -82,38 +90,41 @@ const BORDER_STYLE_KEYWORDS = [
 // ---------------------------------------------------------------------------
 
 const ENUM_OPTIONS = new Map<keyof CSSPropertyBag, string[]>([
-  ['display',          ['block', 'inline', 'inline-block', 'flex', 'grid', 'none']],
-  ['flexDirection',    ['row', 'column', 'row-reverse', 'column-reverse']],
-  ['flexWrap',         ['nowrap', 'wrap', 'wrap-reverse']],
-  ['alignItems',       ['flex-start', 'flex-end', 'center', 'stretch', 'baseline']],
-  ['justifyContent',   ['flex-start', 'flex-end', 'center', 'space-between', 'space-around', 'space-evenly']],
-  ['justifyItems',     ['stretch', 'start', 'center', 'end']],
-  ['alignSelf',        ['auto', 'flex-start', 'flex-end', 'center', 'stretch']],
-  ['justifySelf',      ['auto', 'flex-start', 'flex-end', 'center', 'stretch']],
-  ['fontStyle',        ['normal', 'italic']],
-  ['fontWeight',       ['300', '400', '500', '600', '700', 'bold', 'normal']],
-  ['textAlign',        ['left', 'center', 'right', 'justify']],
-  ['textTransform',    ['none', 'uppercase', 'lowercase', 'capitalize']],
-  ['whiteSpace',       ['normal', 'nowrap', 'pre', 'pre-wrap', 'pre-line', 'break-spaces']],
-  ['textDecoration',   ['none', 'underline', 'line-through', 'overline']],
-  ['boxSizing',        ['border-box', 'content-box']],
-  ['position',         ['static', 'relative', 'absolute', 'fixed', 'sticky']],
-  ['overflow',         ['visible', 'hidden', 'scroll', 'auto']],
-  ['overflowX',        ['visible', 'hidden', 'scroll', 'auto']],
-  ['overflowY',        ['visible', 'hidden', 'scroll', 'auto']],
+  ['display', ['block', 'inline', 'inline-block', 'flex', 'grid', 'none']],
+  ['flexDirection', ['row', 'column', 'row-reverse', 'column-reverse']],
+  ['flexWrap', ['nowrap', 'wrap', 'wrap-reverse']],
+  ['alignItems', ['flex-start', 'flex-end', 'center', 'stretch', 'baseline']],
+  [
+    'justifyContent',
+    ['flex-start', 'flex-end', 'center', 'space-between', 'space-around', 'space-evenly'],
+  ],
+  ['justifyItems', ['stretch', 'start', 'center', 'end']],
+  ['alignSelf', ['auto', 'flex-start', 'flex-end', 'center', 'stretch']],
+  ['justifySelf', ['auto', 'flex-start', 'flex-end', 'center', 'stretch']],
+  ['fontStyle', ['normal', 'italic']],
+  ['fontWeight', ['300', '400', '500', '600', '700', 'bold', 'normal']],
+  ['textAlign', ['left', 'center', 'right', 'justify']],
+  ['textTransform', ['none', 'uppercase', 'lowercase', 'capitalize']],
+  ['whiteSpace', ['normal', 'nowrap', 'pre', 'pre-wrap', 'pre-line', 'break-spaces']],
+  ['textDecoration', ['none', 'underline', 'line-through', 'overline']],
+  ['boxSizing', ['border-box', 'content-box']],
+  ['position', ['static', 'relative', 'absolute', 'fixed', 'sticky']],
+  ['overflow', ['visible', 'hidden', 'scroll', 'auto']],
+  ['overflowX', ['visible', 'hidden', 'scroll', 'auto']],
+  ['overflowY', ['visible', 'hidden', 'scroll', 'auto']],
   ['backgroundRepeat', ['no-repeat', 'repeat', 'repeat-x', 'repeat-y']],
-  ['objectFit',        ['cover', 'contain', 'fill', 'none', 'scale-down']],
-  ['pointerEvents',    ['auto', 'none']],
-  ['scrollBehavior',   ['auto', 'smooth']],
-  ['cursor',           ['auto', 'pointer', 'default', 'move', 'not-allowed', 'crosshair', 'text']],
+  ['objectFit', ['cover', 'contain', 'fill', 'none', 'scale-down']],
+  ['pointerEvents', ['auto', 'none']],
+  ['scrollBehavior', ['auto', 'smooth']],
+  ['cursor', ['auto', 'pointer', 'default', 'move', 'not-allowed', 'crosshair', 'text']],
   // Border styles — the visual BorderControl uses the same list directly.
-  ['borderStyle',      BORDER_STYLE_KEYWORDS],
-  ['borderTopStyle',   BORDER_STYLE_KEYWORDS],
+  ['borderStyle', BORDER_STYLE_KEYWORDS],
+  ['borderTopStyle', BORDER_STYLE_KEYWORDS],
   ['borderRightStyle', BORDER_STYLE_KEYWORDS],
-  ['borderBottomStyle',BORDER_STYLE_KEYWORDS],
-  ['borderLeftStyle',  BORDER_STYLE_KEYWORDS],
+  ['borderBottomStyle', BORDER_STYLE_KEYWORDS],
+  ['borderLeftStyle', BORDER_STYLE_KEYWORDS],
   // Native form-control appearance — only `none` and `auto` see real-world use.
-  ['appearance',       ['auto', 'none']],
+  ['appearance', ['auto', 'none']],
 ])
 
 // ---------------------------------------------------------------------------
@@ -126,7 +137,7 @@ const ENUM_OPTIONS = new Map<keyof CSSPropertyBag, string[]>([
  */
 export function getCSSPropertyControlType(prop: keyof CSSPropertyBag): CSSControlType {
   if (COLOR_PROPERTIES.has(prop)) return 'color'
-  if (ENUM_OPTIONS.has(prop))     return 'select'
+  if (ENUM_OPTIONS.has(prop)) return 'select'
   return 'text'
 }
 
@@ -175,81 +186,81 @@ export function getCSSPropertyTokenSource(
  */
 const DEFAULT_CSS_VALUES: Partial<Record<keyof CSSPropertyBag, string | number>> = {
   // ── Typography ───────────────────────────────────────────────────────────
-  fontFamily:     'inherit',  // inheriting keeps text legible; '#000' would override cascade
-  fontSize:       '14px',
-  fontWeight:     '400',
-  fontStyle:      'normal',
-  letterSpacing:  '0px',
-  lineHeight:     '1.5',      // unitless — NOT '1.5px'; couples to fontSize correctly
-  textAlign:      'left',
+  fontFamily: 'inherit', // inheriting keeps text legible; '#000' would override cascade
+  fontSize: '14px',
+  fontWeight: '400',
+  fontStyle: 'normal',
+  letterSpacing: '0px',
+  lineHeight: '1.5', // unitless — NOT '1.5px'; couples to fontSize correctly
+  textAlign: 'left',
   textDecoration: 'none',
-  textTransform:  'none',
-  whiteSpace:     'normal',
-  color:          'inherit',  // NOT '#000000' — inheriting keeps text legible by default
-  textShadow:     'none',
+  textTransform: 'none',
+  whiteSpace: 'normal',
+  color: 'inherit', // NOT '#000000' — inheriting keeps text legible by default
+  textShadow: 'none',
   // ── Layout ───────────────────────────────────────────────────────────────
-  display:             'block',
-  flexDirection:       'row',
-  flexWrap:            'nowrap',
-  alignItems:          'stretch',
-  justifyContent:      'flex-start',
-  justifyItems:        'stretch',
-  alignSelf:           'auto',
-  justifySelf:         'auto',
-  flex:                '0 1 auto', // matches browser default (flex-grow:0; flex-shrink:1; basis:auto)
-  gap:                 '0',
-  rowGap:              '0',
-  columnGap:           '0',
+  display: 'block',
+  flexDirection: 'row',
+  flexWrap: 'nowrap',
+  alignItems: 'stretch',
+  justifyContent: 'flex-start',
+  justifyItems: 'stretch',
+  alignSelf: 'auto',
+  justifySelf: 'auto',
+  flex: '0 1 auto', // matches browser default (flex-grow:0; flex-shrink:1; basis:auto)
+  gap: '0',
+  rowGap: '0',
+  columnGap: '0',
   gridTemplateColumns: 'none',
-  gridTemplateRows:    'none',
-  gridColumn:          'auto',
-  gridRow:             'auto',
+  gridTemplateRows: 'none',
+  gridColumn: 'auto',
+  gridRow: 'auto',
   // ── Size ─────────────────────────────────────────────────────────────────
-  width:     'auto',   // NOT '100px' — auto avoids surprising layout shifts on add
-  height:    'auto',
-  minWidth:  '0px',
-  maxWidth:  'none',   // 'none' = unconstrained; NOT a px value that incorrectly constrains
+  width: 'auto', // NOT '100px' — auto avoids surprising layout shifts on add
+  height: 'auto',
+  minWidth: '0px',
+  maxWidth: 'none', // 'none' = unconstrained; NOT a px value that incorrectly constrains
   minHeight: '0px',
   maxHeight: 'none',
-  aspectRatio: '',     // free-form text (e.g. "16/9"); no sensible universal default
-  boxSizing:   'border-box',
+  aspectRatio: '', // free-form text (e.g. "16/9"); no sensible universal default
+  boxSizing: 'border-box',
   // ── Spacing ───────────────────────────────────────────────────────────────
   // Per-side only — see CSSPropertyBagSchema for the rationale (publisher
   // collapses 4 sides into the CSS shorthand at emission time).
-  paddingTop:    '0px',
-  paddingRight:  '0px',
+  paddingTop: '0px',
+  paddingRight: '0px',
   paddingBottom: '0px',
-  paddingLeft:   '0px',
-  marginTop:     '0px',
-  marginRight:   '0px',
-  marginBottom:  '0px',
-  marginLeft:    '0px',
+  paddingLeft: '0px',
+  marginTop: '0px',
+  marginRight: '0px',
+  marginBottom: '0px',
+  marginLeft: '0px',
   // ── Position ──────────────────────────────────────────────────────────────
   position: 'static',
-  top:      'auto',    // NOT '0px' — 0px would immediately reposition positioned elements
-  right:    'auto',
-  bottom:   'auto',
-  left:     'auto',
-  zIndex:   0,         // number (CSSPropertyBag.zIndex?: number); 0 is neutral stacking
+  top: 'auto', // NOT '0px' — 0px would immediately reposition positioned elements
+  right: 'auto',
+  bottom: 'auto',
+  left: 'auto',
+  zIndex: 0, // number (CSSPropertyBag.zIndex?: number); 0 is neutral stacking
   // ── Visual ────────────────────────────────────────────────────────────────
-  backgroundColor:   'transparent', // NOT '#000000' — transparent is a safe no-op
-  background:        '',             // shorthand — left empty for manual entry
-  backgroundImage:   'none',
-  backgroundSize:    'auto',
-  backgroundPosition:'0% 0%',
-  backgroundRepeat:  'repeat',
-  objectFit:         'cover',
-  objectPosition:    'center center',
-  opacity:           1,              // number (CSSPropertyBag.opacity?: number); 1 = fully opaque
-  overflow:          'visible',
-  overflowX:         'visible',
-  overflowY:         'visible',
+  backgroundColor: 'transparent', // NOT '#000000' — transparent is a safe no-op
+  background: '', // shorthand — left empty for manual entry
+  backgroundImage: 'none',
+  backgroundSize: 'auto',
+  backgroundPosition: '0% 0%',
+  backgroundRepeat: 'repeat',
+  objectFit: 'cover',
+  objectPosition: 'center center',
+  opacity: 1, // number (CSSPropertyBag.opacity?: number); 1 = fully opaque
+  overflow: 'visible',
+  overflowX: 'visible',
+  overflowY: 'visible',
   // ── Border ────────────────────────────────────────────────────────────────
-  border:       '',    // shorthands left empty — user specifies manually (e.g. "1px solid red")
-  borderTop:    '',
-  borderRight:  '',
+  border: '', // shorthands left empty — user specifies manually (e.g. "1px solid red")
+  borderTop: '',
+  borderRight: '',
   borderBottom: '',
-  borderLeft:   '',
+  borderLeft: '',
   // 4-sides shorthand longhands. Empty placeholders so the publisher
   // doesn't accidentally emit `border-width: 0` etc. when the user only
   // touched the per-side longhands.
@@ -257,40 +268,40 @@ const DEFAULT_CSS_VALUES: Partial<Record<keyof CSSPropertyBag, string | number>>
   borderStyle: '',
   borderColor: 'transparent',
   // Per-side longhands edited by the visual BorderControl.
-  borderTopWidth:    '0',
-  borderTopStyle:    'none',
-  borderTopColor:    'transparent',
-  borderRightWidth:  '0',
-  borderRightStyle:  'none',
-  borderRightColor:  'transparent',
+  borderTopWidth: '0',
+  borderTopStyle: 'none',
+  borderTopColor: 'transparent',
+  borderRightWidth: '0',
+  borderRightStyle: 'none',
+  borderRightColor: 'transparent',
   borderBottomWidth: '0',
   borderBottomStyle: 'none',
   borderBottomColor: 'transparent',
-  borderLeftWidth:   '0',
-  borderLeftStyle:   'none',
-  borderLeftColor:   'transparent',
-  borderRadius:            '0px',
-  borderTopLeftRadius:     '0px',
-  borderTopRightRadius:    '0px',
-  borderBottomLeftRadius:  '0px',
+  borderLeftWidth: '0',
+  borderLeftStyle: 'none',
+  borderLeftColor: 'transparent',
+  borderRadius: '0px',
+  borderTopLeftRadius: '0px',
+  borderTopRightRadius: '0px',
+  borderBottomLeftRadius: '0px',
   borderBottomRightRadius: '0px',
-  outline:       'none',
+  outline: 'none',
   outlineOffset: '0px',
   // ── Form-control reset ────────────────────────────────────────────────────
   appearance: 'auto',
   // ── Effects ───────────────────────────────────────────────────────────────
-  boxShadow:      'none',
-  filter:         'none',
+  boxShadow: 'none',
+  filter: 'none',
   backdropFilter: 'none',
-  transform:      'none',
-  transformOrigin:'50% 50%',  // centre origin — corner '0 0' surprises users rotating/scaling
+  transform: 'none',
+  transformOrigin: '50% 50%', // centre origin — corner '0 0' surprises users rotating/scaling
   // ── Motion ────────────────────────────────────────────────────────────────
   transition: 'none',
-  animation:  'none',
+  animation: 'none',
   // ── Interaction ───────────────────────────────────────────────────────────
-  cursor:        'default',
+  cursor: 'default',
   pointerEvents: 'auto',
-  userSelect:    'auto',
+  userSelect: 'auto',
   // ── Scrollbar ─────────────────────────────────────────────────────────────
   scrollBehavior: 'auto',
 }
@@ -370,14 +381,7 @@ export const CLASS_STYLE_SECTIONS: ReadonlyArray<ClassStyleSectionDefinition> = 
     id: 'position',
     title: 'Position',
     icon: MoveIcon,
-    properties: [
-      'position',
-      'top',
-      'right',
-      'bottom',
-      'left',
-      'zIndex',
-    ],
+    properties: ['position', 'top', 'right', 'bottom', 'left', 'zIndex'],
   },
   {
     id: 'size',
@@ -456,10 +460,18 @@ export const CLASS_STYLE_SECTIONS: ReadonlyArray<ClassStyleSectionDefinition> = 
     // "border" still surfaces the section.
     properties: [
       // Per-side longhands (canonical, edited by BorderControl)
-      'borderTopWidth', 'borderTopStyle', 'borderTopColor',
-      'borderRightWidth', 'borderRightStyle', 'borderRightColor',
-      'borderBottomWidth', 'borderBottomStyle', 'borderBottomColor',
-      'borderLeftWidth', 'borderLeftStyle', 'borderLeftColor',
+      'borderTopWidth',
+      'borderTopStyle',
+      'borderTopColor',
+      'borderRightWidth',
+      'borderRightStyle',
+      'borderRightColor',
+      'borderBottomWidth',
+      'borderBottomStyle',
+      'borderBottomColor',
+      'borderLeftWidth',
+      'borderLeftStyle',
+      'borderLeftColor',
       // Per-corner radius
       'borderTopLeftRadius',
       'borderTopRightRadius',
@@ -500,12 +512,7 @@ export const CLASS_STYLE_SECTIONS: ReadonlyArray<ClassStyleSectionDefinition> = 
     id: 'interaction',
     title: 'Interaction',
     icon: PointerSolidIcon,
-    properties: [
-      'cursor',
-      'pointerEvents',
-      'userSelect',
-      'scrollBehavior',
-    ],
+    properties: ['cursor', 'pointerEvents', 'userSelect', 'scrollBehavior'],
   },
 ]
 

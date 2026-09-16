@@ -60,7 +60,7 @@ export function MediaWidget({ span, editing }: DashboardWidgetRendererProps) {
   // cache. While the cache is loading the viewer waits to mount —
   // `viewerOpen` is gated on a resolved asset so we don't flash an
   // empty window during the fetch.
-  const viewerAsset = viewerAssetId ? assets.find((a) => a.id === viewerAssetId) ?? null : null
+  const viewerAsset = viewerAssetId ? (assets.find((a) => a.id === viewerAssetId) ?? null) : null
 
   const viewerEditor = useStandaloneMediaEditor({
     asset: viewerAsset,
@@ -120,74 +120,72 @@ export function MediaWidget({ span, editing }: DashboardWidgetRendererProps) {
         editing={editing}
         loading={isLoading}
       >
-        {!isLoading && (<>
-        <StatValue
-          value={(count ?? 0).toLocaleString()}
-          sub={<span>files · {formatSize(totalBytes ?? 0)}</span>}
-        />
-        {thumbs.length > 0 ? (
-          <div className={styles.mediaGrid}>
-            {/* Render up to 16 real thumbs via the srcset-aware <Image>
+        {!isLoading && (
+          <>
+            <StatValue
+              value={(count ?? 0).toLocaleString()}
+              sub={<span>files · {formatSize(totalBytes ?? 0)}</span>}
+            />
+            {thumbs.length > 0 ? (
+              <div className={styles.mediaGrid}>
+                {/* Render up to 16 real thumbs via the srcset-aware <Image>
                 primitive. The widget reserves a fixed 8×2 grid; if the
                 host has fewer than 16 images we fill the remaining
                 cells with the decorative muted tile so the grid keeps
                 its rhythm. Each populated cell is a Button so the user
                 can click through to the asset viewer. */}
-            {Array.from({ length: 16 }, (_, i) => {
-              const thumb = thumbs[i]
-              if (!thumb) {
-                return (
-                  <span
-                    key={i}
-                    aria-hidden="true"
-                    className={`${styles.mediaCell} ${styles.mediaCellEmpty}`}
-                  />
-                )
-              }
-              return (
-                <Button
-                  key={thumb.id}
-                  variant="ghost"
-                  size="sm"
-                  className={styles.mediaCellThumb}
-                  onClick={() => openViewer(thumb.id)}
-                  aria-label={`Open ${thumb.altText || 'media asset'} in viewer`}
-                  tooltip="Open in viewer"
-                >
-                  <Image
-                    src={thumb.publicPath}
-                    variants={thumb.variants}
-                    alt={thumb.altText}
-                    sizes="80px"
-                    width={thumb.width ?? undefined}
-                    height={thumb.height ?? undefined}
-                    className={styles.mediaCellThumbImg}
-                  />
-                </Button>
-              )
-            })}
-          </div>
-        ) : (
-          // No media yet — render the original decorative mosaic.
-          <div className={styles.mediaGrid} aria-hidden="true">
-            {Array.from({ length: 16 }, (_, i) => {
-              const klass = ACCENT_INDEXES.has(i)
-                ? `${styles.mediaCell} ${styles.mediaCellAccent}`
-                : EMPTY_INDEXES.has(i)
-                  ? `${styles.mediaCell} ${styles.mediaCellEmpty}`
-                  : styles.mediaCell
-              return <span key={i} className={klass} />
-            })}
-          </div>
+                {Array.from({ length: 16 }, (_, i) => {
+                  const thumb = thumbs[i]
+                  if (!thumb) {
+                    return (
+                      <span
+                        key={i}
+                        aria-hidden="true"
+                        className={`${styles.mediaCell} ${styles.mediaCellEmpty}`}
+                      />
+                    )
+                  }
+                  return (
+                    <Button
+                      key={thumb.id}
+                      variant="ghost"
+                      size="sm"
+                      className={styles.mediaCellThumb}
+                      onClick={() => openViewer(thumb.id)}
+                      aria-label={`Open ${thumb.altText || 'media asset'} in viewer`}
+                      tooltip="Open in viewer"
+                    >
+                      <Image
+                        src={thumb.publicPath}
+                        variants={thumb.variants}
+                        alt={thumb.altText}
+                        sizes="80px"
+                        width={thumb.width ?? undefined}
+                        height={thumb.height ?? undefined}
+                        className={styles.mediaCellThumbImg}
+                      />
+                    </Button>
+                  )
+                })}
+              </div>
+            ) : (
+              // No media yet — render the original decorative mosaic.
+              <div className={styles.mediaGrid} aria-hidden="true">
+                {Array.from({ length: 16 }, (_, i) => {
+                  const klass = ACCENT_INDEXES.has(i)
+                    ? `${styles.mediaCell} ${styles.mediaCellAccent}`
+                    : EMPTY_INDEXES.has(i)
+                      ? `${styles.mediaCell} ${styles.mediaCellEmpty}`
+                      : styles.mediaCell
+                  return <span key={i} className={klass} />
+                })}
+              </div>
+            )}
+          </>
         )}
-        </>)}
       </Widget>
 
-      <MediaViewerWindow
-        editor={viewerEditor}
-        open={viewerAsset !== null}
-        onClose={closeViewer}
-      />
+      <MediaViewerWindow editor={viewerEditor} open={viewerAsset !== null} onClose={closeViewer} />
     </>
   )
 }

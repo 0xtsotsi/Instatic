@@ -42,44 +42,44 @@ export type FrontendAsset =
    * `strategy` maps to the matching HTML attribute (or `module` for ESM).
    */
   | {
-    kind: 'script'
-    src: string
-    placement?: FrontendAssetPlacement
-    strategy?: 'defer' | 'async' | 'module' | 'sync'
-    /** Extra attributes (e.g. `type`, `crossorigin`, `integrity`, `data-*`). */
-    attrs?: Record<string, string>
-  }
+      kind: 'script'
+      src: string
+      placement?: FrontendAssetPlacement
+      strategy?: 'defer' | 'async' | 'module' | 'sync'
+      /** Extra attributes (e.g. `type`, `crossorigin`, `integrity`, `data-*`). */
+      attrs?: Record<string, string>
+    }
   /**
    * Inline `<script>` block. The host wraps `content` in a `<script>` tag at
    * the given placement. Triggers `script-src 'unsafe-inline'` in the page
    * CSP for the inline content to actually execute.
    */
   | {
-    kind: 'script-inline'
-    content: string
-    placement?: FrontendAssetPlacement
-    attrs?: Record<string, string>
-  }
+      kind: 'script-inline'
+      content: string
+      placement?: FrontendAssetPlacement
+      attrs?: Record<string, string>
+    }
   /**
    * External CSS file shipped in the plugin zip. Emits one
    * `<link rel="stylesheet" href="…">` tag.
    */
   | {
-    kind: 'style'
-    href: string
-    placement?: FrontendAssetPlacement
-    attrs?: Record<string, string>
-  }
+      kind: 'style'
+      href: string
+      placement?: FrontendAssetPlacement
+      attrs?: Record<string, string>
+    }
   /**
    * Inline `<style>` block. Triggers `style-src 'unsafe-inline'` in the
    * page CSP.
    */
   | {
-    kind: 'style-inline'
-    content: string
-    placement?: FrontendAssetPlacement
-    attrs?: Record<string, string>
-  }
+      kind: 'style-inline'
+      content: string
+      placement?: FrontendAssetPlacement
+      attrs?: Record<string, string>
+    }
   /**
    * Bare `<link>` tag — for preconnect, dns-prefetch, preload, alternate,
    * etc. The `attrs` object becomes the tag attributes; no body, no inline
@@ -87,18 +87,18 @@ export type FrontendAsset =
    * the right tag shape for you.
    */
   | {
-    kind: 'link'
-    attrs: Record<string, string>
-    placement?: FrontendAssetPlacement
-  }
+      kind: 'link'
+      attrs: Record<string, string>
+      placement?: FrontendAssetPlacement
+    }
   /**
    * Bare `<meta>` tag. The `attrs` object becomes the tag attributes.
    */
   | {
-    kind: 'meta'
-    attrs: Record<string, string>
-    placement?: FrontendAssetPlacement
-  }
+      kind: 'meta'
+      attrs: Record<string, string>
+      placement?: FrontendAssetPlacement
+    }
 
 /**
  * Manifest-level `frontend` block. Currently carries only the `assets`

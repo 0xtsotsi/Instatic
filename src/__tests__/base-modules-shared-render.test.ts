@@ -43,13 +43,25 @@ describe('anchorRel — single source for the noopener rule', () => {
   })
 
   it('drives BOTH link and button render() — _blank emits rel, others omit it', () => {
-    const linkBlank = LinkModule.render({ ...LinkModule.defaults, href: 'https://e.com', target: '_blank' }, []).html
-    const linkSelf = LinkModule.render({ ...LinkModule.defaults, href: 'https://e.com', target: '_self' }, []).html
+    const linkBlank = LinkModule.render(
+      { ...LinkModule.defaults, href: 'https://e.com', target: '_blank' },
+      [],
+    ).html
+    const linkSelf = LinkModule.render(
+      { ...LinkModule.defaults, href: 'https://e.com', target: '_self' },
+      [],
+    ).html
     expect(linkBlank).toContain('rel="noopener noreferrer"')
     expect(linkSelf).not.toContain('rel=')
 
-    const btnBlank = ButtonModule.render({ ...ButtonModule.defaults, href: 'https://e.com', target: '_blank' }, []).html
-    const btnSelf = ButtonModule.render({ ...ButtonModule.defaults, href: 'https://e.com', target: '_self' }, []).html
+    const btnBlank = ButtonModule.render(
+      { ...ButtonModule.defaults, href: 'https://e.com', target: '_blank' },
+      [],
+    ).html
+    const btnSelf = ButtonModule.render(
+      { ...ButtonModule.defaults, href: 'https://e.com', target: '_self' },
+      [],
+    ).html
     expect(btnBlank).toContain('rel="noopener noreferrer"')
     expect(btnSelf).not.toContain('rel=')
   })
@@ -57,8 +69,14 @@ describe('anchorRel — single source for the noopener rule', () => {
   it('link and button expose the SAME target options from the shared leaf', () => {
     const values = ANCHOR_TARGET_OPTIONS.map((o) => o.value)
     expect(values).toEqual(['_self', '_blank', '_parent'])
-    expect(LinkModule.schema.target).toMatchObject({ type: 'select', options: ANCHOR_TARGET_OPTIONS as never })
-    expect(ButtonModule.schema.target).toMatchObject({ type: 'select', options: ANCHOR_TARGET_OPTIONS as never })
+    expect(LinkModule.schema.target).toMatchObject({
+      type: 'select',
+      options: ANCHOR_TARGET_OPTIONS as never,
+    })
+    expect(ButtonModule.schema.target).toMatchObject({
+      type: 'select',
+      options: ANCHOR_TARGET_OPTIONS as never,
+    })
   })
 })
 
@@ -70,7 +88,9 @@ describe('linkUsesChildren — children-vs-text fallback', () => {
   })
 
   it('render() falls back to text exactly when the helper says no children', () => {
-    const withChildren = LinkModule.render({ ...LinkModule.defaults, text: 'fallback' }, ['<strong>kid</strong>']).html
+    const withChildren = LinkModule.render({ ...LinkModule.defaults, text: 'fallback' }, [
+      '<strong>kid</strong>',
+    ]).html
     const withoutChildren = LinkModule.render({ ...LinkModule.defaults, text: 'fallback' }, []).html
     expect(withChildren).toContain('<strong>kid</strong>')
     expect(withChildren).not.toContain('fallback')
@@ -88,14 +108,22 @@ describe('resolveButtonAnchor — element decision', () => {
   })
 
   it('render() emits <a> iff resolveButtonAnchor is truthy', () => {
-    expect(ButtonModule.render({ ...ButtonModule.defaults, href: 'https://e.com' }, []).html).toMatch(/^<a /)
-    expect(ButtonModule.render({ ...ButtonModule.defaults, href: '' }, []).html).toMatch(/^<button /)
-    expect(ButtonModule.render({ ...ButtonModule.defaults, href: '#' }, []).html).toMatch(/^<button /)
+    expect(
+      ButtonModule.render({ ...ButtonModule.defaults, href: 'https://e.com' }, []).html,
+    ).toMatch(/^<a /)
+    expect(ButtonModule.render({ ...ButtonModule.defaults, href: '' }, []).html).toMatch(
+      /^<button /,
+    )
+    expect(ButtonModule.render({ ...ButtonModule.defaults, href: '#' }, []).html).toMatch(
+      /^<button /,
+    )
   })
 
   it('htmlTag agrees with render() on the element choice', () => {
     const tagFor = (href: string) =>
-      typeof ButtonModule.htmlTag === 'function' ? ButtonModule.htmlTag({ ...ButtonModule.defaults, href }) : ButtonModule.htmlTag
+      typeof ButtonModule.htmlTag === 'function'
+        ? ButtonModule.htmlTag({ ...ButtonModule.defaults, href })
+        : ButtonModule.htmlTag
     expect(tagFor('https://e.com')).toBe('a')
     expect(tagFor('#')).toBe('button')
     expect(tagFor('')).toBe('button')
@@ -116,7 +144,9 @@ describe('youtubeEmbedUrl — shared video URL brain', () => {
     const id = parseYoutubeId(url)
     expect(id).toBe('dQw4w9WgXcQ')
     const embed = youtubeEmbedUrl(id as string, false)
-    expect(VideoModule.render({ ...VideoModule.defaults, videoUrl: url } as never, []).html).toContain(`src="${embed}"`)
+    expect(
+      VideoModule.render({ ...VideoModule.defaults, videoUrl: url } as never, []).html,
+    ).toContain(`src="${embed}"`)
   })
 })
 
@@ -143,17 +173,38 @@ describe('published render() golden (byte-identical behavior invariant)', () => 
 
   const actual: Record<string, string> = {
     'link.default': LinkModule.render(LinkModule.defaults, []).html,
-    'link.blank': LinkModule.render({ ...LinkModule.defaults, href: 'https://example.com', target: '_blank', text: 'X' }, []).html,
-    'link.parent': LinkModule.render({ ...LinkModule.defaults, href: 'https://e.com', target: '_parent' }, []).html,
-    'link.children': LinkModule.render({ ...LinkModule.defaults, text: 'fallback' }, ['<strong>kid</strong>']).html,
+    'link.blank': LinkModule.render(
+      { ...LinkModule.defaults, href: 'https://example.com', target: '_blank', text: 'X' },
+      [],
+    ).html,
+    'link.parent': LinkModule.render(
+      { ...LinkModule.defaults, href: 'https://e.com', target: '_parent' },
+      [],
+    ).html,
+    'link.children': LinkModule.render({ ...LinkModule.defaults, text: 'fallback' }, [
+      '<strong>kid</strong>',
+    ]).html,
     'link.empty-children': LinkModule.render({ ...LinkModule.defaults, text: 'fallback' }, []).html,
     'button.default': ButtonModule.render(ButtonModule.defaults, []).html,
-    'button.href': ButtonModule.render({ ...ButtonModule.defaults, href: 'https://e.com', label: 'Go' }, []).html,
-    'button.href-blank': ButtonModule.render({ ...ButtonModule.defaults, href: 'https://e.com', target: '_blank', label: 'Go' }, []).html,
-    'button.hash': ButtonModule.render({ ...ButtonModule.defaults, href: '#', label: 'Go' }, []).html,
-    'button.disabled': ButtonModule.render({ ...ButtonModule.defaults, disabled: true, label: 'Go' }, []).html,
+    'button.href': ButtonModule.render(
+      { ...ButtonModule.defaults, href: 'https://e.com', label: 'Go' },
+      [],
+    ).html,
+    'button.href-blank': ButtonModule.render(
+      { ...ButtonModule.defaults, href: 'https://e.com', target: '_blank', label: 'Go' },
+      [],
+    ).html,
+    'button.hash': ButtonModule.render({ ...ButtonModule.defaults, href: '#', label: 'Go' }, [])
+      .html,
+    'button.disabled': ButtonModule.render(
+      { ...ButtonModule.defaults, disabled: true, label: 'Go' },
+      [],
+    ).html,
     'list.ul': ListModule.render({ ...ListModule.defaults, items: 'A\nB\nC' }, []).html,
-    'list.ol': ListModule.render({ ...ListModule.defaults, listType: 'ordered', items: 'A\n\n  B  \n' }, []).html,
+    'list.ol': ListModule.render(
+      { ...ListModule.defaults, listType: 'ordered', items: 'A\n\n  B  \n' },
+      [],
+    ).html,
     'list.empty': ListModule.render({ ...ListModule.defaults, items: '' }, []).html,
   }
 

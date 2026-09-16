@@ -70,10 +70,16 @@ export function RoleDialog({
         </>
       }
     >
-      <form id={ROLE_FORM_ID} className={dialogStyles.form} onSubmit={(event) => void onSubmit(event)}>
+      <form
+        id={ROLE_FORM_ID}
+        className={dialogStyles.form}
+        onSubmit={(event) => void onSubmit(event)}
+      >
         <div className={styles.roleIdentityGrid}>
           <div className={dialogStyles.field}>
-            <label htmlFor={nameId} className={dialogStyles.label}>Name</label>
+            <label htmlFor={nameId} className={dialogStyles.label}>
+              Name
+            </label>
             <Input
               id={nameId}
               value={form.name}
@@ -84,7 +90,9 @@ export function RoleDialog({
             />
           </div>
           <div className={dialogStyles.field}>
-            <label htmlFor={slugId} className={dialogStyles.label}>Slug</label>
+            <label htmlFor={slugId} className={dialogStyles.label}>
+              Slug
+            </label>
             <Input
               id={slugId}
               value={form.slug}
@@ -95,7 +103,9 @@ export function RoleDialog({
           </div>
         </div>
         <div className={dialogStyles.field}>
-          <label htmlFor={descriptionId} className={dialogStyles.label}>Description</label>
+          <label htmlFor={descriptionId} className={dialogStyles.label}>
+            Description
+          </label>
           <Input
             id={descriptionId}
             value={form.description}
@@ -112,7 +122,11 @@ export function RoleDialog({
           onChange={(next) => onChange({ ...form, capabilities: [...next] })}
         />
 
-        {error && <p role="alert" className={dialogStyles.errorText}>{error}</p>}
+        {error && (
+          <p role="alert" className={dialogStyles.errorText}>
+            {error}
+          </p>
+        )}
       </form>
     </Dialog>
   )

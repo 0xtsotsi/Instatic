@@ -336,8 +336,7 @@ function formatViolations(
   allowlistNote: string,
 ): Error {
   const lines = violations.map(
-    (v) =>
-      `  ${v.file}:${v.line} — [${v.rule}]\n` + `    matched: ${JSON.stringify(v.match)}`,
+    (v) => `  ${v.file}:${v.line} — [${v.rule}]\n` + `    matched: ${JSON.stringify(v.match)}`,
   )
   return new Error(
     `[boundary-validation] ${heading}\n` +

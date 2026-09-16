@@ -46,9 +46,11 @@ export interface VCDeletionImpact {
 
 interface SiteWithVisualComponents {
   pages: ReadonlyArray<Pick<Page, 'id' | 'title' | 'nodes'>>
-  visualComponents: ReadonlyArray<Pick<VisualComponent, 'id' | 'name'> & {
-    tree: { nodes: Record<string, BaseNode> }
-  }>
+  visualComponents: ReadonlyArray<
+    Pick<VisualComponent, 'id' | 'name'> & {
+      tree: { nodes: Record<string, BaseNode> }
+    }
+  >
 }
 
 // ---------------------------------------------------------------------------

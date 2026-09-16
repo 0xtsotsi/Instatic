@@ -51,7 +51,13 @@ const allBuiltInFields = [
   { type: 'text', id: 'title', label: 'Title', required: true, builtIn: true },
   { type: 'text', id: 'slug', label: 'Slug', required: true, builtIn: true },
   { type: 'richText', id: 'body', label: 'Body', format: 'markdown', builtIn: true },
-  { type: 'media', id: 'featuredMedia', label: 'Featured media', mediaKind: 'image', builtIn: true },
+  {
+    type: 'media',
+    id: 'featuredMedia',
+    label: 'Featured media',
+    mediaKind: 'image',
+    builtIn: true,
+  },
   { type: 'text', id: 'seoTitle', label: 'SEO title', builtIn: true },
   { type: 'longText', id: 'seoDescription', label: 'SEO description', builtIn: true },
 ]
@@ -325,7 +331,8 @@ beforeEach(() => {
   })
 
   const calls: FetchCall[] = []
-  ;(globalThis as typeof globalThis & { __contentFetchCalls?: FetchCall[] }).__contentFetchCalls = calls
+  ;(globalThis as typeof globalThis & { __contentFetchCalls?: FetchCall[] }).__contentFetchCalls =
+    calls
   globalThis.fetch = async (input: RequestInfo | URL, init?: RequestInit) => {
     calls.push({ input, init })
     const url = String(input)
@@ -345,12 +352,20 @@ beforeEach(() => {
     }
 
     if (url === '/admin/api/cms/data/tables/posts/rows' && init?.method === 'POST') {
-      return json({
-        row: makeRow('entry_1', 'posts', { title: 'Untitled', slug: 'untitled' }, {
-          authorUserId: ownerAuthor.id,
-          author: ownerAuthor,
-        }),
-      }, 201)
+      return json(
+        {
+          row: makeRow(
+            'entry_1',
+            'posts',
+            { title: 'Untitled', slug: 'untitled' },
+            {
+              authorUserId: ownerAuthor.id,
+              author: ownerAuthor,
+            },
+          ),
+        },
+        201,
+      )
     }
 
     if (url === '/admin/api/cms/data/rows/entry_1' && init?.method === 'PATCH') {
@@ -365,18 +380,30 @@ beforeEach(() => {
 
     if (url === '/admin/api/cms/data/rows/entry_1' && init?.method === 'DELETE') {
       return json({
-        row: makeRow('entry_1', 'posts', { title: 'Untitled', slug: 'untitled' }, {
-          authorUserId: ownerAuthor.id,
-          author: ownerAuthor,
-          deletedAt: '2026-05-01T10:01:00.000Z',
-        }),
+        row: makeRow(
+          'entry_1',
+          'posts',
+          { title: 'Untitled', slug: 'untitled' },
+          {
+            authorUserId: ownerAuthor.id,
+            author: ownerAuthor,
+            deletedAt: '2026-05-01T10:01:00.000Z',
+          },
+        ),
       })
     }
 
     if (url === '/admin/api/cms/data/rows/entry_1/publish' && init?.method === 'POST') {
       return json({
         row: {
-          ...makeRow('entry_1', 'posts', { title: 'My first post', slug: 'untitled', body: '## Intro', featuredMedia: null, seoTitle: '', seoDescription: '' }),
+          ...makeRow('entry_1', 'posts', {
+            title: 'My first post',
+            slug: 'untitled',
+            body: '## Intro',
+            featuredMedia: null,
+            seoTitle: '',
+            seoDescription: '',
+          }),
           status: 'published',
           updatedAt: '2026-05-01T10:02:00.000Z',
           publishedAt: '2026-05-01T10:02:00.000Z',
@@ -388,7 +415,14 @@ beforeEach(() => {
       const body = JSON.parse(String(init.body))
       return json({
         row: {
-          ...makeRow('entry_1', 'posts', { title: 'My first post', slug: 'updated-slug', body: '', featuredMedia: imageAsset.id, seoTitle: '', seoDescription: '' }),
+          ...makeRow('entry_1', 'posts', {
+            title: 'My first post',
+            slug: 'updated-slug',
+            body: '',
+            featuredMedia: imageAsset.id,
+            seoTitle: '',
+            seoDescription: '',
+          }),
           status: body.status,
           updatedAt: '2026-05-01T10:03:00.000Z',
         },
@@ -419,7 +453,7 @@ describe('ContentPage', () => {
         <Routes>
           <Route
             path="/admin/site"
-            element={(
+            element={
               <>
                 <Toolbar
                   section="site"
@@ -428,11 +462,11 @@ describe('ContentPage', () => {
                 />
                 <LocationProbe />
               </>
-            )}
+            }
           />
           <Route
             path="/admin/content"
-            element={(
+            element={
               <>
                 <Toolbar
                   section="content"
@@ -441,7 +475,7 @@ describe('ContentPage', () => {
                 />
                 <LocationProbe />
               </>
-            )}
+            }
           />
         </Routes>
       </AdminTestProviders>,
@@ -462,11 +496,11 @@ describe('ContentPage', () => {
         <Routes>
           <Route
             path="/admin/site"
-            element={(
+            element={
               <>
                 <Toolbar
                   section="site"
-                  adminNavigationSlot={(
+                  adminNavigationSlot={
                     <AdminSectionNavigation
                       section="site"
                       onWorkspaceNavigateStart={() => {
@@ -474,16 +508,16 @@ describe('ContentPage', () => {
                         return 180
                       }}
                     />
-                  )}
+                  }
                   rightSlot={<span>site controls</span>}
                 />
                 <LocationProbe />
               </>
-            )}
+            }
           />
           <Route
             path="/admin/content"
-            element={(
+            element={
               <>
                 <Toolbar
                   section="content"
@@ -492,7 +526,7 @@ describe('ContentPage', () => {
                 />
                 <LocationProbe />
               </>
-            )}
+            }
           />
         </Routes>
       </AdminTestProviders>,
@@ -504,14 +538,20 @@ describe('ContentPage', () => {
     expect(screen.getByLabelText('current route').textContent).toBe('/admin/content')
     expect(screen.getByText('content controls')).toBeDefined()
 
-    const layoutSource = readFileSync(join(process.cwd(), 'src/admin/layouts/AdminCanvasLayout/AdminCanvasLayout.tsx'), 'utf8')
+    const layoutSource = readFileSync(
+      join(process.cwd(), 'src/admin/layouts/AdminCanvasLayout/AdminCanvasLayout.tsx'),
+      'utf8',
+    )
     expect(layoutSource).not.toContain('setLeftSidebarPanel(null)')
     expect(layoutSource).not.toContain('setPropertiesPanel({ collapsed: true })')
     expect(layoutSource).not.toContain('onBeforeWorkspaceExit')
   })
 
   it('does not fade or view-transition the central canvas surface during admin navigation', () => {
-    const layoutCss = readFileSync(join(process.cwd(), 'src/admin/layouts/AdminCanvasLayout/AdminCanvasLayout.module.css'), 'utf8')
+    const layoutCss = readFileSync(
+      join(process.cwd(), 'src/admin/layouts/AdminCanvasLayout/AdminCanvasLayout.module.css'),
+      'utf8',
+    )
 
     expect(layoutCss).not.toContain('admin-canvas-content')
     expect(layoutCss).not.toMatch(/\.canvasContent\s*\{[^}]*animation:/s)
@@ -526,28 +566,30 @@ describe('ContentPage', () => {
         <Routes>
           <Route
             path="/admin/site"
-            element={(
+            element={
               <>
                 <Toolbar
                   section="site"
-                  adminNavigationSlot={(
+                  adminNavigationSlot={
                     <AdminSectionNavigation
                       section="site"
-                      onWorkspaceNavigateStart={() => new Promise<void>((resolve) => {
-                        transitionStarts.push('content')
-                        resolveNavigation = resolve
-                      })}
+                      onWorkspaceNavigateStart={() =>
+                        new Promise<void>((resolve) => {
+                          transitionStarts.push('content')
+                          resolveNavigation = resolve
+                        })
+                      }
                     />
-                  )}
+                  }
                   rightSlot={<span>site controls</span>}
                 />
                 <LocationProbe />
               </>
-            )}
+            }
           />
           <Route
             path="/admin/content"
-            element={(
+            element={
               <>
                 <Toolbar
                   section="content"
@@ -556,7 +598,7 @@ describe('ContentPage', () => {
                 />
                 <LocationProbe />
               </>
-            )}
+            }
           />
         </Routes>
       </AdminTestProviders>,
@@ -678,8 +720,9 @@ describe('ContentPage', () => {
     expect(screen.queryByTestId('right-sidebar-panel-slot')).toBeNull()
 
     fireEvent.click(
-      within(screen.getByRole('region', { name: 'Posts' }))
-        .getByRole('button', { name: /new post/i }),
+      within(screen.getByRole('region', { name: 'Posts' })).getByRole('button', {
+        name: /new post/i,
+      }),
     )
 
     // After creating (and auto-selecting) an entry, the settings panel appears.
@@ -696,8 +739,9 @@ describe('ContentPage', () => {
 
     expect(await screen.findByRole('region', { name: 'Posts' })).toBeDefined()
     fireEvent.click(
-      within(screen.getByRole('region', { name: 'Posts' }))
-        .getByRole('button', { name: /new post/i }),
+      within(screen.getByRole('region', { name: 'Posts' })).getByRole('button', {
+        name: /new post/i,
+      }),
     )
 
     expect(await screen.findByTestId('content-settings-panel')).toBeDefined()
@@ -731,16 +775,22 @@ describe('ContentPage', () => {
     expect(entryButton).toBeTruthy()
     fireEvent.contextMenu(entryButton as HTMLButtonElement, { clientX: 240, clientY: 320 })
     fireEvent.click(
-      within(screen.getByRole('menu', { name: 'Content item options' }))
-        .getByRole('menuitem', { name: /^delete$/i }),
+      within(screen.getByRole('menu', { name: 'Content item options' })).getByRole('menuitem', {
+        name: /^delete$/i,
+      }),
     )
 
-    const calls = (globalThis as typeof globalThis & { __contentFetchCalls?: FetchCall[] }).__contentFetchCalls ?? []
+    const calls =
+      (globalThis as typeof globalThis & { __contentFetchCalls?: FetchCall[] })
+        .__contentFetchCalls ?? []
     await waitFor(() => {
-      expect(calls.some((call) =>
-        String(call.input) === '/admin/api/cms/data/rows/entry_1' &&
-        call.init?.method === 'DELETE'
-      )).toBe(true)
+      expect(
+        calls.some(
+          (call) =>
+            String(call.input) === '/admin/api/cms/data/rows/entry_1' &&
+            call.init?.method === 'DELETE',
+        ),
+      ).toBe(true)
     })
     await waitFor(() => {
       expect(within(postsRegion).queryByText('Untitled')).toBeNull()
@@ -754,7 +804,8 @@ describe('ContentPage', () => {
   it('shows entry authors in the content list and reassigns the selected entry author', async () => {
     const user = userEvent.setup()
     const calls: FetchCall[] = []
-    ;(globalThis as typeof globalThis & { __contentFetchCalls?: FetchCall[] }).__contentFetchCalls = calls
+    ;(globalThis as typeof globalThis & { __contentFetchCalls?: FetchCall[] }).__contentFetchCalls =
+      calls
     globalThis.fetch = async (input: RequestInfo | URL, init?: RequestInit) => {
       calls.push({ input, init })
       const url = String(input)
@@ -769,34 +820,46 @@ describe('ContentPage', () => {
 
       if (url === '/admin/api/cms/data/tables/posts/rows' && init?.method === 'GET') {
         return json({
-          rows: [makeRow('entry_1', 'posts', {
-            title: 'Authored post',
-            slug: 'authored-post',
-            body: 'Body',
-            featuredMedia: null,
-            seoTitle: '',
-            seoDescription: '',
-          }, {
-            authorUserId: editorAuthor.id,
-            author: editorAuthor,
-          })],
+          rows: [
+            makeRow(
+              'entry_1',
+              'posts',
+              {
+                title: 'Authored post',
+                slug: 'authored-post',
+                body: 'Body',
+                featuredMedia: null,
+                seoTitle: '',
+                seoDescription: '',
+              },
+              {
+                authorUserId: editorAuthor.id,
+                author: editorAuthor,
+              },
+            ),
+          ],
         })
       }
 
       if (url === '/admin/api/cms/data/rows/entry_1/author' && init?.method === 'PATCH') {
         return json({
-          row: makeRow('entry_1', 'posts', {
-            title: 'Authored post',
-            slug: 'authored-post',
-            body: 'Body',
-            featuredMedia: null,
-            seoTitle: '',
-            seoDescription: '',
-          }, {
-            authorUserId: adminAuthor.id,
-            author: adminAuthor,
-            updatedAt: '2026-05-01T10:04:00.000Z',
-          }),
+          row: makeRow(
+            'entry_1',
+            'posts',
+            {
+              title: 'Authored post',
+              slug: 'authored-post',
+              body: 'Body',
+              featuredMedia: null,
+              seoTitle: '',
+              seoDescription: '',
+            },
+            {
+              authorUserId: adminAuthor.id,
+              author: adminAuthor,
+              updatedAt: '2026-05-01T10:04:00.000Z',
+            },
+          ),
         })
       }
 
@@ -827,13 +890,18 @@ describe('ContentPage', () => {
     await user.click(await screen.findByRole('option', { name: 'Admin Name' }))
 
     await waitFor(() => {
-      expect(calls.some((call) =>
-        String(call.input) === '/admin/api/cms/data/rows/entry_1/author' &&
-        call.init?.method === 'PATCH' &&
-        call.init?.body === JSON.stringify({ authorUserId: adminAuthor.id })
-      )).toBe(true)
+      expect(
+        calls.some(
+          (call) =>
+            String(call.input) === '/admin/api/cms/data/rows/entry_1/author' &&
+            call.init?.method === 'PATCH' &&
+            call.init?.body === JSON.stringify({ authorUserId: adminAuthor.id }),
+        ),
+      ).toBe(true)
     })
-    expect((screen.getByRole('combobox', { name: 'Author' }) as HTMLInputElement).value).toBe('Admin Name')
+    expect((screen.getByRole('combobox', { name: 'Author' }) as HTMLInputElement).value).toBe(
+      'Admin Name',
+    )
     expect(within(postsRegion).getByText('Admin Name')).toBeDefined()
   })
 
@@ -920,9 +988,10 @@ describe('ContentPage', () => {
 
     expect(activationResult?.ok).toBe(true)
     expect(writeResult?.ok).toBe(true)
-    const patchCall = calls.find((call) =>
-      String(call.input) === '/admin/api/cms/data/rows/article_2' &&
-      call.init?.method === 'PATCH'
+    const patchCall = calls.find(
+      (call) =>
+        String(call.input) === '/admin/api/cms/data/rows/article_2' &&
+        call.init?.method === 'PATCH',
     )
     expect(JSON.parse(String(patchCall?.init?.body))).toMatchObject({
       cells: { seoTitle: 'Remote SEO' },
@@ -960,11 +1029,17 @@ describe('ContentPage', () => {
     const primaryRail = screen.getByTestId('panel-rail-primary')
     const globalRail = screen.getByTestId('panel-rail-global')
 
-    expect(screen.getByTestId('panel-rail-content').getAttribute('aria-label')).toBe('Close Content panel')
-    expect(screen.getByTestId('panel-rail-media').getAttribute('aria-label')).toBe('Open Media panel')
+    expect(screen.getByTestId('panel-rail-content').getAttribute('aria-label')).toBe(
+      'Close Content panel',
+    )
+    expect(screen.getByTestId('panel-rail-media').getAttribute('aria-label')).toBe(
+      'Open Media panel',
+    )
     // The AI assistant panel is docked into the content workspace (it is a
     // global rail panel), so its rail button is present + closed.
-    expect(screen.getByTestId('panel-rail-agent').getAttribute('aria-label')).toBe('Open AI assistant panel')
+    expect(screen.getByTestId('panel-rail-agent').getAttribute('aria-label')).toBe(
+      'Open AI assistant panel',
+    )
     expect(within(primaryRail).queryByTestId('panel-rail-agent')).toBeNull()
     expect(within(globalRail).getByTestId('panel-rail-agent')).toBeDefined()
     expect(screen.getByTestId('content-panel-rail').lastElementChild).toBe(globalRail)
@@ -1012,8 +1087,9 @@ describe('ContentPage', () => {
 
     expect(await screen.findByRole('region', { name: 'Posts' })).toBeDefined()
     fireEvent.click(
-      within(screen.getByRole('region', { name: 'Posts' }))
-        .getByRole('button', { name: /new post/i }),
+      within(screen.getByRole('region', { name: 'Posts' })).getByRole('button', {
+        name: /new post/i,
+      }),
     )
 
     const title = await screen.findByLabelText('Title')
@@ -1030,25 +1106,37 @@ describe('ContentPage', () => {
     await screen.findByText('Draft saved')
 
     clickToolbarPublish()
-    const publishedButton = await screen.findByRole('button', { name: /^published$/i }) as HTMLButtonElement
+    const publishedButton = (await screen.findByRole('button', {
+      name: /^published$/i,
+    })) as HTMLButtonElement
     expect(publishedButton.getAttribute('aria-disabled')).toBe('true')
 
-    const calls = (globalThis as typeof globalThis & { __contentFetchCalls?: FetchCall[] }).__contentFetchCalls ?? []
-    const saveCall = calls.find((call) => String(call.input) === '/admin/api/cms/data/rows/entry_1' && call.init?.method === 'PATCH')
-    expect(saveCall?.init?.body).toBe(JSON.stringify({
-      cells: {
-        title: 'My first post',
-        slug: 'untitled',
-        body: '',
-        featuredMedia: null,
-        seoTitle: '',
-        seoDescription: '',
-      },
-    }))
-    expect(calls.some((call) =>
-      String(call.input) === '/admin/api/cms/data/rows/entry_1/publish' &&
-      call.init?.method === 'POST'
-    )).toBe(true)
+    const calls =
+      (globalThis as typeof globalThis & { __contentFetchCalls?: FetchCall[] })
+        .__contentFetchCalls ?? []
+    const saveCall = calls.find(
+      (call) =>
+        String(call.input) === '/admin/api/cms/data/rows/entry_1' && call.init?.method === 'PATCH',
+    )
+    expect(saveCall?.init?.body).toBe(
+      JSON.stringify({
+        cells: {
+          title: 'My first post',
+          slug: 'untitled',
+          body: '',
+          featuredMedia: null,
+          seoTitle: '',
+          seoDescription: '',
+        },
+      }),
+    )
+    expect(
+      calls.some(
+        (call) =>
+          String(call.input) === '/admin/api/cms/data/rows/entry_1/publish' &&
+          call.init?.method === 'POST',
+      ),
+    ).toBe(true)
   })
 
   it('renders the post title as a wrapping multi-line editor', async () => {
@@ -1060,11 +1148,12 @@ describe('ContentPage', () => {
 
     await screen.findByRole('region', { name: 'Posts' })
     fireEvent.click(
-      within(screen.getByRole('region', { name: 'Posts' }))
-        .getByRole('button', { name: /new post/i }),
+      within(screen.getByRole('region', { name: 'Posts' })).getByRole('button', {
+        name: /new post/i,
+      }),
     )
 
-    const title = await screen.findByLabelText('Title') as HTMLTextAreaElement
+    const title = (await screen.findByLabelText('Title')) as HTMLTextAreaElement
     const longTitle = "Here's my first long post title that needs to wrap cleanly"
 
     expect(title.tagName).toBe('TEXTAREA')
@@ -1074,14 +1163,18 @@ describe('ContentPage', () => {
 
     expect(title.value).toBe(longTitle)
 
-    const contentCss = readFileSync(join(process.cwd(), 'src/admin/pages/content/ContentPage.module.css'), 'utf8')
+    const contentCss = readFileSync(
+      join(process.cwd(), 'src/admin/pages/content/ContentPage.module.css'),
+      'utf8',
+    )
     expect(contentCss).toMatch(/\.titleInput\s*\{[^}]*white-space:\s*pre-wrap/s)
     expect(contentCss).toMatch(/\.titleInput\s*\{[^}]*overflow-wrap:\s*anywhere/s)
   })
 
   it('creates a custom collection and adds entries under that collection label', async () => {
     const calls: FetchCall[] = []
-    ;(globalThis as typeof globalThis & { __contentFetchCalls?: FetchCall[] }).__contentFetchCalls = calls
+    ;(globalThis as typeof globalThis & { __contentFetchCalls?: FetchCall[] }).__contentFetchCalls =
+      calls
     globalThis.fetch = async (input: RequestInfo | URL, init?: RequestInit) => {
       calls.push({ input, init })
       const url = String(input)
@@ -1096,9 +1189,20 @@ describe('ContentPage', () => {
 
       if (url === '/admin/api/cms/data/tables' && init?.method === 'POST') {
         const body = JSON.parse(String(init.body))
-        return json({
-          table: makeTable('products', body.name ?? 'Products', 'products', '/products', body.singularLabel ?? 'Product', body.pluralLabel ?? 'Products', body.fields),
-        }, 201)
+        return json(
+          {
+            table: makeTable(
+              'products',
+              body.name ?? 'Products',
+              'products',
+              '/products',
+              body.singularLabel ?? 'Product',
+              body.pluralLabel ?? 'Products',
+              body.fields,
+            ),
+          },
+          201,
+        )
       }
 
       if (url === '/admin/api/cms/data/tables/products/rows' && init?.method === 'GET') {
@@ -1106,9 +1210,12 @@ describe('ContentPage', () => {
       }
 
       if (url === '/admin/api/cms/data/tables/products/rows' && init?.method === 'POST') {
-        return json({
-          row: makeRow('product_1', 'products', { title: 'Untitled', slug: 'untitled' }),
-        }, 201)
+        return json(
+          {
+            row: makeRow('product_1', 'products', { title: 'Untitled', slug: 'untitled' }),
+          },
+          201,
+        )
       }
 
       const ambient = ambientFetchFallback(url)
@@ -1124,16 +1231,23 @@ describe('ContentPage', () => {
 
     await screen.findByRole('region', { name: 'Posts' })
     fireEvent.click(
-      within(screen.getByRole('region', { name: 'Collections' }))
-        .getByRole('button', { name: /new collection/i }),
+      within(screen.getByRole('region', { name: 'Collections' })).getByRole('button', {
+        name: /new collection/i,
+      }),
     )
 
     const dialog = await screen.findByRole('dialog', { name: /new collection/i })
-    fireEvent.change(within(dialog).getByLabelText('Name'), { target: { value: 'Product Catalog' } })
+    fireEvent.change(within(dialog).getByLabelText('Name'), {
+      target: { value: 'Product Catalog' },
+    })
     fireEvent.change(within(dialog).getByLabelText('Slug'), { target: { value: 'catalog-items' } })
     fireEvent.change(within(dialog).getByLabelText('URL path'), { target: { value: '/catalog' } })
-    fireEvent.change(within(dialog).getByLabelText('Singular label'), { target: { value: 'Product' } })
-    fireEvent.change(within(dialog).getByLabelText('Plural label'), { target: { value: 'Catalog' } })
+    fireEvent.change(within(dialog).getByLabelText('Singular label'), {
+      target: { value: 'Product' },
+    })
+    fireEvent.change(within(dialog).getByLabelText('Plural label'), {
+      target: { value: 'Catalog' },
+    })
     fireEvent.click(within(dialog).getByLabelText('Featured media'))
     fireEvent.click(within(dialog).getByLabelText('SEO fields'))
     fireEvent.click(within(dialog).getByRole('button', { name: /^create$/i }))
@@ -1143,32 +1257,37 @@ describe('ContentPage', () => {
 
     expect(await screen.findByLabelText('Title')).toBeDefined()
 
-    const createCollectionCall = calls.find((call) =>
-      String(call.input) === '/admin/api/cms/data/tables' &&
-      call.init?.method === 'POST'
+    const createCollectionCall = calls.find(
+      (call) => String(call.input) === '/admin/api/cms/data/tables' && call.init?.method === 'POST',
     )
-    expect(createCollectionCall?.init?.body).toBe(JSON.stringify({
-      name: 'Product Catalog',
-      slug: 'catalog-items',
-      routeBase: '/catalog',
-      singularLabel: 'Product',
-      pluralLabel: 'Catalog',
-      fields: [
-        { type: 'text', id: 'title', label: 'Title', required: true, builtIn: true },
-        { type: 'text', id: 'slug', label: 'Slug', required: true, builtIn: true },
-        { type: 'richText', id: 'body', label: 'Body', format: 'markdown', builtIn: true },
-      ],
-      kind: 'postType',
-    }))
-    expect(calls.some((call) =>
-      String(call.input) === '/admin/api/cms/data/tables/products/rows' &&
-      call.init?.method === 'POST'
-    )).toBe(true)
+    expect(createCollectionCall?.init?.body).toBe(
+      JSON.stringify({
+        name: 'Product Catalog',
+        slug: 'catalog-items',
+        routeBase: '/catalog',
+        singularLabel: 'Product',
+        pluralLabel: 'Catalog',
+        fields: [
+          { type: 'text', id: 'title', label: 'Title', required: true, builtIn: true },
+          { type: 'text', id: 'slug', label: 'Slug', required: true, builtIn: true },
+          { type: 'richText', id: 'body', label: 'Body', format: 'markdown', builtIn: true },
+        ],
+        kind: 'postType',
+      }),
+    )
+    expect(
+      calls.some(
+        (call) =>
+          String(call.input) === '/admin/api/cms/data/tables/products/rows' &&
+          call.init?.method === 'POST',
+      ),
+    ).toBe(true)
   })
 
   it('moves the selected entry from the settings sidebar and hides fields disabled by the target collection', async () => {
     const calls: FetchCall[] = []
-    ;(globalThis as typeof globalThis & { __contentFetchCalls?: FetchCall[] }).__contentFetchCalls = calls
+    ;(globalThis as typeof globalThis & { __contentFetchCalls?: FetchCall[] }).__contentFetchCalls =
+      calls
     globalThis.fetch = async (input: RequestInfo | URL, init?: RequestInit) => {
       calls.push({ input, init })
       const url = String(input)
@@ -1177,47 +1296,74 @@ describe('ContentPage', () => {
         return json({
           tables: [
             makeTable('posts', 'Posts', 'posts', '/posts', 'Post', 'Posts'),
-            makeTable('products', 'Products', 'products', '/products', 'Product', 'Products', titleOnlyFields),
+            makeTable(
+              'products',
+              'Products',
+              'products',
+              '/products',
+              'Product',
+              'Products',
+              titleOnlyFields,
+            ),
           ],
         })
       }
 
       if (url === '/admin/api/cms/data/tables/posts/rows' && init?.method === 'GET') {
         return json({
-          rows: [makeRow('entry_1', 'posts', {
-            title: 'Portable lamp',
-            slug: 'portable-lamp',
-            body: 'A compact lamp',
-            featuredMedia: imageAsset.id,
-            seoTitle: 'SEO lamp',
-            seoDescription: 'Lamp description',
-          }, { updatedAt: '2026-05-01T10:01:00.000Z' })],
+          rows: [
+            makeRow(
+              'entry_1',
+              'posts',
+              {
+                title: 'Portable lamp',
+                slug: 'portable-lamp',
+                body: 'A compact lamp',
+                featuredMedia: imageAsset.id,
+                seoTitle: 'SEO lamp',
+                seoDescription: 'Lamp description',
+              },
+              { updatedAt: '2026-05-01T10:01:00.000Z' },
+            ),
+          ],
         })
       }
 
       if (url === '/admin/api/cms/data/rows/entry_1/table' && init?.method === 'PATCH') {
         return json({
-          row: makeRow('entry_1', 'products', {
-            title: 'Portable lamp',
-            slug: 'portable-lamp',
-            body: 'A compact lamp',
-            featuredMedia: imageAsset.id,
-            seoTitle: 'SEO lamp',
-            seoDescription: 'Lamp description',
-          }, { updatedAt: '2026-05-01T10:05:00.000Z' }),
+          row: makeRow(
+            'entry_1',
+            'products',
+            {
+              title: 'Portable lamp',
+              slug: 'portable-lamp',
+              body: 'A compact lamp',
+              featuredMedia: imageAsset.id,
+              seoTitle: 'SEO lamp',
+              seoDescription: 'Lamp description',
+            },
+            { updatedAt: '2026-05-01T10:05:00.000Z' },
+          ),
         })
       }
 
       if (url === '/admin/api/cms/data/tables/products/rows' && init?.method === 'GET') {
         return json({
-          rows: [makeRow('entry_1', 'products', {
-            title: 'Portable lamp',
-            slug: 'portable-lamp',
-            body: 'A compact lamp',
-            featuredMedia: imageAsset.id,
-            seoTitle: 'SEO lamp',
-            seoDescription: 'Lamp description',
-          }, { updatedAt: '2026-05-01T10:05:00.000Z' })],
+          rows: [
+            makeRow(
+              'entry_1',
+              'products',
+              {
+                title: 'Portable lamp',
+                slug: 'portable-lamp',
+                body: 'A compact lamp',
+                featuredMedia: imageAsset.id,
+                seoTitle: 'SEO lamp',
+                seoDescription: 'Lamp description',
+              },
+              { updatedAt: '2026-05-01T10:05:00.000Z' },
+            ),
+          ],
         })
       }
 
@@ -1244,11 +1390,14 @@ describe('ContentPage', () => {
     fireEvent.click(await screen.findByRole('option', { name: 'Products' }))
 
     await waitFor(() => {
-      expect(calls.some((call) =>
-        String(call.input) === '/admin/api/cms/data/rows/entry_1/table' &&
-        call.init?.method === 'PATCH' &&
-        call.init?.body === JSON.stringify({ tableId: 'products' })
-      )).toBe(true)
+      expect(
+        calls.some(
+          (call) =>
+            String(call.input) === '/admin/api/cms/data/rows/entry_1/table' &&
+            call.init?.method === 'PATCH' &&
+            call.init?.body === JSON.stringify({ tableId: 'products' }),
+        ),
+      ).toBe(true)
     })
 
     expect(await screen.findByRole('region', { name: 'Products' })).toBeDefined()
@@ -1258,7 +1407,8 @@ describe('ContentPage', () => {
 
   it('opens explorer-style context menus for content collections and entries', async () => {
     const calls: FetchCall[] = []
-    ;(globalThis as typeof globalThis & { __contentFetchCalls?: FetchCall[] }).__contentFetchCalls = calls
+    ;(globalThis as typeof globalThis & { __contentFetchCalls?: FetchCall[] }).__contentFetchCalls =
+      calls
     globalThis.fetch = async (input: RequestInfo | URL, init?: RequestInit) => {
       calls.push({ input, init })
       const url = String(input)
@@ -1275,8 +1425,36 @@ describe('ContentPage', () => {
       if (url === '/admin/api/cms/data/tables/posts/rows' && init?.method === 'GET') {
         return json({
           rows: [
-            makeRow('entry_1', 'posts', { title: 'Summer sale', slug: 'summer-sale', body: 'Sale copy', featuredMedia: null, seoTitle: '', seoDescription: '' }, { updatedAt: '2026-05-01T10:01:00.000Z' }),
-            makeRow('entry_2', 'posts', { title: 'Published story', slug: 'published-story', body: 'Published copy', featuredMedia: null, seoTitle: '', seoDescription: '' }, { status: 'published', updatedAt: '2026-05-01T10:02:00.000Z', publishedAt: '2026-05-01T10:02:00.000Z' }),
+            makeRow(
+              'entry_1',
+              'posts',
+              {
+                title: 'Summer sale',
+                slug: 'summer-sale',
+                body: 'Sale copy',
+                featuredMedia: null,
+                seoTitle: '',
+                seoDescription: '',
+              },
+              { updatedAt: '2026-05-01T10:01:00.000Z' },
+            ),
+            makeRow(
+              'entry_2',
+              'posts',
+              {
+                title: 'Published story',
+                slug: 'published-story',
+                body: 'Published copy',
+                featuredMedia: null,
+                seoTitle: '',
+                seoDescription: '',
+              },
+              {
+                status: 'published',
+                updatedAt: '2026-05-01T10:02:00.000Z',
+                publishedAt: '2026-05-01T10:02:00.000Z',
+              },
+            ),
           ],
         })
       }
@@ -1297,20 +1475,60 @@ describe('ContentPage', () => {
 
       if (url === '/admin/api/cms/data/rows/entry_1/publish' && init?.method === 'POST') {
         return json({
-          row: makeRow('entry_1', 'posts', { title: 'Summer sale', slug: 'summer-sale', body: 'Sale copy', featuredMedia: null, seoTitle: '', seoDescription: '' }, { status: 'published', updatedAt: '2026-05-01T10:03:00.000Z', publishedAt: '2026-05-01T10:03:00.000Z' }),
+          row: makeRow(
+            'entry_1',
+            'posts',
+            {
+              title: 'Summer sale',
+              slug: 'summer-sale',
+              body: 'Sale copy',
+              featuredMedia: null,
+              seoTitle: '',
+              seoDescription: '',
+            },
+            {
+              status: 'published',
+              updatedAt: '2026-05-01T10:03:00.000Z',
+              publishedAt: '2026-05-01T10:03:00.000Z',
+            },
+          ),
         })
       }
 
       if (url === '/admin/api/cms/data/rows/entry_2/status' && init?.method === 'PATCH') {
         const body = JSON.parse(String(init.body))
         return json({
-          row: makeRow('entry_2', 'posts', { title: 'Published story', slug: 'published-story', body: 'Published copy', featuredMedia: null, seoTitle: '', seoDescription: '' }, { status: body.status, updatedAt: '2026-05-01T10:04:00.000Z' }),
+          row: makeRow(
+            'entry_2',
+            'posts',
+            {
+              title: 'Published story',
+              slug: 'published-story',
+              body: 'Published copy',
+              featuredMedia: null,
+              seoTitle: '',
+              seoDescription: '',
+            },
+            { status: body.status, updatedAt: '2026-05-01T10:04:00.000Z' },
+          ),
         })
       }
 
       if (url === '/admin/api/cms/data/rows/entry_1' && init?.method === 'DELETE') {
         return json({
-          row: makeRow('entry_1', 'posts', { title: 'Winter sale', slug: 'winter-sale', body: 'Sale copy', featuredMedia: null, seoTitle: '', seoDescription: '' }, { updatedAt: '2026-05-01T10:06:00.000Z', deletedAt: '2026-05-01T10:06:00.000Z' }),
+          row: makeRow(
+            'entry_1',
+            'posts',
+            {
+              title: 'Winter sale',
+              slug: 'winter-sale',
+              body: 'Sale copy',
+              featuredMedia: null,
+              seoTitle: '',
+              seoDescription: '',
+            },
+            { updatedAt: '2026-05-01T10:06:00.000Z', deletedAt: '2026-05-01T10:06:00.000Z' },
+          ),
         })
       }
 
@@ -1347,7 +1565,9 @@ describe('ContentPage', () => {
     )
 
     const postsRegion = await screen.findByRole('region', { name: 'Posts' })
-    const publishedButton = (await within(postsRegion).findByText('Published story')).closest('button')
+    const publishedButton = (await within(postsRegion).findByText('Published story')).closest(
+      'button',
+    )
     expect(publishedButton).toBeTruthy()
 
     fireEvent.contextMenu(publishedButton as HTMLButtonElement, { clientX: 240, clientY: 300 })
@@ -1357,11 +1577,14 @@ describe('ContentPage', () => {
     expect(within(menu).queryByRole('menuitem', { name: /^publish$/i })).toBeNull()
     fireEvent.click(within(menu).getByRole('menuitem', { name: /convert to draft/i }))
     await waitFor(() => {
-      expect(calls.some((call) =>
-        String(call.input) === '/admin/api/cms/data/rows/entry_2/status' &&
-        call.init?.method === 'PATCH' &&
-        call.init?.body === JSON.stringify({ status: 'draft' })
-      )).toBe(true)
+      expect(
+        calls.some(
+          (call) =>
+            String(call.input) === '/admin/api/cms/data/rows/entry_2/status' &&
+            call.init?.method === 'PATCH' &&
+            call.init?.body === JSON.stringify({ status: 'draft' }),
+        ),
+      ).toBe(true)
     })
 
     const entryButton = (await within(postsRegion).findByText('Summer sale')).closest('button')
@@ -1374,10 +1597,13 @@ describe('ContentPage', () => {
     expect(within(menu).queryByRole('menuitem', { name: /open in new tab/i })).toBeNull()
     fireEvent.click(within(menu).getByRole('menuitem', { name: /^publish$/i }))
     await waitFor(() => {
-      expect(calls.some((call) =>
-        String(call.input) === '/admin/api/cms/data/rows/entry_1/publish' &&
-        call.init?.method === 'POST'
-      )).toBe(true)
+      expect(
+        calls.some(
+          (call) =>
+            String(call.input) === '/admin/api/cms/data/rows/entry_1/publish' &&
+            call.init?.method === 'POST',
+        ),
+      ).toBe(true)
     })
 
     fireEvent.contextMenu(entryButton as HTMLButtonElement, { clientX: 240, clientY: 320 })
@@ -1390,25 +1616,27 @@ describe('ContentPage', () => {
     fireEvent.click(within(dialog).getByRole('button', { name: /^save$/i }))
 
     expect(await within(postsRegion).findByText('Winter sale')).toBeDefined()
-    expect(calls.some((call) =>
-      String(call.input) === '/admin/api/cms/data/rows/entry_1' &&
-      call.init?.method === 'PATCH' &&
-      call.init?.body === JSON.stringify({
-        cells: {
-          title: 'Winter sale',
-          slug: 'winter-sale',
-          body: 'Sale copy',
-          featuredMedia: null,
-          seoTitle: '',
-          seoDescription: '',
-        },
-      })
-    )).toBe(true)
+    expect(
+      calls.some(
+        (call) =>
+          String(call.input) === '/admin/api/cms/data/rows/entry_1' &&
+          call.init?.method === 'PATCH' &&
+          call.init?.body ===
+            JSON.stringify({
+              cells: {
+                title: 'Winter sale',
+                slug: 'winter-sale',
+                body: 'Sale copy',
+                featuredMedia: null,
+                seoTitle: '',
+                seoDescription: '',
+              },
+            }),
+      ),
+    ).toBe(true)
 
     const collectionsRegion = screen.getByRole('region', { name: 'Collections' })
-    const productsButton = within(collectionsRegion)
-      .getByText('Products')
-      .closest('button')
+    const productsButton = within(collectionsRegion).getByText('Products').closest('button')
     expect(productsButton).toBeTruthy()
 
     fireEvent.contextMenu(productsButton as HTMLButtonElement, { clientX: 220, clientY: 210 })
@@ -1419,36 +1647,49 @@ describe('ContentPage', () => {
     fireEvent.change(within(dialog).getByLabelText('Name'), { target: { value: 'Catalog' } })
     fireEvent.change(within(dialog).getByLabelText('Slug'), { target: { value: 'catalog' } })
     fireEvent.change(within(dialog).getByLabelText('URL path'), { target: { value: '/catalog' } })
-    fireEvent.change(within(dialog).getByLabelText('Plural label'), { target: { value: 'Catalog' } })
+    fireEvent.change(within(dialog).getByLabelText('Plural label'), {
+      target: { value: 'Catalog' },
+    })
     fireEvent.click(within(dialog).getByRole('button', { name: /^save$/i }))
 
     expect(await within(collectionsRegion).findByText('Catalog')).toBeDefined()
-    expect(calls.some((call) =>
-      String(call.input) === '/admin/api/cms/data/tables/products' &&
-      call.init?.method === 'PATCH' &&
-      call.init?.body === JSON.stringify({
-        name: 'Catalog',
-        slug: 'catalog',
-        routeBase: '/catalog',
-        singularLabel: 'Product',
-        pluralLabel: 'Catalog',
-        fields: allBuiltInFields,
-      })
-    )).toBe(true)
+    expect(
+      calls.some(
+        (call) =>
+          String(call.input) === '/admin/api/cms/data/tables/products' &&
+          call.init?.method === 'PATCH' &&
+          call.init?.body ===
+            JSON.stringify({
+              name: 'Catalog',
+              slug: 'catalog',
+              routeBase: '/catalog',
+              singularLabel: 'Product',
+              pluralLabel: 'Catalog',
+              fields: allBuiltInFields,
+            }),
+      ),
+    ).toBe(true)
 
-    const renamedEntryButton = within(screen.getByRole('region', { name: 'Posts' }))
-      .getByRole('button', { name: /winter sale draft/i })
+    const renamedEntryButton = within(screen.getByRole('region', { name: 'Posts' })).getByRole(
+      'button',
+      { name: /winter sale draft/i },
+    )
     fireEvent.contextMenu(renamedEntryButton as HTMLButtonElement, { clientX: 240, clientY: 320 })
     menu = screen.getByRole('menu', { name: 'Content item options' })
     fireEvent.click(within(menu).getByRole('menuitem', { name: /^delete$/i }))
 
     await waitFor(() => {
-      expect(calls.some((call) =>
-        String(call.input) === '/admin/api/cms/data/rows/entry_1' &&
-        call.init?.method === 'DELETE'
-      )).toBe(true)
+      expect(
+        calls.some(
+          (call) =>
+            String(call.input) === '/admin/api/cms/data/rows/entry_1' &&
+            call.init?.method === 'DELETE',
+        ),
+      ).toBe(true)
     })
-    expect(within(screen.getByRole('region', { name: 'Posts' })).queryByText('Winter sale')).toBeNull()
+    expect(
+      within(screen.getByRole('region', { name: 'Posts' })).queryByText('Winter sale'),
+    ).toBeNull()
 
     const catalogButton = within(screen.getByRole('region', { name: 'Collections' }))
       .getByText('Catalog')
@@ -1458,12 +1699,17 @@ describe('ContentPage', () => {
     fireEvent.click(within(menu).getByRole('menuitem', { name: /^delete$/i }))
 
     await waitFor(() => {
-      expect(calls.some((call) =>
-        String(call.input) === '/admin/api/cms/data/tables/products' &&
-        call.init?.method === 'DELETE'
-      )).toBe(true)
+      expect(
+        calls.some(
+          (call) =>
+            String(call.input) === '/admin/api/cms/data/tables/products' &&
+            call.init?.method === 'DELETE',
+        ),
+      ).toBe(true)
     })
-    expect(within(screen.getByRole('region', { name: 'Collections' })).queryByText('Catalog')).toBeNull()
+    expect(
+      within(screen.getByRole('region', { name: 'Collections' })).queryByText('Catalog'),
+    ).toBeNull()
   })
 
   it('opens the selected post in a new browser tab from the content toolbar', async () => {
@@ -1483,12 +1729,15 @@ describe('ContentPage', () => {
 
       await screen.findByRole('region', { name: 'Posts' })
       fireEvent.click(
-        within(screen.getByRole('region', { name: 'Posts' }))
-          .getByRole('button', { name: /new post/i }),
+        within(screen.getByRole('region', { name: 'Posts' })).getByRole('button', {
+          name: /new post/i,
+        }),
       )
 
       await waitFor(() => {
-        expect(screen.getByRole('button', { name: /more publishing actions/i }).hasAttribute('disabled')).toBe(false)
+        expect(
+          screen.getByRole('button', { name: /more publishing actions/i }).hasAttribute('disabled'),
+        ).toBe(false)
       })
       fireEvent.click(screen.getByRole('button', { name: /more publishing actions/i }))
       const menu = screen.getByRole('menu', { name: /publishing actions/i })
@@ -1509,8 +1758,9 @@ describe('ContentPage', () => {
 
     await screen.findByRole('region', { name: 'Posts' })
     fireEvent.click(
-      within(screen.getByRole('region', { name: 'Posts' }))
-        .getByRole('button', { name: /new post/i }),
+      within(screen.getByRole('region', { name: 'Posts' })).getByRole('button', {
+        name: /new post/i,
+      }),
     )
 
     // The Tiptap surface mounts as a single contenteditable region.
@@ -1535,8 +1785,9 @@ describe('ContentPage', () => {
 
     await screen.findByRole('region', { name: 'Posts' })
     fireEvent.click(
-      within(screen.getByRole('region', { name: 'Posts' }))
-        .getByRole('button', { name: /new post/i }),
+      within(screen.getByRole('region', { name: 'Posts' })).getByRole('button', {
+        name: /new post/i,
+      }),
     )
 
     await screen.findByTestId('content-body-editor')
@@ -1553,18 +1804,25 @@ describe('ContentPage', () => {
     clickToolbarSaveDraft()
     await screen.findByText('Draft saved')
 
-    const calls = (globalThis as typeof globalThis & { __contentFetchCalls?: FetchCall[] }).__contentFetchCalls ?? []
-    const saveCalls = calls.filter((call) => String(call.input) === '/admin/api/cms/data/rows/entry_1' && call.init?.method === 'PATCH')
-    expect(saveCalls.at(-1)?.init?.body).toBe(JSON.stringify({
-      cells: {
-        title: 'Untitled',
-        slug: 'untitled',
-        body: '![hero.png](/uploads/hero.png)',
-        featuredMedia: null,
-        seoTitle: '',
-        seoDescription: '',
-      },
-    }))
+    const calls =
+      (globalThis as typeof globalThis & { __contentFetchCalls?: FetchCall[] })
+        .__contentFetchCalls ?? []
+    const saveCalls = calls.filter(
+      (call) =>
+        String(call.input) === '/admin/api/cms/data/rows/entry_1' && call.init?.method === 'PATCH',
+    )
+    expect(saveCalls.at(-1)?.init?.body).toBe(
+      JSON.stringify({
+        cells: {
+          title: 'Untitled',
+          slug: 'untitled',
+          body: '![hero.png](/uploads/hero.png)',
+          featuredMedia: null,
+          seoTitle: '',
+          seoDescription: '',
+        },
+      }),
+    )
   })
 
   // Drag-and-drop block reorder was a Gutenberg-style affordance on the old
@@ -1582,13 +1840,16 @@ describe('ContentPage', () => {
 
     await screen.findByRole('region', { name: 'Posts' })
     fireEvent.click(
-      within(screen.getByRole('region', { name: 'Posts' }))
-        .getByRole('button', { name: /new post/i }),
+      within(screen.getByRole('region', { name: 'Posts' })).getByRole('button', {
+        name: /new post/i,
+      }),
     )
     const title = await screen.findByLabelText('Title')
     fireEvent.change(title, { target: { value: 'My first post' } })
     clickToolbarPublish()
-    const publishedButton = await screen.findByRole('button', { name: /^published$/i }) as HTMLButtonElement
+    const publishedButton = (await screen.findByRole('button', {
+      name: /^published$/i,
+    })) as HTMLButtonElement
     expect(publishedButton.getAttribute('aria-disabled')).toBe('true')
 
     const slugInput = screen.getByLabelText('Slug') as HTMLInputElement
@@ -1608,23 +1869,33 @@ describe('ContentPage', () => {
     })
     await screen.findByText('Unpublished')
 
-    const calls = (globalThis as typeof globalThis & { __contentFetchCalls?: FetchCall[] }).__contentFetchCalls ?? []
-    const saveCalls = calls.filter((call) => String(call.input) === '/admin/api/cms/data/rows/entry_1' && call.init?.method === 'PATCH')
-    expect(saveCalls.at(-1)?.init?.body).toBe(JSON.stringify({
-      cells: {
-        title: 'My first post',
-        slug: 'updated-slug',
-        body: '',
-        featuredMedia: imageAsset.id,
-        seoTitle: '',
-        seoDescription: '',
-      },
-    }))
-    expect(calls.some((call) =>
-      String(call.input) === '/admin/api/cms/data/rows/entry_1/status' &&
-      call.init?.method === 'PATCH' &&
-      call.init?.body === JSON.stringify({ status: 'unpublished' })
-    )).toBe(true)
+    const calls =
+      (globalThis as typeof globalThis & { __contentFetchCalls?: FetchCall[] })
+        .__contentFetchCalls ?? []
+    const saveCalls = calls.filter(
+      (call) =>
+        String(call.input) === '/admin/api/cms/data/rows/entry_1' && call.init?.method === 'PATCH',
+    )
+    expect(saveCalls.at(-1)?.init?.body).toBe(
+      JSON.stringify({
+        cells: {
+          title: 'My first post',
+          slug: 'updated-slug',
+          body: '',
+          featuredMedia: imageAsset.id,
+          seoTitle: '',
+          seoDescription: '',
+        },
+      }),
+    )
+    expect(
+      calls.some(
+        (call) =>
+          String(call.input) === '/admin/api/cms/data/rows/entry_1/status' &&
+          call.init?.method === 'PATCH' &&
+          call.init?.body === JSON.stringify({ status: 'unpublished' }),
+      ),
+    ).toBe(true)
   })
 
   it('hydrates saved featured media metadata when reopening the content page', async () => {
@@ -1633,18 +1904,25 @@ describe('ContentPage', () => {
       const url = String(input)
       if (url === '/admin/api/cms/data/tables/posts/rows' && init?.method === 'GET') {
         return json({
-          rows: [makeRow('entry_1', 'posts', {
-            title: 'First post',
-            slug: 'first-post',
-            body: '',
-            featuredMedia: imageAsset.id,
-            seoTitle: '',
-            seoDescription: '',
-          }, {
-            status: 'published',
-            updatedAt: '2026-05-01T10:01:00.000Z',
-            publishedAt: '2026-05-01T10:01:00.000Z',
-          })],
+          rows: [
+            makeRow(
+              'entry_1',
+              'posts',
+              {
+                title: 'First post',
+                slug: 'first-post',
+                body: '',
+                featuredMedia: imageAsset.id,
+                seoTitle: '',
+                seoDescription: '',
+              },
+              {
+                status: 'published',
+                updatedAt: '2026-05-01T10:01:00.000Z',
+                publishedAt: '2026-05-01T10:01:00.000Z',
+              },
+            ),
+          ],
         })
       }
 
@@ -1671,7 +1949,10 @@ describe('ContentPage', () => {
   // upstream. Round-trip markdown coverage lives in `markdown.test.ts`.
 
   it('uses Tiptap for the body editor and serialises to markdown on update', () => {
-    const src = readFileSync(join(process.cwd(), 'src/admin/pages/content/TiptapBodyEditor.tsx'), 'utf8')
+    const src = readFileSync(
+      join(process.cwd(), 'src/admin/pages/content/TiptapBodyEditor.tsx'),
+      'utf8',
+    )
 
     expect(src).toContain('useEditor')
     expect(src).toContain('proseMirrorDocToMarkdown')
@@ -1684,12 +1965,17 @@ describe('ContentPage', () => {
   })
 
   it('uses the content publish button as the single published-state indicator', () => {
-    const src = readFileSync(join(process.cwd(), 'src/admin/pages/content/components/ContentToolbar/ContentToolbar.tsx'), 'utf8')
+    const src = readFileSync(
+      join(process.cwd(), 'src/admin/pages/content/components/ContentToolbar/ContentToolbar.tsx'),
+      'utf8',
+    )
 
     expect(src).toContain("'Retry publish'")
     expect(src).toContain("'Published'")
     expect(src).toContain('statusLabel={isCleanPublished ? null : statusText}')
-    expect(src).toContain('publishDisabled={!selectedEntry || !canPublish || isPublishing || isCleanPublished}')
+    expect(src).toContain(
+      'publishDisabled={!selectedEntry || !canPublish || isPublishing || isCleanPublished}',
+    )
     expect(src).not.toContain("'Live'")
     expect(src).toContain('isCleanPublished ? CheckIcon')
     expect(src).not.toContain("'Publish failed'")

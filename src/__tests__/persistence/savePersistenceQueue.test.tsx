@@ -95,7 +95,14 @@ function seedStore(): void {
 
 async function mountHook(adapter: IPersistenceAdapter): Promise<() => Promise<void>> {
   let save: (() => Promise<void>) | null = null
-  render(<HookHost adapter={adapter} onSave={(s) => { save = s }} />)
+  render(
+    <HookHost
+      adapter={adapter}
+      onSave={(s) => {
+        save = s
+      }}
+    />,
+  )
   await waitFor(() => expect(save).not.toBeNull())
   return save!
 }

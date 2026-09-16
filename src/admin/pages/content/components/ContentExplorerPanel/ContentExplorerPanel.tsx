@@ -29,8 +29,7 @@ import styles from '../../ContentPage.module.css'
 import { publicContentPath } from '@content/utils/contentEntryUtils'
 
 type ContentExplorerContextTarget =
-  | { kind: 'collection'; collection: DataTable }
-  | { kind: 'entry'; entry: DataRow }
+  { kind: 'collection'; collection: DataTable } | { kind: 'entry'; entry: DataRow }
 
 interface ContextMenuState {
   x: number
@@ -141,13 +140,19 @@ export function ContentExplorerPanel({
     return collections.find((collection) => collection.id === entry.tableId) ?? selectedCollection
   }
 
-  function openContextMenu(target: ContentExplorerContextTarget, event: MouseEvent<HTMLButtonElement>) {
+  function openContextMenu(
+    target: ContentExplorerContextTarget,
+    event: MouseEvent<HTMLButtonElement>,
+  ) {
     event.preventDefault()
     event.stopPropagation()
     setContextMenu({ x: event.clientX, y: event.clientY, target })
   }
 
-  function openKeyboardContextMenu(target: ContentExplorerContextTarget, event: KeyboardEvent<HTMLButtonElement>) {
+  function openKeyboardContextMenu(
+    target: ContentExplorerContextTarget,
+    event: KeyboardEvent<HTMLButtonElement>,
+  ) {
     if (event.key !== 'ContextMenu' && !(event.key === 'F10' && event.shiftKey)) return
     event.preventDefault()
     event.stopPropagation()
@@ -190,14 +195,16 @@ export function ContentExplorerPanel({
   function extraMenuItems(target: ContentExplorerContextTarget): ExplorerContextMenuItem[] {
     if (target.kind === 'collection') {
       if (!canManageCollections) return []
-      return [{
-        label: 'Collection settings',
-        icon: <Settings2SolidIcon size={13} />,
-        action: () => {
-          setSettingsTarget(target.collection)
-          setContextMenu(null)
+      return [
+        {
+          label: 'Collection settings',
+          icon: <Settings2SolidIcon size={13} />,
+          action: () => {
+            setSettingsTarget(target.collection)
+            setContextMenu(null)
+          },
         },
-      }]
+      ]
     }
 
     const items: ExplorerContextMenuItem[] = []
@@ -218,7 +225,11 @@ export function ContentExplorerPanel({
         action: () => {
           const collection = collectionForEntry(target.entry)
           if (collection) {
-            window.open(publicContentPath(collection.routeBase, target.entry.slug), '_blank', 'noopener,noreferrer')
+            window.open(
+              publicContentPath(collection.routeBase, target.entry.slug),
+              '_blank',
+              'noopener,noreferrer',
+            )
           }
           setContextMenu(null)
         },
@@ -298,119 +309,121 @@ export function ContentExplorerPanel({
         testId="content-explorer-panel"
         onClose={onClose}
       >
-        {error && <p className={styles.error} role="alert">{error}</p>}
+        {error && (
+          <p className={styles.error} role="alert">
+            {error}
+          </p>
+        )}
 
-          <section className={explorerStyles.section} aria-label="Collections">
-            <div className={explorerStyles.sectionHeader}>
-              <h2 className={explorerStyles.sectionTitle}>Collections</h2>
-              {/* Hide the count while loading — `0` would look like an
+        <section className={explorerStyles.section} aria-label="Collections">
+          <div className={explorerStyles.sectionHeader}>
+            <h2 className={explorerStyles.sectionTitle}>Collections</h2>
+            {/* Hide the count while loading — `0` would look like an
                   empty install. Same for the entries section below. */}
-              {!loading && (
-                <span className={explorerStyles.sectionCount}>{collections.length}</span>
-              )}
-              {canCreateCollection && (
-                <Button
-                  variant="ghost"
-                  size="xs"
-                  iconOnly
-                  onClick={createCollection}
-                  aria-label="New collection"
-                  tooltip="New collection"
-                >
-                  <BookPlusSolidIcon size={13} aria-hidden="true" />
-                </Button>
-              )}
-            </div>
-            <div className={explorerStyles.rows}>
-              {loading
-                ? Array.from({ length: 2 }, (_, i) => (
-                    // Skeleton collection row mirrors the real row 1:1:
-                    // 14px icon + label text + small meta count slot.
-                    <div
-                      key={`skeleton-coll-${i}`}
-                      className={explorerStyles.row}
-                      aria-hidden="true"
-                    >
-                      <Skeleton width={14} height={14} radius={3} />
-                      <span className={explorerStyles.rowLabel}>
-                        <Skeleton width={`${56 + (i % 2) * 16}%`} height={12} />
-                      </span>
-                      <span className={explorerStyles.rowMeta}>
-                        <Skeleton width={16} height={10} />
-                      </span>
-                    </div>
-                  ))
-                : collections.map((collection) => (
-                <button
-                  key={collection.id}
-                  type="button"
-                  className={cn(
-                    explorerStyles.row,
-                    collection.id === selectedCollectionId && explorerStyles.rowActive,
-                  )}
-                  onClick={() => onSelectCollection(collection.id)}
-                  onContextMenu={(event) => openContextMenu({ kind: 'collection', collection }, event)}
-                  onKeyDown={(event) => openKeyboardContextMenu({ kind: 'collection', collection }, event)}
-                >
-                  <BookOpenSolidIcon size={14} aria-hidden="true" />
-                  <span className={explorerStyles.rowLabel}>{collection.name}</span>
-                  <span className={explorerStyles.rowMeta}>
-                    {collection.id === selectedCollectionId ? entries.length : ''}
-                  </span>
-                </button>
-              ))}
-            </div>
-          </section>
-
-          <section className={explorerStyles.section} aria-label={entryListLabel}>
-            <div className={explorerStyles.sectionHeader}>
-              <h2 className={explorerStyles.sectionTitle}>{entryListLabel}</h2>
-              {!loading && (
-                <span className={explorerStyles.sectionCount}>{entries.length}</span>
-              )}
+            {!loading && <span className={explorerStyles.sectionCount}>{collections.length}</span>}
+            {canCreateCollection && (
               <Button
                 variant="ghost"
                 size="xs"
                 iconOnly
-                onClick={createEntry}
-                disabled={!selectedCollectionId || !canCreateEntry}
-                aria-label={newEntryLabel}
-                tooltip={newEntryLabel}
+                onClick={createCollection}
+                aria-label="New collection"
+                tooltip="New collection"
               >
-                <FilePlusSolidIcon size={13} aria-hidden="true" />
+                <BookPlusSolidIcon size={13} aria-hidden="true" />
               </Button>
-            </div>
-
-            {loading ? (
-              <ContentEntriesLoading />
-            ) : entries.length === 0 ? (
-              <EmptyState compact title="No entries yet." />
-            ) : (
-              <div className={explorerStyles.rows}>
-                {entries.map((entry) => (
+            )}
+          </div>
+          <div className={explorerStyles.rows}>
+            {loading
+              ? Array.from({ length: 2 }, (_, i) => (
+                  // Skeleton collection row mirrors the real row 1:1:
+                  // 14px icon + label text + small meta count slot.
+                  <div key={`skeleton-coll-${i}`} className={explorerStyles.row} aria-hidden="true">
+                    <Skeleton width={14} height={14} radius={3} />
+                    <span className={explorerStyles.rowLabel}>
+                      <Skeleton width={`${56 + (i % 2) * 16}%`} height={12} />
+                    </span>
+                    <span className={explorerStyles.rowMeta}>
+                      <Skeleton width={16} height={10} />
+                    </span>
+                  </div>
+                ))
+              : collections.map((collection) => (
                   <button
-                    key={entry.id}
+                    key={collection.id}
                     type="button"
                     className={cn(
                       explorerStyles.row,
-                      styles.entryRow,
-                      entry.id === selectedEntryId && explorerStyles.rowActive,
+                      collection.id === selectedCollectionId && explorerStyles.rowActive,
                     )}
-                    onClick={() => onSelectEntry(entry)}
-                    onContextMenu={(event) => openContextMenu({ kind: 'entry', entry }, event)}
-                    onKeyDown={(event) => openKeyboardContextMenu({ kind: 'entry', entry }, event)}
+                    onClick={() => onSelectCollection(collection.id)}
+                    onContextMenu={(event) =>
+                      openContextMenu({ kind: 'collection', collection }, event)
+                    }
+                    onKeyDown={(event) =>
+                      openKeyboardContextMenu({ kind: 'collection', collection }, event)
+                    }
                   >
-                    <EntryRowPreview asset={getFeaturedMediaAssetForEntry(entry)} />
-                    <span className={styles.entryTitleStack}>
-                      <span className={styles.entryTitle}>{readTitleCell(entry.cells)}</span>
-                      <span className={styles.entryAuthor} aria-hidden="true">{entryAuthorLabel(entry)}</span>
+                    <BookOpenSolidIcon size={14} aria-hidden="true" />
+                    <span className={explorerStyles.rowLabel}>{collection.name}</span>
+                    <span className={explorerStyles.rowMeta}>
+                      {collection.id === selectedCollectionId ? entries.length : ''}
                     </span>
-                    <span className={explorerStyles.rowMeta}>{entry.status}</span>
                   </button>
                 ))}
-              </div>
-            )}
-          </section>
+          </div>
+        </section>
+
+        <section className={explorerStyles.section} aria-label={entryListLabel}>
+          <div className={explorerStyles.sectionHeader}>
+            <h2 className={explorerStyles.sectionTitle}>{entryListLabel}</h2>
+            {!loading && <span className={explorerStyles.sectionCount}>{entries.length}</span>}
+            <Button
+              variant="ghost"
+              size="xs"
+              iconOnly
+              onClick={createEntry}
+              disabled={!selectedCollectionId || !canCreateEntry}
+              aria-label={newEntryLabel}
+              tooltip={newEntryLabel}
+            >
+              <FilePlusSolidIcon size={13} aria-hidden="true" />
+            </Button>
+          </div>
+
+          {loading ? (
+            <ContentEntriesLoading />
+          ) : entries.length === 0 ? (
+            <EmptyState compact title="No entries yet." />
+          ) : (
+            <div className={explorerStyles.rows}>
+              {entries.map((entry) => (
+                <button
+                  key={entry.id}
+                  type="button"
+                  className={cn(
+                    explorerStyles.row,
+                    styles.entryRow,
+                    entry.id === selectedEntryId && explorerStyles.rowActive,
+                  )}
+                  onClick={() => onSelectEntry(entry)}
+                  onContextMenu={(event) => openContextMenu({ kind: 'entry', entry }, event)}
+                  onKeyDown={(event) => openKeyboardContextMenu({ kind: 'entry', entry }, event)}
+                >
+                  <EntryRowPreview asset={getFeaturedMediaAssetForEntry(entry)} />
+                  <span className={styles.entryTitleStack}>
+                    <span className={styles.entryTitle}>{readTitleCell(entry.cells)}</span>
+                    <span className={styles.entryAuthor} aria-hidden="true">
+                      {entryAuthorLabel(entry)}
+                    </span>
+                  </span>
+                  <span className={explorerStyles.rowMeta}>{entry.status}</span>
+                </button>
+              ))}
+            </div>
+          )}
+        </section>
       </Panel>
 
       {contextMenu && (
@@ -418,19 +431,25 @@ export function ContentExplorerPanel({
           x={contextMenu.x}
           y={contextMenu.y}
           ariaLabel="Content item options"
-          renameDisabled={contextMenu.target.kind === 'collection'
-            ? !canManageCollections
-            : !canEditEntry(contextMenu.target.entry)}
-          deleteDisabled={contextMenu.target.kind === 'collection'
-            ? contextMenu.target.collection.id === 'posts' || !canManageCollections
-            : !canEditEntry(contextMenu.target.entry)}
+          renameDisabled={
+            contextMenu.target.kind === 'collection'
+              ? !canManageCollections
+              : !canEditEntry(contextMenu.target.entry)
+          }
+          deleteDisabled={
+            contextMenu.target.kind === 'collection'
+              ? contextMenu.target.collection.id === 'posts' || !canManageCollections
+              : !canEditEntry(contextMenu.target.entry)
+          }
           extraItems={extraMenuItems(contextMenu.target)}
           onClose={() => setContextMenu(null)}
           onRename={() => {
             setRenameTarget(contextMenu.target)
             setContextMenu(null)
           }}
-          onDelete={() => { void handleDelete(contextMenu.target) }}
+          onDelete={() => {
+            void handleDelete(contextMenu.target)
+          }}
         />
       )}
 
@@ -438,8 +457,16 @@ export function ContentExplorerPanel({
         <ContentItemRenameDialog
           title={renameDialogTitle(renameTarget)}
           titleLabel={renameTarget.kind === 'collection' ? 'Name' : 'Title'}
-          initialTitle={renameTarget.kind === 'collection' ? renameTarget.collection.name : readTitleCell(renameTarget.entry.cells)}
-          initialSlug={renameTarget.kind === 'collection' ? renameTarget.collection.slug : renameTarget.entry.slug}
+          initialTitle={
+            renameTarget.kind === 'collection'
+              ? renameTarget.collection.name
+              : readTitleCell(renameTarget.entry.cells)
+          }
+          initialSlug={
+            renameTarget.kind === 'collection'
+              ? renameTarget.collection.slug
+              : renameTarget.entry.slug
+          }
           onCancel={() => setRenameTarget(null)}
           onRename={handleRename}
         />

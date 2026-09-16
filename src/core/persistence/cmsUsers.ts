@@ -32,11 +32,26 @@ const CmsAuditEventSchema = Type.Object({
 
 export type CmsAuditEvent = Static<typeof CmsAuditEventSchema>
 
-const UsersEnvelope = Type.Object({ users: Type.Optional(Type.Array(CmsCurrentUserSchema)) }, { additionalProperties: true })
-const UserEnvelope = Type.Object({ user: Type.Optional(CmsCurrentUserSchema) }, { additionalProperties: true })
-const RolesEnvelope = Type.Object({ roles: Type.Optional(Type.Array(CmsRoleSchema)) }, { additionalProperties: true })
-const RoleEnvelope = Type.Object({ role: Type.Optional(CmsRoleSchema) }, { additionalProperties: true })
-const AuditEnvelope = Type.Object({ events: Type.Optional(Type.Array(CmsAuditEventSchema)) }, { additionalProperties: true })
+const UsersEnvelope = Type.Object(
+  { users: Type.Optional(Type.Array(CmsCurrentUserSchema)) },
+  { additionalProperties: true },
+)
+const UserEnvelope = Type.Object(
+  { user: Type.Optional(CmsCurrentUserSchema) },
+  { additionalProperties: true },
+)
+const RolesEnvelope = Type.Object(
+  { roles: Type.Optional(Type.Array(CmsRoleSchema)) },
+  { additionalProperties: true },
+)
+const RoleEnvelope = Type.Object(
+  { role: Type.Optional(CmsRoleSchema) },
+  { additionalProperties: true },
+)
+const AuditEnvelope = Type.Object(
+  { events: Type.Optional(Type.Array(CmsAuditEventSchema)) },
+  { additionalProperties: true },
+)
 
 export async function listCmsUsers(
   fetchImpl: FetchLike = globalThis.fetch.bind(globalThis),
@@ -51,7 +66,13 @@ export async function listCmsUsers(
 }
 
 export async function createCmsUser(
-  input: { email: string; displayName: string; password: string; roleId: string; status?: 'active' | 'suspended' },
+  input: {
+    email: string
+    displayName: string
+    password: string
+    roleId: string
+    status?: 'active' | 'suspended'
+  },
   fetchImpl: FetchLike = globalThis.fetch.bind(globalThis),
   basePath = '/admin/api/cms',
 ): Promise<CmsCurrentUser> {
@@ -68,7 +89,13 @@ export async function createCmsUser(
 
 export async function updateCmsUser(
   userId: string,
-  input: Partial<{ email: string; displayName: string; password: string; roleId: string; status: 'active' | 'suspended' }>,
+  input: Partial<{
+    email: string
+    displayName: string
+    password: string
+    roleId: string
+    status: 'active' | 'suspended'
+  }>,
   fetchImpl: FetchLike = globalThis.fetch.bind(globalThis),
   basePath = '/admin/api/cms',
 ): Promise<CmsCurrentUser> {

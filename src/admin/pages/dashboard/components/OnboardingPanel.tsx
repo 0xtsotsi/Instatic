@@ -57,17 +57,14 @@ interface StepDef {
   cta: string
   icon: PixelArtIconComponent
   action:
-    | { kind: 'navigate'; to: string }
-    | { kind: 'settings-modal' }
-    | { kind: 'framework-import' }
+    { kind: 'navigate'; to: string } | { kind: 'settings-modal' } | { kind: 'framework-import' }
 }
 
 const STEPS: readonly StepDef[] = [
   {
     id: 'identity',
     title: 'Set site identity',
-    desc:
-      'Pick a favicon, logo and site title. Used everywhere — admin chrome, OG tags, published pages.',
+    desc: 'Pick a favicon, logo and site title. Used everywhere — admin chrome, OG tags, published pages.',
     cta: 'Open settings',
     icon: ImageSolidIcon,
     action: { kind: 'settings-modal' },
@@ -75,8 +72,7 @@ const STEPS: readonly StepDef[] = [
   {
     id: 'framework',
     title: 'Choose Core Framework import',
-    desc:
-      'Variables only, the full utility framework, or skip it and bring your own CSS.',
+    desc: 'Variables only, the full utility framework, or skip it and bring your own CSS.',
     cta: 'Import',
     icon: CodeIcon,
     action: { kind: 'framework-import' },
@@ -84,8 +80,7 @@ const STEPS: readonly StepDef[] = [
   {
     id: 'firstPage',
     title: 'Create your first page',
-    desc:
-      'Start from a blank canvas, a starter layout, or import HTML and we will scaffold a tree.',
+    desc: 'Start from a blank canvas, a starter layout, or import HTML and we will scaffold a tree.',
     cta: 'New page',
     icon: FileTextSolidIcon,
     action: { kind: 'navigate', to: '/admin/site' },
@@ -93,8 +88,7 @@ const STEPS: readonly StepDef[] = [
   {
     id: 'plugin',
     title: 'Install a plugin',
-    desc:
-      'Add SEO, comments, image optimization or workflow extensions from the registry.',
+    desc: 'Add SEO, comments, image optimization or workflow extensions from the registry.',
     cta: 'Browse plugins',
     icon: PackageSolidIcon,
     action: { kind: 'navigate', to: '/admin/plugins' },
@@ -102,8 +96,7 @@ const STEPS: readonly StepDef[] = [
   {
     id: 'team',
     title: 'Invite your team',
-    desc:
-      'Editors, designers and developers — each role gets a tuned set of editor permissions.',
+    desc: 'Editors, designers and developers — each role gets a tuned set of editor permissions.',
     cta: 'Add members',
     icon: UsersSolidIcon,
     action: { kind: 'navigate', to: '/admin/users' },
@@ -208,11 +201,7 @@ export function OnboardingPanel({ facts, onDismiss, onFrameworkImported }: Onboa
           return (
             <li className={styles.step} data-state={state} key={step.id}>
               <span className={styles.stepCheck} aria-hidden="true">
-                {state === 'done' ? (
-                  <CheckIcon size={11} />
-                ) : (
-                  String(i + 1).padStart(2, '0')
-                )}
+                {state === 'done' ? <CheckIcon size={11} /> : String(i + 1).padStart(2, '0')}
               </span>
               <span className={styles.stepIcon} aria-hidden="true">
                 <StepIcon size={14} />
@@ -228,11 +217,7 @@ export function OnboardingPanel({ facts, onDismiss, onFrameworkImported }: Onboa
                 <span className={styles.stepHint} data-state={state}>
                   {stateLabel(state)}
                 </span>
-                <Button
-                  variant={variant}
-                  size="sm"
-                  onClick={() => runStep(step)}
-                >
+                <Button variant={variant} size="sm" onClick={() => runStep(step)}>
                   {step.cta}
                   <ChevronRightIcon size={10} aria-hidden="true" />
                 </Button>

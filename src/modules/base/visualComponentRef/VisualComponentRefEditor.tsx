@@ -27,12 +27,9 @@ import { CanvasModulePlaceholder } from '@ui/components/CanvasModulePlaceholder'
 import { VCInlineTree } from './VCInlineTree'
 import type { VisualComponentRefStoredProps } from './props'
 
-export const VisualComponentRefEditor: React.FC<ModuleComponentProps<VisualComponentRefStoredProps>> = ({
-  props,
-  nodeId,
-  mcClassName,
-  nodeWrapperProps,
-}) => {
+export const VisualComponentRefEditor: React.FC<
+  ModuleComponentProps<VisualComponentRefStoredProps>
+> = ({ props, nodeId, mcClassName, nodeWrapperProps }) => {
   const componentId = typeof props.componentId === 'string' ? props.componentId : ''
   const propOverrides = safePropOverrides(props)
 
@@ -85,7 +82,13 @@ export const VisualComponentRefEditor: React.FC<ModuleComponentProps<VisualCompo
     }
   }
 
-  const { nodes, rootNodeId } = instantiateVCAtRef(vc, propOverrides, slotInstancesByName, pageNodes, nodeId)
+  const { nodes, rootNodeId } = instantiateVCAtRef(
+    vc,
+    propOverrides,
+    slotInstancesByName,
+    pageNodes,
+    nodeId,
+  )
 
   return (
     <VCInlineTree

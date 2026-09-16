@@ -59,11 +59,7 @@ function pruneClassIdFromSite(site: SiteDocument, classId: string): void {
   )
 }
 
-function remapClassIdInSite(
-  site: SiteDocument,
-  fromId: string,
-  toId: string,
-): void {
+function remapClassIdInSite(site: SiteDocument, fromId: string, toId: string): void {
   mutateAllClassIdLists(site, (ids) => {
     if (!ids.includes(fromId)) return ids
     const seen = new Set<string>()

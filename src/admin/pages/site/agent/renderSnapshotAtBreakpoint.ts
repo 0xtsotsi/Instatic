@@ -10,11 +10,7 @@
  */
 
 import { nanoid } from 'nanoid'
-import {
-  aiToolError,
-  RenderSnapshotInputSchema,
-  type AiToolOutput,
-} from '@core/ai'
+import { aiToolError, RenderSnapshotInputSchema, type AiToolOutput } from '@core/ai'
 import type { Static } from '@core/utils/typeboxHelpers'
 import type { EditorStore } from '@site/store/types'
 import { getAgentStoreApi } from './storeRef'

@@ -147,9 +147,8 @@ export function findAgentRenderFrame({
 }: AgentRenderFrameQuery = {}): HTMLElement | null {
   if (typeof document === 'undefined') return null
 
-  const breakpointAttribute = source === 'transient'
-    ? 'data-agent-snapshot-breakpoint-id'
-    : 'data-breakpoint-id'
+  const breakpointAttribute =
+    source === 'transient' ? 'data-agent-snapshot-breakpoint-id' : 'data-breakpoint-id'
   const breakpointSelector = breakpointId
     ? `[${breakpointAttribute}="${cssAttrEscape(breakpointId)}"]`
     : `[${breakpointAttribute}]`
@@ -270,7 +269,11 @@ function collectNodeLayout(
   const contentEl = nodeEl
   const computed = getComputedStyle(contentEl)
   const text = trimText(nodeEl.textContent ?? '')
-  const visible = rect.width > 0 && rect.height > 0 && computed.display !== 'none' && computed.visibility !== 'hidden'
+  const visible =
+    rect.width > 0 &&
+    rect.height > 0 &&
+    computed.display !== 'none' &&
+    computed.visibility !== 'hidden'
   const nodeId = nodeEl.dataset.nodeId ?? ''
 
   if (!visible && text) {
@@ -282,7 +285,10 @@ function collectNodeLayout(
     })
   }
 
-  if (rect.x < -OVERFLOW_TOLERANCE_PX || rect.x + rect.width > viewport.width + OVERFLOW_TOLERANCE_PX) {
+  if (
+    rect.x < -OVERFLOW_TOLERANCE_PX ||
+    rect.x + rect.width > viewport.width + OVERFLOW_TOLERANCE_PX
+  ) {
     warnings.push({
       type: 'horizontal-overflow',
       severity: 'warning',
@@ -292,7 +298,9 @@ function collectNodeLayout(
   }
 
   if (
-    (computed.overflow === 'hidden' || computed.overflowX === 'hidden' || computed.overflowY === 'hidden') &&
+    (computed.overflow === 'hidden' ||
+      computed.overflowX === 'hidden' ||
+      computed.overflowY === 'hidden') &&
     (contentEl.scrollWidth > contentEl.clientWidth + OVERFLOW_TOLERANCE_PX ||
       contentEl.scrollHeight > contentEl.clientHeight + OVERFLOW_TOLERANCE_PX)
   ) {
@@ -505,7 +513,10 @@ function firstFinite(...values: Array<number | undefined>): number {
 }
 
 function maxFinite(...values: Array<number | undefined>): number {
-  return Math.max(0, ...values.filter((value): value is number => value !== undefined && Number.isFinite(value)))
+  return Math.max(
+    0,
+    ...values.filter((value): value is number => value !== undefined && Number.isFinite(value)),
+  )
 }
 
 function createRect(x: number, y: number, width: number, height: number): DOMRectReadOnly {

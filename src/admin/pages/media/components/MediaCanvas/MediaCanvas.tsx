@@ -43,10 +43,7 @@ import {
   type UseMediaWorkspaceResult,
 } from '../../hooks/useMediaWorkspace'
 import { childFoldersForParent } from '../../utils/folderTree'
-import {
-  writeMediaAssetDragData,
-  writeMediaFolderDragData,
-} from '../../utils/mediaDragDrop'
+import { writeMediaAssetDragData, writeMediaFolderDragData } from '../../utils/mediaDragDrop'
 import { useMediaDnd } from '../../hooks/useMediaDnd'
 import styles from './MediaCanvas.module.css'
 import {
@@ -123,8 +120,13 @@ function folderAssetCount(assets: CmsMediaAsset[], folderId: string): number {
   return assets.filter((asset) => asset.folderIds.includes(folderId)).length
 }
 
-function folderItemMeta(folder: CmsMediaFolder, folders: CmsMediaFolder[], assets: CmsMediaAsset[]): string {
-  const count = childFoldersForParent(folders, folder.id).length + folderAssetCount(assets, folder.id)
+function folderItemMeta(
+  folder: CmsMediaFolder,
+  folders: CmsMediaFolder[],
+  assets: CmsMediaAsset[],
+): string {
+  const count =
+    childFoldersForParent(folders, folder.id).length + folderAssetCount(assets, folder.id)
   return `${count} ${count === 1 ? 'item' : 'items'}`
 }
 
@@ -150,11 +152,12 @@ export function MediaCanvas({ workspace }: MediaCanvasProps) {
   }
 
   const trashView = workspace.folderSelection === FOLDER_TRASH
-  const activeFolder = typeof workspace.folderSelection === 'string'
-    ? workspace.folderById.get(workspace.folderSelection) ?? null
-    : null
+  const activeFolder =
+    typeof workspace.folderSelection === 'string'
+      ? (workspace.folderById.get(workspace.folderSelection) ?? null)
+      : null
   const parentFolder = activeFolder?.parentId
-    ? workspace.folderById.get(activeFolder.parentId) ?? null
+    ? (workspace.folderById.get(activeFolder.parentId) ?? null)
     : null
   const parentEntry: ParentFolderEntry | null = activeFolder
     ? {
@@ -164,12 +167,11 @@ export function MediaCanvas({ workspace }: MediaCanvasProps) {
       }
     : null
   const folderEntriesVisible =
-    !trashView &&
-    workspace.filters.type === 'all' &&
-    workspace.filters.tag.trim() === ''
+    !trashView && workspace.filters.type === 'all' && workspace.filters.tag.trim() === ''
   const childFolders = folderEntriesVisible
-    ? childFoldersForParent(workspace.folders, activeFolder?.id ?? null)
-      .filter((folder) => folderMatchesQuery(folder, workspace.filters.q))
+    ? childFoldersForParent(workspace.folders, activeFolder?.id ?? null).filter((folder) =>
+        folderMatchesQuery(folder, workspace.filters.q),
+      )
     : []
 
   // Modifier-aware click dispatch:
@@ -199,9 +201,8 @@ export function MediaCanvas({ workspace }: MediaCanvasProps) {
       return
     }
     const selectedIds = Array.from(workspace.selectedAssetIds)
-    const dragIds = workspace.selectedAssetIds.has(asset.id) && selectedIds.length > 0
-      ? selectedIds
-      : [asset.id]
+    const dragIds =
+      workspace.selectedAssetIds.has(asset.id) && selectedIds.length > 0 ? selectedIds : [asset.id]
     writeMediaAssetDragData(event.dataTransfer, dragIds)
   }
 
@@ -275,7 +276,9 @@ export function MediaCanvas({ workspace }: MediaCanvasProps) {
     const items: ExplorerContextMenuItem[] = [
       {
         label: 'Copy URL',
-        action: () => { void copyAssetUrl(asset) },
+        action: () => {
+          void copyAssetUrl(asset)
+        },
         icon: <Copy2SolidIcon size={13} />,
       },
     ]
@@ -338,27 +341,27 @@ export function MediaCanvas({ workspace }: MediaCanvasProps) {
             placeholder: 'Search media',
             ariaLabel: 'Search media',
           }}
-          searchLeading={!trashView && canWrite && (
-            <FileUpload
-              multiple
-              onChange={(e) => void handleUpload(e)}
-              buttonProps={{
-                variant: 'primary',
-                size: 'sm',
-                'aria-label': 'Upload media',
-              }}
-            >
-              <UploadIcon size={13} />
-              <span>Upload</span>
-            </FileUpload>
-          )}
+          searchLeading={
+            !trashView &&
+            canWrite && (
+              <FileUpload
+                multiple
+                onChange={(e) => void handleUpload(e)}
+                buttonProps={{
+                  variant: 'primary',
+                  size: 'sm',
+                  'aria-label': 'Upload media',
+                }}
+              >
+                <UploadIcon size={13} />
+                <span>Upload</span>
+              </FileUpload>
+            )
+          }
           groupLabel="Filter media type"
-          trailing={(
+          trailing={
             <div role="group" aria-label="Media view" className={styles.viewGroup}>
-              <SortMenu
-                value={workspace.filters.sort}
-                onChange={workspace.setSort}
-              />
+              <SortMenu value={workspace.filters.sort} onChange={workspace.setSort} />
               <Button
                 variant={viewMode === 'list' ? 'secondary' : 'ghost'}
                 size="xs"
@@ -382,7 +385,7 @@ export function MediaCanvas({ workspace }: MediaCanvasProps) {
                 <Grid2x22SolidIcon size={13} />
               </Button>
             </div>
-          )}
+          }
         />
       </header>
 
@@ -402,18 +405,9 @@ export function MediaCanvas({ workspace }: MediaCanvasProps) {
           // chrome so the grid track / row spacing matches the
           // populated state.
           isGrid ? (
-            <ul
-              className={styles.grid}
-              role="list"
-              aria-busy="true"
-              aria-label="Loading media"
-            >
+            <ul className={styles.grid} role="list" aria-busy="true" aria-label="Loading media">
               {Array.from({ length: 12 }, (_, i) => (
-                <li
-                  key={`skeleton-tile-${i}`}
-                  className={styles.tileItem}
-                  aria-hidden="true"
-                >
+                <li key={`skeleton-tile-${i}`} className={styles.tileItem} aria-hidden="true">
                   <span className={styles.tile}>
                     <span className={styles.tilePreview}>
                       <Skeleton width="100%" height="100%" />
@@ -431,18 +425,9 @@ export function MediaCanvas({ workspace }: MediaCanvasProps) {
               ))}
             </ul>
           ) : (
-            <ul
-              className={styles.list}
-              role="list"
-              aria-busy="true"
-              aria-label="Loading media"
-            >
+            <ul className={styles.list} role="list" aria-busy="true" aria-label="Loading media">
               {Array.from({ length: 6 }, (_, i) => (
-                <li
-                  key={`skeleton-row-${i}`}
-                  className={styles.rowItem}
-                  aria-hidden="true"
-                >
+                <li key={`skeleton-row-${i}`} className={styles.rowItem} aria-hidden="true">
                   <span className={styles.row}>
                     <span className={styles.rowPreview}>
                       <Skeleton width="100%" height="100%" />
@@ -463,11 +448,7 @@ export function MediaCanvas({ workspace }: MediaCanvasProps) {
             variant="centered"
             icon={<ImagesSolidIcon size={28} />}
             title={
-              trashView
-                ? 'Trash is empty'
-                : showingTotal > 0
-                  ? 'No matching media'
-                  : 'No media yet'
+              trashView ? 'Trash is empty' : showingTotal > 0 ? 'No matching media' : 'No media yet'
             }
             description={
               trashView

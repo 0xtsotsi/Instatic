@@ -39,7 +39,10 @@ function rect(init: { x: number; y: number; width: number; height: number }): DO
   } as DOMRect
 }
 
-function setRect(element: HTMLElement, init: { x: number; y: number; width: number; height: number }) {
+function setRect(
+  element: HTMLElement,
+  init: { x: number; y: number; width: number; height: number },
+) {
   element.getBoundingClientRect = () => rect(init)
 }
 

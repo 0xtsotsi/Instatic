@@ -169,8 +169,8 @@ export function runSetTypeScale(rawInput: unknown): AiToolOutput {
   const groups = store.site.settings.framework?.typography?.groups ?? []
   const groupAlias = input.groupId ? normalizeScaleGroupAlias(input.groupId, 'text') : null
   const matchedGroup = input.groupId
-    ? groups.find((g) => g.id === input.groupId) ??
-      groups.find((g) => g.namingConvention === input.groupId)
+    ? (groups.find((g) => g.id === input.groupId) ??
+      groups.find((g) => g.namingConvention === input.groupId))
     : groups[0]
   let groupId = matchedGroup?.id
   if (input.groupId && !groupId && !groupAlias) {
@@ -215,8 +215,8 @@ export function runSetSpacingScale(rawInput: unknown): AiToolOutput {
   const groups = store.site.settings.framework?.spacing?.groups ?? []
   const groupAlias = input.groupId ? normalizeScaleGroupAlias(input.groupId, 'space') : null
   const matchedGroup = input.groupId
-    ? groups.find((g) => g.id === input.groupId) ??
-      groups.find((g) => g.namingConvention === input.groupId)
+    ? (groups.find((g) => g.id === input.groupId) ??
+      groups.find((g) => g.namingConvention === input.groupId))
     : groups[0]
   let groupId = matchedGroup?.id
   if (input.groupId && !groupId && !groupAlias) {

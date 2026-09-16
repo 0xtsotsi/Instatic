@@ -51,7 +51,7 @@ export function assertSandboxSafe(source: string, sourceLabel: string): void {
   const offenders = findings.map((f) => f.literal).join(', ')
   throw new Error(
     `Plugin sandbox: bundle for "${sourceLabel}" references forbidden literals: ${offenders}.\n` +
-    `Plugins run inside a QuickJS-WASM sandbox with no access to Node/Bun runtime APIs. Use the SDK ` +
-    `(api.cms.storage.*, api.cms.hooks.*, api.cms.routes.*) for I/O instead.`,
+      `Plugins run inside a QuickJS-WASM sandbox with no access to Node/Bun runtime APIs. Use the SDK ` +
+      `(api.cms.storage.*, api.cms.hooks.*, api.cms.routes.*) for I/O instead.`,
   )
 }

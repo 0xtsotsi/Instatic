@@ -24,16 +24,18 @@ describe('html attributes panel model', () => {
   })
 
   it('normalizes persisted attributes while preserving stored row order', () => {
-    expect(htmlAttributeRowsFromValue({
-      id: 'hero',
-      'data-z': 'last',
-      'aria-label': 'Hero',
-      'data-a': 'first',
-      'data-instatic-node': 'reserved',
-      'data-number': 123,
-      class: 'ignored',
-      onclick: 'ignored',
-    })).toEqual([
+    expect(
+      htmlAttributeRowsFromValue({
+        id: 'hero',
+        'data-z': 'last',
+        'aria-label': 'Hero',
+        'data-a': 'first',
+        'data-instatic-node': 'reserved',
+        'data-number': 123,
+        class: 'ignored',
+        onclick: 'ignored',
+      }),
+    ).toEqual([
       { id: 'id', name: 'id', value: 'hero' },
       { id: 'data-z', name: 'data-z', value: 'last' },
       { id: 'aria-label', name: 'aria-label', value: 'Hero' },

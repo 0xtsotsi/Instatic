@@ -1,9 +1,6 @@
 import { useEditorStore } from '@site/store/store'
 import type { SiteFile } from '@core/files/schemas'
-import {
-  DEFAULT_STYLE_RUNTIME_CONFIG,
-  normalizeStyleRuntimeConfig,
-} from '@core/site-runtime'
+import { DEFAULT_STYLE_RUNTIME_CONFIG, normalizeStyleRuntimeConfig } from '@core/site-runtime'
 import { Button } from '@ui/components/Button'
 import { Input } from '@ui/components/Input'
 import { AssetScopeControl, type ScopePageOption } from './AssetScopeControl'
@@ -72,7 +69,9 @@ export function StyleSettingsPane({ file }: StyleSettingsPaneProps) {
           value={String(config.priority)}
           onChange={(event) => {
             const next = Number(event.target.value)
-            patch({ priority: Number.isFinite(next) ? next : DEFAULT_STYLE_RUNTIME_CONFIG.priority })
+            patch({
+              priority: Number.isFinite(next) ? next : DEFAULT_STYLE_RUNTIME_CONFIG.priority,
+            })
           }}
         />
       </div>

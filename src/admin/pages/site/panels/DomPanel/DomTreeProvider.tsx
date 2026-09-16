@@ -7,9 +7,5 @@ export function DomTreeProvider({ children }: { children: ReactNode }) {
   // The provided value is the stable store ref → context never changes →
   // zero context-driven re-renders across the entire TreeNode subtree.
   const [store] = useState(() => new ExpansionStore())
-  return (
-    <ExpansionStoreContext.Provider value={store}>
-      {children}
-    </ExpansionStoreContext.Provider>
-  )
+  return <ExpansionStoreContext.Provider value={store}>{children}</ExpansionStoreContext.Provider>
 }

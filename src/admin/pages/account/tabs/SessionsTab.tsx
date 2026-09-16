@@ -143,7 +143,10 @@ export function SessionsTab() {
       <div className={styles.sectionHeader}>
         <div>
           <h2 id="account-sessions-title">Active devices</h2>
-          <p>Devices currently signed in to your account. Sign any out individually or all at once. For a record of past sign-in attempts (including failures), see Sign-in history.</p>
+          <p>
+            Devices currently signed in to your account. Sign any out individually or all at once.
+            For a record of past sign-in attempts (including failures), see Sign-in history.
+          </p>
         </div>
         <Button
           type="button"
@@ -157,8 +160,16 @@ export function SessionsTab() {
         </Button>
       </div>
 
-      {error && <p className={styles.error} role="alert">{error}</p>}
-      {status && <p className={styles.cardStatus} role="status">{status}</p>}
+      {error && (
+        <p className={styles.error} role="alert">
+          {error}
+        </p>
+      )}
+      {status && (
+        <p className={styles.cardStatus} role="status">
+          {status}
+        </p>
+      )}
 
       {loading ? (
         <SkeletonRows count={4} rowHeight={36} ariaLabel="Loading sessions" />
@@ -175,7 +186,9 @@ export function SessionsTab() {
               <DataTableHeader scope="col">Device</DataTableHeader>
               <DataTableHeader scope="col">IP</DataTableHeader>
               <DataTableHeader scope="col">Last active</DataTableHeader>
-              <DataTableHeader scope="col" className={styles.actionsHeader}>Actions</DataTableHeader>
+              <DataTableHeader scope="col" className={styles.actionsHeader}>
+                Actions
+              </DataTableHeader>
             </DataTableRow>
           </DataTableHead>
           <DataTableBody>

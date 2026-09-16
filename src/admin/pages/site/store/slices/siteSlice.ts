@@ -41,7 +41,6 @@ import type { SiteSlice } from './site/types'
 
 // Re-export the public slice type for store wiring.
 
-
 // Contribute this slice's fields to the combined `EditorStore` type via TS
 // module augmentation. See `../types.ts` for why we use this pattern.
 declare module '@site/store/types' {

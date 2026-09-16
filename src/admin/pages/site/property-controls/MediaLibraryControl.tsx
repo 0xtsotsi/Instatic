@@ -18,10 +18,7 @@
  * affordance as the standalone Media page.
  */
 import { Suspense, lazy, useEffect, useState } from 'react'
-import {
-  listCmsMediaAssets,
-  type CmsMediaAsset,
-} from '@core/persistence/cmsMedia'
+import { listCmsMediaAssets, type CmsMediaAsset } from '@core/persistence/cmsMedia'
 import { isValidImageUrl } from '@core/utils/urlValidation'
 import type { ControlProps } from './shared'
 import { ControlRow } from '@ui/components/ControlRow'
@@ -42,9 +39,9 @@ import { getErrorMessage } from '@core/utils/errorMessage'
 // so paying the modal's ~10 KB price only on first click is the right
 // trade-off. Also lets the `layouts-*.js` bundle-size budget stay tight.
 const MediaPickerModal = lazy(() =>
-  import('@admin/pages/media/components/MediaPickerModal/MediaPickerModal').then(
-    (m) => ({ default: m.MediaPickerModal }),
-  ),
+  import('@admin/pages/media/components/MediaPickerModal/MediaPickerModal').then((m) => ({
+    default: m.MediaPickerModal,
+  })),
 )
 
 type MediaKind = 'image' | 'video'
@@ -99,7 +96,9 @@ export function MediaLibraryControl({
   mediaKind,
 }: MediaLibraryControlProps) {
   const currentValue = String(value ?? '')
-  const [mode, setMode] = useState<MediaMode>(() => startsInUrlMode(currentValue) ? 'url' : 'library')
+  const [mode, setMode] = useState<MediaMode>(() =>
+    startsInUrlMode(currentValue) ? 'url' : 'library',
+  )
   const [pickerOpen, setPickerOpen] = useState(false)
   // We still fetch the asset list ONCE on mount so the "currently picked"
   // preview can show the right thumbnail + blurhash for the field's
@@ -134,7 +133,9 @@ export function MediaLibraryControl({
           setLibraryError(message === 'Unauthorized' ? 'Sign in again to use CMS media.' : message)
         }
       })
-    return () => { cancelled = true }
+    return () => {
+      cancelled = true
+    }
   }, [])
 
   const modeLabel = mediaKind === 'image' ? 'image' : 'video'
@@ -149,7 +150,7 @@ export function MediaLibraryControl({
     asset: viewerAsset,
     assets: cmsAssets,
     onAssetChanged: (asset) =>
-      setCmsAssets((current) => current.map((item) => item.id === asset.id ? asset : item)),
+      setCmsAssets((current) => current.map((item) => (item.id === asset.id ? asset : item))),
     onAssetRemoved: (id) => {
       setCmsAssets((current) => current.filter((item) => item.id !== id))
       if (viewerAssetId === id) setViewerAssetId(null)
@@ -187,7 +188,9 @@ export function MediaLibraryControl({
 
   // Fallback filename when we have a saved path but the asset row hasn't
   // matched yet (loading or deleted).
-  const fallbackFilename = currentValue ? currentValue.split('/').pop() ?? currentValue : undefined
+  const fallbackFilename = currentValue
+    ? (currentValue.split('/').pop() ?? currentValue)
+    : undefined
 
   return (
     <ControlRow
@@ -197,11 +200,13 @@ export function MediaLibraryControl({
       layout={layout}
       isOverride={isOverride}
       disabled={disabled}
-      labelSuffix={mode === 'url' && urlError ? (
-        <span className={controlRowStyles.labelError} role="alert">
-          Invalid {modeLabel} URL
-        </span>
-      ) : undefined}
+      labelSuffix={
+        mode === 'url' && urlError ? (
+          <span className={controlRowStyles.labelError} role="alert">
+            Invalid {modeLabel} URL
+          </span>
+        ) : undefined
+      }
     >
       <div className={styles.mediaPicker}>
         <SegmentedControl<MediaMode>
@@ -229,7 +234,9 @@ export function MediaLibraryControl({
               onClear={currentValue ? handleClear : undefined}
             />
             {libraryError && (
-              <p className={styles.mediaStatus} role="alert">{libraryError}</p>
+              <p className={styles.mediaStatus} role="alert">
+                {libraryError}
+              </p>
             )}
           </>
         ) : (
@@ -256,7 +263,11 @@ export function MediaLibraryControl({
               id={`ctrl-${propKey}`}
               type="url"
               value={urlDraft}
-              placeholder={mediaKind === 'image' ? 'https://example.com/image.png' : 'https://example.com/video.mp4'}
+              placeholder={
+                mediaKind === 'image'
+                  ? 'https://example.com/image.png'
+                  : 'https://example.com/video.mp4'
+              }
               disabled={disabled}
               onChange={handleUrlChange}
               invalid={urlError}

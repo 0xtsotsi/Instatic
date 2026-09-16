@@ -117,10 +117,7 @@ interface DynamicSelectPreferenceDef {
   default: string
 }
 
-type PreferenceDef =
-  | BooleanPreferenceDef
-  | SelectPreferenceDef
-  | DynamicSelectPreferenceDef
+type PreferenceDef = BooleanPreferenceDef | SelectPreferenceDef | DynamicSelectPreferenceDef
 
 // ---------------------------------------------------------------------------
 // PREFERENCE_CATALOG — single source of truth
@@ -145,12 +142,13 @@ export const PREFERENCE_CATALOG = [
     type: 'select',
     category: 'editor',
     label: 'Auto-save delay',
-    description: 'How long to wait after the last edit before saving. Only applies when auto-save is on.',
+    description:
+      'How long to wait after the last edit before saving. Only applies when auto-save is on.',
     options: [
-      { value: '5',   label: '5 seconds' },
-      { value: '15',  label: '15 seconds' },
-      { value: '30',  label: '30 seconds' },
-      { value: '60',  label: '1 minute' },
+      { value: '5', label: '5 seconds' },
+      { value: '15', label: '15 seconds' },
+      { value: '30', label: '30 seconds' },
+      { value: '60', label: '1 minute' },
       { value: '300', label: '5 minutes' },
     ],
     default: '30',
@@ -160,7 +158,8 @@ export const PREFERENCE_CATALOG = [
     type: 'boolean',
     category: 'editor',
     label: 'Preview suggestions on hover',
-    description: 'Temporarily apply class suggestions, design tokens (spacing, colour, …), and variable autocomplete entries to the selected canvas element while hovering them in the Properties panel.',
+    description:
+      'Temporarily apply class suggestions, design tokens (spacing, colour, …), and variable autocomplete entries to the selected canvas element while hovering them in the Properties panel.',
     default: true,
   },
   {
@@ -168,7 +167,8 @@ export const PREFERENCE_CATALOG = [
     type: 'boolean',
     category: 'editor',
     label: 'Confirm before deleting layers',
-    description: 'Ask before removing a layer via the Delete key or context menu. Off by default to match power-user flow.',
+    description:
+      'Ask before removing a layer via the Delete key or context menu. Off by default to match power-user flow.',
     default: false,
   },
   {
@@ -176,9 +176,10 @@ export const PREFERENCE_CATALOG = [
     type: 'select',
     category: 'editor',
     label: 'Theme',
-    description: 'Choose whether the admin interface uses the default dark chrome or a light theme.',
+    description:
+      'Choose whether the admin interface uses the default dark chrome or a light theme.',
     options: [
-      { value: 'dark',  label: 'Dark' },
+      { value: 'dark', label: 'Dark' },
       { value: 'light', label: 'Light' },
     ],
     default: 'dark',
@@ -188,9 +189,10 @@ export const PREFERENCE_CATALOG = [
     type: 'select',
     category: 'editor',
     label: 'UI density',
-    description: 'Compact packs more on screen; comfortable gives larger touch targets and more breathing room.',
+    description:
+      'Compact packs more on screen; comfortable gives larger touch targets and more breathing room.',
     options: [
-      { value: 'compact',     label: 'Compact' },
+      { value: 'compact', label: 'Compact' },
       { value: 'comfortable', label: 'Comfortable' },
     ],
     default: 'compact',
@@ -202,9 +204,9 @@ export const PREFERENCE_CATALOG = [
     label: 'UI text size',
     description: 'Scale admin interface text independently from spacing density.',
     options: [
-      { value: 'small',       label: 'Small' },
-      { value: 'default',     label: 'Default' },
-      { value: 'large',       label: 'Large' },
+      { value: 'small', label: 'Small' },
+      { value: 'default', label: 'Default' },
+      { value: 'large', label: 'Large' },
       { value: 'extra-large', label: 'Extra large' },
     ],
     default: 'default',
@@ -216,7 +218,8 @@ export const PREFERENCE_CATALOG = [
     type: 'select-dynamic',
     category: 'canvas',
     label: 'Default viewport',
-    description: 'Which viewport context the canvas focuses on when a site is opened. Mobile-first designers usually pick mobile.',
+    description:
+      'Which viewport context the canvas focuses on when a site is opened. Mobile-first designers usually pick mobile.',
     optionsSource: 'site.breakpoints',
     default: 'desktop',
   },
@@ -225,7 +228,8 @@ export const PREFERENCE_CATALOG = [
     type: 'boolean',
     category: 'canvas',
     label: 'Dim inactive viewports when editing',
-    description: 'When a layer is selected and the properties panel is open, fade non-active viewport frames to focus attention on the one being edited.',
+    description:
+      'When a layer is selected and the properties panel is open, fade non-active viewport frames to focus attention on the one being edited.',
     default: true,
   },
 
@@ -235,7 +239,8 @@ export const PREFERENCE_CATALOG = [
     type: 'boolean',
     category: 'layers',
     label: 'Show module icon',
-    description: 'Display the module type icon (Container, Text, Image, …) at the start of each layer row.',
+    description:
+      'Display the module type icon (Container, Text, Image, …) at the start of each layer row.',
     default: true,
   },
   {
@@ -243,7 +248,8 @@ export const PREFERENCE_CATALOG = [
     type: 'boolean',
     category: 'layers',
     label: 'Show HTML tag',
-    description: 'Display a tinted pill with the underlying HTML tag (div, header, img, …) before each layer name.',
+    description:
+      'Display a tinted pill with the underlying HTML tag (div, header, img, …) before each layer name.',
     default: true,
   },
   {
@@ -251,7 +257,8 @@ export const PREFERENCE_CATALOG = [
     type: 'boolean',
     category: 'layers',
     label: 'Show class names',
-    description: 'Display assigned CSS class names after each layer name in CSS-selector form (e.g. `.header.padding-m`).',
+    description:
+      'Display assigned CSS class names after each layer name in CSS-selector form (e.g. `.header.padding-m`).',
     default: true,
   },
   {
@@ -267,7 +274,8 @@ export const PREFERENCE_CATALOG = [
     type: 'boolean',
     category: 'layers',
     label: 'Smooth scroll to selected',
-    description: 'Animate scrolling when the tree jumps to a newly selected layer. Turn off for instant snapping.',
+    description:
+      'Animate scrolling when the tree jumps to a newly selected layer. Turn off for instant snapping.',
     default: true,
   },
 
@@ -277,7 +285,8 @@ export const PREFERENCE_CATALOG = [
     type: 'boolean',
     category: 'properties',
     label: 'Smooth scroll on tab change',
-    description: 'Animate the properties panel when switching between Style / Module / Component tabs.',
+    description:
+      'Animate the properties panel when switching between Style / Module / Component tabs.',
     default: true,
   },
   {
@@ -285,7 +294,8 @@ export const PREFERENCE_CATALOG = [
     type: 'boolean',
     category: 'properties',
     label: 'Expand style sections by default',
-    description: 'Open every property section (Module, Layout, Typography, …) when an element is selected. Turn off to start with all sections collapsed.',
+    description:
+      'Open every property section (Module, Layout, Typography, …) when an element is selected. Turn off to start with all sections collapsed.',
     default: true,
   },
 
@@ -311,16 +321,13 @@ export const PREFERENCE_CATALOG = [
 // without a cast).
 // ---------------------------------------------------------------------------
 
-export type CatalogPreferenceDef = typeof PREFERENCE_CATALOG[number]
+export type CatalogPreferenceDef = (typeof PREFERENCE_CATALOG)[number]
 
 /** Catalog entries narrowed to boolean-typed preferences. */
 export type BooleanCatalogDef = Extract<CatalogPreferenceDef, { type: 'boolean' }>
 
 /** Catalog entries narrowed to either kind of select-typed preference. */
-export type SelectCatalogDef = Extract<
-  CatalogPreferenceDef,
-  { type: 'select' | 'select-dynamic' }
->
+export type SelectCatalogDef = Extract<CatalogPreferenceDef, { type: 'select' | 'select-dynamic' }>
 
 /** Union of every preference id, narrowed to literal strings via `as const`. */
 type PreferenceId = CatalogPreferenceDef['id']

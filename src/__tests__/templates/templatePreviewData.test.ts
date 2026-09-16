@@ -1,9 +1,6 @@
 import { describe, expect, it } from 'bun:test'
 import type { DataTable } from '@core/data/schemas'
-import {
-  buildPreviewCells,
-  dataTablePreviewToLoopItem,
-} from '@core/templates/templatePreviewData'
+import { buildPreviewCells, dataTablePreviewToLoopItem } from '@core/templates/templatePreviewData'
 
 function makeTable(overrides: Partial<DataTable> = {}): DataTable {
   return {
@@ -92,9 +89,7 @@ describe('template preview data', () => {
           type: 'multiSelect',
           id: 'tags',
           label: 'Tags',
-          options: [
-            { id: 'opt_a', label: 'Tag A', value: 'a' },
-          ],
+          options: [{ id: 'opt_a', label: 'Tag A', value: 'a' }],
         },
       ],
     })

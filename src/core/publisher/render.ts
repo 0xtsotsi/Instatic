@@ -25,10 +25,7 @@ import type { IModuleRegistry } from '@core/module-engine'
 import type { TemplateRenderDataContext } from '@core/templates/dynamicBindings'
 import { buildPageFrame, buildSiteFrame, buildRouteFrame } from '@core/templates/contextFrames'
 import { classNamesForClassIds } from '@core/page-tree'
-import {
-  normalizeHtmlAttributeName,
-  sanitizeRenderableHtmlAttribute,
-} from '@core/htmlAttributes'
+import { normalizeHtmlAttributeName, sanitizeRenderableHtmlAttribute } from '@core/htmlAttributes'
 import { bagToInlineStyle } from './classCss'
 import { collectClassCSS, sanitizeModuleCSS } from './cssCollector'
 import { collectUserStylesheetCss } from './userStylesheets'
@@ -278,7 +275,8 @@ function computeBodyOpenTag(
 
   const attrs =
     htmlAttrs +
-    (classAttr ? ` class="${classAttr}"` : '') + (styleAttr ? ` style="${styleAttr}"` : '')
+    (classAttr ? ` class="${classAttr}"` : '') +
+    (styleAttr ? ` style="${styleAttr}"` : '')
   return `<body${attrs}>`
 }
 
@@ -382,9 +380,7 @@ function buildRuntimeAssetsBlock(
   // tag in `<head>` (must precede any `<script type="module">`) and pin its
   // SHA-256 into `script-src` so the inline tag passes strict CSP.
   const importmap = options.runtimePackageImportmap
-  const importmapTag = importmap
-    ? `  <script type="importmap">${importmap.body}</script>`
-    : ''
+  const importmapTag = importmap ? `  <script type="importmap">${importmap.body}</script>` : ''
 
   return {
     headRuntimeScripts,
@@ -538,10 +534,7 @@ export function publishPage(
   // ids. Hole subtrees are NOT rendered here, so the static walk is the only
   // way to know what their request-time fragments will need.
   const jsModuleIds = [
-    ...new Set([
-      ...acc.jsMap.keys(),
-      ...collectHoleSubtreeModuleIds(page, site, dynamicNodeIds),
-    ]),
+    ...new Set([...acc.jsMap.keys(), ...collectHoleSubtreeModuleIds(page, site, dynamicNodeIds)]),
   ].sort()
 
   // Cascade order (both inline/external): reset → framework (tokens +

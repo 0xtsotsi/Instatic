@@ -26,11 +26,7 @@ function sameSelection<T extends readonly unknown[]>(a: T, b: T): boolean {
 
 function selectWorkspaceLayoutState(): WorkspaceLayoutSelection {
   const state = useWorkspaceLayout.getState()
-  return [
-    state.leftSidebarWidth,
-    state.rightPanel.collapsed,
-    state.rightPanel.width,
-  ] as const
+  return [state.leftSidebarWidth, state.rightPanel.collapsed, state.rightPanel.width] as const
 }
 
 function selectDataLayoutState(): DataLayoutSelection {
@@ -70,9 +66,7 @@ function dataLayoutFromSelection(
   }
 }
 
-export function useWorkspaceLayoutPersistence(
-  workspace: Exclude<EditorWorkspaceId, 'site'>,
-): void {
+export function useWorkspaceLayoutPersistence(workspace: Exclude<EditorWorkspaceId, 'site'>): void {
   useEffect(() => {
     const storedLayout = readWorkspaceLayout(workspace)
     useWorkspaceLayout.getState().hydrateWorkspaceLayout(workspace, storedLayout)

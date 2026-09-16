@@ -115,10 +115,7 @@ describe('ai-tool-schema SSOT gate', () => {
   })
 
   const CONSUMER_SOURCES = {
-    'server/ai/tools/site/writeTools.ts': join(
-      PROJECT_ROOT,
-      'server/ai/tools/site/writeTools.ts',
-    ),
+    'server/ai/tools/site/writeTools.ts': join(PROJECT_ROOT, 'server/ai/tools/site/writeTools.ts'),
     'src/admin/pages/site/agent/executor.ts': join(
       PROJECT_ROOT,
       'src/admin/pages/site/agent/executor.ts',

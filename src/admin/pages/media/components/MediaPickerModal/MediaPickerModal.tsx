@@ -28,10 +28,14 @@ import { bucketForMime, isSvgMime } from '../../utils/filters'
 /** Modal heading / aria-label for the requested media kind. */
 function pickerTitle(kind: 'image' | 'video' | 'svg' | 'any'): string {
   switch (kind) {
-    case 'image': return 'Select an image'
-    case 'video': return 'Select a video'
-    case 'svg': return 'Select an SVG'
-    default: return 'Select media'
+    case 'image':
+      return 'Select an image'
+    case 'video':
+      return 'Select a video'
+    case 'svg':
+      return 'Select an SVG'
+    default:
+      return 'Select media'
   }
 }
 import { blurHashToDataUrl, pickVariantUrl } from '../../utils/variants'
@@ -156,13 +160,7 @@ function MediaPickerModalBody({
       >
         <header className={styles.header}>
           <h2 className={styles.title}>{pickerTitle(mediaKind)}</h2>
-          <Button
-            variant="ghost"
-            size="sm"
-            iconOnly
-            aria-label="Close picker"
-            onClick={onClose}
-          >
+          <Button variant="ghost" size="sm" iconOnly aria-label="Close picker" onClick={onClose}>
             <CloseIcon size={14} />
           </Button>
         </header>
@@ -184,12 +182,7 @@ function MediaPickerModalBody({
             <Button variant="ghost" size="sm" onClick={onClose}>
               Cancel
             </Button>
-            <Button
-              variant="primary"
-              size="sm"
-              disabled={!canCommit}
-              onClick={commit}
-            >
+            <Button variant="primary" size="sm" disabled={!canCommit} onClick={commit}>
               Use selected
             </Button>
           </div>
@@ -217,17 +210,21 @@ function PickedSummary({ asset, matchesKind, mediaKind }: PickedSummaryProps) {
     ? {
         bucket: bucketForMime(asset.mimeType),
         thumbUrl: bucketForMime(asset.mimeType) === 'image' ? pickVariantUrl(asset, 56) : null,
-        blurUrl: bucketForMime(asset.mimeType) === 'image' ? blurHashToDataUrl(asset.blurHash) : null,
+        blurUrl:
+          bucketForMime(asset.mimeType) === 'image' ? blurHashToDataUrl(asset.blurHash) : null,
       }
     : null
 
   if (!asset) {
-    const kindLabel = mediaKind === 'image' ? 'image' : mediaKind === 'video' ? 'video' : mediaKind === 'svg' ? 'SVG' : 'asset'
-    return (
-      <p className={styles.pickedEmpty}>
-        No {kindLabel} selected — pick one from the grid.
-      </p>
-    )
+    const kindLabel =
+      mediaKind === 'image'
+        ? 'image'
+        : mediaKind === 'video'
+          ? 'video'
+          : mediaKind === 'svg'
+            ? 'SVG'
+            : 'asset'
+    return <p className={styles.pickedEmpty}>No {kindLabel} selected — pick one from the grid.</p>
   }
 
   return (
@@ -235,10 +232,14 @@ function PickedSummary({ asset, matchesKind, mediaKind }: PickedSummaryProps) {
       <span
         className={styles.pickedPreview}
         aria-hidden="true"
-        style={summary?.blurUrl ? {
-          backgroundImage: `url(${summary.blurUrl})`,
-          backgroundSize: 'cover',
-        } : undefined}
+        style={
+          summary?.blurUrl
+            ? {
+                backgroundImage: `url(${summary.blurUrl})`,
+                backgroundSize: 'cover',
+              }
+            : undefined
+        }
       >
         {summary?.bucket === 'image' && summary.thumbUrl ? (
           <img src={summary.thumbUrl} alt="" loading="lazy" decoding="async" />
@@ -250,7 +251,15 @@ function PickedSummary({ asset, matchesKind, mediaKind }: PickedSummaryProps) {
         <span className={styles.pickedName}>{asset.filename}</span>
         {!matchesKind && mediaKind !== 'any' && (
           <span className={styles.pickedWrongKind} role="alert">
-            This is not {mediaKind === 'image' ? 'an image' : mediaKind === 'video' ? 'a video' : mediaKind === 'svg' ? 'an SVG' : 'a matching'} asset.
+            This is not{' '}
+            {mediaKind === 'image'
+              ? 'an image'
+              : mediaKind === 'video'
+                ? 'a video'
+                : mediaKind === 'svg'
+                  ? 'an SVG'
+                  : 'a matching'}{' '}
+            asset.
           </span>
         )}
       </span>

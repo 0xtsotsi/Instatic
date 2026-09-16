@@ -14,7 +14,12 @@ const INTER_FONT: FontEntry = {
   variants: ['400'],
   subsets: ['latin'],
   files: [
-    { variant: '400', subset: 'latin', path: '/uploads/fonts/inter/400-latin.woff2', format: 'woff2' },
+    {
+      variant: '400',
+      subset: 'latin',
+      path: '/uploads/fonts/inter/400-latin.woff2',
+      format: 'woff2',
+    },
   ],
   category: 'Sans Serif',
   createdAt: 1,
@@ -76,8 +81,12 @@ describe('FrameworkScalePanel', () => {
       name: 'Spacing scales',
     })
 
-    expect(within(typographyScalePicker).getByRole('button', { name: 'Add typography scale' })).toBeDefined()
-    expect(within(spacingScalePicker).getByRole('button', { name: 'Add spacing scale' })).toBeDefined()
+    expect(
+      within(typographyScalePicker).getByRole('button', { name: 'Add typography scale' }),
+    ).toBeDefined()
+    expect(
+      within(spacingScalePicker).getByRole('button', { name: 'Add spacing scale' }),
+    ).toBeDefined()
   })
 
   it('uses the shared empty state when installed fonts have no font tokens', () => {
@@ -100,7 +109,9 @@ describe('FrameworkScalePanel', () => {
     const emptyState = fontTokenEmptyText.closest('[role="status"]')
 
     expect(emptyState).toBeTruthy()
-    expect(within(emptyState as HTMLElement).getByRole('button', { name: 'Create token' })).toBeTruthy()
+    expect(
+      within(emptyState as HTMLElement).getByRole('button', { name: 'Create token' }),
+    ).toBeTruthy()
     expect(within(typographyPanel).getAllByRole('button', { name: 'Create token' })).toHaveLength(1)
   })
 })

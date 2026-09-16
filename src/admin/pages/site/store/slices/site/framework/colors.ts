@@ -5,10 +5,7 @@
 import { nanoid } from 'nanoid'
 import type { FrameworkColorToken } from '@core/framework-schema'
 import type { SiteDocument, SiteSettings } from '@core/page-tree'
-import {
-  generateDefaultDarkColor,
-  normalizeFrameworkColorSlug,
-} from '@core/framework'
+import { generateDefaultDarkColor, normalizeFrameworkColorSlug } from '@core/framework'
 import { reconcileFrameworkClasses } from './reconcile'
 import { nextOrderValue } from './shared'
 import type {
@@ -134,7 +131,10 @@ function applyFrameworkColorTokenPatch(
   colors: NonNullable<SiteSettings['framework']>['colors'],
 ): boolean {
   let changed = false
-  function assign<K extends keyof FrameworkColorToken>(key: K, value: FrameworkColorToken[K]): void {
+  function assign<K extends keyof FrameworkColorToken>(
+    key: K,
+    value: FrameworkColorToken[K],
+  ): void {
     if (Object.is(token[key], value)) return
     token[key] = value
     changed = true
@@ -183,10 +183,7 @@ function applyFrameworkColorTokenPatch(
   }
   if (patch.generateTints) {
     const next = { ...token.generateTints, ...patch.generateTints }
-    if (
-      next.enabled !== token.generateTints.enabled ||
-      next.count !== token.generateTints.count
-    ) {
+    if (next.enabled !== token.generateTints.enabled || next.count !== token.generateTints.count) {
       token.generateTints = next
       changed = true
     }
@@ -348,9 +345,7 @@ export function applyColorTokenPatchPreview(
   tokenId: string,
   patch: UpdateFrameworkColorTokenPatch,
 ): void {
-  const token = draft.settings.framework?.colors?.tokens.find(
-    (t) => t.id === tokenId,
-  )
+  const token = draft.settings.framework?.colors?.tokens.find((t) => t.id === tokenId)
   if (!token) return
   if (patch.slug !== undefined) token.slug = patch.slug
   if (patch.generateUtilities) {

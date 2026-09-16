@@ -56,7 +56,11 @@ export function RelationPickerDialog({
 
   // Load rows when the dialog opens (or the target table changes); resolve to
   // an empty list while closed so nothing is fetched in the background.
-  const { data, loading, error: loadError } = useAsyncResource(
+  const {
+    data,
+    loading,
+    error: loadError,
+  } = useAsyncResource(
     () => (open && targetTable ? listCmsDataRows(targetTable.id) : Promise.resolve<DataRow[]>([])),
     [open, targetTable],
     { fallbackError: 'Failed to load rows' },
@@ -80,9 +84,7 @@ export function RelationPickerDialog({
   const filteredRows = (() => {
     if (!search.trim()) return rows
     const q = search.trim().toLowerCase()
-    return rows.filter((row) =>
-      readStringCell(row.cells, primaryFieldId).toLowerCase().includes(q),
-    )
+    return rows.filter((row) => readStringCell(row.cells, primaryFieldId).toLowerCase().includes(q))
   })()
 
   function toggleRow(rowId: string) {
@@ -158,11 +160,7 @@ export function RelationPickerDialog({
           {loading && <SkeletonBlock minHeight={140} ariaLabel="Loading rows" />}
 
           {!loading && loadError && (
-            <EmptyState
-              title="Could not load rows"
-              description={loadError}
-              variant="card"
-            />
+            <EmptyState title="Could not load rows" description={loadError} variant="card" />
           )}
 
           {!loading && !loadError && filteredRows.length === 0 && (

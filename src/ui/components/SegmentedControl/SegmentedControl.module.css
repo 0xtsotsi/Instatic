@@ -10,18 +10,18 @@
  */
 
 .group {
-    display: inline-flex;
-    align-items: stretch;
-    gap: var(--space-4xs);
-    border-radius: 12px;
-    padding: var(--space-4xs);
-    border: 1px solid var(--overlay-20);
-    background: var(--overlay-5);
+  display: inline-flex;
+  align-items: stretch;
+  gap: var(--space-4xs);
+  border-radius: 12px;
+  padding: var(--space-4xs);
+  border: 1px solid var(--overlay-20);
+  background: var(--overlay-5);
 }
 
 .fullWidth {
-    display: flex;
-    width: 100%;
+  display: flex;
+  width: 100%;
 }
 
 /* Each segment fills available width and uses a smaller radius so it nests
@@ -30,24 +30,24 @@
  * pairings so the segment's transparent / pressed look wins regardless of
  * stylesheet load order. */
 .group .segment.segment {
-    position: relative;
-    flex: 1 1 0;
-    min-width: 0;
-    border-radius: 8px;
-    background: transparent;
+  position: relative;
+  flex: 1 1 0;
+  min-width: 0;
+  border-radius: 8px;
+  background: transparent;
 }
 
 .group .segment.segment:hover {
-    background: var(--overlay-10);
+  background: var(--overlay-10);
 }
 
-.group .segment.segment[aria-pressed="true"] {
-    background: var(--overlay-20);
-    color: var(--text);
+.group .segment.segment[aria-pressed='true'] {
+  background: var(--overlay-20);
+  color: var(--text);
 }
 
-.group[data-active-surface="recessed"] .segment.segment[aria-pressed="true"] {
-    background: var(--bg-surface);
+.group[data-active-surface='recessed'] .segment.segment[aria-pressed='true'] {
+  background: var(--bg-surface);
 }
 
 /* Trailing modifier — used by the render-prop's `trailingClassName`. Switches
@@ -57,8 +57,8 @@
  * matches the segment's intrinsic 26px height (size-sm Button) so the
  * trailing tile renders perfectly square. */
 .group .segment.trailing.trailing {
-    flex: 0 0 26px;
-    width: 26px;
+  flex: 0 0 26px;
+  width: 26px;
 }
 
 /* ── Clearable overlay ─────────────────────────────────────────────────────
@@ -69,22 +69,20 @@
  * clear behavior is wired to the segment's onClick — this is purely the
  * visual affordance. */
 .group .segment .clearOverlay {
-    position: absolute;
-    inset: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 8px;
-    background: var(--overlay-20);
-    color: var(--text);
-    opacity: 0;
-    pointer-events: none;
-    transition: opacity 100ms ease;
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  background: var(--overlay-20);
+  color: var(--text);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 100ms ease;
 }
 
-.group[data-clearable="true"] .segment[aria-pressed="true"]:hover .clearOverlay,
-.group[data-clearable="true"]
-    .segment[aria-pressed="true"]:focus-visible
-    .clearOverlay {
-    opacity: 1;
+.group[data-clearable='true'] .segment[aria-pressed='true']:hover .clearOverlay,
+.group[data-clearable='true'] .segment[aria-pressed='true']:focus-visible .clearOverlay {
+  opacity: 1;
 }

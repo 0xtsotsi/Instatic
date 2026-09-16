@@ -1,10 +1,6 @@
 import { useEffect, useRef, type ReactElement } from 'react'
 import { createPortal } from 'react-dom'
-import {
-  ContextMenu,
-  ContextMenuItem,
-  ContextMenuSeparator,
-} from '@ui/components/ContextMenu'
+import { ContextMenu, ContextMenuItem, ContextMenuSeparator } from '@ui/components/ContextMenu'
 import { DatabaseSolidIcon } from 'pixel-art-icons/icons/database-solid'
 import { Settings2SolidIcon } from 'pixel-art-icons/icons/settings-2-solid'
 import { TrashSolidIcon } from 'pixel-art-icons/icons/trash-solid'
@@ -59,11 +55,15 @@ export function DataTableContextMenu({
         disabled={selected}
         onClick={() => runAndClose(() => onSelectTable(table.id))}
       >
-        <span aria-hidden="true"><DatabaseSolidIcon size={13} /></span>
+        <span aria-hidden="true">
+          <DatabaseSolidIcon size={13} />
+        </span>
         Open table
       </ContextMenuItem>
       <ContextMenuItem onClick={() => runAndClose(() => onOpenTableSettings(table.id))}>
-        <span aria-hidden="true"><Settings2SolidIcon size={13} /></span>
+        <span aria-hidden="true">
+          <Settings2SolidIcon size={13} />
+        </span>
         Table settings
       </ContextMenuItem>
       <ContextMenuSeparator />
@@ -73,7 +73,9 @@ export function DataTableContextMenu({
         tooltip={deleteReason ?? undefined}
         onClick={() => runAndClose(() => onDeleteTable(table))}
       >
-        <span aria-hidden="true"><TrashSolidIcon size={13} /></span>
+        <span aria-hidden="true">
+          <TrashSolidIcon size={13} />
+        </span>
         Delete table
       </ContextMenuItem>
     </ContextMenu>,

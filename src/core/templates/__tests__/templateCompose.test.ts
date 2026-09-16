@@ -3,26 +3,46 @@ import { composeTemplateChain } from '../templateCompose'
 import type { Page } from '@core/page-tree'
 
 // Minimal tree builders -----------------------------------------------------
-const body = (id: string, children: string[]) => ({ id, moduleId: 'base.body', props: {}, breakpointOverrides: {}, children })
-const node = (id: string, moduleId: string, children: string[] = []) => ({ id, moduleId, props: {}, breakpointOverrides: {}, children })
+const body = (id: string, children: string[]) => ({
+  id,
+  moduleId: 'base.body',
+  props: {},
+  breakpointOverrides: {},
+  children,
+})
+const node = (id: string, moduleId: string, children: string[] = []) => ({
+  id,
+  moduleId,
+  props: {},
+  breakpointOverrides: {},
+  children,
+})
 
 // Layout: body > [header, outlet, footer]
-const layout = (): Page => ({
-  id: 'layout', slug: 'layout', title: 'Layout', rootNodeId: 'L_body',
-  template: { enabled: true, target: { kind: 'everywhere' }, priority: 0 },
-  nodes: {
-    L_body: body('L_body', ['L_header', 'L_outlet', 'L_footer']),
-    L_header: node('L_header', 'base.text'),
-    L_outlet: node('L_outlet', 'base.outlet'),
-    L_footer: node('L_footer', 'base.text'),
-  },
-} as unknown as Page)
+const layout = (): Page =>
+  ({
+    id: 'layout',
+    slug: 'layout',
+    title: 'Layout',
+    rootNodeId: 'L_body',
+    template: { enabled: true, target: { kind: 'everywhere' }, priority: 0 },
+    nodes: {
+      L_body: body('L_body', ['L_header', 'L_outlet', 'L_footer']),
+      L_header: node('L_header', 'base.text'),
+      L_outlet: node('L_outlet', 'base.outlet'),
+      L_footer: node('L_footer', 'base.text'),
+    },
+  }) as unknown as Page
 
 // Page: body > [p_heading]
-const aboutPage = (): Page => ({
-  id: 'about', slug: 'about', title: 'About', rootNodeId: 'A_body',
-  nodes: { A_body: body('A_body', ['A_heading']), A_heading: node('A_heading', 'base.text') },
-} as unknown as Page)
+const aboutPage = (): Page =>
+  ({
+    id: 'about',
+    slug: 'about',
+    title: 'About',
+    rootNodeId: 'A_body',
+    nodes: { A_body: body('A_body', ['A_heading']), A_heading: node('A_heading', 'base.text') },
+  }) as unknown as Page
 
 describe('composeTemplateChain', () => {
   it('returns the page unchanged when the chain is empty', () => {

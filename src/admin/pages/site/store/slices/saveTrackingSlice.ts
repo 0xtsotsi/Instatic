@@ -84,10 +84,7 @@ function nettedDirtySnapshot(current: DirtyMarks, site: SiteDocument | null): Di
   }
 }
 
-export const createSaveTrackingSlice: EditorStoreSliceCreator<SaveTrackingSlice> = (
-  set,
-  get,
-) => ({
+export const createSaveTrackingSlice: EditorStoreSliceCreator<SaveTrackingSlice> = (set, get) => ({
   hasUnsavedChanges: false,
 
   setHasUnsavedChanges: (value) => set({ hasUnsavedChanges: value }),

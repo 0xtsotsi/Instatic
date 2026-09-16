@@ -12,7 +12,11 @@ import '@modules/base'
 const originalFetch = globalThis.fetch
 
 function renderCanvas() {
-  return render(<DndContext><CanvasRoot /></DndContext>)
+  return render(
+    <DndContext>
+      <CanvasRoot />
+    </DndContext>,
+  )
 }
 
 function bodyNode(

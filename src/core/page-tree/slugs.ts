@@ -31,9 +31,7 @@ export function pageSlugDuplicateError(
   pages: Page[],
   currentPageId?: string,
 ): string | null {
-  const duplicate = pages.find((page) =>
-    page.slug === slug && page.id !== currentPageId
-  )
+  const duplicate = pages.find((page) => page.slug === slug && page.id !== currentPageId)
   return duplicate ? `Duplicate page slug "/${slug}".` : null
 }
 
@@ -44,15 +42,14 @@ export function pageSlugDuplicateError(
  * whole site fail `validateSite` on save. `excludePageId` skips the page being
  * renamed so re-saving its own slug is a no-op rather than a self-collision.
  */
-export function uniquePageSlug(
-  desired: string,
-  pages: Page[],
-  excludePageId?: string,
-): string {
+export function uniquePageSlug(desired: string, pages: Page[], excludePageId?: string): string {
   const base = validPageSlugBase(normalizePageSlug(desired) || 'page')
   let candidate = base
   let suffix = 2
-  while (pageSlugError(candidate) || pages.some((page) => page.slug === candidate && page.id !== excludePageId)) {
+  while (
+    pageSlugError(candidate) ||
+    pages.some((page) => page.slug === candidate && page.id !== excludePageId)
+  ) {
     candidate = `${base}-${suffix}`
     suffix += 1
   }

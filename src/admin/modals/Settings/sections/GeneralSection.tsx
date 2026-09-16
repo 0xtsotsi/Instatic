@@ -18,10 +18,7 @@ import { Input, Textarea } from '@ui/components/Input'
 import { Button } from '@ui/components/Button'
 import { SkeletonBlock } from '@ui/components/Skeleton'
 import { ImagesSolidIcon } from 'pixel-art-icons/icons/images-solid'
-import {
-  listCmsMediaAssets,
-  type CmsMediaAsset,
-} from '@core/persistence/cmsMedia'
+import { listCmsMediaAssets, type CmsMediaAsset } from '@core/persistence/cmsMedia'
 import { blurHashToDataUrl, pickVariantUrl } from '@admin/pages/media/utils/variants'
 import s from '../SettingsModal.module.css'
 
@@ -31,16 +28,20 @@ import s from '../SettingsModal.module.css'
 // picker outside the property panel — paying the ~10 KB price only when the
 // favicon row is touched keeps Settings cheap to open.
 const MediaPickerModal = lazy(() =>
-  import('@admin/pages/media/components/MediaPickerModal/MediaPickerModal').then(
-    (m) => ({ default: m.MediaPickerModal }),
-  ),
+  import('@admin/pages/media/components/MediaPickerModal/MediaPickerModal').then((m) => ({
+    default: m.MediaPickerModal,
+  })),
 )
 
 export function GeneralSection() {
   const { site, error, updateSiteName, updateSiteSettings } = useSiteSettingsController()
 
   if (error) {
-    return <p className={s.sectionDescription} role="alert">{error}</p>
+    return (
+      <p className={s.sectionDescription} role="alert">
+        {error}
+      </p>
+    )
   }
 
   if (!site) {
@@ -82,9 +83,7 @@ export function GeneralSection() {
           type="text"
           defaultValue={settings.metaTitle ?? ''}
           placeholder="My Website"
-          onBlur={(e) =>
-            updateSiteSettings({ metaTitle: e.target.value.trim() || undefined })
-          }
+          onBlur={(e) => updateSiteSettings({ metaTitle: e.target.value.trim() || undefined })}
           onKeyDown={(e) => e.key === 'Enter' && (e.target as HTMLInputElement).blur()}
         />
       </div>
@@ -115,9 +114,7 @@ export function GeneralSection() {
           type="text"
           defaultValue={settings.language ?? 'en'}
           placeholder="en"
-          onBlur={(e) =>
-            updateSiteSettings({ language: e.target.value.trim() || 'en' })
-          }
+          onBlur={(e) => updateSiteSettings({ language: e.target.value.trim() || 'en' })}
           onKeyDown={(e) => e.key === 'Enter' && (e.target as HTMLInputElement).blur()}
         />
       </div>
@@ -125,9 +122,7 @@ export function GeneralSection() {
       {/* ── Favicon ───────────────────────────────────────────────────────── */}
       <FaviconField
         currentValue={settings.faviconUrl ?? ''}
-        onChange={(next) =>
-          updateSiteSettings({ faviconUrl: next.trim() || undefined })
-        }
+        onChange={(next) => updateSiteSettings({ faviconUrl: next.trim() || undefined })}
       />
     </div>
   )
@@ -187,18 +182,15 @@ function FaviconField({ currentValue, onChange }: FaviconFieldProps) {
           <span>{currentValue ? 'Change favicon' : 'Browse library…'}</span>
         </Button>
         {currentValue && (
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => onChange('')}
-            aria-label="Clear favicon"
-          >
+          <Button variant="ghost" size="sm" onClick={() => onChange('')} aria-label="Clear favicon">
             Clear
           </Button>
         )}
       </div>
       {libraryError && (
-        <p className={s.faviconStatus} role="alert">{libraryError}</p>
+        <p className={s.faviconStatus} role="alert">
+          {libraryError}
+        </p>
       )}
 
       {pickerOpen && (

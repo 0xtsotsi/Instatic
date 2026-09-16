@@ -39,7 +39,9 @@ function setSnapshot(next: Set<string>): void {
   emit()
 }
 
-export function setPluginsInErrorFromList(plugins: { id: string; lifecycleStatus?: string; enabled?: boolean }[]): void {
+export function setPluginsInErrorFromList(
+  plugins: { id: string; lifecycleStatus?: string; enabled?: boolean }[],
+): void {
   const next = new Set<string>()
   for (const plugin of plugins) {
     if (plugin.enabled !== false && plugin.lifecycleStatus === 'error') {

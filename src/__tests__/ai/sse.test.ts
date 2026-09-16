@@ -65,9 +65,7 @@ describe('parseSseStream', () => {
   })
 
   test('handles CRLF frame boundaries', async () => {
-    const frames = await collect(
-      responseFromChunks(['event: ping\r\ndata: {"k":1}\r\n\r\n']),
-    )
+    const frames = await collect(responseFromChunks(['event: ping\r\ndata: {"k":1}\r\n\r\n']))
     expect(frames).toEqual([{ event: 'ping', data: '{"k":1}' }])
   })
 

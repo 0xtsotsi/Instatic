@@ -49,16 +49,20 @@ describe('public form challenge signing secret configuration', () => {
       formId: 'newsletter',
     })
 
-    expect(sameFormSecret.verifyPublicFormPageToken({
-      pageId: 'page-home',
-      formId: 'newsletter',
-      pageToken,
-    })).toBe(true)
-    expect(changedFormSecret.verifyPublicFormPageToken({
-      pageId: 'page-home',
-      formId: 'newsletter',
-      pageToken,
-    })).toBe(false)
+    expect(
+      sameFormSecret.verifyPublicFormPageToken({
+        pageId: 'page-home',
+        formId: 'newsletter',
+        pageToken,
+      }),
+    ).toBe(true)
+    expect(
+      changedFormSecret.verifyPublicFormPageToken({
+        pageId: 'page-home',
+        formId: 'newsletter',
+        pageToken,
+      }),
+    ).toBe(false)
   })
 
   it('falls back to INSTATIC_SECRET_KEY when no dedicated form secret is configured', async () => {
@@ -71,16 +75,20 @@ describe('public form challenge signing secret configuration', () => {
       formId: 'newsletter',
     })
 
-    expect(verifier.verifyPublicFormPageToken({
-      pageId: 'page-home',
-      formId: 'newsletter',
-      pageToken,
-    })).toBe(true)
-    expect(rotatedMasterKey.verifyPublicFormPageToken({
-      pageId: 'page-home',
-      formId: 'newsletter',
-      pageToken,
-    })).toBe(false)
+    expect(
+      verifier.verifyPublicFormPageToken({
+        pageId: 'page-home',
+        formId: 'newsletter',
+        pageToken,
+      }),
+    ).toBe(true)
+    expect(
+      rotatedMasterKey.verifyPublicFormPageToken({
+        pageId: 'page-home',
+        formId: 'newsletter',
+        pageToken,
+      }),
+    ).toBe(false)
   })
 
   it('uses a process-local fallback secret when neither env var is configured', async () => {
@@ -92,15 +100,19 @@ describe('public form challenge signing secret configuration', () => {
       formId: 'newsletter',
     })
 
-    expect(issuer.verifyPublicFormPageToken({
-      pageId: 'page-home',
-      formId: 'newsletter',
-      pageToken,
-    })).toBe(true)
-    expect(secondProcessSecret.verifyPublicFormPageToken({
-      pageId: 'page-home',
-      formId: 'newsletter',
-      pageToken,
-    })).toBe(false)
+    expect(
+      issuer.verifyPublicFormPageToken({
+        pageId: 'page-home',
+        formId: 'newsletter',
+        pageToken,
+      }),
+    ).toBe(true)
+    expect(
+      secondProcessSecret.verifyPublicFormPageToken({
+        pageId: 'page-home',
+        formId: 'newsletter',
+        pageToken,
+      }),
+    ).toBe(false)
   })
 })

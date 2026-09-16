@@ -179,8 +179,4 @@ export interface RenderAccumulators {
  * parameter (rather than importing `renderNode` directly) so the file graph
  * stays acyclic — only `renderNode.ts` knows both ends of the recursion.
  */
-export type RenderNodeFn = (
-  nodeId: string,
-  config: RenderConfig,
-  acc: RenderAccumulators,
-) => string
+export type RenderNodeFn = (nodeId: string, config: RenderConfig, acc: RenderAccumulators) => string

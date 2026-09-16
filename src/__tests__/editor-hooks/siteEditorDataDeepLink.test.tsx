@@ -115,11 +115,7 @@ describe('Site editor Data workspace deep links', () => {
       activePageId: 'page-home',
       hasUnsavedChanges: false,
     } as Parameters<typeof useEditorStore.setState>[0])
-    window.history.replaceState(
-      {},
-      '',
-      '/admin/site?table=components&row=component-from-data',
-    )
+    window.history.replaceState({}, '', '/admin/site?table=components&row=component-from-data')
 
     renderHook(() => useDeepLinkedSiteEditor(adapter))
 
@@ -150,9 +146,9 @@ describe('Site editor Data workspace deep links', () => {
     await waitFor(() => {
       expect(adapter.loadCount()).toBe(1)
       expect(
-        useEditorStore.getState().site?.visualComponents.some(
-          (component) => component.id === 'component-pending-reload',
-        ),
+        useEditorStore
+          .getState()
+          .site?.visualComponents.some((component) => component.id === 'component-pending-reload'),
       ).toBe(true)
     })
   })

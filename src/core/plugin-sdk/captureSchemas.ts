@@ -17,11 +17,7 @@ export const CaptureInputSchema = Type.Object(
       ]),
     ),
     scope: Type.Optional(
-      Type.Union([
-        Type.Literal('page'),
-        Type.Literal('subtree'),
-        Type.Literal('element'),
-      ]),
+      Type.Union([Type.Literal('page'), Type.Literal('subtree'), Type.Literal('element')]),
     ),
     selector: Type.Optional(Type.String({ maxLength: 500 })),
     assetsMax: Type.Optional(Type.Integer({ minimum: 0, maximum: 100 })),
@@ -66,19 +62,31 @@ export const CaptureOutputSchema = Type.Object(
     html: Type.Optional(Type.String()),
     css: Type.Optional(Type.String()),
     uids: Type.Optional(Type.Array(Type.String())),
-    assetFiles: Type.Optional(Type.Array(Type.Object({
-      localPath: Type.String(),
-      originalUrl: Type.String(),
-    }))),
-    unavailable: Type.Optional(Type.Array(Type.Object({
-      url: Type.String(),
-      reason: Type.String(),
-    }))),
-    nextActions: Type.Optional(Type.Array(Type.Object({
-      tool: Type.String(),
-      input: Type.Record(Type.String(), Type.Unknown()),
-      description: Type.String(),
-    }))),
+    assetFiles: Type.Optional(
+      Type.Array(
+        Type.Object({
+          localPath: Type.String(),
+          originalUrl: Type.String(),
+        }),
+      ),
+    ),
+    unavailable: Type.Optional(
+      Type.Array(
+        Type.Object({
+          url: Type.String(),
+          reason: Type.String(),
+        }),
+      ),
+    ),
+    nextActions: Type.Optional(
+      Type.Array(
+        Type.Object({
+          tool: Type.String(),
+          input: Type.Record(Type.String(), Type.Unknown()),
+          description: Type.String(),
+        }),
+      ),
+    ),
   },
   { additionalProperties: false },
 )

@@ -120,11 +120,9 @@ const NumberFieldSchema = Type.Object({
   max: Type.Optional(Type.Number()),
   step: Type.Optional(Type.Number()),
   integer: Type.Optional(Type.Boolean()),
-  format: Type.Optional(Type.Union([
-    Type.Literal('number'),
-    Type.Literal('currency'),
-    Type.Literal('percent'),
-  ])),
+  format: Type.Optional(
+    Type.Union([Type.Literal('number'), Type.Literal('currency'), Type.Literal('percent')]),
+  ),
   /** ISO 4217 e.g. 'USD' — meaningful when `format: 'currency'`. */
   currency: Type.Optional(Type.String()),
   defaultValue: Type.Optional(Type.Number()),
@@ -185,11 +183,9 @@ const MediaFieldSchema = Type.Object({
    * Restricts the media picker to a specific asset kind. Defaults to `'any'`
    * (image, video, file). Post-type `featuredMedia` is `'image'`.
    */
-  mediaKind: Type.Optional(Type.Union([
-    Type.Literal('image'),
-    Type.Literal('video'),
-    Type.Literal('any'),
-  ])),
+  mediaKind: Type.Optional(
+    Type.Union([Type.Literal('image'), Type.Literal('video'), Type.Literal('any')]),
+  ),
   allowMultiple: Type.Optional(Type.Boolean()),
 })
 
@@ -484,10 +480,7 @@ export const POST_TYPE_FIELD_FEATURED_MEDIA = 'featuredMedia'
 export const POST_TYPE_FIELD_SEO_TITLE = 'seoTitle'
 export const POST_TYPE_FIELD_SEO_DESCRIPTION = 'seoDescription'
 
-export const POST_TYPE_MANDATORY_FIELD_IDS = [
-  POST_TYPE_FIELD_TITLE,
-  POST_TYPE_FIELD_SLUG,
-] as const
+export const POST_TYPE_MANDATORY_FIELD_IDS = [POST_TYPE_FIELD_TITLE, POST_TYPE_FIELD_SLUG] as const
 
 export const POST_TYPE_OPTIONAL_BUILTIN_FIELD_IDS = [
   POST_TYPE_FIELD_BODY,
@@ -554,16 +547,23 @@ const DataMetaFieldSchema = Type.Object({
   // NOTE: pageTree and fieldSchema are intentionally excluded — they are
   // structural types not surfaced in the instatic binding catalog.
   type: Type.Union([
-    Type.Literal('text'), Type.Literal('longText'), Type.Literal('richText'),
-    Type.Literal('number'), Type.Literal('boolean'),
-    Type.Literal('date'), Type.Literal('dateTime'),
-    Type.Literal('select'), Type.Literal('multiSelect'),
-    Type.Literal('url'), Type.Literal('email'),
-    Type.Literal('media'), Type.Literal('relation'),
+    Type.Literal('text'),
+    Type.Literal('longText'),
+    Type.Literal('richText'),
+    Type.Literal('number'),
+    Type.Literal('boolean'),
+    Type.Literal('date'),
+    Type.Literal('dateTime'),
+    Type.Literal('select'),
+    Type.Literal('multiSelect'),
+    Type.Literal('url'),
+    Type.Literal('email'),
+    Type.Literal('media'),
+    Type.Literal('relation'),
   ]),
-  mediaKind: Type.Optional(Type.Union([
-    Type.Literal('image'), Type.Literal('video'), Type.Literal('any'),
-  ])),
+  mediaKind: Type.Optional(
+    Type.Union([Type.Literal('image'), Type.Literal('video'), Type.Literal('any')]),
+  ),
   allowMultiple: Type.Optional(Type.Boolean()),
   /** Resolved slug of the target table. Relation fields only. */
   targetTableSlug: Type.Optional(Type.String()),

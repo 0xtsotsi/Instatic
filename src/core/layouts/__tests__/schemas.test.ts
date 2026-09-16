@@ -58,12 +58,14 @@ describe('parseSavedLayout', () => {
   })
 
   it('drops structurally invalid nodes instead of rejecting the layout', () => {
-    const layout = parseSavedLayout(rawLayout({
-      nodes: {
-        ...(rawLayout().nodes as Record<string, unknown>),
-        broken: { props: {} }, // no id / moduleId
-      },
-    }))
+    const layout = parseSavedLayout(
+      rawLayout({
+        nodes: {
+          ...(rawLayout().nodes as Record<string, unknown>),
+          broken: { props: {} }, // no id / moduleId
+        },
+      }),
+    )
     expect(layout).not.toBeNull()
     expect(Object.keys(layout!.nodes).sort()).toEqual(['root', 'text'])
   })
@@ -79,10 +81,12 @@ describe('parseSavedLayout', () => {
   })
 
   it('drops invalid classes and falls back createdAt', () => {
-    const layout = parseSavedLayout(rawLayout({
-      classes: { junk: { id: 'junk' } }, // missing required StyleRule fields
-      createdAt: 'yesterday',
-    }))
+    const layout = parseSavedLayout(
+      rawLayout({
+        classes: { junk: { id: 'junk' } }, // missing required StyleRule fields
+        createdAt: 'yesterday',
+      }),
+    )
     expect(layout).not.toBeNull()
     expect(layout!.classes).toEqual({})
     expect(typeof layout!.createdAt).toBe('number')

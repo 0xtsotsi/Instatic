@@ -80,7 +80,12 @@ type FormMessageProps = Record<string, unknown> & {
 
 type FormPreviewState = 'default' | 'submitting' | 'success' | 'error'
 
-export function FormEditor({ children, mcClassName, nodeWrapperProps, props }: ModuleComponentProps<FormProps>) {
+export function FormEditor({
+  children,
+  mcClassName,
+  nodeWrapperProps,
+  props,
+}: ModuleComponentProps<FormProps>) {
   const previewState = normalizePreviewState(props.editorPreviewState)
   const runtimeState = previewState === 'submitting' ? 'pending' : previewState
   const formId = normalizeIdentifierValue(props.formId, 'form')
@@ -98,7 +103,11 @@ export function FormEditor({ children, mcClassName, nodeWrapperProps, props }: M
   )
 }
 
-export function LabelEditor({ mcClassName, nodeWrapperProps, props }: ModuleComponentProps<LabelProps>) {
+export function LabelEditor({
+  mcClassName,
+  nodeWrapperProps,
+  props,
+}: ModuleComponentProps<LabelProps>) {
   const htmlFor = props.targetMode === 'explicit' && props.targetId ? props.targetId : undefined
   return (
     <label {...nodeWrapperProps} className={mcClassName} htmlFor={htmlFor}>
@@ -107,7 +116,11 @@ export function LabelEditor({ mcClassName, nodeWrapperProps, props }: ModuleComp
   )
 }
 
-export function InputEditor({ mcClassName, nodeWrapperProps, props }: ModuleComponentProps<InputProps>) {
+export function InputEditor({
+  mcClassName,
+  nodeWrapperProps,
+  props,
+}: ModuleComponentProps<InputProps>) {
   return (
     <input
       {...nodeWrapperProps}
@@ -125,7 +138,11 @@ export function InputEditor({ mcClassName, nodeWrapperProps, props }: ModuleComp
   )
 }
 
-export function TextareaEditor({ mcClassName, nodeWrapperProps, props }: ModuleComponentProps<TextareaProps>) {
+export function TextareaEditor({
+  mcClassName,
+  nodeWrapperProps,
+  props,
+}: ModuleComponentProps<TextareaProps>) {
   return (
     <textarea
       {...nodeWrapperProps}
@@ -142,7 +159,12 @@ export function TextareaEditor({ mcClassName, nodeWrapperProps, props }: ModuleC
   )
 }
 
-export function SelectEditor({ children, mcClassName, nodeWrapperProps, props }: ModuleComponentProps<SelectProps>) {
+export function SelectEditor({
+  children,
+  mcClassName,
+  nodeWrapperProps,
+  props,
+}: ModuleComponentProps<SelectProps>) {
   return (
     <select
       {...nodeWrapperProps}
@@ -166,7 +188,11 @@ export function OptionEditor({ nodeWrapperProps, props }: ModuleComponentProps<O
   )
 }
 
-export function OptionGroupEditor({ children, nodeWrapperProps, props }: ModuleComponentProps<OptionGroupProps>) {
+export function OptionGroupEditor({
+  children,
+  nodeWrapperProps,
+  props,
+}: ModuleComponentProps<OptionGroupProps>) {
   return (
     <optgroup {...nodeWrapperProps} label={props.label} disabled={props.disabled}>
       {children}
@@ -174,7 +200,11 @@ export function OptionGroupEditor({ children, nodeWrapperProps, props }: ModuleC
   )
 }
 
-export function CheckboxEditor({ mcClassName, nodeWrapperProps, props }: ModuleComponentProps<ChoiceProps>) {
+export function CheckboxEditor({
+  mcClassName,
+  nodeWrapperProps,
+  props,
+}: ModuleComponentProps<ChoiceProps>) {
   return (
     <input
       {...nodeWrapperProps}
@@ -190,7 +220,11 @@ export function CheckboxEditor({ mcClassName, nodeWrapperProps, props }: ModuleC
   )
 }
 
-export function RadioEditor({ mcClassName, nodeWrapperProps, props }: ModuleComponentProps<ChoiceProps>) {
+export function RadioEditor({
+  mcClassName,
+  nodeWrapperProps,
+  props,
+}: ModuleComponentProps<ChoiceProps>) {
   return (
     <input
       {...nodeWrapperProps}
@@ -206,7 +240,11 @@ export function RadioEditor({ mcClassName, nodeWrapperProps, props }: ModuleComp
   )
 }
 
-export function SubmitEditor({ mcClassName, nodeWrapperProps, props }: ModuleComponentProps<SubmitProps>) {
+export function SubmitEditor({
+  mcClassName,
+  nodeWrapperProps,
+  props,
+}: ModuleComponentProps<SubmitProps>) {
   const formId = normalizeIdentifierValue(props.formId)
   return (
     <button
@@ -221,7 +259,11 @@ export function SubmitEditor({ mcClassName, nodeWrapperProps, props }: ModuleCom
   )
 }
 
-export function FormMessageEditor({ mcClassName, nodeWrapperProps, props }: ModuleComponentProps<FormMessageProps>) {
+export function FormMessageEditor({
+  mcClassName,
+  nodeWrapperProps,
+  props,
+}: ModuleComponentProps<FormMessageProps>) {
   const previewState = normalizePreviewState(props.editorPreviewState)
   const previewKind = messageKindForPreview(previewState)
   const previewActive = previewKind !== null && props.kind === previewKind

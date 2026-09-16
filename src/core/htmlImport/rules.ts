@@ -92,10 +92,10 @@ function integerAttr(el: Element, name: string, fallback: number, min: number): 
   return Math.max(min, Math.floor(numberAttr(el, name, fallback)))
 }
 
-function normalizeInputType(el: Element): typeof TEXT_INPUT_TYPES[number] {
+function normalizeInputType(el: Element): (typeof TEXT_INPUT_TYPES)[number] {
   const type = normalizedAttr(el, 'type') || 'text'
-  return TEXT_INPUT_TYPES.includes(type as typeof TEXT_INPUT_TYPES[number])
-    ? type as typeof TEXT_INPUT_TYPES[number]
+  return TEXT_INPUT_TYPES.includes(type as (typeof TEXT_INPUT_TYPES)[number])
+    ? (type as (typeof TEXT_INPUT_TYPES)[number])
     : 'text'
 }
 
@@ -162,7 +162,10 @@ export const HTML_TO_MODULE_RULES: ImportRule[] = [
           }
         : {
             moduleId: 'base.text',
-            props: { text: normalizeImportedText(el.textContent ?? ''), tag: el.tagName.toLowerCase() },
+            props: {
+              text: normalizeImportedText(el.textContent ?? ''),
+              tag: el.tagName.toLowerCase(),
+            },
           },
     recurse: hasElementChild,
   },
@@ -411,7 +414,10 @@ export const HTML_TO_MODULE_RULES: ImportRule[] = [
       }
       return {
         moduleId: 'base.button',
-        props: { label: normalizeImportedText(el.textContent ?? ''), disabled: el.hasAttribute('disabled') },
+        props: {
+          label: normalizeImportedText(el.textContent ?? ''),
+          disabled: el.hasAttribute('disabled'),
+        },
       }
     },
   },
@@ -480,7 +486,11 @@ export const HTML_TO_MODULE_RULES: ImportRule[] = [
       if (src) {
         try {
           const host = new URL(src).hostname.toLowerCase().replace(/^www\./, '')
-          isYoutube = host === 'youtube.com' || host === 'm.youtube.com' || host === 'youtube-nocookie.com' || host === 'youtu.be'
+          isYoutube =
+            host === 'youtube.com' ||
+            host === 'm.youtube.com' ||
+            host === 'youtube-nocookie.com' ||
+            host === 'youtu.be'
         } catch {
           // malformed URL — not YouTube
         }
@@ -523,10 +533,7 @@ export const HTML_TO_MODULE_RULES: ImportRule[] = [
       // Prefer the <video src> attribute; fall back to the first <source src>
       // child. Recurse is false so <source> children are consumed here, not
       // emitted as separate nodes.
-      const videoUrl =
-        attr(el, 'src')
-        || el.querySelector('source')?.getAttribute('src')
-        || ''
+      const videoUrl = attr(el, 'src') || el.querySelector('source')?.getAttribute('src') || ''
 
       return {
         moduleId: 'base.video',

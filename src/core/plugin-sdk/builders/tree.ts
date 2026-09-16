@@ -74,11 +74,7 @@ export const h = {
     )
   },
 
-  text(options: {
-    tag?: string
-    text: string
-    classIds?: string[]
-  }): NodeBuilder {
+  text(options: { tag?: string; text: string; classIds?: string[] }): NodeBuilder {
     return builder(
       'base.text',
       'txt',
@@ -87,11 +83,7 @@ export const h = {
     )
   },
 
-  button(options: {
-    label: string
-    href?: string
-    classIds?: string[]
-  }): NodeBuilder {
+  button(options: { label: string; href?: string; classIds?: string[] }): NodeBuilder {
     return builder(
       'base.button',
       'btn',
@@ -100,23 +92,11 @@ export const h = {
     )
   },
 
-  image(options: {
-    src: string
-    classIds?: string[]
-  }): NodeBuilder {
-    return builder(
-      'base.image',
-      'img',
-      { src: options.src },
-      { classIds: options.classIds },
-    )
+  image(options: { src: string; classIds?: string[] }): NodeBuilder {
+    return builder('base.image', 'img', { src: options.src }, { classIds: options.classIds })
   },
 
-  link(options: {
-    href: string
-    text: string
-    classIds?: string[]
-  }): NodeBuilder {
+  link(options: { href: string; text: string; classIds?: string[] }): NodeBuilder {
     return builder(
       'base.link',
       'lnk',
@@ -125,10 +105,7 @@ export const h = {
     )
   },
 
-  vcRef(options: {
-    componentId: string
-    classIds?: string[]
-  }): NodeBuilder {
+  vcRef(options: { componentId: string; classIds?: string[] }): NodeBuilder {
     return builder(
       'base.visual-component-ref',
       'vcr',
@@ -215,10 +192,6 @@ export function defineComponent(
  * Convenience for `defineComponent(ns.vc(name), label, factory)` — the most
  * common spelling in plugin code.
  */
-export function vc(
-  fullId: string,
-  name: string,
-  factory: () => NodeBuilder,
-): VisualComponent {
+export function vc(fullId: string, name: string, factory: () => NodeBuilder): VisualComponent {
   return defineComponent(fullId, name, factory)
 }

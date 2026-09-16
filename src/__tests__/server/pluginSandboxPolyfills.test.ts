@@ -27,12 +27,14 @@ interface RecorderEntry {
  * `test.now` are the only targets the test plugins use. Any other target
  * (e.g. `network.fetch`) is implemented per-test via the optional override.
  */
-function makeRecorderEnv(overrides: {
-  pluginId?: string
-  recorder?: RecorderEntry[]
-  onCall?: (target: string, args: unknown[]) => Promise<unknown> | unknown
-  grantedPermissions?: string[]
-} = {}): { env: PluginVmEnv; recorder: RecorderEntry[] } {
+function makeRecorderEnv(
+  overrides: {
+    pluginId?: string
+    recorder?: RecorderEntry[]
+    onCall?: (target: string, args: unknown[]) => Promise<unknown> | unknown
+    grantedPermissions?: string[]
+  } = {},
+): { env: PluginVmEnv; recorder: RecorderEntry[] } {
   const recorder = overrides.recorder ?? []
   const env: PluginVmEnv = {
     pluginId: overrides.pluginId ?? 'acme.polyfills',
@@ -45,7 +47,9 @@ function makeRecorderEnv(overrides: {
       if (overrides.onCall) return await overrides.onCall(target, args)
       return null
     },
-    log: () => { /* swallow */ },
+    log: () => {
+      /* swallow */
+    },
   }
   return { env, recorder }
 }
@@ -160,7 +164,9 @@ describe('plugin sandbox: timer polyfills', () => {
     })
     try {
       await vm.runLifecycle('activate')
-      const tickCounts = recorder.filter((e) => e.target === 'test.record').map((e) => e.args[0] as number)
+      const tickCounts = recorder
+        .filter((e) => e.target === 'test.record')
+        .map((e) => e.args[0] as number)
       expect(tickCounts).toEqual([1, 2, 3])
     } finally {
       vm.dispose()
@@ -249,8 +255,18 @@ describe('plugin sandbox: AbortController / AbortSignal polyfills', () => {
     })
     try {
       await vm.runLifecycle('activate')
-      const observed = recorder[0]?.args[0] as { before: boolean; after: boolean; listenerCalled: boolean; reasonName: string }
-      expect(observed).toEqual({ before: false, after: true, listenerCalled: true, reasonName: 'AbortError' })
+      const observed = recorder[0]?.args[0] as {
+        before: boolean
+        after: boolean
+        listenerCalled: boolean
+        reasonName: string
+      }
+      expect(observed).toEqual({
+        before: false,
+        after: true,
+        listenerCalled: true,
+        reasonName: 'AbortError',
+      })
     } finally {
       vm.dispose()
     }
@@ -278,7 +294,11 @@ describe('plugin sandbox: AbortController / AbortSignal polyfills', () => {
     })
     try {
       await vm.runLifecycle('activate')
-      const observed = recorder[0]?.args[0] as { seenBefore: boolean; seenAfter: boolean; reasonName: string }
+      const observed = recorder[0]?.args[0] as {
+        seenBefore: boolean
+        seenAfter: boolean
+        reasonName: string
+      }
       expect(observed).toEqual({ seenBefore: false, seenAfter: true, reasonName: 'TimeoutError' })
     } finally {
       vm.dispose()
@@ -461,7 +481,9 @@ describe('plugin sandbox: fetch + AbortSignal integration', () => {
       recorder,
       onCall: async (target) => {
         if (target === 'network.fetch') {
-          return await new Promise((res) => { resolveFetch = res })
+          return await new Promise((res) => {
+            resolveFetch = res
+          })
         }
         return null
       },
@@ -494,15 +516,15 @@ describe('plugin sandbox: fetch + AbortSignal integration', () => {
       // Now release the host fetch so the activate promise can finish
       // microtask draining for its own internal awaits.
       if (resolveFetch) {
-        (resolveFetch as (v: unknown) => void)({ status: 200, ok: true, headers: {}, body: '' })
+        ;(resolveFetch as (v: unknown) => void)({ status: 200, ok: true, headers: {}, body: '' })
       }
       await activateP
       const fetchCall = recorder.find((e) => e.target === 'network.fetch')
       const abortCall = recorder.find((e) => e.target === 'network.abort')
       expect(fetchCall).toBeDefined()
       expect(abortCall).toBeDefined()
-      const fetchInit = (fetchCall!.args[1] as { abortId?: string })
-      const abortArgs = (abortCall!.args[0] as { abortId: string })
+      const fetchInit = fetchCall!.args[1] as { abortId?: string }
+      const abortArgs = abortCall!.args[0] as { abortId: string }
       // Same correlation id on both sides.
       expect(typeof fetchInit.abortId).toBe('string')
       expect(abortArgs.abortId).toBe(fetchInit.abortId!)
@@ -520,7 +542,12 @@ describe('plugin sandbox: fetch + AbortSignal integration', () => {
       recorder,
       onCall: async (target) => {
         if (target === 'network.fetch') {
-          return { status: 200, ok: true, headers: { 'content-type': 'application/json' }, body: '{"hello":"world"}' }
+          return {
+            status: 200,
+            ok: true,
+            headers: { 'content-type': 'application/json' },
+            body: '{"hello":"world"}',
+          }
         }
         return null
       },
@@ -590,9 +617,7 @@ describe('plugin sandbox: schedule register → dispatch round-trip', () => {
       // The host fires the schedule using the namespaced id — exactly like
       // server/plugins/scheduler.ts:fireSchedule does at runtime.
       await vm.runSchedule('acme.polyfills.tick', 5000)
-      const ran = recorder.some(
-        (e) => e.target === 'test.record' && e.args[0] === 'tick-ran',
-      )
+      const ran = recorder.some((e) => e.target === 'test.record' && e.args[0] === 'tick-ran')
       expect(ran).toBe(true)
     } finally {
       vm.dispose()
@@ -620,9 +645,7 @@ describe('plugin sandbox: schedule register → dispatch round-trip', () => {
     try {
       await vm.runLifecycle('activate')
       await vm.runSchedule('acme.polyfills.tick', 5000)
-      const ran = recorder.some(
-        (e) => e.target === 'test.record' && e.args[0] === 'tick-ran',
-      )
+      const ran = recorder.some((e) => e.target === 'test.record' && e.args[0] === 'tick-ran')
       expect(ran).toBe(false)
     } finally {
       vm.dispose()
@@ -710,12 +733,18 @@ function makeCryptoEnv(pluginId: string, recorder: RecorderEntry[]): PluginVmEnv
           false,
           ['sign'],
         )
-        const sig = await crypto.subtle.sign({ name: 'HMAC' }, importedKey, dataBytes.buffer.slice(0))
+        const sig = await crypto.subtle.sign(
+          { name: 'HMAC' },
+          importedKey,
+          dataBytes.buffer.slice(0),
+        )
         return btoa(String.fromCharCode(...new Uint8Array(sig)))
       }
       return null
     },
-    log: () => { /* swallow */ },
+    log: () => {
+      /* swallow */
+    },
   }
 }
 
@@ -817,12 +846,15 @@ describe('plugin sandbox: crypto.subtle bridge', () => {
     })
     try {
       await vm.runLifecycle('activate')
-      const reported = recorder.find((e) => e.target === 'test.record')?.args[0] as { signingKeyHex: string }
+      const reported = recorder.find((e) => e.target === 'test.record')?.args[0] as {
+        signingKeyHex: string
+      }
       // The AWS docs publish this exact derivation as a Sigv4 test
       // vector — if our bridge agrees, we know the plugin can produce
       // correct AWS signatures.
-      expect(reported.signingKeyHex)
-        .toBe('c4afb1cc5771d871763a393e44b703571b55cc28424d1a5e86da6ed3c154a4b9')
+      expect(reported.signingKeyHex).toBe(
+        'c4afb1cc5771d871763a393e44b703571b55cc28424d1a5e86da6ed3c154a4b9',
+      )
     } finally {
       vm.dispose()
     }
@@ -849,7 +881,9 @@ describe('plugin sandbox: crypto.subtle bridge', () => {
     })
     try {
       await vm.runLifecycle('activate')
-      const reported = recorder.find((e) => e.target === 'test.record')?.args[0] as { caught: string }
+      const reported = recorder.find((e) => e.target === 'test.record')?.args[0] as {
+        caught: string
+      }
       expect(reported.caught).toContain('Unsupported digest algorithm')
     } finally {
       vm.dispose()

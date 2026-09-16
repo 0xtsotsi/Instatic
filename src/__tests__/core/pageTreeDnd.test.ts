@@ -25,7 +25,9 @@ function page(nodes: Record<string, PageNode>, rootNodeId = 'root'): Page {
 }
 
 const canHaveChildren = (moduleId: string) =>
-  ['base.body', 'base.container', 'base.visual-component-ref', 'base.slot-instance'].includes(moduleId)
+  ['base.body', 'base.container', 'base.visual-component-ref', 'base.slot-instance'].includes(
+    moduleId,
+  )
 
 describe('resolvePageTreeDropTarget', () => {
   it('normalizes same-parent before and after targets around source removal', () => {
@@ -37,21 +39,25 @@ describe('resolvePageTreeDropTarget', () => {
       d: node('d', 'base.text'),
     })
 
-    expect(resolvePageTreeDropTarget({
-      tree,
-      draggedId: 'a',
-      overId: 'd',
-      zone: 'after',
-      canHaveChildren,
-    })?.index).toBe(3)
+    expect(
+      resolvePageTreeDropTarget({
+        tree,
+        draggedId: 'a',
+        overId: 'd',
+        zone: 'after',
+        canHaveChildren,
+      })?.index,
+    ).toBe(3)
 
-    expect(resolvePageTreeDropTarget({
-      tree,
-      draggedId: 'd',
-      overId: 'a',
-      zone: 'before',
-      canHaveChildren,
-    })?.index).toBe(0)
+    expect(
+      resolvePageTreeDropTarget({
+        tree,
+        draggedId: 'd',
+        overId: 'a',
+        zone: 'before',
+        canHaveChildren,
+      })?.index,
+    ).toBe(0)
   })
 
   it('rejects illegal multi-drag targets for every dragged id', () => {
@@ -63,23 +69,27 @@ describe('resolvePageTreeDropTarget', () => {
       locked: node('locked', 'base.text', [], true),
     })
 
-    expect(resolvePageTreeDropTarget({
-      tree,
-      draggedId: 'container',
-      draggedIds: ['container', 'locked'],
-      overId: 'target',
-      zone: 'inside',
-      canHaveChildren,
-    })).toBeNull()
+    expect(
+      resolvePageTreeDropTarget({
+        tree,
+        draggedId: 'container',
+        draggedIds: ['container', 'locked'],
+        overId: 'target',
+        zone: 'inside',
+        canHaveChildren,
+      }),
+    ).toBeNull()
 
-    expect(resolvePageTreeDropTarget({
-      tree,
-      draggedId: 'container',
-      draggedIds: ['container', 'target'],
-      overId: 'child',
-      zone: 'inside',
-      canHaveChildren,
-    })).toBeNull()
+    expect(
+      resolvePageTreeDropTarget({
+        tree,
+        draggedId: 'container',
+        draggedIds: ['container', 'target'],
+        overId: 'child',
+        zone: 'inside',
+        canHaveChildren,
+      }),
+    ).toBeNull()
   })
 
   it('allows user content inside slot instances while rejecting direct visual-component-ref children', () => {
@@ -90,20 +100,24 @@ describe('resolvePageTreeDropTarget', () => {
       outsideText: node('outsideText', 'base.text'),
     })
 
-    expect(resolvePageTreeDropTarget({
-      tree,
-      draggedId: 'outsideText',
-      overId: 'slot',
-      zone: 'inside',
-      canHaveChildren,
-    })?.parentId).toBe('slot')
+    expect(
+      resolvePageTreeDropTarget({
+        tree,
+        draggedId: 'outsideText',
+        overId: 'slot',
+        zone: 'inside',
+        canHaveChildren,
+      })?.parentId,
+    ).toBe('slot')
 
-    expect(resolvePageTreeDropTarget({
-      tree,
-      draggedId: 'outsideText',
-      overId: 'vcRef',
-      zone: 'inside',
-      canHaveChildren,
-    })).toBeNull()
+    expect(
+      resolvePageTreeDropTarget({
+        tree,
+        draggedId: 'outsideText',
+        overId: 'vcRef',
+        zone: 'inside',
+        canHaveChildren,
+      }),
+    ).toBeNull()
   })
 })

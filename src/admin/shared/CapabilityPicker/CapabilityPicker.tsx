@@ -130,7 +130,9 @@ export function CapabilityPicker({
                             {meta?.label ?? capabilityLabel(capability)}
                           </span>
                           {meta && (
-                            <span className={styles.capabilityRowDescription}>{meta.description}</span>
+                            <span className={styles.capabilityRowDescription}>
+                              {meta.description}
+                            </span>
                           )}
                         </span>
                       </label>

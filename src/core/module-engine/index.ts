@@ -31,14 +31,9 @@ export {
   resolvePropertyControlCategory,
 } from './propertySchema'
 
-export {
-  createModuleImportMap,
-  resolveDependencyUrl,
-} from './runtimeResolver'
+export { createModuleImportMap, resolveDependencyUrl } from './runtimeResolver'
 
-export type {
-  SiteModuleDependencyUsage,
-} from './dependencies'
+export type { SiteModuleDependencyUsage } from './dependencies'
 
 export {
   normalizeModuleDependencies,

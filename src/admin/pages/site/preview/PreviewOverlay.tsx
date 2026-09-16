@@ -66,11 +66,7 @@ export function PreviewOverlay() {
   return (
     <>
       {/* Backdrop */}
-      <div
-        aria-hidden="true"
-        onClick={closePreview}
-        className={styles.backdrop}
-      />
+      <div aria-hidden="true" onClick={closePreview} className={styles.backdrop} />
 
       {/* Dialog wrapper */}
       <div
@@ -86,9 +82,7 @@ export function PreviewOverlay() {
           {/* ── Header bar ──────────────────────────────────────────────── */}
           <div className={styles.header}>
             <EyeSolidIcon size={14} color="var(--text-muted)" className={styles.headerIcon} />
-            <span className={styles.headerTitle}>
-              Preview — {activePage.title}
-            </span>
+            <span className={styles.headerTitle}>Preview — {activePage.title}</span>
 
             {/* Close button */}
             <Button

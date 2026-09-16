@@ -12,8 +12,23 @@
  */
 
 import { strFromU8, unzipSync } from 'fflate'
-import type { SiteBundle, BundlePreview, ImportResult, ImportStrategy, ExportRequest, ExportEstimate, ExportSummary, BundleImportSelection } from '@core/data/bundleSchema'
-import { SiteBundleSchema, BundlePreviewSchema, ImportResultSchema, ExportEstimateSchema, ExportSummarySchema } from '@core/data/bundleSchema'
+import type {
+  SiteBundle,
+  BundlePreview,
+  ImportResult,
+  ImportStrategy,
+  ExportRequest,
+  ExportEstimate,
+  ExportSummary,
+  BundleImportSelection,
+} from '@core/data/bundleSchema'
+import {
+  SiteBundleSchema,
+  BundlePreviewSchema,
+  ImportResultSchema,
+  ExportEstimateSchema,
+  ExportSummarySchema,
+} from '@core/data/bundleSchema'
 import {
   BUNDLE_ARCHIVE_MANIFEST_PATH,
   mediaArchivePath,
@@ -300,7 +315,10 @@ export function parseSiteBundleArchive(bytes: Uint8Array): SiteBundle | null {
     const path = mediaArchivePath(asset.storagePath)
     const mediaBytes = entries[path]
     if (!mediaBytes) {
-      throw new SiteBundleParseError(`Archive is missing media file "${path}"`, `/media/${index}/storagePath`)
+      throw new SiteBundleParseError(
+        `Archive is missing media file "${path}"`,
+        `/media/${index}/storagePath`,
+      )
     }
     return {
       ...asset,
@@ -341,13 +359,15 @@ export async function readSiteBundleArchiveManifestFile(
     throw new SiteBundleParseError('CMS archive manifest must be stored without compression', '')
   }
   if ((flags & ZIP_DATA_DESCRIPTOR_FLAG) !== 0) {
-    throw new SiteBundleParseError('CMS archive manifest must declare its size in the local header', '')
+    throw new SiteBundleParseError(
+      'CMS archive manifest must declare its size in the local header',
+      '',
+    )
   }
 
   const extra = metadata.subarray(fileNameLength)
-  const compressedSize = compressedSize32 === UINT32_MAX
-    ? readZip64LocalSize(extra)
-    : compressedSize32
+  const compressedSize =
+    compressedSize32 === UINT32_MAX ? readZip64LocalSize(extra) : compressedSize32
   if (compressedSize === null) {
     throw new SiteBundleParseError('CMS archive manifest is missing ZIP64 size metadata', '')
   }
@@ -361,7 +381,9 @@ export async function readSiteBundleArchiveManifestFile(
     throw new SiteBundleParseError('CMS archive manifest is truncated', '')
   }
 
-  const manifestBytes = new Uint8Array(await archiveFile.slice(manifestStart, manifestEnd).arrayBuffer())
+  const manifestBytes = new Uint8Array(
+    await archiveFile.slice(manifestStart, manifestEnd).arrayBuffer(),
+  )
   let parsed: unknown
   try {
     parsed = JSON.parse(textDecoder.decode(manifestBytes))
@@ -374,7 +396,9 @@ export async function readSiteBundleArchiveManifestFile(
   return parseSiteBundleArchiveManifestValue(parsed)
 }
 
-export function siteBundlePreviewFromArchiveManifest(manifest: SiteBundleArchiveManifest): SiteBundle {
+export function siteBundlePreviewFromArchiveManifest(
+  manifest: SiteBundleArchiveManifest,
+): SiteBundle {
   return parseValue(SiteBundleSchema, {
     ...manifest,
     ...(manifest.media

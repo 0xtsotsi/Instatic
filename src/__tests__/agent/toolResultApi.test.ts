@@ -7,10 +7,7 @@ function abortError(): Error {
   return error
 }
 
-async function withFetch(
-  implementation: typeof fetch,
-  run: () => Promise<void>,
-): Promise<void> {
+async function withFetch(implementation: typeof fetch, run: () => Promise<void>): Promise<void> {
   const originalFetch = globalThis.fetch
   globalThis.fetch = implementation
   try {
@@ -25,17 +22,15 @@ describe('postToolResult', () => {
     const controller = new AbortController()
 
     await withFetch(
-      (async () => new Response(
-        JSON.stringify({ error: 'The active tool bridge no longer exists.' }),
-        { status: 404, headers: { 'Content-Type': 'application/json' } },
-      )) as typeof fetch,
+      (async () =>
+        new Response(JSON.stringify({ error: 'The active tool bridge no longer exists.' }), {
+          status: 404,
+          headers: { 'Content-Type': 'application/json' },
+        })) as typeof fetch,
       async () => {
-        await expect(postToolResult(
-          'bridge-1',
-          'request-1',
-          { ok: true },
-          controller.signal,
-        )).rejects.toThrow('The active tool bridge no longer exists.')
+        await expect(
+          postToolResult('bridge-1', 'request-1', { ok: true }, controller.signal),
+        ).rejects.toThrow('The active tool bridge no longer exists.')
       },
     )
   })
@@ -44,17 +39,15 @@ describe('postToolResult', () => {
     const controller = new AbortController()
 
     await withFetch(
-      (async () => new Response(
-        JSON.stringify({ error: 'Tool-result storage failed.' }),
-        { status: 503, headers: { 'Content-Type': 'application/json' } },
-      )) as typeof fetch,
+      (async () =>
+        new Response(JSON.stringify({ error: 'Tool-result storage failed.' }), {
+          status: 503,
+          headers: { 'Content-Type': 'application/json' },
+        })) as typeof fetch,
       async () => {
-        await expect(postToolResult(
-          'bridge-1',
-          'request-1',
-          { ok: true },
-          controller.signal,
-        )).rejects.toThrow('Tool-result storage failed.')
+        await expect(
+          postToolResult('bridge-1', 'request-1', { ok: true }, controller.signal),
+        ).rejects.toThrow('Tool-result storage failed.')
       },
     )
   })
@@ -68,12 +61,9 @@ describe('postToolResult', () => {
         throw abortError()
       }) as typeof fetch,
       async () => {
-        await expect(postToolResult(
-          'bridge-1',
-          'request-1',
-          { ok: true },
-          controller.signal,
-        )).resolves.toBeUndefined()
+        await expect(
+          postToolResult('bridge-1', 'request-1', { ok: true }, controller.signal),
+        ).resolves.toBeUndefined()
       },
     )
   })
@@ -86,12 +76,9 @@ describe('postToolResult', () => {
         throw abortError()
       }) as typeof fetch,
       async () => {
-        await expect(postToolResult(
-          'bridge-1',
-          'request-1',
-          { ok: true },
-          controller.signal,
-        )).rejects.toThrow('The operation was aborted.')
+        await expect(
+          postToolResult('bridge-1', 'request-1', { ok: true }, controller.signal),
+        ).rejects.toThrow('The operation was aborted.')
       },
     )
   })

@@ -39,20 +39,14 @@ interface ParamOrigin {
  * Returns null if no origin exists (orphan param — shouldn't happen with GC,
  * but the UI must render the row defensively).
  */
-export function findParamOrigin(
-  vc: VisualComponent,
-  paramId: string,
-): ParamOrigin | null {
+export function findParamOrigin(vc: VisualComponent, paramId: string): ParamOrigin | null {
   const param: VCParam | undefined = vc.params.find((p) => p.id === paramId)
   if (!param) return null
 
   for (const node of Object.values(vc.tree.nodes)) {
     if (param.type === 'slot') {
       // Slot params are originated by base.slot-outlet nodes.
-      if (
-        node.moduleId === 'base.slot-outlet' &&
-        String(node.props.slotName) === param.name
-      ) {
+      if (node.moduleId === 'base.slot-outlet' && String(node.props.slotName) === param.name) {
         return { nodeId: node.id, propKey: 'slotName' }
       }
     } else {

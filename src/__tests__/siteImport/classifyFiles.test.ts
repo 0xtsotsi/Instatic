@@ -11,9 +11,7 @@ const txt = (s: string) => enc.encode(s)
 
 function fileMap(paths: string[]): FileMap {
   return {
-    files: Object.fromEntries(
-      paths.map((p) => [p, { bytes: txt('x') }]),
-    ),
+    files: Object.fromEntries(paths.map((p) => [p, { bytes: txt('x') }])),
   }
 }
 
@@ -97,7 +95,7 @@ describe('classifyFiles — MIME type fallback', () => {
     const fm: FileMap = {
       files: {
         'no-ext-image': { bytes: txt('x'), mimeType: 'image/png' },
-        'no-ext-font':  { bytes: txt('x'), mimeType: 'font/woff2' },
+        'no-ext-font': { bytes: txt('x'), mimeType: 'font/woff2' },
       },
     }
     const result = classifyFiles(fm)

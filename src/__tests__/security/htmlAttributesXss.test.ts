@@ -36,7 +36,9 @@ describe('sanitizeRenderableHtmlAttribute — the shared custom-attribute gate',
     expect(sanitizeRenderableHtmlAttribute('href', 'JavaScript:alert(1)')).toBeNull()
     // browser tab/newline URL normalisation is applied before the scheme test
     expect(sanitizeRenderableHtmlAttribute('href', 'java\tscript:alert(1)')).toBeNull()
-    expect(sanitizeRenderableHtmlAttribute('src', 'data:text/html,<script>alert(1)</script>')).toBeNull()
+    expect(
+      sanitizeRenderableHtmlAttribute('src', 'data:text/html,<script>alert(1)</script>'),
+    ).toBeNull()
     expect(sanitizeRenderableHtmlAttribute('formaction', 'vbscript:msgbox(1)')).toBeNull()
     expect(sanitizeRenderableHtmlAttribute('xlink:href', 'javascript:alert(1)')).toBeNull()
   })
@@ -51,7 +53,9 @@ describe('sanitizeRenderableHtmlAttribute — the shared custom-attribute gate',
     expect(sanitizeRenderableHtmlAttribute('title', 'Hello world')).toBe('Hello world')
     expect(sanitizeRenderableHtmlAttribute('aria-label', 'Close')).toBe('Close')
     expect(sanitizeRenderableHtmlAttribute('data-foo', 'bar')).toBe('bar')
-    expect(sanitizeRenderableHtmlAttribute('href', 'https://example.com/page')).toBe('https://example.com/page')
+    expect(sanitizeRenderableHtmlAttribute('href', 'https://example.com/page')).toBe(
+      'https://example.com/page',
+    )
     expect(sanitizeRenderableHtmlAttribute('href', '/relative/path')).toBe('/relative/path')
   })
 })
@@ -68,13 +72,22 @@ describe('htmlAttributesAttr — publisher string emit funnels through the gate'
 })
 
 describe('resolveHtmlTag — custom-tag escape hatch rejects dangerous elements', () => {
-  it.each(['iframe', 'script', 'object', 'embed', 'base', 'link', 'meta', 'style', 'frame', 'frameset', 'applet'])(
-    'coerces a dangerous custom tag to div: %s',
-    (tag) => {
-      expect(resolveHtmlTag('custom', tag)).toBe('div')
-      expect(resolveHtmlTag('custom', tag.toUpperCase())).toBe('div')
-    },
-  )
+  it.each([
+    'iframe',
+    'script',
+    'object',
+    'embed',
+    'base',
+    'link',
+    'meta',
+    'style',
+    'frame',
+    'frameset',
+    'applet',
+  ])('coerces a dangerous custom tag to div: %s', (tag) => {
+    expect(resolveHtmlTag('custom', tag)).toBe('div')
+    expect(resolveHtmlTag('custom', tag.toUpperCase())).toBe('div')
+  })
 
   it('still allows benign custom tags and built-ins', () => {
     expect(resolveHtmlTag('custom', 'aside')).toBe('aside')

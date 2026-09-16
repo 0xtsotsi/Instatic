@@ -121,15 +121,9 @@ export interface SkeletonBlockProps {
  *
  * Each bar is one local `<span>` with the shared shimmer paint.
  */
-export function SkeletonBlock({
-  minHeight,
-  className,
-  ariaLabel,
-}: SkeletonBlockProps) {
+export function SkeletonBlock({ minHeight, className, ariaLabel }: SkeletonBlockProps) {
   const style: SkeletonBlockCssProperties | undefined =
-    minHeight !== undefined
-      ? { '--skeleton-block-min-height': `${minHeight}px` }
-      : undefined
+    minHeight !== undefined ? { '--skeleton-block-min-height': `${minHeight}px` } : undefined
   return (
     <div
       className={cn(styles.skeletonBlock, className)}
@@ -169,15 +163,8 @@ export interface SkeletonCardsProps {
  * `<AdminPageLayout loading>` renders this automatically. Use it
  * manually only when the page intentionally bypasses `AdminPageLayout`.
  */
-export function SkeletonCards({
-  count = 3,
-  className,
-  ariaLabel,
-}: SkeletonCardsProps) {
-  const cardIds = Array.from(
-    { length: Math.max(1, count) },
-    (_, index) => `skeleton-card-${index}`,
-  )
+export function SkeletonCards({ count = 3, className, ariaLabel }: SkeletonCardsProps) {
+  const cardIds = Array.from({ length: Math.max(1, count) }, (_, index) => `skeleton-card-${index}`)
 
   return (
     <div
@@ -223,10 +210,7 @@ export function SkeletonRows({
   className,
   ariaLabel,
 }: SkeletonRowsProps) {
-  const rowIds = Array.from(
-    { length: Math.max(1, count) },
-    (_, index) => `skeleton-row-${index}`,
-  )
+  const rowIds = Array.from({ length: Math.max(1, count) }, (_, index) => `skeleton-row-${index}`)
 
   return (
     <div
@@ -306,14 +290,8 @@ interface SkeletonTreeProps {
  * tree-of-nodes surfaces (Layers panel, Selectors tree) where flat rows would
  * misrepresent the nested structure about to appear.
  */
-export function SkeletonTree({
-  count,
-  rowHeight,
-  className,
-  ariaLabel,
-}: SkeletonTreeProps) {
-  const length =
-    count !== undefined ? Math.max(1, count) : DEFAULT_TREE_SHAPE.length
+export function SkeletonTree({ count, rowHeight, className, ariaLabel }: SkeletonTreeProps) {
+  const length = count !== undefined ? Math.max(1, count) : DEFAULT_TREE_SHAPE.length
   const rows = Array.from({ length }, (_, index) => ({
     ...DEFAULT_TREE_SHAPE[index % DEFAULT_TREE_SHAPE.length],
     key: `skeleton-tree-row-${index}`,
@@ -321,9 +299,7 @@ export function SkeletonTree({
   }))
 
   const containerStyle: SkeletonTreeCssProperties | undefined =
-    rowHeight !== undefined
-      ? { '--skeleton-tree-row-h': `${rowHeight}px` }
-      : undefined
+    rowHeight !== undefined ? { '--skeleton-tree-row-h': `${rowHeight}px` } : undefined
 
   return (
     <div
@@ -405,7 +381,5 @@ interface SkeletonCircleProps {
  * intended to read as round.
  */
 export function SkeletonCircle({ size, className }: SkeletonCircleProps): ReactNode {
-  return (
-    <Skeleton width={size} height={size} radius="50%" className={className} />
-  )
+  return <Skeleton width={size} height={size} radius="50%" className={className} />
 }

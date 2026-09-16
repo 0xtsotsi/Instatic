@@ -31,12 +31,7 @@ import { isRichtextPropKey } from '@core/sanitize'
 import type { TemplateRenderDataContext } from './renderDataContext'
 
 export type { TemplateRenderDataContext } from './renderDataContext'
-import {
-  containsTokens,
-  interpolateTokens,
-  readFrame,
-  walkFieldPath,
-} from './tokenInterpolation'
+import { containsTokens, interpolateTokens, readFrame, walkFieldPath } from './tokenInterpolation'
 
 /**
  * Resolve a single binding to its runtime value.
@@ -173,9 +168,7 @@ export function resolveDynamicProps(
       mutated = true
     }
     const interpolated = interpolateTokens(v, context)
-    resolved![key] = isRichtextPropKey(key)
-      ? renderMarkdownToHtml(interpolated)
-      : interpolated
+    resolved![key] = isRichtextPropKey(key) ? renderMarkdownToHtml(interpolated) : interpolated
   }
 
   return resolved ?? staticProps

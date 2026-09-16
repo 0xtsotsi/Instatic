@@ -269,23 +269,17 @@ describe('path safety', () => {
   describe('writeArtefact rejects unsafe paths', () => {
     it('rejects .. segments', async () => {
       const { slotDir } = await prepareInactiveSlot(uploadsDir)
-      await expect(writeArtefact(slotDir, '/../etc/passwd', '<html>')).rejects.toThrow(
-        '..',
-      )
+      await expect(writeArtefact(slotDir, '/../etc/passwd', '<html>')).rejects.toThrow('..')
     })
 
     it('rejects URL-encoded .. segments (%2e%2e)', async () => {
       const { slotDir } = await prepareInactiveSlot(uploadsDir)
-      await expect(writeArtefact(slotDir, '/%2e%2e/etc/passwd', '<html>')).rejects.toThrow(
-        '..',
-      )
+      await expect(writeArtefact(slotDir, '/%2e%2e/etc/passwd', '<html>')).rejects.toThrow('..')
     })
 
     it('rejects mixed-case URL-encoded .. (%2E%2E)', async () => {
       const { slotDir } = await prepareInactiveSlot(uploadsDir)
-      await expect(writeArtefact(slotDir, '/%2E%2E/etc/passwd', '<html>')).rejects.toThrow(
-        '..',
-      )
+      await expect(writeArtefact(slotDir, '/%2E%2E/etc/passwd', '<html>')).rejects.toThrow('..')
     })
 
     it('rejects embedded absolute paths (double-slash)', async () => {

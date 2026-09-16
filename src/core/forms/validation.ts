@@ -1,19 +1,11 @@
-import type {
-  DataField,
-  DataTable,
-} from '@core/data/schemas'
-import type {
-  FormControlBinding,
-  FormSubmissionLimits,
-  FormValidationError,
-} from './schemas'
+import type { DataField, DataTable } from '@core/data/schemas'
+import type { FormControlBinding, FormSubmissionLimits, FormValidationError } from './schemas'
 
 const DEFAULT_MAX_FIELDS = 100
 const DEFAULT_MAX_STRING_LENGTH = 10_000
 
 type FormValidationResult =
-  | { ok: true; cells: Record<string, unknown> }
-  | { ok: false; errors: FormValidationError[] }
+  { ok: true; cells: Record<string, unknown> } | { ok: false; errors: FormValidationError[] }
 
 export function validateFormSubmission(input: {
   table: DataTable
@@ -99,9 +91,7 @@ export function validateFormSubmission(input: {
   return errors.length > 0 ? { ok: false, errors } : { ok: true, cells }
 }
 
-type CoerceResult =
-  | { ok: true; value: unknown }
-  | { ok: false; code: string; message: string }
+type CoerceResult = { ok: true; value: unknown } | { ok: false; code: string; message: string }
 
 function coerceFieldValue(field: DataField, value: unknown): CoerceResult {
   if (value === '' || value === null || value === undefined) return { ok: true, value: null }
@@ -144,7 +134,11 @@ function coerceFieldValue(field: DataField, value: unknown): CoerceResult {
       return { ok: true, value: String(value) }
     case 'pageTree':
     case 'fieldSchema':
-      return { ok: false, code: 'unsupported_field', message: 'This field cannot be submitted by a form.' }
+      return {
+        ok: false,
+        code: 'unsupported_field',
+        message: 'This field cannot be submitted by a form.',
+      }
   }
 }
 
@@ -168,7 +162,8 @@ function validateCoercedValue(
   if (value === null) return null
 
   if (typeof value === 'string') {
-    const maxLength = control.maxLength ?? ('maxLength' in field ? field.maxLength : undefined) ?? maxStringLength
+    const maxLength =
+      control.maxLength ?? ('maxLength' in field ? field.maxLength : undefined) ?? maxStringLength
     if (value.length > maxLength) {
       return {
         fieldId: field.id,
@@ -220,14 +215,22 @@ function validateCoercedValue(
   if (field.type === 'select' && typeof value === 'string') {
     const allowed = new Set(field.options.map((option) => option.id))
     if (!allowed.has(value)) {
-      return { fieldId: field.id, code: 'invalid_option', message: 'Choose one of the allowed options.' }
+      return {
+        fieldId: field.id,
+        code: 'invalid_option',
+        message: 'Choose one of the allowed options.',
+      }
     }
   }
 
   if (field.type === 'multiSelect' && Array.isArray(value)) {
     const allowed = new Set(field.options.map((option) => option.id))
     if (value.some((item) => !allowed.has(String(item)))) {
-      return { fieldId: field.id, code: 'invalid_option', message: 'Choose one of the allowed options.' }
+      return {
+        fieldId: field.id,
+        code: 'invalid_option',
+        message: 'Choose one of the allowed options.',
+      }
     }
   }
 

@@ -57,7 +57,9 @@ describe('publish.html filter always receives context', () => {
         }
         if (topLevelCommas < 2) {
           const lineNo = source.slice(0, start).split('\n').length
-          violations.push(`${file}:${lineNo} — applyFilter('publish.html', ...) missing third context argument`)
+          violations.push(
+            `${file}:${lineNo} — applyFilter('publish.html', ...) missing third context argument`,
+          )
         }
       }
     }
@@ -65,7 +67,7 @@ describe('publish.html filter always receives context', () => {
     if (violations.length > 0) {
       throw new Error(
         `applyFilter('publish.html', ...) calls missing context argument:\n` +
-        violations.join('\n'),
+          violations.join('\n'),
       )
     }
   })

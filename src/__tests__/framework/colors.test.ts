@@ -7,7 +7,9 @@ import {
   normalizeFrameworkColorSlug,
 } from '@core/framework'
 
-function makeColorSettings(overrides: Partial<FrameworkColorSettings> = {}): FrameworkColorSettings {
+function makeColorSettings(
+  overrides: Partial<FrameworkColorSettings> = {},
+): FrameworkColorSettings {
   return {
     tokens: [
       {
@@ -62,58 +64,82 @@ describe('framework color generation', () => {
       '--primary-l-1',
       '--primary-l-2',
     ])
-    expect(sets.light.find((variable) => variable.name === '--primary-20')?.value).toBe('hsla(238, 100%, 62%, 0.2)')
-    expect(sets.dark.find((variable) => variable.name === '--primary')?.value).toBe('hsla(238, 100%, 42%, 1)')
-    expect(sets.dark.find((variable) => variable.name === '--primary-50')?.value).toBe('hsla(238, 100%, 42%, 0.5)')
+    expect(sets.light.find((variable) => variable.name === '--primary-20')?.value).toBe(
+      'hsla(238, 100%, 62%, 0.2)',
+    )
+    expect(sets.dark.find((variable) => variable.name === '--primary')?.value).toBe(
+      'hsla(238, 100%, 42%, 1)',
+    )
+    expect(sets.dark.find((variable) => variable.name === '--primary-50')?.value).toBe(
+      'hsla(238, 100%, 42%, 0.5)',
+    )
   })
 
   it('parses rgb()/rgba() base values — imported tokens emit and derive variants', () => {
     // Imported sites routinely author tokens as rgba(); dropping them severed
     // every `var(--rule)`-style reference (e.g. all borders on the demo
     // template). rgb/rgba now parses into channels like hex/hsl.
-    const sets = generateFrameworkColorVariableSets(makeColorSettings({
-      tokens: [{
-        ...makeColorSettings().tokens[0],
-        id: 'rule-token',
-        slug: 'rule',
-        lightValue: 'rgba(255, 255, 255, 0.14)',
-        darkModeEnabled: false,
-      }],
-    }))
+    const sets = generateFrameworkColorVariableSets(
+      makeColorSettings({
+        tokens: [
+          {
+            ...makeColorSettings().tokens[0],
+            id: 'rule-token',
+            slug: 'rule',
+            lightValue: 'rgba(255, 255, 255, 0.14)',
+            darkModeEnabled: false,
+          },
+        ],
+      }),
+    )
 
     const base = sets.light.find((variable) => variable.name === '--rule')
     expect(base?.value).toBe('hsla(0, 0%, 100%, 0.14)')
     // Derived variants work too — the value parsed into channels.
-    expect(sets.light.find((variable) => variable.name === '--rule-20')?.value).toBe('hsla(0, 0%, 100%, 0.2)')
+    expect(sets.light.find((variable) => variable.name === '--rule-20')?.value).toBe(
+      'hsla(0, 0%, 100%, 0.2)',
+    )
     expect(sets.light.some((variable) => variable.name === '--rule-d-1')).toBe(true)
 
     // Space syntax + percentage alpha.
-    const spaceSets = generateFrameworkColorVariableSets(makeColorSettings({
-      tokens: [{
-        ...makeColorSettings().tokens[0],
-        id: 'space-token',
-        slug: 'space',
-        lightValue: 'rgb(5 5 5 / 78%)',
-        darkModeEnabled: false,
-      }],
-    }))
-    expect(spaceSets.light.find((variable) => variable.name === '--space')?.value).toBe('hsla(0, 0%, 1.96%, 0.78)')
+    const spaceSets = generateFrameworkColorVariableSets(
+      makeColorSettings({
+        tokens: [
+          {
+            ...makeColorSettings().tokens[0],
+            id: 'space-token',
+            slug: 'space',
+            lightValue: 'rgb(5 5 5 / 78%)',
+            darkModeEnabled: false,
+          },
+        ],
+      }),
+    )
+    expect(spaceSets.light.find((variable) => variable.name === '--space')?.value).toBe(
+      'hsla(0, 0%, 1.96%, 0.78)',
+    )
   })
 
   it('emits unparseable base values verbatim instead of silently dropping the variable', () => {
-    const sets = generateFrameworkColorVariableSets(makeColorSettings({
-      tokens: [{
-        ...makeColorSettings().tokens[0],
-        id: 'oklch-token',
-        slug: 'fancy',
-        lightValue: 'oklch(0.7 0.1 200)',
-        darkModeEnabled: false,
-      }],
-    }))
+    const sets = generateFrameworkColorVariableSets(
+      makeColorSettings({
+        tokens: [
+          {
+            ...makeColorSettings().tokens[0],
+            id: 'oklch-token',
+            slug: 'fancy',
+            lightValue: 'oklch(0.7 0.1 200)',
+            darkModeEnabled: false,
+          },
+        ],
+      }),
+    )
 
     // The base variable carries the authored value (sanitised at emission by
     // formatCssVariableBlock); derived variants are skipped.
-    expect(sets.light.find((variable) => variable.name === '--fancy')?.value).toBe('oklch(0.7 0.1 200)')
+    expect(sets.light.find((variable) => variable.name === '--fancy')?.value).toBe(
+      'oklch(0.7 0.1 200)',
+    )
     expect(sets.light.some((variable) => variable.name === '--fancy-20')).toBe(false)
     expect(sets.light.some((variable) => variable.name === '--fancy-d-1')).toBe(false)
   })
@@ -148,10 +174,18 @@ describe('framework color generation', () => {
         locked: true,
       },
     })
-    expect(classes['framework:color:primary-token:base:background'].styles).toEqual({ backgroundColor: 'var(--primary)' })
-    expect(classes['framework:color:primary-token:base:border'].styles).toEqual({ borderColor: 'var(--primary)' })
-    expect(classes['framework:color:primary-token:base:fill'].styles).toEqual({ fill: 'var(--primary)' })
-    expect(classes['framework:color:primary-token:transparent-20:text'].name).toBe('text-primary-20')
+    expect(classes['framework:color:primary-token:base:background'].styles).toEqual({
+      backgroundColor: 'var(--primary)',
+    })
+    expect(classes['framework:color:primary-token:base:border'].styles).toEqual({
+      borderColor: 'var(--primary)',
+    })
+    expect(classes['framework:color:primary-token:base:fill'].styles).toEqual({
+      fill: 'var(--primary)',
+    })
+    expect(classes['framework:color:primary-token:transparent-20:text'].name).toBe(
+      'text-primary-20',
+    )
     expect(classes['framework:color:primary-token:shade-1:background'].name).toBe('bg-primary-d-1')
     expect(classes['framework:color:primary-token:tint-2:border'].name).toBe('border-primary-l-2')
 

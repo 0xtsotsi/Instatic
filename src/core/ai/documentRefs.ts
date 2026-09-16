@@ -20,7 +20,10 @@ export function documentRefForPage(page: Pick<Page, 'id' | 'template'>): AgentDo
   return { type: page.template ? 'template' : 'page', id: page.id }
 }
 
-export function documentRefEquals(a: AgentDocumentRef | null | undefined, b: AgentDocumentRef): boolean {
+export function documentRefEquals(
+  a: AgentDocumentRef | null | undefined,
+  b: AgentDocumentRef,
+): boolean {
   return a?.type === b.type && a.id === b.id
 }
 

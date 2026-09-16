@@ -61,10 +61,7 @@ function walkTSX(dir: string, out: string[] = []): string[] {
 }
 
 function collectAllFiles(): string[] {
-  return [
-    ...walkTSX(join(SRC_ROOT, 'admin')),
-    ...walkTSX(join(SRC_ROOT, 'editor')),
-  ]
+  return [...walkTSX(join(SRC_ROOT, 'admin')), ...walkTSX(join(SRC_ROOT, 'editor'))]
 }
 
 // ---------------------------------------------------------------------------
@@ -166,11 +163,7 @@ describe('No-plugin-tab-shells — role="tablist" must come from the Tabs primit
       return
     }
 
-    const lines = violations.map(
-      (v) =>
-        `  ${v.file}:${v.line}\n` +
-        `    ${v.text}`,
-    )
+    const lines = violations.map((v) => `  ${v.file}:${v.line}\n` + `    ${v.text}`)
 
     throw new Error(
       `[no-plugin-tab-shells] ${violations.length} file(s) contain role="tablist" outside the allowlist.\n` +

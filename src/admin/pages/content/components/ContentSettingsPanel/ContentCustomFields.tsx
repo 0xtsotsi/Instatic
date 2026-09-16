@@ -44,7 +44,7 @@ export function ContentCustomFields({
   const openRelationField = fields.find((field) => field.id === relationPickerFieldId)
   const relationPickerField = openRelationField?.type === 'relation' ? openRelationField : null
   const relationPickerTargetTable = relationPickerField
-    ? tables.find((table) => table.id === relationPickerField.targetTableId) ?? null
+    ? (tables.find((table) => table.id === relationPickerField.targetTableId) ?? null)
     : null
   const relationPickerCurrentValue = relationPickerField
     ? ((customCells[relationPickerField.id] ?? null) as string | string[] | null)
@@ -53,7 +53,11 @@ export function ContentCustomFields({
   return (
     <>
       {fields.map((field) => (
-        <div key={field.id} className={styles.customField} data-testid={`content-custom-field-${field.id}`}>
+        <div
+          key={field.id}
+          className={styles.customField}
+          data-testid={`content-custom-field-${field.id}`}
+        >
           <span>{field.label}</span>
           {field.description && <small>{field.description}</small>}
           <CellEditorRenderer
@@ -65,9 +69,7 @@ export function ContentCustomFields({
             rowId={entryId}
             resolveRelationTarget={resolveRelationRow}
             onOpenPicker={
-              field.type === 'relation'
-                ? () => setRelationPickerFieldId(field.id)
-                : undefined
+              field.type === 'relation' ? () => setRelationPickerFieldId(field.id) : undefined
             }
           />
         </div>

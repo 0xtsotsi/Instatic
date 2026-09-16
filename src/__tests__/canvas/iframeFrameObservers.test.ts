@@ -8,7 +8,8 @@ import {
 describe('getIframeObserverConstructors', () => {
   it('uses observer constructors from the iframe document window', () => {
     const FrameResizeObserver = function ResizeObserver() {} as unknown as typeof ResizeObserver
-    const FrameMutationObserver = function MutationObserver() {} as unknown as typeof MutationObserver
+    const FrameMutationObserver =
+      function MutationObserver() {} as unknown as typeof MutationObserver
     const iframe = {
       contentWindow: {
         ResizeObserver: FrameResizeObserver,

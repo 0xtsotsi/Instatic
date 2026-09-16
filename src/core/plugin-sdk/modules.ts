@@ -167,8 +167,8 @@ export interface PluginModulePackApi {
   pluginId: string
 }
 
-export type PluginModulePackEntrypoint = PluginModuleDefinition[] |
-  ((api: PluginModulePackApi) => PluginModuleDefinition[])
+export type PluginModulePackEntrypoint =
+  PluginModuleDefinition[] | ((api: PluginModulePackApi) => PluginModuleDefinition[])
 
 export interface PluginModulesEntrypointModule {
   default: PluginModulePackEntrypoint

@@ -42,9 +42,8 @@ export function savedLayoutFromRow(row: DataRow): SavedLayout | null {
     nodes: body.nodes ?? {},
     classes: cells.classes ?? {},
     // Convert ISO datetime string to epoch milliseconds.
-    createdAt: typeof row.createdAt === 'string'
-      ? (Date.parse(row.createdAt) || Date.now())
-      : Date.now(),
+    createdAt:
+      typeof row.createdAt === 'string' ? Date.parse(row.createdAt) || Date.now() : Date.now(),
   }
 
   return parseSavedLayout(rawLayout)

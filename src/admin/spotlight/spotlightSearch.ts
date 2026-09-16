@@ -68,9 +68,7 @@ function getCommandsForScope(scopeId: string | undefined): Command[] {
  * to group B then back to group A, since the raw score order
  * interleaves groups whenever scores differ.
  */
-export function orderScoredByVisualGroup(
-  scored: ScoredCommand[],
-): ScoredCommand[] {
+export function orderScoredByVisualGroup(scored: ScoredCommand[]): ScoredCommand[] {
   const map = new Map<CommandGroup, ScoredCommand[]>()
   for (const item of scored) {
     const g = item.command.group
@@ -203,9 +201,7 @@ export function getLoadingProviders(
 ): SpotlightProvider[] {
   const scope = getScope(scopeId)
   const providers = scope?.providers ?? []
-  return providers.filter(
-    (p) => loadingProviders.has(p.id) && !asyncResults[p.id],
-  )
+  return providers.filter((p) => loadingProviders.has(p.id) && !asyncResults[p.id])
 }
 
 /**
@@ -219,9 +215,7 @@ export function getMergedCommandList(
   scopeId: string,
   asyncResults: Record<string, Command[]>,
 ): Command[] {
-  const staticCommands = getCappedResults(query, commandContext, scopeId).map(
-    (s) => s.command,
-  )
+  const staticCommands = getCappedResults(query, commandContext, scopeId).map((s) => s.command)
   const asyncGroups = getOrderedAsyncGroups(scopeId, asyncResults)
   const asyncCommands = asyncGroups.flatMap((g) => g.commands)
   return [...staticCommands, ...asyncCommands]

@@ -20,7 +20,10 @@ import { selectActiveCanvasPage } from '@site/store/store'
 import { validateParamName } from '@core/visualComponents'
 import type { PropertyControl } from '@core/module-engine'
 import { PropertyControlRenderer } from '@site/property-controls/PropertyControlRenderer'
-import { paramTypeForControl, paramTypesCompatibleWithControl } from '@site/property-controls/paramTypeCompat'
+import {
+  paramTypeForControl,
+  paramTypesCompatibleWithControl,
+} from '@site/property-controls/paramTypeCompat'
 import { ParamRow } from './ParamRow'
 import { Button } from '@ui/components/Button'
 import { Input } from '@ui/components/Input'
@@ -91,7 +94,7 @@ export function ParamPromotableRow({
   // ── Derived data ──────────────────────────────────────────────────────────
 
   const boundParam = propBinding
-    ? vcParams.find((p) => p.id === propBinding.paramId) ?? null
+    ? (vcParams.find((p) => p.id === propBinding.paramId) ?? null)
     : null
 
   const compatibleTypes = paramTypesCompatibleWithControl(control)
@@ -251,9 +254,7 @@ export function ParamPromotableRow({
                   onClick={() => handleBindToExisting(param.id)}
                 >
                   {param.name}
-                  <span className={styles.existingParamType}>
-                    {param.type}
-                  </span>
+                  <span className={styles.existingParamType}>{param.type}</span>
                 </Button>
               ))}
               <div className={styles.exposeMenuDivider} />

@@ -34,16 +34,12 @@ export function buildSiteFrameworkCss(site: SiteDocument): string {
   // Google).
   const fontsCss = generateFontsCss(fonts)
   const frameworkCss = generateFrameworkCss(site)
-  return [fontsCss, frameworkCss]
-    .filter(Boolean)
-    .join('\n')
+  return [fontsCss, frameworkCss].filter(Boolean).join('\n')
 }
 
 export function generateFrameworkCss(site: SiteDocument): string {
   const { rootCss, utilityClasses } = buildFrameworkPlan(site.settings.framework)
-  return [rootCss, generateFrameworkUtilityCss(site, utilityClasses)]
-    .filter(Boolean)
-    .join('\n')
+  return [rootCss, generateFrameworkUtilityCss(site, utilityClasses)].filter(Boolean).join('\n')
 }
 
 function generateFrameworkUtilityCss(

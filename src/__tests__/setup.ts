@@ -141,11 +141,7 @@ for (const key of GLOBALS_TO_COPY) {
     init?: RequestInit,
   ): Promise<Response> => {
     const url =
-      typeof input === 'string'
-        ? input
-        : input instanceof URL
-          ? input.href
-          : (input as Request).url
+      typeof input === 'string' ? input : input instanceof URL ? input.href : (input as Request).url
     const method = (init?.method ?? (input as Request).method ?? 'GET').toUpperCase()
     if (method === 'GET' && url.includes(PREFERENCES_PATH)) {
       return new Response(JSON.stringify({ value: null }), {
@@ -192,7 +188,8 @@ for (const key of GLOBALS_TO_COPY) {
                 : ''
             return `<${tag}${id}${cls}>`
           }
-          if (nodeType === 3) return `#text ${JSON.stringify(String(this['textContent'] ?? '').slice(0, 60))}`
+          if (nodeType === 3)
+            return `#text ${JSON.stringify(String(this['textContent'] ?? '').slice(0, 60))}`
           if (nodeType === 8) return '#comment'
           if (nodeType === 9) return '#document'
           if (nodeType === 11) return '#document-fragment'
@@ -275,7 +272,9 @@ if (typeof (globalThis as { EventSource?: unknown }).EventSource === 'undefined'
     }
     addEventListener(): void {}
     removeEventListener(): void {}
-    dispatchEvent(): boolean { return true }
+    dispatchEvent(): boolean {
+      return true
+    }
     close(): void {}
   }
   ;(globalThis as { EventSource?: unknown }).EventSource = StubEventSource as unknown

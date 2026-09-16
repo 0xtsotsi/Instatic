@@ -34,7 +34,9 @@ function runtimeScriptsForPlacement(
     .sort((a, b) => a.priority - b.priority || a.src.localeCompare(b.src))
 }
 
-export function hasPublishedRuntimeScripts(runtimeAssets: PublishedPageRuntimeAssets | undefined): boolean {
+export function hasPublishedRuntimeScripts(
+  runtimeAssets: PublishedPageRuntimeAssets | undefined,
+): boolean {
   return (runtimeAssets?.scripts ?? []).some((asset) => isSelfHostedRuntimeAssetUrl(asset.src))
 }
 

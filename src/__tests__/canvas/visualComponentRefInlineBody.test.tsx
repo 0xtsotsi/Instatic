@@ -82,7 +82,11 @@ describe('base.visual-component-ref inline base.body root', () => {
       activeDocument: null,
     } as Parameters<typeof useEditorStore.setState>[0])
 
-    render(<DndContext><CanvasRoot /></DndContext>)
+    render(
+      <DndContext>
+        <CanvasRoot />
+      </DndContext>,
+    )
 
     const componentRoot = await waitFor(() => {
       const el = queryCanvasElement<HTMLElement>('[data-node-id="ref-card"]')

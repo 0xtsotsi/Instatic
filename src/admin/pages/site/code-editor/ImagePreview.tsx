@@ -53,7 +53,9 @@ export function ImagePreview({ file }: ImagePreviewProps) {
       <div className={styles.binaryPlaceholder}>
         <p className={styles.binaryTitle}>Binary file — no preview available</p>
         <p className={styles.binaryMeta}>{filename}</p>
-        <p className={styles.binaryMeta}>{sizeStr} · {mimeStr}</p>
+        <p className={styles.binaryMeta}>
+          {sizeStr} · {mimeStr}
+        </p>
         <p className={styles.binaryHint}>Drag onto canvas to use this asset.</p>
       </div>
     )
@@ -78,15 +80,8 @@ function ImageRenderer({ file, blob }: ImageRendererProps) {
   const previewUrl = `data:${blob.mimeType};base64,${blob.base64}`
 
   return (
-    <div
-      className={styles.previewContainer}
-      aria-label={`Image preview: ${filename}`}
-    >
-      <img
-        src={previewUrl}
-        alt=""
-        className={styles.previewImage}
-      />
+    <div className={styles.previewContainer} aria-label={`Image preview: ${filename}`}>
+      <img src={previewUrl} alt="" className={styles.previewImage} />
       <div className={styles.metaFooter}>
         <span className={styles.metaName}>{filename}</span>
         <span className={styles.metaSep}>·</span>

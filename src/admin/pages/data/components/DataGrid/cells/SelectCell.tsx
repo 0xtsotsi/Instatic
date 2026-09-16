@@ -14,7 +14,8 @@ export function SelectCell({
   readOnly,
   ariaLabel,
 }: CellEditorProps<SelectField>): ReactElement {
-  const selected = typeof value === 'string' ? value : readStringCell({ [field.id]: value }, field.id)
+  const selected =
+    typeof value === 'string' ? value : readStringCell({ [field.id]: value }, field.id)
 
   const options = field.options.map((opt) => ({
     value: opt.id,

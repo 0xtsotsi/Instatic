@@ -28,7 +28,12 @@ interface AssetScopeControlProps {
   ariaLabelPrefix: string
 }
 
-export function AssetScopeControl({ scope, pages, onChange, ariaLabelPrefix }: AssetScopeControlProps) {
+export function AssetScopeControl({
+  scope,
+  pages,
+  onChange,
+  ariaLabelPrefix,
+}: AssetScopeControlProps) {
   const selectedPageIds = scope.type === 'pages' ? scope.pageIds : []
   const selectedTemplateIds = scope.type === 'templates' ? scope.templatePageIds : []
   const regularPages = pages.filter((page) => !page.isTemplate)
@@ -79,7 +84,9 @@ export function AssetScopeControl({ scope, pages, onChange, ariaLabelPrefix }: A
                 align="start"
                 fullWidth
                 pressed={selectedPageIds.includes(page.id)}
-                onClick={() => toggle(page.id, selectedPageIds, (ids) => ({ type: 'pages', pageIds: ids }))}
+                onClick={() =>
+                  toggle(page.id, selectedPageIds, (ids) => ({ type: 'pages', pageIds: ids }))
+                }
               >
                 {page.label}
               </Button>
@@ -89,7 +96,11 @@ export function AssetScopeControl({ scope, pages, onChange, ariaLabelPrefix }: A
       )}
 
       {scope.type === 'templates' && (
-        <div className={styles.list} role="group" aria-label={`${ariaLabelPrefix} target templates`}>
+        <div
+          className={styles.list}
+          role="group"
+          aria-label={`${ariaLabelPrefix} target templates`}
+        >
           {templatePages.length === 0 ? (
             <span className={styles.empty}>No templates to target</span>
           ) : (
@@ -101,7 +112,12 @@ export function AssetScopeControl({ scope, pages, onChange, ariaLabelPrefix }: A
                 align="start"
                 fullWidth
                 pressed={selectedTemplateIds.includes(page.id)}
-                onClick={() => toggle(page.id, selectedTemplateIds, (ids) => ({ type: 'templates', templatePageIds: ids }))}
+                onClick={() =>
+                  toggle(page.id, selectedTemplateIds, (ids) => ({
+                    type: 'templates',
+                    templatePageIds: ids,
+                  }))
+                }
               >
                 {page.label}
               </Button>

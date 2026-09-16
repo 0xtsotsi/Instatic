@@ -63,9 +63,7 @@ export function DataInspector({
     return rows.find((r) => r.id === rowId) ?? null
   }
 
-  const resolvedTitle = row !== null
-    ? (table.singularLabel || 'Row')
-    : 'Table settings'
+  const resolvedTitle = row !== null ? table.singularLabel || 'Row' : 'Table settings'
 
   return (
     <aside
@@ -78,12 +76,12 @@ export function DataInspector({
       <PanelHeader
         panelId="data-inspector"
         title={resolvedTitle}
-        titleContent={(
+        titleContent={
           <span className={propertiesStyles.headerNodeTitle}>
             <Settings2SolidIcon size={13} aria-hidden="true" />
             <span className={propertiesStyles.headerNodeLabel}>{resolvedTitle}</span>
           </span>
-        )}
+        }
         onClose={() => setRightPanel({ collapsed: true })}
       />
 

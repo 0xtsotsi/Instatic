@@ -351,9 +351,10 @@ export function BodyFloatingMenu({ editor, onPickMedia, iframeEl }: BodyFloating
                     // there's no inter-command window where Tiptap could
                     // refocus / reset selection.
                     const restoredPos = selectionSnapshotRef.current
-                    const chain = restoredPos !== null
-                      ? editor.chain().focus(restoredPos)
-                      : editor.chain().focus()
+                    const chain =
+                      restoredPos !== null
+                        ? editor.chain().focus(restoredPos)
+                        : editor.chain().focus()
                     option.apply({ editor, chain, onPickMedia })
                     setMenuRect(null)
                     selectionSnapshotRef.current = null

@@ -157,10 +157,11 @@ export async function listCmsDataRows(
   fetchImpl: FetchLike = globalThis.fetch.bind(globalThis),
   basePath = '/admin/api/cms',
 ): Promise<DataRow[]> {
-  const body = await apiRequest(
-    `${basePath}/data/tables/${encodeURIComponent(tableId)}/rows`,
-    { schema: RowsListEnvelope, fetchImpl, fallbackMessage: 'CMS data rows request failed' },
-  )
+  const body = await apiRequest(`${basePath}/data/tables/${encodeURIComponent(tableId)}/rows`, {
+    schema: RowsListEnvelope,
+    fetchImpl,
+    fallbackMessage: 'CMS data rows request failed',
+  })
   return body.rows ?? []
 }
 
@@ -188,10 +189,13 @@ export async function createCmsDataRow(
   fetchImpl: FetchLike = globalThis.fetch.bind(globalThis),
   basePath = '/admin/api/cms',
 ): Promise<DataRow> {
-  const body = await apiRequest(
-    `${basePath}/data/tables/${encodeURIComponent(tableId)}/rows`,
-    { method: 'POST', body: input, schema: RowEnvelope, fetchImpl, fallbackMessage: 'CMS data row create failed' },
-  )
+  const body = await apiRequest(`${basePath}/data/tables/${encodeURIComponent(tableId)}/rows`, {
+    method: 'POST',
+    body: input,
+    schema: RowEnvelope,
+    fetchImpl,
+    fallbackMessage: 'CMS data row create failed',
+  })
   if (!body.row) throw new Error('CMS data row create response was missing row')
   return body.row
 }
@@ -454,14 +458,12 @@ export async function listCmsDataAuthors(
 // Data meta
 // ---------------------------------------------------------------------------
 
-const DataMetaEnvelope = Type.Object(
-  { meta: DataMetaSchema },
-  { additionalProperties: true },
-)
+const DataMetaEnvelope = Type.Object({ meta: DataMetaSchema }, { additionalProperties: true })
 
-export async function getDataMeta(
-  options?: { fetchImpl?: FetchLike; basePath?: string },
-): Promise<DataMeta> {
+export async function getDataMeta(options?: {
+  fetchImpl?: FetchLike
+  basePath?: string
+}): Promise<DataMeta> {
   const fetchImpl = options?.fetchImpl ?? globalThis.fetch.bind(globalThis)
   const basePath = options?.basePath ?? '/admin/api/cms'
   const body = await apiRequest(`${basePath}/data/_meta`, {

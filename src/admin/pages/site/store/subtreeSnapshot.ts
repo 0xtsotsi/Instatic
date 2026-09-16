@@ -123,9 +123,7 @@ export function insertSnapshotSubtrees(
   //   - { kind: 'add', cls }    — write `cls` to site.styleRules (id may differ)
   //   - { kind: 'drop' }        — strip from restored classIds
   type ClassPlan =
-    | { kind: 'reuse'; id: string }
-    | { kind: 'add'; id: string; cls: StyleRule }
-    | { kind: 'drop' }
+    { kind: 'reuse'; id: string } | { kind: 'add'; id: string; cls: StyleRule } | { kind: 'drop' }
 
   const now = Date.now()
   const targetClasses = site.styleRules
@@ -156,14 +154,9 @@ export function insertSnapshotSubtrees(
           id: newId,
           scope: { ...cls.scope, nodeId: newScopeNodeId },
           styles: { ...cls.styles },
-          ...(cls.stylePriorities
-            ? { stylePriorities: { ...cls.stylePriorities } }
-            : {}),
+          ...(cls.stylePriorities ? { stylePriorities: { ...cls.stylePriorities } } : {}),
           contextStyles: Object.fromEntries(
-            Object.entries(cls.contextStyles).map(([ctx, s]) => [
-              ctx,
-              { ...s },
-            ]),
+            Object.entries(cls.contextStyles).map(([ctx, s]) => [ctx, { ...s }]),
           ),
           ...(cls.contextStylePriorities
             ? {
@@ -185,12 +178,7 @@ export function insertSnapshotSubtrees(
         plans.set(classId, { kind: 'reuse', id: classId })
       } else {
         const matchedId = frameworkByName.get(cls.name)
-        plans.set(
-          classId,
-          matchedId
-            ? { kind: 'reuse', id: matchedId }
-            : { kind: 'drop' },
-        )
+        plans.set(classId, matchedId ? { kind: 'reuse', id: matchedId } : { kind: 'drop' })
       }
     } else {
       // Regular class — reuse if id is already in target, else import as-is.
@@ -203,14 +191,9 @@ export function insertSnapshotSubtrees(
           cls: {
             ...cls,
             styles: { ...cls.styles },
-            ...(cls.stylePriorities
-              ? { stylePriorities: { ...cls.stylePriorities } }
-              : {}),
+            ...(cls.stylePriorities ? { stylePriorities: { ...cls.stylePriorities } } : {}),
             contextStyles: Object.fromEntries(
-              Object.entries(cls.contextStyles).map(([ctx, s]) => [
-                ctx,
-                { ...s },
-              ]),
+              Object.entries(cls.contextStyles).map(([ctx, s]) => [ctx, { ...s }]),
             ),
             ...(cls.contextStylePriorities
               ? {

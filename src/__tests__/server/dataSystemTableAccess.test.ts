@@ -1,5 +1,9 @@
 import { describe, expect, it } from 'bun:test'
-import { createCapabilityTestHarness, expectForbidden, readJson } from '../helpers/capabilityHarness'
+import {
+  createCapabilityTestHarness,
+  expectForbidden,
+  readJson,
+} from '../helpers/capabilityHarness'
 import type { DataTable } from '@core/data/schemas'
 
 const TABLES = '/admin/api/cms/data/tables'
@@ -49,7 +53,9 @@ describe('data system-table visibility + lockdown', () => {
 
       const ownerList = await harness.cms(TABLES, { method: 'GET', cookie: ownerCookie })
       expect(ownerList.status).toBe(200)
-      const ownerSlugs = (await readJson<{ tables: DataTable[] }>(ownerList)).tables.map((t) => t.slug)
+      const ownerSlugs = (await readJson<{ tables: DataTable[] }>(ownerList)).tables.map(
+        (t) => t.slug,
+      )
       // Owner has data.system.tables.read → sees the seeded system tables.
       expect(ownerSlugs).toContain('layouts')
       expect(ownerSlugs).toContain('pages')
@@ -76,12 +82,18 @@ describe('data system-table visibility + lockdown', () => {
 
       // Resolve the seeded `layouts` system table id.
       const list = await harness.cms(TABLES, { method: 'GET', cookie: ownerCookie })
-      const layouts = (await readJson<{ tables: DataTable[] }>(list)).tables.find((t) => t.slug === 'layouts')
+      const layouts = (await readJson<{ tables: DataTable[] }>(list)).tables.find(
+        (t) => t.slug === 'layouts',
+      )
       expect(layouts?.system).toBe(true)
       const path = `${TABLES}/${layouts!.id}`
 
       // Renaming a system table is rejected (frozen identity).
-      const rename = await harness.cms(path, { method: 'PATCH', cookie: ownerCookie, json: { name: 'Renamed' } })
+      const rename = await harness.cms(path, {
+        method: 'PATCH',
+        cookie: ownerCookie,
+        json: { name: 'Renamed' },
+      })
       expect(rename.status).toBe(400)
 
       // Removing/editing built-in fields is rejected.
@@ -113,7 +125,9 @@ describe('data system-table visibility + lockdown', () => {
     try {
       const ownerCookie = await harness.setupOwner()
       const list = await harness.cms(TABLES, { method: 'GET', cookie: ownerCookie })
-      const layouts = (await readJson<{ tables: DataTable[] }>(list)).tables.find((t) => t.slug === 'layouts')
+      const layouts = (await readJson<{ tables: DataTable[] }>(list)).tables.find(
+        (t) => t.slug === 'layouts',
+      )
 
       const viewer = await harness.createRoleUser({
         name: 'System Viewer',

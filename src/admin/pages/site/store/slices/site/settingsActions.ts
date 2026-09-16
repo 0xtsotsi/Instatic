@@ -10,9 +10,7 @@ import type { SiteSettings } from '@core/page-tree'
 
 type SettingsActions = Pick<SiteSlice, 'updateSiteSettings'>
 
-export function createSettingsActions({
-  mutateSite,
-}: SiteSliceHelpers): SettingsActions {
+export function createSettingsActions({ mutateSite }: SiteSliceHelpers): SettingsActions {
   return {
     updateSiteSettings: (patch) => {
       mutateSite((p) => {

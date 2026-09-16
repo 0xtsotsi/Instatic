@@ -30,15 +30,22 @@ function credential(over: Partial<CredentialView> = {}): CredentialView {
 const MODELS = Array.from({ length: 12 }, (_, i) => ({
   id: `m${i}`,
   label: i === 3 ? 'Claude Opus' : i === 4 ? 'Claude Sonnet' : `Model ${i}`,
-  capabilities: { toolCalling: true, visionInput: false, toolResultImages: false, promptCache: false, streaming: true },
+  capabilities: {
+    toolCalling: true,
+    visionInput: false,
+    toolResultImages: false,
+    promptCache: false,
+    streaming: true,
+  },
 }))
 
 function mockModelsFetch() {
-  globalThis.fetch = mock(async () =>
-    new Response(JSON.stringify({ models: MODELS }), {
-      status: 200,
-      headers: { 'content-type': 'application/json' },
-    }),
+  globalThis.fetch = mock(
+    async () =>
+      new Response(JSON.stringify({ models: MODELS }), {
+        status: 200,
+        headers: { 'content-type': 'application/json' },
+      }),
   ) as typeof fetch
 }
 

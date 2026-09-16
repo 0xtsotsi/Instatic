@@ -17,10 +17,7 @@ import { ZapSolidIcon } from 'pixel-art-icons/icons/zap-solid'
 import type { DashboardWidgetRendererProps } from '@core/dashboard'
 import { Sparkline, StatValue } from '@ui/components/charts'
 import { Widget } from '@ui/components/Widget'
-import {
-  listAiAudit,
-  type AiAuditResponse,
-} from '@admin/ai/api'
+import { listAiAudit, type AiAuditResponse } from '@admin/ai/api'
 import { ApiError } from '@core/http'
 import styles from './widgets.module.css'
 
@@ -91,9 +88,7 @@ export function AiUsageWidget({ span, editing }: DashboardWidgetRendererProps) {
       loading={isLoading}
     >
       {forbidden && (
-        <p className={styles.feedTime}>
-          You don't have permission to see site-wide AI usage.
-        </p>
+        <p className={styles.feedTime}>You don't have permission to see site-wide AI usage.</p>
       )}
       {data && (
         <>

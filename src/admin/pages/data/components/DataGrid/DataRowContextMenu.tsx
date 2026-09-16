@@ -1,10 +1,6 @@
 import { useEffect, useRef, type ReactElement, type ReactNode } from 'react'
 import { createPortal } from 'react-dom'
-import {
-  ContextMenu,
-  ContextMenuItem,
-  ContextMenuSeparator,
-} from '@ui/components/ContextMenu'
+import { ContextMenu, ContextMenuItem, ContextMenuSeparator } from '@ui/components/ContextMenu'
 import { ArrowDownIcon } from 'pixel-art-icons/icons/arrow-down'
 import { ArrowUpIcon } from 'pixel-art-icons/icons/arrow-up'
 import { BoxSolidIcon } from 'pixel-art-icons/icons/box-solid'
@@ -143,10 +139,7 @@ export function DataRowContextMenu({
   return createPortal(
     <ContextMenu x={x} y={y} ariaLabel="Row actions" onClose={onClose}>
       {primaryAction !== null && (
-        <ContextMenuItem
-          ref={firstItemRef}
-          onClick={() => runAndClose(primaryAction.run)}
-        >
+        <ContextMenuItem ref={firstItemRef} onClick={() => runAndClose(primaryAction.run)}>
           <span aria-hidden="true">{primaryAction.icon}</span>
           {primaryAction.label}
         </ContextMenuItem>
@@ -157,7 +150,9 @@ export function DataRowContextMenu({
           ref={primaryAction === null ? firstItemRef : undefined}
           onClick={() => runAndClose(onInspectRow)}
         >
-          <span aria-hidden="true"><EditSolidIcon size={13} /></span>
+          <span aria-hidden="true">
+            <EditSolidIcon size={13} />
+          </span>
           Inspect row
         </ContextMenuItem>
       )}
@@ -168,7 +163,9 @@ export function DataRowContextMenu({
             void duplicateRowFromMenu(row, onDuplicateRow, onClose)
           }}
         >
-          <span aria-hidden="true"><CopySolidIcon size={13} /></span>
+          <span aria-hidden="true">
+            <CopySolidIcon size={13} />
+          </span>
           Duplicate row
         </ContextMenuItem>
       )}
@@ -182,7 +179,9 @@ export function DataRowContextMenu({
               void setRowStatusFromMenu(row.id, 'published', onSetRowStatus, onClose)
             }}
           >
-            <span aria-hidden="true"><ArrowUpIcon size={13} /></span>
+            <span aria-hidden="true">
+              <ArrowUpIcon size={13} />
+            </span>
             Publish
           </ContextMenuItem>
           <ContextMenuItem
@@ -191,7 +190,9 @@ export function DataRowContextMenu({
               void setRowStatusFromMenu(row.id, 'draft', onSetRowStatus, onClose)
             }}
           >
-            <span aria-hidden="true"><EditSolidIcon size={13} /></span>
+            <span aria-hidden="true">
+              <EditSolidIcon size={13} />
+            </span>
             Move to draft
           </ContextMenuItem>
           <ContextMenuItem
@@ -200,7 +201,9 @@ export function DataRowContextMenu({
               void setRowStatusFromMenu(row.id, 'unpublished', onSetRowStatus, onClose)
             }}
           >
-            <span aria-hidden="true"><BoxSolidIcon size={13} /></span>
+            <span aria-hidden="true">
+              <BoxSolidIcon size={13} />
+            </span>
             Archive
           </ContextMenuItem>
         </>
@@ -210,14 +213,18 @@ export function DataRowContextMenu({
 
       {onExportRows != null && (
         <ContextMenuItem onClick={() => runAndClose(() => onExportRows([row.id]))}>
-          <span aria-hidden="true"><ArrowDownIcon size={13} /></span>
+          <span aria-hidden="true">
+            <ArrowDownIcon size={13} />
+          </span>
           Export row
         </ContextMenuItem>
       )}
 
       {onDeleteRow != null && (
         <ContextMenuItem danger onClick={() => runAndClose(() => onDeleteRow(row.id))}>
-          <span aria-hidden="true"><TrashSolidIcon size={13} /></span>
+          <span aria-hidden="true">
+            <TrashSolidIcon size={13} />
+          </span>
           Delete row
         </ContextMenuItem>
       )}

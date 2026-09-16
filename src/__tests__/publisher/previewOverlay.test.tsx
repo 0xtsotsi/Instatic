@@ -142,14 +142,18 @@ describe('PreviewOverlay — DOM rendering', () => {
   it('renders the preview iframe inside the dialog', () => {
     openPreviewWithSite()
     render(<PreviewOverlay />)
-    const iframe = document.querySelector('[data-testid="preview-iframe"]') as HTMLIFrameElement | null
+    const iframe = document.querySelector(
+      '[data-testid="preview-iframe"]',
+    ) as HTMLIFrameElement | null
     expect(iframe).not.toBeNull()
   })
 
   it('iframe has a non-empty srcdoc attribute', () => {
     openPreviewWithSite()
     render(<PreviewOverlay />)
-    const iframe = document.querySelector('[data-testid="preview-iframe"]') as HTMLIFrameElement | null
+    const iframe = document.querySelector(
+      '[data-testid="preview-iframe"]',
+    ) as HTMLIFrameElement | null
     const srcdoc = iframe?.getAttribute('srcdoc') ?? ''
     expect(srcdoc.length).toBeGreaterThan(0)
     expect(srcdoc).toContain('<!DOCTYPE html>')
@@ -158,7 +162,9 @@ describe('PreviewOverlay — DOM rendering', () => {
   it('iframe srcdoc contains the page title', () => {
     openPreviewWithSite()
     render(<PreviewOverlay />)
-    const iframe = document.querySelector('[data-testid="preview-iframe"]') as HTMLIFrameElement | null
+    const iframe = document.querySelector(
+      '[data-testid="preview-iframe"]',
+    ) as HTMLIFrameElement | null
     const srcdoc = iframe?.getAttribute('srcdoc') ?? ''
     // The site name "Test Site" should appear as the page title
     expect(srcdoc).toMatch(/<title>[^<]*<\/title>/)
@@ -362,10 +368,7 @@ describe('publishPage — 2-node tree golden test (Phase 7)', () => {
   })
 
   it('output contains CSP meta tag (Constraint #227)', () => {
-    const page = makePage(
-      { root: { moduleId: 'base.body', children: [] } },
-      'root',
-    )
+    const page = makePage({ root: { moduleId: 'base.body', children: [] } }, 'root')
     const site = makeSite({ pages: [page] })
     const { html } = publishPage(page, site, reg)
     expect(html).toContain('Content-Security-Policy')
@@ -373,10 +376,7 @@ describe('publishPage — 2-node tree golden test (Phase 7)', () => {
   })
 
   it('output has zero editor artefacts', () => {
-    const page = makePage(
-      { root: { moduleId: 'base.body', children: [] } },
-      'root',
-    )
+    const page = makePage({ root: { moduleId: 'base.body', children: [] } }, 'root')
     const site = makeSite({ pages: [page] })
     const { html } = publishPage(page, site, reg)
     expect(html).not.toContain('data-testid')

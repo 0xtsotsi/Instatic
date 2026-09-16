@@ -42,9 +42,7 @@ function request(signal: AbortSignal): AiStreamRequest {
   }
 }
 
-function provider(
-  stream: AiProvider['stream'],
-): AiProvider {
+function provider(stream: AiProvider['stream']): AiProvider {
   return {
     id: 'ollama',
     label: 'Test provider',
@@ -115,17 +113,15 @@ describe('runChat pending tool finalization', () => {
     controller.abort()
     await running
 
-    expect(stored.results).toEqual([{
-      toolCallId: 'tool-1',
-      toolName: 'site_render_snapshot',
-      ok: false,
-      error: INTERRUPTED_TOOL_RESULT_ERROR,
-    }])
-    expect(emitted.map((event) => event.type)).toEqual([
-      'toolCall',
-      'toolResult',
-      'done',
+    expect(stored.results).toEqual([
+      {
+        toolCallId: 'tool-1',
+        toolName: 'site_render_snapshot',
+        ok: false,
+        error: INTERRUPTED_TOOL_RESULT_ERROR,
+      },
     ])
+    expect(emitted.map((event) => event.type)).toEqual(['toolCall', 'toolResult', 'done'])
   })
 
   test('emits the interrupted result before a terminal driver error', async () => {
@@ -152,18 +148,16 @@ describe('runChat pending tool finalization', () => {
     })
 
     expect(stored.results).toHaveLength(1)
-    expect(emitted.map((event) => event.type)).toEqual([
-      'toolCall',
-      'toolResult',
-      'error',
-    ])
+    expect(emitted.map((event) => event.type)).toEqual(['toolCall', 'toolResult', 'error'])
     expect(emitted.at(-1)).toEqual({ type: 'error', message: 'Provider stream failed.' })
   })
 })
 
 function deferred<T>() {
   let resolve!: (value: T | PromiseLike<T>) => void
-  const promise = new Promise<T>((done) => { resolve = done })
+  const promise = new Promise<T>((done) => {
+    resolve = done
+  })
   return { promise, resolve }
 }
 

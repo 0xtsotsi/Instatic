@@ -207,9 +207,11 @@ export function CanvasLiveSurface({
         // empty state. CanvasTransformLayer does the equivalent per breakpoint.
         <div
           className={styles.frame}
-          style={{
-            '--live-width': effectiveWidth !== null ? `${effectiveWidth}px` : '100%',
-          } as CSSProperties}
+          style={
+            {
+              '--live-width': effectiveWidth !== null ? `${effectiveWidth}px` : '100%',
+            } as CSSProperties
+          }
           data-testid="canvas-live-loading-frame"
         >
           <div className={styles.iframeViewport}>
@@ -221,7 +223,10 @@ export function CanvasLiveSurface({
   )
 }
 
-function computeNaturalWidth(breakpoint: Breakpoint | null, containerWidth: number | null): number | null {
+function computeNaturalWidth(
+  breakpoint: Breakpoint | null,
+  containerWidth: number | null,
+): number | null {
   if (!breakpoint) return null
   if (containerWidth === null) return breakpoint.width
   return Math.min(breakpoint.width, containerWidth)
@@ -229,7 +234,8 @@ function computeNaturalWidth(breakpoint: Breakpoint | null, containerWidth: numb
 
 function computeResizedWidth(drag: ResizeDragState, clientX: number, max: number): number {
   const delta = clientX - drag.startClientX
-  const widthDelta = drag.side === 'left' ? -delta * SYMMETRIC_DRAG_FACTOR : delta * SYMMETRIC_DRAG_FACTOR
+  const widthDelta =
+    drag.side === 'left' ? -delta * SYMMETRIC_DRAG_FACTOR : delta * SYMMETRIC_DRAG_FACTOR
   const next = drag.startWidth + widthDelta
   return Math.max(LIVE_MIN_WIDTH, Math.min(max, next))
 }

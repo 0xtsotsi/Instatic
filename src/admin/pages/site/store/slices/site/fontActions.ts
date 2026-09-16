@@ -22,11 +22,7 @@ import type { SiteSlice, SiteSliceHelpers } from './types'
 
 type FontActions = Pick<
   SiteSlice,
-  | 'addFont'
-  | 'removeFont'
-  | 'createFontToken'
-  | 'updateFontToken'
-  | 'deleteFontToken'
+  'addFont' | 'removeFont' | 'createFontToken' | 'updateFontToken' | 'deleteFontToken'
 >
 
 function ensureFonts(site: Draft<SiteDocument>): Draft<SiteFontsSettings> {
@@ -43,7 +39,11 @@ function escapeRegExp(value: string): string {
   return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
 }
 
-function rewriteFontVariableValue(value: unknown, oldVariable: string, nextVariable: string): unknown {
+function rewriteFontVariableValue(
+  value: unknown,
+  oldVariable: string,
+  nextVariable: string,
+): unknown {
   if (typeof value !== 'string') return value
   const oldName = normalizeFontTokenVariable(oldVariable)
   const nextName = normalizeFontTokenVariable(nextVariable)
@@ -123,9 +123,7 @@ function createTokenFromInput(
   }
 }
 
-export function createFontActions({
-  mutateSite,
-}: SiteSliceHelpers): FontActions {
+export function createFontActions({ mutateSite }: SiteSliceHelpers): FontActions {
   return {
     addFont: (entry) => {
       let committed: FontEntry = entry
@@ -217,7 +215,10 @@ export function createFontActions({
               delete token.familyId
               changed = true
             }
-          } else if (fonts.items.some((entry) => entry.id === nextFamilyId) && token.familyId !== nextFamilyId) {
+          } else if (
+            fonts.items.some((entry) => entry.id === nextFamilyId) &&
+            token.familyId !== nextFamilyId
+          ) {
             token.familyId = nextFamilyId
             changed = true
           }
@@ -231,7 +232,11 @@ export function createFontActions({
           }
         }
 
-        if (patch.order !== undefined && Number.isFinite(patch.order) && patch.order !== token.order) {
+        if (
+          patch.order !== undefined &&
+          Number.isFinite(patch.order) &&
+          patch.order !== token.order
+        ) {
           token.order = patch.order
           changed = true
         }

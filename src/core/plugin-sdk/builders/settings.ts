@@ -226,4 +226,3 @@ export function validatePluginSettingsRecord(
   }
   return out
 }
-

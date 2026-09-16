@@ -71,14 +71,14 @@ describe('plugin content handlers — access enforced', () => {
     // Cross-table handlers (List on tables, search, republishAll) are
     // intentionally allowlisted — their authorization model differs.
     const crossTableAllowlist = new Set([
-      'handleContentTablesList',     // intersects with allowlist itself
-      'handleContentTablesCreate',   // gated by cms.content.tables.manage
-      'handleContentRepublishAll',   // operates on all published pages
-      'handleContentSearch',         // intersects with allowlist itself
-      'handleContentSnapshot',       // looks up table from rowId, then asserts
-      'handleContentTreeRead',       // looks up table from rowId, then asserts
-      'handleContentTreeMutate',     // looks up table from rowId, then asserts
-      'handleContentTreeReplace',    // looks up table from rowId, then asserts
+      'handleContentTablesList', // intersects with allowlist itself
+      'handleContentTablesCreate', // gated by cms.content.tables.manage
+      'handleContentRepublishAll', // operates on all published pages
+      'handleContentSearch', // intersects with allowlist itself
+      'handleContentSnapshot', // looks up table from rowId, then asserts
+      'handleContentTreeRead', // looks up table from rowId, then asserts
+      'handleContentTreeMutate', // looks up table from rowId, then asserts
+      'handleContentTreeReplace', // looks up table from rowId, then asserts
     ])
 
     for (const { name, body } of handlers) {

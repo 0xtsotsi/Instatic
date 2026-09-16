@@ -60,12 +60,7 @@ const root = createRoot(rootElement, {
     handleRootError('react-root:caught', error, info, null)
   },
   onUncaughtError: (error, info) => {
-    handleRootError(
-      'react-root:uncaught',
-      error,
-      info,
-      'Unhandled render error',
-    )
+    handleRootError('react-root:uncaught', error, info, 'Unhandled render error')
   },
   onRecoverableError: (error, info) => {
     handleRootError('react-root:recoverable', error, info, null)

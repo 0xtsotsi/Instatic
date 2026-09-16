@@ -87,9 +87,7 @@ export function DataGridRow({
 
   // Resolve primary title + subtitle.
   const primaryValue = readStringCell(row.cells, primaryFieldId)
-  const subtitleValue = subtitleFieldId
-    ? readStringCell(row.cells, subtitleFieldId)
-    : ''
+  const subtitleValue = subtitleFieldId ? readStringCell(row.cells, subtitleFieldId) : ''
 
   // Clicking the checkbox or trailing actions cells shouldn't trigger row-select.
   function stopRowClick(e: React.MouseEvent) {
@@ -162,12 +160,7 @@ export function DataGridRow({
             className={styles.cell}
             data-data-grid-row-id={row.id}
           >
-            <CellDisplayRenderer
-              field={field}
-              cells={row.cells}
-              tables={tables}
-              rows={rows}
-            />
+            <CellDisplayRenderer field={field} cells={row.cells} tables={tables} rows={rows} />
           </div>
         )
       })}
@@ -214,7 +207,6 @@ export function DataGridRow({
           )}
         </div>
       </div>
-
     </div>
   )
 }

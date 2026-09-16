@@ -89,35 +89,52 @@ describe('validateSavedLayouts (load path)', () => {
 
 describe('validateSavedLayoutsForPartialWrite (write path)', () => {
   it('returns the parsed changed batch', () => {
-    const result = validateSavedLayoutsForPartialWrite([layout({ name: '  Hero  ' })], [], new Set(['layout-hero']))
+    const result = validateSavedLayoutsForPartialWrite(
+      [layout({ name: '  Hero  ' })],
+      [],
+      new Set(['layout-hero']),
+    )
     expect(result).toHaveLength(1)
     expect(result[0].name).toBe('Hero')
   })
 
   it('throws on a malformed layout instead of dropping it', () => {
-    expect(() => validateSavedLayoutsForPartialWrite([{ id: 'x' }], [], new Set()))
-      .toThrow(SiteValidationError)
+    expect(() => validateSavedLayoutsForPartialWrite([{ id: 'x' }], [], new Set())).toThrow(
+      SiteValidationError,
+    )
   })
 
   it('throws when a changed layout duplicates a kept stored name', () => {
     const stored = layout({ id: 'layout-old' })
     const incoming = layout({ id: 'layout-new' }) // same name "Hero"
     expect(() =>
-      validateSavedLayoutsForPartialWrite([incoming], [stored], new Set(['layout-old', 'layout-new'])),
+      validateSavedLayoutsForPartialWrite(
+        [incoming],
+        [stored],
+        new Set(['layout-old', 'layout-new']),
+      ),
     ).toThrow(SiteValidationError)
   })
 
   it('allows replacing a stored layout by id with the same name', () => {
     const stored = layout()
     const incoming = layout() // same id — replaces in the merged roster
-    const result = validateSavedLayoutsForPartialWrite([incoming], [stored], new Set(['layout-hero']))
+    const result = validateSavedLayoutsForPartialWrite(
+      [incoming],
+      [stored],
+      new Set(['layout-hero']),
+    )
     expect(result).toHaveLength(1)
   })
 
   it('ignores stored rows missing from keptIds when checking identity', () => {
     const stored = layout({ id: 'layout-old' })
     const incoming = layout({ id: 'layout-new' }) // same name, but old row is being reaped
-    const result = validateSavedLayoutsForPartialWrite([incoming], [stored], new Set(['layout-new']))
+    const result = validateSavedLayoutsForPartialWrite(
+      [incoming],
+      [stored],
+      new Set(['layout-new']),
+    )
     expect(result).toHaveLength(1)
   })
 })

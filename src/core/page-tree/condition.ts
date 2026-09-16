@@ -75,18 +75,24 @@ export type ConditionDef = Static<typeof ConditionDefSchema>
  */
 export function conditionId(condition: Condition): string {
   switch (condition.kind) {
-    case 'media': return `media:${condition.query}`
-    case 'container': return `container:${condition.name ?? ''}:${condition.query}`
-    case 'supports': return `supports:${condition.query}`
+    case 'media':
+      return `media:${condition.query}`
+    case 'container':
+      return `container:${condition.name ?? ''}:${condition.query}`
+    case 'supports':
+      return `supports:${condition.query}`
   }
 }
 
 /** Short human label for a condition, used as the default `ConditionDef.label`. */
 export function conditionLabel(condition: Condition): string {
   switch (condition.kind) {
-    case 'media': return condition.query
-    case 'container': return condition.name ? `@${condition.name} ${condition.query}` : condition.query
-    case 'supports': return `supports ${condition.query}`
+    case 'media':
+      return condition.query
+    case 'container':
+      return condition.name ? `@${condition.name} ${condition.query}` : condition.query
+    case 'supports':
+      return `supports ${condition.query}`
   }
 }
 
@@ -130,7 +136,8 @@ function parseConditionDef(raw: unknown): ConditionDef | null {
   const condition = parseCondition(r.condition)
   if (!condition) return null
   const id = typeof r.id === 'string' && r.id.length > 0 ? r.id : conditionId(condition)
-  const label = typeof r.label === 'string' && r.label.length > 0 ? r.label : conditionLabel(condition)
+  const label =
+    typeof r.label === 'string' && r.label.length > 0 ? r.label : conditionLabel(condition)
   return { id, label, condition }
 }
 

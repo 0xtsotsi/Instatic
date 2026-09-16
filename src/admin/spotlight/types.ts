@@ -29,15 +29,15 @@ export type CommandGroup =
   | 'preview'
   | 'ai'
   | 'help'
-  | 'recent'   // synthetic — only when query is empty
-  | 'results'  // catch-all for provider-supplied jump items
+  | 'recent' // synthetic — only when query is empty
+  | 'results' // catch-all for provider-supplied jump items
 
 // ─── Shortcut ─────────────────────────────────────────────────────────────────
 
 export interface CommandShortcut {
   /** Mac order: ⌘ ⌥ ⌃ ⇧ + key. Auto-render Ctrl on non-Mac. */
-  mac: string  // e.g. "⌘⇧K"
-  win: string  // e.g. "Ctrl+Shift+K"
+  mac: string // e.g. "⌘⇧K"
+  win: string // e.g. "Ctrl+Shift+K"
 }
 
 // ─── Argument ─────────────────────────────────────────────────────────────────
@@ -45,20 +45,18 @@ export interface CommandShortcut {
 export interface CommandArg {
   id: string
   label: string
-  type: 'text' | 'select' | 'pick'  // 'pick' = nested scope
+  type: 'text' | 'select' | 'pick' // 'pick' = nested scope
   placeholder?: string
   required?: boolean
   /** For 'select' — static option list. For 'pick' — provider scope id. */
   options?: ReadonlyArray<{ value: string; label: string; sublabel?: string }>
-  scope?: string  // for type: 'pick'
+  scope?: string // for type: 'pick'
 }
 
 // ─── Command ──────────────────────────────────────────────────────────────────
 
 /** Active document descriptor — which canvas document is currently open. */
-type ActiveDocument =
-  | { kind: 'page'; pageId: string }
-  | { kind: 'visualComponent'; vcId: string }
+type ActiveDocument = { kind: 'page'; pageId: string } | { kind: 'visualComponent'; vcId: string }
 
 /** Context snapshot built once per open, refreshed on selection change. */
 export interface CommandContext {
@@ -157,8 +155,8 @@ export interface SpotlightProvider {
 }
 
 export interface Scope {
-  id: string         // 'root' | 'pages' | 'modules' | …
-  title?: string     // header text in argument mode
+  id: string // 'root' | 'pages' | 'modules' | …
+  title?: string // header text in argument mode
   placeholder?: string
   /** Synchronous static commands offered by this scope. */
   commands: () => Command[]

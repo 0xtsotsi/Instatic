@@ -96,17 +96,11 @@ export function collectSubtreeNodeIds(
  * Used by `deleteVisualComponent` to cascade ref removal across every page and
  * every remaining VC tree in one atomic `mutateSite` call.
  */
-export function cascadeRemoveVCRefs(
-  nodes: Record<string, BaseNode>,
-  vcId: string,
-): void {
+export function cascadeRemoveVCRefs(nodes: Record<string, BaseNode>, vcId: string): void {
   // Collect all top-level ref IDs that point at vcId
   const refNodeIds: string[] = []
   for (const [nodeId, node] of Object.entries(nodes)) {
-    if (
-      node.moduleId === 'base.visual-component-ref' &&
-      node.props.componentId === vcId
-    ) {
+    if (node.moduleId === 'base.visual-component-ref' && node.props.componentId === vcId) {
       refNodeIds.push(nodeId)
     }
   }

@@ -41,11 +41,13 @@ describe('wrapEsmAsGlobal — object mode (__plugin_exports)', () => {
   })
 
   it('collects export function / const / let as named properties', () => {
-    const out = run(wrap(
-      `export function activate() { return 'a'; }\n` +
-      `export const fromConst = 'c';\n` +
-      `export let fromLet = 'l';`,
-    ))
+    const out = run(
+      wrap(
+        `export function activate() { return 'a'; }\n` +
+          `export const fromConst = 'c';\n` +
+          `export let fromLet = 'l';`,
+      ),
+    )
     const exports = out.__plugin_exports as Sandbox
     expect(typeof exports.activate).toBe('function')
     expect((exports.activate as () => string)()).toBe('a')
@@ -61,7 +63,9 @@ describe('wrapEsmAsGlobal — object mode (__plugin_exports)', () => {
   })
 
   it('collects mixed default + named export blocks', () => {
-    const out = run(wrap(`const main = 'm';\nconst extra = 'e';\nexport { main as default, extra };`))
+    const out = run(
+      wrap(`const main = 'm';\nconst extra = 'e';\nexport { main as default, extra };`),
+    )
     const exports = out.__plugin_exports as Sandbox
     expect(exports.default).toBe('m')
     expect(exports.extra).toBe('e')
@@ -93,11 +97,13 @@ describe('wrapEsmAsGlobal — unwrapDefault mode (__module_pack)', () => {
     // as a bare `export` and the whole bundle threw a SyntaxError as a module
     // pack (it loaded fine as a plugin). The unified shim rewrites the sibling
     // out of the way and still resolves the default value.
-    const out = run(wrap(
-      `const mods = [{ id: 'c' }];\n` +
-      `export function helper() { return 1; }\n` +
-      `export { mods as default };`,
-    ))
+    const out = run(
+      wrap(
+        `const mods = [{ id: 'c' }];\n` +
+          `export function helper() { return 1; }\n` +
+          `export { mods as default };`,
+      ),
+    )
     expect(out.__module_pack).toEqual([{ id: 'c' }])
   })
 })
@@ -127,7 +133,9 @@ describe('wrapEsmAsGlobal — stack-trace line numbers', () => {
   })
 
   it('still evaluates correctly with the single-line prelude', () => {
-    const out = run(wrapEsmAsGlobal(`// leading comment\nexport const x = 41 + 1;`, '__plugin_exports'))
+    const out = run(
+      wrapEsmAsGlobal(`// leading comment\nexport const x = 41 + 1;`, '__plugin_exports'),
+    )
     expect((out.__plugin_exports as Sandbox).x).toBe(42)
   })
 })

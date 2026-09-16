@@ -69,10 +69,7 @@ export function detectConflicts(
 // Page conflict detection
 // ---------------------------------------------------------------------------
 
-function detectPageConflicts(
-  site: SiteDocument,
-  pagePlans: PagePlan[],
-): PageConflict[] {
+function detectPageConflicts(site: SiteDocument, pagePlans: PagePlan[]): PageConflict[] {
   const conflicts: PageConflict[] = []
 
   // Build slug → id map for existing pages
@@ -122,10 +119,7 @@ function detectPageConflicts(
 // Rule conflict detection
 // ---------------------------------------------------------------------------
 
-function detectRuleConflicts(
-  site: SiteDocument,
-  styleRules: NewStyleRule[],
-): RuleConflict[] {
+function detectRuleConflicts(site: SiteDocument, styleRules: NewStyleRule[]): RuleConflict[] {
   const conflicts: RuleConflict[] = []
 
   // Only kind:'class' rules have unique-name constraints
@@ -237,10 +231,7 @@ function detectTokenConflicts(
  * Find the first available slug by appending `-2`, `-3`, `-4`, ... until
  * none of the claimed slugs match.
  */
-function nextAvailableSlug(
-  baseSlug: string,
-  claimedSlugs: Map<string, string>,
-): string {
+function nextAvailableSlug(baseSlug: string, claimedSlugs: Map<string, string>): string {
   let suffix = 2
   while (true) {
     const candidate = `${baseSlug}-${suffix}`
@@ -252,10 +243,7 @@ function nextAvailableSlug(
 /**
  * Find the first available class name by appending `-2`, `-3`, `-4`, ...
  */
-function nextAvailableName(
-  baseName: string,
-  claimedNames: Map<string, string>,
-): string {
+function nextAvailableName(baseName: string, claimedNames: Map<string, string>): string {
   let suffix = 2
   while (true) {
     const candidate = `${baseName}-${suffix}`
@@ -548,9 +536,8 @@ function rewriteSelectorClasses(selector: string, classRenames: Map<string, stri
  */
 function rewriteRuleVarRefs(rule: NewStyleRule, renames: Map<string, string>): NewStyleRule {
   const styles = rewriteStyleBagVarRefs(rule.styles, renames)
-  const rawCss = typeof rule.rawCss === 'string'
-    ? rewriteCssVarRefs(rule.rawCss, renames)
-    : rule.rawCss
+  const rawCss =
+    typeof rule.rawCss === 'string' ? rewriteCssVarRefs(rule.rawCss, renames) : rule.rawCss
   let contextStyles = rule.contextStyles
   if (contextStyles && Object.keys(contextStyles).length > 0) {
     let ctxChanged = false

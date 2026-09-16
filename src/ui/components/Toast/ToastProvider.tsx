@@ -26,12 +26,7 @@ import { cn } from '@ui/cn'
 import { CloseIcon } from 'pixel-art-icons/icons/close'
 import { CircleAlertSolidIcon } from 'pixel-art-icons/icons/circle-alert-solid'
 import { WarningDiamondSolidIcon } from 'pixel-art-icons/icons/warning-diamond-solid'
-import {
-  dismissToast,
-  subscribeToasts,
-  type Toast,
-  type ToastKind,
-} from './toastBus'
+import { dismissToast, subscribeToasts, type Toast, type ToastKind } from './toastBus'
 import styles from './Toast.module.css'
 
 const DEFAULT_DURATION_MS: Record<ToastKind, number> = {
@@ -159,9 +154,7 @@ function ToastItem({ toast }: { toast: Toast }) {
       <div className={styles.content}>
         <p className={styles.title}>{toast.title}</p>
         {toast.body && <p className={styles.body}>{toast.body}</p>}
-        {toast.location && (
-          <p className={styles.location}>{toast.location}</p>
-        )}
+        {toast.location && <p className={styles.location}>{toast.location}</p>}
       </div>
       <div className={styles.actions}>
         {toast.action && (

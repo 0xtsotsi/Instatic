@@ -132,10 +132,7 @@ describe('ModulePickerDropdown — Visual Components', () => {
   })
 
   it('lists site VCs as items inside the Components section', () => {
-    loadSite([
-      makeVC('vc-1', 'HeroCard', 3),
-      makeVC('vc-2', 'PricingTable', 1),
-    ])
+    loadSite([makeVC('vc-1', 'HeroCard', 3), makeVC('vc-2', 'PricingTable', 1)])
     render(<ModulePickerDropdown />)
 
     const dialog = openInserter()
@@ -156,10 +153,7 @@ describe('ModulePickerDropdown — Visual Components', () => {
   })
 
   it('filters VCs by search query', () => {
-    loadSite([
-      makeVC('vc-1', 'HeroCard', 2),
-      makeVC('vc-2', 'PricingTable', 1),
-    ])
+    loadSite([makeVC('vc-1', 'HeroCard', 2), makeVC('vc-2', 'PricingTable', 1)])
     render(<ModulePickerDropdown />)
     const dialog = openInserter()
     clickSection('Components')
@@ -229,8 +223,9 @@ describe('ModulePickerDropdown — Visual Components', () => {
     const dialog = openInserter()
 
     expect(screen.queryByRole('button', { name: /^Community\b/ })).toBeNull()
-    expect(screen.getByRole('searchbox', { name: 'Search modules' }).getAttribute('placeholder'))
-      .toBe('Search every module, layout & component...')
+    expect(
+      screen.getByRole('searchbox', { name: 'Search modules' }).getAttribute('placeholder'),
+    ).toBe('Search every module, layout & component...')
     expect(within(dialog).queryByText('Plugin catalog unavailable')).toBeNull()
     expect(within(dialog).queryByText(/Community modules/i)).toBeNull()
   })
@@ -299,9 +294,9 @@ describe('ModulePickerDropdown — Visual Components', () => {
     const dialog = openInserter()
 
     // base.visual-component-ref should not appear as a module item
-    const vcRefItem = within(dialog).queryAllByRole('button').find(
-      (el) => el.getAttribute('data-module-id') === 'base.visual-component-ref',
-    )
+    const vcRefItem = within(dialog)
+      .queryAllByRole('button')
+      .find((el) => el.getAttribute('data-module-id') === 'base.visual-component-ref')
     expect(vcRefItem).toBeUndefined()
   })
 
@@ -311,9 +306,9 @@ describe('ModulePickerDropdown — Visual Components', () => {
     const dialog = openInserter()
 
     // base.slot-outlet (display name: "Slot") should not appear in page mode
-    const slotItem = within(dialog).queryAllByRole('button').find(
-      (el) => el.getAttribute('data-module-id') === 'base.slot-outlet',
-    )
+    const slotItem = within(dialog)
+      .queryAllByRole('button')
+      .find((el) => el.getAttribute('data-module-id') === 'base.slot-outlet')
     expect(slotItem).toBeUndefined()
   })
 
@@ -324,9 +319,9 @@ describe('ModulePickerDropdown — Visual Components', () => {
     const dialog = openInserter()
 
     // base.slot-outlet (display name: "Slot") should be visible in VC mode
-    const slotItem = within(dialog).queryAllByRole('button').find(
-      (el) => el.getAttribute('data-module-id') === 'base.slot-outlet',
-    )
+    const slotItem = within(dialog)
+      .queryAllByRole('button')
+      .find((el) => el.getAttribute('data-module-id') === 'base.slot-outlet')
     expect(slotItem).toBeDefined()
   })
 
@@ -339,9 +334,9 @@ describe('ModulePickerDropdown — Visual Components', () => {
     // it must NEVER appear as a user-insertable option in the picker. Otherwise
     // the picker shows two "Slot" entries (one for slot-outlet, one for
     // slot-instance) and orphan slot-instance nodes leak into the tree.
-    const slotInstanceItem = within(dialog).queryAllByRole('button').find(
-      (el) => el.getAttribute('data-module-id') === 'base.slot-instance',
-    )
+    const slotInstanceItem = within(dialog)
+      .queryAllByRole('button')
+      .find((el) => el.getAttribute('data-module-id') === 'base.slot-instance')
     expect(slotInstanceItem).toBeUndefined()
   })
 
@@ -352,9 +347,9 @@ describe('ModulePickerDropdown — Visual Components', () => {
     const dialog = openInserter()
 
     // Same rule as page mode — slot-instance is structural-only, never picker-visible.
-    const slotInstanceItem = within(dialog).queryAllByRole('button').find(
-      (el) => el.getAttribute('data-module-id') === 'base.slot-instance',
-    )
+    const slotInstanceItem = within(dialog)
+      .queryAllByRole('button')
+      .find((el) => el.getAttribute('data-module-id') === 'base.slot-instance')
     expect(slotInstanceItem).toBeUndefined()
   })
 })

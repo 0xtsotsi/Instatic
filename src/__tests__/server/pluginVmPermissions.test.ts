@@ -63,9 +63,7 @@ describe('VM-side permission enforcement', () => {
     })
     try {
       // The bootstrap's assertPermission throws synchronously inside activate.
-      await expect(vm.runLifecycle('activate')).rejects.toThrow(
-        /requires permission "cms\.hooks"/,
-      )
+      await expect(vm.runLifecycle('activate')).rejects.toThrow(/requires permission "cms\.hooks"/)
       // Proof it was denied at the VM, not the host: the host dispatcher was
       // never invoked for the hook registration (the throw short-circuited
       // before any `__hostCall`).

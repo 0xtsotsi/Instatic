@@ -29,7 +29,10 @@
 import { describe, test, expect } from 'bun:test'
 import { readFile } from 'node:fs/promises'
 import { join } from 'node:path'
-import { listInstalledPlugins, setPluginLifecycleStatus } from '../../../server/repositories/plugins'
+import {
+  listInstalledPlugins,
+  setPluginLifecycleStatus,
+} from '../../../server/repositories/plugins'
 import type { DbClient, DbResult } from '../../../server/db'
 
 const ROOT = join(import.meta.dir, '..', '..', '..')
@@ -67,7 +70,11 @@ function makeFakeDb(pluginRows: FakePluginRow[]) {
       if (row) {
         row.lifecycle_status = values[0]
         row.last_error = values[1] ?? null
-        lifecycleUpdates.push({ id, status: values[0] as string, error: (values[1] ?? null) as string | null })
+        lifecycleUpdates.push({
+          id,
+          status: values[0] as string,
+          error: (values[1] ?? null) as string | null,
+        })
       }
       // Return the (still-corrupt) row — the repository wraps it in
       // mapInstalledPlugin which should return kind:'broken' without throwing.
@@ -176,7 +183,12 @@ describe('plugin boot resilience — repository isolation', () => {
     const db = makeFakeDb([row])
     // Should NOT throw — the DB write succeeds; the parse failure is captured
     // in the returned discriminated union (kind:'broken'), not as an exception.
-    const result = await setPluginLifecycleStatus(db, 'test.broken-plugin', 'error', 'test error message')
+    const result = await setPluginLifecycleStatus(
+      db,
+      'test.broken-plugin',
+      'error',
+      'test error message',
+    )
     // DB row was updated
     expect(row.lifecycle_status).toBe('error')
     expect(row.last_error).toBe('test error message')
@@ -194,8 +206,24 @@ describe('plugin boot resilience — repository isolation', () => {
 
   test('2 valid + 1 broken: all 3 are returned, broken identified independently', async () => {
     const db = makeFakeDb([
-      makeValidRow({ id: 'test.plugin-a', name: 'Plugin A', manifest_json: JSON.stringify({ ...VALID_MANIFEST, id: 'test.plugin-a', assetBasePath: '/uploads/plugins/test.plugin-a/1.0.0' }) }),
-      makeValidRow({ id: 'test.plugin-b', name: 'Plugin B', manifest_json: JSON.stringify({ ...VALID_MANIFEST, id: 'test.plugin-b', assetBasePath: '/uploads/plugins/test.plugin-b/1.0.0' }) }),
+      makeValidRow({
+        id: 'test.plugin-a',
+        name: 'Plugin A',
+        manifest_json: JSON.stringify({
+          ...VALID_MANIFEST,
+          id: 'test.plugin-a',
+          assetBasePath: '/uploads/plugins/test.plugin-a/1.0.0',
+        }),
+      }),
+      makeValidRow({
+        id: 'test.plugin-b',
+        name: 'Plugin B',
+        manifest_json: JSON.stringify({
+          ...VALID_MANIFEST,
+          id: 'test.plugin-b',
+          assetBasePath: '/uploads/plugins/test.plugin-b/1.0.0',
+        }),
+      }),
       makeBrokenRow(),
     ])
     const results = await listInstalledPlugins(db)
@@ -227,7 +255,9 @@ describe('plugin boot resilience — boot loop structure', () => {
   test('module-pack-load phase has an isolated catch that writes error status to DB', async () => {
     const source = await readFile(join(ROOT, 'server/plugins/runtime.ts'), 'utf-8')
     // Each boot phase catch must call setPluginLifecycleStatus with 'error'.
-    const statusCallCount = (source.match(/setPluginLifecycleStatus\(db,\s*manifest\.id,\s*['"]error['"]/g) ?? []).length
+    const statusCallCount = (
+      source.match(/setPluginLifecycleStatus\(db,\s*manifest\.id,\s*['"]error['"]/g) ?? []
+    ).length
     // At minimum the module-pack and server-entrypoint phases = 2 calls.
     expect(statusCallCount).toBeGreaterThanOrEqual(2)
     // Phase label in log for module-pack

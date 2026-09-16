@@ -62,13 +62,15 @@ describe('computeNextRun', () => {
     expect(next.toISOString()).toBe('2026-05-18T11:00:00.000Z')
   })
 
-  it('advances `daily at 03:00` to today\'s 03:00 if still in future, else tomorrow', () => {
+  it("advances `daily at 03:00` to today's 03:00 if still in future, else tomorrow", () => {
     const beforeFire = new Date('2026-05-18T02:59:00Z')
     const afterFire = new Date('2026-05-18T03:01:00Z')
-    expect(computeNextRun({ interval: 'daily', at: '03:00' }, beforeFire).toISOString())
-      .toBe('2026-05-18T03:00:00.000Z')
-    expect(computeNextRun({ interval: 'daily', at: '03:00' }, afterFire).toISOString())
-      .toBe('2026-05-19T03:00:00.000Z')
+    expect(computeNextRun({ interval: 'daily', at: '03:00' }, beforeFire).toISOString()).toBe(
+      '2026-05-18T03:00:00.000Z',
+    )
+    expect(computeNextRun({ interval: 'daily', at: '03:00' }, afterFire).toISOString()).toBe(
+      '2026-05-19T03:00:00.000Z',
+    )
   })
 
   it('advances `weekly Mon 09:00` to the next Monday', () => {
@@ -76,19 +78,29 @@ describe('computeNextRun', () => {
     // after 09:00 → next Monday.
     const beforeFire = new Date('2026-05-18T08:00:00Z')
     const afterFire = new Date('2026-05-18T10:00:00Z')
-    expect(computeNextRun({ interval: 'weekly', at: '09:00', day: 'mon' }, beforeFire).toISOString())
-      .toBe('2026-05-18T09:00:00.000Z')
-    expect(computeNextRun({ interval: 'weekly', at: '09:00', day: 'mon' }, afterFire).toISOString())
-      .toBe('2026-05-25T09:00:00.000Z')
+    expect(
+      computeNextRun({ interval: 'weekly', at: '09:00', day: 'mon' }, beforeFire).toISOString(),
+    ).toBe('2026-05-18T09:00:00.000Z')
+    expect(
+      computeNextRun({ interval: 'weekly', at: '09:00', day: 'mon' }, afterFire).toISOString(),
+    ).toBe('2026-05-25T09:00:00.000Z')
   })
 
   it('advances `monthly day 15 at 00:00` to next month if past', () => {
     const stillInMonth = new Date('2026-05-10T00:00:00Z')
     const pastInMonth = new Date('2026-05-20T00:00:00Z')
-    expect(computeNextRun({ interval: 'monthly', at: '00:00', dayOfMonth: 15 }, stillInMonth).toISOString())
-      .toBe('2026-05-15T00:00:00.000Z')
-    expect(computeNextRun({ interval: 'monthly', at: '00:00', dayOfMonth: 15 }, pastInMonth).toISOString())
-      .toBe('2026-06-15T00:00:00.000Z')
+    expect(
+      computeNextRun(
+        { interval: 'monthly', at: '00:00', dayOfMonth: 15 },
+        stillInMonth,
+      ).toISOString(),
+    ).toBe('2026-05-15T00:00:00.000Z')
+    expect(
+      computeNextRun(
+        { interval: 'monthly', at: '00:00', dayOfMonth: 15 },
+        pastInMonth,
+      ).toISOString(),
+    ).toBe('2026-06-15T00:00:00.000Z')
   })
 })
 

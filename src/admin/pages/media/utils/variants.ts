@@ -24,7 +24,7 @@ export function pickVariantUrl(
   targetCssWidth: number,
 ): string {
   if (!asset.variants.length) return asset.publicPath
-  const dpr = typeof window !== 'undefined' ? window.devicePixelRatio ?? 1 : 1
+  const dpr = typeof window !== 'undefined' ? (window.devicePixelRatio ?? 1) : 1
   const targetPx = Math.ceil(targetCssWidth * dpr)
   const sorted: CmsMediaVariant[] = [...asset.variants].sort((a, b) => a.width - b.width)
   // First variant ≥ target wins. Falls back to the largest variant (or the

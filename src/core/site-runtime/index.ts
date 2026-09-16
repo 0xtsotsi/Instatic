@@ -37,7 +37,4 @@ export {
   extractRuntimeImportSpecifiers,
   packageNameFromImportSpecifier,
 } from './importAnalysis'
-export {
-  hasPublishedRuntimeScripts,
-  scriptTagsForRuntimeAssets,
-} from './assetManifest'
+export { hasPublishedRuntimeScripts, scriptTagsForRuntimeAssets } from './assetManifest'

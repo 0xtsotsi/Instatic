@@ -1,8 +1,4 @@
-import type {
-  BundleImportSelection,
-  BundleRowConflict,
-  SiteBundle,
-} from '@core/data/bundleSchema'
+import type { BundleImportSelection, BundleRowConflict, SiteBundle } from '@core/data/bundleSchema'
 import type { ConflictResolution } from '@core/siteImport'
 
 export function selectedCmsRowCount(selection: BundleImportSelection, bundle: SiteBundle): number {
@@ -10,22 +6,32 @@ export function selectedCmsRowCount(selection: BundleImportSelection, bundle: Si
   for (const row of bundle.rows) {
     rowsByTable.set(row.tableId, (rowsByTable.get(row.tableId) ?? 0) + 1)
   }
-  return selection.tables.reduce((sum, table) => (
-    sum + (table.rowIds?.length ?? rowsByTable.get(table.tableId) ?? 0)
-  ), 0)
+  return selection.tables.reduce(
+    (sum, table) => sum + (table.rowIds?.length ?? rowsByTable.get(table.tableId) ?? 0),
+    0,
+  )
 }
 
-export function selectedCmsMediaCount(selection: BundleImportSelection, mediaTotal: number): number {
+export function selectedCmsMediaCount(
+  selection: BundleImportSelection,
+  mediaTotal: number,
+): number {
   if (!selection.includeMedia) return 0
   return selection.mediaIds?.length ?? mediaTotal
 }
 
-export function selectedCmsMediaFolderCount(selection: BundleImportSelection, bundle: SiteBundle): number {
-  return selection.includeMediaFolders ? bundle.mediaFolders?.length ?? 0 : 0
+export function selectedCmsMediaFolderCount(
+  selection: BundleImportSelection,
+  bundle: SiteBundle,
+): number {
+  return selection.includeMediaFolders ? (bundle.mediaFolders?.length ?? 0) : 0
 }
 
-export function selectedCmsRedirectCount(selection: BundleImportSelection, bundle: SiteBundle): number {
-  return selection.includeRedirects ? bundle.redirects?.length ?? 0 : 0
+export function selectedCmsRedirectCount(
+  selection: BundleImportSelection,
+  bundle: SiteBundle,
+): number {
+  return selection.includeRedirects ? (bundle.redirects?.length ?? 0) : 0
 }
 
 export function cmsRowConflictKey(conflict: BundleRowConflict): string {
@@ -60,24 +66,30 @@ export function withCmsConflictResolutions(
       skipped.add(key)
       continue
     }
-    const slug = resolution.action === 'custom-rename'
-      ? resolution.resolvedSlug
-      : resolution.resolvedSlug ?? conflict.suggestedSlug
+    const slug =
+      resolution.action === 'custom-rename'
+        ? resolution.resolvedSlug
+        : (resolution.resolvedSlug ?? conflict.suggestedSlug)
     if (slug && slug !== conflict.slug) {
       rowSlugOverrides.push({ tableId: conflict.tableId, rowId: conflict.rowId, slug })
     }
   }
 
-  const tables = skipped.size === 0
-    ? selection.tables
-    : selection.tables.map((tableSelection) => {
-        const tableRows = bundle.rows.filter((row) => row.tableId === tableSelection.tableId)
-        const selectedRowIds = tableSelection.rowIds ?? tableRows.map((row) => row.id)
-        return {
-          ...tableSelection,
-          rowIds: selectedRowIds.filter((rowId) => !skipped.has(`${tableSelection.tableId}:${rowId}`)),
-        }
-      }).filter((tableSelection) => tableSelection.rowIds.length > 0)
+  const tables =
+    skipped.size === 0
+      ? selection.tables
+      : selection.tables
+          .map((tableSelection) => {
+            const tableRows = bundle.rows.filter((row) => row.tableId === tableSelection.tableId)
+            const selectedRowIds = tableSelection.rowIds ?? tableRows.map((row) => row.id)
+            return {
+              ...tableSelection,
+              rowIds: selectedRowIds.filter(
+                (rowId) => !skipped.has(`${tableSelection.tableId}:${rowId}`),
+              ),
+            }
+          })
+          .filter((tableSelection) => tableSelection.rowIds.length > 0)
 
   return {
     ...selection,
@@ -86,7 +98,11 @@ export function withCmsConflictResolutions(
   }
 }
 
-function isCmsRowSelected(selection: BundleImportSelection, conflict: BundleRowConflict, bundle: SiteBundle): boolean {
+function isCmsRowSelected(
+  selection: BundleImportSelection,
+  conflict: BundleRowConflict,
+  bundle: SiteBundle,
+): boolean {
   const tableSelection = selection.tables.find((table) => table.tableId === conflict.tableId)
   if (!tableSelection) return false
   if (tableSelection.rowIds === undefined) {

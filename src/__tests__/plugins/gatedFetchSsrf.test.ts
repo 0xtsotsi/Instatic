@@ -42,9 +42,21 @@ function resolver(map: Record<string, string[]>): (host: string) => Promise<stri
 describe('isBlockedAddress', () => {
   test('blocks loopback, private, link-local, CGNAT, ULA and mapped forms', () => {
     for (const ip of [
-      '127.0.0.1', '127.5.5.5', '10.0.0.1', '172.16.0.1', '172.31.255.255',
-      '192.168.1.1', '169.254.169.254', '100.64.0.1', '0.0.0.0',
-      '::1', '::', 'fe80::1', 'fc00::1', 'fd12:3456::1', '::ffff:127.0.0.1',
+      '127.0.0.1',
+      '127.5.5.5',
+      '10.0.0.1',
+      '172.16.0.1',
+      '172.31.255.255',
+      '192.168.1.1',
+      '169.254.169.254',
+      '100.64.0.1',
+      '0.0.0.0',
+      '::1',
+      '::',
+      'fe80::1',
+      'fc00::1',
+      'fd12:3456::1',
+      '::ffff:127.0.0.1',
     ]) {
       expect(isBlockedAddress(ip)).toBe(true)
     }
@@ -63,7 +75,9 @@ describe('performGatedFetch — SSRF guards', () => {
       'https://api.example.com/data',
       {},
       {
-        fetchImpl: scriptedFetch({ 'https://api.example.com/data': new Response('OK', { status: 200 }) }),
+        fetchImpl: scriptedFetch({
+          'https://api.example.com/data': new Response('OK', { status: 200 }),
+        }),
         resolveHostAddresses: resolver({ 'api.example.com': [PUBLIC_IP] }),
       },
     )
@@ -139,7 +153,10 @@ describe('performGatedFetch — SSRF guards', () => {
           }),
           'https://b.example.com/final': new Response('LANDED', { status: 200 }),
         }),
-        resolveHostAddresses: resolver({ 'a.example.com': [PUBLIC_IP], 'b.example.com': [PUBLIC_IP] }),
+        resolveHostAddresses: resolver({
+          'a.example.com': [PUBLIC_IP],
+          'b.example.com': [PUBLIC_IP],
+        }),
       },
     )
     expect(res.body).toBe('LANDED')
@@ -150,7 +167,10 @@ describe('performGatedFetch — SSRF guards', () => {
     const fetchImpl = (async (input: string | URL) => {
       const url = typeof input === 'string' ? input : input.toString()
       const n = Number(new URL(url).searchParams.get('n') ?? '0')
-      return new Response(null, { status: 302, headers: { location: `https://loop.example.com/?n=${n + 1}` } })
+      return new Response(null, {
+        status: 302,
+        headers: { location: `https://loop.example.com/?n=${n + 1}` },
+      })
     }) as unknown as typeof fetch
     await expect(
       performGatedFetch(
@@ -165,7 +185,10 @@ describe('performGatedFetch — SSRF guards', () => {
 
 describe('network.ts source invariant', () => {
   test('uses manual redirect handling (never transparent following)', () => {
-    const src = readFileSync(new URL('../../../server/plugins/host/network.ts', import.meta.url), 'utf8')
+    const src = readFileSync(
+      new URL('../../../server/plugins/host/network.ts', import.meta.url),
+      'utf8',
+    )
     expect(src).toContain("redirect: 'manual'")
   })
 })

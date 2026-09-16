@@ -124,26 +124,22 @@ async function markAgentSnapshotFrameReady(
 ): Promise<void> {
   // Let descendant effects register their first data/media requests before an
   // initially-idle tracker can be mistaken for a finished preview.
-  if (!await waitForDelay(0, signal)) return
+  if (!(await waitForDelay(0, signal))) return
 
   while (!signal.aborted) {
-    if (!await previewReadiness.waitUntilIdle(signal)) return
+    if (!(await previewReadiness.waitUntilIdle(signal))) return
     const settledRevision = previewReadiness.revision()
-    if (!await waitForDocumentQuiet(iframeDocument, signal)) return
-    if (
-      previewReadiness.pendingCount() !== 0 ||
-      previewReadiness.revision() !== settledRevision
-    ) continue
+    if (!(await waitForDocumentQuiet(iframeDocument, signal))) return
+    if (previewReadiness.pendingCount() !== 0 || previewReadiness.revision() !== settledRevision)
+      continue
 
     const fonts = iframeDocument.fonts
-    if (fonts?.status === 'loading' && !await waitForPromise(fonts.ready, signal)) return
-    if (!await waitForDocumentQuiet(iframeDocument, signal)) return
+    if (fonts?.status === 'loading' && !(await waitForPromise(fonts.ready, signal))) return
+    if (!(await waitForDocumentQuiet(iframeDocument, signal))) return
     // A settled data request can add more asynchronous preview work during the
     // resource phase. Restart so the final committed DOM is included as well.
-    if (
-      previewReadiness.pendingCount() === 0 &&
-      previewReadiness.revision() === settledRevision
-    ) break
+    if (previewReadiness.pendingCount() === 0 && previewReadiness.revision() === settledRevision)
+      break
   }
 
   if (signal.aborted) return
@@ -163,10 +159,7 @@ function cleanupAgentSnapshotFrameReady(
   }
 }
 
-function waitForDocumentQuiet(
-  iframeDocument: Document,
-  signal: AbortSignal,
-): Promise<boolean> {
+function waitForDocumentQuiet(iframeDocument: Document, signal: AbortSignal): Promise<boolean> {
   if (signal.aborted) return Promise.resolve(false)
   const MutationObserverCtor = iframeDocument.defaultView?.MutationObserver ?? MutationObserver
 
@@ -212,7 +205,10 @@ function waitForPromise(promise: Promise<unknown>, signal: AbortSignal): Promise
     }
     const onAbort = () => finish(false)
     signal.addEventListener('abort', onAbort, { once: true })
-    void promise.then(() => finish(true), () => finish(true))
+    void promise.then(
+      () => finish(true),
+      () => finish(true),
+    )
   })
 }
 

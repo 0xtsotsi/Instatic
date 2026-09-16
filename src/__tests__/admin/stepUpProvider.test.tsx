@@ -85,7 +85,9 @@ function RecoveryCodeCount() {
 
 describe('StepUpProvider', () => {
   beforeEach(() => {
-    globalThis.fetch = mock(async () => jsonResponse({ ok: true, stepUpExpiresAt: new Date().toISOString() })) as typeof fetch
+    globalThis.fetch = mock(async () =>
+      jsonResponse({ ok: true, stepUpExpiresAt: new Date().toISOString() }),
+    ) as typeof fetch
   })
 
   afterEach(() => {
@@ -99,7 +101,12 @@ describe('StepUpProvider', () => {
 
     render(
       <StepUpProvider>
-        <Harness action={action} onResult={(value) => { resolved = value }} />
+        <Harness
+          action={action}
+          onResult={(value) => {
+            resolved = value
+          }}
+        />
       </StepUpProvider>,
     )
 
@@ -121,7 +128,12 @@ describe('StepUpProvider', () => {
 
     render(
       <StepUpProvider>
-        <Harness action={action} onResult={(value) => { resolved = value }} />
+        <Harness
+          action={action}
+          onResult={(value) => {
+            resolved = value
+          }}
+        />
       </StepUpProvider>,
     )
 
@@ -130,7 +142,9 @@ describe('StepUpProvider', () => {
       expect(screen.getByTestId('step-up-dialog')).toBeTruthy()
     })
 
-    fireEvent.change(screen.getByTestId('step-up-password'), { target: { value: 'long-enough-password' } })
+    fireEvent.change(screen.getByTestId('step-up-password'), {
+      target: { value: 'long-enough-password' },
+    })
     fireEvent.click(screen.getByTestId('step-up-confirm'))
 
     await waitFor(() => {
@@ -173,7 +187,12 @@ describe('StepUpProvider', () => {
       >
         <StepUpProvider>
           <RecoveryCodeCount />
-          <Harness action={action} onResult={(value) => { resolved = value }} />
+          <Harness
+            action={action}
+            onResult={(value) => {
+              resolved = value
+            }}
+          />
         </StepUpProvider>
       </AdminSessionProvider>,
     )
@@ -184,7 +203,9 @@ describe('StepUpProvider', () => {
     expect(screen.getByTestId('step-up-mfa-code')).toBeTruthy()
     expect(screen.getByTestId('recovery-code-count').textContent).toBe('10')
 
-    fireEvent.change(screen.getByTestId('step-up-password'), { target: { value: 'long-enough-password' } })
+    fireEvent.change(screen.getByTestId('step-up-password'), {
+      target: { value: 'long-enough-password' },
+    })
     fireEvent.change(screen.getByTestId('step-up-mfa-code'), { target: { value: '123456' } })
     fireEvent.click(screen.getByTestId('step-up-confirm'))
 
@@ -200,12 +221,19 @@ describe('StepUpProvider', () => {
   })
 
   it('rejects with step_up_cancelled when the user cancels', async () => {
-    const action = mock(async () => { throw new Error('step_up_required') })
+    const action = mock(async () => {
+      throw new Error('step_up_required')
+    })
     let rejected: unknown = null
 
     render(
       <StepUpProvider>
-        <Harness action={action} onError={(err) => { rejected = err }} />
+        <Harness
+          action={action}
+          onError={(err) => {
+            rejected = err
+          }}
+        />
       </StepUpProvider>,
     )
 
@@ -225,8 +253,12 @@ describe('StepUpProvider', () => {
   })
 
   it('shows an inline error and keeps the dialog open when the password is wrong', async () => {
-    const action = mock(async () => { throw new Error('step_up_required') })
-    globalThis.fetch = mock(async () => jsonResponse({ error: 'Invalid password' }, 401)) as typeof fetch
+    const action = mock(async () => {
+      throw new Error('step_up_required')
+    })
+    globalThis.fetch = mock(async () =>
+      jsonResponse({ error: 'Invalid password' }, 401),
+    ) as typeof fetch
 
     render(
       <StepUpProvider>
@@ -238,7 +270,9 @@ describe('StepUpProvider', () => {
       expect(screen.getByTestId('step-up-dialog')).toBeTruthy()
     })
 
-    fireEvent.change(screen.getByTestId('step-up-password'), { target: { value: 'wrong-password' } })
+    fireEvent.change(screen.getByTestId('step-up-password'), {
+      target: { value: 'wrong-password' },
+    })
     fireEvent.click(screen.getByTestId('step-up-confirm'))
 
     await waitFor(() => {

@@ -1,8 +1,5 @@
 import { describe, expect, it } from 'bun:test'
-import {
-  frameworkColorClassId,
-  generateFrameworkColorUtilityClasses,
-} from '@core/framework'
+import { frameworkColorClassId, generateFrameworkColorUtilityClasses } from '@core/framework'
 import { buildDefaultSpacingSettings, buildDefaultTypographySettings } from '@core/framework'
 import {
   buildFrameworkPlan,
@@ -122,7 +119,13 @@ describe('framework generation facade', () => {
     const settings = {
       colors: {
         tokens: [
-          { ...colors.tokens[0], id: 'tok-a', slug: 'Primary Color', darkModeEnabled: true, order: 0 },
+          {
+            ...colors.tokens[0],
+            id: 'tok-a',
+            slug: 'Primary Color',
+            darkModeEnabled: true,
+            order: 0,
+          },
           { ...colors.tokens[0], id: 'tok-b', slug: 'Primary_Color', order: 1 },
         ],
       },

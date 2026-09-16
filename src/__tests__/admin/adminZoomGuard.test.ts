@@ -29,14 +29,18 @@ describe('AdminZoomGuard', () => {
     expect(dispatchCancelableDocumentEvent('wheel', { metaKey: true }).defaultPrevented).toBe(true)
     expect(dispatchCancelableDocumentEvent('gesturestart').defaultPrevented).toBe(true)
     expect(dispatchCancelableDocumentEvent('gesturechange').defaultPrevented).toBe(true)
-    expect(dispatchCancelableDocumentEvent('touchmove', { touches: [{}, {}] }).defaultPrevented).toBe(true)
+    expect(
+      dispatchCancelableDocumentEvent('touchmove', { touches: [{}, {}] }).defaultPrevented,
+    ).toBe(true)
   })
 
   it('leaves ordinary wheel and one-finger touch scrolling alone', () => {
     cleanup = installAdminZoomGuard(document)
 
     expect(dispatchCancelableDocumentEvent('wheel').defaultPrevented).toBe(false)
-    expect(dispatchCancelableDocumentEvent('touchmove', { touches: [{}] }).defaultPrevented).toBe(false)
+    expect(dispatchCancelableDocumentEvent('touchmove', { touches: [{}] }).defaultPrevented).toBe(
+      false,
+    )
   })
 
   it('disables native pinch zoom in the admin root while allowing touch pan', () => {

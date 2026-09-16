@@ -121,7 +121,7 @@ export function prewarmedLazy<TProps extends object = Record<string, unknown>>(
         if (loadGeneration !== generation) return
         // Accept either `{ default: Component }` or a bare component.
         const exported = (mod as { default?: ComponentType<TProps> }).default
-        cached = (exported ?? (mod as unknown as ComponentType<TProps>))
+        cached = exported ?? (mod as unknown as ComponentType<TProps>)
         pending = null
       })
       .catch((err: unknown) => {

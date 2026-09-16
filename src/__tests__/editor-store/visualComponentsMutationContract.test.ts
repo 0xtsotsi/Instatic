@@ -71,11 +71,15 @@ describe('Visual Component actions use the SiteDocument mutation contract', () =
         useEditorStore.getState().createVisualComponent('Hero')
       },
       () => {
-        expect(useEditorStore.getState().site!.visualComponents.map((vc) => vc.name)).toContain('Hero')
+        expect(useEditorStore.getState().site!.visualComponents.map((vc) => vc.name)).toContain(
+          'Hero',
+        )
       },
     )
 
-    expect(useEditorStore.getState().site!.visualComponents.map((vc) => vc.name)).not.toContain('Hero')
+    expect(useEditorStore.getState().site!.visualComponents.map((vc) => vc.name)).not.toContain(
+      'Hero',
+    )
   })
 
   it('renameVisualComponent is dirty and undoable', () => {
@@ -101,11 +105,15 @@ describe('Visual Component actions use the SiteDocument mutation contract', () =
         useEditorStore.getState().addParam('vc-card', 'subtitle', 'string', '')
       },
       () => {
-        expect(useEditorStore.getState().site!.visualComponents[0].params.map((p) => p.name)).toContain('subtitle')
+        expect(
+          useEditorStore.getState().site!.visualComponents[0].params.map((p) => p.name),
+        ).toContain('subtitle')
       },
     )
 
-    expect(useEditorStore.getState().site!.visualComponents[0].params.map((p) => p.name)).not.toContain('subtitle')
+    expect(
+      useEditorStore.getState().site!.visualComponents[0].params.map((p) => p.name),
+    ).not.toContain('subtitle')
   })
 
   it('addNodeToVc is dirty and undoable', () => {
@@ -113,18 +121,20 @@ describe('Visual Component actions use the SiteDocument mutation contract', () =
 
     expectMutationContract(
       () => {
-        useEditorStore.getState().addNodeToVc(
-          'vc-card',
-          'vc-root',
-          makeVCNode({ id: 'vc-text', moduleId: 'base.text' }),
-        )
+        useEditorStore
+          .getState()
+          .addNodeToVc('vc-card', 'vc-root', makeVCNode({ id: 'vc-text', moduleId: 'base.text' }))
       },
       () => {
-        expect(useEditorStore.getState().site!.visualComponents[0].tree.nodes['vc-text']).toBeDefined()
+        expect(
+          useEditorStore.getState().site!.visualComponents[0].tree.nodes['vc-text'],
+        ).toBeDefined()
       },
     )
 
-    expect(useEditorStore.getState().site!.visualComponents[0].tree.nodes['vc-text']).toBeUndefined()
+    expect(
+      useEditorStore.getState().site!.visualComponents[0].tree.nodes['vc-text'],
+    ).toBeUndefined()
   })
 
   it('setNodePropBinding and clearNodePropBinding are dirty and undoable in VC mode', () => {
@@ -137,12 +147,15 @@ describe('Visual Component actions use the SiteDocument mutation contract', () =
       },
       () => {
         expect(
-          useEditorStore.getState().site!.visualComponents[0].tree.nodes['vc-root'].propBindings?.text?.paramId,
+          useEditorStore.getState().site!.visualComponents[0].tree.nodes['vc-root'].propBindings
+            ?.text?.paramId,
         ).toBe('param-title')
       },
     )
 
-    expect(useEditorStore.getState().site!.visualComponents[0].tree.nodes['vc-root'].propBindings).toBeUndefined()
+    expect(
+      useEditorStore.getState().site!.visualComponents[0].tree.nodes['vc-root'].propBindings,
+    ).toBeUndefined()
 
     useEditorStore.getState().setNodePropBinding('vc-root', 'text', 'param-title')
     useEditorStore.setState({
@@ -158,12 +171,15 @@ describe('Visual Component actions use the SiteDocument mutation contract', () =
         useEditorStore.getState().clearNodePropBinding('vc-root', 'text')
       },
       () => {
-        expect(useEditorStore.getState().site!.visualComponents[0].tree.nodes['vc-root'].propBindings).toEqual({})
+        expect(
+          useEditorStore.getState().site!.visualComponents[0].tree.nodes['vc-root'].propBindings,
+        ).toEqual({})
       },
     )
 
     expect(
-      useEditorStore.getState().site!.visualComponents[0].tree.nodes['vc-root'].propBindings?.text?.paramId,
+      useEditorStore.getState().site!.visualComponents[0].tree.nodes['vc-root'].propBindings?.text
+        ?.paramId,
     ).toBe('param-title')
   })
 
@@ -183,12 +199,16 @@ describe('Visual Component actions use the SiteDocument mutation contract', () =
         useEditorStore.getState().convertNodeToComponent('text-1', 'Text Card')
       },
       () => {
-        expect(useEditorStore.getState().site!.visualComponents.map((vc) => vc.name)).toContain('Text Card')
+        expect(useEditorStore.getState().site!.visualComponents.map((vc) => vc.name)).toContain(
+          'Text Card',
+        )
         expect(useEditorStore.getState().site!.pages[0].nodes['text-1']).toBeUndefined()
       },
     )
 
-    expect(useEditorStore.getState().site!.visualComponents.map((vc) => vc.name)).not.toContain('Text Card')
+    expect(useEditorStore.getState().site!.visualComponents.map((vc) => vc.name)).not.toContain(
+      'Text Card',
+    )
     expect(useEditorStore.getState().site!.pages[0].nodes['text-1']).toBeDefined()
   })
 })

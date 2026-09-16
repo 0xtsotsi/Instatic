@@ -141,9 +141,9 @@ describe('moveNode', () => {
   it('moves a node to a new parent', () => {
     const page = makePage()
     const rootId = page.rootNodeId
-    const aId = addChildToPage(page, rootId)   // container A
-    const bId = addChildToPage(page, rootId)   // container B
-    const childId = addChildToPage(page, aId)  // child of A
+    const aId = addChildToPage(page, rootId) // container A
+    const bId = addChildToPage(page, rootId) // container B
+    const childId = addChildToPage(page, aId) // child of A
 
     moveNode(page, childId, bId, 0)
     expect(page.nodes[aId].children).not.toContain(childId)

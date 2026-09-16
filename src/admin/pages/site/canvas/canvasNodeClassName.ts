@@ -7,8 +7,7 @@ export function getCanvasNodeClassIds(
   nodeId: string,
 ): readonly string[] | undefined {
   const previewClassId =
-    previewClassAssignment?.nodeId === nodeId &&
-    !classIds?.includes(previewClassAssignment.classId)
+    previewClassAssignment?.nodeId === nodeId && !classIds?.includes(previewClassAssignment.classId)
       ? previewClassAssignment.classId
       : null
 

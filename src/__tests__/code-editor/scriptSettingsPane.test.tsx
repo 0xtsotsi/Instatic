@@ -21,14 +21,16 @@ function resetStore() {
       pages: [home],
       packageJson,
       runtime,
-      files: [{
-        id: 'script-1',
-        path: 'src/scripts/celebrate.ts',
-        type: 'script',
-        content: `import confetti from 'canvas-confetti'`,
-        createdAt: 1,
-        updatedAt: 1,
-      }],
+      files: [
+        {
+          id: 'script-1',
+          path: 'src/scripts/celebrate.ts',
+          type: 'script',
+          content: `import confetti from 'canvas-confetti'`,
+          createdAt: 1,
+          updatedAt: 1,
+        },
+      ],
     }),
     packageJson,
     siteRuntime: runtime,
@@ -95,18 +97,21 @@ describe('Script runtime settings pane', () => {
   })
 
   it('does not run package import analysis for classic scripts', () => {
-    useEditorStore.setState((state) => ({
-      siteRuntime: {
-        ...state.siteRuntime,
-        scripts: {
-          ...state.siteRuntime.scripts,
-          'script-1': {
-            ...state.siteRuntime.scripts['script-1'],
-            format: 'classic',
+    useEditorStore.setState(
+      (state) =>
+        ({
+          siteRuntime: {
+            ...state.siteRuntime,
+            scripts: {
+              ...state.siteRuntime.scripts,
+              'script-1': {
+                ...state.siteRuntime.scripts['script-1'],
+                format: 'classic',
+              },
+            },
           },
-        },
-      },
-    }) as Parameters<typeof useEditorStore.setState>[0])
+        }) as Parameters<typeof useEditorStore.setState>[0],
+    )
 
     render(<CodeEditorPanel />)
 
@@ -114,22 +119,27 @@ describe('Script runtime settings pane', () => {
   })
 
   it('does not render for stylesheets', () => {
-    useEditorStore.setState((state) => ({
-      site: state.site
-        ? {
-            ...state.site,
-            files: [{
-              id: 'style-1',
-              path: 'src/styles/theme.css',
-              type: 'style',
-              content: '',
-              createdAt: 1,
-              updatedAt: 1,
-            }],
-          }
-        : state.site,
-      activeEditorFileId: 'style-1',
-    }) as Parameters<typeof useEditorStore.setState>[0])
+    useEditorStore.setState(
+      (state) =>
+        ({
+          site: state.site
+            ? {
+                ...state.site,
+                files: [
+                  {
+                    id: 'style-1',
+                    path: 'src/styles/theme.css',
+                    type: 'style',
+                    content: '',
+                    createdAt: 1,
+                    updatedAt: 1,
+                  },
+                ],
+              }
+            : state.site,
+          activeEditorFileId: 'style-1',
+        }) as Parameters<typeof useEditorStore.setState>[0],
+    )
 
     render(<CodeEditorPanel />)
 

@@ -29,9 +29,9 @@ import styles from './controls.module.css'
 
 // Lazy so the media-picker stack only loads when the user opens it.
 const MediaPickerModal = lazy(() =>
-  import('@admin/pages/media/components/MediaPickerModal/MediaPickerModal').then(
-    (m) => ({ default: m.MediaPickerModal }),
-  ),
+  import('@admin/pages/media/components/MediaPickerModal/MediaPickerModal').then((m) => ({
+    default: m.MediaPickerModal,
+  })),
 )
 
 const SVG_MIME = 'image/svg+xml'
@@ -121,7 +121,10 @@ export function SvgControl({
             variant="secondary"
             size="sm"
             disabled={disabled || loading}
-            onClick={() => { setError(''); setPickerOpen(true) }}
+            onClick={() => {
+              setError('')
+              setPickerOpen(true)
+            }}
           >
             <ImageSolidIcon size={14} color="currentColor" />
             {loading ? 'Loading…' : 'From library'}
@@ -139,7 +142,9 @@ export function SvgControl({
         </div>
 
         {error ? (
-          <span className={styles.svgError} role="alert">{error}</span>
+          <span className={styles.svgError} role="alert">
+            {error}
+          </span>
         ) : null}
       </div>
 

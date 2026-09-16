@@ -21,7 +21,9 @@ const AgentPanel = lazy(() =>
   import('@site/panels/AgentPanel').then((module) => ({ default: module.AgentPanel })),
 )
 
-function selectActiveLeftSidebarPanel(state: ReturnType<typeof useEditorStore.getState>): LeftSidebarPanelId | null {
+function selectActiveLeftSidebarPanel(
+  state: ReturnType<typeof useEditorStore.getState>,
+): LeftSidebarPanelId | null {
   // A plugin panel takes precedence over the built-in `*PanelOpen` flags;
   // the LeftSidebar reads `activePluginPanelId` separately and shows the
   // plugin mount when set.
@@ -99,9 +101,11 @@ export function LeftSidebar({
       data-testid="left-sidebar"
       data-expanded={panelExpanded ? 'true' : 'false'}
       data-rail-only={railOnly ? 'true' : undefined}
-      data-active-panel={effectivePluginPanelId !== null
-        ? `plugin:${effectivePluginPanelId}`
-        : effectiveActivePanel ?? 'none'}
+      data-active-panel={
+        effectivePluginPanelId !== null
+          ? `plugin:${effectivePluginPanelId}`
+          : (effectiveActivePanel ?? 'none')
+      }
       style={style}
     >
       <PanelRail
@@ -112,47 +116,44 @@ export function LeftSidebar({
       />
 
       <FrameworkChangeConfirmProvider>
-      <VCDeletionConfirmProvider>
-        <div
-          className={styles.panelSlot}
-          data-testid="left-sidebar-panel-slot"
-          inert={panelExpanded ? undefined : true}
-        >
-          {/* Read-only-safe panels — always rendered for any role with
+        <VCDeletionConfirmProvider>
+          <div
+            className={styles.panelSlot}
+            data-testid="left-sidebar-panel-slot"
+            inert={panelExpanded ? undefined : true}
+          >
+            {/* Read-only-safe panels — always rendered for any role with
               `site.read`. These are navigation/inspection surfaces, not
               editing tools; each respects its own read-only state internally
               (e.g. TreeNode disables drag + context menu via `editable`). */}
-          <div className={styles.panelMount} hidden={effectiveActivePanel !== 'explorer'}>
-            <ExplorerPanel editable={editable} />
-          </div>
-          {/* Editor-only panels — only mounted when the caller can perform
+            <div className={styles.panelMount} hidden={effectiveActivePanel !== 'explorer'}>
+              <ExplorerPanel editable={editable} />
+            </div>
+            {/* Editor-only panels — only mounted when the caller can perform
               structural edits. Mounting them for non-editors would expose
               actions (style edits, framework token changes, plugin panels)
               they have no capability to commit. */}
-          {editable && (
-            <>
-              <div className={styles.panelMount} hidden={effectiveActivePanel !== 'selectors'}>
-                <SelectorsPanel variant="docked" />
-              </div>
-              <div className={styles.panelMount} hidden={effectiveActivePanel !== 'framework'}>
-                <FrameworkPanel />
-              </div>
-              <div className={styles.panelMount} hidden={effectiveActivePanel !== 'dependencies'}>
-                <DependenciesPanel variant="docked" />
-              </div>
-              {effectivePluginPanelId !== null && (
-                <div
-                  className={styles.panelMount}
-                  data-testid="left-sidebar-plugin-panel-mount"
-                >
-                  <PluginEditorPanel panelId={effectivePluginPanelId} />
+            {editable && (
+              <>
+                <div className={styles.panelMount} hidden={effectiveActivePanel !== 'selectors'}>
+                  <SelectorsPanel variant="docked" />
                 </div>
-              )}
-            </>
-          )}
-          {canUseAiChat && (
-            <div className={styles.panelMount} hidden={effectiveActivePanel !== 'agent'}>
-              {/* Inject the site editor's store API so AgentPanel +
+                <div className={styles.panelMount} hidden={effectiveActivePanel !== 'framework'}>
+                  <FrameworkPanel />
+                </div>
+                <div className={styles.panelMount} hidden={effectiveActivePanel !== 'dependencies'}>
+                  <DependenciesPanel variant="docked" />
+                </div>
+                {effectivePluginPanelId !== null && (
+                  <div className={styles.panelMount} data-testid="left-sidebar-plugin-panel-mount">
+                    <PluginEditorPanel panelId={effectivePluginPanelId} />
+                  </div>
+                )}
+              </>
+            )}
+            {canUseAiChat && (
+              <div className={styles.panelMount} hidden={effectiveActivePanel !== 'agent'}>
+                {/* Inject the site editor's store API so AgentPanel +
                   ModelPicker + ConversationHistory read agent state
                   from useEditorStore. The same components are mounted
                   in ContentPage with a different store.
@@ -162,16 +163,16 @@ export function LeftSidebar({
                   the store API here, never call it as a hook in this
                   file. The React-Compiler rule keys on the identifier
                   prefix and can't see through the dual API. */}
-              {/* eslint-disable-next-line react-compiler/react-compiler */}
-              <AgentStoreProvider store={useEditorStore}>
-                <Suspense fallback={null}>
-                  <AgentPanel variant="docked" />
-                </Suspense>
-              </AgentStoreProvider>
-            </div>
-          )}
-        </div>
-      </VCDeletionConfirmProvider>
+                {/* eslint-disable-next-line react-compiler/react-compiler */}
+                <AgentStoreProvider store={useEditorStore}>
+                  <Suspense fallback={null}>
+                    <AgentPanel variant="docked" />
+                  </Suspense>
+                </AgentStoreProvider>
+              </div>
+            )}
+          </div>
+        </VCDeletionConfirmProvider>
       </FrameworkChangeConfirmProvider>
 
       {panelExpanded && (

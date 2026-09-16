@@ -27,12 +27,12 @@ import { ArrowRightIcon } from 'pixel-art-icons/icons/arrow-right'
 import type { PixelArtIconComponent } from '@core/dashboard'
 import type { FrameworkColorToken, FrameworkSpacingGroup } from '@core/framework-schema'
 import type { FontEntry, FontToken } from '@core/fonts'
+import { fontFamilyStackForEntry, resolveFontTokenStack, sortFontTokens } from '@core/fonts'
 import {
-  fontFamilyStackForEntry,
-  resolveFontTokenStack,
-  sortFontTokens,
-} from '@core/fonts'
-import { computeFluidScale, effectiveScaleRatio, resolveFrameworkPreferences } from '@core/framework'
+  computeFluidScale,
+  effectiveScaleRatio,
+  resolveFrameworkPreferences,
+} from '@core/framework'
 import { SpacingBarChart, type ChartPoint } from '@site/panels/SpacingPanel'
 import type { FrameworkPanelTab } from '@site/store/slices/uiSlice'
 import styles from './FrameworkHome.module.css'
@@ -213,7 +213,10 @@ function buildSpacingChartPoints(
   preferencesRaw: Parameters<typeof resolveFrameworkPreferences>[0],
 ): ChartPoint[] | null {
   if (!group) return null
-  const stepLabels = group.steps.split(',').map((step) => step.trim()).filter(Boolean)
+  const stepLabels = group.steps
+    .split(',')
+    .map((step) => step.trim())
+    .filter(Boolean)
   if (stepLabels.length === 0) return null
 
   const preferences = resolveFrameworkPreferences(preferencesRaw)

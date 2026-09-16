@@ -53,8 +53,7 @@ export function GridTrackControl({
   onClear,
 }: GridTrackControlProps) {
   const presetN = parseGridRepeat(value)
-  const isPreset =
-    presetN != null && (GRID_PRESETS as ReadonlyArray<number>).includes(presetN)
+  const isPreset = presetN != null && (GRID_PRESETS as ReadonlyArray<number>).includes(presetN)
   const isCustomValue = value != null && value !== '' && !isPreset
 
   // Local state for the inline text-input edit mode.

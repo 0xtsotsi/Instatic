@@ -15,10 +15,7 @@ import type { DashboardWidgetRendererProps } from '@core/dashboard'
 import { UserAvatar } from '@admin/shared/UserAvatar'
 import { Widget } from '@ui/components/Widget'
 import { cn } from '@ui/cn'
-import {
-  useRecentActivityStats,
-  type DashboardActivityEntry,
-} from '../hooks/useDashboardStats'
+import { useRecentActivityStats, type DashboardActivityEntry } from '../hooks/useDashboardStats'
 import styles from './widgets.module.css'
 
 /**
@@ -177,27 +174,28 @@ export function ActivityWidget({ span, editing }: DashboardWidgetRendererProps) 
       <div className={styles.feed}>
         {isEmpty && (
           <p className={cn(styles.feedTime, styles.feedEmpty)}>
-            Nothing has happened yet — edits, publishes, and plugin changes
-            will appear here.
+            Nothing has happened yet — edits, publishes, and plugin changes will appear here.
           </p>
         )}
-        {!isLoading && !isEmpty && rows.map((r) => (
-          <div key={r.id} className={styles.feedRow}>
-            {r.actor ? (
-              <UserAvatar
-                user={r.actor}
-                size={AVATAR_SIZE}
-                alt={`Avatar for ${r.actor.displayName || r.actor.email}`}
-              />
-            ) : (
-              <span className={styles.feedSystemAvatar} title="System" aria-hidden="true">
-                <SettingsCogSolidIcon size={12} />
-              </span>
-            )}
-            <span className={styles.feedBody}>{renderBody(r)}</span>
-            <span className={styles.feedTime}>{formatRelative(r.createdAt)}</span>
-          </div>
-        ))}
+        {!isLoading &&
+          !isEmpty &&
+          rows.map((r) => (
+            <div key={r.id} className={styles.feedRow}>
+              {r.actor ? (
+                <UserAvatar
+                  user={r.actor}
+                  size={AVATAR_SIZE}
+                  alt={`Avatar for ${r.actor.displayName || r.actor.email}`}
+                />
+              ) : (
+                <span className={styles.feedSystemAvatar} title="System" aria-hidden="true">
+                  <SettingsCogSolidIcon size={12} />
+                </span>
+              )}
+              <span className={styles.feedBody}>{renderBody(r)}</span>
+              <span className={styles.feedTime}>{formatRelative(r.createdAt)}</span>
+            </div>
+          ))}
       </div>
     </Widget>
   )

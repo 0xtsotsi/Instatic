@@ -15,10 +15,7 @@
  */
 import type { TSchema, Static } from '@sinclair/typebox'
 import { parseJsonResponse } from '@core/utils/jsonValidate'
-import type {
-  PluginAdminAppComponent,
-  PluginAdminPageRoute,
-} from '@core/plugin-sdk'
+import type { PluginAdminAppComponent, PluginAdminPageRoute } from '@core/plugin-sdk'
 import { withPluginCacheBuster } from './cacheBuster'
 
 type FetchLike = (input: RequestInfo | URL, init?: RequestInit) => Promise<Response>
@@ -34,7 +31,9 @@ type LoadedAdminAppModule = { default: PluginAdminAppComponent }
 export type PluginAdminAppImport = (url: string, cacheKey?: string) => Promise<LoadedAdminAppModule>
 
 const defaultImportModule: PluginAdminAppImport = async (url, cacheKey) =>
-  await import(/* @vite-ignore */ withPluginCacheBuster(url, cacheKey ?? '')) as LoadedAdminAppModule
+  (await import(
+    /* @vite-ignore */ withPluginCacheBuster(url, cacheKey ?? '')
+  )) as LoadedAdminAppModule
 
 function pluginAdminAssetUrl(assetPath: string, entrypoint: string): string {
   return `${assetPath.replace(/\/+$/g, '')}/${entrypoint.replace(/^\/+/g, '')}`
@@ -102,7 +101,7 @@ export async function loadPluginAdminAppComponent(
   if (!page.pluginGrantedPermissions.includes('editor.code')) {
     throw new Error(
       `Plugin admin app "${page.pluginId}:${page.id}" requires the "editor.code" permission, ` +
-      `which is not granted. App pages run unsandboxed in the admin window.`,
+        `which is not granted. App pages run unsandboxed in the admin window.`,
     )
   }
   if (!page.content.assetPath) {

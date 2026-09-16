@@ -92,22 +92,17 @@ export function ComponentParamsOverview({ vc }: ComponentParamsOverviewProps) {
 
       {/* ── Content ──────────────────────────────────────────────────────── */}
       {vc.params.length === 0 ? (
-        <EmptyState
-          plain
-          compact
-          title="Promote a property to create your first param."
-        />
+        <EmptyState plain compact title="Promote a property to create your first param." />
       ) : (
         <ul className={styles.paramList} aria-label="Component params">
           {vc.params.map((param) => {
             const origin = findParamOrigin(vc, param.id)
-            const originNode = origin ? vc.tree.nodes[origin.nodeId] ?? null : null
+            const originNode = origin ? (vc.tree.nodes[origin.nodeId] ?? null) : null
             const moduleName = originNode
-              ? (originNode.label || registry.get(originNode.moduleId)?.name || originNode.moduleId)
+              ? originNode.label || registry.get(originNode.moduleId)?.name || originNode.moduleId
               : null
-            const sourceLabel = origin && moduleName
-              ? `from ${moduleName}.${origin.propKey}`
-              : 'from —'
+            const sourceLabel =
+              origin && moduleName ? `from ${moduleName}.${origin.propKey}` : 'from —'
 
             return (
               <li key={param.id} className={styles.paramItem}>

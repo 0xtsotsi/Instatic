@@ -46,11 +46,7 @@ function defaultFormat(value: number): string {
   return `${(value / 1024).toFixed(2)} GB`
 }
 
-export function StackedBar({
-  segments,
-  total,
-  formatValue = defaultFormat,
-}: StackedBarProps) {
+export function StackedBar({ segments, total, formatValue = defaultFormat }: StackedBarProps) {
   const used = segments.reduce((s, x) => s + x.value, 0)
   const remaining = Math.max(0, total - used)
 

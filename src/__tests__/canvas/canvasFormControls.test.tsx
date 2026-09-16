@@ -8,7 +8,11 @@ import { waitForCanvasNodeInFrame } from './iframeCanvasQuery'
 import '@modules/base'
 
 function renderCanvas() {
-  return render(<DndContext><CanvasRoot /></DndContext>)
+  return render(
+    <DndContext>
+      <CanvasRoot />
+    </DndContext>,
+  )
 }
 
 beforeEach(() => {
@@ -35,25 +39,41 @@ describe('canvas form controls', () => {
   it('prevents native form-control activation while preserving canvas node selection', async () => {
     const site = useEditorStore.getState().createSite('Form Controls')
     const page = site.pages[0]!
-    const formId = useEditorStore.getState().insertNode('base.form', {
-      mode: 'cms',
-      formId: 'contact',
-      targetTableId: '',
-    }, page.rootNodeId)
-    const inputId = useEditorStore.getState().insertNode('base.input', {
-      inputType: 'email',
-      name: 'email',
-      id: 'email',
-      autocomplete: 'email',
-    }, formId)
-    const selectId = useEditorStore.getState().insertNode('base.select', {
-      name: 'plan',
-      id: 'plan',
-    }, formId)
-    const submitId = useEditorStore.getState().insertNode('base.submit', {
-      label: 'Send',
-      formId: '',
-    }, formId)
+    const formId = useEditorStore.getState().insertNode(
+      'base.form',
+      {
+        mode: 'cms',
+        formId: 'contact',
+        targetTableId: '',
+      },
+      page.rootNodeId,
+    )
+    const inputId = useEditorStore.getState().insertNode(
+      'base.input',
+      {
+        inputType: 'email',
+        name: 'email',
+        id: 'email',
+        autocomplete: 'email',
+      },
+      formId,
+    )
+    const selectId = useEditorStore.getState().insertNode(
+      'base.select',
+      {
+        name: 'plan',
+        id: 'plan',
+      },
+      formId,
+    )
+    const submitId = useEditorStore.getState().insertNode(
+      'base.submit',
+      {
+        label: 'Send',
+        formId: '',
+      },
+      formId,
+    )
 
     renderCanvas()
 

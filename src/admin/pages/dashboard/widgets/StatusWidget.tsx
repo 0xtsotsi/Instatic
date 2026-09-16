@@ -7,7 +7,11 @@ import type { DashboardWidgetRendererProps } from '@core/dashboard'
 import { Widget } from '@ui/components/Widget'
 import styles from './widgets.module.css'
 
-interface Row { label: string; value: string; tone: 'green' | 'amber' }
+interface Row {
+  label: string
+  value: string
+  tone: 'green' | 'amber'
+}
 
 const ROWS: readonly Row[] = [
   { label: 'Site', value: 'Live', tone: 'green' },
@@ -30,7 +34,9 @@ export function StatusWidget({ span, editing }: DashboardWidgetRendererProps) {
         {ROWS.map((r) => (
           <div key={r.label} className={styles.statusRow}>
             <span className={styles.statusLabel}>
-              <span className={`${styles.dot} ${r.tone === 'green' ? styles.dotGreen : styles.dotAmber}`} />
+              <span
+                className={`${styles.dot} ${r.tone === 'green' ? styles.dotGreen : styles.dotAmber}`}
+              />
               {r.label}
             </span>
             <span className={styles.wlistMeta}>{r.value}</span>

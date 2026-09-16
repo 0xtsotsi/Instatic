@@ -45,7 +45,7 @@ describe('media migration invariants', () => {
     // The executor must use `dispatchUpload` — not raw fetch or a
     // hand-rolled call to the registry. That keeps the abortWrite path
     // wired and orphan-cleanup honest.
-    expect(source).toContain("dispatchUpload(args.db, {")
+    expect(source).toContain('dispatchUpload(args.db, {')
     expect(source).toMatch(/from\s+['"]\.\/mediaUploadDispatch['"]/)
   })
 

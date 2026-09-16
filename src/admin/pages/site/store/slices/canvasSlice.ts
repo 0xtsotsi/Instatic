@@ -1,11 +1,5 @@
 import type { EditorStoreSliceCreator } from '@site/store/types'
-import {
-  INITIAL_ZOOM,
-  RESET_ZOOM,
-  clampZoom,
-  clampPan,
-  nearestZoomStep,
-} from '@site/canvas/math'
+import { INITIAL_ZOOM, RESET_ZOOM, clampZoom, clampPan, nearestZoomStep } from '@site/canvas/math'
 
 type CanvasMode = 'select' | 'pan' | 'insert'
 
@@ -137,11 +131,12 @@ export const createCanvasSlice: EditorStoreSliceCreator<CanvasSlice> = (set, get
 
   setPan: (panX, panY) => set({ panX: clampPan(panX), panY: clampPan(panY) }),
 
-  setCanvasTransform: (zoom, panX, panY) => set({
-    zoom: clampZoom(zoom),
-    panX: clampPan(panX),
-    panY: clampPan(panY),
-  }),
+  setCanvasTransform: (zoom, panX, panY) =>
+    set({
+      zoom: clampZoom(zoom),
+      panX: clampPan(panX),
+      panY: clampPan(panY),
+    }),
 
   // Picking a viewport switches editing back to that viewport's styles, so the
   // condition overlay is cleared.
@@ -157,15 +152,17 @@ export const createCanvasSlice: EditorStoreSliceCreator<CanvasSlice> = (set, get
 
   setRunScripts: (run) => set({ runScripts: run }),
 
-  toggleBreakpointCollapsed: (id) => set((s) => {
-    const idx = s.collapsedBreakpointIds.indexOf(id)
-    if (idx === -1) s.collapsedBreakpointIds.push(id)
-    else s.collapsedBreakpointIds.splice(idx, 1)
-  }),
+  toggleBreakpointCollapsed: (id) =>
+    set((s) => {
+      const idx = s.collapsedBreakpointIds.indexOf(id)
+      if (idx === -1) s.collapsedBreakpointIds.push(id)
+      else s.collapsedBreakpointIds.splice(idx, 1)
+    }),
 
-  setAgentSnapshotCaptureRequest: (agentSnapshotCaptureRequest) => set({
-    agentSnapshotCaptureRequest,
-  }),
+  setAgentSnapshotCaptureRequest: (agentSnapshotCaptureRequest) =>
+    set({
+      agentSnapshotCaptureRequest,
+    }),
 
   resetView: () => set({ zoom: RESET_ZOOM, panX: 0, panY: 0 }),
 

@@ -43,7 +43,10 @@ const PROPERTY_KEYMAP = {
   'column-gap': 'columnGap',
 } satisfies Record<string, keyof CSSPropertyBag | readonly (keyof CSSPropertyBag)[]>
 
-const spacingModule = createFrameworkScaleModule<FrameworkSpacingGroup, FrameworkSpacingClassGenerator>({
+const spacingModule = createFrameworkScaleModule<
+  FrameworkSpacingGroup,
+  FrameworkSpacingClassGenerator
+>({
   family: 'spacing',
   getMinBaseSize: (group) => group.min.size,
   getMaxBaseSize: (group) => group.max.size,

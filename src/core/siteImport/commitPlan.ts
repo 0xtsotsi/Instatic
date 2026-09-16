@@ -45,8 +45,10 @@ export async function commitImportPlan(
 
   // ── Step B: rewrite plan URLs + install Google fonts ──────────────────────
   const rewrittenPlan = applyAssetRewrites(plan, rewriteMap)
-  const { installedGoogleFonts, warnings: fontInstallWarnings } =
-    await installPlanGoogleFonts(rewrittenPlan, adapter)
+  const { installedGoogleFonts, warnings: fontInstallWarnings } = await installPlanGoogleFonts(
+    rewrittenPlan,
+    adapter,
+  )
 
   // ── Step C: commit pages + style rules (single atomic transaction) ────────
   // Conflict resolution lookup maps (source → resolution).
@@ -294,9 +296,7 @@ function commitStyleRules(
   results: CommitResults,
 ): void {
   for (const rule of plan.styleRules) {
-    const conflict = rule.kind === 'class'
-      ? ruleConflictsByName.get(rule.name)
-      : undefined
+    const conflict = rule.kind === 'class' ? ruleConflictsByName.get(rule.name) : undefined
     const resolution = conflict?.defaultResolution
 
     if (resolution?.action === 'skip') continue

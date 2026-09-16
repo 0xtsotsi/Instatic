@@ -220,7 +220,9 @@ describe('Data table context menu', () => {
       screen.getByTestId('data-left-sidebar').style.getPropertyValue('--left-sidebar-panel-width'),
     ).toBe('0px')
     expect(
-      screen.getByTestId('data-left-sidebar').style.getPropertyValue('--left-sidebar-panel-layout-width'),
+      screen
+        .getByTestId('data-left-sidebar')
+        .style.getPropertyValue('--left-sidebar-panel-layout-width'),
     ).toBe('320px')
   })
 

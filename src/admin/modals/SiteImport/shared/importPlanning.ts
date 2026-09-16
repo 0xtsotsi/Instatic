@@ -28,7 +28,9 @@ import { useEditorStore } from '@site/store/store'
 import { getErrorMessage } from '@core/utils/errorMessage'
 
 /** Stable map key for a token conflict — the colour/font namespaces are joined. */
-export function tokenConflictKey(conflict: Pick<TokenConflict, 'kind' | 'desiredVariable'>): string {
+export function tokenConflictKey(
+  conflict: Pick<TokenConflict, 'kind' | 'desiredVariable'>,
+): string {
   return `${conflict.kind}:${conflict.desiredVariable}`
 }
 
@@ -41,11 +43,11 @@ export function crossSheetConflictKey(
 
 /** Which import categories the user has selected to commit, keyed per kind. */
 export interface ImportSelection {
-  pagesIncluded: Set<string>       // by source path
-  styleRulesIncluded: Set<number>  // by index in plan.styleRules
-  assetsIncluded: Set<string>      // by sourcePath
-  fontsIncluded: Set<string>       // by font family
-  scriptsIncluded: Set<string>     // by script path
+  pagesIncluded: Set<string> // by source path
+  styleRulesIncluded: Set<number> // by index in plan.styleRules
+  assetsIncluded: Set<string> // by sourcePath
+  fontsIncluded: Set<string> // by font family
+  scriptsIncluded: Set<string> // by script path
   stylesheetsIncluded: Set<string> // by kept-stylesheet path (mode 'file')
 }
 
@@ -66,7 +68,9 @@ export function makeDefaultSelection(plan: ImportPlan): ImportSelection {
 
 /** Narrow a plan to only the categories the user kept selected. */
 export function filterPlanBySelection(plan: ImportPlan, selection: ImportSelection): ImportPlan {
-  const fontTokens = plan.fontTokens.filter((t) => !t.family || selection.fontsIncluded.has(t.family))
+  const fontTokens = plan.fontTokens.filter(
+    (t) => !t.family || selection.fontsIncluded.has(t.family),
+  )
   // A font-token conflict is only relevant when its token survived selection
   // filtering (a deselected font drops its token, so its conflict row is moot).
   // Colour-token conflicts always stand — colours aren't individually toggled.
@@ -132,10 +136,11 @@ export function buildResolvedPlan(
     ...c,
     defaultResolution: tokenResMap.get(tokenConflictKey(c)) ?? c.defaultResolution,
   }))
-  const updatedCrossSheetConflicts: CrossSheetClassConflict[] = plan.conflicts.crossSheetClasses.map((c) => ({
-    ...c,
-    defaultResolution: crossSheetResMap.get(crossSheetConflictKey(c)) ?? c.defaultResolution,
-  }))
+  const updatedCrossSheetConflicts: CrossSheetClassConflict[] =
+    plan.conflicts.crossSheetClasses.map((c) => ({
+      ...c,
+      defaultResolution: crossSheetResMap.get(crossSheetConflictKey(c)) ?? c.defaultResolution,
+    }))
   return applyConflictResolutions(
     {
       ...plan,
@@ -161,10 +166,14 @@ function formatByteLimit(bytes: number): string {
 
 /** Turn an ingest-stage error into a human-readable message for the Drop step. */
 export function describeIngestError(err: unknown): string {
-  if (err instanceof EmptyImportError) return 'No importable files found. Drop at least one HTML or CSS file.'
-  if (err instanceof OversizeImportError) return `Import is too large (${Math.round(err.sizeBytes / 1024 / 1024)} MB). Maximum is ${formatByteLimit(err.limitBytes)}.`
-  if (err instanceof ZipBombError) return 'ZIP archive is too large when uncompressed. Maximum uncompressed size is 5 GB.'
-  if (err instanceof TooManyFilesError) return `Too many files (${err.count}). Maximum is ${err.limit}.`
+  if (err instanceof EmptyImportError)
+    return 'No importable files found. Drop at least one HTML or CSS file.'
+  if (err instanceof OversizeImportError)
+    return `Import is too large (${Math.round(err.sizeBytes / 1024 / 1024)} MB). Maximum is ${formatByteLimit(err.limitBytes)}.`
+  if (err instanceof ZipBombError)
+    return 'ZIP archive is too large when uncompressed. Maximum uncompressed size is 5 GB.'
+  if (err instanceof TooManyFilesError)
+    return `Too many files (${err.count}). Maximum is ${err.limit}.`
   if (err instanceof PathTraversalError) return `Unsafe path detected: "${err.path}".`
   return getErrorMessage(err, 'Unknown import error')
 }

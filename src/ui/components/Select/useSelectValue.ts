@@ -1,9 +1,5 @@
 import { useState } from 'react'
-import {
-  hasTextValue,
-  stringifySelectValue,
-  type NormalizedSelectOption,
-} from './SelectOption'
+import { hasTextValue, stringifySelectValue, type NormalizedSelectOption } from './SelectOption'
 
 interface UseSelectValueArgs {
   value: unknown
@@ -44,8 +40,7 @@ export function useSelectValue({
     ? rawSelectedValue
     : firstValue
   const selectedOption =
-    normalizedOptions.find((option) => option.value === selectedValue) ??
-    normalizedOptions[0]
+    normalizedOptions.find((option) => option.value === selectedValue) ?? normalizedOptions[0]
   const showPlaceholder = rawSelectedValue === '' && hasTextValue(placeholder)
   const selectedText = showPlaceholder ? '' : (selectedOption?.textValue ?? '')
 

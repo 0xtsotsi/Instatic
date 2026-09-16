@@ -41,24 +41,37 @@ export const BINDING_COMPATIBILITY: Record<PropertyControlKind, readonly DataFie
   // text accepts every scalar type that can be meaningfully rendered as a string.
   // multiSelect binds as a comma-joined list of selected option labels.
   // relation binds as the related row's primary-field display label.
-  text:     ['text', 'longText', 'richText', 'url', 'email', 'select', 'multiSelect', 'relation', 'number', 'boolean', 'date', 'dateTime'],
+  text: [
+    'text',
+    'longText',
+    'richText',
+    'url',
+    'email',
+    'select',
+    'multiSelect',
+    'relation',
+    'number',
+    'boolean',
+    'date',
+    'dateTime',
+  ],
   textarea: ['text', 'longText', 'richText'],
   richtext: ['richText', 'longText', 'text'],
   // svg holds raw inline-SVG markup — edited in the code editor, never wired
   // to a data field.
-  svg:      [],
-  number:   ['number'],
-  url:      ['url', 'email'],
-  color:    [],
-  toggle:   ['boolean'],
-  select:   [],
+  svg: [],
+  number: ['number'],
+  url: ['url', 'email'],
+  color: [],
+  toggle: ['boolean'],
+  select: [],
   dataTable: [],
-  image:    ['media'],
-  media:    ['media'],
+  image: ['media'],
+  media: ['media'],
   // Structural (document-level) types: not scalar-bindable, listed here for
   // coverage-test completeness only — the picker excludes them from the
   // binding catalog via buildMetaFields in src/core/data/fields.ts.
-  group:    ['pageTree', 'fieldSchema'],
+  group: ['pageTree', 'fieldSchema'],
 }
 
 /**

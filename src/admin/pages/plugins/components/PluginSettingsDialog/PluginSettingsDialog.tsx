@@ -67,9 +67,7 @@ type SettingDefinition = PluginSettingsSchema[number]
 
 /** Human labels for the secret fields flagged as needing re-entry. */
 function reentryLabels(settingIds: string[], schema: PluginSettingsSchema | null): string {
-  return settingIds
-    .map((id) => schema?.find((field) => field.id === id)?.label ?? id)
-    .join(', ')
+  return settingIds.map((id) => schema?.find((field) => field.id === id)?.label ?? id).join(', ')
 }
 
 interface PluginSettingsDialogProps {

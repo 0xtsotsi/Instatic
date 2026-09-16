@@ -36,10 +36,7 @@
 import type { PageNode } from '@core/page-tree'
 import { createNode } from '@core/page-tree'
 import { registry } from '@core/module-engine'
-import {
-  normalizeHtmlAttributeName,
-  sanitizeRenderableHtmlAttribute,
-} from '@core/htmlAttributes'
+import { normalizeHtmlAttributeName, sanitizeRenderableHtmlAttribute } from '@core/htmlAttributes'
 import { HTML_TO_MODULE_RULES } from './rules'
 import type { ImportRule } from './rules'
 import { parseHtml } from './parseHtml'
@@ -314,9 +311,7 @@ function processElement(el: Element, ctx: WalkContext): string {
     // content isn't an element.
     // Entering a <pre> switches the subtree to whitespace-preserving mode.
     const childCtx =
-      ctx.preserveWs || el.tagName.toLowerCase() === 'pre'
-        ? { ...ctx, preserveWs: true }
-        : ctx
+      ctx.preserveWs || el.tagName.toLowerCase() === 'pre' ? { ...ctx, preserveWs: true } : ctx
     node.children = mapChildNodes(el, childCtx)
     // A node that recursed into real child nodes must NOT also keep a flattened
     // `text` prop: the children (including synthesized base.text for direct

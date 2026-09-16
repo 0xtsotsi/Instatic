@@ -103,10 +103,22 @@ describe('IT-2 — single propBinding with override', () => {
       { propBindings: { content: { paramId: 'param-1' } } },
     )
     const component = vc('vc-1', [root], 'root', [
-      { id: 'param-1', name: 'label', type: 'string', defaultValue: 'default text', required: false },
+      {
+        id: 'param-1',
+        name: 'label',
+        type: 'string',
+        defaultValue: 'default text',
+        required: false,
+      },
     ])
 
-    const { nodes } = instantiateVCAtRef(component, { 'param-1': 'overridden text' }, {}, {}, TEST_REF_ID)
+    const { nodes } = instantiateVCAtRef(
+      component,
+      { 'param-1': 'overridden text' },
+      {},
+      {},
+      TEST_REF_ID,
+    )
 
     expect(nodes['root'].props.content).toBe('overridden text')
   })
@@ -125,7 +137,13 @@ describe('IT-3 — propBinding fallback to defaultValue', () => {
       { propBindings: { content: { paramId: 'param-1' } } },
     )
     const component = vc('vc-1', [root], 'root', [
-      { id: 'param-1', name: 'label', type: 'string', defaultValue: 'fallback value', required: false },
+      {
+        id: 'param-1',
+        name: 'label',
+        type: 'string',
+        defaultValue: 'fallback value',
+        required: false,
+      },
     ])
 
     const { nodes } = instantiateVCAtRef(component, {}, {}, {}, TEST_REF_ID)
@@ -152,11 +170,23 @@ describe('IT-4 — multiple propBindings on one node', () => {
       },
     )
     const component = vc('vc-1', [root], 'root', [
-      { id: 'p-label', name: 'buttonLabel', type: 'string', defaultValue: 'default', required: false },
+      {
+        id: 'p-label',
+        name: 'buttonLabel',
+        type: 'string',
+        defaultValue: 'default',
+        required: false,
+      },
       { id: 'p-href', name: 'buttonHref', type: 'url', defaultValue: '#', required: false },
     ])
 
-    const { nodes } = instantiateVCAtRef(component, { 'p-label': 'Buy Now', 'p-href': '/checkout' }, {}, {}, TEST_REF_ID)
+    const { nodes } = instantiateVCAtRef(
+      component,
+      { 'p-label': 'Buy Now', 'p-href': '/checkout' },
+      {},
+      {},
+      TEST_REF_ID,
+    )
 
     expect(nodes['root'].props.label).toBe('Buy Now')
     expect(nodes['root'].props.href).toBe('/checkout')
@@ -177,10 +207,22 @@ describe('IT-5 — propBindings on non-root (child) node', () => {
     )
     const root = node('root', 'base.container', {}, { children: ['child-1'] })
     const component = vc('vc-1', [root, child], 'root', [
-      { id: 'p-text', name: 'bodyText', type: 'string', defaultValue: 'default body', required: false },
+      {
+        id: 'p-text',
+        name: 'bodyText',
+        type: 'string',
+        defaultValue: 'default body',
+        required: false,
+      },
     ])
 
-    const { nodes } = instantiateVCAtRef(component, { 'p-text': 'injected body' }, {}, {}, TEST_REF_ID)
+    const { nodes } = instantiateVCAtRef(
+      component,
+      { 'p-text': 'injected body' },
+      {},
+      {},
+      TEST_REF_ID,
+    )
 
     expect(nodes['child-1'].props.content).toBe('injected body')
   })
@@ -198,7 +240,13 @@ describe('IT-6 — slot outlet replaced with slot content', () => {
 
     const contentNode = node('content-1', 'base.text', { content: 'slot content' })
     const pageNodes = { 'content-1': contentNode }
-    const { nodes, rootNodeId } = instantiateVCAtRef(component, {}, { body: ['content-1'] }, pageNodes, TEST_REF_ID)
+    const { nodes, rootNodeId } = instantiateVCAtRef(
+      component,
+      {},
+      { body: ['content-1'] },
+      pageNodes,
+      TEST_REF_ID,
+    )
 
     expect(rootNodeId).toBe('root')
     // Root's children should now point to the content node, not the slot outlet
@@ -393,7 +441,13 @@ describe('IT-15 — slot content nodes have _fromSlotContent = true', () => {
     const contentChild = node('content-child', 'base.text', { content: 'child content' })
     const contentRoot = node('content-root', 'base.container', {}, { children: ['content-child'] })
     const pageNodes = { 'content-root': contentRoot, 'content-child': contentChild }
-    const { nodes } = instantiateVCAtRef(component, {}, { body: ['content-root'] }, pageNodes, TEST_REF_ID)
+    const { nodes } = instantiateVCAtRef(
+      component,
+      {},
+      { body: ['content-root'] },
+      pageNodes,
+      TEST_REF_ID,
+    )
 
     expect(nodes['content-root']._fromSlotContent).toBe(true)
   })

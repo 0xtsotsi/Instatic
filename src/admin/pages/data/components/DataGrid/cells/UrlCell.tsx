@@ -18,7 +18,8 @@ export function UrlCell({
   context,
   ariaLabel,
 }: CellEditorProps<UrlField>): ReactElement {
-  const strValue = typeof value === 'string' ? value : readStringCell({ [field.id]: value }, field.id)
+  const strValue =
+    typeof value === 'string' ? value : readStringCell({ [field.id]: value }, field.id)
   const hasUrl = strValue.trim().length > 0
 
   return (
@@ -31,7 +32,9 @@ export function UrlCell({
         aria-label={ariaLabel ?? field.label}
         onChange={(e) => onChange(e.target.value)}
         onBlur={() => onCommit?.()}
-        onKeyDown={(e) => { if (e.key === 'Enter') onCommit?.() }}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter') onCommit?.()
+        }}
       />
       {context === 'detail' && hasUrl && (
         <Button

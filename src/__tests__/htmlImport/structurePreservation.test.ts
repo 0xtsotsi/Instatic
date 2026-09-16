@@ -45,9 +45,7 @@ describe('nested phrasing spans are preserved (not flattened)', () => {
     expect(texts).toContain('Auth & access')
     expect(texts).toContain('Sessions, MFA.')
     // class names ride along so .led-k / .led-v styling still applies
-    expect(kids.map((k) => k.classIds).flat()).toEqual(
-      expect.arrayContaining(['led-k', 'led-v']),
-    )
+    expect(kids.map((k) => k.classIds).flat()).toEqual(expect.arrayContaining(['led-k', 'led-v']))
   })
 })
 

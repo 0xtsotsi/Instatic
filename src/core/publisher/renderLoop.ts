@@ -76,7 +76,9 @@ export function renderLoop(
   // The base template context (page/site/route frames + the outer entry stack)
   // that loop-body bindings resolve against. Each iteration derives a CHILD
   // config from this WITHOUT mutating it — see below.
-  const baseTemplateContext: TemplateRenderDataContext = config.templateContext ?? { entryStack: [] }
+  const baseTemplateContext: TemplateRenderDataContext = config.templateContext ?? {
+    entryStack: [],
+  }
   const baseStack = baseTemplateContext.entryStack
 
   let body = ''

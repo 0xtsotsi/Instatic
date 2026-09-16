@@ -1,11 +1,4 @@
-import {
-  useCallback,
-  useEffect,
-  useEffectEvent,
-  useRef,
-  useState,
-  type ReactNode,
-} from 'react'
+import { useCallback, useEffect, useEffectEvent, useRef, useState, type ReactNode } from 'react'
 import { createPortal } from 'react-dom'
 import type { StyleRuleRegistry } from '@core/page-tree'
 import type { VisualComponent } from '@core/visualComponents'
@@ -55,15 +48,21 @@ export function useCanvasTreeLadderOverlay({
 }: UseCanvasTreeLadderOverlayArgs): CanvasTreeLadderOverlayResult {
   const activePage = useEditorStore(selectActiveCanvasPage)
   const styleRules = useEditorStore((s) => s.site?.styleRules ?? EMPTY_STYLE_RULES)
-  const visualComponents = useEditorStore((s) => s.site?.visualComponents ?? EMPTY_VISUAL_COMPONENTS)
+  const visualComponents = useEditorStore(
+    (s) => s.site?.visualComponents ?? EMPTY_VISUAL_COMPONENTS,
+  )
   const treeLadderRef = useRef<HTMLDivElement>(null)
   const [inspectActive, setInspectActive] = useState(false)
   const [inspectSuppressed, setInspectSuppressed] = useState(false)
   const [inspectAnchorNodeId, setInspectAnchorNodeId] = useState<string | null>(null)
-  const [treeLadderHighlightedNodeId, setTreeLadderHighlightedNodeId] = useState<string | null>(null)
+  const [treeLadderHighlightedNodeId, setTreeLadderHighlightedNodeId] = useState<string | null>(
+    null,
+  )
 
   const treeLadderRows = buildCanvasTreeLadderRows(activePage, inspectAnchorNodeId)
-  const treeLadderKey = treeLadderRows.map((row) => `${row.nodeId}:${row.depth}:${row.relation}`).join('|')
+  const treeLadderKey = treeLadderRows
+    .map((row) => `${row.nodeId}:${row.depth}:${row.relation}`)
+    .join('|')
   const showTreeLadder =
     show &&
     inspectActive &&
@@ -81,34 +80,43 @@ export function useCanvasTreeLadderOverlay({
   const effectiveTreeLadderHighlightedNodeId =
     explicitHighlightNodeId ??
     (showTreeLadder
-      ? treeLadderRows.find((row) => row.relation === 'current')?.nodeId ?? treeLadderRows[0]?.nodeId ?? null
+      ? (treeLadderRows.find((row) => row.relation === 'current')?.nodeId ??
+        treeLadderRows[0]?.nodeId ??
+        null)
       : null)
   const hoverNodeId = showTreeLadder
-    ? effectiveTreeLadderHighlightedNodeId ?? inspectAnchorNodeId
+    ? (effectiveTreeLadderHighlightedNodeId ?? inspectAnchorNodeId)
     : null
 
   // React Compiler exception #1: this function is referenced by the keyboard
   // listener effect, so exhaustive-deps requires a stable identity.
-  const commitTreeLadderSelection = useCallback((nodeId: string | null) => {
-    const state = useEditorStore.getState()
-    if (!commitCanvasTreeLadderSelection(state, nodeId, breakpointId)) return
-    setInspectSuppressed(true)
-    setInspectActive(false)
-    setInspectAnchorNodeId(null)
-    setTreeLadderHighlightedNodeId(null)
-  }, [breakpointId])
-
-  useEffect(() => useEditorStore.subscribe(
-    (s) => [s.hoveredNodeId, s.hoveredBreakpointId] as const,
-    ([nodeId, hoveredBreakpoint]) => {
-      if (!inspectActive || inspectSuppressed) return
-      if (nodeId && hoveredBreakpoint === breakpointId) {
-        setInspectAnchorNodeId(nodeId)
-        setTreeLadderHighlightedNodeId(null)
-      }
+  const commitTreeLadderSelection = useCallback(
+    (nodeId: string | null) => {
+      const state = useEditorStore.getState()
+      if (!commitCanvasTreeLadderSelection(state, nodeId, breakpointId)) return
+      setInspectSuppressed(true)
+      setInspectActive(false)
+      setInspectAnchorNodeId(null)
+      setTreeLadderHighlightedNodeId(null)
     },
-    { equalityFn: (a, b) => a[0] === b[0] && a[1] === b[1] },
-  ), [breakpointId, inspectActive, inspectSuppressed])
+    [breakpointId],
+  )
+
+  useEffect(
+    () =>
+      useEditorStore.subscribe(
+        (s) => [s.hoveredNodeId, s.hoveredBreakpointId] as const,
+        ([nodeId, hoveredBreakpoint]) => {
+          if (!inspectActive || inspectSuppressed) return
+          if (nodeId && hoveredBreakpoint === breakpointId) {
+            setInspectAnchorNodeId(nodeId)
+            setTreeLadderHighlightedNodeId(null)
+          }
+        },
+        { equalityFn: (a, b) => a[0] === b[0] && a[1] === b[1] },
+      ),
+    [breakpointId, inspectActive, inspectSuppressed],
+  )
 
   useEffect(() => {
     if (!iframeElement) return
@@ -187,7 +195,11 @@ export function useCanvasTreeLadderOverlay({
         event.stopPropagation()
         const direction = event.key === 'ArrowUp' ? 'up' : 'down'
         setTreeLadderHighlightedNodeId(
-          moveCanvasTreeLadderHighlight(treeLadderRows, effectiveTreeLadderHighlightedNodeId, direction),
+          moveCanvasTreeLadderHighlight(
+            treeLadderRows,
+            effectiveTreeLadderHighlightedNodeId,
+            direction,
+          ),
         )
         return
       }
@@ -297,37 +309,39 @@ export function useCanvasTreeLadderOverlay({
     }
   }, [canvasRoot, iframeElement, showTreeLadder, treeLadderKey])
 
-  const portal = showTreeLadder ? createPortal(
-    <div
-      ref={treeLadderRef}
-      role="group"
-      aria-label="Select canvas element from tree"
-      className={styles.treeLadder}
-      data-canvas-tree-ladder="true"
-      data-canvas-tree-ladder-mode={portalMode}
-      data-placement="above"
-    >
-      <div className={styles.treeLadderRows}>
-        {treeLadderRows.map((row) => {
-          const node = activePage?.nodes[row.nodeId] ?? null
-          if (!node) return null
-          return (
-            <CanvasTreeLadderRowButton
-              key={`${row.nodeId}:${row.relation}`}
-              row={row}
-              node={node}
-              highlighted={row.nodeId === effectiveTreeLadderHighlightedNodeId}
-              styleRules={styleRules}
-              visualComponents={visualComponents}
-              onHighlight={setTreeLadderHighlightedNodeId}
-              onCommit={commitTreeLadderSelection}
-            />
-          )
-        })}
-      </div>
-    </div>,
-    portalTarget,
-  ) : null
+  const portal = showTreeLadder
+    ? createPortal(
+        <div
+          ref={treeLadderRef}
+          role="group"
+          aria-label="Select canvas element from tree"
+          className={styles.treeLadder}
+          data-canvas-tree-ladder="true"
+          data-canvas-tree-ladder-mode={portalMode}
+          data-placement="above"
+        >
+          <div className={styles.treeLadderRows}>
+            {treeLadderRows.map((row) => {
+              const node = activePage?.nodes[row.nodeId] ?? null
+              if (!node) return null
+              return (
+                <CanvasTreeLadderRowButton
+                  key={`${row.nodeId}:${row.relation}`}
+                  row={row}
+                  node={node}
+                  highlighted={row.nodeId === effectiveTreeLadderHighlightedNodeId}
+                  styleRules={styleRules}
+                  visualComponents={visualComponents}
+                  onHighlight={setTreeLadderHighlightedNodeId}
+                  onCommit={commitTreeLadderSelection}
+                />
+              )
+            })}
+          </div>
+        </div>,
+        portalTarget,
+      )
+    : null
 
   return { hoverNodeId, portal }
 }
@@ -383,7 +397,11 @@ function isEditableKeyboardTarget(target: EventTarget | null): boolean {
   if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.tagName === 'SELECT') {
     return true
   }
-  return target.closest('[contenteditable="true"], [contenteditable="plaintext-only"], [contenteditable=""]') !== null
+  return (
+    target.closest(
+      '[contenteditable="true"], [contenteditable="plaintext-only"], [contenteditable=""]',
+    ) !== null
+  )
 }
 
 function isElementLike(value: EventTarget | null): value is Element {

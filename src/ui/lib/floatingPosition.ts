@@ -174,14 +174,22 @@ export function computeFloatingPosition(
 
   // Try each side in priority order; return on the first that fits.
   for (const s of candidates) {
-    const c = sideCandidate(s, trigger, fw, fh, align, offset, viewportMargin, edgePadding, arrowEdgePad)
+    const c = sideCandidate(
+      s,
+      trigger,
+      fw,
+      fh,
+      align,
+      offset,
+      viewportMargin,
+      edgePadding,
+      arrowEdgePad,
+    )
     if (c.fits) return { x: c.x, y: c.y, arrowOffset: c.arrowOffset, side: s }
   }
 
   // No side fits — pick the one with the most available space and clamp.
-  const scored = (
-    side === 'auto' ? [...autoPriority] : [side as ResolvedFloatingSide]
-  ).map((s) => {
+  const scored = (side === 'auto' ? [...autoPriority] : [side as ResolvedFloatingSide]).map((s) => {
     const space =
       s === 'top'
         ? trigger.top
@@ -194,6 +202,16 @@ export function computeFloatingPosition(
   })
   scored.sort((a, b) => b.space - a.space)
   const best = scored[0].s
-  const c = sideCandidate(best, trigger, fw, fh, align, offset, viewportMargin, edgePadding, arrowEdgePad)
+  const c = sideCandidate(
+    best,
+    trigger,
+    fw,
+    fh,
+    align,
+    offset,
+    viewportMargin,
+    edgePadding,
+    arrowEdgePad,
+  )
   return { x: c.x, y: c.y, arrowOffset: c.arrowOffset, side: best }
 }

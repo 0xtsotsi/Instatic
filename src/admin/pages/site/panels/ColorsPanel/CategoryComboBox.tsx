@@ -1,9 +1,4 @@
-import {
-  useState,
-  type ChangeEvent,
-  type FocusEvent,
-  type KeyboardEvent,
-} from 'react'
+import { useState, type ChangeEvent, type FocusEvent, type KeyboardEvent } from 'react'
 import { Input } from '@ui/components/Input'
 import styles from './CategoryComboBox.module.css'
 
@@ -96,9 +91,7 @@ export function CategoryComboBox({
       setOpen(false)
     } else if (event.key === 'ArrowDown') {
       event.preventDefault()
-      setActiveIndex((index) =>
-        Math.min(index + 1, filteredSuggestions.length - 1),
-      )
+      setActiveIndex((index) => Math.min(index + 1, filteredSuggestions.length - 1))
     } else if (event.key === 'ArrowUp') {
       event.preventDefault()
       setActiveIndex((index) => Math.max(index - 1, 0))
@@ -128,11 +121,7 @@ export function CategoryComboBox({
           onKeyDown={handleKeyDown}
         />
         {showMenu && (
-          <div
-            role="listbox"
-            aria-label={`${label} suggestions`}
-            className={styles.categoryMenu}
-          >
+          <div role="listbox" aria-label={`${label} suggestions`} className={styles.categoryMenu}>
             {filteredSuggestions.map((suggestion, index) => (
               <button
                 key={suggestion}

@@ -39,7 +39,9 @@ const registry = makeRegistry({
 // VC fixture helpers
 // ---------------------------------------------------------------------------
 
-function makeParam(overrides: Partial<VCParam> & { id: string; name: string; type: VCParam['type'] }): VCParam {
+function makeParam(
+  overrides: Partial<VCParam> & { id: string; name: string; type: VCParam['type'] },
+): VCParam {
   return {
     defaultValue: '',
     required: false,
@@ -101,7 +103,14 @@ describe('VC inlining — prop override substitution', () => {
     name: 'Card',
     nodes: [containerNode, textNode],
     rootId: 'vc-root',
-    params: [makeParam({ id: 'param-title', name: 'title', type: 'string', defaultValue: 'Default Title' })],
+    params: [
+      makeParam({
+        id: 'param-title',
+        name: 'title',
+        type: 'string',
+        defaultValue: 'Default Title',
+      }),
+    ],
   })
 
   it('inlines the VC tree and substitutes the prop override', () => {
@@ -183,12 +192,14 @@ describe('VC inlining — slot expansion', () => {
     name: 'SlotComponent',
     nodes: [slotContainerNode, slotOutletNode],
     rootId: 'vc-slot-root',
-    params: [makeParam({
-      id: 'param-children',
-      name: 'children',
-      type: 'slot',
-      defaultValue: [defaultSlotNode] as unknown,
-    })],
+    params: [
+      makeParam({
+        id: 'param-children',
+        name: 'children',
+        type: 'slot',
+        defaultValue: [defaultSlotNode] as unknown,
+      }),
+    ],
   })
 
   it('expands slot with provided slot-instance content (Task 4 Tree Unification)', () => {
@@ -243,12 +254,14 @@ describe('VC inlining — slot expansion', () => {
       name: 'NoDefault',
       nodes: [slotContainerNode, slotOutletNode],
       rootId: 'vc-slot-root',
-      params: [makeParam({
-        id: 'param-empty',
-        name: 'children',
-        type: 'slot',
-        defaultValue: [],
-      })],
+      params: [
+        makeParam({
+          id: 'param-empty',
+          name: 'children',
+          type: 'slot',
+          defaultValue: [],
+        }),
+      ],
     })
     const page = makePage({
       root: {
@@ -324,12 +337,14 @@ describe('VC inlining — hidden nodes', () => {
       name: 'Hidden Slot',
       nodes: [container, slotOutletNode],
       rootId: 'hidden-slot-root',
-      params: [makeParam({
-        id: 'param-children',
-        name: 'children',
-        type: 'slot',
-        defaultValue: [],
-      })],
+      params: [
+        makeParam({
+          id: 'param-children',
+          name: 'children',
+          type: 'slot',
+          defaultValue: [],
+        }),
+      ],
     })
     const page = makePage({
       root: {
@@ -380,7 +395,12 @@ describe('VC inlining — class CSS collection', () => {
       moduleId: 'base.container',
       children: ['vc-cls-text'],
     })
-    const vc = makeVC({ id: 'vc-cls', name: 'Cls', nodes: [rootNode, textNode], rootId: 'vc-cls-root' })
+    const vc = makeVC({
+      id: 'vc-cls',
+      name: 'Cls',
+      nodes: [rootNode, textNode],
+      rootId: 'vc-cls-root',
+    })
 
     const page = makePage({
       root: {
@@ -437,7 +457,12 @@ describe('VC inlining — class CSS collection', () => {
       moduleId: 'base.container',
       children: ['vc-dedup-styled'],
     })
-    const vc = makeVC({ id: 'vc-dedup', name: 'Dedup', nodes: [dedupRoot, styledNode], rootId: 'vc-dedup-root' })
+    const vc = makeVC({
+      id: 'vc-dedup',
+      name: 'Dedup',
+      nodes: [dedupRoot, styledNode],
+      rootId: 'vc-dedup-root',
+    })
 
     // Two ref nodes pointing at the same VC
     const page = makePage({

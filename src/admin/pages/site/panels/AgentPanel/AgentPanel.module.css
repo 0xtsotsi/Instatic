@@ -72,8 +72,13 @@
 }
 
 @keyframes pulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.4; }
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.4;
+  }
 }
 
 /* ── Message thread ──────────────────────────────────────────────────────── */
@@ -119,11 +124,11 @@
   gap: var(--space-2xs);
 }
 
-.attachmentGrid[data-count="1"] {
+.attachmentGrid[data-count='1'] {
   grid-template-columns: minmax(0, 96px);
 }
 
-.attachmentGrid[data-count="2"] {
+.attachmentGrid[data-count='2'] {
   grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
@@ -318,12 +323,20 @@
   line-height: 1.3;
 }
 
-.markdownText h1 { font-size: var(--text-xl); }
-.markdownText h2 { font-size: var(--text-xl); }
-.markdownText h3 { font-size: var(--text-l); }
+.markdownText h1 {
+  font-size: var(--text-xl);
+}
+.markdownText h2 {
+  font-size: var(--text-xl);
+}
+.markdownText h3 {
+  font-size: var(--text-l);
+}
 .markdownText h4,
 .markdownText h5,
-.markdownText h6 { font-size: var(--text-m); }
+.markdownText h6 {
+  font-size: var(--text-m);
+}
 
 .markdownText strong,
 .markdownText b {
@@ -420,11 +433,21 @@
 
 /* Category tone — amber for style/tokens, green for writes, red for
    destructive; reads/unknowns stay achromatic. */
-.toolCallIconDanger { color: var(--danger-light); }
-.toolCallIconRead { color: var(--text-muted); }
-.toolCallIconStyle { color: var(--warning); }
-.toolCallIconWrite { color: var(--success); }
-.toolCallIconNeutral { color: var(--text-subtle); }
+.toolCallIconDanger {
+  color: var(--danger-light);
+}
+.toolCallIconRead {
+  color: var(--text-muted);
+}
+.toolCallIconStyle {
+  color: var(--warning);
+}
+.toolCallIconWrite {
+  color: var(--success);
+}
+.toolCallIconNeutral {
+  color: var(--text-subtle);
+}
 
 .toolCallCopy {
   display: flex;
@@ -468,9 +491,15 @@
   color: var(--text-disabled);
 }
 
-.toolCallStatusPending { color: var(--text-disabled); }
-.toolCallStatusSuccess { color: var(--success-bright); }
-.toolCallStatusFailed { color: var(--danger-light); }
+.toolCallStatusPending {
+  color: var(--text-disabled);
+}
+.toolCallStatusSuccess {
+  color: var(--success-bright);
+}
+.toolCallStatusFailed {
+  color: var(--danger-light);
+}
 
 /* Colour-token preview — swatches under a set_color_tokens row. Each is
    composited over a neutral base with a hairline ring (like the Framework
@@ -502,7 +531,6 @@
   color: var(--danger-light);
   word-break: break-word;
 }
-
 
 /* ── Credential setup state ──────────────────────────────────────────────── */
 

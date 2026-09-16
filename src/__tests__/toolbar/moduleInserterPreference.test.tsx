@@ -131,7 +131,9 @@ describe('useModuleInserterPreference', () => {
   it('keeps defaults without logging when the session expires during preference load', async () => {
     const logged = mock(() => {})
     console.error = logged as typeof console.error
-    globalThis.fetch = mock(async () => jsonResponse({ error: 'Unauthorized' }, 401)) as typeof fetch
+    globalThis.fetch = mock(async () =>
+      jsonResponse({ error: 'Unauthorized' }, 401),
+    ) as typeof fetch
 
     const { result } = renderHook(() => useModuleInserterPreference())
 

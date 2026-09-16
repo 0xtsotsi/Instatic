@@ -200,7 +200,9 @@ describe('Select', () => {
             options={OPTIONS}
             onChange={() => {}}
           />
-          <button type="button" data-testid="sibling">Sibling</button>
+          <button type="button" data-testid="sibling">
+            Sibling
+          </button>
         </div>
       )
     }
@@ -255,7 +257,9 @@ describe('Select', () => {
       />,
     )
 
-    const combobox = screen.getByRole('combobox', { name: /placeholder status/i }) as HTMLInputElement
+    const combobox = screen.getByRole('combobox', {
+      name: /placeholder status/i,
+    }) as HTMLInputElement
 
     expect(combobox.value).toBe('')
     expect(combobox.placeholder).toBe('Browser default')
@@ -278,10 +282,12 @@ describe('Select', () => {
 
     fireEvent.click(screen.getByRole('combobox', { name: /target table/i }))
 
-    expect(screen.getByRole('option', { name: 'Choose table' }).dataset.placeholderOption)
-      .toBe('true')
-    expect(screen.getByRole('option', { name: 'Contact submissions' }).dataset.placeholderOption)
-      .toBeUndefined()
+    expect(screen.getByRole('option', { name: 'Choose table' }).dataset.placeholderOption).toBe(
+      'true',
+    )
+    expect(
+      screen.getByRole('option', { name: 'Contact submissions' }).dataset.placeholderOption,
+    ).toBeUndefined()
   })
 
   it('can open a wider menu than the closed trigger', () => {
@@ -298,8 +304,9 @@ describe('Select', () => {
 
     fireEvent.click(screen.getByRole('combobox', { name: /compact status/i }))
 
-    expect(screen.getByRole('listbox', { name: /compact status/i }).getAttribute('style'))
-      .toContain('--context-menu-min-width: 192px')
+    expect(
+      screen.getByRole('listbox', { name: /compact status/i }).getAttribute('style'),
+    ).toContain('--context-menu-min-width: 192px')
   })
 
   it('anchors the menu width to a parent element when menuAnchorRef is provided', () => {
@@ -495,17 +502,18 @@ describe('Select', () => {
 
   it('can place the menu to the left of the trigger', () => {
     const originalRect = HTMLElement.prototype.getBoundingClientRect
-    HTMLElement.prototype.getBoundingClientRect = () => ({
-      x: 260,
-      y: 50,
-      left: 260,
-      top: 50,
-      right: 290,
-      bottom: 80,
-      width: 30,
-      height: 30,
-      toJSON: () => ({}),
-    } as DOMRect)
+    HTMLElement.prototype.getBoundingClientRect = () =>
+      ({
+        x: 260,
+        y: 50,
+        left: 260,
+        top: 50,
+        right: 290,
+        bottom: 80,
+        width: 30,
+        height: 30,
+        toJSON: () => ({}),
+      }) as DOMRect
 
     try {
       render(

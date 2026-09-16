@@ -82,7 +82,12 @@ export function describeFrameworkTokens(
   const spacing = generateFrameworkSpacingPlan(settings.spacing, preferences)
   return {
     colors: describeColors(settings.colors),
-    typography: describeScale('typography', typography.variables, typography.utilityClasses, settings.typography),
+    typography: describeScale(
+      'typography',
+      typography.variables,
+      typography.utilityClasses,
+      settings.typography,
+    ),
     spacing: describeScale('spacing', spacing.variables, spacing.utilityClasses, settings.spacing),
   }
 }
@@ -127,7 +132,8 @@ function describeColors(
   const byToken = new Map<string, ColorTokenDescriptor>()
 
   for (const variable of sets.light) {
-    const classesForVariant = classNames.get(colorVariantKey(variable.tokenId, variable.variantName)) ?? []
+    const classesForVariant =
+      classNames.get(colorVariantKey(variable.tokenId, variable.variantName)) ?? []
     if (variable.variantName === undefined) {
       order.push(variable.tokenId)
       const darkValue = darkBaseByToken.get(variable.tokenId)
@@ -175,8 +181,7 @@ function describeScale(
   const classNames = new Map<string, string[]>()
   for (const rule of Object.values(utilityClasses)) {
     const meta = rule.generated as
-      | { origin?: string; family?: string; sourceId?: string; step?: string }
-      | undefined
+      { origin?: string; family?: string; sourceId?: string; step?: string } | undefined
     if (!meta || meta.origin !== 'framework' || meta.family !== family) continue
     if (!meta.sourceId || meta.step === undefined) continue
     const key = `${meta.sourceId}:${meta.step}`

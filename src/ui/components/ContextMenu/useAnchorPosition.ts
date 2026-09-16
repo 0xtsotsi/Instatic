@@ -87,12 +87,10 @@ export function useAnchorPosition({
   // Effective render width: when `matchAnchorWidth` is set, the menu expands
   // to the anchor's measured width, then clamps to the optional `maxWidth`
   // ceiling while never shrinking below the `minWidth` floor.
-  const anchorMatchedWidth = matchAnchorWidth && anchorWidth != null
-    ? Math.max(anchorWidth, minWidth)
-    : width
-  const effectiveWidth = maxWidth != null
-    ? Math.min(anchorMatchedWidth, maxWidth)
-    : anchorMatchedWidth
+  const anchorMatchedWidth =
+    matchAnchorWidth && anchorWidth != null ? Math.max(anchorWidth, minWidth) : width
+  const effectiveWidth =
+    maxWidth != null ? Math.min(anchorMatchedWidth, maxWidth) : anchorMatchedWidth
 
   const recompute = useEvent(() => {
     if (!anchorRef) return
@@ -111,9 +109,8 @@ export function useAnchorPosition({
     // height (CSS applies `max-height` before getBoundingClientRect). Still
     // defensively clamp here so position calculations agree with the rendered
     // size even on the very first measurement.
-    const effectiveHeight = maxHeight != null
-      ? Math.min(menuRect.height, maxHeight)
-      : menuRect.height
+    const effectiveHeight =
+      maxHeight != null ? Math.min(menuRect.height, maxHeight) : menuRect.height
     const next = computeFloatingPosition(anchorRect, {
       floatingWidth: effectiveWidth,
       floatingHeight: effectiveHeight,

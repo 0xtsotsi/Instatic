@@ -82,10 +82,16 @@ export class ProviderRunner {
     const seen = new Set<string>()
     const providers: SpotlightProvider[] = []
     for (const p of scopeProviders) {
-      if (!seen.has(p.id)) { seen.add(p.id); providers.push(p) }
+      if (!seen.has(p.id)) {
+        seen.add(p.id)
+        providers.push(p)
+      }
     }
     for (const p of pluginProviders) {
-      if (!seen.has(p.id)) { seen.add(p.id); providers.push(p) }
+      if (!seen.has(p.id)) {
+        seen.add(p.id)
+        providers.push(p)
+      }
     }
 
     // Cancel any providers that are no longer in the active set.
@@ -199,4 +205,3 @@ export class ProviderRunner {
     return state
   }
 }
-

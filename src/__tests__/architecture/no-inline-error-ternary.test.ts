@@ -42,9 +42,7 @@ function collectFiles(dir: string): string[] {
 }
 
 function stripComments(source: string): string {
-  return source
-    .replace(/\/\*[\s\S]*?\*\//g, '')
-    .replace(/^\s*\/\/.*$/gm, '')
+  return source.replace(/\/\*[\s\S]*?\*\//g, '').replace(/^\s*\/\/.*$/gm, '')
 }
 
 describe('admin code uses getErrorMessage, not inline instanceof-Error ternaries', () => {

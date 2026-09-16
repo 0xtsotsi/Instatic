@@ -98,10 +98,7 @@ declare module '@site/store/types' {
   interface EditorStore extends LayoutsSlice {}
 }
 
-export const createLayoutsSlice: EditorStoreSliceCreator<LayoutsSlice> = (
-  set,
-  get,
-) => {
+export const createLayoutsSlice: EditorStoreSliceCreator<LayoutsSlice> = (set, get) => {
   const { mutateSite, mutateActiveTreeAndSite } = buildSiteHelpers(set, get)
 
   return {
@@ -211,16 +208,18 @@ export const createLayoutsSlice: EditorStoreSliceCreator<LayoutsSlice> = (
 
       const newRootIds: string[] = []
       mutateActiveTreeAndSite((tree, draftSite) => {
-        newRootIds.push(...insertSnapshotSubtrees(
-          tree,
-          draftSite,
-          {
-            rootNodeIds: [snapshotRootId],
-            nodes: snapshotNodes,
-            classes: layout.classes,
-          },
-          location,
-        ))
+        newRootIds.push(
+          ...insertSnapshotSubtrees(
+            tree,
+            draftSite,
+            {
+              rootNodeIds: [snapshotRootId],
+              nodes: snapshotNodes,
+              classes: layout.classes,
+            },
+            location,
+          ),
+        )
         return newRootIds.length > 0
       })
 

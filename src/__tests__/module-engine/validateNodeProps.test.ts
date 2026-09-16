@@ -28,9 +28,7 @@ import '@modules/base'
 // Helpers
 // ---------------------------------------------------------------------------
 
-function stubDef(
-  overrides: Partial<AnyModuleDefinition> = {},
-): AnyModuleDefinition {
+function stubDef(overrides: Partial<AnyModuleDefinition> = {}): AnyModuleDefinition {
   return {
     id: 'test.stub',
     name: 'Stub',
@@ -141,8 +139,8 @@ describe('validateNodeProps — (b) injected unknown fields survive', () => {
 
   it('coerced schema props override rawProps while unknowns are preserved', () => {
     const rawProps = {
-      count: '5',                  // will be coerced to 5
-      _unknownField: 'preserved',  // must survive
+      count: '5', // will be coerced to 5
+      _unknownField: 'preserved', // must survive
     }
     const result = validateNodeProps(def, rawProps)
     expect(result.count).toBe(5)

@@ -33,14 +33,7 @@
  *   • Focus is captured on mount; first focusable element inside is focused
  *   • Focus is restored to the previously-focused element on close
  */
-import {
-  useEffect,
-  useId,
-  useRef,
-  type ReactNode,
-  type Ref,
-  type RefObject,
-} from 'react'
+import { useEffect, useId, useRef, type ReactNode, type Ref, type RefObject } from 'react'
 import { createPortal } from 'react-dom'
 import { Button } from '@ui/components/Button'
 import { SkeletonBlock } from '@ui/components/Skeleton'
@@ -228,10 +221,13 @@ export function Dialog({
           <div id={descId} className={cn(styles.body, bodyClassName)}>
             <SkeletonBlock minHeight={120} />
           </div>
-        ) : children !== undefined && children !== null && (
-          <div id={descId} className={cn(styles.body, bodyClassName)}>
-            {children}
-          </div>
+        ) : (
+          children !== undefined &&
+          children !== null && (
+            <div id={descId} className={cn(styles.body, bodyClassName)}>
+              {children}
+            </div>
+          )
         )}
 
         {footer && <footer className={cn(styles.footer, footerClassName)}>{footer}</footer>}

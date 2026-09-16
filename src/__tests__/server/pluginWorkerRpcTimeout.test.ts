@@ -22,9 +22,15 @@ import type { MainToWorkerMessage } from '../../../server/plugins/protocol/messa
 
 function stubWorker(events: string[]): Worker {
   return {
-    postMessage: () => { events.push('post') },
-    terminate: () => { events.push('terminate') },
-    addEventListener: () => { /* listeners unused for injected stubs */ },
+    postMessage: () => {
+      events.push('post')
+    },
+    terminate: () => {
+      events.push('terminate')
+    },
+    addEventListener: () => {
+      /* listeners unused for injected stubs */
+    },
   } as unknown as Worker
 }
 
@@ -47,9 +53,14 @@ describe('requestFromWorker timeout', () => {
     workers.set('acme.wedged-a', stubWorker(events))
 
     await expect(
-      requestFromWorker('acme.wedged-a', lifecycleMsg('acme.wedged-a', 'corr-timeout'), 'lifecycle-result', {
-        timeoutMs: 40,
-      }),
+      requestFromWorker(
+        'acme.wedged-a',
+        lifecycleMsg('acme.wedged-a', 'corr-timeout'),
+        'lifecycle-result',
+        {
+          timeoutMs: 40,
+        },
+      ),
     ).rejects.toThrow('Plugin "acme.wedged-a" did not respond to run-lifecycle within 40ms')
 
     // Crash-style teardown engaged: worker terminated + dropped so the next
@@ -71,7 +82,9 @@ describe('requestFromWorker timeout', () => {
   })
 
   it('rejects sibling pending calls for the same plugin when one call times out', async () => {
-    setCrashRecoveryHandler(async () => { /* recorded elsewhere */ })
+    setCrashRecoveryHandler(async () => {
+      /* recorded elsewhere */
+    })
     workers.set('acme.wedged-b', stubWorker([]))
 
     // Capture rejections through synchronously-attached handlers — the
@@ -79,12 +92,22 @@ describe('requestFromWorker timeout', () => {
     // so a late `.rejects` attachment would trip the unhandled-rejection
     // reporter.
     const asError = (e: unknown): Error | null => (e instanceof Error ? e : null)
-    const first = requestFromWorker('acme.wedged-b', lifecycleMsg('acme.wedged-b', 'corr-1'), 'lifecycle-result', {
-      timeoutMs: 40,
-    }).then(() => null, asError)
-    const second = requestFromWorker('acme.wedged-b', lifecycleMsg('acme.wedged-b', 'corr-2'), 'lifecycle-result', {
-      timeoutMs: 60_000,
-    }).then(() => null, asError)
+    const first = requestFromWorker(
+      'acme.wedged-b',
+      lifecycleMsg('acme.wedged-b', 'corr-1'),
+      'lifecycle-result',
+      {
+        timeoutMs: 40,
+      },
+    ).then(() => null, asError)
+    const second = requestFromWorker(
+      'acme.wedged-b',
+      lifecycleMsg('acme.wedged-b', 'corr-2'),
+      'lifecycle-result',
+      {
+        timeoutMs: 60_000,
+      },
+    ).then(() => null, asError)
 
     const firstErr = await first
     expect(firstErr?.message).toContain('did not respond to run-lifecycle within 40ms')
@@ -99,9 +122,14 @@ describe('requestFromWorker timeout', () => {
     const events: string[] = []
     workers.set('acme.healthy', stubWorker(events))
 
-    const promise = requestFromWorker('acme.healthy', lifecycleMsg('acme.healthy', 'corr-ok'), 'lifecycle-result', {
-      timeoutMs: 50,
-    })
+    const promise = requestFromWorker(
+      'acme.healthy',
+      lifecycleMsg('acme.healthy', 'corr-ok'),
+      'lifecycle-result',
+      {
+        timeoutMs: 50,
+      },
+    )
     // Deliver the worker's reply the same way handleWorkerMessage does:
     // remove the pending entry, then resolve it.
     const pending = pendingRequests.get('corr-ok')

@@ -30,18 +30,10 @@ interface CardProps {
   children?: ReactNode
 }
 
-export function Card({
-  padding = 16,
-  bordered = true,
-  className,
-  children,
-}: CardProps) {
+export function Card({ padding = 16, bordered = true, className, children }: CardProps) {
   const style: CSSProperties = { padding: `${padding}px` }
   return (
-    <div
-      className={cn(bordered ? styles.card : styles.cardBare, className)}
-      style={style}
-    >
+    <div className={cn(bordered ? styles.card : styles.cardBare, className)} style={style}>
       {children}
     </div>
   )

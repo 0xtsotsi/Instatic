@@ -2,7 +2,7 @@ import { describe, expect, it, beforeAll } from 'bun:test'
 import { parseSiteDocument } from '@core/page-tree'
 import { makePage, makeSite } from '../publisher/helpers'
 
-let buildSystemPromptForScope: typeof import('../../../server/ai/handlers/chat')['buildSystemPromptForScope']
+let buildSystemPromptForScope: (typeof import('../../../server/ai/handlers/chat'))['buildSystemPromptForScope']
 
 beforeAll(async () => {
   await import('../../../src/modules/base') // register base modules in this process

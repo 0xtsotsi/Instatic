@@ -4,10 +4,7 @@
  * builder exposes those variables as editable font tokens.
  */
 
-import {
-  normalizeFontTokenVariable,
-  sanitizeFontFallbackStack,
-} from '@core/fonts'
+import { normalizeFontTokenVariable, sanitizeFontFallbackStack } from '@core/fonts'
 import type { NewStyleRule, ImportFontToken } from './types'
 import { isRootScopeSelector } from './rootScope'
 
@@ -27,7 +24,8 @@ const GENERIC_FAMILIES = new Set([
   'fangsong',
 ])
 
-const LENGTH_OR_NUMBER_RE = /^-?(?:\d+|\d*\.\d+)(?:px|rem|em|ch|ex|vw|vh|vmin|vmax|%|pt|pc|in|cm|mm)?$/i
+const LENGTH_OR_NUMBER_RE =
+  /^-?(?:\d+|\d*\.\d+)(?:px|rem|em|ch|ex|vw|vh|vmin|vmax|%|pt|pc|in|cm|mm)?$/i
 
 function splitFontStack(raw: string): string[] {
   const parts: string[] = []
@@ -37,7 +35,7 @@ function splitFontStack(raw: string): string[] {
   for (let i = 0; i < raw.length; i++) {
     const ch = raw[i]
     if ((ch === '"' || ch === "'") && raw[i - 1] !== '\\') {
-      quote = quote === ch ? null : quote ?? ch
+      quote = quote === ch ? null : (quote ?? ch)
       continue
     }
     if (ch === ',' && !quote) {
@@ -116,9 +114,10 @@ function importTokenFromDeclaration(prop: string, value: string): ImportFontToke
  * Only `--font-*` declarations with font-family-like values are extracted.
  * Sizing variables such as `--font-size-base: 16px` remain in the rule.
  */
-export function extractRootFontTokens(
-  rules: NewStyleRule[],
-): { rules: NewStyleRule[]; fontTokens: ImportFontToken[] } {
+export function extractRootFontTokens(rules: NewStyleRule[]): {
+  rules: NewStyleRule[]
+  fontTokens: ImportFontToken[]
+} {
   const fontTokens: ImportFontToken[] = []
   const out: NewStyleRule[] = []
 
@@ -132,9 +131,10 @@ export function extractRootFontTokens(
     const remainingPriorities: Record<string, 'important'> = {}
     for (const [prop, value] of Object.entries(rule.styles)) {
       const important = rule.stylePriorities?.[prop] === 'important'
-      const token = !important && typeof value === 'string'
-        ? importTokenFromDeclaration(prop, value.trim())
-        : null
+      const token =
+        !important && typeof value === 'string'
+          ? importTokenFromDeclaration(prop, value.trim())
+          : null
       if (token) fontTokens.push(token)
       else {
         remaining[prop] = value

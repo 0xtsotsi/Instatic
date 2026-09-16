@@ -82,6 +82,8 @@ describe('describeFrameworkTokens', () => {
 
     const stepM = group.steps.find((s) => s.step === 'm')
     expect(stepM?.cssVar).toBe('--space-m')
-    expect(stepM?.utilityClasses).toEqual(expect.arrayContaining(['padding-m', 'margin-m', 'gap-m']))
+    expect(stepM?.utilityClasses).toEqual(
+      expect.arrayContaining(['padding-m', 'margin-m', 'gap-m']),
+    )
   })
 })

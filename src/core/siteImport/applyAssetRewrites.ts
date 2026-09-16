@@ -162,7 +162,10 @@ function rewriteProps(
  * Format: `"url1 2x, url2 1x"` — each token is the URL, descriptor preserved.
  */
 function rewriteSrcset(srcset: string, rewriteMap: Record<string, string>): string {
-  const parts = srcset.split(',').map((s) => s.trim()).filter(Boolean)
+  const parts = srcset
+    .split(',')
+    .map((s) => s.trim())
+    .filter(Boolean)
   const rewritten = parts.map((part) => {
     const [urlPart, ...descriptors] = part.split(/\s+/)
     if (!urlPart) return part
@@ -177,23 +180,16 @@ function rewriteSrcset(srcset: string, rewriteMap: Record<string, string>): stri
 // ---------------------------------------------------------------------------
 
 function rewriteRule(rule: NewStyleRule, rewriteMap: Record<string, string>): NewStyleRule {
-  const newStyles = rewriteStylesBag(
-    rule.styles as Record<string, unknown>,
-    rewriteMap,
-  )
-  const newRawCss = typeof rule.rawCss === 'string'
-    ? rewriteUrlsInCssValue(rule.rawCss, rewriteMap)
-    : rule.rawCss
+  const newStyles = rewriteStylesBag(rule.styles as Record<string, unknown>, rewriteMap)
+  const newRawCss =
+    typeof rule.rawCss === 'string' ? rewriteUrlsInCssValue(rule.rawCss, rewriteMap) : rule.rawCss
 
   // Every per-context override (viewport contexts AND custom conditions) lives
   // in one map now and can carry url() backgrounds — rewrite each bag to the
   // uploaded media URLs just like base styles.
   const newContextStyles: Record<string, Record<string, unknown>> = {}
   for (const [contextId, bag] of Object.entries(rule.contextStyles ?? {})) {
-    newContextStyles[contextId] = rewriteStylesBag(
-      bag as Record<string, unknown>,
-      rewriteMap,
-    )
+    newContextStyles[contextId] = rewriteStylesBag(bag as Record<string, unknown>, rewriteMap)
   }
 
   return {
@@ -241,17 +237,11 @@ function rewriteStringStylesBag(
  * Replace all `url('key')` / `url("key")` occurrences in a CSS value string
  * whose URL payload (the key) appears in `rewriteMap`.
  */
-function rewriteUrlsInCssValue(
-  value: string,
-  rewriteMap: Record<string, string>,
-): string {
-  return value.replace(
-    /url\(\s*(['"]?)([^'")\n]+)\1\s*\)/g,
-    (match, _quote, urlPayload) => {
-      const newUrl = rewriteMap[urlPayload.trim()]
-      return newUrl ? `url('${newUrl}')` : match
-    },
-  )
+function rewriteUrlsInCssValue(value: string, rewriteMap: Record<string, string>): string {
+  return value.replace(/url\(\s*(['"]?)([^'")\n]+)\1\s*\)/g, (match, _quote, urlPayload) => {
+    const newUrl = rewriteMap[urlPayload.trim()]
+    return newUrl ? `url('${newUrl}')` : match
+  })
 }
 
 function isStringRecord(value: unknown): value is Record<string, string> {

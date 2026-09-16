@@ -330,10 +330,7 @@ describe('handleExportRoute — POST { tables: [{ tableId: "posts", rowIds: [id1
 
 describe('handleExportRoute — GET ?includeMedia=1', () => {
   test('streams archive downloads instead of materializing media and the zip in memory', async () => {
-    const source = await readFile(
-      join(process.cwd(), 'server/handlers/cms/export.ts'),
-      'utf-8',
-    )
+    const source = await readFile(join(process.cwd(), 'server/handlers/cms/export.ts'), 'utf-8')
 
     expect(source).not.toContain('zipSync')
     expect(source).not.toContain('readFile(join(uploadsDir')
@@ -467,7 +464,12 @@ describe('handleExportRoute — auth', () => {
 // and sizes them analytically (Base64 length) instead.
 // ---------------------------------------------------------------------------
 
-async function estimateBytes(path: string, body: unknown, cookieStr: string, opts?: { uploadsDir?: string }): Promise<number> {
+async function estimateBytes(
+  path: string,
+  body: unknown,
+  cookieStr: string,
+  opts?: { uploadsDir?: string },
+): Promise<number> {
   const res = await handleExportRoute(makePostRequest(path, cookieStr, body), db, opts)
   expect(res!.status).toBe(200)
   const parsed = JSON.parse(await res!.text()) as { bytes: number }
@@ -484,8 +486,16 @@ describe('handleExportRoute — POST /export/estimate', () => {
   })
 
   test('estimate drops the shell cost when includeSite is false, still matching the real download', async () => {
-    const withSite = await estimateBytes('/admin/api/cms/export/estimate', { includeSite: true }, cookie)
-    const withoutSite = await estimateBytes('/admin/api/cms/export/estimate', { includeSite: false }, cookie)
+    const withSite = await estimateBytes(
+      '/admin/api/cms/export/estimate',
+      { includeSite: true },
+      cookie,
+    )
+    const withoutSite = await estimateBytes(
+      '/admin/api/cms/export/estimate',
+      { includeSite: false },
+      cookie,
+    )
     expect(withoutSite).toBeLessThan(withSite)
 
     const realNoSite = await handleExportRoute(

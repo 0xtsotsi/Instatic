@@ -71,11 +71,17 @@ describe('SiteExplorerPanel templates', () => {
 
     const panel = screen.getByTestId('site-explorer-panel')
     const pagesSection = within(panel).getByRole('heading', { name: 'Pages' }).closest('section')!
-    const templatesSection = within(panel).getByRole('heading', { name: 'Templates' }).closest('section')!
+    const templatesSection = within(panel)
+      .getByRole('heading', { name: 'Templates' })
+      .closest('section')!
 
     expect(within(pagesSection).getByRole('button', { name: /open page home/i })).toBeDefined()
-    expect(within(pagesSection).queryByRole('button', { name: /open template post template/i })).toBeNull()
-    expect(within(templatesSection).getByRole('button', { name: /open template post template/i })).toBeDefined()
+    expect(
+      within(pagesSection).queryByRole('button', { name: /open template post template/i }),
+    ).toBeNull()
+    expect(
+      within(templatesSection).getByRole('button', { name: /open template post template/i }),
+    ).toBeDefined()
   })
 
   it('converts a page to a template from the context menu', () => {
@@ -95,7 +101,9 @@ describe('SiteExplorerPanel templates', () => {
     })
     fireEvent.click(within(dialog).getByRole('button', { name: 'Save' }))
 
-    const page = useEditorStore.getState().site?.pages.find((candidate) => candidate.id === 'page-home')
+    const page = useEditorStore
+      .getState()
+      .site?.pages.find((candidate) => candidate.id === 'page-home')
     expect(page?.template).toMatchObject({
       enabled: true,
       target: { kind: 'everywhere' },
@@ -108,47 +116,50 @@ describe('SiteExplorerPanel templates', () => {
     globalThis.fetch = async (input: RequestInfo | URL) => {
       if (String(input) === '/admin/api/cms/data/tables') {
         collectionRequests += 1
-        return new Response(JSON.stringify({
-          tables: [
-            {
-              id: 'posts',
-              name: 'Posts',
-              slug: 'posts',
-              kind: 'postType',
-              routeBase: '/posts',
-              singularLabel: 'Post',
-              pluralLabel: 'Posts',
-              primaryFieldId: 'title',
-              fields: [],
-              system: true,
-              rowCount: 0,
-              createdByUserId: null,
-              updatedByUserId: null,
-              createdAt: '2026-05-01T10:00:00.000Z',
-              updatedAt: '2026-05-01T10:00:00.000Z',
-            },
-            {
-              id: 'projects',
-              name: 'Projects',
-              slug: 'projects',
-              kind: 'postType',
-              routeBase: '/projects',
-              singularLabel: 'Project',
-              pluralLabel: 'Projects',
-              primaryFieldId: 'title',
-              fields: [],
-              system: false,
-              rowCount: 0,
-              createdByUserId: null,
-              updatedByUserId: null,
-              createdAt: '2026-05-01T10:00:00.000Z',
-              updatedAt: '2026-05-01T10:00:00.000Z',
-            },
-          ],
-        }), {
-          status: 200,
-          headers: { 'content-type': 'application/json' },
-        })
+        return new Response(
+          JSON.stringify({
+            tables: [
+              {
+                id: 'posts',
+                name: 'Posts',
+                slug: 'posts',
+                kind: 'postType',
+                routeBase: '/posts',
+                singularLabel: 'Post',
+                pluralLabel: 'Posts',
+                primaryFieldId: 'title',
+                fields: [],
+                system: true,
+                rowCount: 0,
+                createdByUserId: null,
+                updatedByUserId: null,
+                createdAt: '2026-05-01T10:00:00.000Z',
+                updatedAt: '2026-05-01T10:00:00.000Z',
+              },
+              {
+                id: 'projects',
+                name: 'Projects',
+                slug: 'projects',
+                kind: 'postType',
+                routeBase: '/projects',
+                singularLabel: 'Project',
+                pluralLabel: 'Projects',
+                primaryFieldId: 'title',
+                fields: [],
+                system: false,
+                rowCount: 0,
+                createdByUserId: null,
+                updatedByUserId: null,
+                createdAt: '2026-05-01T10:00:00.000Z',
+                updatedAt: '2026-05-01T10:00:00.000Z',
+              },
+            ],
+          }),
+          {
+            status: 200,
+            headers: { 'content-type': 'application/json' },
+          },
+        )
       }
 
       return new Response(JSON.stringify({ error: `Unhandled ${String(input)}` }), { status: 500 })
@@ -174,11 +185,15 @@ describe('SiteExplorerPanel templates', () => {
     fireEvent.keyDown(appliesTo, { key: 'Enter' })
 
     await waitFor(() => expect(collectionRequests).toBe(1))
-    await waitFor(() => expect(within(dialog).getByRole('checkbox', { name: 'Projects' })).toBeDefined())
+    await waitFor(() =>
+      expect(within(dialog).getByRole('checkbox', { name: 'Projects' })).toBeDefined(),
+    )
     fireEvent.click(within(dialog).getByRole('checkbox', { name: 'Projects' }))
     fireEvent.click(within(dialog).getByRole('button', { name: 'Save' }))
 
-    const page = useEditorStore.getState().site?.pages.find((candidate) => candidate.id === 'page-home')
+    const page = useEditorStore
+      .getState()
+      .site?.pages.find((candidate) => candidate.id === 'page-home')
     expect(page?.template?.target).toEqual({ kind: 'postTypes', tableSlugs: ['projects'] })
   })
 
@@ -192,7 +207,9 @@ describe('SiteExplorerPanel templates', () => {
     })
     fireEvent.click(screen.getByRole('menuitem', { name: /convert to page/i }))
 
-    const page = useEditorStore.getState().site?.pages.find((candidate) => candidate.id === 'page-template')
+    const page = useEditorStore
+      .getState()
+      .site?.pages.find((candidate) => candidate.id === 'page-template')
     expect(page?.template).toBeUndefined()
     expect(page?.nodes['root-template'].dynamicBindings).toBeUndefined()
   })

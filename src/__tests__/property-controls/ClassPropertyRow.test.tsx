@@ -4,7 +4,10 @@ describe('ClassPropertyRow remove button layout', () => {
   it('does not reserve a right-side gutter that shrinks property controls', async () => {
     const { readFileSync } = await import('fs')
     const css = readFileSync(
-      new URL('../../admin/pages/site/panels/PropertiesPanel/ClassPropertyRow.module.css', import.meta.url),
+      new URL(
+        '../../admin/pages/site/panels/PropertiesPanel/ClassPropertyRow.module.css',
+        import.meta.url,
+      ),
       'utf-8',
     )
 
@@ -14,7 +17,10 @@ describe('ClassPropertyRow remove button layout', () => {
   it('overlays the remove button on the left label column with a fade', async () => {
     const { readFileSync } = await import('fs')
     const css = readFileSync(
-      new URL('../../admin/pages/site/panels/PropertiesPanel/ClassPropertyRow.module.css', import.meta.url),
+      new URL(
+        '../../admin/pages/site/panels/PropertiesPanel/ClassPropertyRow.module.css',
+        import.meta.url,
+      ),
       'utf-8',
     )
     const controlCss = readFileSync(
@@ -33,8 +39,12 @@ describe('ClassPropertyRow remove button layout', () => {
     expect(compactCss).toContain(
       '.removeBtn{position:absolute;top:calc(var(--class-remove-row-center)-(var(--class-remove-button-size)/2));left:calc(var(--class-remove-label-column)-var(--class-remove-button-size)-4px)',
     )
-    expect(css).toMatch(/\.removeBtn\.removeBtn\s*\{[^}]*width:\s*var\(--class-remove-button-size\)/s)
-    expect(css).toMatch(/\.removeBtn\.removeBtn\s*\{[^}]*height:\s*var\(--class-remove-button-size\)/s)
+    expect(css).toMatch(
+      /\.removeBtn\.removeBtn\s*\{[^}]*width:\s*var\(--class-remove-button-size\)/s,
+    )
+    expect(css).toMatch(
+      /\.removeBtn\.removeBtn\s*\{[^}]*height:\s*var\(--class-remove-button-size\)/s,
+    )
     expect(css).not.toMatch(/\.removeBtn\s*\{[^}]*right:/s)
     expect(css).not.toMatch(/\.removeBtn\s*\{[^}]*translateY\(-50%\)/s)
   })
@@ -42,11 +52,17 @@ describe('ClassPropertyRow remove button layout', () => {
   it('uses a neutral remove affordance instead of the destructive danger hover style', async () => {
     const { readFileSync } = await import('fs')
     const rowSource = readFileSync(
-      new URL('../../admin/pages/site/panels/PropertiesPanel/ClassPropertyRow.tsx', import.meta.url),
+      new URL(
+        '../../admin/pages/site/panels/PropertiesPanel/ClassPropertyRow.tsx',
+        import.meta.url,
+      ),
       'utf-8',
     )
     const css = readFileSync(
-      new URL('../../admin/pages/site/panels/PropertiesPanel/ClassPropertyRow.module.css', import.meta.url),
+      new URL(
+        '../../admin/pages/site/panels/PropertiesPanel/ClassPropertyRow.module.css',
+        import.meta.url,
+      ),
       'utf-8',
     )
 
@@ -69,7 +85,10 @@ describe('StyleRuleComposer module style remove button layout', () => {
     // This gate ensures no moduleStyleRow padding-right accidentally reappears.
     const { readFileSync } = await import('fs')
     const css = readFileSync(
-      new URL('../../admin/pages/site/panels/PropertiesPanel/StyleRuleComposer.module.css', import.meta.url),
+      new URL(
+        '../../admin/pages/site/panels/PropertiesPanel/StyleRuleComposer.module.css',
+        import.meta.url,
+      ),
       'utf-8',
     )
 

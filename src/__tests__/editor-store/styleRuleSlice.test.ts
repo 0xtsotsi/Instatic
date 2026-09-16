@@ -244,8 +244,9 @@ describe('styleRuleSlice.applyCssRules', () => {
       updated: 0,
       blockedSelectors: [],
     })
-    const rule = Object.values(useEditorStore.getState().site!.styleRules)
-      .find((candidate) => candidate.selector === '.priority')!
+    const rule = Object.values(useEditorStore.getState().site!.styleRules).find(
+      (candidate) => candidate.selector === '.priority',
+    )!
     const historyBeforeNoop = historyLength()
     const updatedAtBeforeNoop = rule.updatedAt
 
@@ -646,7 +647,9 @@ describe('styleRuleSlice — undo / redo', () => {
 
     getStore().deleteClass(cls.id)
     expect(useEditorStore.getState().site!.styleRules[cls.id]).toBeUndefined()
-    expect(useEditorStore.getState().site!.pages[0].nodes[childId].classIds ?? []).not.toContain(cls.id)
+    expect(useEditorStore.getState().site!.pages[0].nodes[childId].classIds ?? []).not.toContain(
+      cls.id,
+    )
 
     useEditorStore.getState().undo()
     expect(useEditorStore.getState().site!.styleRules[cls.id]).toBeDefined()
@@ -654,7 +657,9 @@ describe('styleRuleSlice — undo / redo', () => {
 
     useEditorStore.getState().redo()
     expect(useEditorStore.getState().site!.styleRules[cls.id]).toBeUndefined()
-    expect(useEditorStore.getState().site!.pages[0].nodes[childId].classIds ?? []).not.toContain(cls.id)
+    expect(useEditorStore.getState().site!.pages[0].nodes[childId].classIds ?? []).not.toContain(
+      cls.id,
+    )
   })
 
   it('style edits are undoable and redoable', () => {
@@ -676,13 +681,19 @@ describe('styleRuleSlice — undo / redo', () => {
     const cls = getStore().createClass('responsive')
 
     getStore().setClassContextStyles(cls.id, 'mobile', { fontSize: '14px' })
-    expect(useEditorStore.getState().site!.styleRules[cls.id].contextStyles.mobile?.fontSize).toBe('14px')
+    expect(useEditorStore.getState().site!.styleRules[cls.id].contextStyles.mobile?.fontSize).toBe(
+      '14px',
+    )
 
     useEditorStore.getState().undo()
-    expect(useEditorStore.getState().site!.styleRules[cls.id].contextStyles.mobile?.fontSize).toBeUndefined()
+    expect(
+      useEditorStore.getState().site!.styleRules[cls.id].contextStyles.mobile?.fontSize,
+    ).toBeUndefined()
 
     useEditorStore.getState().redo()
-    expect(useEditorStore.getState().site!.styleRules[cls.id].contextStyles.mobile?.fontSize).toBe('14px')
+    expect(useEditorStore.getState().site!.styleRules[cls.id].contextStyles.mobile?.fontSize).toBe(
+      '14px',
+    )
   })
 
   it('node class assignments are undoable and redoable', () => {
@@ -693,13 +704,17 @@ describe('styleRuleSlice — undo / redo', () => {
     expect(useEditorStore.getState().site!.pages[0].nodes[childId].classIds ?? []).toContain(cls.id)
 
     useEditorStore.getState().undo()
-    expect(useEditorStore.getState().site!.pages[0].nodes[childId].classIds ?? []).not.toContain(cls.id)
+    expect(useEditorStore.getState().site!.pages[0].nodes[childId].classIds ?? []).not.toContain(
+      cls.id,
+    )
 
     useEditorStore.getState().redo()
     expect(useEditorStore.getState().site!.pages[0].nodes[childId].classIds ?? []).toContain(cls.id)
 
     getStore().removeNodeClass(childId, cls.id)
-    expect(useEditorStore.getState().site!.pages[0].nodes[childId].classIds ?? []).not.toContain(cls.id)
+    expect(useEditorStore.getState().site!.pages[0].nodes[childId].classIds ?? []).not.toContain(
+      cls.id,
+    )
 
     useEditorStore.getState().undo()
     expect(useEditorStore.getState().site!.pages[0].nodes[childId].classIds ?? []).toContain(cls.id)
@@ -801,9 +816,7 @@ describe('styleRuleSlice — node class assignment in VC canvas', () => {
 
     getStore().addNodeClass(vcChildId, cls.id)
 
-    const vc = useEditorStore
-      .getState()
-      .site!.visualComponents.find((v) => v.id === vcId)!
+    const vc = useEditorStore.getState().site!.visualComponents.find((v) => v.id === vcId)!
     expect(vc.tree.nodes[vcChildId].classIds).toContain(cls.id)
   })
 
@@ -814,9 +827,7 @@ describe('styleRuleSlice — node class assignment in VC canvas', () => {
     getStore().addNodeClass(vcChildId, cls.id)
     getStore().removeNodeClass(vcChildId, cls.id)
 
-    const vc = useEditorStore
-      .getState()
-      .site!.visualComponents.find((v) => v.id === vcId)!
+    const vc = useEditorStore.getState().site!.visualComponents.find((v) => v.id === vcId)!
     expect(vc.tree.nodes[vcChildId].classIds ?? []).not.toContain(cls.id)
   })
 
@@ -832,9 +843,7 @@ describe('styleRuleSlice — node class assignment in VC canvas', () => {
     // [a, b, c] → move c up → [a, c, b]
     getStore().reorderNodeClass(vcChildId, c.id, 'up')
 
-    const vc = useEditorStore
-      .getState()
-      .site!.visualComponents.find((v) => v.id === vcId)!
+    const vc = useEditorStore.getState().site!.visualComponents.find((v) => v.id === vcId)!
     expect(vc.tree.nodes[vcChildId].classIds).toEqual([a.id, c.id, b.id])
   })
 
@@ -845,9 +854,7 @@ describe('styleRuleSlice — node class assignment in VC canvas', () => {
 
     getStore().deleteClass(cls.id)
 
-    const vc = useEditorStore
-      .getState()
-      .site!.visualComponents.find((v) => v.id === vcId)!
+    const vc = useEditorStore.getState().site!.visualComponents.find((v) => v.id === vcId)!
     expect(vc.tree.nodes[vcChildId].classIds ?? []).not.toContain(cls.id)
   })
 })

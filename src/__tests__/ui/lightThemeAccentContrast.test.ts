@@ -48,12 +48,10 @@ function parseHexColor(value: string): [number, number, number] {
 function relativeLuminance([red, green, blue]: [number, number, number]): number {
   const [r, g, b] = [red, green, blue].map((channel) => {
     const normalized = channel / 255
-    return normalized <= 0.03928
-      ? normalized / 12.92
-      : ((normalized + 0.055) / 1.055) ** 2.4
+    return normalized <= 0.03928 ? normalized / 12.92 : ((normalized + 0.055) / 1.055) ** 2.4
   })
 
-  return (0.2126 * r) + (0.7152 * g) + (0.0722 * b)
+  return 0.2126 * r + 0.7152 * g + 0.0722 * b
 }
 
 function contrastRatio(foreground: string, background: string): number {

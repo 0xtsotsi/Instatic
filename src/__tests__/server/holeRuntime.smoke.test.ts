@@ -16,10 +16,7 @@
  */
 
 import { describe, it, expect } from 'bun:test'
-import {
-  HOLE_RUNTIME_JS,
-  runInstaticHoleRuntime,
-} from '../../../server/publish/holeRuntime'
+import { HOLE_RUNTIME_JS, runInstaticHoleRuntime } from '../../../server/publish/holeRuntime'
 
 describe('HOLE_RUNTIME_JS — static source content', () => {
   it('parses and keeps the non-behavioral runtime constants wired', () => {
@@ -47,7 +44,7 @@ describe('HOLE_RUNTIME_JS — static source content', () => {
 // ---------------------------------------------------------------------------
 
 describe('HOLE_RUNTIME_JS — runtime behaviour with mock IntersectionObserver', () => {
-  it('observes each hole\'s placeholder child (not the boxless instatic-hole)', () => {
+  it("observes each hole's placeholder child (not the boxless instatic-hole)", () => {
     document.body.innerHTML = `
       <instatic-hole id="hole-a" data-instatic-hole="node-a" data-instatic-version="1" style="display:contents"><div class="sk">a</div></instatic-hole>
       <instatic-hole id="hole-b" data-instatic-hole="node-b" data-instatic-version="1" style="display:contents"><div class="sk">b</div></instatic-hole>
@@ -66,7 +63,9 @@ describe('HOLE_RUNTIME_JS — runtime behaviour with mock IntersectionObserver',
       }
       unobserve(_el: Element) {}
       disconnect() {}
-      takeRecords() { return [] }
+      takeRecords() {
+        return []
+      }
     } as unknown as typeof IntersectionObserver
 
     try {
@@ -108,7 +107,9 @@ describe('HOLE_RUNTIME_JS — runtime behaviour with mock IntersectionObserver',
         unobservedElements.push(el)
       }
       disconnect() {}
-      takeRecords() { return [] }
+      takeRecords() {
+        return []
+      }
     } as unknown as typeof IntersectionObserver
 
     try {
@@ -164,7 +165,9 @@ describe('HOLE_RUNTIME_JS — runtime behaviour with mock IntersectionObserver',
       }
       unobserve(_el: Element) {}
       disconnect() {}
-      takeRecords() { return [] }
+      takeRecords() {
+        return []
+      }
     } as unknown as typeof IntersectionObserver
 
     try {
@@ -205,7 +208,9 @@ describe('HOLE_RUNTIME_JS — runtime behaviour with mock IntersectionObserver',
       observe(_el: Element) {}
       unobserve(_el: Element) {}
       disconnect() {}
-      takeRecords() { return [] }
+      takeRecords() {
+        return []
+      }
     } as unknown as typeof IntersectionObserver
 
     try {

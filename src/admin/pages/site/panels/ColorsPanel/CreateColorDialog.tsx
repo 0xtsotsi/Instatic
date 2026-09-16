@@ -48,21 +48,10 @@ export function CreateColorDialog({
       initialFocusRef={nameInputRef}
       footer={
         <>
-          <Button
-            variant="secondary"
-            size="sm"
-            type="button"
-            onClick={onCancel}
-          >
+          <Button variant="secondary" size="sm" type="button" onClick={onCancel}>
             Cancel
           </Button>
-          <Button
-            variant="primary"
-            size="sm"
-            type="submit"
-            form={FORM_ID}
-            disabled={!canSubmit}
-          >
+          <Button variant="primary" size="sm" type="submit" form={FORM_ID} disabled={!canSubmit}>
             Create
           </Button>
         </>
@@ -70,7 +59,9 @@ export function CreateColorDialog({
     >
       <form id={FORM_ID} className={dialogStyles.form} onSubmit={handleSubmit}>
         <div className={dialogStyles.field}>
-          <label htmlFor={nameInputId} className={dialogStyles.label}>Token name</label>
+          <label htmlFor={nameInputId} className={dialogStyles.label}>
+            Token name
+          </label>
           <Input
             id={nameInputId}
             ref={nameInputRef}

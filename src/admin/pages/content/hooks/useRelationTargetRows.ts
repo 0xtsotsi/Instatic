@@ -16,9 +16,11 @@ export function useRelationTargetRows(fields: DataField[]): (rowId: string) => D
 
   // Stable key over the SET of target tables — sorted so field order and
   // identity churn don't retrigger the fetch effect.
-  const targetKey = [...new Set(
-    fields.flatMap((field) => (field.type === 'relation' ? [field.targetTableId] : [])),
-  )].sort().join('\0')
+  const targetKey = [
+    ...new Set(fields.flatMap((field) => (field.type === 'relation' ? [field.targetTableId] : []))),
+  ]
+    .sort()
+    .join('\0')
 
   // Render-time reset when the target-table set changes (the React-recommended
   // adjust-state-during-render pattern) — the effect below only fetches.
@@ -41,7 +43,9 @@ export function useRelationTargetRows(fields: DataField[]): (rowId: string) => D
     ).then((pairs) => {
       if (!cancelled) setRowsByTable(new Map(pairs))
     })
-    return () => { cancelled = true }
+    return () => {
+      cancelled = true
+    }
   }, [targetKey])
 
   return (rowId: string) => {

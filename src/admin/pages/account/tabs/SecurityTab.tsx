@@ -25,12 +25,22 @@ export function SecurityTab({ user }: SecurityTabProps) {
       <div className={styles.sectionHeader}>
         <div>
           <h2 id="account-security-title">Security</h2>
-          <p>Password, step-up authentication, two-factor authentication, and connected sign-ins.</p>
+          <p>
+            Password, step-up authentication, two-factor authentication, and connected sign-ins.
+          </p>
         </div>
       </div>
 
-      {error && <p className={styles.error} role="alert">{error}</p>}
-      {status && <p className={styles.cardStatus} role="status">{status}</p>}
+      {error && (
+        <p className={styles.error} role="alert">
+          {error}
+        </p>
+      )}
+      {status && (
+        <p className={styles.cardStatus} role="status">
+          {status}
+        </p>
+      )}
 
       <div className={styles.cards}>
         <PasswordSettingsCard

@@ -148,4 +148,3 @@ export function zoomFromWheelDelta(currentZoom: number, deltaY: number): number 
   const factor = Math.pow(0.9985, deltaY)
   return clampZoom(currentZoom * factor)
 }
-

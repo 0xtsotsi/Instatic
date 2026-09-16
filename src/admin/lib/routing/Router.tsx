@@ -77,11 +77,7 @@ function getServerSnapshot(): string {
 }
 
 export function Router({ children }: { children: ReactNode }) {
-  const snapshot = useSyncExternalStore(
-    browserSubscribe,
-    getBrowserSnapshot,
-    getServerSnapshot,
-  )
+  const snapshot = useSyncExternalStore(browserSubscribe, getBrowserSnapshot, getServerSnapshot)
 
   const location: Location = (() => {
     const queryIndex = snapshot.indexOf('?')
@@ -122,9 +118,7 @@ export function Router({ children }: { children: ReactNode }) {
 
   const value: RouterContextValue = { location, navigate }
 
-  return (
-    <RouterContext.Provider value={value}>{children}</RouterContext.Provider>
-  )
+  return <RouterContext.Provider value={value}>{children}</RouterContext.Provider>
 }
 
 // ---------------------------------------------------------------------------
@@ -161,9 +155,7 @@ export function MemoryRouter({
 
   const value: RouterContextValue = { location, navigate }
 
-  return (
-    <RouterContext.Provider value={value}>{children}</RouterContext.Provider>
-  )
+  return <RouterContext.Provider value={value}>{children}</RouterContext.Provider>
 }
 
 // ---------------------------------------------------------------------------
@@ -219,10 +211,10 @@ function collectRouteChildren(children: ReactNode): RouteProps[] {
   const arr = Array.isArray(children) ? children : [children]
   for (const child of arr) {
     if (
-      typeof child === 'object'
-      && child !== null
-      && 'type' in child
-      && (child as { type?: unknown }).type === Route
+      typeof child === 'object' &&
+      child !== null &&
+      'type' in child &&
+      (child as { type?: unknown }).type === Route
     ) {
       const props = (child as { props: RouteProps }).props
       out.push(props)

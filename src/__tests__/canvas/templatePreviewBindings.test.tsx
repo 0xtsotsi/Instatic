@@ -25,7 +25,13 @@ const postsTable = {
     { type: 'text', id: 'title', label: 'Title', required: true, builtIn: true },
     { type: 'text', id: 'slug', label: 'Slug', required: true, builtIn: true },
     { type: 'richText', id: 'body', label: 'Body', format: 'markdown', builtIn: true },
-    { type: 'media', id: 'featuredMedia', label: 'Featured media', mediaKind: 'image', builtIn: true },
+    {
+      type: 'media',
+      id: 'featuredMedia',
+      label: 'Featured media',
+      mediaKind: 'image',
+      builtIn: true,
+    },
     { type: 'text', id: 'seoTitle', label: 'SEO title', builtIn: true },
     { type: 'longText', id: 'seoDescription', label: 'SEO description', builtIn: true },
   ],
@@ -142,8 +148,8 @@ describe('canvas template preview bindings', () => {
 
     await waitFor(() => {
       // No image element with the placeholder alt text should be rendered.
-      const altMatch = canvasFrameDocs().some((doc) =>
-        doc.querySelector('img[alt="Template image"]') !== null,
+      const altMatch = canvasFrameDocs().some(
+        (doc) => doc.querySelector('img[alt="Template image"]') !== null,
       )
       expect(altMatch).toBe(false)
       expect(combinedCanvasText()).toContain('No image selected')
@@ -157,22 +163,25 @@ describe('canvas template preview bindings', () => {
         return new Response(JSON.stringify({ table: postsTable }), { status: 200 })
       }
       if (url.startsWith('/admin/api/cms/data/tables/posts/loop-preview')) {
-        return new Response(JSON.stringify({
-          items: [
-            {
-              id: 'post-1',
-              fields: {
+        return new Response(
+          JSON.stringify({
+            items: [
+              {
                 id: 'post-1',
-                title: 'Published Blog Post',
-                slug: 'published-blog-post',
-                body: 'Body',
-                permalink: '/posts/published-blog-post',
-                publishedAt: '2026-05-01T10:00:00.000Z',
+                fields: {
+                  id: 'post-1',
+                  title: 'Published Blog Post',
+                  slug: 'published-blog-post',
+                  body: 'Body',
+                  permalink: '/posts/published-blog-post',
+                  publishedAt: '2026-05-01T10:00:00.000Z',
+                },
               },
-            },
-          ],
-          totalItems: 1,
-        }), { status: 200 })
+            ],
+            totalItems: 1,
+          }),
+          { status: 200 },
+        )
       }
       if (url === '/admin/api/cms/data/tables') {
         return new Response(JSON.stringify({ tables: [postsTable] }), { status: 200 })
@@ -244,12 +253,14 @@ describe('canvas template preview bindings', () => {
 })
 
 function canvasFrameDocs(): Document[] {
-  const iframes = Array.from(document.querySelectorAll<HTMLIFrameElement>('iframe')).filter(
-    (i) => i.title.startsWith('Canvas frame for '),
+  const iframes = Array.from(document.querySelectorAll<HTMLIFrameElement>('iframe')).filter((i) =>
+    i.title.startsWith('Canvas frame for '),
   )
   return iframes.map((i) => i.contentDocument).filter((d): d is Document => d !== null)
 }
 
 function combinedCanvasText(): string {
-  return canvasFrameDocs().map((doc) => doc.body.textContent ?? '').join(' ')
+  return canvasFrameDocs()
+    .map((doc) => doc.body.textContent ?? '')
+    .join(' ')
 }

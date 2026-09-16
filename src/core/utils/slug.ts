@@ -11,11 +11,12 @@
  * `src/core/page-tree/slugs.ts::normalizePageSlug`.
  */
 export function slugFromTitle(title: string): string {
-  return title
-    .trim()
-    .toLowerCase()
-    .replace(/['"]/g, '')
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/^-+|-+$/g, '')
-    || 'untitled'
+  return (
+    title
+      .trim()
+      .toLowerCase()
+      .replace(/['"]/g, '')
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-+|-+$/g, '') || 'untitled'
+  )
 }

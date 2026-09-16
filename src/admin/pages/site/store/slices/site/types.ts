@@ -8,7 +8,17 @@
 
 import type { StoreApi } from 'zustand'
 import type { Draft, Patches } from 'mutative'
-import type { FrameworkColorToken, FrameworkColorUtilityType, FrameworkPreferencesSettings, FrameworkScaleManualSize, FrameworkScaleMode, FrameworkSpacingClassGenerator, FrameworkSpacingGroup, FrameworkTypographyClassGenerator, FrameworkTypographyGroup } from '@core/framework-schema'
+import type {
+  FrameworkColorToken,
+  FrameworkColorUtilityType,
+  FrameworkPreferencesSettings,
+  FrameworkScaleManualSize,
+  FrameworkScaleMode,
+  FrameworkSpacingClassGenerator,
+  FrameworkSpacingGroup,
+  FrameworkTypographyClassGenerator,
+  FrameworkTypographyGroup,
+} from '@core/framework-schema'
 import type {
   DecorativeSiteExplorerSectionId,
   DynamicPropBinding,
@@ -30,7 +40,6 @@ import type { ImportFragment } from '@core/htmlImport'
 import type { NewStyleRule, SiteImportTransaction } from '@core/siteImport'
 import type { FrameworkChangeImpact, FrameworkPreset } from '@core/framework'
 import type { EditorStore } from '@site/store/types'
-
 
 // ---------------------------------------------------------------------------
 // Public action surface — every method below appears as a top-level entry on
@@ -136,10 +145,22 @@ export interface SiteSlice {
   reorderPages: (fromIndex: number, toIndex: number) => void
   convertPageToTemplate: (pageId: string, config: PageTemplateConfig) => void
   convertTemplateToPage: (pageId: string) => void
-  createExplorerFolder: (sectionId: SiteExplorerSectionId, name: string, parentPath?: string) => string
-  renameExplorerFolder: (sectionId: DecorativeSiteExplorerSectionId, folderId: string, name: string) => void
+  createExplorerFolder: (
+    sectionId: SiteExplorerSectionId,
+    name: string,
+    parentPath?: string,
+  ) => string
+  renameExplorerFolder: (
+    sectionId: DecorativeSiteExplorerSectionId,
+    folderId: string,
+    name: string,
+  ) => void
   deleteExplorerFolder: (sectionId: DecorativeSiteExplorerSectionId, folderId: string) => void
-  moveExplorerFolder: (sectionId: DecorativeSiteExplorerSectionId, folderId: string, nextIndex: number) => void
+  moveExplorerFolder: (
+    sectionId: DecorativeSiteExplorerSectionId,
+    folderId: string,
+    nextIndex: number,
+  ) => void
   moveExplorerItem: (
     sectionId: DecorativeSiteExplorerSectionId,
     itemId: string,
@@ -152,7 +173,11 @@ export interface SiteSlice {
     parentFolderId: string | null,
     nextIndex: number,
   ) => void
-  wrapExplorerItemsInFolder: (sectionId: DecorativeSiteExplorerSectionId, itemIds: string[], name: string) => string | null
+  wrapExplorerItemsInFolder: (
+    sectionId: DecorativeSiteExplorerSectionId,
+    itemIds: string[],
+    name: string,
+  ) => string | null
   previewRenameExplorerFolder: (
     sectionId: StructuralSiteExplorerSectionId,
     folderPath: string,
@@ -173,7 +198,10 @@ export interface SiteSlice {
     folderPath: string,
   ) => ExplorerPathChangePlan
   commitExplorerPathChange: (plan: ExplorerPathChangePlan) => void
-  toggleStructuralExplorerFolder: (sectionId: StructuralSiteExplorerSectionId, folderPath: string) => void
+  toggleStructuralExplorerFolder: (
+    sectionId: StructuralSiteExplorerSectionId,
+    folderPath: string,
+  ) => void
   moveStructuralExplorerRow: (
     sectionId: StructuralSiteExplorerSectionId,
     row: Omit<StructuralExplorerRowOrder, 'order'>,
@@ -182,7 +210,12 @@ export interface SiteSlice {
   setPageAsHomepage: (pageId: string) => void
 
   // Node mutations (operate on the active page)
-  insertNode: (moduleId: string, defaults: Record<string, unknown>, parentId: string, index?: number) => string
+  insertNode: (
+    moduleId: string,
+    defaults: Record<string, unknown>,
+    parentId: string,
+    index?: number,
+  ) => string
 
   /**
    * Insert a fragment of imported HTML nodes into the active tree under `parentId`.
@@ -225,12 +258,19 @@ export interface SiteSlice {
    * Inline styles are BASE-ONLY (no breakpoint/condition axis), mirroring real
    * HTML inline styles.
    */
-  setNodeInlineStyles: (nodeId: string, patch: Record<string, string | number | null | undefined>) => void
+  setNodeInlineStyles: (
+    nodeId: string,
+    patch: Record<string, string | number | null | undefined>,
+  ) => void
   /** Remove a single property from a node's inline styles. */
   removeNodeInlineStyleProperty: (nodeId: string, propKey: string) => void
   /** Remove ALL inline styles from a node (clears the `inlineStyles` field). */
   clearNodeInlineStyles: (nodeId: string) => void
-  setBreakpointOverride: (nodeId: string, breakpointId: string, patch: Record<string, unknown>) => void
+  setBreakpointOverride: (
+    nodeId: string,
+    breakpointId: string,
+    patch: Record<string, unknown>,
+  ) => void
   clearBreakpointOverride: (nodeId: string, breakpointId: string) => void
   renameNode: (nodeId: string, label: string) => void
   toggleNodeLocked: (nodeId: string) => void
@@ -241,12 +281,20 @@ export interface SiteSlice {
   duplicateNode: (nodeId: string) => string
   /** Multi-duplicate: duplicates every id in place (single undo step). Returns the new ids. */
   duplicateNodes: (nodeIds: string[]) => string[]
-  wrapNode: (nodeId: string, containerModuleId: string, defaults?: Record<string, unknown>) => string
+  wrapNode: (
+    nodeId: string,
+    containerModuleId: string,
+    defaults?: Record<string, unknown>,
+  ) => string
   /**
    * Wrap a multi-selection inside one new container with closest-common-ancestor
    * semantics. Returns the new wrapper id, or `null` when the selection is empty.
    */
-  wrapNodes: (nodeIds: string[], containerModuleId: string, defaults?: Record<string, unknown>) => string | null
+  wrapNodes: (
+    nodeIds: string[],
+    containerModuleId: string,
+    defaults?: Record<string, unknown>,
+  ) => string | null
   setNodeDynamicBinding: (nodeId: string, propKey: string, binding: DynamicPropBinding) => void
   clearNodeDynamicBinding: (nodeId: string, propKey: string) => void
 
@@ -272,7 +320,10 @@ export interface SiteSlice {
   // Framework typography mutations
   toggleFrameworkTypographyDisabled: () => void
   createFrameworkTypographyGroup: () => FrameworkTypographyGroup
-  updateFrameworkTypographyGroup: (groupId: string, patch: UpdateFrameworkTypographyGroupPatch) => void
+  updateFrameworkTypographyGroup: (
+    groupId: string,
+    patch: UpdateFrameworkTypographyGroupPatch,
+  ) => void
   duplicateFrameworkTypographyGroup: (groupId: string) => FrameworkTypographyGroup | null
   resetFrameworkTypographyGroup: (groupId: string) => void
   deleteFrameworkTypographyGroup: (groupId: string) => void
@@ -351,7 +402,9 @@ export interface SiteSlice {
    * single press. Returns `true` when the recipe produced at least one real
    * mutation; `false` for explicit no-ops.
    */
-  mutateAllPagesAndSite(fn: (site: SiteDocument, helpers: SiteImportTransaction) => SiteMutationResult): boolean
+  mutateAllPagesAndSite(
+    fn: (site: SiteDocument, helpers: SiteImportTransaction) => SiteMutationResult,
+  ): boolean
 
   // ─── Undo / Redo ──────────────────────────────────────────────────────────
   /**

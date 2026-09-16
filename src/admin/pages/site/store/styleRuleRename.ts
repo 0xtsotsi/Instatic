@@ -44,11 +44,12 @@ function validateSelectorListWithCssSupports(selector: string): boolean | null {
 type CssStyleSheetConstructor = new () => CSSStyleSheet
 
 function validateSelectorRuleWithStylesheet(selector: string): boolean | null {
-  const Sheet = typeof CSSStyleSheet !== 'undefined'
-    ? CSSStyleSheet
-    : typeof window !== 'undefined' && typeof window.CSSStyleSheet === 'function'
-      ? window.CSSStyleSheet
-      : null
+  const Sheet =
+    typeof CSSStyleSheet !== 'undefined'
+      ? CSSStyleSheet
+      : typeof window !== 'undefined' && typeof window.CSSStyleSheet === 'function'
+        ? window.CSSStyleSheet
+        : null
   if (!Sheet) return null
 
   try {
@@ -137,7 +138,8 @@ export function renameStyleRule(
   const trimmed = name.trim()
   if ((rule.kind ?? 'class') === 'ambient') {
     if (trimmed.length === 0) throw new Error('[classSlice] Ambient selector cannot be empty')
-    if (!isValidCssSelector(trimmed)) throw new Error(`[classSlice] Invalid CSS selector: ${trimmed}`)
+    if (!isValidCssSelector(trimmed))
+      throw new Error(`[classSlice] Invalid CSS selector: ${trimmed}`)
     if (Object.is(rule.selector, trimmed) && Object.is(rule.name, trimmed)) return false
 
     rule.name = trimmed

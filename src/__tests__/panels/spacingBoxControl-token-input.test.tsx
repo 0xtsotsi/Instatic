@@ -24,9 +24,27 @@ import { useEditorStore } from '@site/store/store'
 import { makeSite } from '../fixtures'
 
 const TOKENS: ReadonlyArray<Token> = [
-  { step: 'sm', varName: '--space-sm', valueExpr: 'var(--space-sm)', groupName: 'Spacing', prefix: 'space' },
-  { step: 'md', varName: '--space-md', valueExpr: 'var(--space-md)', groupName: 'Spacing', prefix: 'space' },
-  { step: 'lg', varName: '--space-lg', valueExpr: 'var(--space-lg)', groupName: 'Spacing', prefix: 'space' },
+  {
+    step: 'sm',
+    varName: '--space-sm',
+    valueExpr: 'var(--space-sm)',
+    groupName: 'Spacing',
+    prefix: 'space',
+  },
+  {
+    step: 'md',
+    varName: '--space-md',
+    valueExpr: 'var(--space-md)',
+    groupName: 'Spacing',
+    prefix: 'space',
+  },
+  {
+    step: 'lg',
+    varName: '--space-lg',
+    valueExpr: 'var(--space-lg)',
+    groupName: 'Spacing',
+    prefix: 'space',
+  },
 ]
 
 beforeEach(() => {

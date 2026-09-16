@@ -35,9 +35,27 @@ function resolvedMedia(path = '/uploads/hero.png'): RenderResolvedMedia {
     altText: '',
     blurHash: null,
     variants: [
-      { width: 320, height: 160, format: 'webp', path: '/uploads/hero-w320.webp', sizeBytes: 12_000 },
-      { width: 1024, height: 512, format: 'webp', path: '/uploads/hero-w1024.webp', sizeBytes: 82_000 },
-      { width: 2048, height: 1024, format: 'webp', path: '/uploads/hero-w2048.webp', sizeBytes: 190_000 },
+      {
+        width: 320,
+        height: 160,
+        format: 'webp',
+        path: '/uploads/hero-w320.webp',
+        sizeBytes: 12_000,
+      },
+      {
+        width: 1024,
+        height: 512,
+        format: 'webp',
+        path: '/uploads/hero-w1024.webp',
+        sizeBytes: 82_000,
+      },
+      {
+        width: 2048,
+        height: 1024,
+        format: 'webp',
+        path: '/uploads/hero-w2048.webp',
+        sizeBytes: 190_000,
+      },
     ],
     posterPath: null,
   }
@@ -74,9 +92,13 @@ describe('generateCanvasClassCSS', () => {
   it('uses the viewport context media query for canvas breakpoint styles', () => {
     const css = generateCanvasClassCSS(
       {
-        title: makeClass('title', { fontSize: '64px' }, {
-          mobile: { fontSize: '36px' },
-        }),
+        title: makeClass(
+          'title',
+          { fontSize: '64px' },
+          {
+            mobile: { fontSize: '36px' },
+          },
+        ),
       },
       [{ id: 'mobile', width: 375, mediaQuery: '(min-width: 375px)' }],
     )
@@ -115,9 +137,7 @@ describe('generateCanvasClassCSS', () => {
   it('uses the same declaration priorities as published CSS', () => {
     const rule = makeClass('notice', { color: 'red' })
     rule.stylePriorities = { color: 'important' }
-    expect(generateCanvasClassCSS({ notice: rule }, [])).toContain(
-      'color: red !important;',
-    )
+    expect(generateCanvasClassCSS({ notice: rule }, [])).toContain('color: red !important;')
   })
 
   it('emits sanitized raw @keyframes rules, matching the published output', () => {
@@ -186,12 +206,7 @@ describe('generateCanvasClassCSS', () => {
       ],
     }
 
-    const css = generateCanvasClassCSS(
-      generateFrameworkColorUtilityClasses(colors),
-      [],
-      [],
-      colors,
-    )
+    const css = generateCanvasClassCSS(generateFrameworkColorUtilityClasses(colors), [], [], colors)
 
     expect(css).toContain(':root.theme-alt')
     expect(css).not.toContain('theme-dark')
@@ -296,11 +311,7 @@ describe('generateForcedStateCSS', () => {
     const rule = hoverRule({ color: 'red' }, { mobile: { color: 'blue' } })
     rule.stylePriorities = { color: 'important' }
     rule.contextStylePriorities = { mobile: { color: 'important' } }
-    const css = generateForcedStateCSS(
-      'node-1',
-      rule,
-      [{ id: 'mobile', width: 375 }],
-    )
+    const css = generateForcedStateCSS('node-1', rule, [{ id: 'mobile', width: 375 }])
     expect(css).toContain('color: red !important;')
     expect(css).toContain('color: blue !important;')
   })

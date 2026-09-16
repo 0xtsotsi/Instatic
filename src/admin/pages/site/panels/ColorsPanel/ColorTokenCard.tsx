@@ -60,20 +60,12 @@ export function ColorTokenCard({
         >
           <span className={styles.rowText}>
             <span className={styles.rowTitle}>--{token.slug}</span>
-            <span className={styles.rowMeta}>
-              {token.category.trim() || 'Uncategorized'}
-            </span>
+            <span className={styles.rowMeta}>{token.category.trim() || 'Uncategorized'}</span>
           </span>
         </button>
       </div>
 
-      {expanded && (
-        <ColorTokenEditor
-          token={token}
-          categories={categories}
-          onPatch={onPatch}
-        />
-      )}
+      {expanded && <ColorTokenEditor token={token} categories={categories} onPatch={onPatch} />}
     </div>
   )
 }

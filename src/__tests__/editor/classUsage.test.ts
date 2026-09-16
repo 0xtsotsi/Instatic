@@ -137,15 +137,12 @@ describe('selectRecentAndFrequent', () => {
     expect(frequent).toHaveLength(CLASS_USAGE_FREQUENT_LIMIT)
   })
 
-  it('skips classes that aren\'t in the available list', () => {
+  it("skips classes that aren't in the available list", () => {
     const usage = {
       'cls-deleted': { lastUsedAt: 1000, count: 50 },
       'cls-still-here': { lastUsedAt: 500, count: 1 },
     }
-    const { recent, frequent } = selectRecentAndFrequent(
-      usage,
-      ['cls-still-here'],
-    )
+    const { recent, frequent } = selectRecentAndFrequent(usage, ['cls-still-here'])
 
     expect(recent).toEqual(['cls-still-here'])
     expect(frequent).toEqual([])
@@ -156,10 +153,7 @@ describe('selectRecentAndFrequent', () => {
       'cls-stale': { lastUsedAt: 999, count: 0 },
       'cls-real': { lastUsedAt: 100, count: 1 },
     }
-    const { recent, frequent } = selectRecentAndFrequent(
-      usage,
-      ['cls-stale', 'cls-real'],
-    )
+    const { recent, frequent } = selectRecentAndFrequent(usage, ['cls-stale', 'cls-real'])
 
     expect(recent).toEqual(['cls-real'])
     expect(frequent).toEqual([])

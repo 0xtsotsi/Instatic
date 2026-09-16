@@ -24,13 +24,8 @@ interface ModuleIconProps extends IconProps {
   module?: AnyModuleDefinition | null
 }
 
-export function ModuleIcon({
-  moduleId,
-  module: explicitModule,
-  ...iconProps
-}: ModuleIconProps) {
-  const definition =
-    explicitModule ?? (moduleId ? registry.get(moduleId) ?? null : null)
+export function ModuleIcon({ moduleId, module: explicitModule, ...iconProps }: ModuleIconProps) {
+  const definition = explicitModule ?? (moduleId ? (registry.get(moduleId) ?? null) : null)
   const ResolvedIcon = definition?.icon ?? SquareSolidIcon
   return <ResolvedIcon {...iconProps} />
 }

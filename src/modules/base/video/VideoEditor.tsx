@@ -56,7 +56,11 @@ const FACADE_LAYER_STYLE: CSSProperties = {
   border: 0,
 }
 const FACADE_POSTER_STYLE: CSSProperties = { ...FACADE_LAYER_STYLE, objectFit: 'cover' }
-const FACADE_FRAME_STYLE: CSSProperties = { ...FACADE_LAYER_STYLE, background: 'transparent', zIndex: 1 }
+const FACADE_FRAME_STYLE: CSSProperties = {
+  ...FACADE_LAYER_STYLE,
+  background: 'transparent',
+  zIndex: 1,
+}
 // Transparent click-shield rendered on top of the iframe in the canvas
 // ONLY. The iframe has its own browsing context — even when we set
 // `pointer-events: none` on it, the YouTube player can still intercept
@@ -71,7 +75,11 @@ const FACADE_SHIELD_STYLE: CSSProperties = {
   cursor: 'pointer',
 }
 
-export const VideoEditor: React.FC<ModuleComponentProps<VideoStoredProps>> = ({ props, mcClassName, nodeWrapperProps }) => {
+export const VideoEditor: React.FC<ModuleComponentProps<VideoStoredProps>> = ({
+  props,
+  mcClassName,
+  nodeWrapperProps,
+}) => {
   const youtubeId = parseYoutubeId(props.videoUrl || '')
 
   // Resolve both assets in parallel via the per-path cache. For YouTube
@@ -80,9 +88,11 @@ export const VideoEditor: React.FC<ModuleComponentProps<VideoStoredProps>> = ({ 
   const videoAsset = useCmsMediaAssetByPath(!youtubeId ? props.videoUrl || null : null)
   const posterAsset = useCmsMediaAssetByPath(props.poster || null)
 
-  const posterUrl = posterAsset ? pickVariantUrl(posterAsset, CANVAS_CSS_WIDTH) : props.poster || null
+  const posterUrl = posterAsset
+    ? pickVariantUrl(posterAsset, CANVAS_CSS_WIDTH)
+    : props.poster || null
 
-  const posterSrcset = posterAsset ? buildVariantSrcset(posterAsset) ?? null : null
+  const posterSrcset = posterAsset ? (buildVariantSrcset(posterAsset) ?? null) : null
 
   const intrinsic = videoAsset
     ? { width: videoAsset.width ?? undefined, height: videoAsset.height ?? undefined }

@@ -148,7 +148,14 @@ describe('CanvasModeToggle', () => {
 function withRuntimeSite() {
   const runtime = normalizeSiteRuntimeConfig({
     scripts: {
-      entry: { enabled: true, runInCanvas: true, placement: 'body-end', timing: 'dom-ready', scope: { type: 'all-pages' }, priority: 100 },
+      entry: {
+        enabled: true,
+        runInCanvas: true,
+        placement: 'body-end',
+        timing: 'dom-ready',
+        scope: { type: 'all-pages' },
+        priority: 100,
+      },
     },
   })
   const page = makePage({
@@ -157,14 +164,16 @@ function withRuntimeSite() {
   })
   const site = makeSite({
     pages: [page],
-    files: [{
-      id: 'entry',
-      path: 'src/scripts/entry.ts',
-      type: 'script',
-      content: 'console.log("hi")',
-      createdAt: 1,
-      updatedAt: 1,
-    }],
+    files: [
+      {
+        id: 'entry',
+        path: 'src/scripts/entry.ts',
+        type: 'script',
+        content: 'console.log("hi")',
+        createdAt: 1,
+        updatedAt: 1,
+      },
+    ],
     packageJson: { dependencies: {}, devDependencies: {} },
     runtime,
   })
@@ -210,12 +219,15 @@ describe('useRuntimeScriptBuild', () => {
       const url = typeof input === 'string' ? input : input.toString()
       if (url.includes('/admin/api/cms/runtime/preview')) {
         buildCalls += 1
-        return new Response(JSON.stringify({
-          html: '<!DOCTYPE html><html><body></body></html>',
-          assets: [],
-          runtimeAssets: { scripts: [] },
-          diagnostics: [],
-        }), { status: 200 })
+        return new Response(
+          JSON.stringify({
+            html: '<!DOCTYPE html><html><body></body></html>',
+            assets: [],
+            runtimeAssets: { scripts: [] },
+            diagnostics: [],
+          }),
+          { status: 200 },
+        )
       }
       return new Response('', { status: 404 })
     }) as typeof fetch
@@ -251,13 +263,15 @@ describe('useRuntimeScriptBuild', () => {
     act(() => {
       const current = useEditorStore.getState().site!
       const nextPages = current.pages.map((p) =>
-        p.id !== 'page-1' ? p : {
-          ...p,
-          nodes: {
-            ...p.nodes,
-            root: { ...p.nodes.root, props: { ...p.nodes.root.props, padding: '16px' } },
-          },
-        },
+        p.id !== 'page-1'
+          ? p
+          : {
+              ...p,
+              nodes: {
+                ...p.nodes,
+                root: { ...p.nodes.root, props: { ...p.nodes.root.props, padding: '16px' } },
+              },
+            },
       )
       useEditorStore.setState({
         site: { ...current, pages: nextPages, updatedAt: Date.now() },

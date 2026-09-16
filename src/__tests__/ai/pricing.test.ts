@@ -22,7 +22,9 @@ describe('pricingKey normalisation', () => {
     expect(pricingKey('anthropic/claude-opus-4.8-fast')).toBe('claude-opus-4-8-fast')
     expect(pricingKey('anthropic/claude-opus-4.8:thinking')).toBe('claude-opus-4-8:thinking')
     // The variant must NOT collide with the base model's key.
-    expect(pricingKey('anthropic/claude-opus-4.8-fast')).not.toBe(pricingKey('anthropic/claude-opus-4.8'))
+    expect(pricingKey('anthropic/claude-opus-4.8-fast')).not.toBe(
+      pricingKey('anthropic/claude-opus-4.8'),
+    )
   })
 })
 

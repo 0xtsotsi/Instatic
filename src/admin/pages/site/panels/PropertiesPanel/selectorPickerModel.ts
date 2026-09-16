@@ -1,9 +1,7 @@
 import { styleRuleSelector, type PageNode, type StyleRule } from '@core/page-tree'
 import { readIdentifierEnd, splitSelectorList, stripStatePseudos } from '@site/cssStatePseudo'
 
-type SelectorMatch =
-  | { kind: 'direct' }
-  | { kind: 'inactive-pseudo'; pseudo: string }
+type SelectorMatch = { kind: 'direct' } | { kind: 'inactive-pseudo'; pseudo: string }
 
 export interface SelectorPillItem {
   rule: StyleRule
@@ -126,7 +124,10 @@ function stripCanvasEditorAttributes(root: Element): void {
   for (const element of [root, ...Array.from(root.querySelectorAll('*'))]) {
     const isCanvasNodeRoot = element.hasAttribute('data-node-id')
     for (const attr of Array.from(element.attributes)) {
-      if (attr.name.startsWith('data-canvas-') || (isCanvasNodeRoot && CANVAS_NODE_EDITOR_ATTRS.has(attr.name))) {
+      if (
+        attr.name.startsWith('data-canvas-') ||
+        (isCanvasNodeRoot && CANVAS_NODE_EDITOR_ATTRS.has(attr.name))
+      ) {
         element.removeAttribute(attr.name)
       }
     }
@@ -134,10 +135,12 @@ function stripCanvasEditorAttributes(root: Element): void {
 }
 
 function sortedRules(rules: Record<string, StyleRule>): StyleRule[] {
-  return Object.values(rules).slice().sort((a, b) => {
-    const byOrder = normaliseOrder(a) - normaliseOrder(b)
-    return byOrder !== 0 ? byOrder : a.name.localeCompare(b.name)
-  })
+  return Object.values(rules)
+    .slice()
+    .sort((a, b) => {
+      const byOrder = normaliseOrder(a) - normaliseOrder(b)
+      return byOrder !== 0 ? byOrder : a.name.localeCompare(b.name)
+    })
 }
 
 function normaliseOrder(rule: StyleRule): number {
@@ -166,7 +169,7 @@ function sortPillsBySpecificity(pills: SelectorPillItem[]): SelectorPillItem[] {
 type Specificity = readonly [number, number, number]
 
 function compareSpecificity(a: Specificity, b: Specificity): number {
-  return (a[0] - b[0]) || (a[1] - b[1]) || (a[2] - b[2])
+  return a[0] - b[0] || a[1] - b[1] || a[2] - b[2]
 }
 
 /**
@@ -269,7 +272,10 @@ interface AmbientRuleEvaluation {
   pillMatch: SelectorMatch | null
 }
 
-function evaluateAmbientRule(rule: StyleRule, selectedElement: Element | null): AmbientRuleEvaluation {
+function evaluateAmbientRule(
+  rule: StyleRule,
+  selectedElement: Element | null,
+): AmbientRuleEvaluation {
   if (!selectedElement) return { match: null, pillMatch: null }
 
   let match: SelectorMatch | null = null

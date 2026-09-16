@@ -70,7 +70,11 @@ export const OutletEditor: React.FC<ModuleComponentProps<OutletStoredProps>> = (
       nodes={previewPage.nodes as Record<string, BaseNode>}
       rootNodeId={previewPage.rootNodeId}
       classes={styleRules}
-      readonly={{ label: `${previewPage.title} (outlet preview)`, kind: 'page', targetId: previewPage.id }}
+      readonly={{
+        label: `${previewPage.title} (outlet preview)`,
+        kind: 'page',
+        targetId: previewPage.id,
+      }}
     />
   ) : (
     <CanvasModulePlaceholder icon={<TextPlusIcon size={16} />} label="Content outlet" />

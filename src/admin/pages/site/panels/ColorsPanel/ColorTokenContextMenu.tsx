@@ -1,8 +1,4 @@
-import {
-  ContextMenu,
-  ContextMenuItem,
-  ContextMenuSeparator,
-} from '@ui/components/ContextMenu'
+import { ContextMenu, ContextMenuItem, ContextMenuSeparator } from '@ui/components/ContextMenu'
 import { ChevronDownIcon } from 'pixel-art-icons/icons/chevron-down'
 import { ChevronUpIcon } from 'pixel-art-icons/icons/chevron-up'
 import { Copy2SharpIcon } from 'pixel-art-icons/icons/copy-2-sharp'

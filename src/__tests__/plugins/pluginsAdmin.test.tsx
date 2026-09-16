@@ -17,20 +17,22 @@ const mapManifest = {
   version: '1.0.0',
   apiVersion: 1,
   permissions: ['admin.navigation'],
-  adminPages: [{
-    id: 'overview',
-    title: 'Map Studio',
-    navLabel: 'Map',
-    icon: 'map',
-    route: '/admin/plugins/local.map/overview',
-    content: {
-      kind: 'map',
-      heading: 'Store Map',
-      body: 'Track important locations.',
-      centerLabel: 'Prague',
-      pins: [{ label: 'HQ', detail: 'Main office', x: 42, y: 55 }],
+  adminPages: [
+    {
+      id: 'overview',
+      title: 'Map Studio',
+      navLabel: 'Map',
+      icon: 'map',
+      route: '/admin/plugins/local.map/overview',
+      content: {
+        kind: 'map',
+        heading: 'Store Map',
+        body: 'Track important locations.',
+        centerLabel: 'Prague',
+        pins: [{ label: 'HQ', detail: 'Main office', x: 42, y: 55 }],
+      },
     },
-  }],
+  ],
 }
 
 function pluginRow(enabled = true, overrides: Record<string, unknown> = {}) {
@@ -115,9 +117,27 @@ function adminUser(): CmsCurrentUser {
       name: 'Admin',
       description: '',
       isSystem: true,
-      capabilities: ['site.read', 'site.structure.edit','site.content.edit','site.style.edit', 'plugins.read', 'plugins.configure', 'plugins.install', 'plugins.lifecycle'],
+      capabilities: [
+        'site.read',
+        'site.structure.edit',
+        'site.content.edit',
+        'site.style.edit',
+        'plugins.read',
+        'plugins.configure',
+        'plugins.install',
+        'plugins.lifecycle',
+      ],
     },
-    capabilities: ['site.read', 'site.structure.edit','site.content.edit','site.style.edit', 'plugins.read', 'plugins.configure', 'plugins.install', 'plugins.lifecycle'],
+    capabilities: [
+      'site.read',
+      'site.structure.edit',
+      'site.content.edit',
+      'site.style.edit',
+      'plugins.read',
+      'plugins.configure',
+      'plugins.install',
+      'plugins.lifecycle',
+    ],
     lastLoginAt: null,
     failedLoginCount: 0,
     lockedUntil: null,
@@ -164,7 +184,9 @@ describe('PluginsPage', () => {
       if (url === '/admin/api/cms/plugins' && init?.method === 'GET') {
         return json({
           plugins: [pluginRow(true)],
-          adminPages: [{ pluginId: 'local.map', pluginName: 'Map Studio', ...mapManifest.adminPages[0] }],
+          adminPages: [
+            { pluginId: 'local.map', pluginName: 'Map Studio', ...mapManifest.adminPages[0] },
+          ],
         })
       }
       if (url === '/admin/api/cms/plugins/local.map' && init?.method === 'PATCH') {
@@ -185,15 +207,20 @@ describe('PluginsPage', () => {
     )
 
     expect(await screen.findByText('Map Studio')).toBeDefined()
-    expect(screen.getAllByRole('link', { name: 'Map' })[0].getAttribute('href')).toBe('/admin/plugins/local.map/overview')
+    expect(screen.getAllByRole('link', { name: 'Map' })[0].getAttribute('href')).toBe(
+      '/admin/plugins/local.map/overview',
+    )
 
     fireEvent.click(screen.getByRole('button', { name: /disable map studio/i }))
     await waitFor(() => {
-      expect(calls.some((call) =>
-        String(call.input) === '/admin/api/cms/plugins/local.map' &&
-        call.init?.method === 'PATCH' &&
-        call.init.body === JSON.stringify({ enabled: false })
-      )).toBe(true)
+      expect(
+        calls.some(
+          (call) =>
+            String(call.input) === '/admin/api/cms/plugins/local.map' &&
+            call.init?.method === 'PATCH' &&
+            call.init.body === JSON.stringify({ enabled: false }),
+        ),
+      ).toBe(true)
     })
 
     fireEvent.click(screen.getByRole('button', { name: /remove map studio/i }))
@@ -205,10 +232,13 @@ describe('PluginsPage', () => {
     fireEvent.click(confirm)
 
     await waitFor(() => {
-      expect(calls.some((call) =>
-        String(call.input) === '/admin/api/cms/plugins/local.map' &&
-        call.init?.method === 'DELETE'
-      )).toBe(true)
+      expect(
+        calls.some(
+          (call) =>
+            String(call.input) === '/admin/api/cms/plugins/local.map' &&
+            call.init?.method === 'DELETE',
+        ),
+      ).toBe(true)
     })
   })
 
@@ -239,21 +269,28 @@ describe('PluginsPage', () => {
     const input = screen.getByLabelText('Plugin file')
     fireEvent.change(input, {
       target: {
-        files: [new File([JSON.stringify(mapManifest)], 'map-studio.plugin.json', { type: 'application/json' })],
+        files: [
+          new File([JSON.stringify(mapManifest)], 'map-studio.plugin.json', {
+            type: 'application/json',
+          }),
+        ],
       },
     })
 
     // Every install now goes through the review dialog — nothing installs
     // silently, even a near-declarative manifest.
     expect(await screen.findByText('Review Map Studio')).toBeDefined()
-    expect(calls.some((call) => String(call.input) === '/admin/api/cms/plugins' && call.init?.method === 'POST')).toBe(false)
+    expect(
+      calls.some(
+        (call) => String(call.input) === '/admin/api/cms/plugins' && call.init?.method === 'POST',
+      ),
+    ).toBe(false)
 
     fireEvent.click(screen.getByRole('button', { name: /approve and install/i }))
 
     await waitFor(() => {
-      const installCall = calls.find((call) =>
-        String(call.input) === '/admin/api/cms/plugins' &&
-        call.init?.method === 'POST'
+      const installCall = calls.find(
+        (call) => String(call.input) === '/admin/api/cms/plugins' && call.init?.method === 'POST',
       )
       expect(installCall).toBeDefined()
       expect(JSON.parse(String(installCall?.init?.body))).toMatchObject({
@@ -269,7 +306,14 @@ describe('PluginsPage', () => {
       ...mapManifest,
       id: 'acme.workflow',
       name: 'Workflow Tools',
-      permissions: ['admin.navigation', 'editor.code', 'editor.toolbar', 'editor.commands', 'editor.store.write', 'cms.storage'],
+      permissions: [
+        'admin.navigation',
+        'editor.code',
+        'editor.toolbar',
+        'editor.commands',
+        'editor.store.write',
+        'cms.storage',
+      ],
       entrypoints: { editor: 'editor/index.js' },
     }
 
@@ -297,22 +341,33 @@ describe('PluginsPage', () => {
 
     fireEvent.change(screen.getByLabelText('Plugin file'), {
       target: {
-        files: [new File([JSON.stringify(privilegedManifest)], 'workflow.plugin.json', { type: 'application/json' })],
+        files: [
+          new File([JSON.stringify(privilegedManifest)], 'workflow.plugin.json', {
+            type: 'application/json',
+          }),
+        ],
       },
     })
 
     expect(await screen.findByText('Review Workflow Tools')).toBeDefined()
     expect(screen.getByText('Add controls to the editor toolbar')).toBeDefined()
     expect(screen.getByText('Register editor commands')).toBeDefined()
-    expect(screen.getByText('Allows the plugin to mutate editor store state through a host transaction.')).toBeDefined()
-    expect(calls.some((call) => String(call.input) === '/admin/api/cms/plugins' && call.init?.method === 'POST')).toBe(false)
+    expect(
+      screen.getByText(
+        'Allows the plugin to mutate editor store state through a host transaction.',
+      ),
+    ).toBeDefined()
+    expect(
+      calls.some(
+        (call) => String(call.input) === '/admin/api/cms/plugins' && call.init?.method === 'POST',
+      ),
+    ).toBe(false)
 
     fireEvent.click(screen.getByRole('button', { name: /approve and install/i }))
 
     await waitFor(() => {
-      const installCall = calls.find((call) =>
-        String(call.input) === '/admin/api/cms/plugins' &&
-        call.init?.method === 'POST'
+      const installCall = calls.find(
+        (call) => String(call.input) === '/admin/api/cms/plugins' && call.init?.method === 'POST',
       )
       expect(installCall).toBeDefined()
       expect(JSON.parse(String(installCall?.init?.body))).toMatchObject({
@@ -371,10 +426,13 @@ describe('PluginsPage', () => {
     fireEvent.click(within(dialog).getByRole('button', { name: 'Remove anyway' }))
 
     await waitFor(() => {
-      expect(calls.some((call) =>
-        String(call.input) === '/admin/api/cms/plugins/local.map?force=true' &&
-        call.init?.method === 'DELETE'
-      )).toBe(true)
+      expect(
+        calls.some(
+          (call) =>
+            String(call.input) === '/admin/api/cms/plugins/local.map?force=true' &&
+            call.init?.method === 'DELETE',
+        ),
+      ).toBe(true)
     })
   })
 
@@ -383,10 +441,12 @@ describe('PluginsPage', () => {
       const url = String(input)
       if (url === '/admin/api/cms/plugins' && init?.method === 'GET') {
         return json({
-          plugins: [pluginRow(true, {
-            lifecycleStatus: 'error',
-            lastError: 'install exploded',
-          })],
+          plugins: [
+            pluginRow(true, {
+              lifecycleStatus: 'error',
+              lastError: 'install exploded',
+            }),
+          ],
           adminPages: [],
         })
       }

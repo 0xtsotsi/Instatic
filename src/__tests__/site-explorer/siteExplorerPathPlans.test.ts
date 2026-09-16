@@ -50,15 +50,33 @@ describe('site explorer path plans', () => {
     })
 
     expect(plan.blockers).toEqual([
-      { code: 'duplicate-page-slug', message: 'Page slug "/docs/setup" already exists.', target: 'docs/setup' },
+      {
+        code: 'duplicate-page-slug',
+        message: 'Page slug "/docs/setup" already exists.',
+        target: 'docs/setup',
+      },
     ])
   })
 
   it('plans exact script path rewrites and keeps file ids', () => {
     const site = makeSite({
       files: [
-        { id: 'main', path: 'documentation/assets/js/main.js', type: 'script', content: '', createdAt: 1, updatedAt: 1 },
-        { id: 'vendor', path: 'documentation/assets/js/vendor/jquery.min.js', type: 'script', content: '', createdAt: 1, updatedAt: 1 },
+        {
+          id: 'main',
+          path: 'documentation/assets/js/main.js',
+          type: 'script',
+          content: '',
+          createdAt: 1,
+          updatedAt: 1,
+        },
+        {
+          id: 'vendor',
+          path: 'documentation/assets/js/vendor/jquery.min.js',
+          type: 'script',
+          content: '',
+          createdAt: 1,
+          updatedAt: 1,
+        },
       ],
     })
 
@@ -71,7 +89,11 @@ describe('site explorer path plans', () => {
     expect(plan.blockers).toEqual([])
     expect(plan.changes.map((change) => [change.id, change.from, change.to])).toEqual([
       ['main', 'documentation/assets/js/main.js', 'documentation/assets/scripts/main.js'],
-      ['vendor', 'documentation/assets/js/vendor/jquery.min.js', 'documentation/assets/scripts/vendor/jquery.min.js'],
+      [
+        'vendor',
+        'documentation/assets/js/vendor/jquery.min.js',
+        'documentation/assets/scripts/vendor/jquery.min.js',
+      ],
     ])
   })
 
@@ -85,7 +107,10 @@ describe('site explorer path plans', () => {
       ],
     })
 
-    const plan = buildDeleteExplorerPathPlan(site, { sectionId: 'pages', folderPath: 'documentation' })
+    const plan = buildDeleteExplorerPathPlan(site, {
+      sectionId: 'pages',
+      folderPath: 'documentation',
+    })
 
     expect(plan.deletedItems.map((item) => [item.id, item.path])).toEqual([
       ['docs', 'documentation'],
@@ -95,10 +120,7 @@ describe('site explorer path plans', () => {
 
   it('commits rewrite plans exactly', () => {
     const site = makeSite({
-      pages: [
-        makePage({ id: 'home', slug: 'index' }),
-        makePage({ id: 'about', slug: 'about' }),
-      ],
+      pages: [makePage({ id: 'home', slug: 'index' }), makePage({ id: 'about', slug: 'about' })],
     })
     const plan = buildMoveExplorerItemPlan(site, {
       sectionId: 'pages',
@@ -114,9 +136,30 @@ describe('site explorer path plans', () => {
   it('commits file delete plans and removes matching runtime config', () => {
     const site = makeSite({
       files: [
-        { id: 'theme', path: 'documentation/assets/css/theme.css', type: 'style', content: '', createdAt: 1, updatedAt: 1 },
-        { id: 'main', path: 'documentation/assets/js/main.js', type: 'script', content: '', createdAt: 1, updatedAt: 1 },
-        { id: 'keep', path: 'marketing/assets/js/keep.js', type: 'script', content: '', createdAt: 1, updatedAt: 1 },
+        {
+          id: 'theme',
+          path: 'documentation/assets/css/theme.css',
+          type: 'style',
+          content: '',
+          createdAt: 1,
+          updatedAt: 1,
+        },
+        {
+          id: 'main',
+          path: 'documentation/assets/js/main.js',
+          type: 'script',
+          content: '',
+          createdAt: 1,
+          updatedAt: 1,
+        },
+        {
+          id: 'keep',
+          path: 'marketing/assets/js/keep.js',
+          type: 'script',
+          content: '',
+          createdAt: 1,
+          updatedAt: 1,
+        },
       ],
       runtime: {
         dependencyLock: { version: 1, packages: {}, updatedAt: 0 },

@@ -88,7 +88,14 @@ export function PluginSchedulesDialog({
   const error = loadError ?? actionError
 
   async function withStepUp<T>(scheduleId: string, action: () => Promise<T>): Promise<void> {
-    await runScheduleAction(scheduleId, action, runStepUp, setBusyScheduleId, setActionError, refresh)
+    await runScheduleAction(
+      scheduleId,
+      action,
+      runStepUp,
+      setBusyScheduleId,
+      setActionError,
+      refresh,
+    )
   }
 
   return (
@@ -128,10 +135,14 @@ export function PluginSchedulesDialog({
                 )
               }
               onPause={() =>
-                withStepUp(sched.scheduleId, () => pauseCmsPluginSchedule(pluginId, sched.scheduleId))
+                withStepUp(sched.scheduleId, () =>
+                  pauseCmsPluginSchedule(pluginId, sched.scheduleId),
+                )
               }
               onResume={() =>
-                withStepUp(sched.scheduleId, () => resumeCmsPluginSchedule(pluginId, sched.scheduleId))
+                withStepUp(sched.scheduleId, () =>
+                  resumeCmsPluginSchedule(pluginId, sched.scheduleId),
+                )
               }
             />
           ))}
@@ -198,13 +209,7 @@ function ScheduleRow({
           plugin owns that state, so the admin gets no controls for it. */}
       {canManageLifecycle && schedule.enabled && (
         <div className={styles.scheduleActions}>
-          <Button
-            variant="secondary"
-            size="sm"
-            type="button"
-            onClick={onRunNow}
-            disabled={busy}
-          >
+          <Button variant="secondary" size="sm" type="button" onClick={onRunNow} disabled={busy}>
             {busy ? 'Working...' : 'Run now'}
           </Button>
           {schedule.paused ? (

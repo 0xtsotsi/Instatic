@@ -16,10 +16,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { checkSizeLimit } from '@core/files/upload'
 import { compiledCheck } from '@core/utils/typeboxCompiler'
-import {
-  setCmsMediaAssetFolders,
-  type CmsMediaAsset,
-} from '@core/persistence/cmsMedia'
+import { setCmsMediaAssetFolders, type CmsMediaAsset } from '@core/persistence/cmsMedia'
 import {
   CmsMediaAssetEnvelopeSchema,
   type CmsMediaAssetWire,
@@ -105,9 +102,14 @@ export function useUploadQueue({
   }, [])
 
   // Exception #1: feeds the transitive closure of `pump`, which is a useEffect dependency.
-  const patchItem = useCallback((id: string, patch: Partial<UploadItem>) => {
-    setItemsAndMirror((prev) => prev.map((item) => item.id === id ? { ...item, ...patch } : item))
-  }, [setItemsAndMirror])
+  const patchItem = useCallback(
+    (id: string, patch: Partial<UploadItem>) => {
+      setItemsAndMirror((prev) =>
+        prev.map((item) => (item.id === id ? { ...item, ...patch } : item)),
+      )
+    },
+    [setItemsAndMirror],
+  )
 
   // `runUpload` and `pump` are mutually recursive: every transfer end calls
   // pump() to start the next queued item. To keep both useCallbacks stable
@@ -117,95 +119,98 @@ export function useUploadQueue({
 
   // ── Single-upload pipeline ────────────────────────────────────────────────
   // Exception #1: feeds the transitive closure of `pump`, which is a useEffect dependency.
-  const runUpload = useCallback((item: UploadItem) => {
-    inFlightRef.current += 1
-    patchItem(item.id, { status: 'uploading', progress: 0, error: null })
+  const runUpload = useCallback(
+    (item: UploadItem) => {
+      inFlightRef.current += 1
+      patchItem(item.id, { status: 'uploading', progress: 0, error: null })
 
-    const xhr = new XMLHttpRequest()
-    transfersRef.current.set(item.id, { xhr })
+      const xhr = new XMLHttpRequest()
+      transfersRef.current.set(item.id, { xhr })
 
-    xhr.open('POST', '/admin/api/cms/media', true)
-    xhr.withCredentials = true
-    xhr.responseType = 'json'
+      xhr.open('POST', '/admin/api/cms/media', true)
+      xhr.withCredentials = true
+      xhr.responseType = 'json'
 
-    xhr.upload.onprogress = (event) => {
-      if (event.lengthComputable) {
-        patchItem(item.id, { progress: event.loaded / event.total })
+      xhr.upload.onprogress = (event) => {
+        if (event.lengthComputable) {
+          patchItem(item.id, { progress: event.loaded / event.total })
+        }
       }
-    }
 
-    xhr.onload = async () => {
-      transfersRef.current.delete(item.id)
-      inFlightRef.current = Math.max(0, inFlightRef.current - 1)
+      xhr.onload = async () => {
+        transfersRef.current.delete(item.id)
+        inFlightRef.current = Math.max(0, inFlightRef.current - 1)
 
-      if (xhr.status >= 200 && xhr.status < 300) {
-        try {
-          // Validate the envelope shape at the boundary just like the fetch
-          // path does (`parseJsonResponse`) — XHR returns the parsed JSON
-          // via responseType: 'json'.
-          const data = xhr.response as unknown
-          if (!compiledCheck(CmsMediaAssetEnvelopeSchema, data)) {
-            patchItem(item.id, {
-              status: 'failed',
-              error: 'Server response did not match the expected shape',
-              progress: 1,
-            })
-            pumpRef.current()
-            return
-          }
-          const wire = (data as { asset: CmsMediaAssetWire }).asset
-          let asset = normalize(wire)
-          if (item.folderId) {
-            try {
-              asset = await setCmsMediaAssetFolders(asset.id, { add: [item.folderId] })
-            } catch (folderErr) {
-              // Folder assignment is best-effort — the upload itself
-              // succeeded. Surface the issue on the queue row so the user
-              // can retry with the asset already in place.
+        if (xhr.status >= 200 && xhr.status < 300) {
+          try {
+            // Validate the envelope shape at the boundary just like the fetch
+            // path does (`parseJsonResponse`) — XHR returns the parsed JSON
+            // via responseType: 'json'.
+            const data = xhr.response as unknown
+            if (!compiledCheck(CmsMediaAssetEnvelopeSchema, data)) {
               patchItem(item.id, {
-                status: 'succeeded',
-                asset,
-                error: getErrorMessage(folderErr, 'Folder assignment failed'),
+                status: 'failed',
+                error: 'Server response did not match the expected shape',
                 progress: 1,
               })
-              onUploaded(asset)
               pumpRef.current()
               return
             }
+            const wire = (data as { asset: CmsMediaAssetWire }).asset
+            let asset = normalize(wire)
+            if (item.folderId) {
+              try {
+                asset = await setCmsMediaAssetFolders(asset.id, { add: [item.folderId] })
+              } catch (folderErr) {
+                // Folder assignment is best-effort — the upload itself
+                // succeeded. Surface the issue on the queue row so the user
+                // can retry with the asset already in place.
+                patchItem(item.id, {
+                  status: 'succeeded',
+                  asset,
+                  error: getErrorMessage(folderErr, 'Folder assignment failed'),
+                  progress: 1,
+                })
+                onUploaded(asset)
+                pumpRef.current()
+                return
+              }
+            }
+            patchItem(item.id, { status: 'succeeded', asset, error: null, progress: 1 })
+            onUploaded(asset)
+          } catch (err) {
+            patchItem(item.id, {
+              status: 'failed',
+              error: getErrorMessage(err, 'Upload failed'),
+            })
           }
-          patchItem(item.id, { status: 'succeeded', asset, error: null, progress: 1 })
-          onUploaded(asset)
-        } catch (err) {
-          patchItem(item.id, {
-            status: 'failed',
-            error: getErrorMessage(err, 'Upload failed'),
-          })
+        } else {
+          const message = extractXhrErrorMessage(xhr) ?? `Upload failed with ${xhr.status}`
+          patchItem(item.id, { status: 'failed', error: message })
         }
-      } else {
-        const message = extractXhrErrorMessage(xhr) ?? `Upload failed with ${xhr.status}`
-        patchItem(item.id, { status: 'failed', error: message })
+        pumpRef.current()
       }
-      pumpRef.current()
-    }
 
-    xhr.onerror = () => {
-      transfersRef.current.delete(item.id)
-      inFlightRef.current = Math.max(0, inFlightRef.current - 1)
-      patchItem(item.id, { status: 'failed', error: 'Network error during upload' })
-      pumpRef.current()
-    }
+      xhr.onerror = () => {
+        transfersRef.current.delete(item.id)
+        inFlightRef.current = Math.max(0, inFlightRef.current - 1)
+        patchItem(item.id, { status: 'failed', error: 'Network error during upload' })
+        pumpRef.current()
+      }
 
-    xhr.onabort = () => {
-      transfersRef.current.delete(item.id)
-      inFlightRef.current = Math.max(0, inFlightRef.current - 1)
-      patchItem(item.id, { status: 'cancelled', error: null })
-      pumpRef.current()
-    }
+      xhr.onabort = () => {
+        transfersRef.current.delete(item.id)
+        inFlightRef.current = Math.max(0, inFlightRef.current - 1)
+        patchItem(item.id, { status: 'cancelled', error: null })
+        pumpRef.current()
+      }
 
-    const body = new FormData()
-    body.set('file', item.file)
-    xhr.send(body)
-  }, [normalize, onUploaded, patchItem])
+      const body = new FormData()
+      body.set('file', item.file)
+      xhr.send(body)
+    },
+    [normalize, onUploaded, patchItem],
+  )
 
   // ── Pump: start additional uploads up to the concurrency cap ──────────────
   // Relies on `setItemsAndMirror` writing the ref synchronously so the
@@ -223,7 +228,9 @@ export function useUploadQueue({
 
   // Mirror `pump` into the ref so the XHR callbacks (which closed over the
   // initial empty pump) always invoke the latest version.
-  useEffect(() => { pumpRef.current = pump }, [pump])
+  useEffect(() => {
+    pumpRef.current = pump
+  }, [pump])
 
   const enqueue = (files: File[], folderId: string | null) => {
     const additions: UploadItem[] = []
@@ -235,7 +242,9 @@ export function useUploadQueue({
         file,
         progress: 0,
         status: sizeCheck.ok ? 'queued' : 'failed',
-        error: sizeCheck.ok ? null : sizeCheck.message ?? `${file.name} exceeds the upload size limit`,
+        error: sizeCheck.ok
+          ? null
+          : (sizeCheck.message ?? `${file.name} exceeds the upload size limit`),
         asset: null,
         folderId,
         startedAt: Date.now(),
@@ -260,16 +269,18 @@ export function useUploadQueue({
   }
 
   const clearFinished = () => {
-    setItemsAndMirror((prev) => prev.filter((item) =>
-      item.status === 'queued' || item.status === 'uploading',
-    ))
+    setItemsAndMirror((prev) =>
+      prev.filter((item) => item.status === 'queued' || item.status === 'uploading'),
+    )
   }
 
   const cancelAll = () => {
     for (const [, transfer] of transfersRef.current) transfer.xhr.abort()
-    setItemsAndMirror((prev) => prev.map((item) =>
-      item.status === 'queued' ? { ...item, status: 'cancelled' as const } : item,
-    ))
+    setItemsAndMirror((prev) =>
+      prev.map((item) =>
+        item.status === 'queued' ? { ...item, status: 'cancelled' as const } : item,
+      ),
+    )
   }
 
   const active = items.some((item) => item.status === 'queued' || item.status === 'uploading')

@@ -11,7 +11,11 @@ export function PublishingSection() {
   const { site, error, updateFrameworkPreferences } = useSiteSettingsController()
 
   if (error) {
-    return <p className={s.sectionDescription} role="alert">{error}</p>
+    return (
+      <p className={s.sectionDescription} role="alert">
+        {error}
+      </p>
+    )
   }
 
   if (!site) {
@@ -23,9 +27,7 @@ export function PublishingSection() {
 
   return (
     <div>
-      <p className={s.sectionDescription}>
-        Published pages are served by this self-hosted CMS.
-      </p>
+      <p className={s.sectionDescription}>Published pages are served by this self-hosted CMS.</p>
 
       <section aria-labelledby="pub-runtime-heading" className={s.sectionBlock}>
         <h4 id="pub-runtime-heading" className={s.subHeading}>

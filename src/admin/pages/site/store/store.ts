@@ -79,8 +79,8 @@ export const useEditorStore = create<EditorStore>()(
         ...createSaveTrackingSlice(...args),
       }),
       { enableAutoFreeze: true },
-    )
-  )
+    ),
+  ),
 )
 
 // Synchronously hydrate the persisted editor layout (sidebar widths,
@@ -194,11 +194,7 @@ export const selectActivePage = (s: EditorStore): Page | null => {
 export const selectRightSidebarExpanded = (s: EditorStore) =>
   s.propertiesPanelMode === 'docked' &&
   !s.propertiesPanel.collapsed &&
-  Boolean(
-    s.selectedNodeId ||
-      s.selectedSelectorClassId ||
-      s.selectedSelectorClassIds.length > 0,
-  )
+  Boolean(s.selectedNodeId || s.selectedSelectorClassId || s.selectedSelectorClassIds.length > 0)
 
 // ---------------------------------------------------------------------------
 // selectActiveCanvasPage — VC-aware canvas page selector (Task #438)
@@ -230,9 +226,7 @@ export const selectActiveCanvasPage = (s: EditorStore): Page | null => {
   }
 
   if (activeDocument.kind === 'visualComponent') {
-    const vc = s.site?.visualComponents?.find(
-      (v) => v.id === activeDocument.vcId,
-    ) ?? null
+    const vc = s.site?.visualComponents?.find((v) => v.id === activeDocument.vcId) ?? null
     if (!vc) return null
 
     // WeakMap key: vc object — Mutative gives a new ref on ANY field change (name,

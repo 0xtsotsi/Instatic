@@ -110,9 +110,7 @@ describe('VC-ref slot-instance integrity', () => {
     expect(Object.keys(afterUndo).length).toBe(baseline)
     expect(afterUndo[refId]).toBeUndefined()
     // No orphan slot-instance left behind anywhere in the node map.
-    expect(
-      Object.values(afterUndo).some((n) => n.moduleId === 'base.slot-instance'),
-    ).toBe(false)
+    expect(Object.values(afterUndo).some((n) => n.moduleId === 'base.slot-instance')).toBe(false)
   })
 
   it('Bug 2: editing VC-B slot-outlets reconciles a ref to VC-B nested inside VC-A', () => {
@@ -159,9 +157,8 @@ describe('VC-ref slot-instance integrity', () => {
     } as Parameters<typeof useEditorStore.setState>[0])
 
     // Baseline: VC-A's nested ref has no slot-instance children yet.
-    const refBefore = useEditorStore
-      .getState()
-      .site!.visualComponents.find((v) => v.id === 'vc-a')!.tree.nodes['a-ref']
+    const refBefore = useEditorStore.getState().site!.visualComponents.find((v) => v.id === 'vc-a')!
+      .tree.nodes['a-ref']
     expect(refBefore.children).toHaveLength(0)
 
     // Add a slot-outlet to VC-B — this changes VC-B's slot set.
@@ -171,9 +168,7 @@ describe('VC-ref slot-instance integrity', () => {
     expect(outletId).toBeTruthy()
 
     // VC-A's nested ref to VC-B must now carry a materialized slot-instance.
-    const vcAAfter = useEditorStore
-      .getState()
-      .site!.visualComponents.find((v) => v.id === 'vc-a')!
+    const vcAAfter = useEditorStore.getState().site!.visualComponents.find((v) => v.id === 'vc-a')!
     const refAfter = vcAAfter.tree.nodes['a-ref']
     expect(refAfter.children).toHaveLength(1)
     const slotInst = vcAAfter.tree.nodes[refAfter.children[0]]

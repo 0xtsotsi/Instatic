@@ -72,7 +72,9 @@ describe('audit log edge semantics', () => {
         userAgent: 'Audit test',
       })
 
-      await expectForbidden(await harness.cms('/admin/api/cms/audit', { cookie: siteReader.cookie }))
+      await expectForbidden(
+        await harness.cms('/admin/api/cms/audit', { cookie: siteReader.cookie }),
+      )
 
       const wrongMethod = await harness.cms('/admin/api/cms/audit', {
         method: 'POST',
@@ -179,17 +181,19 @@ describe('audit log edge semantics', () => {
       expect(roleDelete.status).toBe(200)
 
       const events = await listAuditPayload(harness, steppedManagerCookie)
-      expect(events.find((event) => event.action === 'user.delete' && event.targetId === deletedUserId))
-        .toMatchObject({
-          targetLabel: 'Audit Deleted User',
-        })
-      expect(events.find((event) => event.action === 'role.delete' && event.targetId === deletedRoleId))
-        .toMatchObject({
-          targetLabel: 'Audit Deleted Role',
-          metadata: {
-            name: 'Audit Deleted Role',
-          },
-        })
+      expect(
+        events.find((event) => event.action === 'user.delete' && event.targetId === deletedUserId),
+      ).toMatchObject({
+        targetLabel: 'Audit Deleted User',
+      })
+      expect(
+        events.find((event) => event.action === 'role.delete' && event.targetId === deletedRoleId),
+      ).toMatchObject({
+        targetLabel: 'Audit Deleted Role',
+        metadata: {
+          name: 'Audit Deleted Role',
+        },
+      })
     } finally {
       await harness.cleanup()
     }

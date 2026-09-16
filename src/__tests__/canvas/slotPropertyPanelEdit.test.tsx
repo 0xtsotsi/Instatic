@@ -107,11 +107,9 @@ describe('slot-content edit via PropertyPanel', () => {
     })
     const slotInstId = useEditorStore.getState().site!.pages[0].nodes[refId].children[0]
     act(() => {
-      textId = useEditorStore.getState().insertNode(
-        'base.text',
-        { text: 'Initial text' },
-        slotInstId,
-      )!
+      textId = useEditorStore
+        .getState()
+        .insertNode('base.text', { text: 'Initial text' }, slotInstId)!
     })
 
     // Select the text via the store directly (simulates DOM panel row click).
@@ -143,9 +141,7 @@ describe('slot-content edit via PropertyPanel', () => {
     })
 
     // The store must hold the new value.
-    expect(
-      useEditorStore.getState().site!.pages[0].nodes[textId].props.text,
-    ).toBe('Edited text')
+    expect(useEditorStore.getState().site!.pages[0].nodes[textId].props.text).toBe('Edited text')
 
     // The canvas DOM must reflect the new value.
     expect(await screen.findAllByText('Edited text')).not.toHaveLength(0)
@@ -226,11 +222,9 @@ describe('slot-content edit via PropertyPanel', () => {
     })
     const slotInstId = useEditorStore.getState().site!.pages[0].nodes[refId].children[0]
     act(() => {
-      textId = useEditorStore.getState().insertNode(
-        'base.text',
-        { text: 'Nested initial' },
-        slotInstId,
-      )!
+      textId = useEditorStore
+        .getState()
+        .insertNode('base.text', { text: 'Nested initial' }, slotInstId)!
     })
     act(() => {
       useEditorStore.getState().selectNode(textId)
@@ -253,9 +247,7 @@ describe('slot-content edit via PropertyPanel', () => {
       fireEvent.change(textarea!, { target: { value: 'Nested edited' } })
     })
 
-    expect(
-      useEditorStore.getState().site!.pages[0].nodes[textId].props.text,
-    ).toBe('Nested edited')
+    expect(useEditorStore.getState().site!.pages[0].nodes[textId].props.text).toBe('Nested edited')
 
     expect(await screen.findAllByText('Nested edited')).not.toHaveLength(0)
     expect(screen.queryByText('Nested initial')).toBeNull()

@@ -57,10 +57,10 @@ export function useAutoResolveDependencies({
     // Every locked package needs a root entry in the importmap — `name` →
     // its entry-file URL. Missing entries mean the iframe sandbox would
     // 404 the bare import, so we trigger a fresh resolve to rebuild the map.
-    const importmapMissing = lockHasPackages && (
-      !packageImportmap
-      || Object.keys(lockedPackages).some((name) => !packageImportmap.imports[name])
-    )
+    const importmapMissing =
+      lockHasPackages &&
+      (!packageImportmap ||
+        Object.keys(lockedPackages).some((name) => !packageImportmap.imports[name]))
     if (status.kind === 'in-sync' && !importmapMissing) return
 
     // Don't pile on top of an in-flight resolve — the action's own
@@ -83,5 +83,13 @@ export function useAutoResolveDependencies({
         timerRef.current = null
       }
     }
-  }, [site, packageJson, lockedPackages, packageImportmap, resolveDependencyLock, dependencyResolveStatus, debounceMs])
+  }, [
+    site,
+    packageJson,
+    lockedPackages,
+    packageImportmap,
+    resolveDependencyLock,
+    dependencyResolveStatus,
+    debounceMs,
+  ])
 }

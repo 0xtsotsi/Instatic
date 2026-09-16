@@ -67,7 +67,9 @@ function loadSiteWithNode(): { nodeId: string } {
     nodes: { [rootId]: rootNode, [nodeId]: textNode },
   })
   const site = makeSite({ pages: [page] })
-  useEditorStore.setState({ site, activePageId: 'page-1' } as Parameters<typeof useEditorStore.setState>[0])
+  useEditorStore.setState({ site, activePageId: 'page-1' } as Parameters<
+    typeof useEditorStore.setState
+  >[0])
   return { nodeId }
 }
 
@@ -136,15 +138,15 @@ describe('ClassPicker — rendering', () => {
     render(<ClassPicker nodeId={nodeId} />)
     // Class-kind rules display as CSS selectors so they are visually distinct
     // from ambient selectors and plain text.
-    expect(screen.getByRole('button', { name: /edit class \.header|deselect class \.header/i })).toBeTruthy()
+    expect(
+      screen.getByRole('button', { name: /edit class \.header|deselect class \.header/i }),
+    ).toBeTruthy()
     expect(screen.getByRole('button', { name: 'Remove class .header' })).toBeTruthy()
   })
 
   it('renders the trailing action node when supplied', () => {
     const { nodeId } = loadSiteWithNode()
-    render(
-      <ClassPicker nodeId={nodeId} trailingAction={<span data-testid="trailing">tt</span>} />,
-    )
+    render(<ClassPicker nodeId={nodeId} trailingAction={<span data-testid="trailing">tt</span>} />)
     expect(screen.getByTestId('trailing')).toBeTruthy()
   })
 })
@@ -224,29 +226,34 @@ describe('ClassPicker — search + create', () => {
     const { nodeId } = loadSiteWithNode()
     render(<ClassPicker nodeId={nodeId} />)
 
-    await withCssSupports((conditionText) => {
-      if (conditionText === 'selector(*)') return true
-      return conditionText !== 'selector(input:placeholder)'
-    }, async () => {
-      const input = screen.getByPlaceholderText('Add or create selector…')
-      await user.click(input)
-      await user.type(input, 'input:placeholder')
+    await withCssSupports(
+      (conditionText) => {
+        if (conditionText === 'selector(*)') return true
+        return conditionText !== 'selector(input:placeholder)'
+      },
+      async () => {
+        const input = screen.getByPlaceholderText('Add or create selector…')
+        await user.click(input)
+        await user.type(input, 'input:placeholder')
 
-      expect(screen.queryByRole('alert')).toBeNull()
-      expect(screen.getByTestId('class-picker-invalid-selector').textContent).toContain(
-        'Invalid CSS selector: input:placeholder',
-      )
-      expect(screen.queryByText('+ Create selector “input:placeholder”')).toBeNull()
-      expect(screen.getByRole('button', { name: 'Submit selector' }).getAttribute('aria-disabled')).toBe('true')
+        expect(screen.queryByRole('alert')).toBeNull()
+        expect(screen.getByTestId('class-picker-invalid-selector').textContent).toContain(
+          'Invalid CSS selector: input:placeholder',
+        )
+        expect(screen.queryByText('+ Create selector “input:placeholder”')).toBeNull()
+        expect(
+          screen.getByRole('button', { name: 'Submit selector' }).getAttribute('aria-disabled'),
+        ).toBe('true')
 
-      await user.keyboard('{Enter}')
-      expect(screen.queryByRole('alert')).toBeNull()
-      expect(screen.getByTestId('class-picker-invalid-selector').textContent).toContain(
-        'Invalid CSS selector: input:placeholder',
-      )
-      expect(screen.queryByText('+ Create selector “input:placeholder”')).toBeNull()
-      expect(screen.getByRole('menu', { name: 'Selector suggestions' })).toBeTruthy()
-    })
+        await user.keyboard('{Enter}')
+        expect(screen.queryByRole('alert')).toBeNull()
+        expect(screen.getByTestId('class-picker-invalid-selector').textContent).toContain(
+          'Invalid CSS selector: input:placeholder',
+        )
+        expect(screen.queryByText('+ Create selector “input:placeholder”')).toBeNull()
+        expect(screen.getByRole('menu', { name: 'Selector suggestions' })).toBeTruthy()
+      },
+    )
   })
 })
 
@@ -289,7 +296,9 @@ describe('ClassPicker — assigned pill', () => {
     const cls = selectClass(nodeId, 'header')
     render(<ClassPicker nodeId={nodeId} />)
 
-    const pill = screen.getByRole('button', { name: /edit class \.header|deselect class \.header/i })
+    const pill = screen.getByRole('button', {
+      name: /edit class \.header|deselect class \.header/i,
+    })
     const initiallyActive = useEditorStore.getState().activeClassId === cls.id
     pill.focus()
     fireEvent.keyDown(pill, { key: 'Enter' })
@@ -302,7 +311,9 @@ describe('ClassPicker — assigned pill', () => {
     selectClass(nodeId, 'header')
     render(<ClassPicker nodeId={nodeId} />)
 
-    const pill = screen.getByRole('button', { name: /edit class \.header|deselect class \.header/i })
+    const pill = screen.getByRole('button', {
+      name: /edit class \.header|deselect class \.header/i,
+    })
     fireEvent.contextMenu(pill, { clientX: 0, clientY: 0 })
 
     // Context menu opens — assert at least the Remove item is present.
@@ -318,7 +329,9 @@ describe('ClassPicker — ambient selectors', () => {
   it('auto-activates a matching ambient selector on selection, renders it without a remove action, and lets it be toggled', async () => {
     const user = userEvent.setup()
     const { nodeId } = loadSiteWithNode()
-    addRenderedCanvasFrame(`<section class="hero"><h1 data-node-id="${nodeId}" class="title"></h1></section>`)
+    addRenderedCanvasFrame(
+      `<section class="hero"><h1 data-node-id="${nodeId}" class="title"></h1></section>`,
+    )
     const ambient = createAmbient('.hero .title')
 
     render(<ClassPicker nodeId={nodeId} />)

@@ -59,9 +59,7 @@ type FrameworkSpacingActions = Pick<
   | 'setFrameworkSpacingClassGenerators'
 >
 
-export function createFrameworkSpacingActions(
-  helpers: SiteSliceHelpers,
-): FrameworkSpacingActions {
+export function createFrameworkSpacingActions(helpers: SiteSliceHelpers): FrameworkSpacingActions {
   const inner = createScaleGroupActions(helpers, {
     family: 'spacing',
     buildDefault: buildDefaultSpacingGroup,

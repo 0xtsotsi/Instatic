@@ -10,7 +10,13 @@ import {
 import { openaiDriver } from '../../../server/ai/drivers/openai'
 import { openrouterDriver } from '../../../server/ai/drivers/openrouter'
 import type { AiStreamRequest } from '../../../server/ai/drivers/types'
-import type { AiMessage, AiBrowserBridge, AiStreamEvent, AiTool, AiToolOutput } from '../../../server/ai/runtime/types'
+import type {
+  AiMessage,
+  AiBrowserBridge,
+  AiStreamEvent,
+  AiTool,
+  AiToolOutput,
+} from '../../../server/ai/runtime/types'
 import type { SseFrame } from '../../../server/ai/drivers/http/sse'
 
 function frame(obj: unknown): SseFrame {
@@ -27,14 +33,21 @@ describe('Responses SSE translate', () => {
       { type: 'text', text: ' world' },
     ])
     t.translate(
-      frame({ type: 'response.completed', response: { usage: { input_tokens: 12, output_tokens: 8 } } }),
+      frame({
+        type: 'response.completed',
+        response: { usage: { input_tokens: 12, output_tokens: 8 } },
+      }),
     )
 
     const result = t.finish()
     expect(result.stop).toBe(true)
     expect(result.toolCalls).toEqual([])
     expect(result.assistantMessage).toEqual([
-      { type: 'message', role: 'assistant', content: [{ type: 'output_text', text: 'Hello world' }] },
+      {
+        type: 'message',
+        role: 'assistant',
+        content: [{ type: 'output_text', text: 'Hello world' }],
+      },
     ])
     expect(result.usage).toEqual({
       promptTokens: 12,
@@ -49,21 +62,44 @@ describe('Responses SSE translate', () => {
     const events = t.translate(
       frame({
         type: 'response.output_item.done',
-        item: { type: 'function_call', call_id: 'call_1', name: 'site_insert_html', arguments: '{"parentId":"root"}' },
+        item: {
+          type: 'function_call',
+          call_id: 'call_1',
+          name: 'site_insert_html',
+          arguments: '{"parentId":"root"}',
+        },
       }),
     )
     expect(events).toEqual([
-      { type: 'toolCall', toolCallId: 'call_1', toolName: 'site_insert_html', input: { parentId: 'root' }, status: 'pending' },
+      {
+        type: 'toolCall',
+        toolCallId: 'call_1',
+        toolName: 'site_insert_html',
+        input: { parentId: 'root' },
+        status: 'pending',
+      },
     ])
-    t.translate(frame({ type: 'response.completed', response: { usage: { input_tokens: 5, output_tokens: 3 } } }))
+    t.translate(
+      frame({
+        type: 'response.completed',
+        response: { usage: { input_tokens: 5, output_tokens: 3 } },
+      }),
+    )
 
     const result = t.finish()
     expect(result.stop).toBe(false)
-    expect(result.toolCalls).toEqual([{ id: 'call_1', name: 'site_insert_html', input: { parentId: 'root' } }])
+    expect(result.toolCalls).toEqual([
+      { id: 'call_1', name: 'site_insert_html', input: { parentId: 'root' } },
+    ])
     // The assistant turn carries the function_call item so the next request can
     // pair the function_call_output by call_id.
     expect(result.assistantMessage).toEqual([
-      { type: 'function_call', call_id: 'call_1', name: 'site_insert_html', arguments: '{"parentId":"root"}' },
+      {
+        type: 'function_call',
+        call_id: 'call_1',
+        name: 'site_insert_html',
+        arguments: '{"parentId":"root"}',
+      },
     ])
   })
 
@@ -73,12 +109,22 @@ describe('Responses SSE translate', () => {
       frame({
         type: 'response.completed',
         response: {
-          usage: { input_tokens: 100, output_tokens: 40, cost: 0.0021, input_tokens_details: { cached_tokens: 64 } },
+          usage: {
+            input_tokens: 100,
+            output_tokens: 40,
+            cost: 0.0021,
+            input_tokens_details: { cached_tokens: 64 },
+          },
         },
       }),
     )
     const result = t.finish()
-    expect(result.usage).toEqual({ promptTokens: 100, completionTokens: 40, cacheReadTokens: 64, costUsd: 0.0021 })
+    expect(result.usage).toEqual({
+      promptTokens: 100,
+      completionTokens: 40,
+      cacheReadTokens: 64,
+      costUsd: 0.0021,
+    })
   })
 
   test('surfaces a response.failed / error event', () => {
@@ -97,7 +143,12 @@ describe('Responses mapHistory', () => {
     const history: AiMessage[] = [
       { role: 'user', content: [{ kind: 'text', text: 'hi' }] },
       { role: 'assistant', content: [{ kind: 'text', text: 'ok' }] },
-      { role: 'assistant', content: [{ kind: 'toolCall', toolCallId: 'c1', toolName: 'site_insert_html', input: { a: 1 } }] },
+      {
+        role: 'assistant',
+        content: [
+          { kind: 'toolCall', toolCallId: 'c1', toolName: 'site_insert_html', input: { a: 1 } },
+        ],
+      },
       { role: 'tool', toolCallId: 'c1', output: { ok: true, data: { nodeIds: ['n1'] } } },
       { role: 'assistant', content: [{ kind: 'text', text: 'done' }] },
     ]
@@ -113,7 +164,10 @@ describe('Responses mapHistory', () => {
 
   test('stringifies a failed tool result as the error text', () => {
     const history: AiMessage[] = [
-      { role: 'assistant', content: [{ kind: 'toolCall', toolCallId: 'c9', toolName: 'x', input: {} }] },
+      {
+        role: 'assistant',
+        content: [{ kind: 'toolCall', toolCallId: 'c9', toolName: 'x', input: {} }],
+      },
       { role: 'tool', toolCallId: 'c9', output: { ok: false, error: 'boom' } },
     ]
     const mapped = mapResponsesHistory(history).flat()
@@ -148,7 +202,9 @@ describe('Responses mapHistory', () => {
 
 describe('Responses joinInstructions', () => {
   test('drops the cache boundary marker and joins the halves', () => {
-    expect(joinInstructions(['PREFIX', '__SYSTEM_PROMPT_DYNAMIC_BOUNDARY__', 'SUFFIX'])).toBe('PREFIX\n\nSUFFIX')
+    expect(joinInstructions(['PREFIX', '__SYSTEM_PROMPT_DYNAMIC_BOUNDARY__', 'SUFFIX'])).toBe(
+      'PREFIX\n\nSUFFIX',
+    )
   })
 
   test('returns the single element unchanged for the 1-element form', () => {
@@ -182,7 +238,10 @@ function sseResponse(body: string): Response {
 
 // Turn 1: the model issues a function_call; turn 2 finishes with text.
 const RESP_TURN1 = responsesSse(
-  { type: 'response.output_item.done', item: { type: 'function_call', call_id: 'call_1', name: 'echo', arguments: '{"v":7}' } },
+  {
+    type: 'response.output_item.done',
+    item: { type: 'function_call', call_id: 'call_1', name: 'echo', arguments: '{"v":7}' },
+  },
   { type: 'response.completed', response: { usage: { input_tokens: 20, output_tokens: 10 } } },
 )
 const RESP_TURN2 = responsesSse(
@@ -211,17 +270,39 @@ describe('runToolLoop via openaiDriver (Responses)', () => {
         return { echoed: input }
       },
     }
-    const bridge: AiBrowserBridge = { async callBrowser(): Promise<AiToolOutput> { return { ok: true } } }
+    const bridge: AiBrowserBridge = {
+      async callBrowser(): Promise<AiToolOutput> {
+        return { ok: true }
+      },
+    }
     const req: AiStreamRequest = {
       systemPrompt: ['You are a test.'],
       messages: [{ role: 'user', content: [{ kind: 'text', text: 'go' }] }],
       tools: [echoTool],
       modelId: 'gpt-5.4',
-      modelCapabilities: { toolCalling: true, visionInput: true, toolResultImages: false, promptCache: false, streaming: true },
-      credentials: { id: 'cr', providerId: 'openai', authMode: 'apiKey', apiKey: 'sk-test', baseUrl: null },
+      modelCapabilities: {
+        toolCalling: true,
+        visionInput: true,
+        toolResultImages: false,
+        promptCache: false,
+        streaming: true,
+      },
+      credentials: {
+        id: 'cr',
+        providerId: 'openai',
+        authMode: 'apiKey',
+        apiKey: 'sk-test',
+        baseUrl: null,
+      },
       signal: new AbortController().signal,
       bridge,
-      toolContextBase: { db: {} as never, userId: 'u1', scope: 'site', conversationId: 'c1', snapshot: {} },
+      toolContextBase: {
+        db: {} as never,
+        userId: 'u1',
+        scope: 'site',
+        conversationId: 'c1',
+        snapshot: {},
+      },
     }
 
     const events: AiStreamEvent[] = []
@@ -235,14 +316,26 @@ describe('runToolLoop via openaiDriver (Responses)', () => {
     // The 2nd request body carries the function_call (so the output can pair by
     // call_id) followed by the function_call_output.
     const secondInput = requestBodies[1]!.input as ResponsesInputItem[]
-    const fnCall = secondInput.find((i): i is Extract<ResponsesInputItem, { type: 'function_call' }> => i.type === 'function_call')
-    const fnOut = secondInput.find((i): i is Extract<ResponsesInputItem, { type: 'function_call_output' }> => i.type === 'function_call_output')
+    const fnCall = secondInput.find(
+      (i): i is Extract<ResponsesInputItem, { type: 'function_call' }> =>
+        i.type === 'function_call',
+    )
+    const fnOut = secondInput.find(
+      (i): i is Extract<ResponsesInputItem, { type: 'function_call_output' }> =>
+        i.type === 'function_call_output',
+    )
     expect(fnCall?.call_id).toBe('call_1')
     expect(fnOut?.call_id).toBe('call_1')
     expect(JSON.parse(fnOut!.output)).toEqual({ echoed: { v: 7 } })
 
-    expect(events.filter((e) => e.type === 'text').map((e) => (e as { text: string }).text).join('')).toBe('all done')
-    const usage = events.find((e) => e.type === 'usage') as { promptTokens: number; completionTokens: number } | undefined
+    expect(
+      events
+        .filter((e) => e.type === 'text')
+        .map((e) => (e as { text: string }).text)
+        .join(''),
+    ).toBe('all done')
+    const usage = events.find((e) => e.type === 'usage') as
+      { promptTokens: number; completionTokens: number } | undefined
     expect(usage!.promptTokens).toBe(45)
     expect(usage!.completionTokens).toBe(15)
   })
@@ -266,14 +359,30 @@ describe('openrouterDriver', () => {
       )
     }) as typeof fetch
 
-    const bridge: AiBrowserBridge = { async callBrowser(): Promise<AiToolOutput> { return { ok: true } } }
+    const bridge: AiBrowserBridge = {
+      async callBrowser(): Promise<AiToolOutput> {
+        return { ok: true }
+      },
+    }
     const req: AiStreamRequest = {
       systemPrompt: ['You are a test.'],
       messages: [{ role: 'user', content: [{ kind: 'text', text: 'go' }] }],
       tools: [],
       modelId: 'openai/gpt-5.4',
-      modelCapabilities: { toolCalling: true, visionInput: true, toolResultImages: false, promptCache: false, streaming: true },
-      credentials: { id: 'cr', providerId: 'openrouter', authMode: 'apiKey', apiKey: 'sk-or-test', baseUrl: null },
+      modelCapabilities: {
+        toolCalling: true,
+        visionInput: true,
+        toolResultImages: false,
+        promptCache: false,
+        streaming: true,
+      },
+      credentials: {
+        id: 'cr',
+        providerId: 'openrouter',
+        authMode: 'apiKey',
+        apiKey: 'sk-or-test',
+        baseUrl: null,
+      },
       signal: new AbortController().signal,
       bridge,
       toolContextBase: {
@@ -293,12 +402,14 @@ describe('openrouterDriver', () => {
     expect(requestBodies[0]!.model).toBe('openai/gpt-5.4')
     expect(requestBodies[0]!.stream).toBe(true)
     expect(requestBodies[0]!).not.toHaveProperty('prompt_cache_key')
-    expect(events.filter((e) => e.type === 'text').map((e) => (e as { text: string }).text).join('')).toBe(
-      'openrouter reply',
-    )
+    expect(
+      events
+        .filter((e) => e.type === 'text')
+        .map((e) => (e as { text: string }).text)
+        .join(''),
+    ).toBe('openrouter reply')
     const usage = events.find((e) => e.type === 'usage') as
-      | { promptTokens: number; completionTokens: number; costUsd?: number }
-      | undefined
+      { promptTokens: number; completionTokens: number; costUsd?: number } | undefined
     expect(usage).toBeDefined()
     expect(usage!.promptTokens).toBe(12)
     expect(usage!.completionTokens).toBe(3)
@@ -346,14 +457,26 @@ describe('openrouterDriver', () => {
       {
         id: 'openai/gpt-5.4',
         label: 'GPT 5.4',
-        capabilities: { toolCalling: true, visionInput: true, toolResultImages: false, promptCache: false, streaming: true },
+        capabilities: {
+          toolCalling: true,
+          visionInput: true,
+          toolResultImages: false,
+          promptCache: false,
+          streaming: true,
+        },
         pricing: { inputPerMTok: 5, outputPerMTok: 25 },
         contextWindow: 128_000,
       },
       {
         id: 'anthropic/claude-opus-4.8',
         label: 'Claude Opus 4.8',
-        capabilities: { toolCalling: false, visionInput: false, toolResultImages: false, promptCache: false, streaming: true },
+        capabilities: {
+          toolCalling: false,
+          visionInput: false,
+          toolResultImages: false,
+          promptCache: false,
+          streaming: true,
+        },
         pricing: { inputPerMTok: 10, outputPerMTok: 50 },
         contextWindow: 200_000,
       },

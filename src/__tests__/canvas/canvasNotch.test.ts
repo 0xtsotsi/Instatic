@@ -3,7 +3,10 @@ import { readFileSync } from 'fs'
 
 const CANVAS_ROOT = new URL('../../admin/pages/site/canvas/CanvasRoot.tsx', import.meta.url)
 const CANVAS_NOTCH = new URL('../../admin/pages/site/canvas/CanvasNotch.tsx', import.meta.url)
-const CANVAS_NOTCH_CSS = new URL('../../admin/pages/site/canvas/CanvasNotch.module.css', import.meta.url)
+const CANVAS_NOTCH_CSS = new URL(
+  '../../admin/pages/site/canvas/CanvasNotch.module.css',
+  import.meta.url,
+)
 const CANVAS_MODE_TOGGLE_CSS = new URL(
   '../../admin/pages/site/canvas/CanvasModeToggle.module.css',
   import.meta.url,
@@ -13,10 +16,17 @@ const SELECTION_OVERLAY_CSS = new URL(
   import.meta.url,
 )
 const TOOLBAR = new URL('../../admin/pages/site/toolbar/Toolbar.tsx', import.meta.url)
-const MODULE_PICKER = new URL('../../admin/pages/site/toolbar/ModulePickerDropdown.tsx', import.meta.url)
+const MODULE_PICKER = new URL(
+  '../../admin/pages/site/toolbar/ModulePickerDropdown.tsx',
+  import.meta.url,
+)
 
 function cssRule(css: string, selector: string): string {
-  return css.match(new RegExp(`${selector.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\s*\\{[\\s\\S]*?\\}`))?.[0] ?? ''
+  return (
+    css.match(
+      new RegExp(`${selector.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\s*\\{[\\s\\S]*?\\}`),
+    )?.[0] ?? ''
+  )
 }
 
 function zIndexForRule(rule: string): number {

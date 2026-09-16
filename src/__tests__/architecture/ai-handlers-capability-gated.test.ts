@@ -35,9 +35,9 @@ describe('ai-handlers-capability-gated gate', () => {
     if (violations.length > 0) {
       throw new Error(
         `[ai-handlers-capability-gated] handler files don't call requireCapability():\n` +
-        violations.map((v) => `  ${relative(REPO_ROOT, v).replaceAll('\\', '/')}`).join('\n') +
-        `\n\nEvery /admin/api/ai/** route must gate access via requireCapability()` +
-        ` so unauthenticated callers cannot reach the AI runtime.`,
+          violations.map((v) => `  ${relative(REPO_ROOT, v).replaceAll('\\', '/')}`).join('\n') +
+          `\n\nEvery /admin/api/ai/** route must gate access via requireCapability()` +
+          ` so unauthenticated callers cannot reach the AI runtime.`,
       )
     }
     expect(violations).toHaveLength(0)

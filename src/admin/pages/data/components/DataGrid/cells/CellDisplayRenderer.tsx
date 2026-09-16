@@ -21,12 +21,7 @@ import {
   readStringArrayCell,
   readStringCell,
 } from '@core/data/cells'
-import type {
-  DataField,
-  DataRow,
-  DataRowCells,
-  DataTable,
-} from '@core/data/schemas'
+import type { DataField, DataRow, DataRowCells, DataTable } from '@core/data/schemas'
 import { useMediaAssetMap } from '@admin/pages/data/hooks/useMediaAssetMap'
 import { Image } from '@ui/components/Image'
 import { ImageSolidIcon } from 'pixel-art-icons/icons/image-solid'
@@ -55,7 +50,11 @@ interface CellDisplayProps {
 // ---------------------------------------------------------------------------
 
 function Empty(): ReactElement {
-  return <span className={styles.empty} aria-label="Empty">—</span>
+  return (
+    <span className={styles.empty} aria-label="Empty">
+      —
+    </span>
+  )
 }
 
 // ---------------------------------------------------------------------------
@@ -63,9 +62,10 @@ function Empty(): ReactElement {
 // ---------------------------------------------------------------------------
 
 function formatNumber(value: number, field: Extract<DataField, { type: 'number' }>): string {
-  const intOpts = field.integer === true
-    ? { maximumFractionDigits: 0 } as const
-    : {} as Intl.NumberFormatOptions
+  const intOpts =
+    field.integer === true
+      ? ({ maximumFractionDigits: 0 } as const)
+      : ({} as Intl.NumberFormatOptions)
   try {
     if (field.format === 'currency') {
       return new Intl.NumberFormat(undefined, {
@@ -115,7 +115,10 @@ function formatDate(iso: string, withTime: boolean): string | null {
 
 function richTextPreview(raw: string, format: 'markdown' | 'html'): string {
   if (format === 'html') {
-    return raw.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim()
+    return raw
+      .replace(/<[^>]+>/g, ' ')
+      .replace(/\s+/g, ' ')
+      .trim()
   }
   return raw
     .replace(/^[#>*_~`-]+\s*/gm, '')
@@ -156,7 +159,13 @@ function BooleanDisplay({ value }: { value: boolean }): ReactElement {
   return <Empty />
 }
 
-function DateDisplay({ value, withTime }: { value: string | null; withTime: boolean }): ReactElement {
+function DateDisplay({
+  value,
+  withTime,
+}: {
+  value: string | null
+  withTime: boolean
+}): ReactElement {
   if (value == null || value === '') return <Empty />
   const formatted = formatDate(value, withTime)
   if (formatted == null) return <Empty />
@@ -207,7 +216,11 @@ function MultiSelectDisplay({
             data-color={option.color ?? undefined}
           >
             {option.color && (
-              <span className={styles.chipDot} style={{ background: option.color }} aria-hidden="true" />
+              <span
+                className={styles.chipDot}
+                style={{ background: option.color }}
+                aria-hidden="true"
+              />
             )}
             <span className={styles.chipLabel}>{option.label}</span>
           </span>
@@ -227,11 +240,7 @@ function UrlEmailDisplay({ value }: { value: string }): ReactElement {
   return <span className={styles.linkText}>{value}</span>
 }
 
-function MediaDisplay({
-  ids,
-}: {
-  ids: string[]
-}): ReactElement {
+function MediaDisplay({ ids }: { ids: string[] }): ReactElement {
   const assetMap = useMediaAssetMap(ids)
   if (ids.length === 0) return <Empty />
 
@@ -327,9 +336,7 @@ function RelationDisplay({
     const row = targetRows.find((r) => r.id === id)
     if (!row) return id
     const primaryValue = row.cells[target.primaryFieldId]
-    return typeof primaryValue === 'string' && primaryValue.length > 0
-      ? primaryValue
-      : id
+    return typeof primaryValue === 'string' && primaryValue.length > 0 ? primaryValue : id
   }
 
   const isMulti = field.allowMultiple === true
@@ -346,7 +353,9 @@ function RelationDisplay({
           </span>
         ))}
         {overflow > 0 && (
-          <span className={styles.chip} data-tone="overflow">+{overflow}</span>
+          <span className={styles.chip} data-tone="overflow">
+            +{overflow}
+          </span>
         )}
       </span>
     )
@@ -408,21 +417,23 @@ export function CellDisplayRenderer({
       return <UrlEmailDisplay value={readStringCell(cells, field.id)} />
     }
     case 'media': {
-      const ids = field.allowMultiple === true
-        ? readStringArrayCell(cells, field.id)
-        : (() => {
-            const v = cells[field.id]
-            return typeof v === 'string' && v.length > 0 ? [v] : []
-          })()
+      const ids =
+        field.allowMultiple === true
+          ? readStringArrayCell(cells, field.id)
+          : (() => {
+              const v = cells[field.id]
+              return typeof v === 'string' && v.length > 0 ? [v] : []
+            })()
       return <MediaDisplay ids={ids} />
     }
     case 'relation': {
-      const ids = field.allowMultiple === true
-        ? readStringArrayCell(cells, field.id)
-        : (() => {
-            const v = cells[field.id]
-            return typeof v === 'string' && v.length > 0 ? [v] : []
-          })()
+      const ids =
+        field.allowMultiple === true
+          ? readStringArrayCell(cells, field.id)
+          : (() => {
+              const v = cells[field.id]
+              return typeof v === 'string' && v.length > 0 ? [v] : []
+            })()
       return <RelationDisplay ids={ids} field={field} tables={tables} rows={rows} />
     }
     case 'pageTree': {

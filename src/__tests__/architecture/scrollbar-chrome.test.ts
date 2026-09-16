@@ -40,9 +40,7 @@ describe('architecture — admin scrollbar chrome', () => {
   })
 
   it('styles both standards and WebKit scrollbar implementations with tokens', () => {
-    expect(globals).toContain(
-      'scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track);',
-    )
+    expect(globals).toContain('scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track);')
     expect(globals).toContain('width: var(--scrollbar-size);')
     expect(globals).toContain('height: var(--scrollbar-size);')
     expect(globals).toContain('background: var(--scrollbar-track);')

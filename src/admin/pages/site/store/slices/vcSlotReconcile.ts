@@ -22,10 +22,7 @@ export function syncAllVCRefSlotInstances(
 ): void {
   for (const treeNodes of nodeMaps) {
     for (const node of Object.values(treeNodes)) {
-      if (
-        node.moduleId === 'base.visual-component-ref' &&
-        node.props.componentId === vcId
-      ) {
+      if (node.moduleId === 'base.visual-component-ref' && node.props.componentId === vcId) {
         const syncResult = syncSlotInstances(node, vc, treeNodes)
         applySlotSyncResult(treeNodes, syncResult, node.id)
       }

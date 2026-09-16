@@ -35,10 +35,7 @@ import type {
 } from '../types'
 import type { PluginModuleDefinition } from '../modules'
 import type { PluginPackContents } from './definePack'
-import {
-  validatePluginSettingsDefinitions,
-  type PluginSettingDefinition,
-} from './settings'
+import { validatePluginSettingsDefinitions, type PluginSettingDefinition } from './settings'
 
 export interface DefinePluginConfig {
   id: string
@@ -127,7 +124,9 @@ export interface PluginDefinition {
 
 export function definePlugin(config: DefinePluginConfig): PluginDefinition {
   if (!config.id.includes('.')) {
-    throw new Error(`[plugin-sdk] Plugin id "${config.id}" must be namespaced as "<vendor>.<name>".`)
+    throw new Error(
+      `[plugin-sdk] Plugin id "${config.id}" must be namespaced as "<vendor>.<name>".`,
+    )
   }
   for (const mod of config.modules ?? []) {
     if (!mod.id.startsWith(`${config.id}.`)) {
@@ -175,9 +174,7 @@ export function definePlugin(config: DefinePluginConfig): PluginDefinition {
     resources: config.resources ?? [],
     adminPages: config.adminPages ?? [],
     ...(config.description !== undefined ? { description: config.description } : {}),
-    ...(config.networkAllowedHosts
-      ? { networkAllowedHosts: [...config.networkAllowedHosts] }
-      : {}),
+    ...(config.networkAllowedHosts ? { networkAllowedHosts: [...config.networkAllowedHosts] } : {}),
     ...(config.settings !== undefined ? { settings: config.settings } : {}),
     ...(config.author !== undefined ? { author: config.author } : {}),
     ...(config.license !== undefined ? { license: config.license } : {}),

@@ -58,7 +58,9 @@ describe('plugin admin UI surface', () => {
       <pluginAdminUi.Input
         label="Name"
         value="hello"
-        onChange={(value) => { captured = value }}
+        onChange={(value) => {
+          captured = value
+        }}
       />,
     )
     const input = getByDisplayValue('hello') as HTMLInputElement
@@ -76,7 +78,9 @@ describe('plugin admin UI surface', () => {
       <pluginAdminUi.Switch
         label="Featured"
         checked={false}
-        onChange={(next) => { captured = next }}
+        onChange={(next) => {
+          captured = next
+        }}
       />,
     )
     const button = getByRole('switch') as HTMLButtonElement

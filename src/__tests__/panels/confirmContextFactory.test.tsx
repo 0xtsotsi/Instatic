@@ -77,7 +77,11 @@ describe('createConfirmContext', () => {
 
     // Mirrors the framework no-impact path: resolve commits immediately and
     // reports it handled the request, so the factory never opens a dialog.
-    const request: TestRequest = { commit: () => { committed = true } }
+    const request: TestRequest = {
+      commit: () => {
+        committed = true
+      },
+    }
     const resolve = (req: TestRequest): ConfirmResolution<TestImpact> => {
       req.commit()
       return { status: 'handled' }
@@ -85,7 +89,12 @@ describe('createConfirmContext', () => {
 
     render(
       <TestProvider resolve={resolve}>
-        <Harness request={request} onMounted={(t) => { trigger = t }} />
+        <Harness
+          request={request}
+          onMounted={(t) => {
+            trigger = t
+          }}
+        />
       </TestProvider>,
     )
 
@@ -99,7 +108,11 @@ describe('createConfirmContext', () => {
     let trigger: (() => void) | null = null
     let committed = false
 
-    const request: TestRequest = { commit: () => { committed = true } }
+    const request: TestRequest = {
+      commit: () => {
+        committed = true
+      },
+    }
     const resolve = (): ConfirmResolution<TestImpact> => ({
       status: 'confirm',
       impact: { label: 'two elements affected' },
@@ -107,7 +120,12 @@ describe('createConfirmContext', () => {
 
     render(
       <TestProvider resolve={resolve}>
-        <Harness request={request} onMounted={(t) => { trigger = t }} />
+        <Harness
+          request={request}
+          onMounted={(t) => {
+            trigger = t
+          }}
+        />
       </TestProvider>,
     )
 
@@ -127,7 +145,11 @@ describe('createConfirmContext', () => {
     let trigger: (() => void) | null = null
     let committed = false
 
-    const request: TestRequest = { commit: () => { committed = true } }
+    const request: TestRequest = {
+      commit: () => {
+        committed = true
+      },
+    }
     const resolve = (): ConfirmResolution<TestImpact> => ({
       status: 'confirm',
       impact: { label: 'one element affected' },
@@ -135,7 +157,12 @@ describe('createConfirmContext', () => {
 
     render(
       <TestProvider resolve={resolve}>
-        <Harness request={request} onMounted={(t) => { trigger = t }} />
+        <Harness
+          request={request}
+          onMounted={(t) => {
+            trigger = t
+          }}
+        />
       </TestProvider>,
     )
 
@@ -154,9 +181,20 @@ describe('createConfirmContext', () => {
     let trigger: (() => void) | null = null
     let committed = false
 
-    const request: TestRequest = { commit: () => { committed = true } }
+    const request: TestRequest = {
+      commit: () => {
+        committed = true
+      },
+    }
 
-    render(<Harness request={request} onMounted={(t) => { trigger = t }} />)
+    render(
+      <Harness
+        request={request}
+        onMounted={(t) => {
+          trigger = t
+        }}
+      />,
+    )
 
     act(() => trigger!())
 

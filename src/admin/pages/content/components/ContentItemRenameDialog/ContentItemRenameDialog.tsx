@@ -70,13 +70,7 @@ export function ContentItemRenameDialog({
           <Button variant="secondary" size="sm" type="button" onClick={onCancel}>
             Cancel
           </Button>
-          <Button
-            variant="primary"
-            size="sm"
-            type="submit"
-            form={FORM_ID}
-            disabled={!trimmedValue}
-          >
+          <Button variant="primary" size="sm" type="submit" form={FORM_ID} disabled={!trimmedValue}>
             Save
           </Button>
         </>
@@ -84,7 +78,9 @@ export function ContentItemRenameDialog({
     >
       <form id={FORM_ID} className={dialogStyles.form} onSubmit={handleSubmit}>
         <div className={dialogStyles.field}>
-          <label htmlFor={titleInputId} className={dialogStyles.label}>{titleLabel}</label>
+          <label htmlFor={titleInputId} className={dialogStyles.label}>
+            {titleLabel}
+          </label>
           <Input
             id={titleInputId}
             ref={inputRef}
@@ -100,7 +96,9 @@ export function ContentItemRenameDialog({
         </div>
 
         <div className={dialogStyles.field}>
-          <label htmlFor={slugInputId} className={dialogStyles.label}>Slug</label>
+          <label htmlFor={slugInputId} className={dialogStyles.label}>
+            Slug
+          </label>
           <Input
             id={slugInputId}
             fieldSize="sm"

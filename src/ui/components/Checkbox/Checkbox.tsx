@@ -5,8 +5,7 @@ import styles from './Checkbox.module.css'
 
 type BoxSize = 'sm' | 'md'
 
-interface CheckboxProps
-  extends Omit<InputHTMLAttributes<HTMLInputElement>, 'type' | 'size'> {
+interface CheckboxProps extends Omit<InputHTMLAttributes<HTMLInputElement>, 'type' | 'size'> {
   checked: boolean
   /** Fired with the next checked state when the user toggles the box. */
   onCheckedChange?: (checked: boolean) => void

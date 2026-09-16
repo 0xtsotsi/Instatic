@@ -69,9 +69,23 @@ function makeClass(
 }
 
 function loadSiteWithSelectors() {
-  const rootNode = makeNode({ id: 'root-1', moduleId: 'base.body', children: ['text-1', 'button-1'] })
-  const textNode = makeNode({ id: 'text-1', moduleId: 'base.text', classIds: ['hero-title'], props: { text: 'Hero', tag: 'h1' } })
-  const buttonNode = makeNode({ id: 'button-1', moduleId: 'base.button', classIds: ['hero-title', 'cta-button'], props: { label: 'Buy' } })
+  const rootNode = makeNode({
+    id: 'root-1',
+    moduleId: 'base.body',
+    children: ['text-1', 'button-1'],
+  })
+  const textNode = makeNode({
+    id: 'text-1',
+    moduleId: 'base.text',
+    classIds: ['hero-title'],
+    props: { text: 'Hero', tag: 'h1' },
+  })
+  const buttonNode = makeNode({
+    id: 'button-1',
+    moduleId: 'base.button',
+    classIds: ['hero-title', 'cta-button'],
+    props: { label: 'Buy' },
+  })
   const page = makePage({
     id: 'page-1',
     rootNodeId: 'root-1',
@@ -86,26 +100,41 @@ function loadSiteWithSelectors() {
     site: makeSite({
       pages: [page],
       styleRules: {
-        'hero-title': makeClass('hero-title', 'hero-title', { fontSize: '48px', color: '#111' }, {
-          contextStyles: { mobile: { fontSize: '32px' } },
-        }),
+        'hero-title': makeClass(
+          'hero-title',
+          'hero-title',
+          { fontSize: '48px', color: '#111' },
+          {
+            contextStyles: { mobile: { fontSize: '32px' } },
+          },
+        ),
         'cta-button': makeClass('cta-button', 'cta-button', { padding: '12px' }),
         'unused-card': makeClass('unused-card', 'unused-card'),
-        'text-m': makeClass('text-m', 'text-m', { fontSize: '16px' }, {
-          generated: {
-            origin: 'framework',
-            family: 'typography',
-            sourceId: 'group-1',
-            generatorId: 'gen-1',
-            tokenName: 'text',
-            step: 'm',
-            locked: true,
+        'text-m': makeClass(
+          'text-m',
+          'text-m',
+          { fontSize: '16px' },
+          {
+            generated: {
+              origin: 'framework',
+              family: 'typography',
+              sourceId: 'group-1',
+              generatorId: 'gen-1',
+              tokenName: 'text',
+              step: 'm',
+              locked: true,
+            },
           },
-        }),
-        'internal-style': makeClass('internal-style', 'Text instance text-1', { color: '#333' }, {
-          scope: { type: 'node', nodeId: 'text-1', role: 'module-style' },
-          tags: ['module-instance'],
-        }),
+        ),
+        'internal-style': makeClass(
+          'internal-style',
+          'Text instance text-1',
+          { color: '#333' },
+          {
+            scope: { type: 'node', nodeId: 'text-1', role: 'module-style' },
+            tags: ['module-instance'],
+          },
+        ),
       },
     }),
     activePageId: 'page-1',
@@ -132,7 +161,9 @@ describe('selectorUsage helpers', () => {
     expect(formatSelectorUsage(0)).toBe('Unused')
     expect(formatSelectorUsage(1)).toBe('Used 1 time')
     expect(formatSelectorUsage(2)).toBe('Used 2 times')
-    expect(getSelectorStyleSummary(state.site!.styleRules['hero-title'])).toBe('2 props · 1 context')
+    expect(getSelectorStyleSummary(state.site!.styleRules['hero-title'])).toBe(
+      '2 props · 1 context',
+    )
     expect(getSelectorStyleSummary(state.site!.styleRules['unused-card'])).toBe('No styles')
   })
 
@@ -195,7 +226,9 @@ describe('SelectorsPanel', () => {
     const panel = screen.getByTestId('selectors-panel')
     expect(within(panel).getByRole('button', { name: /edit selector \.hero-title/i })).toBeDefined()
     expect(within(panel).getByRole('button', { name: /edit selector \.cta-button/i })).toBeDefined()
-    expect(within(panel).getByRole('button', { name: /edit selector \.unused-card/i })).toBeDefined()
+    expect(
+      within(panel).getByRole('button', { name: /edit selector \.unused-card/i }),
+    ).toBeDefined()
     expect(within(panel).getByRole('button', { name: /edit selector \.text-m/i })).toBeDefined()
     expect(within(panel).getByText('.hero-title')).toBeDefined()
     expect(within(panel).getByText('.cta-button')).toBeDefined()
@@ -222,7 +255,9 @@ describe('SelectorsPanel', () => {
     fireEvent.click(userButton)
     expect(within(panel).getByRole('button', { name: /edit selector \.hero-title/i })).toBeDefined()
     expect(within(panel).getByRole('button', { name: /edit selector \.cta-button/i })).toBeDefined()
-    expect(within(panel).getByRole('button', { name: /edit selector \.unused-card/i })).toBeDefined()
+    expect(
+      within(panel).getByRole('button', { name: /edit selector \.unused-card/i }),
+    ).toBeDefined()
     expect(within(panel).queryByRole('button', { name: /edit selector \.text-m/i })).toBeNull()
 
     fireEvent.click(utilityButton)
@@ -260,7 +295,9 @@ describe('SelectorsPanel', () => {
 
     // unused-card (no nodes) and text-m (no nodes) are unused; hero-title and
     // cta-button are referenced by page nodes.
-    expect(within(panel).getByRole('button', { name: /edit selector \.unused-card/i })).toBeDefined()
+    expect(
+      within(panel).getByRole('button', { name: /edit selector \.unused-card/i }),
+    ).toBeDefined()
     expect(within(panel).getByRole('button', { name: /edit selector \.text-m/i })).toBeDefined()
     expect(within(panel).queryByRole('button', { name: /edit selector \.hero-title/i })).toBeNull()
     expect(within(panel).queryByRole('button', { name: /edit selector \.cta-button/i })).toBeNull()
@@ -315,7 +352,9 @@ describe('SelectorsPanel', () => {
 
   it('bulk-applies selected selectors to the selected element', () => {
     const { textNodeId } = loadSiteWithSelectors()
-    useEditorStore.setState({ selectedNodeId: textNodeId } as Parameters<typeof useEditorStore.setState>[0])
+    useEditorStore.setState({ selectedNodeId: textNodeId } as Parameters<
+      typeof useEditorStore.setState
+    >[0])
     render(
       <>
         <SelectorsPanel variant="docked" />
@@ -329,12 +368,16 @@ describe('SelectorsPanel', () => {
     const propertiesPanel = screen.getByTestId('properties-panel')
     fireEvent.click(within(propertiesPanel).getByRole('button', { name: /^apply$/i }))
 
-    expect(useEditorStore.getState().site!.pages[0].nodes[textNodeId].classIds ?? []).toContain('cta-button')
+    expect(useEditorStore.getState().site!.pages[0].nodes[textNodeId].classIds ?? []).toContain(
+      'cta-button',
+    )
   })
 
   it('keeps bulk apply enabled for locked utility selectors', () => {
     const { textNodeId } = loadSiteWithSelectors()
-    useEditorStore.setState({ selectedNodeId: textNodeId } as Parameters<typeof useEditorStore.setState>[0])
+    useEditorStore.setState({ selectedNodeId: textNodeId } as Parameters<
+      typeof useEditorStore.setState
+    >[0])
     render(
       <>
         <SelectorsPanel variant="docked" />
@@ -348,11 +391,15 @@ describe('SelectorsPanel', () => {
     fireEvent.click(within(panel).getByRole('checkbox', { name: /select selector \.text-m/i }))
 
     const propertiesPanel = screen.getByTestId('properties-panel')
-    const apply = within(propertiesPanel).getByRole('button', { name: /^apply$/i }) as HTMLButtonElement
+    const apply = within(propertiesPanel).getByRole('button', {
+      name: /^apply$/i,
+    }) as HTMLButtonElement
     expect(apply.disabled).toBe(false)
 
     fireEvent.click(apply)
-    expect(useEditorStore.getState().site!.pages[0].nodes[textNodeId].classIds ?? []).toContain('text-m')
+    expect(useEditorStore.getState().site!.pages[0].nodes[textNodeId].classIds ?? []).toContain(
+      'text-m',
+    )
   })
 
   it('shows a sticky selection toolbar with select-all and deselect-all', () => {
@@ -401,7 +448,9 @@ describe('SelectorsPanel', () => {
 
   it('bulk-applies as a single undo step', () => {
     const { textNodeId } = loadSiteWithSelectors()
-    useEditorStore.setState({ selectedNodeId: textNodeId } as Parameters<typeof useEditorStore.setState>[0])
+    useEditorStore.setState({ selectedNodeId: textNodeId } as Parameters<
+      typeof useEditorStore.setState
+    >[0])
     render(
       <>
         <SelectorsPanel variant="docked" />
@@ -422,7 +471,9 @@ describe('SelectorsPanel', () => {
 
     // A single undo reverts the entire batch, not one class at a time.
     useEditorStore.getState().undo()
-    expect(useEditorStore.getState().site!.pages[0].nodes[textNodeId].classIds ?? []).toEqual(['hero-title'])
+    expect(useEditorStore.getState().site!.pages[0].nodes[textNodeId].classIds ?? []).toEqual([
+      'hero-title',
+    ])
   })
 
   it('disables bulk delete and duplicate for locked utility selectors', () => {
@@ -536,7 +587,9 @@ describe('SelectorsPanel', () => {
     expect(within(header).queryByRole('button', { name: /create selector/i })).toBeNull()
     expect(within(panel).queryByRole('button', { name: /create ambient selector/i })).toBeNull()
     expect(searchRow).not.toBeNull()
-    expect(within(searchRow as HTMLElement).getByRole('button', { name: 'Create selector' })).toBeDefined()
+    expect(
+      within(searchRow as HTMLElement).getByRole('button', { name: 'Create selector' }),
+    ).toBeDefined()
   })
 
   it('creates a reusable selector from the search-row create action and opens it for editing', async () => {
@@ -567,8 +620,12 @@ describe('SelectorsPanel', () => {
     expect(useEditorStore.getState().propertiesPanel.collapsed).toBe(false)
     const propertiesPanel = screen.getByTestId('properties-panel')
     expect(within(propertiesPanel).getByRole('heading', { name: '.feature-card' })).toBeDefined()
-    expect(within(propertiesPanel).getByRole('button', { name: /rename selector \.feature-card/i })).toBeDefined()
-    expect(within(propertiesPanel).queryByRole('region', { name: /selector feature-card/i })).toBeNull()
+    expect(
+      within(propertiesPanel).getByRole('button', { name: /rename selector \.feature-card/i }),
+    ).toBeDefined()
+    expect(
+      within(propertiesPanel).queryByRole('region', { name: /selector feature-card/i }),
+    ).toBeNull()
   })
 
   it('creates an ambient selector from the same create dialog', async () => {
@@ -592,7 +649,11 @@ describe('SelectorsPanel', () => {
     expect(created).toBeDefined()
     expect(useEditorStore.getState().activeClassId).toBe(created!.id)
     await waitFor(() => expect(screen.getByTestId('properties-panel')).toBeDefined())
-    expect(within(screen.getByTestId('properties-panel')).getByRole('heading', { name: '.feature-card:hover' })).toBeDefined()
+    expect(
+      within(screen.getByTestId('properties-panel')).getByRole('heading', {
+        name: '.feature-card:hover',
+      }),
+    ).toBeDefined()
   })
 
   it('selecting a row opens the global class editor in the right properties panel', async () => {
@@ -605,19 +666,33 @@ describe('SelectorsPanel', () => {
     )
 
     const selectorsPanel = screen.getByTestId('selectors-panel')
-    fireEvent.click(within(selectorsPanel).getByRole('button', { name: /edit selector \.hero-title/i }))
+    fireEvent.click(
+      within(selectorsPanel).getByRole('button', { name: /edit selector \.hero-title/i }),
+    )
 
-    expect(within(selectorsPanel).queryByRole('searchbox', { name: /search class style properties to add/i })).toBeNull()
+    expect(
+      within(selectorsPanel).queryByRole('searchbox', {
+        name: /search class style properties to add/i,
+      }),
+    ).toBeNull()
     await waitFor(() => expect(screen.getByTestId('properties-panel')).toBeDefined())
     const propertiesPanel = screen.getByTestId('properties-panel')
     expect(within(propertiesPanel).getByRole('heading', { name: '.hero-title' })).toBeDefined()
-    expect(within(propertiesPanel).queryByRole('region', { name: /selector hero-title/i })).toBeNull()
-    expect(within(propertiesPanel).getByRole('searchbox', { name: /search class style properties to add/i })).toBeDefined()
+    expect(
+      within(propertiesPanel).queryByRole('region', { name: /selector hero-title/i }),
+    ).toBeNull()
+    expect(
+      within(propertiesPanel).getByRole('searchbox', {
+        name: /search class style properties to add/i,
+      }),
+    ).toBeDefined()
     expect(screen.queryByRole('textbox', { name: /add or create a css class/i })).toBeNull()
     expect(useEditorStore.getState().activeClassId).toBe('hero-title')
     expect(useEditorStore.getState().propertiesPanel.collapsed).toBe(false)
 
-    fireEvent.click(within(propertiesPanel).getByRole('button', { name: /rename selector \.hero-title/i }))
+    fireEvent.click(
+      within(propertiesPanel).getByRole('button', { name: /rename selector \.hero-title/i }),
+    )
     const classNameInput = within(propertiesPanel).getByRole('textbox', { name: /class name/i })
     expect((classNameInput as HTMLInputElement).value).toBe('.hero-title')
     fireEvent.change(classNameInput, { target: { value: '.feature-heading' } })
@@ -640,7 +715,9 @@ describe('SelectorsPanel', () => {
     )
 
     const selectorsPanel = screen.getByTestId('selectors-panel')
-    fireEvent.click(within(selectorsPanel).getByRole('button', { name: /edit selector \.auth-back:hover/i }))
+    fireEvent.click(
+      within(selectorsPanel).getByRole('button', { name: /edit selector \.auth-back:hover/i }),
+    )
 
     await waitFor(() => expect(screen.getByTestId('properties-panel')).toBeDefined())
     const propertiesPanel = screen.getByTestId('properties-panel')
@@ -702,23 +779,36 @@ describe('SelectorsPanel', () => {
     const copy = Object.values(classes).find((cls) => cls.name === 'cta-button-copy')
     expect(copy).toBeDefined()
     expect(copy!.styles).toEqual({ padding: '12px' })
-    expect(useEditorStore.getState().site!.pages[0].nodes[buttonNodeId].classIds).toEqual(['hero-title', 'cta-button'])
+    expect(useEditorStore.getState().site!.pages[0].nodes[buttonNodeId].classIds).toEqual([
+      'hero-title',
+      'cta-button',
+    ])
     await waitFor(() => expect(screen.getByTestId('properties-panel')).toBeDefined())
-    expect(within(screen.getByTestId('properties-panel')).getByRole('heading', { name: '.cta-button-copy' })).toBeDefined()
+    expect(
+      within(screen.getByTestId('properties-panel')).getByRole('heading', {
+        name: '.cta-button-copy',
+      }),
+    ).toBeDefined()
   })
 
   it('applies and removes a selector from the selected element via context menu', () => {
     const { textNodeId } = loadSiteWithSelectors()
-    useEditorStore.setState({ selectedNodeId: textNodeId } as Parameters<typeof useEditorStore.setState>[0])
+    useEditorStore.setState({ selectedNodeId: textNodeId } as Parameters<
+      typeof useEditorStore.setState
+    >[0])
     render(<SelectorsPanel variant="docked" />)
 
     fireEvent.contextMenu(screen.getByRole('button', { name: /edit selector \.cta-button/i }))
     fireEvent.click(screen.getByRole('menuitem', { name: /apply to selected element/i }))
-    expect(useEditorStore.getState().site!.pages[0].nodes[textNodeId].classIds ?? []).toContain('cta-button')
+    expect(useEditorStore.getState().site!.pages[0].nodes[textNodeId].classIds ?? []).toContain(
+      'cta-button',
+    )
 
     fireEvent.contextMenu(screen.getByRole('button', { name: /edit selector \.cta-button/i }))
     fireEvent.click(screen.getByRole('menuitem', { name: /remove from selected element/i }))
-    expect(useEditorStore.getState().site!.pages[0].nodes[textNodeId].classIds ?? []).not.toContain('cta-button')
+    expect(useEditorStore.getState().site!.pages[0].nodes[textNodeId].classIds ?? []).not.toContain(
+      'cta-button',
+    )
   })
 
   it('renames and deletes selectors with confirmation', () => {
@@ -775,8 +865,14 @@ describe('SelectorsPanel', () => {
 
 describe('SelectorsPanel architecture', () => {
   it('wires selectors into the panel rail and left sidebar', () => {
-    const railSource = readFileSync(join(SRC_ROOT, 'admin/pages/site/sidebars/PanelRail/PanelRail.tsx'), 'utf-8')
-    const sidebarSource = readFileSync(join(SRC_ROOT, 'admin/pages/site/sidebars/LeftSidebar/LeftSidebar.tsx'), 'utf-8')
+    const railSource = readFileSync(
+      join(SRC_ROOT, 'admin/pages/site/sidebars/PanelRail/PanelRail.tsx'),
+      'utf-8',
+    )
+    const sidebarSource = readFileSync(
+      join(SRC_ROOT, 'admin/pages/site/sidebars/LeftSidebar/LeftSidebar.tsx'),
+      'utf-8',
+    )
 
     expect(railSource).toContain("id: 'selectors'")
     expect(sidebarSource).toContain('SelectorsPanel')

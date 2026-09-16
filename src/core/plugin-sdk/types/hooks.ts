@@ -16,9 +16,7 @@
  *                the past).
  */
 export type ContentEntryActor =
-  | { kind: 'user'; userId: string }
-  | { kind: 'plugin'; pluginId: string }
-  | { kind: 'system' }
+  { kind: 'user'; userId: string } | { kind: 'plugin'; pluginId: string } | { kind: 'system' }
 
 export interface CmsServerEvents {
   'publish.before': { siteId: string; pageId?: string }
@@ -96,9 +94,9 @@ export interface ServerPluginHooksApi {
     name: K,
     handler: (
       value: K extends keyof CmsServerFilters ? CmsServerFilters[K] : unknown,
-      context: { pluginId: string } & (
-        K extends keyof CmsServerFilterContexts ? CmsServerFilterContexts[K] : Record<string, unknown>
-      ),
+      context: { pluginId: string } & (K extends keyof CmsServerFilterContexts
+        ? CmsServerFilterContexts[K]
+        : Record<string, unknown>),
     ) =>
       | (K extends keyof CmsServerFilters ? CmsServerFilters[K] : unknown)
       | Promise<K extends keyof CmsServerFilters ? CmsServerFilters[K] : unknown>,

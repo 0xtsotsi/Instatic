@@ -1,10 +1,4 @@
-import {
-  DndContext,
-  PointerSensor,
-  pointerWithin,
-  useSensor,
-  useSensors,
-} from '@dnd-kit/core'
+import { DndContext, PointerSensor, pointerWithin, useSensor, useSensors } from '@dnd-kit/core'
 import { lazy, Suspense } from 'react'
 import { CanvasRoot } from '@admin/pages/site/canvas'
 import { CodeEditorPanel, CodeEditorSkeleton } from '@admin/pages/site/code-editor'
@@ -96,7 +90,10 @@ export function AdminCanvasEditorBody({
               railOnly={hasRightSidebar && narrowChrome}
             />
             <div
-              className={cn(styles.canvasStage, hasRightSidebar && styles.canvasStageRightSidebarOpen)}
+              className={cn(
+                styles.canvasStage,
+                hasRightSidebar && styles.canvasStageRightSidebarOpen,
+              )}
               data-right-sidebar-expanded={hasRightSidebar ? 'true' : 'false'}
             >
               <div className={styles.canvasContent} key="site">
@@ -107,7 +104,9 @@ export function AdminCanvasEditorBody({
                   <CanvasRoot editable={canEditDraftSite} />
                 )}
                 {/* Properties can be unpinned into the floating draggable overlay. */}
-                {canSaveSite && propertiesPanelMode === 'floating' && <PropertiesPanel variant="floating" />}
+                {canSaveSite && propertiesPanelMode === 'floating' && (
+                  <PropertiesPanel variant="floating" />
+                )}
               </div>
             </div>
             {/* `mode` tells the RightSidebar which expansion model to use:
@@ -115,10 +114,7 @@ export function AdminCanvasEditorBody({
                   gated `sitePropertiesExpanded` selector.
                 - `'hidden'`:    Site viewer with no `pages.draft.save`
                   capability. */}
-            <RightSidebar
-              key="site"
-              mode={canSaveSite ? 'site' : 'hidden'}
-            />
+            <RightSidebar key="site" mode={canSaveSite ? 'site' : 'hidden'} />
           </div>
         </ConfirmDeleteProvider>
       </DndContext>

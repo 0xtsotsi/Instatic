@@ -33,10 +33,7 @@ import { resolve } from 'path'
 
 const PROJECT_ROOT = resolve(import.meta.dir, '../../..')
 
-const PICKER_PATH = resolve(
-  PROJECT_ROOT,
-  'src/admin/pages/site/toolbar/ModulePickerDropdown.tsx',
-)
+const PICKER_PATH = resolve(PROJECT_ROOT, 'src/admin/pages/site/toolbar/ModulePickerDropdown.tsx')
 const EXPLORER_PATH = resolve(
   PROJECT_ROOT,
   'src/admin/pages/site/panels/SiteExplorerPanel/SiteExplorerPanel.tsx',
@@ -96,9 +93,9 @@ describe('G1 — ModulePickerDropdown calls insertComponentRef for VC insertion 
     if (!src.includes('insertComponentRef')) {
       throw new Error(
         '[Phase 4 / G1] ModulePickerDropdown.tsx does not reference insertComponentRef.\n' +
-        'The Components-category click must route through insertComponentRef — the single\n' +
-        'shared action that handles both page-mode and VC-mode insertion with cycle detection.\n' +
-        'File: src/admin/pages/site/components/Toolbar/ModulePickerDropdown.tsx',
+          'The Components-category click must route through insertComponentRef — the single\n' +
+          'shared action that handles both page-mode and VC-mode insertion with cycle detection.\n' +
+          'File: src/admin/pages/site/components/Toolbar/ModulePickerDropdown.tsx',
       )
     }
     expect(src).toContain('insertComponentRef')
@@ -116,12 +113,15 @@ describe('G1 — ModulePickerDropdown calls insertComponentRef for VC insertion 
 describe('G2 — SiteExplorerPanel does not expose a visualComponentRef drag source', () => {
   test('SiteExplorer tree must not register component-to-canvas drag payloads', () => {
     const src = readSource(EXPLORER_TREE_SECTION_PATH)
-    if (src.includes("'visualComponentRef'") || src.includes('site-explorer-component-drag-handle')) {
+    if (
+      src.includes("'visualComponentRef'") ||
+      src.includes('site-explorer-component-drag-handle')
+    ) {
       throw new Error(
         '[Phase 4 / G2] Site Explorer exposes component-to-canvas dragging.\n' +
-        'Component rows may open and organize Visual Components, but they must not register\n' +
-        "a drag payload with kind: 'visualComponentRef' or render the canvas drag handle.\n" +
-        'File: src/admin/pages/site/panels/SiteExplorerPanel/SiteExplorerTreeSection.tsx',
+          'Component rows may open and organize Visual Components, but they must not register\n' +
+          "a drag payload with kind: 'visualComponentRef' or render the canvas drag handle.\n" +
+          'File: src/admin/pages/site/panels/SiteExplorerPanel/SiteExplorerTreeSection.tsx',
       )
     }
     expect(src).not.toContain("'visualComponentRef'")
@@ -139,10 +139,10 @@ describe("G3 — LayerNodeContextMenu calls insertComponentRef for 'Insert modul
     if (!src.includes('insertComponentRef')) {
       throw new Error(
         '[Phase 4 / G4] LayerNodeContextMenu.tsx does not reference insertComponentRef.\n' +
-        "The 'Insert module here' submenu's VC-pick callback must route through\n" +
-        "insertComponentRef so cycle detection and VC/page mode dispatch are\n" +
-        'applied uniformly.\n' +
-        'File: src/admin/pages/site/components/DomPanel/LayerNodeContextMenu.tsx',
+          "The 'Insert module here' submenu's VC-pick callback must route through\n" +
+          'insertComponentRef so cycle detection and VC/page mode dispatch are\n' +
+          'applied uniformly.\n' +
+          'File: src/admin/pages/site/components/DomPanel/LayerNodeContextMenu.tsx',
       )
     }
     expect(src).toContain('insertComponentRef')
@@ -171,9 +171,9 @@ describe("G4 — No placement file calls insertNode with 'base.visual-component-
       if (hasBypass) {
         throw new Error(
           `[Phase 4 / G4] ${label} calls insertNode with 'base.visual-component-ref'.\n` +
-          "Use insertComponentRef(parentId, componentId) instead — it handles both VC and page\n" +
-          "mode, prevents cycles, and is the single authorised entry point for VC ref insertion.\n" +
-          `File: ${filePath}`,
+            'Use insertComponentRef(parentId, componentId) instead — it handles both VC and page\n' +
+            'mode, prevents cycles, and is the single authorised entry point for VC ref insertion.\n' +
+            `File: ${filePath}`,
         )
       }
       expect(hasBypass).toBe(false)
@@ -204,9 +204,9 @@ describe("G5 — No placement file calls addNodeToVc with 'base.visual-component
       if (hasBypass) {
         throw new Error(
           `[Phase 4 / G5] ${label} calls addNodeToVc with 'base.visual-component-ref'.\n` +
-          "Use insertComponentRef(parentId, componentId) instead — it wraps addNodeToVc\n" +
-          "with cycle detection and is the single authorised entry point for VC ref insertion.\n" +
-          `File: ${filePath}`,
+            'Use insertComponentRef(parentId, componentId) instead — it wraps addNodeToVc\n' +
+            'with cycle detection and is the single authorised entry point for VC ref insertion.\n' +
+            `File: ${filePath}`,
         )
       }
       expect(hasBypass).toBe(false)

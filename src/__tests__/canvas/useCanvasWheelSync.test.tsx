@@ -205,8 +205,14 @@ describe('canvas mouse pan input policy', () => {
   })
 
   it('uses shift-wheel for sideways mouse scrolling', () => {
-    expect(panDeltaFromWheel({ shiftKey: true, deltaX: 0, deltaY: 120 })).toEqual({ dx: -120, dy: 0 })
-    expect(panDeltaFromWheel({ shiftKey: false, deltaX: 0, deltaY: 120 })).toEqual({ dx: 0, dy: -120 })
+    expect(panDeltaFromWheel({ shiftKey: true, deltaX: 0, deltaY: 120 })).toEqual({
+      dx: -120,
+      dy: 0,
+    })
+    expect(panDeltaFromWheel({ shiftKey: false, deltaX: 0, deltaY: 120 })).toEqual({
+      dx: 0,
+      dy: -120,
+    })
   })
 
   it('uses middle-button dragging as a canvas pan gesture', () => {

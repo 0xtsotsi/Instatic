@@ -71,4 +71,3 @@ export function loadFontPreviewWithVariants(family: string, variants: readonly s
   link.setAttribute('data-source', 'instatic-font-preview-variants')
   document.head.appendChild(link)
 }
-

@@ -34,16 +34,17 @@ describe('publish version allocation', () => {
   })
 
   test('the publish lock serializes allocation so every bump is exactly +1 (ISS-038)', async () => {
-    const deltas = await Promise.all([
-      withPublishLock(allocate),
-      withPublishLock(allocate),
-    ])
+    const deltas = await Promise.all([withPublishLock(allocate), withPublishLock(allocate)])
     expect(deltas).toEqual([1, 1])
     expect(getPublishVersion()).toBe(2)
   })
 
   test('the lock advances even when a publish throws', async () => {
-    await expect(withPublishLock(async () => { throw new Error('boom') })).rejects.toThrow('boom')
+    await expect(
+      withPublishLock(async () => {
+        throw new Error('boom')
+      }),
+    ).rejects.toThrow('boom')
     // A later publish still runs (the chain isn't wedged by the failure).
     const delta = await withPublishLock(allocate)
     expect(delta).toBe(1)

@@ -12,10 +12,7 @@
  */
 
 import { describe, it, expect } from 'bun:test'
-import {
-  frameworkColorClassId,
-  generateFrameworkColorUtilityClasses,
-} from '@core/framework'
+import { frameworkColorClassId, generateFrameworkColorUtilityClasses } from '@core/framework'
 import { buildSiteCssBundle } from '../../../server/publish/siteCssBundle'
 import { makeModule, makeRegistry, makePage, makeSite } from '../publisher/helpers'
 
@@ -75,7 +72,9 @@ describe('buildSiteCssBundle', () => {
     site.pages = [page]
 
     const bundle = buildSiteCssBundle(site, registry)
-    expect(bundle.reset.content).toContain(':where(*, *::before, *::after) { box-sizing: border-box; }')
+    expect(bundle.reset.content).toContain(
+      ':where(*, *::before, *::after) { box-sizing: border-box; }',
+    )
     expect(bundle.reset.content).toContain('font-family: system-ui')
   })
 

@@ -2,10 +2,7 @@ import { afterEach, describe, expect, it } from 'bun:test'
 import React, { useEffect, useState } from 'react'
 import { act, cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { PluginPageRenderer } from '@plugins/components/PluginPageRenderer/PluginPageRenderer'
-import type {
-  PluginAdminAppComponent,
-  PluginAdminPageRoute,
-} from '@core/plugin-sdk'
+import type { PluginAdminAppComponent, PluginAdminPageRoute } from '@core/plugin-sdk'
 import { usePluginRoutes } from '@admin/plugin-host-hooks'
 
 const originalFetch = globalThis.fetch
@@ -43,7 +40,10 @@ describe('PluginPageRenderer resource pages', () => {
       calls.push({ input, init })
       const url = String(input)
 
-      if (url === '/admin/api/cms/plugins/acme.books/resources/books/records' && init?.method === 'GET') {
+      if (
+        url === '/admin/api/cms/plugins/acme.books/resources/books/records' &&
+        init?.method === 'GET'
+      ) {
         return json({
           resource: {
             id: 'books',
@@ -55,28 +55,36 @@ describe('PluginPageRenderer resource pages', () => {
               { id: 'author', label: 'Author', type: 'text' },
             ],
           },
-          records: [{
-            id: 'record_1',
-            pluginId: 'acme.books',
-            resourceId: 'books',
-            data: { title: 'Invisible Cities', author: 'Italo Calvino' },
-            createdAt: '2026-05-01T10:00:00.000Z',
-            updatedAt: '2026-05-01T10:00:00.000Z',
-          }],
+          records: [
+            {
+              id: 'record_1',
+              pluginId: 'acme.books',
+              resourceId: 'books',
+              data: { title: 'Invisible Cities', author: 'Italo Calvino' },
+              createdAt: '2026-05-01T10:00:00.000Z',
+              updatedAt: '2026-05-01T10:00:00.000Z',
+            },
+          ],
         })
       }
 
-      if (url === '/admin/api/cms/plugins/acme.books/resources/books/records' && init?.method === 'POST') {
-        return json({
-          record: {
-            id: 'record_2',
-            pluginId: 'acme.books',
-            resourceId: 'books',
-            data: JSON.parse(String(init.body)).data,
-            createdAt: '2026-05-01T10:05:00.000Z',
-            updatedAt: '2026-05-01T10:05:00.000Z',
+      if (
+        url === '/admin/api/cms/plugins/acme.books/resources/books/records' &&
+        init?.method === 'POST'
+      ) {
+        return json(
+          {
+            record: {
+              id: 'record_2',
+              pluginId: 'acme.books',
+              resourceId: 'books',
+              data: JSON.parse(String(init.body)).data,
+              createdAt: '2026-05-01T10:05:00.000Z',
+              updatedAt: '2026-05-01T10:05:00.000Z',
+            },
           },
-        }, 201)
+          201,
+        )
       }
 
       return json({ error: `Unhandled ${url}` }, 500)
@@ -91,16 +99,20 @@ describe('PluginPageRenderer resource pages', () => {
     fireEvent.click(screen.getByRole('button', { name: /create book/i }))
 
     await waitFor(() => {
-      expect(calls.some((call) =>
-        String(call.input) === '/admin/api/cms/plugins/acme.books/resources/books/records' &&
-        call.init?.method === 'POST' &&
-        call.init.body === JSON.stringify({
-          data: {
-            title: 'The Dispossessed',
-            author: 'Ursula K. Le Guin',
-          },
-        })
-      )).toBe(true)
+      expect(
+        calls.some(
+          (call) =>
+            String(call.input) === '/admin/api/cms/plugins/acme.books/resources/books/records' &&
+            call.init?.method === 'POST' &&
+            call.init.body ===
+              JSON.stringify({
+                data: {
+                  title: 'The Dispossessed',
+                  author: 'Ursula K. Le Guin',
+                },
+              }),
+        ),
+      ).toBe(true)
     })
   })
 
@@ -112,18 +124,18 @@ describe('PluginPageRenderer resource pages', () => {
         resource: {
           id: 'approvals',
           title: 'Approvals',
-          fields: [
-            { id: 'pageTitle', label: 'Page Title', type: 'text', required: true },
-          ],
+          fields: [{ id: 'pageTitle', label: 'Page Title', type: 'text', required: true }],
         },
-        records: [{
-          id: 'record_1',
-          pluginId: 'acme.demo',
-          resourceId: 'approvals',
-          data: { pageTitle: 'Home', status: 'approved' },
-          createdAt: '2026-05-01T10:00:00.000Z',
-          updatedAt: '2026-05-01T10:00:00.000Z',
-        }],
+        records: [
+          {
+            id: 'record_1',
+            pluginId: 'acme.demo',
+            resourceId: 'approvals',
+            data: { pageTitle: 'Home', status: 'approved' },
+            createdAt: '2026-05-01T10:00:00.000Z',
+            updatedAt: '2026-05-01T10:00:00.000Z',
+          },
+        ],
       })
     }
 
@@ -138,7 +150,9 @@ describe('PluginPageRenderer resource pages', () => {
           .then((body: { count: number }) => {
             if (!cancelled) setCount(body.count)
           })
-        return () => { cancelled = true }
+        return () => {
+          cancelled = true
+        }
       }, [routes])
       return <strong>{count === null ? 'Loading...' : `Approvals: ${count}`}</strong>
     }
@@ -210,7 +224,9 @@ describe('PluginPageRenderer resource pages', () => {
 
     const PluginComponent: PluginAdminAppComponent = () => <strong>Plugin dashboard subtree</strong>
 
-    const { rerender } = render(<PluginPageRenderer page={{ ...appPage }} importModule={importModule} />)
+    const { rerender } = render(
+      <PluginPageRenderer page={{ ...appPage }} importModule={importModule} />,
+    )
 
     await waitFor(() => {
       expect(imports).toHaveLength(1)

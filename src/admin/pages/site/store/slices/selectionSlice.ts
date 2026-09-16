@@ -157,20 +157,22 @@ export const createSelectionSlice: EditorStoreSliceCreator<SelectionSlice> = (se
     applySelection(set, current, next)
   },
 
-  hoverNode: (id, breakpointId = null) => set({
-    hoveredNodeId: id,
-    hoveredBreakpointId: id ? breakpointId : null,
-  }),
+  hoverNode: (id, breakpointId = null) =>
+    set({
+      hoveredNodeId: id,
+      hoveredBreakpointId: id ? breakpointId : null,
+    }),
 
-  clearSelection: () => set({
-    selectedNodeIds: [],
-    selectedNodeId: null,
-    hoveredNodeId: null,
-    hoveredBreakpointId: null,
-    activeClassId: null,
-    inlineStyleEditing: false,
-    componentizeEditorRequest: null,
-  }),
+  clearSelection: () =>
+    set({
+      selectedNodeIds: [],
+      selectedNodeId: null,
+      hoveredNodeId: null,
+      hoveredBreakpointId: null,
+      activeClassId: null,
+      inlineStyleEditing: false,
+      componentizeEditorRequest: null,
+    }),
 })
 
 // ---------------------------------------------------------------------------
@@ -223,9 +225,7 @@ export function pruneCanvasSelectionDraft(state: EditorStore): void {
   if (state.activeInlineEdit && !tree?.nodes[state.activeInlineEdit.nodeId]) {
     state.activeInlineEdit = null
   }
-  const surviving = tree
-    ? state.selectedNodeIds.filter((id) => Boolean(tree.nodes[id]))
-    : []
+  const surviving = tree ? state.selectedNodeIds.filter((id) => Boolean(tree.nodes[id])) : []
   if (surviving.length === state.selectedNodeIds.length) return
   state.selectedNodeIds = surviving
   state.selectedNodeId = surviving.length > 0 ? surviving[surviving.length - 1] : null
@@ -270,15 +270,19 @@ function applySelection(
   // Re-selecting the same node when the panel was manually collapsed must
   // re-open it (matches the J7+J8 user flow). The check is symmetric:
   // collapse on empty selection, expand on any selection — even the same one.
-  const panelChanged = !Object.is(
-    current.propertiesPanel.collapsed,
-    shouldCollapseProperties,
-  )
+  const panelChanged = !Object.is(current.propertiesPanel.collapsed, shouldCollapseProperties)
   const activeClassChanged = !Object.is(current.activeClassId, nextActiveClassId)
   const inlineEditingChanged =
     anchorChanged && !Object.is(current.inlineStyleEditing, nextInlineEditing)
 
-  if (!idsChanged && !anchorChanged && !panelChanged && !activeClassChanged && !inlineEditingChanged) return
+  if (
+    !idsChanged &&
+    !anchorChanged &&
+    !panelChanged &&
+    !activeClassChanged &&
+    !inlineEditingChanged
+  )
+    return
 
   set((state) => {
     state.selectedNodeIds = nextIds
@@ -332,11 +336,7 @@ function filterMultiSelectableIds(state: EditorStore, ids: string[]): string[] {
  * active tree's depth-first pre-order. Inclusive of both endpoints. Returns
  * an empty array when either id is absent from the active tree.
  */
-function computeRangeIds(
-  state: EditorStore,
-  anchorId: string,
-  targetId: string,
-): string[] {
+function computeRangeIds(state: EditorStore, anchorId: string, targetId: string): string[] {
   const tree = getActiveTree(state)
   if (!tree) return []
   if (!tree.nodes[anchorId] || !tree.nodes[targetId]) return []

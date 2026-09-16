@@ -19,9 +19,18 @@ import { readFileSync } from 'fs'
 
 const CANVAS_ROOT = new URL('../../admin/pages/site/canvas/CanvasRoot.tsx', import.meta.url)
 const NODE_RENDERER = new URL('../../admin/pages/site/canvas/NodeRenderer.tsx', import.meta.url)
-const KEYBOARD_SHORTCUTS = new URL('../../admin/pages/site/canvas/useCanvasKeyboardShortcuts.ts', import.meta.url)
-const IFRAME_FRAME_SURFACE = new URL('../../admin/pages/site/canvas/IframeFrameSurface.tsx', import.meta.url)
-const BREAKPOINT_FRAME = new URL('../../admin/pages/site/canvas/BreakpointFrame.tsx', import.meta.url)
+const KEYBOARD_SHORTCUTS = new URL(
+  '../../admin/pages/site/canvas/useCanvasKeyboardShortcuts.ts',
+  import.meta.url,
+)
+const IFRAME_FRAME_SURFACE = new URL(
+  '../../admin/pages/site/canvas/IframeFrameSurface.tsx',
+  import.meta.url,
+)
+const BREAKPOINT_FRAME = new URL(
+  '../../admin/pages/site/canvas/BreakpointFrame.tsx',
+  import.meta.url,
+)
 const CONTEXTS = new URL('../../admin/pages/site/canvas/CanvasContexts.ts', import.meta.url)
 
 describe('inline text editing wiring (in-place contentEditable)', () => {
@@ -33,13 +42,17 @@ describe('inline text editing wiring (in-place contentEditable)', () => {
 
   it('the double-click context channel carries the originating breakpoint', () => {
     const src = readFileSync(CONTEXTS, 'utf-8')
-    expect(src).toContain('onNodeDoubleClick: (nodeId: string, e: MouseEvent, breakpointId?: string) => void')
+    expect(src).toContain(
+      'onNodeDoubleClick: (nodeId: string, e: MouseEvent, breakpointId?: string) => void',
+    )
   })
 
   it('NodeRenderer builds an InlineEditBinding for the edited node in the session frame', () => {
     const src = readFileSync(NODE_RENDERER, 'utf-8')
     // Edits flow live: read the contentEditable text back, commit through the store.
-    expect(src).toContain('const inlineEditBinding: InlineEditBinding | undefined = isInlineEditing')
+    expect(src).toContain(
+      'const inlineEditBinding: InlineEditBinding | undefined = isInlineEditing',
+    )
     expect(src).toContain('applyInlineEditValue(readInlineEditableText')
     // Session is scoped to the one frame that owns it.
     expect(src).toContain('s.activeInlineEdit.breakpointId === breakpointId')

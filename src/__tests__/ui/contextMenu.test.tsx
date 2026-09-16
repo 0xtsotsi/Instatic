@@ -43,12 +43,7 @@ describe('ContextMenu', () => {
   it('renders viewport-fixed point menus in document.body instead of the caller subtree', () => {
     const { getByTestId } = render(
       <div data-testid="host">
-        <ContextMenu
-          x={24}
-          y={32}
-          ariaLabel="Portaled options"
-          onClose={() => {}}
-        >
+        <ContextMenu x={24} y={32} ariaLabel="Portaled options" onClose={() => {}}>
           <ContextMenuItem onClick={() => {}}>Rename</ContextMenuItem>
         </ContextMenu>
       </div>,
@@ -64,12 +59,7 @@ describe('ContextMenu', () => {
     const onClose = mock(() => {})
     const onTargetClick = mock(() => {})
 
-    render(
-      <PointContextMenuHarness
-        onClose={onClose}
-        onTargetClick={onTargetClick}
-      />,
-    )
+    render(<PointContextMenuHarness onClose={onClose} onTargetClick={onTargetClick} />)
 
     expect(screen.getByRole('menu', { name: /node options/i })).toBeDefined()
 
@@ -87,13 +77,7 @@ describe('ContextMenu', () => {
     const onClose = mock(() => {})
     const onTargetClick = mock(() => {})
 
-    render(
-      <PointContextMenuHarness
-        onClose={onClose}
-        onTargetClick={onTargetClick}
-        animateExit
-      />,
-    )
+    render(<PointContextMenuHarness onClose={onClose} onTargetClick={onTargetClick} animateExit />)
 
     const target = screen.getByRole('button', { name: /different element/i })
     fireEvent.mouseDown(target)
@@ -133,10 +117,19 @@ describe('ContextMenu', () => {
 
     // The menu mounts short, then grows once its (mock) content loads.
     let menuHeight = 40
-    const rect = (r: Partial<DOMRect>): DOMRect => ({
-      top: 0, left: 0, right: 0, bottom: 0, width: 0, height: 0, x: 0, y: 0,
-      toJSON: () => ({}), ...r,
-    }) as DOMRect
+    const rect = (r: Partial<DOMRect>): DOMRect =>
+      ({
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        width: 0,
+        height: 0,
+        x: 0,
+        y: 0,
+        toJSON: () => ({}),
+        ...r,
+      }) as DOMRect
 
     HTMLElement.prototype.getBoundingClientRect = function () {
       if (this.getAttribute('role') === 'menu') {
@@ -213,10 +206,19 @@ describe('ContextMenu', () => {
     Object.defineProperty(window, 'innerHeight', { value: 800, configurable: true })
     Object.defineProperty(window, 'innerWidth', { value: 1600, configurable: true })
 
-    const rect = (r: Partial<DOMRect>): DOMRect => ({
-      top: 0, left: 0, right: 0, bottom: 0, width: 0, height: 0, x: 0, y: 0,
-      toJSON: () => ({}), ...r,
-    }) as DOMRect
+    const rect = (r: Partial<DOMRect>): DOMRect =>
+      ({
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        width: 0,
+        height: 0,
+        x: 0,
+        y: 0,
+        toJSON: () => ({}),
+        ...r,
+      }) as DOMRect
 
     HTMLElement.prototype.getBoundingClientRect = function () {
       if (this.getAttribute('role') === 'menu') {
@@ -270,10 +272,7 @@ describe('ContextMenu', () => {
       const [open, setOpen] = useState(true)
       return (
         <>
-          <iframe
-            title="canvas"
-            ref={(el) => setDoc(el?.contentDocument ?? null)}
-          />
+          <iframe title="canvas" ref={(el) => setDoc(el?.contentDocument ?? null)} />
           {open && (
             <ContextMenu
               x={24}

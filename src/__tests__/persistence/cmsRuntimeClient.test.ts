@@ -11,7 +11,9 @@ describe('CMS runtime client', () => {
       updatedAt: 123,
     }
     const packageImportmap = {
-      imports: { 'canvas-confetti': '/_instatic/runtime/cache/abc/canvas-confetti/dist/confetti.module.mjs' },
+      imports: {
+        'canvas-confetti': '/_instatic/runtime/cache/abc/canvas-confetti/dist/confetti.module.mjs',
+      },
       lockHash: 'abc',
     }
 
@@ -19,10 +21,7 @@ describe('CMS runtime client', () => {
       { dependencies: { 'canvas-confetti': '^1.9.3' }, devDependencies: {} },
       async (input, init) => {
         calls.push({ input, init })
-        return new Response(
-          JSON.stringify({ dependencyLock, packageImportmap }),
-          { status: 200 },
-        )
+        return new Response(JSON.stringify({ dependencyLock, packageImportmap }), { status: 200 })
       },
     )
 
@@ -32,9 +31,11 @@ describe('CMS runtime client', () => {
       input: '/admin/api/cms/runtime/dependencies/resolve',
       init: { method: 'POST', credentials: 'include' },
     })
-    expect(calls[0].init?.body).toBe(JSON.stringify({
-      packageJson: { dependencies: { 'canvas-confetti': '^1.9.3' }, devDependencies: {} },
-    }))
+    expect(calls[0].init?.body).toBe(
+      JSON.stringify({
+        packageJson: { dependencies: { 'canvas-confetti': '^1.9.3' }, devDependencies: {} },
+      }),
+    )
   })
 
   it('returns only the lock when the server skips importmap build', async () => {
@@ -112,12 +113,15 @@ describe('CMS runtime client', () => {
       },
       async (input, init) => {
         calls.push({ input, init })
-        return new Response(JSON.stringify({
-          html: '<!DOCTYPE html>',
-          assets: [],
-          runtimeAssets: { scripts: [] },
-          diagnostics: [],
-        }), { status: 200 })
+        return new Response(
+          JSON.stringify({
+            html: '<!DOCTYPE html>',
+            assets: [],
+            runtimeAssets: { scripts: [] },
+            diagnostics: [],
+          }),
+          { status: 200 },
+        )
       },
     )
 
@@ -126,11 +130,13 @@ describe('CMS runtime client', () => {
       input: '/admin/api/cms/runtime/preview',
       init: { method: 'POST', credentials: 'include' },
     })
-    expect(calls[0].init?.body).toBe(JSON.stringify({
-      site: { id: 'site_1' },
-      pageId: 'page_1',
-      breakpointId: 'mobile',
-      templateContext: { entryStack: [] },
-    }))
+    expect(calls[0].init?.body).toBe(
+      JSON.stringify({
+        site: { id: 'site_1' },
+        pageId: 'page_1',
+        breakpointId: 'mobile',
+        templateContext: { entryStack: [] },
+      }),
+    )
   })
 })

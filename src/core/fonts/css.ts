@@ -15,11 +15,7 @@
 import type { FontEntry, FontFile, FontFileFormat, SiteFontsSettings } from './schemas'
 import { isSafeFontSrc } from './schemas'
 import { parseVariant } from './variants'
-import {
-  fontTokenCssVariable,
-  resolveFontTokenStack,
-  sortFontTokens,
-} from './tokens'
+import { fontTokenCssVariable, resolveFontTokenStack, sortFontTokens } from './tokens'
 
 /**
  * CSS `format(...)` token for each container format. The CSS keyword differs
@@ -113,9 +109,7 @@ function fontFaceRule(
  * Empty input yields the empty string — caller should skip the `<style>` tag
  * entirely if there are no fonts installed.
  */
-export function generateSiteFontsCss(
-  fonts: SiteFontsSettings | null | undefined,
-): string {
+export function generateSiteFontsCss(fonts: SiteFontsSettings | null | undefined): string {
   if (!fonts || !fonts.items || fonts.items.length === 0) return ''
 
   const blocks: string[] = []
@@ -128,7 +122,13 @@ export function generateSiteFontsCss(
       // HTML. Self-hosted /uploads/ paths and media-backed entries pass;
       // arbitrary third-party URLs are skipped (no-CDN guarantee).
       if (!isSafeFontSrc(file.path, file.mediaAssetId)) continue
-      const rule = fontFaceRule(entry.family, file.variant, file.path, file.format, file.unicodeRange)
+      const rule = fontFaceRule(
+        entry.family,
+        file.variant,
+        file.path,
+        file.format,
+        file.unicodeRange,
+      )
       if (rule) blocks.push(rule)
     }
   }
@@ -154,9 +154,7 @@ export function familySlug(family: string): string {
  * site's editable font tokens. Installed families do not emit direct variables;
  * authored styles should bind to tokens so family swaps preserve declarations.
  */
-export function generateFontTokenVariablesCss(
-  fonts: SiteFontsSettings | null | undefined,
-): string {
+export function generateFontTokenVariablesCss(fonts: SiteFontsSettings | null | undefined): string {
   if (!fonts?.tokens || fonts.tokens.length === 0) return ''
   const declarations: string[] = []
   for (const token of sortFontTokens(fonts.tokens)) {

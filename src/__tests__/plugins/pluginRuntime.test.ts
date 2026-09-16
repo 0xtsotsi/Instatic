@@ -1,8 +1,5 @@
 import { beforeEach, describe, expect, it } from 'bun:test'
-import {
-  activateEditorPlugin,
-  pluginRuntime,
-} from '@core/plugins/runtime'
+import { activateEditorPlugin, pluginRuntime } from '@core/plugins/runtime'
 import type { PluginManifest } from '@core/plugin-sdk'
 
 const workflowManifest: PluginManifest = {
@@ -32,7 +29,9 @@ describe('editor plugin runtime SDK', () => {
         api.editor.commands.register({
           id: 'workflow.approve',
           label: 'Approve Page',
-          run: () => { approved = true },
+          run: () => {
+            approved = true
+          },
         })
         api.editor.toolbar.addButton({
           id: 'workflow.approve',
@@ -42,12 +41,14 @@ describe('editor plugin runtime SDK', () => {
       },
     })
 
-    expect(pluginRuntime.getToolbarButtons()).toEqual([{
-      id: 'workflow.approve',
-      label: 'Approve',
-      command: 'workflow.approve',
-      pluginId: 'acme.workflow',
-    }])
+    expect(pluginRuntime.getToolbarButtons()).toEqual([
+      {
+        id: 'workflow.approve',
+        label: 'Approve',
+        command: 'workflow.approve',
+        pluginId: 'acme.workflow',
+      },
+    ])
 
     await pluginRuntime.runCommand('workflow.approve')
     expect(approved).toBe(true)
@@ -59,15 +60,17 @@ describe('editor plugin runtime SDK', () => {
       grantedPermissions: ['editor.commands'],
     } satisfies PluginManifest
 
-    await expect(activateEditorPlugin(manifest, {
-      activate(api) {
-        api.editor.toolbar.addButton({
-          id: 'workflow.approve',
-          label: 'Approve',
-          command: 'workflow.approve',
-        })
-      },
-    })).rejects.toThrow('requires permission "editor.toolbar"')
+    await expect(
+      activateEditorPlugin(manifest, {
+        activate(api) {
+          api.editor.toolbar.addButton({
+            id: 'workflow.approve',
+            label: 'Approve',
+            command: 'workflow.approve',
+          })
+        },
+      }),
+    ).rejects.toThrow('requires permission "editor.toolbar"')
 
     expect(pluginRuntime.getToolbarButtons()).toEqual([])
   })
@@ -75,26 +78,33 @@ describe('editor plugin runtime SDK', () => {
   it('exposes plugin-scoped CMS storage helpers that call the backend API', async () => {
     const calls: Array<{ input: RequestInfo | URL; init?: RequestInit }> = []
 
-    await activateEditorPlugin(workflowManifest, {
-      activate(api) {
-        void api.cms.storage.collection('approvals').create({
-          pageId: 'page_home',
-          status: 'approved',
-        })
-      },
-    }, async (input, init) => {
-      calls.push({ input, init })
-      return new Response(JSON.stringify({
-        record: {
-          id: 'record_1',
-          pluginId: 'acme.workflow',
-          resourceId: 'approvals',
-          data: { pageId: 'page_home', status: 'approved' },
-          createdAt: '2026-05-01T10:00:00.000Z',
-          updatedAt: '2026-05-01T10:00:00.000Z',
+    await activateEditorPlugin(
+      workflowManifest,
+      {
+        activate(api) {
+          void api.cms.storage.collection('approvals').create({
+            pageId: 'page_home',
+            status: 'approved',
+          })
         },
-      }), { status: 201 })
-    })
+      },
+      async (input, init) => {
+        calls.push({ input, init })
+        return new Response(
+          JSON.stringify({
+            record: {
+              id: 'record_1',
+              pluginId: 'acme.workflow',
+              resourceId: 'approvals',
+              data: { pageId: 'page_home', status: 'approved' },
+              createdAt: '2026-05-01T10:00:00.000Z',
+              updatedAt: '2026-05-01T10:00:00.000Z',
+            },
+          }),
+          { status: 201 },
+        )
+      },
+    )
 
     await Promise.resolve()
 
@@ -106,8 +116,10 @@ describe('editor plugin runtime SDK', () => {
         headers: { 'Content-Type': 'application/json' },
       },
     })
-    expect(calls[0].init?.body).toBe(JSON.stringify({
-      data: { pageId: 'page_home', status: 'approved' },
-    }))
+    expect(calls[0].init?.body).toBe(
+      JSON.stringify({
+        data: { pageId: 'page_home', status: 'approved' },
+      }),
+    )
   })
 })

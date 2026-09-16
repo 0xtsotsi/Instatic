@@ -34,12 +34,12 @@ import { readdirSync, readFileSync, existsSync, statSync } from 'fs'
 import { join, extname } from 'path'
 
 const PROJECT_ROOT = join(import.meta.dir, '../../../')
-const EDITOR_DIR   = join(PROJECT_ROOT, 'src/admin/pages/site')
+const EDITOR_DIR = join(PROJECT_ROOT, 'src/admin/pages/site')
 // Resolve the pixel-art-icons package via node_modules. The published shape
 // exposes built artifacts under dist/icons/<name>.js (+ .d.ts), so that's what
 // we check against — same path consumers see whether installed from the file:
 // dep or the published registry version.
-const ICONS_DIR    = join(PROJECT_ROOT, 'node_modules/pixel-art-icons/dist/icons')
+const ICONS_DIR = join(PROJECT_ROOT, 'node_modules/pixel-art-icons/dist/icons')
 const ICON_FILE_EXT = '.js'
 
 // ─── helpers ─────────────────────────────────────────────────────────────────
@@ -85,7 +85,10 @@ function extractIconNames(source: string): string[] {
   const seen = new Set<string>()
 
   function add(n: string) {
-    if (!seen.has(n)) { seen.add(n); names.push(n) }
+    if (!seen.has(n)) {
+      seen.add(n)
+      names.push(n)
+    }
   }
 
   const importPattern = /from\s+["']pixel-art-icons\/icons\/([a-z0-9-]+)["']/g
@@ -101,7 +104,10 @@ describe('Gate 1 — All direct icon imports exist in the icon catalog', () => {
   const editorFiles = collectFiles(EDITOR_DIR)
 
   // Collect every (iconName, filePath) pair referenced across editor components
-  interface IconRef { name: string; file: string }
+  interface IconRef {
+    name: string
+    file: string
+  }
   const allRefs: IconRef[] = []
 
   for (const filePath of editorFiles) {
@@ -126,9 +132,7 @@ describe('Gate 1 — All direct icon imports exist in the icon catalog', () => {
     )
 
     if (missing.length > 0) {
-      const lines = missing.map(
-        (m) => `  icon "${m.name}" referenced in ${m.file}`,
-      )
+      const lines = missing.map((m) => `  icon "${m.name}" referenced in ${m.file}`)
       throw new Error(
         `[Gate 1 — Task #389] ${missing.length} icon(s) missing from pixel-art-icons.\n` +
           lines.join('\n') +
@@ -340,11 +344,11 @@ describe('Gate 4 — No Unicode/emoji characters used as visual icons (user dire
    * Each entry: [character, description, suggested pixel-art-icons replacement]
    */
   const FORBIDDEN_ICON_CHARS = [
-    { char: '≡',  desc: 'triple-bar / hamburger', replacement: 'MenuIcon' },
-    { char: '‹',  desc: 'single left-pointing angle quotation', replacement: 'ChevronLeftIcon' },
-    { char: '›',  desc: 'single right-pointing angle quotation', replacement: 'ChevronRightIcon' },
-    { char: '⬇',  desc: 'downwards black arrow', replacement: 'ArrowDownIcon or DownloadIcon' },
-    { char: '⬆',  desc: 'upwards black arrow', replacement: 'ArrowUpIcon' },
+    { char: '≡', desc: 'triple-bar / hamburger', replacement: 'MenuIcon' },
+    { char: '‹', desc: 'single left-pointing angle quotation', replacement: 'ChevronLeftIcon' },
+    { char: '›', desc: 'single right-pointing angle quotation', replacement: 'ChevronRightIcon' },
+    { char: '⬇', desc: 'downwards black arrow', replacement: 'ArrowDownIcon or DownloadIcon' },
+    { char: '⬆', desc: 'upwards black arrow', replacement: 'ArrowUpIcon' },
   ]
 
   // Scan src/admin/pages/site/ and src/admin/.
@@ -374,9 +378,12 @@ describe('Gate 4 — No Unicode/emoji characters used as visual icons (user dire
           const line = lines[i]
           const trimmed = line.trimStart()
           // Skip comment lines
-          if (trimmed.startsWith('//') || trimmed.startsWith('*') || trimmed.startsWith('/*')) continue
+          if (trimmed.startsWith('//') || trimmed.startsWith('*') || trimmed.startsWith('/*'))
+            continue
           if (line.includes(char)) {
-            violations.push(`  ${filePath.replace(PROJECT_ROOT, '')}:${i + 1}: ${trimmed.slice(0, 80)}`)
+            violations.push(
+              `  ${filePath.replace(PROJECT_ROOT, '')}:${i + 1}: ${trimmed.slice(0, 80)}`,
+            )
           }
         }
       }

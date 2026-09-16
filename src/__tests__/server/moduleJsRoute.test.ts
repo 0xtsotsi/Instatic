@@ -74,13 +74,15 @@ function makeFakeDb(snapshot: ReturnType<typeof makeSnapshot> | null): DbClient 
     if (normalized.includes('site_snapshots.site_json')) {
       return {
         rows: snapshot
-          ? [{
-              row_id: snapshot.pageRowId,
-              site_json: snapshot.site,
-              runtime_assets_json: null,
-              importmap_body: null,
-              importmap_sha256: null,
-            } as unknown as Row]
+          ? [
+              {
+                row_id: snapshot.pageRowId,
+                site_json: snapshot.site,
+                runtime_assets_json: null,
+                importmap_body: null,
+                importmap_sha256: null,
+              } as unknown as Row,
+            ]
           : [],
         rowCount: snapshot ? 1 : 0,
       }

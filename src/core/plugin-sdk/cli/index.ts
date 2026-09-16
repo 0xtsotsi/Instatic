@@ -97,11 +97,14 @@ async function main(): Promise<void> {
     const kindFlag = flags.kind
     if (kindFlag !== undefined && kindFlag !== true) {
       if (kindFlag !== 'module' && kindFlag !== 'content-editor') {
-        console.error(`Unknown --kind value: "${kindFlag}". Use --kind=module or --kind=content-editor.`)
+        console.error(
+          `Unknown --kind value: "${kindFlag}". Use --kind=module or --kind=content-editor.`,
+        )
         process.exit(1)
       }
     }
-    const kind: 'module' | 'content-editor' = kindFlag === 'content-editor' ? 'content-editor' : 'module'
+    const kind: 'module' | 'content-editor' =
+      kindFlag === 'content-editor' ? 'content-editor' : 'module'
     const created = await runPluginInit(name, { kind })
     console.log(`✓ Created plugin at ${created}`)
     console.log(`  cd ${created.split('/').pop()} && instatic-plugin dev`)
@@ -133,7 +136,7 @@ async function main(): Promise<void> {
     }
     console.log(
       `\n${errors.length} error${errors.length === 1 ? '' : 's'}, ` +
-      `${warnings.length} warning${warnings.length === 1 ? '' : 's'} for ${result.pluginId}`,
+        `${warnings.length} warning${warnings.length === 1 ? '' : 's'} for ${result.pluginId}`,
     )
     if (errors.length > 0) process.exit(1)
     return

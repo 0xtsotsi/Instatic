@@ -54,13 +54,15 @@ describe('DOMPanel DnD target resolution', () => {
       c: node('c', 'base.text'),
     })
 
-    expect(resolveDomDropTarget({
-      page: p,
-      draggedId: 'c',
-      overId: 'b',
-      zone: 'before',
-      canHaveChildren,
-    })).toEqual({
+    expect(
+      resolveDomDropTarget({
+        page: p,
+        draggedId: 'c',
+        overId: 'b',
+        zone: 'before',
+        canHaveChildren,
+      }),
+    ).toEqual({
       draggedId: 'c',
       // Multi-drag: single-drag callers default to `[draggedId]`.
       draggedIds: ['c'],
@@ -71,13 +73,15 @@ describe('DOMPanel DnD target resolution', () => {
       overId: 'b',
     })
 
-    expect(resolveDomDropTarget({
-      page: p,
-      draggedId: 'a',
-      overId: 'b',
-      zone: 'after',
-      canHaveChildren,
-    })).toEqual({
+    expect(
+      resolveDomDropTarget({
+        page: p,
+        draggedId: 'a',
+        overId: 'b',
+        zone: 'after',
+        canHaveChildren,
+      }),
+    ).toEqual({
       draggedId: 'a',
       draggedIds: ['a'],
       parentId: 'root',
@@ -95,13 +99,15 @@ describe('DOMPanel DnD target resolution', () => {
       leaf: node('leaf', 'base.text'),
     })
 
-    expect(resolveDomDropTarget({
-      page: p,
-      draggedId: 'leaf',
-      overId: 'container',
-      zone: 'inside',
-      canHaveChildren,
-    })).toEqual({
+    expect(
+      resolveDomDropTarget({
+        page: p,
+        draggedId: 'leaf',
+        overId: 'container',
+        zone: 'inside',
+        canHaveChildren,
+      }),
+    ).toEqual({
       draggedId: 'leaf',
       draggedIds: ['leaf'],
       parentId: 'container',
@@ -110,7 +116,6 @@ describe('DOMPanel DnD target resolution', () => {
       slot: 'default',
       overId: 'container',
     })
-
   })
 
   it('normalizes same-parent insertion indices after source removal', () => {
@@ -122,21 +127,25 @@ describe('DOMPanel DnD target resolution', () => {
       d: node('d', 'base.text'),
     })
 
-    expect(resolveDomDropTarget({
-      page: p,
-      draggedId: 'a',
-      overId: 'd',
-      zone: 'after',
-      canHaveChildren,
-    })?.index).toBe(3)
+    expect(
+      resolveDomDropTarget({
+        page: p,
+        draggedId: 'a',
+        overId: 'd',
+        zone: 'after',
+        canHaveChildren,
+      })?.index,
+    ).toBe(3)
 
-    expect(resolveDomDropTarget({
-      page: p,
-      draggedId: 'd',
-      overId: 'a',
-      zone: 'before',
-      canHaveChildren,
-    })?.index).toBe(0)
+    expect(
+      resolveDomDropTarget({
+        page: p,
+        draggedId: 'd',
+        overId: 'a',
+        zone: 'before',
+        canHaveChildren,
+      })?.index,
+    ).toBe(0)
   })
 
   it('rejects root moves, leaf inside drops, self/descendant drops, locked moves, and no-ops', () => {
@@ -148,11 +157,59 @@ describe('DOMPanel DnD target resolution', () => {
       locked: node('locked', 'base.text', [], true),
     })
 
-    expect(resolveDomDropTarget({ page: p, draggedId: 'root', overId: 'b', zone: 'after', canHaveChildren })).toBeNull()
-    expect(resolveDomDropTarget({ page: p, draggedId: 'b', overId: 'child', zone: 'inside', canHaveChildren })).toBeNull()
-    expect(resolveDomDropTarget({ page: p, draggedId: 'a', overId: 'child', zone: 'inside', canHaveChildren })).toBeNull()
-    expect(resolveDomDropTarget({ page: p, draggedId: 'locked', overId: 'b', zone: 'before', canHaveChildren })).toBeNull()
-    expect(resolveDomDropTarget({ page: p, draggedId: 'b', overId: 'b', zone: 'inside', canHaveChildren })).toBeNull()
-    expect(resolveDomDropTarget({ page: p, draggedId: 'b', overId: 'b', zone: 'before', canHaveChildren })).toBeNull()
+    expect(
+      resolveDomDropTarget({
+        page: p,
+        draggedId: 'root',
+        overId: 'b',
+        zone: 'after',
+        canHaveChildren,
+      }),
+    ).toBeNull()
+    expect(
+      resolveDomDropTarget({
+        page: p,
+        draggedId: 'b',
+        overId: 'child',
+        zone: 'inside',
+        canHaveChildren,
+      }),
+    ).toBeNull()
+    expect(
+      resolveDomDropTarget({
+        page: p,
+        draggedId: 'a',
+        overId: 'child',
+        zone: 'inside',
+        canHaveChildren,
+      }),
+    ).toBeNull()
+    expect(
+      resolveDomDropTarget({
+        page: p,
+        draggedId: 'locked',
+        overId: 'b',
+        zone: 'before',
+        canHaveChildren,
+      }),
+    ).toBeNull()
+    expect(
+      resolveDomDropTarget({
+        page: p,
+        draggedId: 'b',
+        overId: 'b',
+        zone: 'inside',
+        canHaveChildren,
+      }),
+    ).toBeNull()
+    expect(
+      resolveDomDropTarget({
+        page: p,
+        draggedId: 'b',
+        overId: 'b',
+        zone: 'before',
+        canHaveChildren,
+      }),
+    ).toBeNull()
   })
 })

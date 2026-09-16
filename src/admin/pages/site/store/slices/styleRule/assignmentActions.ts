@@ -14,14 +14,13 @@ import { findNodeWithClassIds, mutateNodeClassIds } from './helpers'
 
 type AssignmentActions = Pick<
   StyleRuleSlice,
-  | 'addNodeClass'
-  | 'addNodeClasses'
-  | 'removeNodeClass'
-  | 'reorderNodeClasses'
-  | 'reorderNodeClass'
+  'addNodeClass' | 'addNodeClasses' | 'removeNodeClass' | 'reorderNodeClasses' | 'reorderNodeClass'
 >
 
-export function createAssignmentActions({ get, mutateSiteState }: SiteSliceHelpers): AssignmentActions {
+export function createAssignmentActions({
+  get,
+  mutateSiteState,
+}: SiteSliceHelpers): AssignmentActions {
   return {
     addNodeClass(nodeId, classId) {
       const { site } = get()
@@ -35,10 +34,11 @@ export function createAssignmentActions({ get, mutateSiteState }: SiteSliceHelpe
       // a never-matching token. Surface the misuse and bail.
       const cls = site?.styleRules[classId]
       if (cls && cls.kind && cls.kind !== 'class') {
-        console.error(
-          '[styleRuleSlice] addNodeClass refused: classId references an ambient rule',
-          { nodeId, classId, selector: cls.selector },
-        )
+        console.error('[styleRuleSlice] addNodeClass refused: classId references an ambient rule', {
+          nodeId,
+          classId,
+          selector: cls.selector,
+        })
         return
       }
 
@@ -61,10 +61,11 @@ export function createAssignmentActions({ get, mutateSiteState }: SiteSliceHelpe
         if (node.classIds?.includes(classId)) return false
         const cls = site?.styleRules[classId]
         if (cls && cls.kind && cls.kind !== 'class') {
-          console.error(
-            '[styleRuleSlice] addNodeClasses skipped an ambient rule',
-            { nodeId, classId, selector: cls.selector },
-          )
+          console.error('[styleRuleSlice] addNodeClasses skipped an ambient rule', {
+            nodeId,
+            classId,
+            selector: cls.selector,
+          })
           return false
         }
         return true

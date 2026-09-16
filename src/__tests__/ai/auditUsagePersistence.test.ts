@@ -2,11 +2,7 @@ import { afterEach, beforeEach, describe, expect, it } from 'bun:test'
 import type { AiProvider, AiStreamRequest } from '../../../server/ai/drivers/types'
 import type { AiStreamEvent } from '../../../server/ai/runtime/types'
 import { createConversationsPersister, runChat } from '../../../server/ai/runtime'
-import {
-  getUsageByModel,
-  getUsageByScope,
-  getUsageTotals,
-} from '../../../server/ai/audit/store'
+import { getUsageByModel, getUsageByScope, getUsageTotals } from '../../../server/ai/audit/store'
 import {
   createCapabilityTestHarness,
   readJson,
@@ -57,11 +53,8 @@ describe('AI audit usage persistence', () => {
     const cookie = await harness.setupOwner()
     console.error = () => {}
     globalThis.fetch = async (input) => {
-      const url = typeof input === 'string'
-        ? input
-        : input instanceof URL
-          ? input.toString()
-          : input.url
+      const url =
+        typeof input === 'string' ? input : input instanceof URL ? input.toString() : input.url
       if (url === 'http://127.0.0.1:1/api/tags') {
         return Response.json({ models: [{ name: 'e2e-model' }] })
       }
@@ -136,12 +129,7 @@ describe('AI audit usage persistence', () => {
       },
     })
 
-    expect(emitted.map((event) => event.type)).toEqual([
-      'text',
-      'context',
-      'usage',
-      'done',
-    ])
+    expect(emitted.map((event) => event.type)).toEqual(['text', 'context', 'usage', 'done'])
     expect(emitted.find((event) => event.type === 'usage')).toMatchObject({
       promptTokens: 123,
       completionTokens: 45,

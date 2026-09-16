@@ -422,7 +422,10 @@ const CHROME_RULES = `
 }
 `.trim()
 
-export function EditorChromeInjector({ targetDocument, parentDocument }: EditorChromeInjectorProps) {
+export function EditorChromeInjector({
+  targetDocument,
+  parentDocument,
+}: EditorChromeInjectorProps) {
   useEffect(() => {
     let styleEl = targetDocument.getElementById(STYLE_TAG_ID) as HTMLStyleElement | null
     if (!styleEl) {

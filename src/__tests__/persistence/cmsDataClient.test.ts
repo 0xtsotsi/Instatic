@@ -43,7 +43,14 @@ function rowFixture(overrides: Record<string, unknown> = {}) {
   return {
     id: 'row_1',
     tableId: 'posts',
-    cells: { title: 'Hello', slug: 'hello', body: '', featuredMedia: null, seoTitle: '', seoDescription: '' },
+    cells: {
+      title: 'Hello',
+      slug: 'hello',
+      body: '',
+      featuredMedia: null,
+      seoTitle: '',
+      seoDescription: '',
+    },
     slug: 'hello',
     status: 'draft',
     authorUserId: null,
@@ -69,9 +76,12 @@ describe('CMS data client', () => {
 
     const tables = await listCmsDataTables(async (input, init) => {
       calls.push({ input, init })
-      return new Response(JSON.stringify({
-        tables: [tableFixture()],
-      }), { status: 200 })
+      return new Response(
+        JSON.stringify({
+          tables: [tableFixture()],
+        }),
+        { status: 200 },
+      )
     })
 
     expect(tables[0].slug).toBe('posts')
@@ -95,9 +105,12 @@ describe('CMS data client', () => {
 
     const table = await updateCmsDataTable('posts', update, async (input, init) => {
       calls.push({ input, init })
-      return new Response(JSON.stringify({
-        table: tableFixture({ updatedAt: '2026-05-01T10:02:00.000Z', ...update }),
-      }), { status: 200 })
+      return new Response(
+        JSON.stringify({
+          table: tableFixture({ updatedAt: '2026-05-01T10:02:00.000Z', ...update }),
+        }),
+        { status: 200 },
+      )
     })
 
     expect(table.name).toBe('Articles')
@@ -131,13 +144,16 @@ describe('CMS data client', () => {
 
     const table = await createCmsDataTable(input, async (requestInput, init) => {
       calls.push({ input: requestInput, init })
-      return new Response(JSON.stringify({
-        table: tableFixture({
-          id: 'products',
-          system: false,
-          ...input,
+      return new Response(
+        JSON.stringify({
+          table: tableFixture({
+            id: 'products',
+            system: false,
+            ...input,
+          }),
         }),
-      }), { status: 201 })
+        { status: 201 },
+      )
     })
 
     expect(table.id).toBe('products')
@@ -163,12 +179,22 @@ describe('CMS data client', () => {
 
     await createCmsDataRow('posts', { cells: { title: 'Hello' } }, async (input, init) => {
       calls.push({ input, init })
-      return new Response(JSON.stringify({
-        row: rowFixture({
-          cells: { title: 'Hello', slug: '', body: '', featuredMedia: null, seoTitle: '', seoDescription: '' },
-          slug: '',
+      return new Response(
+        JSON.stringify({
+          row: rowFixture({
+            cells: {
+              title: 'Hello',
+              slug: '',
+              body: '',
+              featuredMedia: null,
+              seoTitle: '',
+              seoDescription: '',
+            },
+            slug: '',
+          }),
         }),
-      }), { status: 201 })
+        { status: 201 },
+      )
     })
 
     expect(calls[0]).toMatchObject({
@@ -193,8 +219,9 @@ describe('CMS data client', () => {
       calls.push({ input, init })
       return new Response(JSON.stringify({ row: rowFixture({ id: 'row/1' }) }), { status: 200 })
     })
-    const missing = await getCmsDataRow('missing', async () =>
-      new Response(JSON.stringify({ error: 'Not found' }), { status: 404 }),
+    const missing = await getCmsDataRow(
+      'missing',
+      async () => new Response(JSON.stringify({ error: 'Not found' }), { status: 404 }),
     )
 
     expect(row?.id).toBe('row/1')
@@ -210,24 +237,31 @@ describe('CMS data client', () => {
 
     const authors = await listCmsDataAuthors(async (input, init) => {
       calls.push({ input, init })
-      return new Response(JSON.stringify({
-        authors: [{
-          id: 'user_author',
-          email: 'author@example.com',
-          displayName: 'Author Name',
-          roleSlug: 'editor',
-          roleName: 'Editor',
-        }],
-      }), { status: 200 })
+      return new Response(
+        JSON.stringify({
+          authors: [
+            {
+              id: 'user_author',
+              email: 'author@example.com',
+              displayName: 'Author Name',
+              roleSlug: 'editor',
+              roleName: 'Editor',
+            },
+          ],
+        }),
+        { status: 200 },
+      )
     })
 
-    expect(authors).toEqual([{
-      id: 'user_author',
-      email: 'author@example.com',
-      displayName: 'Author Name',
-      roleSlug: 'editor',
-      roleName: 'Editor',
-    }])
+    expect(authors).toEqual([
+      {
+        id: 'user_author',
+        email: 'author@example.com',
+        displayName: 'Author Name',
+        roleSlug: 'editor',
+        roleName: 'Editor',
+      },
+    ])
     expect(calls[0]).toMatchObject({
       input: '/admin/api/cms/data/authors',
       init: { method: 'GET', credentials: 'include' },
@@ -249,24 +283,30 @@ describe('CMS data client', () => {
 
     await saveCmsDataRowDraft('row_1', draft, async (input, init) => {
       calls.push({ input, init })
-      return new Response(JSON.stringify({
-        row: rowFixture({
-          authorUserId: null,
-          cells: draft.cells,
-          updatedAt: '2026-05-01T10:01:00.000Z',
+      return new Response(
+        JSON.stringify({
+          row: rowFixture({
+            authorUserId: null,
+            cells: draft.cells,
+            updatedAt: '2026-05-01T10:01:00.000Z',
+          }),
         }),
-      }), { status: 200 })
+        { status: 200 },
+      )
     })
 
     await publishCmsDataRow('row_1', async (input, init) => {
       calls.push({ input, init })
-      return new Response(JSON.stringify({
-        row: rowFixture({
-          status: 'published',
-          publishedByUserId: 'user_owner',
-          publishedAt: '2026-05-01T10:02:00.000Z',
+      return new Response(
+        JSON.stringify({
+          row: rowFixture({
+            status: 'published',
+            publishedByUserId: 'user_owner',
+            publishedAt: '2026-05-01T10:02:00.000Z',
+          }),
         }),
-      }), { status: 200 })
+        { status: 200 },
+      )
     })
 
     expect(calls[0]).toMatchObject({
@@ -289,12 +329,15 @@ describe('CMS data client', () => {
 
     const row = await updateCmsDataRowStatus('row_1', 'unpublished', async (input, init) => {
       calls.push({ input, init })
-      return new Response(JSON.stringify({
-        row: rowFixture({
-          status: 'unpublished',
-          updatedAt: '2026-05-01T10:03:00.000Z',
+      return new Response(
+        JSON.stringify({
+          row: rowFixture({
+            status: 'unpublished',
+            updatedAt: '2026-05-01T10:03:00.000Z',
+          }),
         }),
-      }), { status: 200 })
+        { status: 200 },
+      )
     })
 
     expect(row.status).toBe('unpublished')
@@ -314,12 +357,15 @@ describe('CMS data client', () => {
 
     const row = await updateCmsDataRowTable('row_1', 'products', async (input, init) => {
       calls.push({ input, init })
-      return new Response(JSON.stringify({
-        row: rowFixture({
-          tableId: 'products',
-          updatedAt: '2026-05-01T10:03:00.000Z',
+      return new Response(
+        JSON.stringify({
+          row: rowFixture({
+            tableId: 'products',
+            updatedAt: '2026-05-01T10:03:00.000Z',
+          }),
         }),
-      }), { status: 200 })
+        { status: 200 },
+      )
     })
 
     expect(row.tableId).toBe('products')
@@ -339,12 +385,15 @@ describe('CMS data client', () => {
 
     const row = await updateCmsDataRowAuthor('row_1', 'user_author_2', async (input, init) => {
       calls.push({ input, init })
-      return new Response(JSON.stringify({
-        row: rowFixture({
-          authorUserId: 'user_author_2',
-          updatedAt: '2026-05-01T10:03:00.000Z',
+      return new Response(
+        JSON.stringify({
+          row: rowFixture({
+            authorUserId: 'user_author_2',
+            updatedAt: '2026-05-01T10:03:00.000Z',
+          }),
         }),
-      }), { status: 200 })
+        { status: 200 },
+      )
     })
 
     expect(row.authorUserId).toBe('user_author_2')
@@ -364,28 +413,34 @@ describe('CMS data client', () => {
 
     await deleteCmsDataRow('row_1', async (input, init) => {
       calls.push({ input, init })
-      return new Response(JSON.stringify({
-        row: rowFixture({
-          updatedAt: '2026-05-01T10:03:00.000Z',
+      return new Response(
+        JSON.stringify({
+          row: rowFixture({
+            updatedAt: '2026-05-01T10:03:00.000Z',
+          }),
         }),
-      }), { status: 200 })
+        { status: 200 },
+      )
     })
 
     await deleteCmsDataTable('products', async (input, init) => {
       calls.push({ input, init })
-      return new Response(JSON.stringify({
-        table: tableFixture({
-          id: 'products',
-          name: 'Products',
-          slug: 'products',
-          kind: 'data',
-          routeBase: '/products',
-          singularLabel: 'Product',
-          pluralLabel: 'Products',
-          system: false,
-          updatedAt: '2026-05-01T10:03:00.000Z',
+      return new Response(
+        JSON.stringify({
+          table: tableFixture({
+            id: 'products',
+            name: 'Products',
+            slug: 'products',
+            kind: 'data',
+            routeBase: '/products',
+            singularLabel: 'Product',
+            pluralLabel: 'Products',
+            system: false,
+            updatedAt: '2026-05-01T10:03:00.000Z',
+          }),
         }),
-      }), { status: 200 })
+        { status: 200 },
+      )
     })
 
     expect(calls[0]).toMatchObject({
@@ -400,20 +455,28 @@ describe('CMS data client', () => {
 
   it('surfaces API errors from the response body', async () => {
     await expect(
-      listCmsDataTables(async () =>
-        new Response(JSON.stringify({ error: 'Unauthorized' }), { status: 401 })),
+      listCmsDataTables(
+        async () => new Response(JSON.stringify({ error: 'Unauthorized' }), { status: 401 }),
+      ),
     ).rejects.toThrow('Unauthorized')
   })
 
   it('rejects malformed table payloads at the HTTP boundary', async () => {
     await expect(
-      listCmsDataTables(async () =>
-        new Response(JSON.stringify({
-          tables: [{
-            id: 'bad-table',
-            slug: 'bad-table',
-          }],
-        }), { status: 200 })),
+      listCmsDataTables(
+        async () =>
+          new Response(
+            JSON.stringify({
+              tables: [
+                {
+                  id: 'bad-table',
+                  slug: 'bad-table',
+                },
+              ],
+            }),
+            { status: 200 },
+          ),
+      ),
     ).rejects.toThrow('/tables/0')
   })
 })

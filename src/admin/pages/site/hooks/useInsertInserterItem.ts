@@ -31,8 +31,7 @@ export function useInsertInserterItem() {
     // selection acts as the target, no selection drops at root, leaf targets
     // become a sibling-after under their parent (see resolveInsertLocation).
     const location =
-      explicitTarget ??
-      resolveInsertLocation(canvasPage, selectedNodeId ?? canvasPage.rootNodeId)
+      explicitTarget ?? resolveInsertLocation(canvasPage, selectedNodeId ?? canvasPage.rootNodeId)
     if (!location) return false
     insertComponentRef(location.parentId, vcId, location.index)
     return true

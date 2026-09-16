@@ -46,7 +46,7 @@ function LayoutNameDialogBody({
   const renameLayout = useEditorStore((s) => s.renameLayout)
   const currentName = useEditorStore((s) =>
     request.mode === 'rename'
-      ? s.site?.layouts.find((l) => l.id === request.layoutId)?.name ?? ''
+      ? (s.site?.layouts.find((l) => l.id === request.layoutId)?.name ?? '')
       : '',
   )
   const [name, setName] = useState(currentName)
@@ -123,8 +123,8 @@ function LayoutNameDialogBody({
         />
         {isCreate && (
           <p className={styles.hint}>
-            Saves this element and everything inside it — content, settings,
-            and classes — for exact re-insertion from the module inserter.
+            Saves this element and everything inside it — content, settings, and classes — for exact
+            re-insertion from the module inserter.
           </p>
         )}
         {error !== null && (

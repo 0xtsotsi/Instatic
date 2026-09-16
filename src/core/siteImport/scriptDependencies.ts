@@ -41,9 +41,7 @@ export function rewriteNpmCdnModuleImports(source: string): ScriptDependencyRewr
 
   for (const rewrite of rewrites.reverse()) {
     content =
-      content.slice(0, rewrite.start + 1) +
-      rewrite.importSpecifier +
-      content.slice(rewrite.end - 1)
+      content.slice(0, rewrite.start + 1) + rewrite.importSpecifier + content.slice(rewrite.end - 1)
   }
 
   return { content, dependencies: [...dependencies.values()] }
@@ -67,9 +65,7 @@ function npmCdnSpecifierFromUrl(specifier: string): NpmCdnSpecifier | null {
     return null
   }
   const rawParts = pathname.split('/').filter(Boolean)
-  const parts = host === 'esm.sh' && /^v\d+$/.test(rawParts[0] ?? '')
-    ? rawParts.slice(1)
-    : rawParts
+  const parts = host === 'esm.sh' && /^v\d+$/.test(rawParts[0] ?? '') ? rawParts.slice(1) : rawParts
 
   if (host === 'esm.sh' || host === 'esm.run') {
     return npmSpecifierFromPackagePath(parts)
@@ -122,7 +118,9 @@ function parseScopedPackage(
   }
 }
 
-function parsePackageToken(token: string): { packageName: string; version: string; consumedParts: number } | null {
+function parsePackageToken(
+  token: string,
+): { packageName: string; version: string; consumedParts: number } | null {
   const versionIndex = token.lastIndexOf('@')
   if (versionIndex <= 0) return { packageName: token, version: '', consumedParts: 1 }
   return {

@@ -47,7 +47,9 @@ describe('token digest in the dynamic suffix', () => {
 
   it('summarizes colors, type, spacing and fonts once established', async () => {
     freshStore()
-    await executeAgentTool('site_set_color_tokens', { tokens: [{ slug: 'primary', lightValue: '#3b82f6' }] })
+    await executeAgentTool('site_set_color_tokens', {
+      tokens: [{ slug: 'primary', lightValue: '#3b82f6' }],
+    })
     await executeAgentTool('site_set_type_scale', { namingConvention: 'text', steps: 's,m,l' })
     await executeAgentTool('site_set_spacing_scale', { namingConvention: 'space', steps: 'xs,s,m' })
     await executeAgentTool('site_set_font_tokens', {

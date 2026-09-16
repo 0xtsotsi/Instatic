@@ -30,11 +30,7 @@ import {
 // Fixture helpers
 // ---------------------------------------------------------------------------
 
-function makeNode(
-  id: string,
-  moduleId = 'base.div',
-  children: string[] = [],
-): PageNode {
+function makeNode(id: string, moduleId = 'base.div', children: string[] = []): PageNode {
   return {
     id,
     moduleId,
@@ -45,10 +41,7 @@ function makeNode(
   }
 }
 
-function makeTree(
-  nodes: Record<string, PageNode>,
-  rootNodeId = 'root',
-): NodeTree<PageNode> {
+function makeTree(nodes: Record<string, PageNode>, rootNodeId = 'root'): NodeTree<PageNode> {
   // Derive the parentId index — mirrors what parse/loadSite do for real trees.
   reindexNodeParents(nodes)
   return { nodes, rootNodeId }

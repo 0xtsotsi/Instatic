@@ -3,11 +3,7 @@ import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs'
 import { extname, join, relative } from 'node:path'
 
 const SRC_ROOT = join(import.meta.dir, '../..')
-const SCAN_ROOTS = [
-  join(SRC_ROOT, 'admin'),
-  join(SRC_ROOT, 'core'),
-  join(SRC_ROOT, 'ui'),
-]
+const SCAN_ROOTS = [join(SRC_ROOT, 'admin'), join(SRC_ROOT, 'core'), join(SRC_ROOT, 'ui')]
 
 const NATIVE_DIALOG_RE = /\b(?:window\.)?(?:alert|confirm|prompt)\s*\(/g
 
@@ -27,9 +23,7 @@ function collectFiles(dir: string): string[] {
 }
 
 function stripComments(source: string): string {
-  return source
-    .replace(/\/\*[\s\S]*?\*\//g, '')
-    .replace(/^\s*\/\/.*$/gm, '')
+  return source.replace(/\/\*[\s\S]*?\*\//g, '').replace(/^\s*\/\/.*$/gm, '')
 }
 
 describe('native browser dialogs are not used in production app code', () => {

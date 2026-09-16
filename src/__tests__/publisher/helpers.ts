@@ -10,7 +10,6 @@ import { DEFAULT_SITE_SETTINGS, reindexNodeParents } from '@core/page-tree'
 
 // Re-exported because legacy publisher tests still reference it.
 
-
 // ---------------------------------------------------------------------------
 // Render accumulators — the mutable output bag every renderNode call needs.
 // Tests that don't inspect the CSS / loop / hole sets just pass a fresh one;
@@ -60,9 +59,7 @@ export function makeModule(
 // Minimal registry — takes a Record<id, ModuleDefinition>
 // ---------------------------------------------------------------------------
 
-export function makeRegistry(
-  modules: Record<string, AnyModuleDefinition>,
-): IModuleRegistry {
+export function makeRegistry(modules: Record<string, AnyModuleDefinition>): IModuleRegistry {
   return {
     register: () => {},
     registerOrReplace: () => {},
@@ -96,10 +93,7 @@ export function makeRegistry(
 
 type NodeSpec = Partial<Omit<PageNode, 'id' | 'moduleId'>> & { moduleId: string }
 
-export function makePage(
-  nodes: Record<string, NodeSpec>,
-  rootNodeId = 'root',
-): Page {
+export function makePage(nodes: Record<string, NodeSpec>, rootNodeId = 'root'): Page {
   const full: Record<string, PageNode> = {}
   for (const [id, spec] of Object.entries(nodes)) {
     full[id] = {

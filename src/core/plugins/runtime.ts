@@ -50,9 +50,9 @@ function requireEditorStore(): StoreApi<EditorStore> {
   if (!editorStoreApi) {
     throw new Error(
       '[plugin-runtime] editor store accessed before initialization. ' +
-      'This typically means a plugin called api.store.read/transaction ' +
-      'outside an editor route (Site / Content / Data / Media), where ' +
-      'the editor store has not been loaded.',
+        'This typically means a plugin called api.store.read/transaction ' +
+        'outside an editor route (Site / Content / Data / Media), where ' +
+        'the editor store has not been loaded.',
     )
   }
   return editorStoreApi
@@ -412,7 +412,9 @@ class PluginRuntime {
    */
   getCanvasOverlays(): RegisteredPluginCanvasOverlay[] {
     if (this.canvasOverlaysSnapshot === null) {
-      this.canvasOverlaysSnapshot = [...this.canvasOverlays.values()].map((record) => record.overlay)
+      this.canvasOverlaysSnapshot = [...this.canvasOverlays.values()].map(
+        (record) => record.overlay,
+      )
     }
     return this.canvasOverlaysSnapshot
   }
@@ -448,8 +450,9 @@ export function createEditorPluginApi(
   manifest: PluginManifest,
   fetchImpl: FetchLike,
 ): EditorPluginApi {
-  const baseAsset = (manifest.assetBasePath ?? `/uploads/plugins/${manifest.id}/${manifest.version}`)
-    .replace(/\/+$/g, '')
+  const baseAsset = (
+    manifest.assetBasePath ?? `/uploads/plugins/${manifest.id}/${manifest.version}`
+  ).replace(/\/+$/g, '')
   return {
     plugin: {
       id: manifest.id,
@@ -553,10 +556,20 @@ export function createEditorPluginApi(
         collection(resourceId) {
           assertPluginPermission(manifest, 'cms.storage')
           return {
-            list: (options) => listCmsPluginResourceRecords(manifest.id, resourceId, fetchImpl, '/admin/api/cms', options),
-            create: (data) => createCmsPluginResourceRecord(manifest.id, resourceId, data, fetchImpl),
-            update: (recordId, data) => updateCmsPluginResourceRecord(manifest.id, resourceId, recordId, data, fetchImpl),
-            delete: (recordId) => deleteCmsPluginResourceRecord(manifest.id, resourceId, recordId, fetchImpl),
+            list: (options) =>
+              listCmsPluginResourceRecords(
+                manifest.id,
+                resourceId,
+                fetchImpl,
+                '/admin/api/cms',
+                options,
+              ),
+            create: (data) =>
+              createCmsPluginResourceRecord(manifest.id, resourceId, data, fetchImpl),
+            update: (recordId, data) =>
+              updateCmsPluginResourceRecord(manifest.id, resourceId, recordId, data, fetchImpl),
+            delete: (recordId) =>
+              deleteCmsPluginResourceRecord(manifest.id, resourceId, recordId, fetchImpl),
           }
         },
       },

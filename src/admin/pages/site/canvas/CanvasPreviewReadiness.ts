@@ -14,8 +14,7 @@ export interface CanvasPreviewReadiness {
   revision: () => number
 }
 
-export const CanvasPreviewReadinessContext =
-  createContext<CanvasPreviewReadiness | null>(null)
+export const CanvasPreviewReadinessContext = createContext<CanvasPreviewReadiness | null>(null)
 
 export function createCanvasPreviewReadiness(): CanvasPreviewReadiness {
   let pending = 0

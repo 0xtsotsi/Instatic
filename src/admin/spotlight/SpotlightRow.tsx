@@ -68,15 +68,19 @@ import { getKeybindingForCommand, isPlatformMac } from './keybindings'
 // ─── Icon registry ────────────────────────────────────────────────────────────
 // Maps iconName strings to pixel-art-icons components.
 
-type IconComponent = React.ComponentType<{ size?: number; className?: string; 'aria-hidden'?: 'true' }>
+type IconComponent = React.ComponentType<{
+  size?: number
+  className?: string
+  'aria-hidden'?: 'true'
+}>
 
 const ICON_MAP: Record<string, IconComponent> = {
   // Phase 1 icons
   'search-solid': SearchSolidIcon,
   'save-solid': SaveSolidIcon,
   'send-solid': SendSolidIcon,
-  'undo': UndoIcon,
-  'redo': RedoIcon,
+  undo: UndoIcon,
+  redo: RedoIcon,
   'layout-solid': LayoutSolidIcon,
   'file-text-solid': FileTextSolidIcon,
   'database-solid': DatabaseSolidIcon,
@@ -86,7 +90,7 @@ const ICON_MAP: Record<string, IconComponent> = {
   'cursor-minimal-solid': CursorMinimalSolidIcon,
   'power-off': PowerOffIcon,
   'settings-cog-solid': SettingsCogSolidIcon,
-  'command': CommandIcon,
+  command: CommandIcon,
   'book-open-solid': BookOpenSolidIcon,
   'arrows-horizontal': ArrowsHorizontalIcon,
   'sliders-horizontal': SlidersHorizontalIcon,
@@ -99,7 +103,7 @@ const ICON_MAP: Record<string, IconComponent> = {
   'eye-solid': EyeSolidIcon,
   'arrow-up': ArrowUpIcon,
   'arrow-down': ArrowDownIcon,
-  'plus': PlusIcon,
+  plus: PlusIcon,
   'edit-solid': EditSolidIcon,
   'container-solid': ContainerSolidIcon,
   'box-solid': BoxSolidIcon,
@@ -112,14 +116,14 @@ const ICON_MAP: Record<string, IconComponent> = {
   'pointer-solid': PointerSolidIcon,
   'colors-swatch-solid': ColorsSwatchSolidIcon,
   'file-plus-solid': FilePlusSolidIcon,
-  'code': CodeIcon,
+  code: CodeIcon,
   'external-link-solid': ExternalLinkSolidIcon,
   'circle-alert-solid': CircleAlertSolidIcon,
-  'check': CheckIcon,
-  'braces': BracesIcon,
+  check: CheckIcon,
+  braces: BracesIcon,
   'list-box-solid': ListBoxSolidIcon,
   'proportions-solid': ProportionsSolidIcon,
-  'power': PowerIcon,
+  power: PowerIcon,
   'dock-solid': DockSolidIcon,
 }
 
@@ -186,7 +190,9 @@ export function SpotlightRow({
   // Shortcut is looked up from the keybindings registry — single source of truth.
   const keybinding = getKeybindingForCommand(command.id)
   const shortcutLabel = keybinding
-    ? (isMac ? keybinding.shortcut.mac : keybinding.shortcut.win)
+    ? isMac
+      ? keybinding.shortcut.mac
+      : keybinding.shortcut.win
     : undefined
   const ariaLabel = isConfirming
     ? `${command.title} — Press Enter again to confirm`
@@ -229,9 +235,7 @@ export function SpotlightRow({
             <span className={styles.rowLabel}>
               <HighlightedLabel label={command.title} ranges={matchRanges} />
             </span>
-            {command.subtitle && (
-              <span className={styles.rowSublabel}>{command.subtitle}</span>
-            )}
+            {command.subtitle && <span className={styles.rowSublabel}>{command.subtitle}</span>}
           </>
         )}
       </span>

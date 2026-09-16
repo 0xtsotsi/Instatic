@@ -19,10 +19,7 @@
  */
 import { useEffect, type RefObject } from 'react'
 
-export function useAutoFocusPanel(
-  panelRef: RefObject<HTMLElement | null>,
-  isOpen: boolean,
-): void {
+export function useAutoFocusPanel(panelRef: RefObject<HTMLElement | null>, isOpen: boolean): void {
   useEffect(() => {
     if (!isOpen) return undefined
     const handle = requestAnimationFrame(() => {

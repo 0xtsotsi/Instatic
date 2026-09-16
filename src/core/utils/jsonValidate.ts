@@ -7,15 +7,9 @@
  */
 
 import type { TSchema, Static } from '@sinclair/typebox'
-import {
-  compiledCheck,
-  compiledDecode,
-  compiledFormatValueErrors,
-} from './typeboxCompiler'
+import { compiledCheck, compiledDecode, compiledFormatValueErrors } from './typeboxCompiler'
 
-type JsonParseResult<T> =
-  | { ok: true; value: T }
-  | { ok: false; error: Error }
+type JsonParseResult<T> = { ok: true; value: T } | { ok: false; error: Error }
 
 /**
  * Parse a string as JSON and validate it against a TypeBox schema.

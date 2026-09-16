@@ -98,10 +98,7 @@ describe('no-legacy-pages-table — pages and page_versions must not exist in th
   })
 
   test('no later migration in either file recreates pages or page_versions', () => {
-    const allSql = [
-      ...pgMigrations.map((m) => m.sql),
-      ...sqliteMigrations.map((m) => m.sql),
-    ]
+    const allSql = [...pgMigrations.map((m) => m.sql), ...sqliteMigrations.map((m) => m.sql)]
     const violations = allSql.filter(hasLegacyTableDDL)
     if (violations.length > 0) {
       throw new Error(
@@ -119,9 +116,7 @@ describe('no-legacy-pages-table — pages and page_versions must not exist in th
       join(PROJECT_ROOT, 'server/db/migrations-sqlite.ts'),
     ])
 
-    const serverFiles = walk(join(PROJECT_ROOT, 'server')).filter(
-      (f) => !migrationFiles.has(f),
-    )
+    const serverFiles = walk(join(PROJECT_ROOT, 'server')).filter((f) => !migrationFiles.has(f))
 
     // Pattern: SQL fragment `from pages` or `from page_versions`.
     // We strip JS comments first to avoid false-positives in JSDoc.
@@ -137,9 +132,7 @@ describe('no-legacy-pages-table — pages and page_versions must not exist in th
       }
 
       // Strip line and block comments so pattern only matches live SQL.
-      const stripped = content
-        .replace(/\/\*[\s\S]*?\*\//g, '')
-        .replace(/\/\/[^\n]*/g, '')
+      const stripped = content.replace(/\/\*[\s\S]*?\*\//g, '').replace(/\/\/[^\n]*/g, '')
 
       if (FROM_PAGES_RE.test(stripped)) {
         violations.push(relative(PROJECT_ROOT, file))

@@ -204,7 +204,9 @@ describe('site explorer organization', () => {
     const folderId = createExplorerFolder(explorer, 'components', 'Marketing')
     moveExplorerItem(explorer, 'components', 'footer', folderId, 0)
 
-    expect(explorer.components.items.find((item) => item.id === 'footer')?.parentFolderId).toBe(folderId)
+    expect(explorer.components.items.find((item) => item.id === 'footer')?.parentFolderId).toBe(
+      folderId,
+    )
     expect(site.visualComponents.map((component) => component.id)).toEqual(['hero', 'footer'])
   })
 
@@ -219,7 +221,12 @@ describe('site explorer organization', () => {
       ],
     }
 
-    const folderId = wrapExplorerItemsInFolder(explorer, 'components', ['pricing', 'about'], 'Marketing')
+    const folderId = wrapExplorerItemsInFolder(
+      explorer,
+      'components',
+      ['pricing', 'about'],
+      'Marketing',
+    )
 
     expect(typeof folderId).toBe('string')
     expect(explorer.components.folders).toEqual([
@@ -266,9 +273,7 @@ describe('site explorer organization', () => {
 
     moveExplorerItem(explorer, 'components', 'hero', null, 0)
 
-    expect(explorer.components.folders).toEqual([
-      { id: 'folder-1', name: 'Marketing', order: 1 },
-    ])
+    expect(explorer.components.folders).toEqual([{ id: 'folder-1', name: 'Marketing', order: 1 }])
     expect(explorer.components.items).toEqual([
       { id: 'hero', order: 0 },
       { id: 'footer', order: 2 },
@@ -276,9 +281,7 @@ describe('site explorer organization', () => {
 
     moveExplorerItem(explorer, 'components', 'hero', null, 2)
 
-    expect(explorer.components.folders).toEqual([
-      { id: 'folder-1', name: 'Marketing', order: 0 },
-    ])
+    expect(explorer.components.folders).toEqual([{ id: 'folder-1', name: 'Marketing', order: 0 }])
     expect(explorer.components.items).toEqual([
       { id: 'footer', order: 1 },
       { id: 'hero', order: 2 },

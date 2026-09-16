@@ -19,12 +19,7 @@ export const CAPABILITY_GROUPS: CapabilityGroup[] = [
   { title: 'Dashboard', capabilities: ['dashboard.read'] },
   {
     title: 'Site',
-    capabilities: [
-      'site.read',
-      'site.structure.edit',
-      'site.content.edit',
-      'site.style.edit',
-    ],
+    capabilities: ['site.read', 'site.structure.edit', 'site.content.edit', 'site.style.edit'],
   },
   { title: 'Pages', capabilities: ['pages.edit', 'pages.publish'] },
   {

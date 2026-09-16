@@ -1,10 +1,6 @@
 import type { PageNode } from '@core/page-tree'
 import type { NodeTree } from '@core/page-tree'
-import type {
-  CanvasDropAxis,
-  CanvasDropCandidate,
-  CanvasRect,
-} from './canvasDnd'
+import type { CanvasDropAxis, CanvasDropCandidate, CanvasRect } from './canvasDnd'
 
 const CANVAS_NODE_SELECTOR = '[data-node-id]'
 
@@ -172,10 +168,7 @@ interface ClientRectLike {
   height: number
 }
 
-function clientRectToViewportRect(
-  viewport: HTMLElement,
-  rect: ClientRectLike,
-): CanvasRect {
+function clientRectToViewportRect(viewport: HTMLElement, rect: ClientRectLike): CanvasRect {
   const viewportRect = viewport.getBoundingClientRect()
   const scale = getViewportScale(viewport, viewportRect)
   const left = (rect.left - viewportRect.left) / scale
@@ -216,9 +209,10 @@ function inferCanvasDropAxis(target: HTMLElement): CanvasDropAxis {
 function findLayoutParent(element: HTMLElement): HTMLElement | null {
   let parent = element.parentElement
   while (parent) {
-    const style = typeof window !== 'undefined' && typeof window.getComputedStyle === 'function'
-      ? window.getComputedStyle(parent)
-      : null
+    const style =
+      typeof window !== 'undefined' && typeof window.getComputedStyle === 'function'
+        ? window.getComputedStyle(parent)
+        : null
     if (style?.display !== 'contents') return parent
     parent = parent.parentElement
   }

@@ -50,7 +50,9 @@ describe('self-host docker config', () => {
   it('allows PATCH in server CORS preflight for CMS media rename', () => {
     const serverIndex = readFileSync('server/index.ts', 'utf8')
 
-    expect(serverIndex).toContain("'Access-Control-Allow-Methods': 'GET, POST, PUT, PATCH, DELETE, OPTIONS'")
+    expect(serverIndex).toContain(
+      "'Access-Control-Allow-Methods': 'GET, POST, PUT, PATCH, DELETE, OPTIONS'",
+    )
   })
 
   it('defines a production compose stack with health checks and persistent data', () => {

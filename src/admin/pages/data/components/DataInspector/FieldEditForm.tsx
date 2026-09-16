@@ -76,9 +76,7 @@ export function FieldEditForm({
       <div className={styles.formGroup}>
         <label htmlFor={labelInputId} className={styles.label}>
           Label
-          {labelLocked && (
-            <span className={styles.optional}> (locked)</span>
-          )}
+          {labelLocked && <span className={styles.optional}> (locked)</span>}
         </label>
         <Input
           id={labelInputId}
@@ -93,10 +91,7 @@ export function FieldEditForm({
       {/* Required */}
       <div className={styles.switchRow}>
         <span className={styles.switchLabel}>Required</span>
-        <Switch
-          checked={state.required}
-          onCheckedChange={(v) => onChange('required', v)}
-        />
+        <Switch checked={state.required} onCheckedChange={(v) => onChange('required', v)} />
       </div>
 
       {/* Description */}
@@ -163,7 +158,9 @@ export function FieldEditForm({
         <>
           <div className={styles.fieldRow3Col}>
             <div className={styles.formGroup}>
-              <label htmlFor={numberMinId} className={styles.label}>Min</label>
+              <label htmlFor={numberMinId} className={styles.label}>
+                Min
+              </label>
               <Input
                 id={numberMinId}
                 fieldSize="sm"
@@ -173,7 +170,9 @@ export function FieldEditForm({
               />
             </div>
             <div className={styles.formGroup}>
-              <label htmlFor={numberMaxId} className={styles.label}>Max</label>
+              <label htmlFor={numberMaxId} className={styles.label}>
+                Max
+              </label>
               <Input
                 id={numberMaxId}
                 fieldSize="sm"
@@ -183,7 +182,9 @@ export function FieldEditForm({
               />
             </div>
             <div className={styles.formGroup}>
-              <label htmlFor={numberStepId} className={styles.label}>Step</label>
+              <label htmlFor={numberStepId} className={styles.label}>
+                Step
+              </label>
               <Input
                 id={numberStepId}
                 fieldSize="sm"
@@ -274,13 +275,7 @@ export function FieldEditForm({
               </div>
             ))}
           </div>
-          <Button
-            variant="ghost"
-            size="xs"
-            type="button"
-            align="start"
-            onClick={onOptionAdd}
-          >
+          <Button variant="ghost" size="xs" type="button" align="start" onClick={onOptionAdd}>
             <PlusIcon size={11} aria-hidden="true" />
             Add option
           </Button>
@@ -295,9 +290,7 @@ export function FieldEditForm({
               fieldSize="sm"
               value={state.mediaKind}
               options={MEDIA_KIND_OPTIONS}
-              onChange={(e) =>
-                onChange('mediaKind', e.target.value as 'image' | 'video' | 'any')
-              }
+              onChange={(e) => onChange('mediaKind', e.target.value as 'image' | 'video' | 'any')}
             />
           </div>
           <div className={styles.switchRow}>
@@ -315,8 +308,8 @@ export function FieldEditForm({
           <div className={styles.formGroup}>
             <span className={styles.label}>Target table</span>
             <span className={styles.caption}>
-              {tableOptions.find((t) => t.value === field.targetTableId)?.label ?? field.targetTableId}
-              {' '}
+              {tableOptions.find((t) => t.value === field.targetTableId)?.label ??
+                field.targetTableId}{' '}
               <span className={styles.optional}>(cannot be changed after creation)</span>
             </span>
           </div>
@@ -332,7 +325,9 @@ export function FieldEditForm({
 
       {/* Error */}
       {error && (
-        <p role="alert" className={styles.errorBanner}>{error}</p>
+        <p role="alert" className={styles.errorBanner}>
+          {error}
+        </p>
       )}
 
       {/* Actions */}

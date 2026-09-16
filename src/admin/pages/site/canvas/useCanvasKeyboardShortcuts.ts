@@ -46,11 +46,7 @@ interface CanvasKeyboardShortcutsDeps {
 /** Inputs / textareas / contenteditable surfaces let the browser own the keystroke. */
 function isTextInputTarget(target: EventTarget | null): boolean {
   if (!(target instanceof HTMLElement)) return false
-  return (
-    target.tagName === 'INPUT' ||
-    target.tagName === 'TEXTAREA' ||
-    target.isContentEditable
-  )
+  return target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable
 }
 
 function runDeleteShortcut(

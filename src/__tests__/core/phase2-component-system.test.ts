@@ -77,13 +77,24 @@ function getVC(vcId: string) {
     visualComponents: Array<{
       id: string
       name: string
-      params: Array<{ id: string; name: string; type: string; defaultValue: unknown; required: boolean; description?: string; enumOptions?: string[] }>
+      params: Array<{
+        id: string
+        name: string
+        type: string
+        defaultValue: unknown
+        required: boolean
+        description?: string
+        enumOptions?: string[]
+      }>
       tree: {
         rootNodeId: string
-        nodes: Record<string, {
-          id: string
-          propBindings?: Record<string, { paramId: string }>
-        }>
+        nodes: Record<
+          string,
+          {
+            id: string
+            propBindings?: Record<string, { paramId: string }>
+          }
+        >
       }
     }>
   }
@@ -101,7 +112,9 @@ function getActivePage() {
 // ---------------------------------------------------------------------------
 
 describe('Gate PROP-BIND-1 — setNodePropBinding in VC mode', () => {
-  beforeEach(() => { setupSite() })
+  beforeEach(() => {
+    setupSite()
+  })
 
   it('sets propBindings[propKey] on the VC rootNode when activeDocument is a VC', () => {
     const vcId = createVC('Card')
@@ -110,7 +123,9 @@ describe('Gate PROP-BIND-1 — setNodePropBinding in VC mode', () => {
     const rootNodeId = vc.tree.rootNodeId
 
     // Set active document to VC mode
-    useEditorStore.setState({ activeDocument: { kind: 'visualComponent', vcId } } as Parameters<typeof useEditorStore.setState>[0])
+    useEditorStore.setState({ activeDocument: { kind: 'visualComponent', vcId } } as Parameters<
+      typeof useEditorStore.setState
+    >[0])
 
     callAction<void>('setNodePropBinding', rootNodeId, 'text', paramId)
 
@@ -124,14 +139,18 @@ describe('Gate PROP-BIND-1 — setNodePropBinding in VC mode', () => {
 // ---------------------------------------------------------------------------
 
 describe('Gate PROP-BIND-2 — setNodePropBinding in page mode', () => {
-  beforeEach(() => { setupSite() })
+  beforeEach(() => {
+    setupSite()
+  })
 
   it('sets propBindings[propKey] on the page node when activeDocument is a page', () => {
     const page = getActivePage()!
     const rootNodeId = page.rootNodeId
 
     // Set active document to page mode
-    useEditorStore.setState({ activeDocument: { kind: 'page', pageId: page.id } } as Parameters<typeof useEditorStore.setState>[0])
+    useEditorStore.setState({ activeDocument: { kind: 'page', pageId: page.id } } as Parameters<
+      typeof useEditorStore.setState
+    >[0])
 
     callAction<void>('setNodePropBinding', rootNodeId, 'someKey', 'param-abc')
 
@@ -145,7 +164,9 @@ describe('Gate PROP-BIND-2 — setNodePropBinding in page mode', () => {
 // ---------------------------------------------------------------------------
 
 describe('Gate PROP-BIND-2a — setNodePropBinding with null activeDocument (default page canvas)', () => {
-  beforeEach(() => { setupSite() })
+  beforeEach(() => {
+    setupSite()
+  })
 
   it('sets propBindings on the page node when activeDocument is null and activePageId is set', () => {
     const page = getActivePage()!
@@ -167,7 +188,9 @@ describe('Gate PROP-BIND-2a — setNodePropBinding with null activeDocument (def
 // ---------------------------------------------------------------------------
 
 describe('Gate PROP-BIND-3 — clearNodePropBinding GCs orphan param', () => {
-  beforeEach(() => { setupSite() })
+  beforeEach(() => {
+    setupSite()
+  })
 
   it('removes the param from vc.params when no other node references it after clear', () => {
     const vcId = createVC('Widget')
@@ -175,7 +198,9 @@ describe('Gate PROP-BIND-3 — clearNodePropBinding GCs orphan param', () => {
     const vc = getVC(vcId)!
     const rootNodeId = vc.tree.rootNodeId
 
-    useEditorStore.setState({ activeDocument: { kind: 'visualComponent', vcId } } as Parameters<typeof useEditorStore.setState>[0])
+    useEditorStore.setState({ activeDocument: { kind: 'visualComponent', vcId } } as Parameters<
+      typeof useEditorStore.setState
+    >[0])
 
     // Bind the param
     callAction<void>('setNodePropBinding', rootNodeId, 'text', paramId)
@@ -197,7 +222,9 @@ describe('Gate PROP-BIND-3 — clearNodePropBinding GCs orphan param', () => {
 // ---------------------------------------------------------------------------
 
 describe('Gate PROP-BIND-4 — clearNodePropBinding does NOT GC when still referenced', () => {
-  beforeEach(() => { setupSite() })
+  beforeEach(() => {
+    setupSite()
+  })
 
   it('keeps the param in vc.params when another node still has a binding to it', () => {
     const vcId = createVC('Banner')
@@ -205,7 +232,9 @@ describe('Gate PROP-BIND-4 — clearNodePropBinding does NOT GC when still refer
     const vc = getVC(vcId)!
     const rootNodeId = vc.tree.rootNodeId
 
-    useEditorStore.setState({ activeDocument: { kind: 'visualComponent', vcId } } as Parameters<typeof useEditorStore.setState>[0])
+    useEditorStore.setState({ activeDocument: { kind: 'visualComponent', vcId } } as Parameters<
+      typeof useEditorStore.setState
+    >[0])
 
     // Add a child node to the VC tree
     const childNode = {
@@ -239,19 +268,27 @@ describe('Gate PROP-BIND-4 — clearNodePropBinding does NOT GC when still refer
 // ---------------------------------------------------------------------------
 
 describe('Gate PROP-BIND-3a — clearNodePropBinding with null activeDocument (default page canvas)', () => {
-  beforeEach(() => { setupSite() })
+  beforeEach(() => {
+    setupSite()
+  })
 
   it('removes propBinding from page node when activeDocument is null and activePageId is set', () => {
     const page = getActivePage()!
     const rootNodeId = page.rootNodeId
 
     // Set the binding while in page mode
-    useEditorStore.setState({ activeDocument: { kind: 'page', pageId: page.id } } as Parameters<typeof useEditorStore.setState>[0])
+    useEditorStore.setState({ activeDocument: { kind: 'page', pageId: page.id } } as Parameters<
+      typeof useEditorStore.setState
+    >[0])
     callAction<void>('setNodePropBinding', rootNodeId, 'label', 'param-clear-test')
-    expect(getActivePage()!.nodes[rootNodeId]?.propBindings?.label?.paramId).toBe('param-clear-test')
+    expect(getActivePage()!.nodes[rootNodeId]?.propBindings?.label?.paramId).toBe(
+      'param-clear-test',
+    )
 
     // Now switch to null activeDocument (default page canvas) and clear
-    useEditorStore.setState({ activeDocument: null } as Parameters<typeof useEditorStore.setState>[0])
+    useEditorStore.setState({ activeDocument: null } as Parameters<
+      typeof useEditorStore.setState
+    >[0])
     expect(useEditorStore.getState().activeDocument).toBeNull()
 
     callAction<void>('clearNodePropBinding', rootNodeId, 'label')
@@ -265,7 +302,9 @@ describe('Gate PROP-BIND-3a — clearNodePropBinding with null activeDocument (d
 // ---------------------------------------------------------------------------
 
 describe('Gate PROP-BIND-5 — updateParamDefaultValue', () => {
-  beforeEach(() => { setupSite() })
+  beforeEach(() => {
+    setupSite()
+  })
 
   it('updates the defaultValue of the specified param', () => {
     const vcId = createVC('Card')
@@ -283,7 +322,9 @@ describe('Gate PROP-BIND-5 — updateParamDefaultValue', () => {
 // ---------------------------------------------------------------------------
 
 describe('Gate PROP-BIND-6 — renameParam happy path', () => {
-  beforeEach(() => { setupSite() })
+  beforeEach(() => {
+    setupSite()
+  })
 
   it('renames a param and updates its name field', () => {
     const vcId = createVC('Card')
@@ -302,7 +343,9 @@ describe('Gate PROP-BIND-6 — renameParam happy path', () => {
 // ---------------------------------------------------------------------------
 
 describe('Gate PROP-BIND-7 — renameParam stability invariant', () => {
-  beforeEach(() => { setupSite() })
+  beforeEach(() => {
+    setupSite()
+  })
 
   it('override stored by paramId is still findable after param rename', () => {
     const vcId = createVC('Card')
@@ -331,7 +374,9 @@ describe('Gate PROP-BIND-7 — renameParam stability invariant', () => {
 // ---------------------------------------------------------------------------
 
 describe('Gate PROP-BIND-8 — renameParam throws on invalid name', () => {
-  beforeEach(() => { setupSite() })
+  beforeEach(() => {
+    setupSite()
+  })
 
   it('throws VisualComponentParamNameError when renaming to an empty name', () => {
     const vcId = createVC('Card')
@@ -361,7 +406,9 @@ describe('Gate PROP-BIND-8 — renameParam throws on invalid name', () => {
 // ---------------------------------------------------------------------------
 
 describe('Gate PROP-BIND-9 — updateParamMeta round-trip', () => {
-  beforeEach(() => { setupSite() })
+  beforeEach(() => {
+    setupSite()
+  })
 
   it('updates required, description, and enumOptions for an enum param', () => {
     const vcId = createVC('Card')

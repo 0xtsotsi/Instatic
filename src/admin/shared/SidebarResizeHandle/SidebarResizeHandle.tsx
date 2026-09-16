@@ -27,9 +27,7 @@ interface ResizeDragState {
 }
 
 function widthFromPointer(side: SidebarSide, drag: ResizeDragState, clientX: number) {
-  const delta = side === 'left'
-    ? clientX - drag.startClientX
-    : drag.startClientX - clientX
+  const delta = side === 'left' ? clientX - drag.startClientX : drag.startClientX - clientX
   return clampSidebarWidth(drag.startWidth + delta)
 }
 
@@ -53,14 +51,17 @@ export function SidebarResizeHandle({
   const dragRef = useRef<ResizeDragState | null>(null)
 
   // useCallback kept: stable identity for the [applyLiveWidth] useEffect dep array (exhaustive-deps).
-  const applyLiveWidth = useCallback((nextWidth: number) => {
-    const clampedWidth = clampSidebarWidth(nextWidth)
-    widthRef.current = clampedWidth
-    const target = targetRef.current
-    target?.style.setProperty(cssVariable, `${clampedWidth}px`)
-    if (layoutCssVariable) target?.style.setProperty(layoutCssVariable, `${clampedWidth}px`)
-    handleRef.current?.setAttribute('aria-valuenow', String(clampedWidth))
-  }, [cssVariable, layoutCssVariable, targetRef])
+  const applyLiveWidth = useCallback(
+    (nextWidth: number) => {
+      const clampedWidth = clampSidebarWidth(nextWidth)
+      widthRef.current = clampedWidth
+      const target = targetRef.current
+      target?.style.setProperty(cssVariable, `${clampedWidth}px`)
+      if (layoutCssVariable) target?.style.setProperty(layoutCssVariable, `${clampedWidth}px`)
+      handleRef.current?.setAttribute('aria-valuenow', String(clampedWidth))
+    },
+    [cssVariable, layoutCssVariable, targetRef],
+  )
 
   useEffect(() => {
     applyLiveWidth(width)

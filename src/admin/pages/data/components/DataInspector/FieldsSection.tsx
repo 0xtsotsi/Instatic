@@ -236,9 +236,10 @@ export function FieldsSection({
   // ── Delete ──
 
   function requestDeleteField(field: DataField) {
-    const rowDescription = rowCount > 0
-      ? `This will permanently delete the field and all values across ${rowCount} row${rowCount === 1 ? '' : 's'}.`
-      : undefined
+    const rowDescription =
+      rowCount > 0
+        ? `This will permanently delete the field and all values across ${rowCount} row${rowCount === 1 ? '' : 's'}.`
+        : undefined
     confirmDelete({
       title: `Delete field "${field.label}"?`,
       description: rowDescription,
@@ -263,18 +264,21 @@ export function FieldsSection({
 
   // Compute which optional built-in field IDs are absent from the table
   // (so NewFieldDialog can offer quick-add buttons for them).
-  const missingOptionalBuiltInIds = table.kind === 'postType'
-    ? (POST_TYPE_OPTIONAL_BUILTIN_FIELD_IDS as readonly string[]).filter(
-        (id) => !table.fields.some((f) => f.id === id),
-      )
-    : []
+  const missingOptionalBuiltInIds =
+    table.kind === 'postType'
+      ? (POST_TYPE_OPTIONAL_BUILTIN_FIELD_IDS as readonly string[]).filter(
+          (id) => !table.fields.some((f) => f.id === id),
+        )
+      : []
 
   // ── Render ──
 
   return (
     <div className={styles.fieldsSectionBody}>
       {updateError && (
-        <p role="alert" className={styles.errorBanner}>{updateError}</p>
+        <p role="alert" className={styles.errorBanner}>
+          {updateError}
+        </p>
       )}
 
       <div className={styles.fieldList}>

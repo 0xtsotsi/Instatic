@@ -49,11 +49,17 @@ export function hasCapability(user: CmsCurrentUser | null, capability: CoreCapab
   return Boolean(user?.capabilities.includes(capability))
 }
 
-function hasAnyCapability(user: CmsCurrentUser | null, capabilities: readonly CoreCapability[]): boolean {
+function hasAnyCapability(
+  user: CmsCurrentUser | null,
+  capabilities: readonly CoreCapability[],
+): boolean {
   return capabilities.some((capability) => hasCapability(user, capability))
 }
 
-function hasAllCapabilities(user: CmsCurrentUser | null, capabilities: readonly CoreCapability[]): boolean {
+function hasAllCapabilities(
+  user: CmsCurrentUser | null,
+  capabilities: readonly CoreCapability[],
+): boolean {
   return capabilities.every((capability) => hasCapability(user, capability))
 }
 
@@ -123,12 +129,16 @@ export function canEditAnyContent(user: CmsCurrentUser | null): boolean {
 }
 
 export function canEditContentEntry(user: CmsCurrentUser | null, row: DataRow | null): boolean {
-  return canEditAnyContent(user) || (ownsDataRow(user, row) && hasCapability(user, 'content.edit.own'))
+  return (
+    canEditAnyContent(user) || (ownsDataRow(user, row) && hasCapability(user, 'content.edit.own'))
+  )
 }
 
 export function canPublishContentEntry(user: CmsCurrentUser | null, row: DataRow | null): boolean {
-  return hasCapability(user, 'content.publish.any') ||
+  return (
+    hasCapability(user, 'content.publish.any') ||
     (ownsDataRow(user, row) && hasCapability(user, 'content.publish.own'))
+  )
 }
 
 // ---------------------------------------------------------------------------
@@ -155,7 +165,10 @@ export function canManageDataTables(user: CmsCurrentUser | null): boolean {
  * (`posts`/`pages`/`components`/`layouts`) need a system read cap; custom
  * tables need a custom read cap.
  */
-export function canReadTable(user: CmsCurrentUser | null, table: Pick<DataTable, 'system'>): boolean {
+export function canReadTable(
+  user: CmsCurrentUser | null,
+  table: Pick<DataTable, 'system'>,
+): boolean {
   return table.system
     ? hasAnyCapability(user, ['data.system.tables.read', 'data.system.tables.manage'])
     : hasAnyCapability(user, ['data.custom.tables.read', 'data.custom.tables.manage'])
@@ -166,8 +179,14 @@ export function canReadTable(user: CmsCurrentUser | null, table: Pick<DataTable,
  * this only governs custom fields + primary field (identity and built-in fields
  * are immutable for everyone — enforced server-side).
  */
-export function canManageTable(user: CmsCurrentUser | null, table: Pick<DataTable, 'system'>): boolean {
-  return hasCapability(user, table.system ? 'data.system.tables.manage' : 'data.custom.tables.manage')
+export function canManageTable(
+  user: CmsCurrentUser | null,
+  table: Pick<DataTable, 'system'>,
+): boolean {
+  return hasCapability(
+    user,
+    table.system ? 'data.system.tables.manage' : 'data.custom.tables.manage',
+  )
 }
 
 /** Caller can move a row from one table to another (`PATCH /rows/:id/table`). */
@@ -267,7 +286,10 @@ export function canRunPluginBackgroundWork(user: CmsCurrentUser | null): boolean
   return canAccessPluginsWorkspace(user)
 }
 
-export function canAccessWorkspace(user: CmsCurrentUser | null, workspace: AdminWorkspace): boolean {
+export function canAccessWorkspace(
+  user: CmsCurrentUser | null,
+  workspace: AdminWorkspace,
+): boolean {
   switch (workspace) {
     case 'dashboard':
       return hasCapability(user, 'dashboard.read')
@@ -300,7 +322,16 @@ export function firstAccessibleWorkspace(user: CmsCurrentUser | null): AdminWork
   // Dashboard comes first — it's the canonical admin home. Falls through to
   // the next accessible workspace for users whose role doesn't grant
   // `dashboard.read` (rare; only happens with hand-edited custom roles).
-  const order: AdminWorkspace[] = ['dashboard', 'site', 'content', 'data', 'media', 'plugins', 'users', 'ai']
+  const order: AdminWorkspace[] = [
+    'dashboard',
+    'site',
+    'content',
+    'data',
+    'media',
+    'plugins',
+    'users',
+    'ai',
+  ]
   return order.find((workspace) => canAccessWorkspace(user, workspace)) ?? null
 }
 

@@ -43,7 +43,7 @@ const PILL_ACCENT_BY_CHAR = new Map<string, PillAccent>(
 )
 const MEANINGFUL_ACCENT_CHAR_RE = /[a-z0-9]/i
 
-export type PillAccent = typeof PILL_ACCENTS[number]
+export type PillAccent = (typeof PILL_ACCENTS)[number]
 
 const PILL_ACCENT_TOKEN: Record<PillAccent, string> = {
   a: 'var(--accent-1)',

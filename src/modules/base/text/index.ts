@@ -8,10 +8,7 @@ import { registry } from '@core/module-engine'
 import type { ModuleDefinition } from '@core/module-engine'
 import { TextStartTIcon } from 'pixel-art-icons/icons/text-start-t'
 import { Value } from '@core/utils/typeboxHelpers'
-import {
-  htmlAttributesAttr,
-  htmlAttributesControl,
-} from '@modules/base/shared/htmlAttributes'
+import { htmlAttributesAttr, htmlAttributesControl } from '@modules/base/shared/htmlAttributes'
 import { textToBreakHtml } from '@modules/base/shared/inlineText'
 import { TextEditor } from './TextEditor'
 import { normalizeTag } from './tags'

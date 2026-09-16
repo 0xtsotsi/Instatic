@@ -118,11 +118,7 @@ export function ConvertToComponentButton({ nodeId }: ConvertToComponentButtonPro
             }
           }}
         />
-        <Button
-          variant="primary"
-          size="sm"
-          onClick={handleSubmit}
-        >
+        <Button variant="primary" size="sm" onClick={handleSubmit}>
           Create
         </Button>
         <Button

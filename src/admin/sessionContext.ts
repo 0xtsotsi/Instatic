@@ -41,9 +41,7 @@ export function useCurrentAdminUser(): CmsCurrentUser | null {
 export function useAuthenticatedAdminUser(): CmsCurrentUser {
   const value = use(AdminSessionContext)
   if (!value?.user) {
-    throw new Error(
-      'useAuthenticatedAdminUser must be called inside <AdminSessionProvider>',
-    )
+    throw new Error('useAuthenticatedAdminUser must be called inside <AdminSessionProvider>')
   }
   return value.user
 }

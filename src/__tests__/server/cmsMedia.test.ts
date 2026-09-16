@@ -25,12 +25,16 @@ import { mediaStorageRegistry } from '../../../src/core/plugins/mediaStorageRegi
 const PNG_BYTES = new Uint8Array(
   await sharp({
     create: { width: 4, height: 4, channels: 4, background: { r: 200, g: 100, b: 50, alpha: 1 } },
-  }).png().toBuffer(),
+  })
+    .png()
+    .toBuffer(),
 )
 const JPEG_BYTES = new Uint8Array(
   await sharp({
     create: { width: 4, height: 4, channels: 3, background: { r: 200, g: 100, b: 50 } },
-  }).jpeg().toBuffer(),
+  })
+    .jpeg()
+    .toBuffer(),
 )
 
 function pngFile(name: string): File {
@@ -88,21 +92,30 @@ function makeFakeDb() {
       if (!session) return { rows: [], rowCount: 0 }
       const admin = admins.find((a) => a.id === session.user_id)
       return {
-        rows: admin ? [{
-          ...admin,
-          email_normalized: admin.email,
-          display_name: 'Owner',
-          status: 'active',
-          role_id: 'owner',
-          last_login_at: null,
-          updated_at: admin.created_at,
-          deleted_at: null,
-          role_slug: 'owner',
-          role_name: 'Owner',
-          role_description: '',
-          role_is_system: true,
-          role_capabilities_json: ['media.read', 'media.write', 'media.replace', 'media.delete'],
-        } as Row] : [],
+        rows: admin
+          ? [
+              {
+                ...admin,
+                email_normalized: admin.email,
+                display_name: 'Owner',
+                status: 'active',
+                role_id: 'owner',
+                last_login_at: null,
+                updated_at: admin.created_at,
+                deleted_at: null,
+                role_slug: 'owner',
+                role_name: 'Owner',
+                role_description: '',
+                role_is_system: true,
+                role_capabilities_json: [
+                  'media.read',
+                  'media.write',
+                  'media.replace',
+                  'media.delete',
+                ],
+              } as Row,
+            ]
+          : [],
         rowCount: admin ? 1 : 0,
       }
     }
@@ -156,7 +169,10 @@ function makeFakeDb() {
 
     // getMediaAsset — single-row SELECT scoped by id. Matched BEFORE the
     // listMediaAssets branch because the column prefix substring overlaps.
-    if (normalized.includes('select id, filename, mime_type') && normalized.includes('where id =')) {
+    if (
+      normalized.includes('select id, filename, mime_type') &&
+      normalized.includes('where id =')
+    ) {
       const row = media.find((asset) => asset.id === values[0])
       return { rows: row ? [row as Row] : [], rowCount: row ? 1 : 0 }
     }
@@ -265,7 +281,12 @@ async function createCookie(db: ReturnType<typeof makeFakeDb>): Promise<string> 
 
 function cmsRequest(
   url: string,
-  init: { method?: string; formData?: FormData; headers?: Record<string, string>; body?: string } = {},
+  init: {
+    method?: string
+    formData?: FormData
+    headers?: Record<string, string>
+    body?: string
+  } = {},
 ): Request {
   const headers = new Map(
     Object.entries(init.headers ?? {}).map(([key, value]) => [key.toLowerCase(), value]),
@@ -393,7 +414,7 @@ describe('CMS media handlers', () => {
       )
 
       expect(res.status).toBe(201)
-      const payload = await res.json() as {
+      const payload = (await res.json()) as {
         asset: { filename: string; publicPath: string; mimeType: string; uploadedByUserId: string }
       }
       expect(payload.asset).toMatchObject({
@@ -406,7 +427,9 @@ describe('CMS media handlers', () => {
       // The on-disk extension is server-chosen (`.png`), not user-supplied —
       // the original filename's extension is irrelevant once stripped.
       expect(extname(String(db.media[0].storage_path))).toBe('.png')
-      expect(new Uint8Array(await readFile(join(uploadsDir, String(db.media[0].storage_path))))).toEqual(PNG_BYTES)
+      expect(
+        new Uint8Array(await readFile(join(uploadsDir, String(db.media[0].storage_path)))),
+      ).toEqual(PNG_BYTES)
     } finally {
       rmSync(uploadsDir, { recursive: true, force: true })
     }
@@ -502,7 +525,9 @@ describe('CMS media handlers', () => {
     body.set(
       'file',
       new File(
-        ['<svg xmlns="http://www.w3.org/2000/svg" width="0" height="0"><script>alert(1)</script><rect width="10" height="10"/></svg>'],
+        [
+          '<svg xmlns="http://www.w3.org/2000/svg" width="0" height="0"><script>alert(1)</script><rect width="10" height="10"/></svg>',
+        ],
         'logo.svg',
         { type: 'image/svg+xml' },
       ),
@@ -654,12 +679,14 @@ describe('CMS media handlers', () => {
       )
 
       expect(res.status).toBe(200)
-      const payload = await res.json() as { asset: { deletedAt: string | null } }
+      const payload = (await res.json()) as { asset: { deletedAt: string | null } }
       // Soft delete stamps `deleted_at` and returns the row.
       expect(payload.asset.deletedAt).toBeTruthy()
       // Row stays in the table; file stays on disk until ?purge=1.
       expect(db.media).toHaveLength(1)
-      await expect(readFile(join(uploadsDir, 'asset_1-hero.png'), 'utf-8')).resolves.toBe('image-bytes')
+      await expect(readFile(join(uploadsDir, 'asset_1-hero.png'), 'utf-8')).resolves.toBe(
+        'image-bytes',
+      )
     } finally {
       rmSync(uploadsDir, { recursive: true, force: true })
     }

@@ -63,12 +63,7 @@ export function DataGridSkeleton() {
             {/* Chip placeholders — five pills (All / Published / Drafts /
                 Archived / Scheduled) is the most common shape on post-types. */}
             {Array.from({ length: 5 }, (_, i) => (
-              <Skeleton
-                key={`chip-${i}`}
-                width={64 + (i % 3) * 10}
-                height={24}
-                radius={999}
-              />
+              <Skeleton key={`chip-${i}`} width={64 + (i % 3) * 10} height={24} radius={999} />
             ))}
           </div>
         </div>
@@ -111,11 +106,7 @@ export function DataGridSkeleton() {
                 <Skeleton width={48 + (i % 3) * 14} height={10} />
               </div>
             ))}
-            <div
-              role="columnheader"
-              className={styles.headerCell}
-              aria-hidden="true"
-            />
+            <div role="columnheader" className={styles.headerCell} aria-hidden="true" />
           </div>
 
           {/* Skeleton rows — shared with the live `DataGrid`'s loading state

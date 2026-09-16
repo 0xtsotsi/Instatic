@@ -1,9 +1,4 @@
-import type {
-  CSSDeclarationPriorityBag,
-  StyleRule,
-  Condition,
-  ConditionDef,
-} from '@core/page-tree'
+import type { CSSDeclarationPriorityBag, StyleRule, Condition, ConditionDef } from '@core/page-tree'
 import { breakpointMediaQuery, styleRuleSelector } from '@core/page-tree'
 import { sanitiseCssValue } from './utils'
 import { responsiveBackgroundImage, type ResponsiveCssOptions } from './responsiveBackground'
@@ -42,11 +37,7 @@ function toKebab(camel: string): string {
  * vectors (IE `behavior`, Mozilla XBL `-moz-binding`), so we drop them outright
  * regardless of value. Lowercased for comparison.
  */
-const DENIED_PROPS = new Set<string>([
-  'behavior',
-  '-moz-binding',
-  '-ms-behavior',
-])
+const DENIED_PROPS = new Set<string>(['behavior', '-moz-binding', '-ms-behavior'])
 
 /**
  * A syntactically valid CSS property name. `-{0,2}` allows an optional leading
@@ -221,7 +212,10 @@ export function bagToCSS(
  * Returns `''` when no declaration survives the gate (the caller then emits no
  * `style` attribute at all).
  */
-export function bagToInlineStyle(bag: Record<string, unknown>, options: ResponsiveCssOptions = {}): string {
+export function bagToInlineStyle(
+  bag: Record<string, unknown>,
+  options: ResponsiveCssOptions = {},
+): string {
   return bagToDeclarations(bag, options)
     .map(([prop, value]) => `${prop}: ${value}`)
     .join('; ')
@@ -323,10 +317,7 @@ export interface StyleRuleDeclarationLayers {
   contextStylePriorities?: Record<string, CSSDeclarationPriorityBag>
 }
 
-export type StyleRuleCssEmitter = (
-  selector: string,
-  layers: StyleRuleDeclarationLayers,
-) => string[]
+export type StyleRuleCssEmitter = (selector: string, layers: StyleRuleDeclarationLayers) => string[]
 
 export function createStyleRuleCssEmitter(
   breakpoints: ViewportContext[],
@@ -411,11 +402,13 @@ export function generateClassCSS(
   // more-specific override appears later in source and wins on equal
   // specificity. Imported rules carry the source stylesheet's position;
   // user-created rules append at the end (see classSlice.nextRuleOrder).
-  const orderedClasses = Object.values(classes).slice().sort((a, b) => {
-    const ao = typeof a.order === 'number' ? a.order : 0
-    const bo = typeof b.order === 'number' ? b.order : 0
-    return ao - bo
-  })
+  const orderedClasses = Object.values(classes)
+    .slice()
+    .sort((a, b) => {
+      const ao = typeof a.order === 'number' ? a.order : 0
+      const bo = typeof b.order === 'number' ? b.order : 0
+      return ao - bo
+    })
 
   for (const cls of orderedClasses) {
     if (typeof cls.rawCss === 'string') {
@@ -430,8 +423,7 @@ export function generateClassCSS(
   return blocks.join('\n\n')
 }
 
-const RAW_KEYFRAMES_RE =
-  /^@(?:-webkit-)?keyframes\s+-?[_a-zA-Z][\w-]*\s*\{[\s\S]*\}\s*$/i
+const RAW_KEYFRAMES_RE = /^@(?:-webkit-)?keyframes\s+-?[_a-zA-Z][\w-]*\s*\{[\s\S]*\}\s*$/i
 
 /**
  * Raw style rules are intentionally narrow: today only imported @keyframes are
@@ -481,7 +473,9 @@ function conditionPrelude(condition: Condition): string | null {
         : `@container ${wrapParens(condition.query)}`
     }
     case 'supports':
-      return isSafeConditionText(condition.query) ? `@supports ${wrapParens(condition.query)}` : null
+      return isSafeConditionText(condition.query)
+        ? `@supports ${wrapParens(condition.query)}`
+        : null
   }
 }
 

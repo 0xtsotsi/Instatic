@@ -114,7 +114,8 @@ export function FontFamilyControl({
           }}
         />
 
-        {open && !disabled &&
+        {open &&
+          !disabled &&
           createPortal(
             <ContextMenu
               anchorRef={inputRef}
@@ -131,7 +132,9 @@ export function FontFamilyControl({
               }}
               onMouseLeave={() => onClearPreview?.()}
             >
-              <div className={styles.menuHeader} aria-hidden="true">Base</div>
+              <div className={styles.menuHeader} aria-hidden="true">
+                Base
+              </div>
               <FontChoiceRow
                 title="Inherit"
                 meta="Use the parent font"
@@ -141,7 +144,9 @@ export function FontFamilyControl({
               />
 
               {tokens.length > 0 && (
-                <div className={styles.menuHeader} aria-hidden="true">Font tokens</div>
+                <div className={styles.menuHeader} aria-hidden="true">
+                  Font tokens
+                </div>
               )}
               {tokens.map((token) => {
                 const valueExpr = fontTokenValueExpr(token.variable)
@@ -163,7 +168,9 @@ export function FontFamilyControl({
               })}
 
               {entries.length > 0 && (
-                <div className={styles.menuHeader} aria-hidden="true">Installed fonts</div>
+                <div className={styles.menuHeader} aria-hidden="true">
+                  Installed fonts
+                </div>
               )}
               {entries.map((entry) => {
                 const stack = fontFamilyStackForEntry(entry)
@@ -215,11 +222,7 @@ function FontChoiceRow({
     >
       <span
         className={styles.menuTitle}
-        style={
-          previewFamily
-            ? ({ fontFamily: previewFamily } as CSSProperties)
-            : undefined
-        }
+        style={previewFamily ? ({ fontFamily: previewFamily } as CSSProperties) : undefined}
       >
         {title}
       </span>

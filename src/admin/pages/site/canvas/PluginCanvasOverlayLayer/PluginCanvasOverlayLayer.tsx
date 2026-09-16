@@ -82,10 +82,7 @@ function PluginCanvasOverlaySlot({ overlay }: { overlay: RegisteredPluginCanvasO
   }
 
   return (
-    <ErrorBoundary
-      location="plugin-canvas-overlay"
-      resetKeys={[overlay.id, overlay.pluginId]}
-    >
+    <ErrorBoundary location="plugin-canvas-overlay" resetKeys={[overlay.id, overlay.pluginId]}>
       <div
         className={styles.overlaySlot}
         data-plugin-id={overlay.pluginId}

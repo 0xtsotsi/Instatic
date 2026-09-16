@@ -120,9 +120,7 @@ function MediaPreviewMulti({
       {visible.map((id) => (
         <MediaThumb key={id} id={id} asset={assetMap.get(id)} />
       ))}
-      {overflow > 0 && (
-        <span className={styles.mediaOverflow}>+{overflow}</span>
-      )}
+      {overflow > 0 && <span className={styles.mediaOverflow}>+{overflow}</span>}
     </span>
   )
 }
@@ -153,9 +151,7 @@ export function MediaCell({
 
   function handlePick(asset: CmsMediaAsset) {
     if (isMulti) {
-      const next = currentIds.includes(asset.id)
-        ? currentIds
-        : [...currentIds, asset.id]
+      const next = currentIds.includes(asset.id) ? currentIds : [...currentIds, asset.id]
       onChange(next)
     } else {
       onChange(asset.id)

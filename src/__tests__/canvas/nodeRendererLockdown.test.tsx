@@ -53,9 +53,12 @@ function makeAnnotatedNode(
 
 /** Renders the CanvasRoot (which requires a DndContext). */
 function renderCanvas() {
-  return render(<DndContext><CanvasRoot /></DndContext>)
+  return render(
+    <DndContext>
+      <CanvasRoot />
+    </DndContext>,
+  )
 }
-
 
 /**
  * Sets up a page with annotated nodes and loads it into the editor store.
@@ -105,7 +108,7 @@ function setupAnnotatedPage() {
   useEditorStore.setState({
     site: makeSite({ pages: [page] }),
     activePageId: 'page-1',
-    activeDocument: null,  // page mode (not VC edit mode)
+    activeDocument: null, // page mode (not VC edit mode)
     activeBreakpointId: 'mobile',
     selectedNodeId: null,
     selectedNodeIds: [],

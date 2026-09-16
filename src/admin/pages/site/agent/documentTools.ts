@@ -151,10 +151,12 @@ function resolveAgentDocument(
   if (document.type === 'visualComponent') {
     const vc = site.visualComponents?.find((component) => component.id === document.id)
     if (!vc) return null
-    const descriptor = descriptors.find((item) => documentRefEquals(item.document, {
-      type: 'visualComponent',
-      id: vc.id,
-    }))
+    const descriptor = descriptors.find((item) =>
+      documentRefEquals(item.document, {
+        type: 'visualComponent',
+        id: vc.id,
+      }),
+    )
     if (!descriptor) return null
     return { descriptor, page: flattenVCToVirtualPage(vc) }
   }

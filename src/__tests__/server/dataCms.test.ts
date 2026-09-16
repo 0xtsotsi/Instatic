@@ -37,7 +37,13 @@ const defaultFields = [
   { type: 'text', id: 'title', label: 'Title', required: true, builtIn: true },
   { type: 'text', id: 'slug', label: 'Slug', required: true, builtIn: true },
   { type: 'richText', id: 'body', label: 'Body', format: 'markdown', builtIn: true },
-  { type: 'media', id: 'featuredMedia', label: 'Featured media', mediaKind: 'image', builtIn: true },
+  {
+    type: 'media',
+    id: 'featuredMedia',
+    label: 'Featured media',
+    mediaKind: 'image',
+    builtIn: true,
+  },
   { type: 'text', id: 'seoTitle', label: 'SEO title', builtIn: true },
   { type: 'longText', id: 'seoDescription', label: 'SEO description', builtIn: true },
 ]
@@ -51,7 +57,7 @@ describe('data CMS migrations', () => {
     expect(sql).toContain('create table if not exists data_row_versions')
     expect(sql).toContain('active_version_id')
     expect(sql).toContain('create table if not exists data_row_redirects')
-    expect(sql).toContain("insert into data_tables")
+    expect(sql).toContain('insert into data_tables')
   })
 })
 
@@ -61,42 +67,46 @@ describe('data CMS repository', () => {
       (sql) => {
         if (!sql.startsWith('select id, name, slug, kind, route_base')) return undefined
         return {
-          rows: [{
-            id: 'posts',
-            name: 'Posts',
-            slug: 'posts',
-            kind: 'postType',
-            route_base: '/posts',
-            singular_label: 'Post',
-            plural_label: 'Posts',
-            primary_field_id: 'title',
-            fields_json: defaultFields,
-            created_by_user_id: null,
-            updated_by_user_id: null,
-            created_at: rowDate('2026-05-01T10:00:00Z'),
-            updated_at: rowDate('2026-05-01T10:00:00Z'),
-          }],
+          rows: [
+            {
+              id: 'posts',
+              name: 'Posts',
+              slug: 'posts',
+              kind: 'postType',
+              route_base: '/posts',
+              singular_label: 'Post',
+              plural_label: 'Posts',
+              primary_field_id: 'title',
+              fields_json: defaultFields,
+              created_by_user_id: null,
+              updated_by_user_id: null,
+              created_at: rowDate('2026-05-01T10:00:00Z'),
+              updated_at: rowDate('2026-05-01T10:00:00Z'),
+            },
+          ],
           rowCount: 1,
         }
       },
     ])
 
-    await expect(listDataTables(db)).resolves.toEqual([{
-      id: 'posts',
-      name: 'Posts',
-      slug: 'posts',
-      kind: 'postType',
-      routeBase: '/posts',
-      singularLabel: 'Post',
-      pluralLabel: 'Posts',
-      primaryFieldId: 'title',
-      fields: defaultFields,
-      system: false,
-      createdByUserId: null,
-      updatedByUserId: null,
-      createdAt: '2026-05-01T10:00:00.000Z',
-      updatedAt: '2026-05-01T10:00:00.000Z',
-    }])
+    await expect(listDataTables(db)).resolves.toEqual([
+      {
+        id: 'posts',
+        name: 'Posts',
+        slug: 'posts',
+        kind: 'postType',
+        routeBase: '/posts',
+        singularLabel: 'Post',
+        pluralLabel: 'Posts',
+        primaryFieldId: 'title',
+        fields: defaultFields,
+        system: false,
+        createdByUserId: null,
+        updatedByUserId: null,
+        createdAt: '2026-05-01T10:00:00.000Z',
+        updatedAt: '2026-05-01T10:00:00.000Z',
+      },
+    ])
   })
 
   it('creates a post-type table without creating a template page row', async () => {
@@ -107,21 +117,23 @@ describe('data CMS repository', () => {
         expect(params[1]).toBe('Products')
         expect(params[2]).toBe('products')
         return {
-          rows: [{
-            id: 'products',
-            name: 'Products',
-            slug: 'products',
-            kind: 'postType',
-            route_base: '/products',
-            singular_label: 'Product',
-            plural_label: 'Products',
-            primary_field_id: 'title',
-            fields_json: defaultFields,
-            created_by_user_id: null,
-            updated_by_user_id: null,
-            created_at: rowDate('2026-05-01T10:00:00Z'),
-            updated_at: rowDate('2026-05-01T10:00:00Z'),
-          }],
+          rows: [
+            {
+              id: 'products',
+              name: 'Products',
+              slug: 'products',
+              kind: 'postType',
+              route_base: '/products',
+              singular_label: 'Product',
+              plural_label: 'Products',
+              primary_field_id: 'title',
+              fields_json: defaultFields,
+              created_by_user_id: null,
+              updated_by_user_id: null,
+              created_at: rowDate('2026-05-01T10:00:00Z'),
+              updated_at: rowDate('2026-05-01T10:00:00Z'),
+            },
+          ],
           rowCount: 1,
         }
       },
@@ -159,34 +171,43 @@ describe('data CMS repository', () => {
         expect(params).toContain('Catalog')
         expect(params).toContain('catalog')
         return {
-          rows: [{
-            id: 'products',
-            name: 'Catalog',
-            slug: 'catalog',
-            kind: 'postType',
-            route_base: '/catalog',
-            singular_label: 'Product',
-            plural_label: 'Catalog',
-            primary_field_id: 'title',
-            fields_json: nextFields,
-            created_by_user_id: null,
-            updated_by_user_id: null,
-            created_at: rowDate('2026-05-01T10:00:00Z'),
-            updated_at: rowDate('2026-05-01T10:05:00Z'),
-          }],
+          rows: [
+            {
+              id: 'products',
+              name: 'Catalog',
+              slug: 'catalog',
+              kind: 'postType',
+              route_base: '/catalog',
+              singular_label: 'Product',
+              plural_label: 'Catalog',
+              primary_field_id: 'title',
+              fields_json: nextFields,
+              created_by_user_id: null,
+              updated_by_user_id: null,
+              created_at: rowDate('2026-05-01T10:00:00Z'),
+              updated_at: rowDate('2026-05-01T10:05:00Z'),
+            },
+          ],
           rowCount: 1,
         }
       },
     ])
 
-    await expect(updateDataTable(db, 'products', {
-      name: 'Catalog',
-      slug: 'catalog',
-      routeBase: '/catalog',
-      singularLabel: 'Product',
-      pluralLabel: 'Catalog',
-      fields: nextFields,
-    }, null)).resolves.toMatchObject({
+    await expect(
+      updateDataTable(
+        db,
+        'products',
+        {
+          name: 'Catalog',
+          slug: 'catalog',
+          routeBase: '/catalog',
+          singularLabel: 'Product',
+          pluralLabel: 'Catalog',
+          fields: nextFields,
+        },
+        null,
+      ),
+    ).resolves.toMatchObject({
       id: 'products',
       name: 'Catalog',
       slug: 'catalog',
@@ -202,36 +223,40 @@ describe('data CMS repository', () => {
         expect(sql).toContain('users.status = $1')
         expect(params).toEqual(['active'])
         return {
-          rows: [{
-            id: 'author_1',
-            email: 'author@example.com',
-            email_normalized: 'author@example.com',
-            display_name: 'Author Name',
-            password_hash: 'hash',
-            status: 'active',
-            role_id: 'editor',
-            last_login_at: null,
-            created_at: rowDate('2026-05-01T10:00:00Z'),
-            updated_at: rowDate('2026-05-01T10:00:00Z'),
-            deleted_at: null,
-            role_slug: 'editor',
-            role_name: 'Editor',
-            role_description: '',
-            role_is_system: true,
-            role_capabilities_json: ['content.edit.own'],
-          }],
+          rows: [
+            {
+              id: 'author_1',
+              email: 'author@example.com',
+              email_normalized: 'author@example.com',
+              display_name: 'Author Name',
+              password_hash: 'hash',
+              status: 'active',
+              role_id: 'editor',
+              last_login_at: null,
+              created_at: rowDate('2026-05-01T10:00:00Z'),
+              updated_at: rowDate('2026-05-01T10:00:00Z'),
+              deleted_at: null,
+              role_slug: 'editor',
+              role_name: 'Editor',
+              role_description: '',
+              role_is_system: true,
+              role_capabilities_json: ['content.edit.own'],
+            },
+          ],
           rowCount: 1,
         }
       },
     ])
 
-    await expect(listDataAuthorOptions(db)).resolves.toEqual([{
-      id: 'author_1',
-      email: 'author@example.com',
-      displayName: 'Author Name',
-      roleSlug: 'editor',
-      roleName: 'Editor',
-    }])
+    await expect(listDataAuthorOptions(db)).resolves.toEqual([
+      {
+        id: 'author_1',
+        email: 'author@example.com',
+        displayName: 'Author Name',
+        roleSlug: 'editor',
+        roleName: 'Editor',
+      },
+    ])
   })
 
   it('resolves the active published version by table route and row slug', async () => {
@@ -241,34 +266,36 @@ describe('data CMS repository', () => {
         expect(sql).toContain('data_row_versions.id = data_rows.active_version_id')
         expect(params).toEqual(['/posts', 'hello'])
         return {
-          rows: [{
-            id: 'version_1',
-            row_id: 'row_1',
-            table_id: 'posts',
-            table_slug: 'posts',
-            table_kind: 'postType',
-            table_route_base: '/posts',
-            version_number: 2,
-            cells_json: {
-              title: 'Published Hello',
+          rows: [
+            {
+              id: 'version_1',
+              row_id: 'row_1',
+              table_id: 'posts',
+              table_slug: 'posts',
+              table_kind: 'postType',
+              table_route_base: '/posts',
+              version_number: 2,
+              cells_json: {
+                title: 'Published Hello',
+                slug: 'hello',
+                body: 'Published body',
+                featuredMedia: null,
+                seoTitle: 'SEO',
+                seoDescription: 'Description',
+              },
               slug: 'hello',
-              body: 'Published body',
-              featuredMedia: null,
-              seoTitle: 'SEO',
-              seoDescription: 'Description',
+              author_user_id: 'author_1',
+              author_display_name: 'Author Name',
+              author_role_slug: 'editor',
+              author_role_name: 'Editor',
+              published_by_user_id: 'publisher_1',
+              published_by_display_name: 'Publisher Name',
+              published_by_role_slug: 'admin',
+              published_by_role_name: 'Admin',
+              published_at: rowDate('2026-05-01T10:02:00Z'),
+              created_at: rowDate('2026-05-01T10:02:00Z'),
             },
-            slug: 'hello',
-            author_user_id: 'author_1',
-            author_display_name: 'Author Name',
-            author_role_slug: 'editor',
-            author_role_name: 'Editor',
-            published_by_user_id: 'publisher_1',
-            published_by_display_name: 'Publisher Name',
-            published_by_role_slug: 'admin',
-            published_by_role_name: 'Admin',
-            published_at: rowDate('2026-05-01T10:02:00Z'),
-            created_at: rowDate('2026-05-01T10:02:00Z'),
-          }],
+          ],
           rowCount: 1,
         }
       },
@@ -306,13 +333,15 @@ describe('data CMS repository', () => {
         if (!sql.startsWith('select data_row_redirects.id')) return undefined
         expect(params).toEqual(['/posts', 'untitled'])
         return {
-          rows: [{
-            id: 'redirect_1',
-            from_route_base: '/posts',
-            from_slug: 'untitled',
-            target_route_base: '/posts',
-            target_slug: 'post',
-          }],
+          rows: [
+            {
+              id: 'redirect_1',
+              from_route_base: '/posts',
+              from_slug: 'untitled',
+              target_route_base: '/posts',
+              target_slug: 'post',
+            },
+          ],
           rowCount: 1,
         }
       },
@@ -353,26 +382,28 @@ describe('data CMS public routes', () => {
       (sql) => {
         if (!sql.startsWith('select data_row_versions.id')) return undefined
         return {
-          rows: [{
-            id: 'version_1',
-            row_id: 'row_1',
-            table_id: 'products',
-            table_slug: 'products',
-            table_kind: 'postType',
-            table_route_base: '/products',
-            version_number: 1,
-            cells_json: {
-              title: 'Some product',
+          rows: [
+            {
+              id: 'version_1',
+              row_id: 'row_1',
+              table_id: 'products',
+              table_slug: 'products',
+              table_kind: 'postType',
+              table_route_base: '/products',
+              version_number: 1,
+              cells_json: {
+                title: 'Some product',
+                slug: 'some-product',
+                body: 'A product body.',
+                featuredMedia: null,
+                seoTitle: '',
+                seoDescription: '',
+              },
               slug: 'some-product',
-              body: 'A product body.',
-              featuredMedia: null,
-              seoTitle: '',
-              seoDescription: '',
+              published_at: rowDate('2026-05-01T10:00:00Z'),
+              created_at: rowDate('2026-05-01T10:00:00Z'),
             },
-            slug: 'some-product',
-            published_at: rowDate('2026-05-01T10:00:00Z'),
-            created_at: rowDate('2026-05-01T10:00:00Z'),
-          }],
+          ],
           rowCount: 1,
         }
       },
@@ -394,7 +425,9 @@ describe('data CMS public routes', () => {
       },
     ])
 
-    const res = await handleServerRequest(new Request('http://localhost/products/some-product'), { db })
+    const res = await handleServerRequest(new Request('http://localhost/products/some-product'), {
+      db,
+    })
 
     expect(res.status).toBe(404)
   })

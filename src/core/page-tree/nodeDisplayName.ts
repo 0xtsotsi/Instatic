@@ -47,7 +47,8 @@ export function getNodeDisplayName(
   // which named slot this placeholder fills (e.g. "Slot: children", "Slot: actions").
   if (node.moduleId === 'base.slot-instance') {
     const props = node.props as Record<string, unknown> | undefined
-    const slotName = typeof props?.slotName === 'string' && props.slotName ? props.slotName : 'children'
+    const slotName =
+      typeof props?.slotName === 'string' && props.slotName ? props.slotName : 'children'
     return `Slot: ${slotName}`
   }
 

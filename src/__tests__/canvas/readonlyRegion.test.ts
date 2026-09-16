@@ -42,7 +42,9 @@ describe('closestReadonlyRegion', () => {
 
   it('returns the region element for read-only template chrome', () => {
     const nav = readonly('nav')
-    expect(closestReadonlyRegion(nav)?.getAttribute('data-instatic-readonly-label')).toBe('Main template')
+    expect(closestReadonlyRegion(nav)?.getAttribute('data-instatic-readonly-label')).toBe(
+      'Main template',
+    )
   })
 
   it('returns the read-only ancestor for an unmarked child of chrome (e.g. a logo image)', () => {

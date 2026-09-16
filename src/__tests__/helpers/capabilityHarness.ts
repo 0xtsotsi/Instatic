@@ -28,16 +28,8 @@ export interface CapabilityTestHarness extends TestDb {
   setupOwner(): Promise<string>
   sessionForEmail(email: string): Promise<string>
   stepUp(cookie: string): Promise<string>
-  createRole(input: {
-    name: string
-    slug: string
-    capabilities: CoreCapability[]
-  }): Promise<string>
-  createUser(input: {
-    email: string
-    displayName?: string
-    roleId: string
-  }): Promise<void>
+  createRole(input: { name: string; slug: string; capabilities: CoreCapability[] }): Promise<string>
+  createUser(input: { email: string; displayName?: string; roleId: string }): Promise<void>
   createRoleUser(input: {
     name: string
     slug: string
@@ -154,7 +146,7 @@ export async function createCapabilityTestHarness(
   }
 
   async function requireOwnerCookie(): Promise<string> {
-    return ownerCookie ?? await setupOwner()
+    return ownerCookie ?? (await setupOwner())
   }
 
   async function createRole(input: {
@@ -224,5 +216,3 @@ export async function createCapabilityTestHarness(
     createRoleUser,
   }
 }
-
-

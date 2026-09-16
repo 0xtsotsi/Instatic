@@ -14,12 +14,7 @@
  * document at the caret).
  */
 
-import {
-  useEffect,
-  useImperativeHandle,
-  useRef,
-  type Ref,
-} from 'react'
+import { useEffect, useImperativeHandle, useRef, type Ref } from 'react'
 import { EditorContent, useEditor } from '@tiptap/react'
 import type { Editor } from '@tiptap/core'
 import { StarterKit } from '@tiptap/starter-kit'
@@ -29,10 +24,7 @@ import { TableRow } from '@tiptap/extension-table-row'
 import { TableHeader } from '@tiptap/extension-table-header'
 import { TableCell } from '@tiptap/extension-table-cell'
 import { TextAlign } from '@tiptap/extension-text-align'
-import {
-  markdownToProseMirrorDoc,
-  proseMirrorDocToMarkdown,
-} from '@core/markdown/markdownDocument'
+import { markdownToProseMirrorDoc, proseMirrorDocToMarkdown } from '@core/markdown/markdownDocument'
 import { MediaNode, type MediaAttributes } from './nodes/MediaNode'
 import { MediaUploadPlaceholder } from './nodes/MediaUploadPlaceholder'
 import { useEditorMediaDrop } from './hooks/useEditorMediaDrop'
@@ -41,10 +33,7 @@ import {
   type SlashCommandItem,
   type SlashExternalAction,
 } from './components/BodySlashMenu/SlashCommand'
-import {
-  BodySlashMenu,
-  type SlashMenuHandle,
-} from './components/BodySlashMenu/BodySlashMenu'
+import { BodySlashMenu, type SlashMenuHandle } from './components/BodySlashMenu/BodySlashMenu'
 import { BodyBubbleMenu } from './components/BodyBubbleMenu/BodyBubbleMenu'
 import { BodyFloatingMenu } from './components/BodyFloatingMenu/BodyFloatingMenu'
 import { MediaNodeToolbar } from './components/MediaNodeToolbar/MediaNodeToolbar'

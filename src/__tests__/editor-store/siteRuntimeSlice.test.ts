@@ -78,7 +78,9 @@ describe('site runtime store actions', () => {
       placement: 'head',
       priority: 25,
     })
-    expect(afterPatch.site?.runtime?.scripts[fileId]).toEqual(afterPatch.siteRuntime.scripts[fileId])
+    expect(afterPatch.site?.runtime?.scripts[fileId]).toEqual(
+      afterPatch.siteRuntime.scripts[fileId],
+    )
 
     afterPatch.undo()
 
@@ -122,11 +124,15 @@ describe('site runtime store actions', () => {
     expect(useEditorStore.getState().hasUnsavedChanges).toBe(true)
     expect(useEditorStore.getState().canUndo).toBe(true)
     expect(useEditorStore.getState().packageJson.dependencies['canvas-confetti']).toBe('^1.9.3')
-    expect(useEditorStore.getState().site?.packageJson?.dependencies['canvas-confetti']).toBe('^1.9.3')
+    expect(useEditorStore.getState().site?.packageJson?.dependencies['canvas-confetti']).toBe(
+      '^1.9.3',
+    )
 
     useEditorStore.getState().undo()
 
     expect(useEditorStore.getState().packageJson.dependencies['canvas-confetti']).toBeUndefined()
-    expect(useEditorStore.getState().site?.packageJson?.dependencies['canvas-confetti']).toBeUndefined()
+    expect(
+      useEditorStore.getState().site?.packageJson?.dependencies['canvas-confetti'],
+    ).toBeUndefined()
   })
 })

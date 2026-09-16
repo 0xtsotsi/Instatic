@@ -49,12 +49,12 @@ function totpCode(secret: string, now = Date.now()): string {
   counterBytes.writeBigUInt64BE(BigInt(counter))
   const digest = createHmac('sha1', decodeBase32(secret)).update(counterBytes).digest()
   const offset = digest[digest.length - 1]! & 0x0f
-  const value = (
-    ((digest[offset]! & 0x7f) << 24)
-    | ((digest[offset + 1]! & 0xff) << 16)
-    | ((digest[offset + 2]! & 0xff) << 8)
-    | (digest[offset + 3]! & 0xff)
-  ) % 1_000_000
+  const value =
+    (((digest[offset]! & 0x7f) << 24) |
+      ((digest[offset + 1]! & 0xff) << 16) |
+      ((digest[offset + 2]! & 0xff) << 8) |
+      (digest[offset + 3]! & 0xff)) %
+    1_000_000
   return value.toString().padStart(6, '0')
 }
 
@@ -117,7 +117,10 @@ async function completeStepUp(
   return cookieFromSetCookie(res)
 }
 
-async function enableMfa(db: DbClient, cookie: string): Promise<{ cookie: string; recoveryCodes: string[] }> {
+async function enableMfa(
+  db: DbClient,
+  cookie: string,
+): Promise<{ cookie: string; recoveryCodes: string[] }> {
   const stepUpRes = await stepUp(db, cookie, VALID_LOGIN_PHRASE)
   expect(stepUpRes.status).toBe(200)
   const steppedCookie = cookieFromSetCookie(stepUpRes)
@@ -130,7 +133,7 @@ async function enableMfa(db: DbClient, cookie: string): Promise<{ cookie: string
   enableReq.headers.set('cookie', steppedCookie)
   const enableRes = await handleCmsRequest(enableReq, db)
   expect(enableRes.status).toBe(200)
-  const enableBody = await enableRes.json() as { recoveryCodes: string[] }
+  const enableBody = (await enableRes.json()) as { recoveryCodes: string[] }
 
   await db`
     update sessions
@@ -175,7 +178,7 @@ describe('Step-up auth', () => {
 
     const res = await stepUp(db, cookie, VALID_LOGIN_PHRASE)
     expect(res.status).toBe(200)
-    const body = await res.json() as { ok: boolean; stepUpExpiresAt: string }
+    const body = (await res.json()) as { ok: boolean; stepUpExpiresAt: string }
     expect(body.ok).toBe(true)
     expect(cookieFromSetCookie(res)).not.toBe(cookie)
 
@@ -238,14 +241,16 @@ describe('Step-up auth', () => {
     const res = await stepUp(db, mfaCookie, VALID_LOGIN_PHRASE, totpCode(TOTP_SECRET))
     expect(res.status).toBe(200)
     expect(cookieFromSetCookie(res)).not.toBe(mfaCookie)
-    const body = await res.json() as {
+    const body = (await res.json()) as {
       ok: boolean
       stepUpExpiresAt: string
       user: { mfaEnabled: boolean }
     }
     expect(body.ok).toBe(true)
     expect(body.user.mfaEnabled).toBe(true)
-    expect(Date.parse(body.stepUpExpiresAt)).toBeGreaterThanOrEqual(before + STEP_UP_DEFAULT_WINDOW_MS - 1000)
+    expect(Date.parse(body.stepUpExpiresAt)).toBeGreaterThanOrEqual(
+      before + STEP_UP_DEFAULT_WINDOW_MS - 1000,
+    )
   })
 
   it('POST /step-up for an MFA-enabled account accepts and burns a recovery code', async () => {
@@ -257,7 +262,7 @@ describe('Step-up auth', () => {
     const res = await stepUp(db, mfaCookie, VALID_LOGIN_PHRASE, recoveryCode)
     expect(res.status).toBe(200)
     const rotatedCookie = cookieFromSetCookie(res)
-    const body = await res.json() as {
+    const body = (await res.json()) as {
       ok: boolean
       user: { mfaRecoveryCodesRemaining: number }
     }
@@ -292,8 +297,8 @@ describe('Step-up auth', () => {
     expect(res.status).toBe(401)
 
     const events = await listAuditEvents(db)
-    const stepUpFailures = events.filter((event) =>
-      event.action === 'login.failure' && event.metadata.reason === 'step_up'
+    const stepUpFailures = events.filter(
+      (event) => event.action === 'login.failure' && event.metadata.reason === 'step_up',
     )
     expect(stepUpFailures).toHaveLength(1)
   })
@@ -337,7 +342,7 @@ describe('Step-up auth', () => {
 
     const res = await logoutAll(db, cookie)
     expect(res.status).toBe(401)
-    const body = await res.json() as { error: string }
+    const body = (await res.json()) as { error: string }
     expect(body.error).toBe('step_up_required')
   })
 
@@ -371,7 +376,7 @@ describe('Step-up auth', () => {
     req.headers.set('cookie', cookie)
     const res = await handleCmsRequest(req, db)
     expect(res.status).toBe(401)
-    const body = await res.json() as { error: string }
+    const body = (await res.json()) as { error: string }
     expect(body.error).toBe('step_up_required')
 
     // Sibling session is still alive — was NOT revoked.
@@ -397,7 +402,7 @@ describe('Step-up auth', () => {
     createReq.headers.set('cookie', steppedOwnerCookie)
     const createRes = await handleCmsRequest(createReq, db)
     expect(createRes.status).toBe(201)
-    const created = await createRes.json() as { user: { id: string } }
+    const created = (await createRes.json()) as { user: { id: string } }
 
     // Roll the step-up window backwards so the next call is gated again.
     await db`
@@ -411,7 +416,7 @@ describe('Step-up auth', () => {
     deleteReq.headers.set('cookie', steppedOwnerCookie)
     const deleteRes = await handleCmsRequest(deleteReq, db)
     expect(deleteRes.status).toBe(401)
-    const body = await deleteRes.json() as { error: string }
+    const body = (await deleteRes.json()) as { error: string }
     expect(body.error).toBe('step_up_required')
   })
 
@@ -467,7 +472,7 @@ describe('Step-up auth', () => {
     createUserReq.headers.set('cookie', steppedCookie)
     const createUserRes = await handleCmsRequest(createUserReq, db)
     expect(createUserRes.status).toBe(201)
-    const createdUser = await createUserRes.json() as { user: { id: string } }
+    const createdUser = (await createUserRes.json()) as { user: { id: string } }
 
     const createRoleReq = new Request('http://localhost/admin/api/cms/roles', {
       method: 'POST',
@@ -481,36 +486,45 @@ describe('Step-up auth', () => {
     createRoleReq.headers.set('cookie', steppedCookie)
     const createRoleRes = await handleCmsRequest(createRoleReq, db)
     expect(createRoleRes.status).toBe(201)
-    const createdRole = await createRoleRes.json() as { role: { id: string } }
+    const createdRole = (await createRoleRes.json()) as { role: { id: string } }
 
     await db`
       update sessions
       set step_up_expires_at = ${new Date(Date.now() - 1000)}
     `
 
-    const patchUserReq = new Request(`http://localhost/admin/api/cms/users/${createdUser.user.id}`, {
-      method: 'PATCH',
-      headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({ status: 'suspended' }),
-    })
+    const patchUserReq = new Request(
+      `http://localhost/admin/api/cms/users/${createdUser.user.id}`,
+      {
+        method: 'PATCH',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ status: 'suspended' }),
+      },
+    )
     patchUserReq.headers.set('cookie', steppedCookie)
     const patchUserRes = await handleCmsRequest(patchUserReq, db)
     expect(patchUserRes.status).toBe(401)
     expect(await patchUserRes.json()).toEqual({ error: 'step_up_required' })
 
-    const patchRoleReq = new Request(`http://localhost/admin/api/cms/roles/${createdRole.role.id}`, {
-      method: 'PATCH',
-      headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({ capabilities: ['users.manage'] }),
-    })
+    const patchRoleReq = new Request(
+      `http://localhost/admin/api/cms/roles/${createdRole.role.id}`,
+      {
+        method: 'PATCH',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ capabilities: ['users.manage'] }),
+      },
+    )
     patchRoleReq.headers.set('cookie', steppedCookie)
     const patchRoleRes = await handleCmsRequest(patchRoleReq, db)
     expect(patchRoleRes.status).toBe(401)
     expect(await patchRoleRes.json()).toEqual({ error: 'step_up_required' })
 
-    const deleteRoleReq = new Request(`http://localhost/admin/api/cms/roles/${createdRole.role.id}`, {
-      method: 'DELETE',
-    })
+    const deleteRoleReq = new Request(
+      `http://localhost/admin/api/cms/roles/${createdRole.role.id}`,
+      {
+        method: 'DELETE',
+      },
+    )
     deleteRoleReq.headers.set('cookie', steppedCookie)
     const deleteRoleRes = await handleCmsRequest(deleteRoleReq, db)
     expect(deleteRoleRes.status).toBe(401)
@@ -535,7 +549,7 @@ describe('Step-up auth', () => {
     createUserReq.headers.set('cookie', steppedOwnerCookie)
     const createUserRes = await handleCmsRequest(createUserReq, db)
     expect(createUserRes.status).toBe(201)
-    const created = await createUserRes.json() as { user: { id: string } }
+    const created = (await createUserRes.json()) as { user: { id: string } }
 
     const targetLoginReq = new Request('http://localhost/admin/api/cms/login', {
       method: 'POST',
@@ -556,7 +570,7 @@ describe('Step-up auth', () => {
     resetReq.headers.set('cookie', steppedOwnerCookie)
     const resetRes = await handleCmsRequest(resetReq, db)
     expect(resetRes.status).toBe(200)
-    const resetBody = await resetRes.json() as { user: { passwordUpdatedAt: string | null } }
+    const resetBody = (await resetRes.json()) as { user: { passwordUpdatedAt: string | null } }
     expect(resetBody.user.passwordUpdatedAt).not.toBeNull()
 
     const oldSessionReq = new Request('http://localhost/admin/api/cms/me', { method: 'GET' })

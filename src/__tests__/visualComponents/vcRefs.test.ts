@@ -15,17 +15,37 @@ import { forEachVCRef, collectVCRefs, getReferencedComponentIds } from '@core/vi
 /** Mixed node map: valid refs + every shape the predicate must reject. */
 function mixedNodes(): Record<string, unknown> {
   return {
-    'ref-a': { id: 'ref-a', moduleId: 'base.visual-component-ref', props: { componentId: 'vc-1' }, children: [] },
+    'ref-a': {
+      id: 'ref-a',
+      moduleId: 'base.visual-component-ref',
+      props: { componentId: 'vc-1' },
+      children: [],
+    },
     'text-1': { id: 'text-1', moduleId: 'base.text', props: { text: 'hi' }, children: [] },
-    'ref-b': { id: 'ref-b', moduleId: 'base.visual-component-ref', props: { componentId: 'vc-2' }, children: [] },
+    'ref-b': {
+      id: 'ref-b',
+      moduleId: 'base.visual-component-ref',
+      props: { componentId: 'vc-2' },
+      children: [],
+    },
     // ref with a blank componentId → rejected
-    'ref-blank': { id: 'ref-blank', moduleId: 'base.visual-component-ref', props: { componentId: '' }, children: [] },
+    'ref-blank': {
+      id: 'ref-blank',
+      moduleId: 'base.visual-component-ref',
+      props: { componentId: '' },
+      children: [],
+    },
     // ref with non-object props → rejected
-    'ref-noprops': { id: 'ref-noprops', moduleId: 'base.visual-component-ref', props: 'nope', children: [] },
+    'ref-noprops': {
+      id: 'ref-noprops',
+      moduleId: 'base.visual-component-ref',
+      props: 'nope',
+      children: [],
+    },
     // ref missing props entirely → rejected
     'ref-undef': { id: 'ref-undef', moduleId: 'base.visual-component-ref', children: [] },
     // non-object node → skipped
-    'bad': null,
+    bad: null,
   }
 }
 

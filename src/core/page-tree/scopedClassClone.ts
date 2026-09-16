@@ -57,9 +57,7 @@ export function cloneScopedClassesForNodeMap(
       id: newId,
       scope: { ...cls.scope, nodeId: newScopeNodeId },
       styles: { ...cls.styles },
-      ...(cls.stylePriorities
-        ? { stylePriorities: { ...cls.stylePriorities } }
-        : {}),
+      ...(cls.stylePriorities ? { stylePriorities: { ...cls.stylePriorities } } : {}),
       // Deep-clone every per-context override bag so the clone owns independent
       // maps — the bare `...cls` spread would share the same bag objects with
       // the source rule (the shared-reference hazard F-0005 addresses for

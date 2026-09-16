@@ -1,9 +1,6 @@
 import type { BundleRowConflict } from '@core/data/bundleSchema'
 import type { ConflictResolution } from '@core/siteImport'
-import {
-  cmsRowConflictKey,
-  defaultCmsRowConflictResolution,
-} from '../shared/cmsBundleFlow'
+import { cmsRowConflictKey, defaultCmsRowConflictResolution } from '../shared/cmsBundleFlow'
 import { ConflictRow } from '../shared/ConflictRow'
 import styles from './ConflictsStep.module.css'
 
@@ -24,13 +21,11 @@ export function CmsBundleConflictsStep({
     <div className={styles.wrapper}>
       <section className={styles.section}>
         <div className={styles.sectionHeader}>
-          <h3 className={styles.heading}>
-            Row slug conflicts ({conflicts.length})
-          </h3>
+          <h3 className={styles.heading}>Row slug conflicts ({conflicts.length})</h3>
         </div>
         <p className={styles.hint}>
-          These imported rows use a slug that already exists in the target table.
-          Rename the imported row or skip it before continuing.
+          These imported rows use a slug that already exists in the target table. Rename the
+          imported row or skip it before continuing.
         </p>
         <div className={styles.rows}>
           {conflicts.map((conflict) => {

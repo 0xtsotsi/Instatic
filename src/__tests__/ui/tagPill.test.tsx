@@ -26,8 +26,12 @@ describe('TagPill', () => {
       <TagPill
         label=".card"
         active
-        onClick={() => { toggles += 1 }}
-        onRemove={() => { removes += 1 }}
+        onClick={() => {
+          toggles += 1
+        }}
+        onRemove={() => {
+          removes += 1
+        }}
         mainAriaLabel="Edit class .card"
         removeAriaLabel="Remove class .card"
         removeTooltip="Remove from this element"
@@ -49,9 +53,7 @@ describe('TagPill', () => {
   it('assigns the visible clickable pill area to buttons, not inert wrapper padding', () => {
     const css = readFileSync('src/ui/components/TagPill/TagPill.module.css', 'utf8')
 
-    expect(css).toMatch(
-      /\.pill\[data-clickable="true"\]\s*\{[^}]*padding:\s*0;[^}]*gap:\s*0;/s,
-    )
+    expect(css).toMatch(/\.pill\[data-clickable="true"\]\s*\{[^}]*padding:\s*0;[^}]*gap:\s*0;/s)
     expect(css).toMatch(
       /\.pill\[data-size="sm"\]\[data-clickable="true"\]\s+\.mainButton\.mainButton\s*\{[^}]*min-height:\s*20px;[^}]*padding:\s*0 var\(--space-s\);/s,
     )

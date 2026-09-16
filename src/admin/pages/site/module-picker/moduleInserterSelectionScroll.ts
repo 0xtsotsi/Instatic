@@ -12,18 +12,12 @@ export function scrollSelectedItemIntoView(
   const edgePadding = 14
 
   if (selectedRect.top < containerRect.top + edgePadding) {
-    scrollContainerBy(
-      container,
-      selectedRect.top - (containerRect.top + edgePadding),
-    )
+    scrollContainerBy(container, selectedRect.top - (containerRect.top + edgePadding))
     return true
   }
 
   if (selectedRect.bottom > containerRect.bottom - edgePadding) {
-    scrollContainerBy(
-      container,
-      selectedRect.bottom - (containerRect.bottom - edgePadding),
-    )
+    scrollContainerBy(container, selectedRect.bottom - (containerRect.bottom - edgePadding))
     return true
   }
 

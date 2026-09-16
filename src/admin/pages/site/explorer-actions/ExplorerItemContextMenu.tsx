@@ -81,21 +81,29 @@ export function ExplorerItemContextMenu({
 
   const items: ExplorerContextMenuItem[] = [
     ...extraItems,
-    ...(showRename ? [{
-      kind: 'action' as const,
-      label: renameLabel,
-      action: onRename,
-      icon: <EditSolidIcon size={13} />,
-      disabled: renameDisabled,
-    }] : []),
-    ...(showDelete ? [{
-      kind: 'action' as const,
-      label: deleteLabel,
-      action: onDelete,
-      icon: <TrashSolidIcon size={13} />,
-      danger: true,
-      disabled: deleteDisabled,
-    }] : []),
+    ...(showRename
+      ? [
+          {
+            kind: 'action' as const,
+            label: renameLabel,
+            action: onRename,
+            icon: <EditSolidIcon size={13} />,
+            disabled: renameDisabled,
+          },
+        ]
+      : []),
+    ...(showDelete
+      ? [
+          {
+            kind: 'action' as const,
+            label: deleteLabel,
+            action: onDelete,
+            icon: <TrashSolidIcon size={13} />,
+            danger: true,
+            disabled: deleteDisabled,
+          },
+        ]
+      : []),
   ]
 
   let firstActionAssigned = false

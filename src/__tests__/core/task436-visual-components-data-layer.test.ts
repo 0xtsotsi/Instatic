@@ -52,18 +52,17 @@ import { safeParseValue } from '@core/utils/typeboxHelpers'
 let validateComponentName: (
   name: string,
   existing: Array<{ id: string; name: string }>,
-  selfId?: string
+  selfId?: string,
 ) => { ok: true } | { ok: false; error: string; reason: string }
 
 let getReferencedComponentIds: (node: unknown) => Set<string>
 let wouldCreateCycle: (
   visualComponents: unknown[],
   hostVcId: string,
-  candidateChildVcId: string
+  candidateChildVcId: string,
 ) => boolean
 
 try {
-   
   const nvMod = require('@core/visualComponents')
   validateComponentName = nvMod.validateComponentName
 } catch {
@@ -71,13 +70,12 @@ try {
 }
 
 try {
-   
   const rgMod = require('@core/visualComponents')
   getReferencedComponentIds = rgMod.getReferencedComponentIds
-  wouldCreateCycle          = rgMod.wouldCreateCycle
+  wouldCreateCycle = rgMod.wouldCreateCycle
 } catch {
   getReferencedComponentIds = undefined as unknown as typeof getReferencedComponentIds
-  wouldCreateCycle          = undefined as unknown as typeof wouldCreateCycle
+  wouldCreateCycle = undefined as unknown as typeof wouldCreateCycle
 }
 
 // ---------------------------------------------------------------------------
@@ -88,8 +86,8 @@ function requireNV(fn: typeof validateComponentName) {
   if (!fn) {
     throw new Error(
       '[Task #436 not implemented] validateComponentName is not exported from\n' +
-      '  src/core/visualComponents/nameValidation.ts\n\n' +
-      'Implement the module and export validateComponentName to make this gate green.',
+        '  src/core/visualComponents/nameValidation.ts\n\n' +
+        'Implement the module and export validateComponentName to make this gate green.',
     )
   }
 }
@@ -98,8 +96,8 @@ function requireRG(fn: unknown) {
   if (!fn) {
     throw new Error(
       '[Task #436 not implemented] recursionGuard function not found in\n' +
-      '  src/core/visualComponents/recursionGuard.ts\n\n' +
-      'Implement and export getReferencedComponentIds + wouldCreateCycle.',
+        '  src/core/visualComponents/recursionGuard.ts\n\n' +
+        'Implement and export getReferencedComponentIds + wouldCreateCycle.',
     )
   }
 }
@@ -131,7 +129,7 @@ function requireSliceAction(actionName: string): void {
   if (typeof state[actionName] !== 'function') {
     throw new Error(
       `[Task #436 not implemented] useEditorStore.getState().${actionName} is not a function.\n\n` +
-      'Add visualComponentsSlice to the store to make this gate green.',
+        'Add visualComponentsSlice to the store to make this gate green.',
     )
   }
 }
@@ -382,7 +380,13 @@ describe('Gate RG-3 — getReferencedComponentIds: nested componentRef discovere
 })
 
 function makeSimpleVC(id: string, name: string, extraNodes: Record<string, unknown> = {}) {
-  const rootNode = { id: 'root', moduleId: 'base.container', props: {}, children: Object.keys(extraNodes), breakpointOverrides: {} }
+  const rootNode = {
+    id: 'root',
+    moduleId: 'base.container',
+    props: {},
+    children: Object.keys(extraNodes),
+    breakpointOverrides: {},
+  }
   return {
     id,
     name,
@@ -397,10 +401,7 @@ function makeSimpleVC(id: string, name: string, extraNodes: Record<string, unkno
 describe('Gate RG-4 — wouldCreateCycle: returns false when no cycle', () => {
   it('adding Banner inside Card (no cross-reference) → no cycle', () => {
     requireRG(wouldCreateCycle)
-    const vcs = [
-      makeSimpleVC('vc-card', 'Card'),
-      makeSimpleVC('vc-banner', 'Banner'),
-    ]
+    const vcs = [makeSimpleVC('vc-card', 'Card'), makeSimpleVC('vc-banner', 'Banner')]
     const result = wouldCreateCycle(vcs, 'vc-card', 'vc-banner')
     expect(result).toBe(false)
   })
@@ -446,10 +447,7 @@ describe('Gate RG-6 — wouldCreateCycle: detects 2-step cycle', () => {
       classIds: [],
       createdAt: 1000,
     }
-    const vcs = [
-      makeSimpleVC('vc-card', 'Card'),
-      vcBanner,
-    ]
+    const vcs = [makeSimpleVC('vc-card', 'Card'), vcBanner]
     // Card tries to embed Banner — Banner already contains Card → cycle
     const result = wouldCreateCycle(vcs, 'vc-card', 'vc-banner')
     expect(result).toBe(true)
@@ -466,8 +464,20 @@ describe('Gate RG-7 — wouldCreateCycle: detects 3-step cycle', () => {
       tree: {
         rootNodeId: 'c-root',
         nodes: {
-          'c-root': { id: 'c-root', moduleId: 'base.container', props: {}, children: ['b-ref'], breakpointOverrides: {} },
-          'b-ref': { id: 'b-ref', moduleId: 'base.visual-component-ref', props: { componentId: 'vc-b', propOverrides: {} }, children: [], breakpointOverrides: {} },
+          'c-root': {
+            id: 'c-root',
+            moduleId: 'base.container',
+            props: {},
+            children: ['b-ref'],
+            breakpointOverrides: {},
+          },
+          'b-ref': {
+            id: 'b-ref',
+            moduleId: 'base.visual-component-ref',
+            props: { componentId: 'vc-b', propOverrides: {} },
+            children: [],
+            breakpointOverrides: {},
+          },
         },
       },
       params: [],
@@ -481,8 +491,20 @@ describe('Gate RG-7 — wouldCreateCycle: detects 3-step cycle', () => {
       tree: {
         rootNodeId: 'b-root',
         nodes: {
-          'b-root': { id: 'b-root', moduleId: 'base.container', props: {}, children: ['a-ref'], breakpointOverrides: {} },
-          'a-ref': { id: 'a-ref', moduleId: 'base.visual-component-ref', props: { componentId: 'vc-a', propOverrides: {} }, children: [], breakpointOverrides: {} },
+          'b-root': {
+            id: 'b-root',
+            moduleId: 'base.container',
+            props: {},
+            children: ['a-ref'],
+            breakpointOverrides: {},
+          },
+          'a-ref': {
+            id: 'a-ref',
+            moduleId: 'base.visual-component-ref',
+            props: { componentId: 'vc-a', propOverrides: {} },
+            children: [],
+            breakpointOverrides: {},
+          },
         },
       },
       params: [],
@@ -490,11 +512,7 @@ describe('Gate RG-7 — wouldCreateCycle: detects 3-step cycle', () => {
       classIds: [],
       createdAt: 1000,
     }
-    const vcs = [
-      makeSimpleVC('vc-a', 'Alpha'),
-      vcB,
-      vcC,
-    ]
+    const vcs = [makeSimpleVC('vc-a', 'Alpha'), vcB, vcC]
     // vc-c tries to embed vc-a; vc-c already reaches vc-a via vc-b → cycle
     const result = wouldCreateCycle(vcs, 'vc-c', 'vc-a')
     expect(result).toBe(true)
@@ -517,7 +535,9 @@ describe('Gate RG-8 — wouldCreateCycle: handles unknown candidate id gracefull
 // ============================================================================
 
 describe('Gate SL-1 — createVisualComponent: adds vc to site.visualComponents', () => {
-  beforeEach(() => { setupSite() })
+  beforeEach(() => {
+    setupSite()
+  })
 
   it('createVisualComponent adds a VC and returns its id', () => {
     requireSliceAction('createVisualComponent')
@@ -530,9 +550,10 @@ describe('Gate SL-1 — createVisualComponent: adds vc to site.visualComponents'
   })
 })
 
-
 describe('Gate SL-3 — createVisualComponent: throws on EMPTY name', () => {
-  beforeEach(() => { setupSite() })
+  beforeEach(() => {
+    setupSite()
+  })
 
   it('createVisualComponent("") throws VisualComponentNameError', () => {
     requireSliceAction('createVisualComponent')
@@ -542,49 +563,82 @@ describe('Gate SL-3 — createVisualComponent: throws on EMPTY name', () => {
 })
 
 describe('Gate SL-4 — createVisualComponent: free-form names accepted (no PascalCase requirement)', () => {
-  beforeEach(() => { setupSite() })
+  beforeEach(() => {
+    setupSite()
+  })
 
   it('createVisualComponent("my header section") does NOT throw', () => {
     requireSliceAction('createVisualComponent')
     const s = useEditorStore.getState() as Record<string, unknown>
-    expect(() => (s.createVisualComponent as (name: string) => string)('my header section')).not.toThrow()
-    const vcs = (useEditorStore.getState().site as unknown as { visualComponents: Array<{ name: string }> }).visualComponents
+    expect(() =>
+      (s.createVisualComponent as (name: string) => string)('my header section'),
+    ).not.toThrow()
+    const vcs = (
+      useEditorStore.getState().site as unknown as { visualComponents: Array<{ name: string }> }
+    ).visualComponents
     expect(vcs.some((vc) => vc.name === 'my header section')).toBe(true)
   })
 })
 
 describe('Gate SL-5 — createVisualComponent: throws on PROJECT_DUPLICATE name', () => {
-  beforeEach(() => { setupSite() })
+  beforeEach(() => {
+    setupSite()
+  })
 
   it('creating two VCs with the same name throws on the second', () => {
     requireSliceAction('createVisualComponent')
     const s = useEditorStore.getState() as Record<string, unknown>
     ;(s.createVisualComponent as (name: string) => string)('Card')
-    expect(() => (useEditorStore.getState() as Record<string, unknown>).createVisualComponent as (name: string) => string).not.toThrow()
+    expect(
+      () =>
+        (useEditorStore.getState() as Record<string, unknown>).createVisualComponent as (
+          name: string,
+        ) => string,
+    ).not.toThrow()
     expect(() =>
-      ((useEditorStore.getState() as Record<string, unknown>).createVisualComponent as (name: string) => string)('Card')
+      (
+        (useEditorStore.getState() as Record<string, unknown>).createVisualComponent as (
+          name: string,
+        ) => string
+      )('Card'),
     ).toThrow()
   })
 })
 
 describe('Gate SL-6 — renameVisualComponent: updates name', () => {
-  beforeEach(() => { setupSite() })
+  beforeEach(() => {
+    setupSite()
+  })
 
   it('renaming "Card" to "HeroCard" updates name', () => {
     requireSliceAction('createVisualComponent')
     requireSliceAction('renameVisualComponent')
     const s = useEditorStore.getState() as Record<string, unknown>
     const id = (s.createVisualComponent as (name: string) => string)('Card')
-    ;(useEditorStore.getState() as Record<string, unknown>).renameVisualComponent as (id: string, name: string) => void
-    ;((useEditorStore.getState() as Record<string, unknown>).renameVisualComponent as (id: string, name: string) => void)(id, 'HeroCard')
-    const vcs = (useEditorStore.getState().site as unknown as { visualComponents: Array<{ id: string; name: string }> }).visualComponents
+    ;(useEditorStore.getState() as Record<string, unknown>).renameVisualComponent as (
+      id: string,
+      name: string,
+    ) => void
+    ;(
+      (useEditorStore.getState() as Record<string, unknown>).renameVisualComponent as (
+        id: string,
+        name: string,
+      ) => void
+    )(id, 'HeroCard')
+    const vcs = (
+      useEditorStore.getState().site as unknown as {
+        visualComponents: Array<{ id: string; name: string }>
+      }
+    ).visualComponents
     const vc = vcs.find((v) => v.id === id)!
     expect(vc.name).toBe('HeroCard')
   })
 })
 
 describe('Gate SL-7 — renameVisualComponent: throws on invalid new name', () => {
-  beforeEach(() => { setupSite() })
+  beforeEach(() => {
+    setupSite()
+  })
 
   it('renaming a VC to an empty name throws', () => {
     requireSliceAction('createVisualComponent')
@@ -592,7 +646,12 @@ describe('Gate SL-7 — renameVisualComponent: throws on invalid new name', () =
     const s = useEditorStore.getState() as Record<string, unknown>
     const id = (s.createVisualComponent as (name: string) => string)('Card')
     expect(() =>
-      ((useEditorStore.getState() as Record<string, unknown>).renameVisualComponent as (id: string, name: string) => void)(id, '   ')
+      (
+        (useEditorStore.getState() as Record<string, unknown>).renameVisualComponent as (
+          id: string,
+          name: string,
+        ) => void
+      )(id, '   '),
     ).toThrow()
   })
 
@@ -601,15 +660,24 @@ describe('Gate SL-7 — renameVisualComponent: throws on invalid new name', () =
     requireSliceAction('renameVisualComponent')
     const s = useEditorStore.getState() as Record<string, unknown>
     ;(s.createVisualComponent as (name: string) => string)('Card')
-    const id = (useEditorStore.getState() as { createVisualComponent: (name: string) => string }).createVisualComponent('Other')
+    const id = (
+      useEditorStore.getState() as { createVisualComponent: (name: string) => string }
+    ).createVisualComponent('Other')
     expect(() =>
-      ((useEditorStore.getState() as Record<string, unknown>).renameVisualComponent as (id: string, name: string) => void)(id, 'Card')
+      (
+        (useEditorStore.getState() as Record<string, unknown>).renameVisualComponent as (
+          id: string,
+          name: string,
+        ) => void
+      )(id, 'Card'),
     ).toThrow()
   })
 })
 
 describe('Gate SL-8 — renameVisualComponent: renaming to same name is no-op (selfId check)', () => {
-  beforeEach(() => { setupSite() })
+  beforeEach(() => {
+    setupSite()
+  })
 
   it('renaming "Card" to "Card" does not throw (selfId skip in name validation)', () => {
     requireSliceAction('createVisualComponent')
@@ -617,46 +685,77 @@ describe('Gate SL-8 — renameVisualComponent: renaming to same name is no-op (s
     const s = useEditorStore.getState() as Record<string, unknown>
     const id = (s.createVisualComponent as (name: string) => string)('Card')
     expect(() =>
-      ((useEditorStore.getState() as Record<string, unknown>).renameVisualComponent as (id: string, name: string) => void)(id, 'Card')
+      (
+        (useEditorStore.getState() as Record<string, unknown>).renameVisualComponent as (
+          id: string,
+          name: string,
+        ) => void
+      )(id, 'Card'),
     ).not.toThrow()
   })
 })
 
 describe('Gate SL-9 — deleteVisualComponent: removes vc by id', () => {
-  beforeEach(() => { setupSite() })
+  beforeEach(() => {
+    setupSite()
+  })
 
   it('deleteVisualComponent removes the vc from site.visualComponents', () => {
     requireSliceAction('createVisualComponent')
     requireSliceAction('deleteVisualComponent')
     const s = useEditorStore.getState() as Record<string, unknown>
     const id = (s.createVisualComponent as (name: string) => string)('Card')
-    ;((useEditorStore.getState() as Record<string, unknown>).deleteVisualComponent as (id: string) => void)(id)
-    const vcs = (useEditorStore.getState().site as unknown as { visualComponents: Array<{ id: string }> }).visualComponents ?? []
+    ;(
+      (useEditorStore.getState() as Record<string, unknown>).deleteVisualComponent as (
+        id: string,
+      ) => void
+    )(id)
+    const vcs =
+      (useEditorStore.getState().site as unknown as { visualComponents: Array<{ id: string }> })
+        .visualComponents ?? []
     expect(vcs.some((vc) => vc.id === id)).toBe(false)
   })
 })
 
 describe('Gate SL-10 — deleteVisualComponent: no-op for unknown id', () => {
-  beforeEach(() => { setupSite() })
+  beforeEach(() => {
+    setupSite()
+  })
 
   it('deleteVisualComponent("nonexistent") does not throw', () => {
     requireSliceAction('deleteVisualComponent')
     expect(() =>
-      ((useEditorStore.getState() as Record<string, unknown>).deleteVisualComponent as (id: string) => void)('nonexistent')
+      (
+        (useEditorStore.getState() as Record<string, unknown>).deleteVisualComponent as (
+          id: string,
+        ) => void
+      )('nonexistent'),
     ).not.toThrow()
   })
 })
 
 describe('Gate SL-11 — addParam: appends a VCParam to vc.params', () => {
-  beforeEach(() => { setupSite() })
+  beforeEach(() => {
+    setupSite()
+  })
 
   it('addParam adds a param with a stable id to the VC', () => {
     requireSliceAction('createVisualComponent')
     requireSliceAction('addParam')
     const s = useEditorStore.getState() as Record<string, unknown>
     const vcId = (s.createVisualComponent as (name: string) => string)('Card')
-    ;((useEditorStore.getState() as Record<string, unknown>).addParam as (vcId: string, name: string, type: string) => void)(vcId, 'title', 'string')
-    const vcs = (useEditorStore.getState().site as unknown as { visualComponents: Array<{ id: string; params: Array<{ name: string; id: string }> }> }).visualComponents
+    ;(
+      (useEditorStore.getState() as Record<string, unknown>).addParam as (
+        vcId: string,
+        name: string,
+        type: string,
+      ) => void
+    )(vcId, 'title', 'string')
+    const vcs = (
+      useEditorStore.getState().site as unknown as {
+        visualComponents: Array<{ id: string; params: Array<{ name: string; id: string }> }>
+      }
+    ).visualComponents
     const vc = vcs.find((v) => v.id === vcId)!
     expect(vc.params).toHaveLength(1)
     expect(vc.params[0].name).toBe('title')
@@ -667,7 +766,9 @@ describe('Gate SL-11 — addParam: appends a VCParam to vc.params', () => {
 })
 
 describe('Gate SL-12 — removeParamWithCleanup: removes a VCParam by id and cleans up bindings', () => {
-  beforeEach(() => { setupSite() })
+  beforeEach(() => {
+    setupSite()
+  })
 
   it('removeParamWithCleanup removes the param from vc.params', () => {
     requireSliceAction('createVisualComponent')
@@ -675,24 +776,60 @@ describe('Gate SL-12 — removeParamWithCleanup: removes a VCParam by id and cle
     requireSliceAction('removeParamWithCleanup')
     const s = useEditorStore.getState() as Record<string, unknown>
     const vcId = (s.createVisualComponent as (name: string) => string)('Card')
-    ;((useEditorStore.getState() as Record<string, unknown>).addParam as (vcId: string, name: string, type: string) => void)(vcId, 'title', 'string')
-    const paramId = (useEditorStore.getState().site as unknown as { visualComponents: Array<{ id: string; params: Array<{ id: string }> }> }).visualComponents.find((v) => v.id === vcId)!.params[0].id
+    ;(
+      (useEditorStore.getState() as Record<string, unknown>).addParam as (
+        vcId: string,
+        name: string,
+        type: string,
+      ) => void
+    )(vcId, 'title', 'string')
+    const paramId = (
+      useEditorStore.getState().site as unknown as {
+        visualComponents: Array<{ id: string; params: Array<{ id: string }> }>
+      }
+    ).visualComponents.find((v) => v.id === vcId)!.params[0].id
 
     // Set a propBinding on the VC root node to verify cleanup
-    type FlatVC = { id: string; tree: { rootNodeId: string; nodes: Record<string, { propBindings?: Record<string, { paramId: string }> }> }; params: Array<{ id: string }> }
-    const vc = (useEditorStore.getState().site as unknown as { visualComponents: FlatVC[] }).visualComponents.find((v) => v.id === vcId)!
+    type FlatVC = {
+      id: string
+      tree: {
+        rootNodeId: string
+        nodes: Record<string, { propBindings?: Record<string, { paramId: string }> }>
+      }
+      params: Array<{ id: string }>
+    }
+    const vc = (
+      useEditorStore.getState().site as unknown as { visualComponents: FlatVC[] }
+    ).visualComponents.find((v) => v.id === vcId)!
     // Set activeDocument so setNodePropBinding targets the VC tree
-    useEditorStore.setState({ activeDocument: { kind: 'visualComponent', vcId } } as Parameters<typeof useEditorStore.setState>[0])
-    ;((useEditorStore.getState() as Record<string, unknown>).setNodePropBinding as (nodeId: string, propKey: string, paramId: string) => void)(vc.tree.rootNodeId, 'text', paramId)
+    useEditorStore.setState({ activeDocument: { kind: 'visualComponent', vcId } } as Parameters<
+      typeof useEditorStore.setState
+    >[0])
+    ;(
+      (useEditorStore.getState() as Record<string, unknown>).setNodePropBinding as (
+        nodeId: string,
+        propKey: string,
+        paramId: string,
+      ) => void
+    )(vc.tree.rootNodeId, 'text', paramId)
 
     // Verify binding is set
-    const vcBefore = (useEditorStore.getState().site as unknown as { visualComponents: FlatVC[] }).visualComponents.find((v) => v.id === vcId)!
+    const vcBefore = (
+      useEditorStore.getState().site as unknown as { visualComponents: FlatVC[] }
+    ).visualComponents.find((v) => v.id === vcId)!
     expect(vcBefore.tree.nodes[vcBefore.tree.rootNodeId]?.propBindings?.text?.paramId).toBe(paramId)
 
     // Call removeParamWithCleanup
-    ;((useEditorStore.getState() as Record<string, unknown>).removeParamWithCleanup as (vcId: string, paramId: string) => void)(vcId, paramId)
+    ;(
+      (useEditorStore.getState() as Record<string, unknown>).removeParamWithCleanup as (
+        vcId: string,
+        paramId: string,
+      ) => void
+    )(vcId, paramId)
 
-    const vcAfter = (useEditorStore.getState().site as unknown as { visualComponents: FlatVC[] }).visualComponents.find((v) => v.id === vcId)!
+    const vcAfter = (
+      useEditorStore.getState().site as unknown as { visualComponents: FlatVC[] }
+    ).visualComponents.find((v) => v.id === vcId)!
     // Param removed
     expect(vcAfter.params).toHaveLength(0)
     // Binding cleaned up
@@ -701,7 +838,9 @@ describe('Gate SL-12 — removeParamWithCleanup: removes a VCParam by id and cle
 })
 
 describe('Gate SL-13 — addNodeToVc: cycle guard fires at slice write boundary', () => {
-  beforeEach(() => { setupSite() })
+  beforeEach(() => {
+    setupSite()
+  })
 
   it('adding a componentRef that creates a self-cycle throws at the slice boundary', () => {
     requireSliceAction('createVisualComponent')
@@ -716,15 +855,27 @@ describe('Gate SL-13 — addNodeToVc: cycle guard fires at slice write boundary'
       breakpointOverrides: {},
     }
     // The vc's root node id — get from flat tree
-    const vcRootNodeId = (useEditorStore.getState().site as unknown as { visualComponents: Array<{ id: string; tree: { rootNodeId: string } }> }).visualComponents.find((v) => v.id === vcId)!.tree.rootNodeId
+    const vcRootNodeId = (
+      useEditorStore.getState().site as unknown as {
+        visualComponents: Array<{ id: string; tree: { rootNodeId: string } }>
+      }
+    ).visualComponents.find((v) => v.id === vcId)!.tree.rootNodeId
     expect(() =>
-      ((useEditorStore.getState() as Record<string, unknown>).addNodeToVc as (vcId: string, parentNodeId: string, newNode: unknown) => void)(vcId, vcRootNodeId, selfRefNode)
+      (
+        (useEditorStore.getState() as Record<string, unknown>).addNodeToVc as (
+          vcId: string,
+          parentNodeId: string,
+          newNode: unknown,
+        ) => void
+      )(vcId, vcRootNodeId, selfRefNode),
     ).toThrow()
   })
 })
 
 describe('Gate SL-14 — addNodeToVc: succeeds when no cycle', () => {
-  beforeEach(() => { setupSite() })
+  beforeEach(() => {
+    setupSite()
+  })
 
   it('adding a regular (non-ref) node to a VC succeeds', () => {
     requireSliceAction('createVisualComponent')
@@ -738,9 +889,19 @@ describe('Gate SL-14 — addNodeToVc: succeeds when no cycle', () => {
       children: [],
       breakpointOverrides: {},
     }
-    const vcRootNodeId = (useEditorStore.getState().site as unknown as { visualComponents: Array<{ id: string; tree: { rootNodeId: string } }> }).visualComponents.find((v) => v.id === vcId)!.tree.rootNodeId
+    const vcRootNodeId = (
+      useEditorStore.getState().site as unknown as {
+        visualComponents: Array<{ id: string; tree: { rootNodeId: string } }>
+      }
+    ).visualComponents.find((v) => v.id === vcId)!.tree.rootNodeId
     expect(() =>
-      ((useEditorStore.getState() as Record<string, unknown>).addNodeToVc as (vcId: string, parentNodeId: string, newNode: unknown) => void)(vcId, vcRootNodeId, headingNode)
+      (
+        (useEditorStore.getState() as Record<string, unknown>).addNodeToVc as (
+          vcId: string,
+          parentNodeId: string,
+          newNode: unknown,
+        ) => void
+      )(vcId, vcRootNodeId, headingNode),
     ).not.toThrow()
   })
 })
@@ -787,7 +948,6 @@ describe('Gate VP-5 — lenient: duplicate VC names are deduplicated (first-wins
     expect(cardVCs[0].id).toBe('vc-card-1')
   })
 })
-
 
 describe('Gate VP-7 — site shell validates independently of VCs', () => {
   it('validateSite does not throw (VCs are stored separately and ignored by the shell parser)', () => {
@@ -849,7 +1009,6 @@ describe('Gate VP-8 — validateVisualComponents round-trips flat VC tree', () =
     expect(vcResult.tree.nodes['child-heading']).toBeDefined()
     expect(vcResult.tree.nodes['child-heading'].id).toBe('child-heading')
   })
-
 })
 
 describe('Gate VP-9 — validateVisualComponents preserves propBindings on VC nodes in flat tree', () => {
@@ -883,7 +1042,10 @@ describe('Gate VP-9 — validateVisualComponents preserves propBindings on VC no
     const vcResult = vcs[0]
     expect(vcResult).toBeDefined()
     const rootNode = vcResult.tree.nodes[vcResult.tree.rootNodeId]
-    expect((rootNode as { propBindings?: Record<string, { paramId: string }> })?.propBindings?.text?.paramId).toBe('param-title-1')
+    expect(
+      (rootNode as { propBindings?: Record<string, { paramId: string }> })?.propBindings?.text
+        ?.paramId,
+    ).toBe('param-title-1')
   })
 
   it('multiple propBindings on root node all survive the round-trip', () => {
@@ -912,8 +1074,7 @@ describe('Gate VP-9 — validateVisualComponents preserves propBindings on VC no
 
     const vcResult = vcs[0]
     const rootNode = vcResult?.tree.nodes[vcResult.tree.rootNodeId] as
-      | { propBindings?: Record<string, { paramId: string }> }
-      | undefined
+      { propBindings?: Record<string, { paramId: string }> } | undefined
     expect(rootNode?.propBindings?.title?.paramId).toBe('param-title-1')
     expect(rootNode?.propBindings?.subtitle?.paramId).toBe('param-subtitle-2')
     expect(rootNode?.propBindings?.backgroundColor?.paramId).toBe('param-bg-3')
@@ -950,8 +1111,7 @@ describe('Gate VP-9 — validateVisualComponents preserves propBindings on VC no
     const vcs = validateVisualComponents([flatVC])
 
     const childNode = vcs[0]?.tree.nodes['heading-child'] as
-      | { id: string; propBindings?: Record<string, { paramId: string }> }
-      | undefined
+      { id: string; propBindings?: Record<string, { paramId: string }> } | undefined
     expect(childNode?.id).toBe('heading-child')
     expect(childNode?.propBindings?.text?.paramId).toBe('param-label-5')
   })
@@ -962,7 +1122,7 @@ describe('Gate VP-9 — validateVisualComponents preserves propBindings on VC no
 // ============================================================================
 
 describe("Gate PT-1 — 'slot' param type round-trips through validateVisualComponents", () => {
-  it("a VC with a slot param survives validateVisualComponents with type preserved", () => {
+  it('a VC with a slot param survives validateVisualComponents with type preserved', () => {
     const vc = rawVC({
       params: [
         {
@@ -982,7 +1142,7 @@ describe("Gate PT-1 — 'slot' param type round-trips through validateVisualComp
 })
 
 describe("Gate PT-2 — 'image' param type round-trips through validateVisualComponents", () => {
-  it("a VC with an image param and null defaultValue survives validateVisualComponents", () => {
+  it('a VC with an image param and null defaultValue survives validateVisualComponents', () => {
     const vc = rawVC({
       params: [
         {
@@ -1000,7 +1160,7 @@ describe("Gate PT-2 — 'image' param type round-trips through validateVisualCom
     expect(param?.type).toBe('image')
   })
 
-  it("a VC with an image param and URL defaultValue survives validateVisualComponents", () => {
+  it('a VC with an image param and URL defaultValue survives validateVisualComponents', () => {
     const vc = rawVC({
       params: [
         {
@@ -1021,7 +1181,7 @@ describe("Gate PT-2 — 'image' param type round-trips through validateVisualCom
 })
 
 describe("Gate PT-3 — 'richText' param type round-trips through validateVisualComponents", () => {
-  it("a VC with a richText param and HTML defaultValue survives validateVisualComponents", () => {
+  it('a VC with a richText param and HTML defaultValue survives validateVisualComponents', () => {
     const vc = rawVC({
       params: [
         {
@@ -1133,10 +1293,34 @@ describe('Gate RG-9 — getReferencedComponentIds finds all vcRefs in flat tree 
       tree: {
         rootNodeId: 'root',
         nodes: {
-          root: { id: 'root', moduleId: 'base.container', props: {}, children: ['ref-a', 'ref-b', 'ref-c'], breakpointOverrides: {} },
-          'ref-a': { id: 'ref-a', moduleId: 'base.visual-component-ref', props: { componentId: 'vc-alpha', propOverrides: {} }, children: [], breakpointOverrides: {} },
-          'ref-b': { id: 'ref-b', moduleId: 'base.visual-component-ref', props: { componentId: 'vc-beta', propOverrides: {} }, children: [], breakpointOverrides: {} },
-          'ref-c': { id: 'ref-c', moduleId: 'base.visual-component-ref', props: { componentId: 'vc-gamma', propOverrides: {} }, children: [], breakpointOverrides: {} },
+          root: {
+            id: 'root',
+            moduleId: 'base.container',
+            props: {},
+            children: ['ref-a', 'ref-b', 'ref-c'],
+            breakpointOverrides: {},
+          },
+          'ref-a': {
+            id: 'ref-a',
+            moduleId: 'base.visual-component-ref',
+            props: { componentId: 'vc-alpha', propOverrides: {} },
+            children: [],
+            breakpointOverrides: {},
+          },
+          'ref-b': {
+            id: 'ref-b',
+            moduleId: 'base.visual-component-ref',
+            props: { componentId: 'vc-beta', propOverrides: {} },
+            children: [],
+            breakpointOverrides: {},
+          },
+          'ref-c': {
+            id: 'ref-c',
+            moduleId: 'base.visual-component-ref',
+            props: { componentId: 'vc-gamma', propOverrides: {} },
+            children: [],
+            breakpointOverrides: {},
+          },
         },
       },
     }

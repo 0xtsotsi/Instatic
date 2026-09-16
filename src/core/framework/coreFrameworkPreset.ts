@@ -88,26 +88,143 @@ interface CoreColorSeed {
  */
 const CORE_COLOR_SEED: CoreColorSeed[] = [
   // ── Brand ──────────────────────────────────────────────────────────────
-  { category: 'Brand', slug: 'primary',   lightValue: 'hsla(238, 100%, 62%, 1)', darkValue: '', gen: ['text', 'bg', 'border'], transparent: true, shades: 4, tints: 4 },
-  { category: 'Brand', slug: 'secondary', lightValue: 'hsla(0, 94%, 68%, 1)',    darkValue: '', gen: ['border', 'bg', 'text'], transparent: true, shades: 4, tints: 4 },
-  { category: 'Brand', slug: 'tertiary',  lightValue: 'hsla(198, 74%, 51%, 1)',  darkValue: '', gen: ['text', 'bg', 'border'], transparent: true, shades: 4, tints: 4 },
+  {
+    category: 'Brand',
+    slug: 'primary',
+    lightValue: 'hsla(238, 100%, 62%, 1)',
+    darkValue: '',
+    gen: ['text', 'bg', 'border'],
+    transparent: true,
+    shades: 4,
+    tints: 4,
+  },
+  {
+    category: 'Brand',
+    slug: 'secondary',
+    lightValue: 'hsla(0, 94%, 68%, 1)',
+    darkValue: '',
+    gen: ['border', 'bg', 'text'],
+    transparent: true,
+    shades: 4,
+    tints: 4,
+  },
+  {
+    category: 'Brand',
+    slug: 'tertiary',
+    lightValue: 'hsla(198, 74%, 51%, 1)',
+    darkValue: '',
+    gen: ['text', 'bg', 'border'],
+    transparent: true,
+    shades: 4,
+    tints: 4,
+  },
   // ── Background ─────────────────────────────────────────────────────────
-  { category: 'Background', slug: 'bg-body',    lightValue: 'hsla(0, 0%, 90%, 1)',  darkValue: 'hsla(0, 0%, 5%, 1)',  gen: ['bg'], transparent: false, shades: 0, tints: 0 },
-  { category: 'Background', slug: 'bg-surface', lightValue: 'hsla(0, 0%, 100%, 1)', darkValue: 'hsla(0, 0%, 15%, 1)', gen: ['bg'], transparent: false, shades: 0, tints: 0 },
+  {
+    category: 'Background',
+    slug: 'bg-body',
+    lightValue: 'hsla(0, 0%, 90%, 1)',
+    darkValue: 'hsla(0, 0%, 5%, 1)',
+    gen: ['bg'],
+    transparent: false,
+    shades: 0,
+    tints: 0,
+  },
+  {
+    category: 'Background',
+    slug: 'bg-surface',
+    lightValue: 'hsla(0, 0%, 100%, 1)',
+    darkValue: 'hsla(0, 0%, 15%, 1)',
+    gen: ['bg'],
+    transparent: false,
+    shades: 0,
+    tints: 0,
+  },
   // ── Text ───────────────────────────────────────────────────────────────
-  { category: 'Text', slug: 'text-body',  lightValue: 'hsla(0, 0%, 25%, 1)', darkValue: 'hsla(0, 0%, 75%, 1)',  gen: ['text'], transparent: false, shades: 0, tints: 0 },
-  { category: 'Text', slug: 'text-title', lightValue: 'hsla(0, 0%, 0%, 1)',  darkValue: 'hsla(0, 0%, 100%, 1)', gen: ['text'], transparent: false, shades: 0, tints: 0 },
+  {
+    category: 'Text',
+    slug: 'text-body',
+    lightValue: 'hsla(0, 0%, 25%, 1)',
+    darkValue: 'hsla(0, 0%, 75%, 1)',
+    gen: ['text'],
+    transparent: false,
+    shades: 0,
+    tints: 0,
+  },
+  {
+    category: 'Text',
+    slug: 'text-title',
+    lightValue: 'hsla(0, 0%, 0%, 1)',
+    darkValue: 'hsla(0, 0%, 100%, 1)',
+    gen: ['text'],
+    transparent: false,
+    shades: 0,
+    tints: 0,
+  },
   // ── Base ───────────────────────────────────────────────────────────────
-  { category: 'Base', slug: 'border-primary', lightValue: 'hsla(0, 0%, 50%, 0.25)', darkValue: 'hsla(0, 0%, 75%, 0.1)', gen: ['border'], transparent: false, shades: 0, tints: 0 },
+  {
+    category: 'Base',
+    slug: 'border-primary',
+    lightValue: 'hsla(0, 0%, 50%, 0.25)',
+    darkValue: 'hsla(0, 0%, 75%, 0.1)',
+    gen: ['border'],
+    transparent: false,
+    shades: 0,
+    tints: 0,
+  },
   // `shadow-primary` has no `gen` in Core Framework — it is a variable only,
   // never a utility class, in either import mode.
-  { category: 'Base', slug: 'shadow-primary', lightValue: 'hsla(0, 0%, 0%, 0.15)',  darkValue: 'hsla(0, 0%, 0%, 0.4)',  gen: [],         transparent: false, shades: 0, tints: 0 },
+  {
+    category: 'Base',
+    slug: 'shadow-primary',
+    lightValue: 'hsla(0, 0%, 0%, 0.15)',
+    darkValue: 'hsla(0, 0%, 0%, 0.4)',
+    gen: [],
+    transparent: false,
+    shades: 0,
+    tints: 0,
+  },
   // ── Neutral ────────────────────────────────────────────────────────────
-  { category: 'Neutral', slug: 'light', lightValue: 'hsla(85, 0%, 100%, 1)', darkValue: 'hsla(0, 0%, 0%, 1)',   gen: ['bg', 'text', 'border'], transparent: true, shades: 0, tints: 0 },
-  { category: 'Neutral', slug: 'dark',  lightValue: 'hsla(0, 0%, 0%, 1)',    darkValue: 'hsla(0, 0%, 100%, 1)', gen: ['bg', 'text', 'border'], transparent: true, shades: 0, tints: 0 },
+  {
+    category: 'Neutral',
+    slug: 'light',
+    lightValue: 'hsla(85, 0%, 100%, 1)',
+    darkValue: 'hsla(0, 0%, 0%, 1)',
+    gen: ['bg', 'text', 'border'],
+    transparent: true,
+    shades: 0,
+    tints: 0,
+  },
+  {
+    category: 'Neutral',
+    slug: 'dark',
+    lightValue: 'hsla(0, 0%, 0%, 1)',
+    darkValue: 'hsla(0, 0%, 100%, 1)',
+    gen: ['bg', 'text', 'border'],
+    transparent: true,
+    shades: 0,
+    tints: 0,
+  },
   // ── Status ─────────────────────────────────────────────────────────────
-  { category: 'Status', slug: 'success', lightValue: 'hsla(136, 95%, 56%, 1)', darkValue: '', gen: ['text', 'bg', 'border'], transparent: true, shades: 0, tints: 0 },
-  { category: 'Status', slug: 'error',   lightValue: 'hsla(351, 95%, 56%, 1)', darkValue: '', gen: ['text', 'bg', 'border'], transparent: true, shades: 0, tints: 0 },
+  {
+    category: 'Status',
+    slug: 'success',
+    lightValue: 'hsla(136, 95%, 56%, 1)',
+    darkValue: '',
+    gen: ['text', 'bg', 'border'],
+    transparent: true,
+    shades: 0,
+    tints: 0,
+  },
+  {
+    category: 'Status',
+    slug: 'error',
+    lightValue: 'hsla(351, 95%, 56%, 1)',
+    darkValue: '',
+    gen: ['text', 'bg', 'border'],
+    transparent: true,
+    shades: 0,
+    tints: 0,
+  },
 ]
 
 function genToUtilities(
@@ -180,9 +297,7 @@ function buildCoreTypographySettings(
   return { groups: [buildDefaultTypographyGroup()], classes: [] }
 }
 
-function buildCoreSpacingSettings(
-  options: CoreFrameworkImportOptions,
-): FrameworkSpacingSettings {
+function buildCoreSpacingSettings(options: CoreFrameworkImportOptions): FrameworkSpacingSettings {
   if (options.includeUtilities) return buildDefaultSpacingSettings()
   return { groups: [buildDefaultSpacingGroup()], classes: [] }
 }
@@ -214,9 +329,7 @@ function buildCoreFrameworkPreferences(
  * Build a complete `FrameworkSettings` from the Core Framework default preset.
  * Drop this onto `site.settings.framework` to import the framework.
  */
-export function buildCoreFrameworkSettings(
-  options: CoreFrameworkImportOptions,
-): FrameworkSettings {
+export function buildCoreFrameworkSettings(options: CoreFrameworkImportOptions): FrameworkSettings {
   return {
     colors: buildCoreFrameworkColorSettings(options),
     typography: buildCoreTypographySettings(options),

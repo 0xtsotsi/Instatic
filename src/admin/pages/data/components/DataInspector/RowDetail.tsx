@@ -56,17 +56,23 @@ function formatDate(iso: string | null | undefined): string {
 
 function statusPillClass(status: DataRow['status']): string {
   switch (status) {
-    case 'published': return styles.statusPublished
-    case 'unpublished': return styles.statusUnpublished
-    default: return styles.statusDraft
+    case 'published':
+      return styles.statusPublished
+    case 'unpublished':
+      return styles.statusUnpublished
+    default:
+      return styles.statusDraft
   }
 }
 
 function statusLabel(status: DataRow['status']): string {
   switch (status) {
-    case 'published': return 'Published'
-    case 'unpublished': return 'Unpublished'
-    default: return 'Draft'
+    case 'published':
+      return 'Published'
+    case 'unpublished':
+      return 'Unpublished'
+    default:
+      return 'Draft'
   }
 }
 
@@ -187,17 +193,17 @@ function DataRowForm({
     ? (table.fields.find((f) => f.id === pickerState.fieldId) ?? null)
     : null
 
-  const pickerTargetTable = pickerField?.type === 'relation'
-    ? (tables.find((t) => t.id === pickerField.targetTableId) ?? null)
-    : null
+  const pickerTargetTable =
+    pickerField?.type === 'relation'
+      ? (tables.find((t) => t.id === pickerField.targetTableId) ?? null)
+      : null
 
   const pickerCurrentValue = pickerState
     ? ((draft.cells[pickerState.fieldId] ?? null) as string | string[] | null)
     : null
 
-  const pickerAllowMultiple = pickerField?.type === 'relation'
-    ? (pickerField.allowMultiple ?? false)
-    : false
+  const pickerAllowMultiple =
+    pickerField?.type === 'relation' ? (pickerField.allowMultiple ?? false) : false
 
   return (
     <>
@@ -218,9 +224,7 @@ function DataRowForm({
               rowId={row.id}
               resolveRelationTarget={resolveRow}
               onOpenPicker={
-                field.type === 'relation'
-                  ? () => setPickerState({ fieldId: field.id })
-                  : undefined
+                field.type === 'relation' ? () => setPickerState({ fieldId: field.id }) : undefined
               }
               onOpenEditor={field.type === 'pageTree' ? onOpenEditor : undefined}
             />
@@ -228,11 +232,11 @@ function DataRowForm({
         ))}
 
         <div className={styles.saveStatus} aria-live="polite" aria-atomic="true">
-          {draft.isSaving && (
-            <span className={styles.savingText}>Saving…</span>
-          )}
+          {draft.isSaving && <span className={styles.savingText}>Saving…</span>}
           {!draft.isSaving && draft.saveError && (
-            <span className={styles.saveErrorText} role="alert">{draft.saveError}</span>
+            <span className={styles.saveErrorText} role="alert">
+              {draft.saveError}
+            </span>
           )}
           {!draft.isSaving && !draft.saveError && !draft.isDirty && (
             <span className={styles.savedText}>Saved</span>
@@ -285,7 +289,8 @@ export function RowDetail({
   resolveRow,
   canEdit,
 }: RowDetailProps): ReactElement {
-  const showHeader = table.kind === 'postType' || table.kind === 'page' || table.kind === 'component'
+  const showHeader =
+    table.kind === 'postType' || table.kind === 'page' || table.kind === 'component'
 
   // Pick the right action for the header card based on kind. The handlers
   // are wired at the DataPage level; here we just dispatch on `kind`.
@@ -317,9 +322,10 @@ export function RowDetail({
   }
 
   // Wire the inline body cell's "Open editor →" button for page/component kinds.
-  const formOpenEditor = (table.kind === 'page' || table.kind === 'component') && onOpenInSiteEditor
-    ? () => onOpenInSiteEditor(row)
-    : undefined
+  const formOpenEditor =
+    (table.kind === 'page' || table.kind === 'component') && onOpenInSiteEditor
+      ? () => onOpenInSiteEditor(row)
+      : undefined
 
   return (
     <>

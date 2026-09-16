@@ -343,13 +343,13 @@ export function Select({
         className={styles.nativeSelect}
         {...props}
       >
-        {options ? (
-          normalizedOptions.map((option) => (
-            <option key={option.value} value={option.value} disabled={option.disabled}>
-              {option.textValue}
-            </option>
-          ))
-        ) : children}
+        {options
+          ? normalizedOptions.map((option) => (
+              <option key={option.value} value={option.value} disabled={option.disabled}>
+                {option.textValue}
+              </option>
+            ))
+          : children}
       </select>
 
       {selectedOption?.icon && (

@@ -27,22 +27,32 @@ function ctxWith(href: string): RenderConfig {
 
 describe('publisher page-ref resolution', () => {
   it('resolves a page ref to /slug', () => {
-    expect(renderNode('root', ctxWith('cms:page:club-id'), makeAccumulators())).toBe('<a href="/club">x</a>')
+    expect(renderNode('root', ctxWith('cms:page:club-id'), makeAccumulators())).toBe(
+      '<a href="/club">x</a>',
+    )
   })
 
   it('resolves a home-page ref (slug "index") to "/"', () => {
-    expect(renderNode('root', ctxWith('cms:page:home-id'), makeAccumulators())).toBe('<a href="/">x</a>')
+    expect(renderNode('root', ctxWith('cms:page:home-id'), makeAccumulators())).toBe(
+      '<a href="/">x</a>',
+    )
   })
 
   it('preserves a fragment', () => {
-    expect(renderNode('root', ctxWith('cms:page:club-id#join'), makeAccumulators())).toBe('<a href="/club#join">x</a>')
+    expect(renderNode('root', ctxWith('cms:page:club-id#join'), makeAccumulators())).toBe(
+      '<a href="/club#join">x</a>',
+    )
   })
 
   it('resolves a dangling ref to "#"', () => {
-    expect(renderNode('root', ctxWith('cms:page:deleted'), makeAccumulators())).toBe('<a href="#">x</a>')
+    expect(renderNode('root', ctxWith('cms:page:deleted'), makeAccumulators())).toBe(
+      '<a href="#">x</a>',
+    )
   })
 
   it('leaves a normal URL untouched', () => {
-    expect(renderNode('root', ctxWith('https://example.com'), makeAccumulators())).toBe('<a href="https://example.com">x</a>')
+    expect(renderNode('root', ctxWith('https://example.com'), makeAccumulators())).toBe(
+      '<a href="https://example.com">x</a>',
+    )
   })
 })

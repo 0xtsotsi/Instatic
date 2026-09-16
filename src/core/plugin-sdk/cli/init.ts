@@ -23,7 +23,11 @@ interface InitTemplate {
   kind: InitKind
 }
 
-function pluginIdFromName(input: string): { pluginId: string; pluginName: string; dirName: string } {
+function pluginIdFromName(input: string): {
+  pluginId: string
+  pluginName: string
+  dirName: string
+} {
   const trimmed = input.trim()
   if (!trimmed) {
     throw new Error('Plugin name is required: `instatic-plugin init <name>`')
@@ -75,7 +79,11 @@ export async function runPluginInit(
 
   if (kind === 'content-editor') {
     await mkdir(join(pluginDir, 'server'), { recursive: true })
-    await writeFile(join(pluginDir, 'instatic-plugin.config.ts'), pluginConfigTemplate(template), 'utf-8')
+    await writeFile(
+      join(pluginDir, 'instatic-plugin.config.ts'),
+      pluginConfigTemplate(template),
+      'utf-8',
+    )
     await writeFile(join(pluginDir, 'server', 'index.ts'), serverEntryTemplate(template), 'utf-8')
     await writeFile(join(pluginDir, 'README.md'), readmeTemplate(template), 'utf-8')
     await writeFile(join(pluginDir, '.gitignore'), gitignoreTemplate(), 'utf-8')
@@ -83,7 +91,11 @@ export async function runPluginInit(
   }
 
   await mkdir(join(pluginDir, 'modules'), { recursive: true })
-  await writeFile(join(pluginDir, 'instatic-plugin.config.ts'), pluginConfigTemplate(template), 'utf-8')
+  await writeFile(
+    join(pluginDir, 'instatic-plugin.config.ts'),
+    pluginConfigTemplate(template),
+    'utf-8',
+  )
   await writeFile(join(pluginDir, 'modules', 'hello.ts'), helloModuleTemplate(template), 'utf-8')
   await writeFile(join(pluginDir, 'README.md'), readmeTemplate(template), 'utf-8')
   await writeFile(join(pluginDir, '.gitignore'), gitignoreTemplate(), 'utf-8')

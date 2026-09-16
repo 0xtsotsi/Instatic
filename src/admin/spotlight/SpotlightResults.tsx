@@ -107,9 +107,7 @@ function ArgModeResults({
     const q = query.toLowerCase()
     if (!q) return [...currentArg.options]
     return currentArg.options.filter(
-      (opt) =>
-        opt.label.toLowerCase().includes(q) ||
-        opt.value.toLowerCase().includes(q),
+      (opt) => opt.label.toLowerCase().includes(q) || opt.value.toLowerCase().includes(q),
     )
   })()
 
@@ -119,9 +117,7 @@ function ArgModeResults({
       <div className={styles.argBreadcrumb}>
         <span className={styles.argBreadcrumbTitle}>{argMode.command.title}</span>
         <span className={styles.argBreadcrumbSeparator}>›</span>
-        <span className={styles.argBreadcrumbCurrent}>
-          {currentArg?.label ?? 'Done'}
-        </span>
+        <span className={styles.argBreadcrumbCurrent}>{currentArg?.label ?? 'Done'}</span>
       </div>
 
       {/* Completed args (read-only rows) */}
@@ -140,7 +136,11 @@ function ArgModeResults({
           <span className={styles.argRowLabel}>{currentArg.label}</span>
           {currentArg.type !== 'select' && (
             <span className={styles.argRowValueActive}>
-              {query || <span className={styles.argRowPlaceholder}>{currentArg.placeholder ?? 'Enter value…'}</span>}
+              {query || (
+                <span className={styles.argRowPlaceholder}>
+                  {currentArg.placeholder ?? 'Enter value…'}
+                </span>
+              )}
             </span>
           )}
         </div>
@@ -160,9 +160,7 @@ function ArgModeResults({
               <span className={styles.rowIcon} />
               <span className={styles.rowContent}>
                 <span className={styles.rowLabel}>{opt.label}</span>
-                {opt.sublabel && (
-                  <span className={styles.rowSublabel}>{opt.sublabel}</span>
-                )}
+                {opt.sublabel && <span className={styles.rowSublabel}>{opt.sublabel}</span>}
               </span>
             </div>
           ))}
@@ -226,12 +224,9 @@ export function SpotlightResults({
 
   // Phase 3: async state — use stable module-level fallbacks so hook deps
   // don't see a new object/Set reference on every render when closed.
-  const asyncResults = ctx?.state.phase === 'open'
-    ? ctx.state.asyncResults
-    : EMPTY_ASYNC_RESULTS
-  const loadingProviders = ctx?.state.phase === 'open'
-    ? ctx.state.loadingProviders
-    : EMPTY_LOADING_PROVIDERS
+  const asyncResults = ctx?.state.phase === 'open' ? ctx.state.asyncResults : EMPTY_ASYNC_RESULTS
+  const loadingProviders =
+    ctx?.state.phase === 'open' ? ctx.state.loadingProviders : EMPTY_LOADING_PROVIDERS
 
   // ─── Skeleton delay ───────────────────────────────────────────────────────
   // Show skeleton only after 240 ms of loading to avoid a flash for fast
@@ -262,9 +257,10 @@ export function SpotlightResults({
   const asyncGroups = argMode ? [] : getOrderedAsyncGroups(activeScopeId, asyncResults)
 
   // Providers still in-flight that haven't produced results yet → skeleton.
-  const skeletonProviders = (showSkeleton && !argMode)
-    ? getLoadingProviders(activeScopeId, loadingProviders, asyncResults)
-    : []
+  const skeletonProviders =
+    showSkeleton && !argMode
+      ? getLoadingProviders(activeScopeId, loadingProviders, asyncResults)
+      : []
 
   // ─── Merged flat list for keyboard-navigation index tracking ──────────────
 
@@ -336,9 +332,7 @@ export function SpotlightResults({
 
   // ─── Scope breadcrumb ─────────────────────────────────────────────────────
 
-  const breadcrumb = scopeStack.length > 1 ? (
-    <ScopeBreadcrumb scopeStack={scopeStack} />
-  ) : null
+  const breadcrumb = scopeStack.length > 1 ? <ScopeBreadcrumb scopeStack={scopeStack} /> : null
 
   const hasStaticResults = capped.length > 0
   const hasAsyncResults = asyncGroups.length > 0
@@ -364,8 +358,7 @@ export function SpotlightResults({
           </span>
           {query ? (
             <p className={styles.emptyStateText}>
-              No results for{' '}
-              <span className={styles.emptyStateQuery}>"{query}"</span>
+              No results for <span className={styles.emptyStateQuery}>"{query}"</span>
             </p>
           ) : (
             <p className={styles.emptyStateText}>No commands available</p>
@@ -426,7 +419,12 @@ export function SpotlightResults({
 
       {/* Async provider result groups — rendered in provider-definition order */}
       {asyncGroups.map(({ providerId, provider, commands }) => (
-        <div key={providerId} role="group" aria-label={provider.label} data-accent={groupAccent('results')}>
+        <div
+          key={providerId}
+          role="group"
+          aria-label={provider.label}
+          data-accent={groupAccent('results')}
+        >
           <div className={styles.groupHeader} aria-hidden="true">
             <span className={styles.groupBar} />
             <span className={styles.groupTitle}>{provider.label}</span>

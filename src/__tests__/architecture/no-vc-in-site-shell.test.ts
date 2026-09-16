@@ -25,10 +25,10 @@ import { join } from 'path'
 
 const ROOT = join(import.meta.dir, '../../../')
 
-const PAGE_TREE_SCHEMAS  = join(ROOT, 'src/core/page-tree/siteDocument.ts')
-const SITE_REPOSITORY    = join(ROOT, 'server/repositories/site.ts')
-const CMS_ADAPTER        = join(ROOT, 'src/core/persistence/cms.ts')
-const VALIDATE_TS        = join(ROOT, 'src/core/persistence/validate.ts')
+const PAGE_TREE_SCHEMAS = join(ROOT, 'src/core/page-tree/siteDocument.ts')
+const SITE_REPOSITORY = join(ROOT, 'server/repositories/site.ts')
+const CMS_ADAPTER = join(ROOT, 'src/core/persistence/cms.ts')
+const VALIDATE_TS = join(ROOT, 'src/core/persistence/validate.ts')
 const COMPONENTS_HANDLER = join(ROOT, 'server/handlers/cms/components.ts')
 
 // ---------------------------------------------------------------------------

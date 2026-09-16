@@ -1,9 +1,5 @@
 import { useCallback, useLayoutEffect, useState } from 'react'
-import {
-  publishCmsDataRow,
-  saveCmsDataRowDraft,
-  updateCmsDataRowStatus,
-} from '@core/persistence'
+import { publishCmsDataRow, saveCmsDataRowDraft, updateCmsDataRowStatus } from '@core/persistence'
 import type { DataRow, DataRowCells, DataRowStatus } from '@core/data/schemas'
 import {
   readBodyCell,
@@ -85,7 +81,8 @@ export function useContentEntryDraft({
 
   const isDirty = (() => {
     if (!selectedEntry) return false
-    return title !== readTitleCell(selectedEntry.cells) ||
+    return (
+      title !== readTitleCell(selectedEntry.cells) ||
       slug !== readSlugCell(selectedEntry.cells) ||
       seoTitle !== readSeoTitleCell(selectedEntry.cells) ||
       seoDescription !== readSeoDescriptionCell(selectedEntry.cells) ||
@@ -94,6 +91,7 @@ export function useContentEntryDraft({
       // Cell values are JSON by definition (persisted via cells_json), so a
       // stringify comparison is exact — same approach as useDataRowDraft.
       JSON.stringify(customCells) !== JSON.stringify(stripPostTypeBuiltInCells(selectedEntry.cells))
+    )
   })()
 
   const saveDraft = async (): Promise<DataRow | null> => {

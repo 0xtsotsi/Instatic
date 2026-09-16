@@ -15,7 +15,9 @@ function makeDeps() {
 describe('runEntryOp — save-state machine', () => {
   it('runs saving → saved and applies the result on success', async () => {
     const { deps, saveMessages, errors } = makeDeps()
-    const apply = mock((result: number) => { void result })
+    const apply = mock((result: number) => {
+      void result
+    })
 
     await runEntryOp(deps, async () => 42, {
       permitted: true,
@@ -33,11 +35,17 @@ describe('runEntryOp — save-state machine', () => {
   it('a thrown op surfaces the error and leaves save-state coherent (not stuck on saving)', async () => {
     const { deps, saveMessages, errors } = makeDeps()
 
-    await runEntryOp(deps, async () => { throw new Error('boom') }, {
-      permitted: true,
-      fallback: 'Could not do thing',
-      phase: { pending: 'saving', done: 'saved' },
-    })
+    await runEntryOp(
+      deps,
+      async () => {
+        throw new Error('boom')
+      },
+      {
+        permitted: true,
+        fallback: 'Could not do thing',
+        phase: { pending: 'saving', done: 'saved' },
+      },
+    )
 
     // 'saving' set on entry, then flipped to 'error' — never left on 'saving'.
     expect(saveMessages).toEqual(['saving', 'error'])
@@ -48,11 +56,17 @@ describe('runEntryOp — save-state machine', () => {
   it('falls back to the provided message when the op throws a non-Error', async () => {
     const { deps, errors } = makeDeps()
 
-    await runEntryOp(deps, async () => { throw 'nope' }, {
-      permitted: true,
-      fallback: 'Could not do thing',
-      phase: { pending: 'saving', done: 'saved' },
-    })
+    await runEntryOp(
+      deps,
+      async () => {
+        throw 'nope'
+      },
+      {
+        permitted: true,
+        fallback: 'Could not do thing',
+        phase: { pending: 'saving', done: 'saved' },
+      },
+    )
 
     expect(errors[errors.length - 1]).toBe('Could not do thing')
   })
@@ -76,10 +90,16 @@ describe('runEntryOp — save-state machine', () => {
   it('omits the save toast for ops without a phase, still surfacing errors', async () => {
     const { deps, saveMessages, errors } = makeDeps()
 
-    await runEntryOp(deps, async () => { throw new Error('delete failed') }, {
-      permitted: true,
-      fallback: 'Could not delete',
-    })
+    await runEntryOp(
+      deps,
+      async () => {
+        throw new Error('delete failed')
+      },
+      {
+        permitted: true,
+        fallback: 'Could not delete',
+      },
+    )
 
     expect(saveMessages).toEqual([]) // no save-state machine for delete-style ops
     expect(errors).toEqual([null, 'delete failed'])
@@ -89,11 +109,17 @@ describe('runEntryOp — save-state machine', () => {
     const { deps } = makeDeps()
 
     await expect(
-      runEntryOp(deps, async () => { throw new Error('rename failed') }, {
-        permitted: true,
-        fallback: 'Could not rename',
-        rethrow: true,
-      }),
+      runEntryOp(
+        deps,
+        async () => {
+          throw new Error('rename failed')
+        },
+        {
+          permitted: true,
+          fallback: 'Could not rename',
+          rethrow: true,
+        },
+      ),
     ).rejects.toThrow('rename failed')
   })
 })

@@ -74,4 +74,4 @@ export const CORE_CAPABILITIES = [
   'ai.audit.read',
 ] as const
 
-export type CoreCapability = typeof CORE_CAPABILITIES[number]
+export type CoreCapability = (typeof CORE_CAPABILITIES)[number]

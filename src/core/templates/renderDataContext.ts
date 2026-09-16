@@ -4,11 +4,7 @@
  */
 
 import type { LoopItem } from '@core/loops/types'
-import type {
-  PageFrame,
-  RouteFrame,
-  SiteFrame,
-} from './contextFrames'
+import type { PageFrame, RouteFrame, SiteFrame } from './contextFrames'
 
 /**
  * Render-time context handed to the publisher.

@@ -9,10 +9,10 @@
  */
 
 .wrapper {
-    position: relative;
-    display: block;
-    width: 100%;
-    min-width: 0;
+  position: relative;
+  display: block;
+  width: 100%;
+  min-width: 0;
 }
 
 /* Overlay variant — the wrapper generates no box (display: contents) so the
@@ -20,23 +20,23 @@
    the spacing box's per-side segments). The dropdown still anchors to the
    input via portal + matchAnchorWidth, so no positioned wrapper is needed. */
 .wrapperOverlay {
-    display: contents;
+  display: contents;
 }
 
 .input {
-    width: 100%;
-    min-width: 0;
+  width: 100%;
+  min-width: 0;
 }
 
 /* ── Dropdown menu — section headers + token rows ──────────────────────── */
 .menuHeader {
-    padding: var(--space-xs) var(--space-m) var(--space-3xs);
-    color: var(--text-subtle);
-    font-size: var(--text-2xs);
-    font-weight: 600;
-    letter-spacing: 0.04em;
-    text-transform: uppercase;
-    user-select: none;
+  padding: var(--space-xs) var(--space-m) var(--space-3xs);
+  color: var(--text-subtle);
+  font-size: var(--text-2xs);
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  user-select: none;
 }
 
 /* Grid: token name (identifier, e.g. "4xs") is the row's primary label — it
@@ -48,25 +48,25 @@
    redundant detail. Mirrors SpacingBoxControl's `.sideMenuItem` exactly
    so the two token pickers stay visually consistent. */
 .menuItem {
-    display: grid;
-    grid-template-columns: minmax(0, auto) minmax(0, 1fr);
-    gap: var(--space-s);
-    align-items: baseline;
-    padding: var(--space-xs) var(--space-m);
+  display: grid;
+  grid-template-columns: minmax(0, auto) minmax(0, 1fr);
+  gap: var(--space-s);
+  align-items: baseline;
+  padding: var(--space-xs) var(--space-m);
 }
 
 .menuToken {
-    color: var(--text);
-    font-size: var(--text-s);
-    font-weight: 600;
-    white-space: nowrap;
+  color: var(--text);
+  font-size: var(--text-s);
+  font-weight: 600;
+  white-space: nowrap;
 }
 
 .menuVar {
-    color: var(--text-subtle);
-    font-size: var(--text-2xs);
-    font-variant-numeric: tabular-nums;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+  color: var(--text-subtle);
+  font-size: var(--text-2xs);
+  font-variant-numeric: tabular-nums;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }

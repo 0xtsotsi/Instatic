@@ -47,8 +47,18 @@ import styles from './DateTimePicker.module.css'
 // ---------------------------------------------------------------------------
 
 const MONTH_NAMES = [
-  'January', 'February', 'March', 'April', 'May', 'June',
-  'July', 'August', 'September', 'October', 'November', 'December',
+  'January',
+  'February',
+  'March',
+  'April',
+  'May',
+  'June',
+  'July',
+  'August',
+  'September',
+  'October',
+  'November',
+  'December',
 ]
 const DAY_LABELS = ['Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa', 'Su']
 
@@ -75,15 +85,7 @@ function isSameLocalDay(a: Date, b: Date): boolean {
 }
 
 function combine(dayDate: Date, hour: number, minute: number): Date {
-  return new Date(
-    dayDate.getFullYear(),
-    dayDate.getMonth(),
-    dayDate.getDate(),
-    hour,
-    minute,
-    0,
-    0,
-  )
+  return new Date(dayDate.getFullYear(), dayDate.getMonth(), dayDate.getDate(), hour, minute, 0, 0)
 }
 
 function clampHour(value: number): number {
@@ -181,25 +183,9 @@ function defaultInitialDate(): Date {
   const minutes = now.getMinutes()
   const rounded = Math.ceil((minutes + 1) / 5) * 5
   if (rounded >= 60) {
-    return new Date(
-      now.getFullYear(),
-      now.getMonth(),
-      now.getDate(),
-      now.getHours() + 1,
-      0,
-      0,
-      0,
-    )
+    return new Date(now.getFullYear(), now.getMonth(), now.getDate(), now.getHours() + 1, 0, 0, 0)
   }
-  return new Date(
-    now.getFullYear(),
-    now.getMonth(),
-    now.getDate(),
-    now.getHours(),
-    rounded,
-    0,
-    0,
-  )
+  return new Date(now.getFullYear(), now.getMonth(), now.getDate(), now.getHours(), rounded, 0, 0)
 }
 
 export function DateTimePicker({
@@ -344,7 +330,9 @@ export function DateTimePicker({
             >
               <ChevronLeftIcon size={12} aria-hidden="true" />
             </Button>
-            <span className={styles.monthLabel} aria-live="polite">{monthLabel}</span>
+            <span className={styles.monthLabel} aria-live="polite">
+              {monthLabel}
+            </span>
             <Button
               variant="ghost"
               size="sm"
@@ -358,7 +346,9 @@ export function DateTimePicker({
 
           <div className={styles.weekdayRow} aria-hidden="true">
             {DAY_LABELS.map((label) => (
-              <span key={label} className={styles.weekdayLabel}>{label}</span>
+              <span key={label} className={styles.weekdayLabel}>
+                {label}
+              </span>
             ))}
           </div>
 
@@ -414,7 +404,9 @@ export function DateTimePicker({
               onBump={bumpHour}
               max={23}
             />
-            <span className={styles.timeColon} aria-hidden="true">:</span>
+            <span className={styles.timeColon} aria-hidden="true">
+              :
+            </span>
             <TimeSpinner
               label="Minutes"
               value={selected.getMinutes()}
@@ -443,8 +435,12 @@ export function DateTimePicker({
           })}
         </span>
         <div className={styles.footerActions}>
-          <Button variant="ghost" size="sm" onClick={onCancel}>Cancel</Button>
-          <Button variant="primary" size="sm" onClick={handleConfirm}>Confirm</Button>
+          <Button variant="ghost" size="sm" onClick={onCancel}>
+            Cancel
+          </Button>
+          <Button variant="primary" size="sm" onClick={handleConfirm}>
+            Confirm
+          </Button>
         </div>
       </footer>
     </div>

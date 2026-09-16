@@ -248,7 +248,9 @@ describe('DynamicBindingControl picker', () => {
         propKey="src"
         label="Image"
         control={{ type: 'image', label: 'Image' }}
-        onSet={(b) => { result = b }}
+        onSet={(b) => {
+          result = b
+        }}
         onClear={() => {}}
       >
         <input aria-label="Image" />
@@ -260,9 +262,9 @@ describe('DynamicBindingControl picker', () => {
     await waitFor(() => expect(screen.getByText('Featured media')).toBeDefined())
 
     // Click the Featured media field — should fire onSet immediately.
-    const featuredBtn = screen.getAllByRole('button').find((b) =>
-      b.textContent?.includes('Featured media'),
-    )
+    const featuredBtn = screen
+      .getAllByRole('button')
+      .find((b) => b.textContent?.includes('Featured media'))
     fireEvent.click(featuredBtn!)
 
     expect(result).toMatchObject({

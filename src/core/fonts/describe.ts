@@ -7,7 +7,12 @@
  */
 
 import type { SiteFontsSettings } from './schemas'
-import { fontTokenCssVariable, fontTokenValueExpr, resolveFontTokenStack, sortFontTokens } from './tokens'
+import {
+  fontTokenCssVariable,
+  fontTokenValueExpr,
+  resolveFontTokenStack,
+  sortFontTokens,
+} from './tokens'
 
 interface FontTokenDescriptor {
   /** Display name, e.g. "Primary". */

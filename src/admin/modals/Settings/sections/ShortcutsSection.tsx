@@ -15,8 +15,8 @@ export function ShortcutsSection() {
   return (
     <div>
       <p className={s.sectionDescription}>
-        All keyboard shortcuts, organized by context. Platform-specific hints
-        are shown automatically based on your operating system.
+        All keyboard shortcuts, organized by context. Platform-specific hints are shown
+        automatically based on your operating system.
       </p>
       <HelpKeybindingsList />
     </div>

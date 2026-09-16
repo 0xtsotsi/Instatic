@@ -28,7 +28,13 @@ function makePostTypeTable(overrides: Partial<DataTable> = {}): DataTable {
       { type: 'text', id: 'title', label: 'Title', required: true, builtIn: true },
       { type: 'text', id: 'slug', label: 'Slug', required: true, builtIn: true },
       { type: 'richText', id: 'body', label: 'Body', format: 'markdown', builtIn: true },
-      { type: 'media', id: 'featuredMedia', label: 'Featured media', mediaKind: 'image', builtIn: true },
+      {
+        type: 'media',
+        id: 'featuredMedia',
+        label: 'Featured media',
+        mediaKind: 'image',
+        builtIn: true,
+      },
       { type: 'text', id: 'seoTitle', label: 'SEO title', builtIn: true },
       { type: 'longText', id: 'seoDescription', label: 'SEO description', builtIn: true },
     ],
@@ -89,8 +95,8 @@ describe('buildDataMeta', () => {
       singularLabel: 'Post',
       pluralLabel: 'Posts',
       primaryFieldId: 'title',
-      routable: true,    // routeBase: '/posts' → non-empty
-      versioned: true,   // kind: 'postType'
+      routable: true, // routeBase: '/posts' → non-empty
+      versioned: true, // kind: 'postType'
     })
   })
 
@@ -99,7 +105,7 @@ describe('buildDataMeta', () => {
     const table = meta.tables[0]
 
     expect(table.kind).toBe('data')
-    expect(table.routable).toBe(false)  // routeBase: ''
+    expect(table.routable).toBe(false) // routeBase: ''
     expect(table.versioned).toBe(false) // kind: 'data'
   })
 
@@ -113,8 +119,14 @@ describe('buildDataMeta', () => {
     expect(fields.find((f) => f.id === 'title')).toMatchObject({ type: 'text', label: 'Title' })
     expect(fields.find((f) => f.id === 'slug')).toMatchObject({ type: 'text', label: 'Slug' })
     expect(fields.find((f) => f.id === 'body')).toMatchObject({ type: 'richText', label: 'Body' })
-    expect(fields.find((f) => f.id === 'seoTitle')).toMatchObject({ type: 'text', label: 'SEO title' })
-    expect(fields.find((f) => f.id === 'seoDescription')).toMatchObject({ type: 'longText', label: 'SEO description' })
+    expect(fields.find((f) => f.id === 'seoTitle')).toMatchObject({
+      type: 'text',
+      label: 'SEO title',
+    })
+    expect(fields.find((f) => f.id === 'seoDescription')).toMatchObject({
+      type: 'longText',
+      label: 'SEO description',
+    })
   })
 
   it('copies mediaKind and allowMultiple from media fields', () => {
@@ -129,13 +141,23 @@ describe('buildDataMeta', () => {
     const fields = meta.tables[0].fields
 
     expect(fields.find((f) => f.id === 'photo')).toEqual({
-      id: 'photo', label: 'Photo', type: 'media', mediaKind: 'image', allowMultiple: false,
+      id: 'photo',
+      label: 'Photo',
+      type: 'media',
+      mediaKind: 'image',
+      allowMultiple: false,
     })
     expect(fields.find((f) => f.id === 'gallery')).toEqual({
-      id: 'gallery', label: 'Gallery', type: 'media', mediaKind: 'any', allowMultiple: true,
+      id: 'gallery',
+      label: 'Gallery',
+      type: 'media',
+      mediaKind: 'any',
+      allowMultiple: true,
     })
     expect(fields.find((f) => f.id === 'file')).toEqual({
-      id: 'file', label: 'File', type: 'media',
+      id: 'file',
+      label: 'File',
+      type: 'media',
     })
   })
 

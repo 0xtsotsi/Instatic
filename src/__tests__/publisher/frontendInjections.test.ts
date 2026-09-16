@@ -14,7 +14,10 @@
  * tracker plugin with a single external script hit this.
  */
 import { describe, it, expect } from 'bun:test'
-import { injectFrontendAssets, type FrontendInjections } from '../../../server/publish/frontendInjections'
+import {
+  injectFrontendAssets,
+  type FrontendInjections,
+} from '../../../server/publish/frontendInjections'
 
 const PAGE_WITH_CSP_META = `<!doctype html>
 <html>
@@ -45,7 +48,9 @@ describe('frontend injection — CSP relaxation', () => {
   it('relaxes script-src to `self` for external-only scripts (regression: tracker plugins)', () => {
     const plan = emptyPlan()
     plan.hasExternalScript = true
-    plan.tags['body-end'] = [`<script src="/uploads/plugins/acme.analytics/1.0.0/frontend/tracker.js" defer></script>`]
+    plan.tags['body-end'] = [
+      `<script src="/uploads/plugins/acme.analytics/1.0.0/frontend/tracker.js" defer></script>`,
+    ]
     const out = injectFrontendAssets(PAGE_WITH_CSP_META, plan)
     expect(out).toContain("script-src 'self';")
     // NOT 'unsafe-inline' — the plan is external-only

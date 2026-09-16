@@ -33,10 +33,7 @@ export function styleRuleSelector(cls: Pick<StyleRule, 'selector'>): string {
   return cls.selector
 }
 
-function classNameForClassId(
-  classes: StyleRuleRegistry,
-  classId: string,
-): string | null {
+function classNameForClassId(classes: StyleRuleRegistry, classId: string): string | null {
   const cls = classes?.[classId]
   if (!cls) return null
   // Only class-kind rules contribute a token to the node's `class=` attribute.

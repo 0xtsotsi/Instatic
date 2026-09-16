@@ -28,9 +28,7 @@ export interface SpotlightOpenState {
   pendingConfirm: string | null
 }
 
-export type SpotlightState =
-  | { phase: 'closed' }
-  | SpotlightOpenState
+export type SpotlightState = { phase: 'closed' } | SpotlightOpenState
 
 export type SpotlightAction =
   | { type: 'OPEN' }

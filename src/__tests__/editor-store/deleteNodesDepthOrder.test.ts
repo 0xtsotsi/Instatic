@@ -127,7 +127,9 @@ describe('deleteNodes — batch ordering and routing', () => {
         makeVCNode({ id: 'vc-text', moduleId: 'base.text', props: { text: 'hi' } }),
       ]),
     })
-    useEditorStore.getState().loadSite(makeSite({ pages: [makePage({ id: 'p1' })], visualComponents: [vc] }))
+    useEditorStore
+      .getState()
+      .loadSite(makeSite({ pages: [makePage({ id: 'p1' })], visualComponents: [vc] }))
     useEditorStore.setState({
       activePageId: 'p1',
       activeDocument: { kind: 'visualComponent', vcId: 'vc-1' },

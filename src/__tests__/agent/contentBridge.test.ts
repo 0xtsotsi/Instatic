@@ -193,16 +193,19 @@ describe('runMcpWorkspaceBridgeConnection', () => {
         const signal = init?.signal as AbortSignal
         expect(signal.aborted).toBe(false)
         connectionSignals.push(signal)
-        return new Response([
-          JSON.stringify({ type: 'bridgeReady', bridgeId: 'bridge-stale' }),
-          JSON.stringify({
-            type: 'toolRequest',
-            requestId: 'request-stale',
-            toolName: 'site_apply_css',
-            input: {},
-          }),
-          '',
-        ].join('\n'), { headers: { 'Content-Type': 'application/x-ndjson' } })
+        return new Response(
+          [
+            JSON.stringify({ type: 'bridgeReady', bridgeId: 'bridge-stale' }),
+            JSON.stringify({
+              type: 'toolRequest',
+              requestId: 'request-stale',
+              toolName: 'site_apply_css',
+              input: {},
+            }),
+            '',
+          ].join('\n'),
+          { headers: { 'Content-Type': 'application/x-ndjson' } },
+        )
       }
       if (requestCount === 2) {
         return new Response(
@@ -219,22 +222,26 @@ describe('runMcpWorkspaceBridgeConnection', () => {
 
     const lifecycleController = new AbortController()
     try {
-      await expect(runMcpWorkspaceBridgeConnection(
-        'site',
-        async () => ({ ok: true }),
-        undefined,
-        lifecycleController.signal,
-      )).rejects.toThrow('The editor bridge no longer owns this request.')
+      await expect(
+        runMcpWorkspaceBridgeConnection(
+          'site',
+          async () => ({ ok: true }),
+          undefined,
+          lifecycleController.signal,
+        ),
+      ).rejects.toThrow('The editor bridge no longer owns this request.')
 
       expect(lifecycleController.signal.aborted).toBe(false)
       expect(connectionSignals[0]?.aborted).toBe(true)
 
-      await expect(runMcpWorkspaceBridgeConnection(
-        'site',
-        async () => ({ ok: true }),
-        undefined,
-        lifecycleController.signal,
-      )).resolves.toBe('auth')
+      await expect(
+        runMcpWorkspaceBridgeConnection(
+          'site',
+          async () => ({ ok: true }),
+          undefined,
+          lifecycleController.signal,
+        ),
+      ).resolves.toBe('auth')
       expect(connectionSignals[1]?.aborted).toBe(true)
       expect(requestCount).toBe(3)
     } finally {

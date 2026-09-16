@@ -23,13 +23,27 @@
  */
 const SUPPORTED_PSEUDO_STATES = [
   // Pointer / keyboard interaction — never active while the panel has focus.
-  ':hover', ':active', ':focus', ':focus-visible', ':focus-within',
+  ':hover',
+  ':active',
+  ':focus',
+  ':focus-visible',
+  ':focus-within',
   // Navigation — not applicable inside the editing canvas.
-  ':target', ':visited',
+  ':target',
+  ':visited',
   // Form value & validation — a static render shows one state, but the rule
   // styles the other (e.g. the `:checked` look of a currently-unchecked toggle).
-  ':checked', ':indeterminate', ':placeholder-shown', ':autofill', ':disabled',
-  ':valid', ':invalid', ':in-range', ':out-of-range', ':user-valid', ':user-invalid',
+  ':checked',
+  ':indeterminate',
+  ':placeholder-shown',
+  ':autofill',
+  ':disabled',
+  ':valid',
+  ':invalid',
+  ':in-range',
+  ':out-of-range',
+  ':user-valid',
+  ':user-invalid',
 ] as const
 const SUPPORTED_PSEUDO_SET = new Set<string>(SUPPORTED_PSEUDO_STATES)
 

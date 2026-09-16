@@ -30,29 +30,36 @@ function makeBackgroundClass(): StyleRule {
 }
 
 function mediaResponse(): Response {
-  return new Response(JSON.stringify({
-    assets: [{
-      id: 'asset-1',
-      filename: 'background.png',
-      mimeType: 'image/png',
-      sizeBytes: 100,
-      publicPath: backgroundPath,
-      uploadedByUserId: null,
-      createdAt: '2026-07-03T00:00:00.000Z',
-      width: 1024,
-      height: 512,
-      variants: [{
-        width: 1024,
-        height: 512,
-        format: 'webp',
-        path: variantPath,
-        sizeBytes: 80,
-      }],
-    }],
-  }), {
-    status: 200,
-    headers: { 'Content-Type': 'application/json' },
-  })
+  return new Response(
+    JSON.stringify({
+      assets: [
+        {
+          id: 'asset-1',
+          filename: 'background.png',
+          mimeType: 'image/png',
+          sizeBytes: 100,
+          publicPath: backgroundPath,
+          uploadedByUserId: null,
+          createdAt: '2026-07-03T00:00:00.000Z',
+          width: 1024,
+          height: 512,
+          variants: [
+            {
+              width: 1024,
+              height: 512,
+              format: 'webp',
+              path: variantPath,
+              sizeBytes: 80,
+            },
+          ],
+        },
+      ],
+    }),
+    {
+      status: 200,
+      headers: { 'Content-Type': 'application/json' },
+    },
+  )
 }
 
 function resetEditorStore() {
@@ -105,7 +112,8 @@ describe('ClassStyleInjector media backgrounds', () => {
     })
 
     await waitFor(() => {
-      const css = document.head.querySelector<HTMLStyleElement>('style#mc-classes')?.textContent ?? ''
+      const css =
+        document.head.querySelector<HTMLStyleElement>('style#mc-classes')?.textContent ?? ''
       expect(css).toContain(`background-image: url("${variantPath}");`)
       expect(css).toContain('background-image: image-set(')
       expect(css).not.toContain(backgroundPath)

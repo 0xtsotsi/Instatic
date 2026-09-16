@@ -123,7 +123,8 @@ const EMPTY_RUNTIME_SCRIPTS: InjectableRuntimeScript[] = []
  * via a `submit` listener, so a default-typed submit button inside a form is
  * covered there even though it isn't matched here.
  */
-const NAVIGABLE_SELECTOR = 'a[href], area[href], button[type="submit"], input[type="submit"], input[type="image"]'
+const NAVIGABLE_SELECTOR =
+  'a[href], area[href], button[type="submit"], input[type="submit"], input[type="image"]'
 
 interface IframeFrameSurfaceProps {
   /** Stable id used to tag the iframe's `<body>` with `data-breakpoint-id`. */
@@ -198,10 +199,10 @@ export const IframeFrameSurface = forwardRef<IframeFrameSurfaceHandle, IframeFra
       onReadonlyOpen,
     },
     ref,
-    ) {
-      const isLive = interaction === 'live'
-      const iframeRef = useRef<HTMLIFrameElement | null>(null)
-      const [iframeDoc, setIframeDoc] = useState<Document | null>(null)
+  ) {
+    const isLive = interaction === 'live'
+    const iframeRef = useRef<HTMLIFrameElement | null>(null)
+    const [iframeDoc, setIframeDoc] = useState<Document | null>(null)
 
     useIframeCursorBridge(iframeRef, iframeDoc, { onCursorMove, onCursorLeave })
     useCanvasFormControlSuppression(iframeDoc, { breakpointId, enabled: !isLive })
@@ -238,11 +239,7 @@ export const IframeFrameSurface = forwardRef<IframeFrameSurfaceHandle, IframeFra
       delete iframe.dataset.instaticCanvasDocumentLoaded
       const captureSrcDoc = () => {
         const doc = iframe.contentDocument
-        if (
-          !doc ||
-          doc.readyState === 'loading' ||
-          !claimIframeSrcDocument(doc)
-        ) return
+        if (!doc || doc.readyState === 'loading' || !claimIframeSrcDocument(doc)) return
         // Never portal the canvas tree into the short-lived initial about:blank
         // document. Module effects, media reads, and authored runtime scripts
         // must run once against the final srcDoc document only.
@@ -569,7 +566,10 @@ export const IframeFrameSurface = forwardRef<IframeFrameSurfaceHandle, IframeFra
         // and forwarding the first iframe-internal pointerdown would
         // confuse the parent's session state.
         const dragSignal = isCanvasDragActive()
-        if (dragSignal && (e.type === 'pointermove' || e.type === 'pointerup' || e.type === 'pointercancel')) {
+        if (
+          dragSignal &&
+          (e.type === 'pointermove' || e.type === 'pointerup' || e.type === 'pointercancel')
+        ) {
           // The iframe-internal event is harmless on its own (no selection
           // logic listens for raw pointermove inside the iframe), so we
           // don't swallow it — but we do forward it to the parent doc with
@@ -621,9 +621,7 @@ export const IframeFrameSurface = forwardRef<IframeFrameSurfaceHandle, IframeFra
     }, [iframeDoc, isLive])
 
     const dataAttrSpread = dataAttrs
-      ? Object.fromEntries(
-          Object.entries(dataAttrs).filter(([, v]) => v !== undefined),
-        )
+      ? Object.fromEntries(Object.entries(dataAttrs).filter(([, v]) => v !== undefined))
       : {}
 
     // Frame viewport for canvas viewport-unit resolution. Width is the
@@ -643,7 +641,9 @@ export const IframeFrameSurface = forwardRef<IframeFrameSurfaceHandle, IframeFra
           // Canvas frames are sized to the breakpoint width and grow to content
           // height. Live frames fill the surface-controlled wrapper and scroll
           // internally, so they take 100% in both axes.
-          style={isLive ? { ...style, width: '100%', height: '100%' } : { ...style, width: `${width}px` }}
+          style={
+            isLive ? { ...style, width: '100%', height: '100%' } : { ...style, width: `${width}px` }
+          }
           title={`Canvas frame for ${breakpointId}`}
           {...dataAttrSpread}
           // Allow the same-origin policy so the parent can read/write the
@@ -662,7 +662,10 @@ export const IframeFrameSurface = forwardRef<IframeFrameSurfaceHandle, IframeFra
                 {children}
                 {/* Runtime scripts (opt-in) run against the node tree mounted
                     above. Empty list = no-op, so this is safe to always mount. */}
-                <RuntimeScriptInjector targetDocument={iframeDoc} scripts={runtimeScripts ?? EMPTY_RUNTIME_SCRIPTS} />
+                <RuntimeScriptInjector
+                  targetDocument={iframeDoc}
+                  scripts={runtimeScripts ?? EMPTY_RUNTIME_SCRIPTS}
+                />
               </CanvasDocumentContext.Provider>
             </CanvasFrameElementContext.Provider>,
             iframeDoc.body,

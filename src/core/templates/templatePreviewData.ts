@@ -44,8 +44,7 @@ const POST_TYPE_PREVIEW_VALUE_BY_FIELD_ID: Record<string, string> = {
   [POST_TYPE_FIELD_TITLE]: 'Example Post Title',
   [POST_TYPE_FIELD_SLUG]: 'example-post-title',
   [POST_TYPE_FIELD_SEO_TITLE]: 'Example Post — Site Name',
-  [POST_TYPE_FIELD_SEO_DESCRIPTION]:
-    'A short description of this example post for search engines.',
+  [POST_TYPE_FIELD_SEO_DESCRIPTION]: 'A short description of this example post for search engines.',
   [POST_TYPE_FIELD_BODY]:
     '## Example heading\n\nLorem ipsum dolor sit amet, consectetur adipiscing elit. Pellentesque at porta est.',
 }
@@ -68,24 +67,39 @@ function previewTextLikeValue(field: TextLikeField, fallback: string): string {
  */
 function previewValueForField(field: DataField): unknown {
   switch (field.type) {
-    case 'text': return previewTextLikeValue(field, 'Lorem ipsum')
-    case 'longText': return previewTextLikeValue(field, 'Lorem ipsum dolor sit amet, consectetur adipiscing elit.')
-    case 'richText': return previewTextLikeValue(field, 'Lorem ipsum dolor sit amet, consectetur adipiscing elit.')
-    case 'number': return field.defaultValue ?? 42
-    case 'boolean': return field.defaultValue ?? false
-    case 'date': return new Date().toISOString().split('T')[0]
-    case 'dateTime': return new Date().toISOString()
-    case 'select': return field.defaultValue ?? field.options[0]?.value ?? null
-    case 'multiSelect': return field.options.length > 0 ? [field.options[0]!.value] : []
-    case 'url': return 'https://example.com'
-    case 'email': return 'hello@example.com'
+    case 'text':
+      return previewTextLikeValue(field, 'Lorem ipsum')
+    case 'longText':
+      return previewTextLikeValue(field, 'Lorem ipsum dolor sit amet, consectetur adipiscing elit.')
+    case 'richText':
+      return previewTextLikeValue(field, 'Lorem ipsum dolor sit amet, consectetur adipiscing elit.')
+    case 'number':
+      return field.defaultValue ?? 42
+    case 'boolean':
+      return field.defaultValue ?? false
+    case 'date':
+      return new Date().toISOString().split('T')[0]
+    case 'dateTime':
+      return new Date().toISOString()
+    case 'select':
+      return field.defaultValue ?? field.options[0]?.value ?? null
+    case 'multiSelect':
+      return field.options.length > 0 ? [field.options[0]!.value] : []
+    case 'url':
+      return 'https://example.com'
+    case 'email':
+      return 'hello@example.com'
     // No synthetic media URL — modules that render a media field must handle null gracefully.
-    case 'media': return null
-    case 'relation': return null
+    case 'media':
+      return null
+    case 'relation':
+      return null
     // Structural types: pageTree and fieldSchema hold whole documents, not scalar values.
     // Preview data generation has no meaningful value to produce for them.
-    case 'pageTree': return null
-    case 'fieldSchema': return []
+    case 'pageTree':
+      return null
+    case 'fieldSchema':
+      return []
     default: {
       // Exhaustive check: TypeScript will error here if a new field type
       // is added to the discriminated union without a case above.
@@ -121,9 +135,10 @@ export function buildPreviewCells(table: DataTable): DataRowCells {
 export function dataTablePreviewToLoopItem(table: DataTable): LoopItem {
   const cells = buildPreviewCells(table)
   const tableRouteBase = normalizeRouteBase(table.routeBase || `/${table.slug}`)
-  const slugValue = typeof cells[POST_TYPE_FIELD_SLUG] === 'string' && cells[POST_TYPE_FIELD_SLUG]
-    ? cells[POST_TYPE_FIELD_SLUG] as string
-    : 'preview-row'
+  const slugValue =
+    typeof cells[POST_TYPE_FIELD_SLUG] === 'string' && cells[POST_TYPE_FIELD_SLUG]
+      ? (cells[POST_TYPE_FIELD_SLUG] as string)
+      : 'preview-row'
   const permalink = `${tableRouteBase === '/' ? '' : tableRouteBase}/${slugValue}`
 
   // Determine featured media field: post-type tables have a known field id;
@@ -131,7 +146,7 @@ export function dataTablePreviewToLoopItem(table: DataTable): LoopItem {
   const hasFeaturedMediaField = table.fields.some((f) => f.id === POST_TYPE_FIELD_FEATURED_MEDIA)
   const featuredMediaField = hasFeaturedMediaField
     ? POST_TYPE_FIELD_FEATURED_MEDIA
-    : table.fields.find((f) => f.type === 'media')?.id ?? null
+    : (table.fields.find((f) => f.type === 'media')?.id ?? null)
 
   return {
     id: '__preview__',
@@ -153,7 +168,7 @@ export function dataTablePreviewToLoopItem(table: DataTable): LoopItem {
       publishedByRoleSlug: null,
       publishedByRoleName: null,
       // Media aliases — no resolved path in preview
-      featuredMediaId: featuredMediaField ? cells[featuredMediaField] ?? null : null,
+      featuredMediaId: featuredMediaField ? (cells[featuredMediaField] ?? null) : null,
       featuredMedia: null,
       featuredMediaPath: null,
       featuredMediaUrl: null,

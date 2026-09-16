@@ -79,7 +79,8 @@ export function StepUpDialog({
     })
   }
 
-  const confirmDisabled = submitting || password.length === 0 || (mfaRequired && mfaCode.trim().length === 0)
+  const confirmDisabled =
+    submitting || password.length === 0 || (mfaRequired && mfaCode.trim().length === 0)
 
   return (
     <div
@@ -97,17 +98,20 @@ export function StepUpDialog({
         className={styles.dialog}
         data-testid="step-up-dialog"
       >
-        <h2 id={titleId} className={styles.title}>Confirm your password</h2>
+        <h2 id={titleId} className={styles.title}>
+          Confirm your password
+        </h2>
         <p className={styles.body}>
-          {reason ?? (
-            mfaRequired
+          {reason ??
+            (mfaRequired
               ? 'This action requires your password and a current authentication code.'
-              : 'This action requires a recent password re-entry. You\'ll stay signed in here.'
-          )}
+              : "This action requires a recent password re-entry. You'll stay signed in here.")}
         </p>
         <form className={styles.form} onSubmit={handleSubmit}>
           <div className={styles.field}>
-            <label htmlFor={passwordId} className={styles.label}>Password</label>
+            <label htmlFor={passwordId} className={styles.label}>
+              Password
+            </label>
             <Input
               id={passwordId}
               type="password"
@@ -122,7 +126,9 @@ export function StepUpDialog({
           </div>
           {mfaRequired && (
             <div className={styles.field}>
-              <label htmlFor={mfaCodeId} className={styles.label}>Authentication or recovery code</label>
+              <label htmlFor={mfaCodeId} className={styles.label}>
+                Authentication or recovery code
+              </label>
               <Input
                 id={mfaCodeId}
                 type="text"
@@ -134,7 +140,11 @@ export function StepUpDialog({
               />
             </div>
           )}
-          {error && <p className={styles.error} role="alert">{error}</p>}
+          {error && (
+            <p className={styles.error} role="alert">
+              {error}
+            </p>
+          )}
           <div className={styles.actions}>
             <Button
               ref={cancelRef}

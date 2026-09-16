@@ -70,10 +70,7 @@ describe('CodeMirrorEditor theme', () => {
   })
 
   it('defines the GitHub Dark syntax palette as editor design tokens', () => {
-    const globals = readFileSync(
-      new URL('../../styles/globals.css', import.meta.url),
-      'utf8',
-    )
+    const globals = readFileSync(new URL('../../styles/globals.css', import.meta.url), 'utf8')
 
     expect(globals).toContain('--syntax-keyword: #ff7b72;')
     expect(globals).toContain('--syntax-entity: #d2a8ff;')

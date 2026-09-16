@@ -71,8 +71,7 @@ export const ALLOWED_NATIVE_TITLES: Array<{
   },
   {
     file: 'admin/pages/site/panels/PropertiesPanel/ComponentRefView.tsx',
-    reason:
-      'Truncated parameter name label (<span title={param.name}>) — non-interactive display.',
+    reason: 'Truncated parameter name label (<span title={param.name}>) — non-interactive display.',
   },
   {
     file: 'admin/pages/site/panels/PropertiesPanel/PropertiesPanel.tsx',

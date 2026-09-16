@@ -1,9 +1,6 @@
 import { describe, expect, it } from 'bun:test'
 import { Value } from '@core/utils/typeboxHelpers'
-import {
-  PropertyControlSchema,
-  PropertySchemaSchema,
-} from '@core/module-engine'
+import { PropertyControlSchema, PropertySchemaSchema } from '@core/module-engine'
 
 describe('module-engine property schema', () => {
   it('accepts every host property control type, including nested groups', () => {
@@ -37,15 +34,19 @@ describe('module-engine property schema', () => {
   })
 
   it('rejects unknown controls and extra keys at the boundary', () => {
-    expect(Value.Check(PropertyControlSchema, {
-      type: 'text',
-      label: 'Title',
-      unsafe: true,
-    })).toBe(false)
+    expect(
+      Value.Check(PropertyControlSchema, {
+        type: 'text',
+        label: 'Title',
+        unsafe: true,
+      }),
+    ).toBe(false)
 
-    expect(Value.Check(PropertyControlSchema, {
-      type: 'slider',
-      label: 'Range',
-    })).toBe(false)
+    expect(
+      Value.Check(PropertyControlSchema, {
+        type: 'slider',
+        label: 'Range',
+      }),
+    ).toBe(false)
   })
 })

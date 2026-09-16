@@ -46,6 +46,7 @@ export function resolveAvatarUrl(
   options: GravatarOptions,
 ): string | null {
   if (user.avatarUrl && user.avatarUrl.length > 0) return user.avatarUrl
-  if (user.gravatarHash && user.gravatarHash.length > 0) return gravatarUrl(user.gravatarHash, options)
+  if (user.gravatarHash && user.gravatarHash.length > 0)
+    return gravatarUrl(user.gravatarHash, options)
   return null
 }

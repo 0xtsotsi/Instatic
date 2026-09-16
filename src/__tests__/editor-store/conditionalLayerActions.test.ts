@@ -53,8 +53,12 @@ describe('addClassCondition', () => {
   it('reuses the existing condition id for an identical condition', () => {
     freshStore()
     const id = classId()
-    const a = useEditorStore.getState().addClassCondition(id, { kind: 'media', query: '(min-width: 1px)' })
-    const b = useEditorStore.getState().addClassCondition(id, { kind: 'media', query: '(min-width: 1px)' })
+    const a = useEditorStore
+      .getState()
+      .addClassCondition(id, { kind: 'media', query: '(min-width: 1px)' })
+    const b = useEditorStore
+      .getState()
+      .addClassCondition(id, { kind: 'media', query: '(min-width: 1px)' })
     expect(a).toBe(b)
     expect(useEditorStore.getState().site!.conditions).toHaveLength(1)
   })
@@ -62,8 +66,12 @@ describe('addClassCondition', () => {
   it('container conditions distinguish by name', () => {
     freshStore()
     const id = classId()
-    useEditorStore.getState().addClassCondition(id, { kind: 'container', query: '(min-width: 400px)', name: 'a' })
-    useEditorStore.getState().addClassCondition(id, { kind: 'container', query: '(min-width: 400px)', name: 'b' })
+    useEditorStore
+      .getState()
+      .addClassCondition(id, { kind: 'container', query: '(min-width: 400px)', name: 'a' })
+    useEditorStore
+      .getState()
+      .addClassCondition(id, { kind: 'container', query: '(min-width: 400px)', name: 'b' })
     expect(useEditorStore.getState().site!.conditions).toHaveLength(2)
   })
 })
@@ -72,7 +80,9 @@ describe('setClassContextStyles', () => {
   it('merges a style patch into the context bag', () => {
     freshStore()
     const id = classId()
-    const cid = useEditorStore.getState().addClassCondition(id, { kind: 'media', query: '(max-width: 860px)' })!
+    const cid = useEditorStore
+      .getState()
+      .addClassCondition(id, { kind: 'media', query: '(max-width: 860px)' })!
     useEditorStore.getState().setClassContextStyles(id, cid, { color: 'red' })
     useEditorStore.getState().setClassContextStyles(id, cid, { fontSize: '14px' })
     expect(useEditorStore.getState().site!.styleRules[id].contextStyles[cid]).toMatchObject({
@@ -84,10 +94,14 @@ describe('setClassContextStyles', () => {
   it('an undefined value deletes the property from the context bag', () => {
     freshStore()
     const id = classId()
-    const cid = useEditorStore.getState().addClassCondition(id, { kind: 'media', query: '(max-width: 860px)' })!
+    const cid = useEditorStore
+      .getState()
+      .addClassCondition(id, { kind: 'media', query: '(max-width: 860px)' })!
     useEditorStore.getState().setClassContextStyles(id, cid, { color: 'red' })
     useEditorStore.getState().setClassContextStyles(id, cid, { color: undefined })
-    expect(useEditorStore.getState().site!.styleRules[id].contextStyles[cid]).not.toHaveProperty('color')
+    expect(useEditorStore.getState().site!.styleRules[id].contextStyles[cid]).not.toHaveProperty(
+      'color',
+    )
   })
 })
 
@@ -95,7 +109,9 @@ describe('removeClassContext', () => {
   it('removes the override bag for that context', () => {
     freshStore()
     const id = classId()
-    const cid = useEditorStore.getState().addClassCondition(id, { kind: 'media', query: '(max-width: 860px)' })!
+    const cid = useEditorStore
+      .getState()
+      .addClassCondition(id, { kind: 'media', query: '(max-width: 860px)' })!
     useEditorStore.getState().removeClassContext(id, cid)
     expect(useEditorStore.getState().site!.styleRules[id].contextStyles).not.toHaveProperty(cid)
   })
@@ -105,7 +121,9 @@ describe('removeCondition', () => {
   it('drops the registry entry and clears it from every class', () => {
     freshStore()
     const id = classId()
-    const cid = useEditorStore.getState().addClassCondition(id, { kind: 'media', query: '(max-width: 600px)' })!
+    const cid = useEditorStore
+      .getState()
+      .addClassCondition(id, { kind: 'media', query: '(max-width: 600px)' })!
     useEditorStore.getState().setClassContextStyles(id, cid, { color: 'red' })
     useEditorStore.getState().removeCondition(cid)
     const site = useEditorStore.getState().site!
@@ -118,7 +136,9 @@ describe('duplicateClass preserves context overrides', () => {
   it('deep-clones context bags (no shared references)', () => {
     freshStore()
     const id = classId()
-    const cid = useEditorStore.getState().addClassCondition(id, { kind: 'media', query: '(max-width: 600px)' })!
+    const cid = useEditorStore
+      .getState()
+      .addClassCondition(id, { kind: 'media', query: '(max-width: 600px)' })!
     useEditorStore.getState().setClassContextStyles(id, cid, { color: 'red' })
 
     const copy = useEditorStore.getState().duplicateClass(id)!
@@ -127,7 +147,9 @@ describe('duplicateClass preserves context overrides', () => {
 
     // Mutating the copy must not touch the source (no shared reference).
     useEditorStore.getState().setClassContextStyles(copy.id, cid, { color: 'green' })
-    expect(useEditorStore.getState().site!.styleRules[id].contextStyles[cid]).toMatchObject({ color: 'red' })
+    expect(useEditorStore.getState().site!.styleRules[id].contextStyles[cid]).toMatchObject({
+      color: 'red',
+    })
   })
 })
 
@@ -136,7 +158,9 @@ describe('removeClassStyleProperty clears context overrides too', () => {
     freshStore()
     const id = classId()
     useEditorStore.getState().updateClassStyles(id, { display: 'flex' })
-    const cid = useEditorStore.getState().addClassCondition(id, { kind: 'media', query: '(max-width: 600px)' })!
+    const cid = useEditorStore
+      .getState()
+      .addClassCondition(id, { kind: 'media', query: '(max-width: 600px)' })!
     useEditorStore.getState().setClassContextStyles(id, cid, { display: 'grid' })
 
     useEditorStore.getState().removeClassStyleProperty(id, 'display')

@@ -17,10 +17,7 @@ import { watch } from 'node:fs'
 import { cp, mkdir, readdir, rm, stat } from 'node:fs/promises'
 import { basename, join, relative, resolve } from 'node:path'
 import { buildPlugin } from './build'
-import {
-  resolvePluginDevConfig,
-  type PluginDevTargets,
-} from './config'
+import { resolvePluginDevConfig, type PluginDevTargets } from './config'
 
 export interface PluginDevOptions {
   pluginDir: string

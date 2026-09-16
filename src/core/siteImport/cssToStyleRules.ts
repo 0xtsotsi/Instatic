@@ -49,13 +49,7 @@ import {
   sparsePriorities,
 } from './declarationCascade'
 import { parseStyleDeclarations } from './cssDeclarationReader'
-import type {
-  ImportWarning,
-  BreakpointHint,
-  AssetRef,
-  NewStyleRule,
-  ParsedFontFace,
-} from './types'
+import type { ImportWarning, BreakpointHint, AssetRef, NewStyleRule, ParsedFontFace } from './types'
 
 // ---------------------------------------------------------------------------
 // Public interface
@@ -102,15 +96,15 @@ interface CssToStyleRulesResult {
 // live on window, not globalThis).
 // ---------------------------------------------------------------------------
 
-const STYLE_RULE_TYPE = 1   // CSSStyleRule
-const IMPORT_RULE_TYPE = 3  // CSSImportRule
-const MEDIA_RULE_TYPE = 4   // CSSMediaRule
-const FONT_FACE_RULE_TYPE = 5  // CSSFontFaceRule
-const PAGE_RULE_TYPE = 6    // CSSPageRule
-const KEYFRAMES_RULE_TYPE = 7  // CSSKeyframesRule
-const KEYFRAME_RULE_TYPE = 8   // CSSKeyframeRule
+const STYLE_RULE_TYPE = 1 // CSSStyleRule
+const IMPORT_RULE_TYPE = 3 // CSSImportRule
+const MEDIA_RULE_TYPE = 4 // CSSMediaRule
+const FONT_FACE_RULE_TYPE = 5 // CSSFontFaceRule
+const PAGE_RULE_TYPE = 6 // CSSPageRule
+const KEYFRAMES_RULE_TYPE = 7 // CSSKeyframesRule
+const KEYFRAME_RULE_TYPE = 8 // CSSKeyframeRule
 const NAMESPACE_RULE_TYPE = 10 // CSSNamespaceRule
-const SUPPORTS_RULE_TYPE = 12  // CSSSupportsRule
+const SUPPORTS_RULE_TYPE = 12 // CSSSupportsRule
 
 // ---------------------------------------------------------------------------
 // Internal helpers
@@ -150,10 +144,7 @@ function classifySelector(selector: string): { kind: StyleRuleKind; name: string
 function getSheetConstructor(): typeof CSSStyleSheet | null {
   if (typeof CSSStyleSheet !== 'undefined') return CSSStyleSheet
   // happy-dom test env: available on globalThis.window
-  const w =
-    typeof window !== 'undefined'
-      ? (window as unknown as Record<string, unknown>)
-      : null
+  const w = typeof window !== 'undefined' ? (window as unknown as Record<string, unknown>) : null
   if (w?.CSSStyleSheet) return w.CSSStyleSheet as typeof CSSStyleSheet
   return null
 }
@@ -204,14 +195,22 @@ function collectAssetRefsFromDecls(
  */
 function atRuleName(type: number): string {
   switch (type) {
-    case IMPORT_RULE_TYPE:   return '@import'
-    case FONT_FACE_RULE_TYPE: return '@font-face'
-    case PAGE_RULE_TYPE:     return '@page'
-    case KEYFRAMES_RULE_TYPE: return '@keyframes'
-    case KEYFRAME_RULE_TYPE:  return '@keyframe'
-    case NAMESPACE_RULE_TYPE: return '@namespace'
-    case SUPPORTS_RULE_TYPE: return '@supports'
-    default:                 return `CSS at-rule (type ${type})`
+    case IMPORT_RULE_TYPE:
+      return '@import'
+    case FONT_FACE_RULE_TYPE:
+      return '@font-face'
+    case PAGE_RULE_TYPE:
+      return '@page'
+    case KEYFRAMES_RULE_TYPE:
+      return '@keyframes'
+    case KEYFRAME_RULE_TYPE:
+      return '@keyframe'
+    case NAMESPACE_RULE_TYPE:
+      return '@namespace'
+    case SUPPORTS_RULE_TYPE:
+      return '@supports'
+    default:
+      return `CSS at-rule (type ${type})`
   }
 }
 
@@ -399,7 +398,11 @@ function processTopLevelRule(
       // addition; browsers report 0). Detect it structurally: a grouping rule
       // whose cssText starts with `@container`. Route it to a conditional
       // layer keyed on the verbatim query (+ optional container name).
-      const groupingRule = rule as Partial<CSSGroupingRule> & { cssText?: string; containerName?: string; containerQuery?: string }
+      const groupingRule = rule as Partial<CSSGroupingRule> & {
+        cssText?: string
+        containerName?: string
+        containerQuery?: string
+      }
       const cssText = groupingRule.cssText ?? ''
       // A grouping rule (it exposes `cssRules`) whose cssText starts with
       // `@container`. cssRules is a CSSRuleList, not an Array, so test for its
@@ -585,8 +588,8 @@ function processMediaRule(
   // conditionText is on CSSConditionRule (parent of CSSMediaRule) per CSSOM spec.
   // Fallback to mediaText for environments that don't expose conditionText.
   const conditionText =
-    (mediaRule as CSSMediaRule & { conditionText?: string }).conditionText
-    ?? mediaRule.media.mediaText
+    (mediaRule as CSSMediaRule & { conditionText?: string }).conditionText ??
+    mediaRule.media.mediaText
 
   const matched = matchMediaQueryToViewport(conditionText, breakpoints, mediaTolerance)
 
@@ -629,9 +632,7 @@ function processMediaRule(
  *   - any custom condition → `contextStyles[conditionId(condition)]`, and the
  *     condition is registered in `conditionsById` (the reusable registry).
  */
-type ConditionTarget =
-  | { kind: 'breakpoint'; breakpointId: string }
-  | Condition
+type ConditionTarget = { kind: 'breakpoint'; breakpointId: string } | Condition
 
 /** Resolve the `contextStyles` key for a target. */
 function targetContextId(target: ConditionTarget): string {

@@ -22,15 +22,75 @@ import type { FileMap } from '@core/siteImport'
 // A valid 1×1 transparent PNG as a base-64-like Uint8Array literal.
 // This is the smallest legal PNG that browsers and image decoders accept.
 export const MINIMAL_PNG: Uint8Array = new Uint8Array([
-  0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, // PNG signature
-  0x00, 0x00, 0x00, 0x0d, 0x49, 0x48, 0x44, 0x52, // IHDR chunk length + type
-  0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x01, // width=1, height=1
-  0x08, 0x02, 0x00, 0x00, 0x00, 0x90, 0x77, 0x53, // bit depth=8, color=RGB, CRC
-  0xde, 0x00, 0x00, 0x00, 0x0c, 0x49, 0x44, 0x41, // IDAT chunk
-  0x54, 0x08, 0xd7, 0x63, 0xf8, 0xcf, 0xc0, 0x00, // compressed scanline
-  0x00, 0x00, 0x02, 0x00, 0x01, 0xe2, 0x21, 0xbc, // CRC
-  0x33, 0x00, 0x00, 0x00, 0x00, 0x49, 0x45, 0x4e, // IEND chunk
-  0x44, 0xae, 0x42, 0x60, 0x82,                   // IEND CRC
+  0x89,
+  0x50,
+  0x4e,
+  0x47,
+  0x0d,
+  0x0a,
+  0x1a,
+  0x0a, // PNG signature
+  0x00,
+  0x00,
+  0x00,
+  0x0d,
+  0x49,
+  0x48,
+  0x44,
+  0x52, // IHDR chunk length + type
+  0x00,
+  0x00,
+  0x00,
+  0x01,
+  0x00,
+  0x00,
+  0x00,
+  0x01, // width=1, height=1
+  0x08,
+  0x02,
+  0x00,
+  0x00,
+  0x00,
+  0x90,
+  0x77,
+  0x53, // bit depth=8, color=RGB, CRC
+  0xde,
+  0x00,
+  0x00,
+  0x00,
+  0x0c,
+  0x49,
+  0x44,
+  0x41, // IDAT chunk
+  0x54,
+  0x08,
+  0xd7,
+  0x63,
+  0xf8,
+  0xcf,
+  0xc0,
+  0x00, // compressed scanline
+  0x00,
+  0x00,
+  0x02,
+  0x00,
+  0x01,
+  0xe2,
+  0x21,
+  0xbc, // CRC
+  0x33,
+  0x00,
+  0x00,
+  0x00,
+  0x00,
+  0x49,
+  0x45,
+  0x4e, // IEND chunk
+  0x44,
+  0xae,
+  0x42,
+  0x60,
+  0x82, // IEND CRC
 ])
 
 // ---------------------------------------------------------------------------
@@ -39,7 +99,9 @@ export const MINIMAL_PNG: Uint8Array = new Uint8Array([
 
 const enc = new TextEncoder()
 
-function txt(s: string): Uint8Array { return enc.encode(s) }
+function txt(s: string): Uint8Array {
+  return enc.encode(s)
+}
 
 // ---------------------------------------------------------------------------
 // Sample HTML pages
@@ -137,16 +199,25 @@ const THEME_CSS = `.btn-primary {
 export function makeSampleFileMap(): FileMap {
   return {
     files: {
-      'index.html':        { bytes: txt(INDEX_HTML),   mimeType: 'text/html' },
-      'about.html':        { bytes: txt(ABOUT_HTML),   mimeType: 'text/html' },
-      'contact.html':      { bytes: txt(CONTACT_HTML), mimeType: 'text/html' },
-      'styles/main.css':   { bytes: txt(MAIN_CSS),     mimeType: 'text/css' },
-      'styles/theme.css':  { bytes: txt(THEME_CSS),    mimeType: 'text/css' },
-      'images/hero.png':   { bytes: MINIMAL_PNG,       mimeType: 'image/png' },
-      'images/logo.png':   { bytes: MINIMAL_PNG,       mimeType: 'image/png' },
-      'scripts/vendor.js': { bytes: txt('window.vendorReady = true'), mimeType: 'application/javascript' },
-      'scripts/app.js':    { bytes: txt('import "./vendor.js"; console.log("hello")'), mimeType: 'application/javascript' },
-      'scripts/unused.js': { bytes: txt('console.log("unused")'), mimeType: 'application/javascript' },
+      'index.html': { bytes: txt(INDEX_HTML), mimeType: 'text/html' },
+      'about.html': { bytes: txt(ABOUT_HTML), mimeType: 'text/html' },
+      'contact.html': { bytes: txt(CONTACT_HTML), mimeType: 'text/html' },
+      'styles/main.css': { bytes: txt(MAIN_CSS), mimeType: 'text/css' },
+      'styles/theme.css': { bytes: txt(THEME_CSS), mimeType: 'text/css' },
+      'images/hero.png': { bytes: MINIMAL_PNG, mimeType: 'image/png' },
+      'images/logo.png': { bytes: MINIMAL_PNG, mimeType: 'image/png' },
+      'scripts/vendor.js': {
+        bytes: txt('window.vendorReady = true'),
+        mimeType: 'application/javascript',
+      },
+      'scripts/app.js': {
+        bytes: txt('import "./vendor.js"; console.log("hello")'),
+        mimeType: 'application/javascript',
+      },
+      'scripts/unused.js': {
+        bytes: txt('console.log("unused")'),
+        mimeType: 'application/javascript',
+      },
       // Hidden file — should be filtered out during ingest (not normally in a FileMap,
       // but included here to test any code that receives raw FileMaps)
     },

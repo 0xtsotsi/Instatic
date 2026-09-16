@@ -7,7 +7,12 @@ import { validateVisualComponents } from '@core/persistence/validate'
  * children synced — a slot added to the inner VC left the nested ref with no
  * fill location. The load-time reconciler must heal VC trees too.
  */
-const node = (id: string, moduleId: string, children: string[] = [], props: Record<string, unknown> = {}) => ({
+const node = (
+  id: string,
+  moduleId: string,
+  children: string[] = [],
+  props: Record<string, unknown> = {},
+) => ({
   id,
   moduleId,
   props,

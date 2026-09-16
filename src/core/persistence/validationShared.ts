@@ -16,7 +16,10 @@ export class SiteValidationError extends Error {
   }
 }
 
-export function siteValidationErrorFromTreeInvariant(err: unknown, fallbackPath: string): SiteValidationError {
+export function siteValidationErrorFromTreeInvariant(
+  err: unknown,
+  fallbackPath: string,
+): SiteValidationError {
   const message = err instanceof Error ? err.message : 'invalid node tree'
   const colonIndex = message.indexOf(': ')
   const path = colonIndex > 0 ? message.slice(0, colonIndex) : fallbackPath

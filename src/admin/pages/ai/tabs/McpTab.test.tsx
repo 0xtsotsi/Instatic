@@ -5,8 +5,14 @@ mock.module('../../../ai/api', () => ({
   listMcpConnectors: async () => [],
   createMcpConnector: async () => ({
     connector: {
-      id: 'c1', label: 'L', type: 'local', authMode: 'bearer',
-      capabilities: ['ai.chat'], createdAt: '', lastUsedAt: null, revoked: false,
+      id: 'c1',
+      label: 'L',
+      type: 'local',
+      authMode: 'bearer',
+      capabilities: ['ai.chat'],
+      createdAt: '',
+      lastUsedAt: null,
+      revoked: false,
       expiresAt: null,
     },
     token: 'imcp_test',

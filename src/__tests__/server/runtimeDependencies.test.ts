@@ -10,30 +10,32 @@ import {
 import type { SiteDependencyLock } from '@core/site-runtime'
 
 function registryResponse(name: string) {
-  return new Response(JSON.stringify({
-    name,
-    'dist-tags': { latest: '2.0.0' },
-    versions: {
-      '1.8.0': {
-        dist: {
-          tarball: `https://registry.example/${name}/-/pkg-1.8.0.tgz`,
-          integrity: 'sha512-1',
+  return new Response(
+    JSON.stringify({
+      name,
+      'dist-tags': { latest: '2.0.0' },
+      versions: {
+        '1.8.0': {
+          dist: {
+            tarball: `https://registry.example/${name}/-/pkg-1.8.0.tgz`,
+            integrity: 'sha512-1',
+          },
+        },
+        '1.9.3': {
+          dist: {
+            tarball: `https://registry.example/${name}/-/pkg-1.9.3.tgz`,
+            integrity: 'sha512-2',
+          },
+        },
+        '2.0.0': {
+          dist: {
+            tarball: `https://registry.example/${name}/-/pkg-2.0.0.tgz`,
+            integrity: 'sha512-3',
+          },
         },
       },
-      '1.9.3': {
-        dist: {
-          tarball: `https://registry.example/${name}/-/pkg-1.9.3.tgz`,
-          integrity: 'sha512-2',
-        },
-      },
-      '2.0.0': {
-        dist: {
-          tarball: `https://registry.example/${name}/-/pkg-2.0.0.tgz`,
-          integrity: 'sha512-3',
-        },
-      },
-    },
-  }))
+    }),
+  )
 }
 
 describe('runtime dependency resolution', () => {
@@ -120,7 +122,9 @@ describe('runtime dependency resolution', () => {
           await writeFile(join(options.cwd, 'bun.lock'), '', 'utf8')
         },
       })
-      const generatedPackage = JSON.parse(await readFile(join(cache.workspaceDir, 'package.json'), 'utf8')) as {
+      const generatedPackage = JSON.parse(
+        await readFile(join(cache.workspaceDir, 'package.json'), 'utf8'),
+      ) as {
         dependencies: Record<string, string>
       }
 
@@ -197,12 +201,14 @@ describe('runtime dependency resolution', () => {
       // hash slot but is missing the sentinel and only has a partial
       // node_modules tree. ensureRuntimeDependencyCache must NOT trust the
       // bare directory and must re-install.
-      const hash = (await ensureRuntimeDependencyCache(lock, {
-        cacheRoot,
-        runInstall: async (_command, options) => {
-          await mkdir(join(options.cwd, 'node_modules'), { recursive: true })
-        },
-      })).hash
+      const hash = (
+        await ensureRuntimeDependencyCache(lock, {
+          cacheRoot,
+          runInstall: async (_command, options) => {
+            await mkdir(join(options.cwd, 'node_modules'), { recursive: true })
+          },
+        })
+      ).hash
       const workspaceDir = join(cacheRoot, 'deps', hash)
       await rm(join(workspaceDir, '.instatic-install-complete'), { force: true })
       await rm(join(workspaceDir, 'node_modules'), { recursive: true, force: true })
@@ -214,7 +220,11 @@ describe('runtime dependency resolution', () => {
         runInstall: async (_command, options) => {
           installCount += 1
           await mkdir(join(options.cwd, 'node_modules', 'canvas-confetti'), { recursive: true })
-          await writeFile(join(options.cwd, 'node_modules', 'canvas-confetti', 'package.json'), '{}', 'utf8')
+          await writeFile(
+            join(options.cwd, 'node_modules', 'canvas-confetti', 'package.json'),
+            '{}',
+            'utf8',
+          )
         },
       })
 
@@ -226,7 +236,10 @@ describe('runtime dependency resolution', () => {
         JSON.parse(await readFile(join(workspaceDir, '.instatic-install-complete'), 'utf8')),
       ).toMatchObject({ hash })
       expect(
-        await readFile(join(workspaceDir, 'node_modules', 'canvas-confetti', 'package.json'), 'utf8'),
+        await readFile(
+          join(workspaceDir, 'node_modules', 'canvas-confetti', 'package.json'),
+          'utf8',
+        ),
       ).toBe('{}')
     } finally {
       await rm(cacheRoot, { recursive: true, force: true })

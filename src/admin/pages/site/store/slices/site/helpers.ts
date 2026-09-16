@@ -11,7 +11,12 @@
 import { nanoid } from 'nanoid'
 import type { StoreApi } from 'zustand'
 import type { NodeTree, PageNode, StyleRule, SiteDocument } from '@core/page-tree'
-import { addPage, createNode, reconcileSiteExplorerInPlace, reindexNodeParents } from '@core/page-tree'
+import {
+  addPage,
+  createNode,
+  reconcileSiteExplorerInPlace,
+  reindexNodeParents,
+} from '@core/page-tree'
 import type { VisualComponent } from '@core/visualComponents'
 import { syncAllVCRefSlotInstances, allTreeNodeMaps } from '../vcSlotReconcile'
 import { collectSlotOutletNames } from '@core/visualComponents'
@@ -19,14 +24,23 @@ import { create } from 'mutative'
 import type { Draft, Patches } from 'mutative'
 import type { ImportFragment } from '@core/htmlImport'
 import type { NewStyleRule } from '@core/siteImport'
-import { addImportedScriptDependencies, addImportedScripts, addImportedStylesheets } from './importedSiteFiles'
+import {
+  addImportedScriptDependencies,
+  addImportedScripts,
+  addImportedStylesheets,
+} from './importedSiteFiles'
 import { collectDirtyFromSitePatches, mergeDirtyMarks } from './dirtyTracking'
 import type { EditorStore } from '@site/store/types'
 import { MAX_HISTORY } from './defaults'
 import { reconcileFrameworkClasses } from './framework/reconcile'
 import { indexStyleRulesByName, linkImportedClassNames } from './importLinking'
 import { addImportedColorTokens, overwriteImportedColorTokens } from './importedColorTokens'
-import { addImportedFonts, addImportedFontTokens, addInstalledFontEntries, overwriteImportedFontTokens } from './importedFonts'
+import {
+  addImportedFonts,
+  addImportedFontTokens,
+  addInstalledFontEntries,
+  overwriteImportedFontTokens,
+} from './importedFonts'
 import type { HistoryEntry, SiteMutationResult, SiteSliceHelpers, SiteSliceRecipe } from './types'
 import type { SiteImportTransaction } from '@core/siteImport'
 
@@ -296,7 +310,10 @@ export function buildSiteHelpers(
         // The same patches drive save-dirty attribution: autosave ships only
         // the pages/VCs these paths name, plus explicit deleted-row ids
         // derived from the pre/post membership diff (see dirtyTracking.ts).
-        mergeDirtyMarks(state._dirtySave, collectDirtyFromSitePatches(siteForward, cur.site!, next.site!))
+        mergeDirtyMarks(
+          state._dirtySave,
+          collectDirtyFromSitePatches(siteForward, cur.site!, next.site!),
+        )
       }
       state.hasUnsavedChanges = true
     })
@@ -371,7 +388,9 @@ export function buildSiteHelpers(
     return runHistoricMutation((draft) => fn(draft.site!), opts?.coalesceKey ?? null)
   }
 
-  const mutateSiteWithExplorerReconcile: SiteSliceHelpers['mutateSiteWithExplorerReconcile'] = (fn) =>
+  const mutateSiteWithExplorerReconcile: SiteSliceHelpers['mutateSiteWithExplorerReconcile'] = (
+    fn,
+  ) =>
     mutateSite((site) => {
       const result = fn(site)
       if (!recipeDidMutate(result)) return false
@@ -437,7 +456,17 @@ export function buildSiteHelpers(
       const byName = indexStyleRulesByName(site.styleRules)
 
       const helpers: SiteImportTransaction = {
-        addPage({ id: pageId, title, slug, nodeFragment }: { id?: string; title: string; slug: string; nodeFragment: ImportFragment }): string {
+        addPage({
+          id: pageId,
+          title,
+          slug,
+          nodeFragment,
+        }: {
+          id?: string
+          title: string
+          slug: string
+          nodeFragment: ImportFragment
+        }): string {
           // addPage creates a fresh base.body root, normalises the slug, and
           // pushes the page onto site.pages. We then graft the fragment nodes
           // in as children of that root — same logical step as insertImportedNodes.
@@ -483,7 +512,14 @@ export function buildSiteHelpers(
           return id
         },
 
-        overwritePage(pageId: string, { title, slug, nodeFragment }: { title: string; slug: string; nodeFragment: ImportFragment }): void {
+        overwritePage(
+          pageId: string,
+          {
+            title,
+            slug,
+            nodeFragment,
+          }: { title: string; slug: string; nodeFragment: ImportFragment },
+        ): void {
           const page = site.pages.find((p) => p.id === pageId)
           if (!page) throw new Error('overwritePage: page not found')
 

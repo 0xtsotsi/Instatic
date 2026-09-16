@@ -34,7 +34,7 @@ describe('Gate PR-1 — invalid rename shows alert, blocks onParamRename', () =>
         value="#interface"
         onValueChange={() => {}}
         existingParams={[{ id: 'p-1', name: 'interfaceUrl' }]}
-      />
+      />,
     )
 
     expect(screen.getByText('Param name')).toBeDefined()
@@ -47,7 +47,9 @@ describe('Gate PR-1 — invalid rename shows alert, blocks onParamRename', () =>
   it('shows a role="alert" error and does not call onParamRename for a duplicate name', () => {
     const onParamRename = { fn: (_: string) => {} }
     let renameCalled = false
-    onParamRename.fn = () => { renameCalled = true }
+    onParamRename.fn = () => {
+      renameCalled = true
+    }
 
     render(
       <ParamRow
@@ -62,7 +64,7 @@ describe('Gate PR-1 — invalid rename shows alert, blocks onParamRename', () =>
           { id: 'p-1', name: 'title' },
           { id: 'p-2', name: 'subtitle' },
         ]}
-      />
+      />,
     )
 
     const input = screen.getByRole('textbox', { name: /parameter name/i })
@@ -91,9 +93,11 @@ describe('Gate PR-1 — invalid rename shows alert, blocks onParamRename', () =>
         paramId="p-1"
         value="Hello"
         onValueChange={() => {}}
-        onParamRename={(name) => { renamedTo = name }}
+        onParamRename={(name) => {
+          renamedTo = name
+        }}
         existingParams={[{ id: 'p-1', name: 'title' }]}
-      />
+      />,
     )
 
     const input = screen.getByRole('textbox', { name: /parameter name/i })
@@ -123,7 +127,7 @@ describe('Gate PR-2 — enum renders Select with options', () => {
         value="md"
         enumOptions={['sm', 'md', 'lg']}
         onValueChange={() => {}}
-      />
+      />,
     )
 
     // @ui/components/Select renders a custom dropdown — find by role combobox or listbox
@@ -148,7 +152,7 @@ describe('Gate PR-3 — slot paramType does not render a value control', () => {
         paramId="p-3"
         value={[]}
         onValueChange={() => {}}
-      />
+      />,
     )
 
     // No inputs, no select, no buttons (only UI might be param name)
@@ -183,9 +187,11 @@ describe('Gate PR-4 — advanced disclosure toggles required/description', () =>
         required={false}
         description=""
         onValueChange={() => {}}
-        onAdvancedChange={(patch) => { patches.push(patch) }}
+        onAdvancedChange={(patch) => {
+          patches.push(patch)
+        }}
         existingParams={[{ id: 'p-4', name: 'title' }]}
-      />
+      />,
     )
 
     // Advanced disclosure is closed by default — no required switch visible

@@ -29,21 +29,30 @@ function makeFakeDb() {
       if (!session) return { rows: [], rowCount: 0 }
       const admin = admins.find((a) => a.id === session.user_id)
       return {
-        rows: admin ? [{
-          ...admin,
-          email_normalized: admin.email,
-          display_name: 'Owner',
-          status: 'active',
-          role_id: 'owner',
-          last_login_at: null,
-          updated_at: admin.created_at,
-          deleted_at: null,
-          role_slug: 'owner',
-          role_name: 'Owner',
-          role_description: '',
-          role_is_system: true,
-          role_capabilities_json: ['plugins.read', 'plugins.configure', 'plugins.install', 'plugins.lifecycle'],
-        } as Row] : [],
+        rows: admin
+          ? [
+              {
+                ...admin,
+                email_normalized: admin.email,
+                display_name: 'Owner',
+                status: 'active',
+                role_id: 'owner',
+                last_login_at: null,
+                updated_at: admin.created_at,
+                deleted_at: null,
+                role_slug: 'owner',
+                role_name: 'Owner',
+                role_description: '',
+                role_is_system: true,
+                role_capabilities_json: [
+                  'plugins.read',
+                  'plugins.configure',
+                  'plugins.install',
+                  'plugins.lifecycle',
+                ],
+              } as Row,
+            ]
+          : [],
         rowCount: admin ? 1 : 0,
       }
     }
@@ -67,7 +76,10 @@ function makeFakeDb() {
       }
     }
     // getInstalledPlugin — values[0]=id (check with id = $1 to distinguish from list)
-    if (normalized.includes('select id, name, version, enabled') && normalized.includes('where id = $1')) {
+    if (
+      normalized.includes('select id, name, version, enabled') &&
+      normalized.includes('where id = $1')
+    ) {
       const plugin = plugins.find((candidate) => candidate.id === values[0])
       return { rows: plugin ? [plugin as Row] : [], rowCount: plugin ? 1 : 0 }
     }
@@ -105,8 +117,8 @@ function makeFakeDb() {
     // listPluginRecords now uses db.unsafe(); this branch handles any
     // remaining tagged-template callers that still produce this pattern.
     if (normalized.includes('select id, plugin_id, resource_id, data_json')) {
-      const rows = records.filter((record) =>
-        record.plugin_id === values[0] && record.resource_id === values[1]
+      const rows = records.filter(
+        (record) => record.plugin_id === values[0] && record.resource_id === values[1],
       )
       return { rows: rows as Row[], rowCount: rows.length }
     }
@@ -117,8 +129,10 @@ function makeFakeDb() {
     if (normalized.includes('insert into plugin_crash_events')) {
       return { rows: [], rowCount: 1 }
     }
-    if (normalized.includes('select id, plugin_id, occurred_at, reason, stack')
-        && normalized.includes('from plugin_crash_events')) {
+    if (
+      normalized.includes('select id, plugin_id, occurred_at, reason, stack') &&
+      normalized.includes('from plugin_crash_events')
+    ) {
       return { rows: [] as Row[], rowCount: 0 }
     }
     if (normalized.includes('delete from plugin_crash_events')) {
@@ -141,10 +155,11 @@ function makeFakeDb() {
     }
     // updatePluginRecord — values[0]=dataJson, values[1]=id, values[2]=pluginId, values[3]=resourceId
     if (normalized.includes('update plugin_records set data_json')) {
-      const row = records.find((record) =>
-        record.id === values[1] &&
-        record.plugin_id === values[2] &&
-        record.resource_id === values[3]
+      const row = records.find(
+        (record) =>
+          record.id === values[1] &&
+          record.plugin_id === values[2] &&
+          record.resource_id === values[3],
       )
       if (!row) return { rows: [], rowCount: 0 }
       row.data_json = values[0]
@@ -153,10 +168,11 @@ function makeFakeDb() {
     }
     // deletePluginRecord — values[0]=id, values[1]=pluginId, values[2]=resourceId
     if (normalized.includes('delete from plugin_records')) {
-      const index = records.findIndex((record) =>
-        record.id === values[0] &&
-        record.plugin_id === values[1] &&
-        record.resource_id === values[2]
+      const index = records.findIndex(
+        (record) =>
+          record.id === values[0] &&
+          record.plugin_id === values[1] &&
+          record.resource_id === values[2],
       )
       if (index === -1) return { rows: [], rowCount: 0 }
       records.splice(index, 1)
@@ -179,18 +195,20 @@ function makeFakeDb() {
       // COUNT query — params[0]=pluginId, params[1]=resourceId (matching the WHERE clause)
       const pluginId = params?.[0]
       const resourceId = params?.[1]
-      const count = records.filter((record) =>
-        record.plugin_id === pluginId && record.resource_id === resourceId
+      const count = records.filter(
+        (record) => record.plugin_id === pluginId && record.resource_id === resourceId,
       ).length
       return { rows: [{ total: count } as Row], rowCount: 1 }
     }
-    if (normalized.includes('select id, plugin_id, resource_id, data_json')
-        && normalized.includes('from plugin_records')) {
+    if (
+      normalized.includes('select id, plugin_id, resource_id, data_json') &&
+      normalized.includes('from plugin_records')
+    ) {
       // Data query — params[0]=pluginId, params[1]=resourceId (LIMIT/OFFSET are last two params)
       const pluginId = params?.[0]
       const resourceId = params?.[1]
-      const matched = records.filter((record) =>
-        record.plugin_id === pluginId && record.resource_id === resourceId
+      const matched = records.filter(
+        (record) => record.plugin_id === pluginId && record.resource_id === resourceId,
       )
       return { rows: matched as Row[], rowCount: matched.length }
     }
@@ -287,52 +305,70 @@ describe('CMS plugin resource handlers', () => {
     const db = makeFakeDb()
     const cookie = await createCookie(db)
 
-    const install = await handleCmsRequest(cmsRequest('http://localhost/admin/api/cms/plugins', {
-      method: 'POST',
-      headers: { cookie, 'content-type': 'application/json' },
-      body: JSON.stringify({ manifest: booksPlugin, grantedPermissions: booksPlugin.permissions }),
-    }), db)
-    expect(install.status).toBe(201)
-
-    const create = await handleCmsRequest(cmsRequest(
-      'http://localhost/admin/api/cms/plugins/acme.books/resources/books/records',
-      {
+    const install = await handleCmsRequest(
+      cmsRequest('http://localhost/admin/api/cms/plugins', {
         method: 'POST',
         headers: { cookie, 'content-type': 'application/json' },
-        body: JSON.stringify({ data: { title: 'Invisible Cities', author: 'Italo Calvino', ignored: 'drop' } }),
-      },
-    ), db)
+        body: JSON.stringify({
+          manifest: booksPlugin,
+          grantedPermissions: booksPlugin.permissions,
+        }),
+      }),
+      db,
+    )
+    expect(install.status).toBe(201)
+
+    const create = await handleCmsRequest(
+      cmsRequest('http://localhost/admin/api/cms/plugins/acme.books/resources/books/records', {
+        method: 'POST',
+        headers: { cookie, 'content-type': 'application/json' },
+        body: JSON.stringify({
+          data: { title: 'Invisible Cities', author: 'Italo Calvino', ignored: 'drop' },
+        }),
+      }),
+      db,
+    )
     expect(create.status).toBe(201)
-    const createdBody = await create.json() as { record: { id: string; data: Record<string, unknown> } }
+    const createdBody = (await create.json()) as {
+      record: { id: string; data: Record<string, unknown> }
+    }
     expect(createdBody.record.data).toEqual({ title: 'Invisible Cities', author: 'Italo Calvino' })
 
-    const list = await handleCmsRequest(cmsRequest(
-      'http://localhost/admin/api/cms/plugins/acme.books/resources/books/records',
-      { headers: { cookie } },
-    ), db)
+    const list = await handleCmsRequest(
+      cmsRequest('http://localhost/admin/api/cms/plugins/acme.books/resources/books/records', {
+        headers: { cookie },
+      }),
+      db,
+    )
     expect(list.status).toBe(200)
     expect(await list.json()).toMatchObject({
       resource: { id: 'books', title: 'Books' },
       records: [{ data: { title: 'Invisible Cities' } }],
     })
 
-    const update = await handleCmsRequest(cmsRequest(
-      `http://localhost/admin/api/cms/plugins/acme.books/resources/books/records/${createdBody.record.id}`,
-      {
-        method: 'PATCH',
-        headers: { cookie, 'content-type': 'application/json' },
-        body: JSON.stringify({ data: { title: 'The Left Hand of Darkness' } }),
-      },
-    ), db)
+    const update = await handleCmsRequest(
+      cmsRequest(
+        `http://localhost/admin/api/cms/plugins/acme.books/resources/books/records/${createdBody.record.id}`,
+        {
+          method: 'PATCH',
+          headers: { cookie, 'content-type': 'application/json' },
+          body: JSON.stringify({ data: { title: 'The Left Hand of Darkness' } }),
+        },
+      ),
+      db,
+    )
     expect(update.status).toBe(200)
     expect(await update.json()).toMatchObject({
       record: { data: { title: 'The Left Hand of Darkness' } },
     })
 
-    const remove = await handleCmsRequest(cmsRequest(
-      `http://localhost/admin/api/cms/plugins/acme.books/resources/books/records/${createdBody.record.id}`,
-      { method: 'DELETE', headers: { cookie } },
-    ), db)
+    const remove = await handleCmsRequest(
+      cmsRequest(
+        `http://localhost/admin/api/cms/plugins/acme.books/resources/books/records/${createdBody.record.id}`,
+        { method: 'DELETE', headers: { cookie } },
+      ),
+      db,
+    )
     expect(remove.status).toBe(200)
     expect(await remove.json()).toEqual({ ok: true })
     expect(db.records).toHaveLength(0)
@@ -342,20 +378,26 @@ describe('CMS plugin resource handlers', () => {
     const db = makeFakeDb()
     const cookie = await createCookie(db)
 
-    await handleCmsRequest(cmsRequest('http://localhost/admin/api/cms/plugins', {
-      method: 'POST',
-      headers: { cookie, 'content-type': 'application/json' },
-      body: JSON.stringify({ manifest: booksPlugin, grantedPermissions: booksPlugin.permissions }),
-    }), db)
+    await handleCmsRequest(
+      cmsRequest('http://localhost/admin/api/cms/plugins', {
+        method: 'POST',
+        headers: { cookie, 'content-type': 'application/json' },
+        body: JSON.stringify({
+          manifest: booksPlugin,
+          grantedPermissions: booksPlugin.permissions,
+        }),
+      }),
+      db,
+    )
 
-    const res = await handleCmsRequest(cmsRequest(
-      'http://localhost/admin/api/cms/plugins/acme.books/resources/books/records',
-      {
+    const res = await handleCmsRequest(
+      cmsRequest('http://localhost/admin/api/cms/plugins/acme.books/resources/books/records', {
         method: 'POST',
         headers: { cookie, 'content-type': 'application/json' },
         body: JSON.stringify({ data: { author: 'Missing title' } }),
-      },
-    ), db)
+      }),
+      db,
+    )
 
     expect(res.status).toBe(400)
     expect(db.records).toHaveLength(0)

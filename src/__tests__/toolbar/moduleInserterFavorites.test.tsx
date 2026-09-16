@@ -60,7 +60,8 @@ function loadSite() {
 describe('ModuleInserterDialog favorites', () => {
   it('renders a favorite toggle for every visible module tile', async () => {
     globalThis.fetch = mock(async (_input: RequestInfo | URL, init?: RequestInit) => {
-      if (init?.method === 'PUT') return jsonResponse({ value: JSON.parse(String(init.body)).value })
+      if (init?.method === 'PUT')
+        return jsonResponse({ value: JSON.parse(String(init.body)).value })
       return jsonResponse({ value: { favorites: [] } })
     }) as typeof fetch
 
@@ -69,9 +70,7 @@ describe('ModuleInserterDialog favorites', () => {
 
     fireEvent.click(screen.getByTestId('toolbar-add-module-btn'))
     await waitFor(() => {
-      expect(
-        screen.getByRole('button', { name: 'Add Text to notch favorites' }),
-      ).toBeTruthy()
+      expect(screen.getByRole('button', { name: 'Add Text to notch favorites' })).toBeTruthy()
     })
 
     for (const name of ['Container', 'Loop', 'Text', 'List', 'Content Outlet', 'Image']) {
@@ -114,7 +113,8 @@ describe('ModuleInserterDialog favorites', () => {
     const calls: Array<{ input: RequestInfo | URL; init?: RequestInit }> = []
     globalThis.fetch = mock(async (input: RequestInfo | URL, init?: RequestInit) => {
       calls.push({ input, init })
-      if (init?.method === 'PUT') return jsonResponse({ value: JSON.parse(String(init.body)).value })
+      if (init?.method === 'PUT')
+        return jsonResponse({ value: JSON.parse(String(init.body)).value })
       return jsonResponse({ value: { favorites: [] } })
     }) as typeof fetch
 

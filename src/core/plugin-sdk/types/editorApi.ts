@@ -1,9 +1,5 @@
 import type { EditorStore } from '@site/store/types'
-import type {
-  PluginRecord,
-  StorageListOptions,
-  StorageListResult,
-} from '../storageSchemas'
+import type { PluginRecord, StorageListOptions, StorageListResult } from '../storageSchemas'
 import type { PluginCanvasOverlay } from './canvasOverlays'
 import type { PluginCommand, PluginPaletteProvider, PluginToolbarButton } from './commands'
 import type { PluginDashboardWidget } from './dashboardWidgets'

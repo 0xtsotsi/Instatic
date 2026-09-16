@@ -44,11 +44,7 @@ function toneLabel(tone: ContextMeterTone): string {
 
 function Segments({ filled }: { filled: number }) {
   return Array.from({ length: CONTEXT_METER_SEGMENT_COUNT }, (_, index) => (
-    <span
-      key={index}
-      data-context-segment=""
-      data-filled={index < filled ? 'true' : 'false'}
-    />
+    <span key={index} data-context-segment="" data-filled={index < filled ? 'true' : 'false'} />
   ))
 }
 
@@ -57,18 +53,20 @@ export function ContextMeter({ credentialId, modelId, windowTokens, pricing }: C
 
   if (windowTokens === null || windowTokens <= 0) return null
 
-  const selectionOwnsContext = usage.contextCredentialId === credentialId
-    && usage.contextModelId === modelId
-  const conversationIsEmpty = usage.promptTokens === 0
-    && usage.completionTokens === 0
-    && usage.cacheReadTokens === 0
-    && usage.cacheCreationTokens === 0
-    && usage.costUsd === 0
-  const currentContext = selectionOwnsContext && usage.contextTokens !== null
-    ? usage.contextTokens
-    : conversationIsEmpty
-      ? 0
-      : null
+  const selectionOwnsContext =
+    usage.contextCredentialId === credentialId && usage.contextModelId === modelId
+  const conversationIsEmpty =
+    usage.promptTokens === 0 &&
+    usage.completionTokens === 0 &&
+    usage.cacheReadTokens === 0 &&
+    usage.cacheCreationTokens === 0 &&
+    usage.costUsd === 0
+  const currentContext =
+    selectionOwnsContext && usage.contextTokens !== null
+      ? usage.contextTokens
+      : conversationIsEmpty
+        ? 0
+        : null
   const metrics = getContextMeterMetrics(currentContext, windowTokens)
   const valueText = metrics.measured
     ? `${formatNumber(metrics.remainingTokens)} of ${formatNumber(windowTokens)} context tokens available (${metrics.remainingPercentage}%)`
@@ -80,7 +78,9 @@ export function ContextMeter({ credentialId, modelId, windowTokens, pricing }: C
         <div>
           <span className={styles.eyebrow}>Context remaining</span>
           <strong className={styles.contextHeadline}>
-            {metrics.measured ? `${metrics.remainingPercentage}% available` : 'Waiting for a response'}
+            {metrics.measured
+              ? `${metrics.remainingPercentage}% available`
+              : 'Waiting for a response'}
           </strong>
         </div>
         <span className={styles.status} data-tone={metrics.tone}>

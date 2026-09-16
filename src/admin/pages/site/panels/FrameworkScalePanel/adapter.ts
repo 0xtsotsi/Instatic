@@ -24,9 +24,7 @@ import type {
 } from '@core/framework-schema'
 
 export type GroupShape = FrameworkTypographyGroup | FrameworkSpacingGroup
-export type GeneratorShape =
-  | FrameworkTypographyClassGenerator
-  | FrameworkSpacingClassGenerator
+export type GeneratorShape = FrameworkTypographyClassGenerator | FrameworkSpacingClassGenerator
 
 export interface ScaleAdapter<G, C> {
   /** Public name used in the panel header and aria labels. */

@@ -49,13 +49,7 @@ export {
  * chart code. Stay achromatic by default; tint colors come from the
  * widget chrome via the standard `--accent-*` tokens.
  */
-export {
-  Sparkline,
-  Bars,
-  StackedBar,
-  StatValue,
-  Delta,
-} from '@ui/components/charts'
+export { Sparkline, Bars, StackedBar, StatValue, Delta } from '@ui/components/charts'
 
 /**
  * Dashboard widget chrome — Widget, RangeTabs.
@@ -75,11 +69,7 @@ export { Widget } from '@ui/components/Widget'
 export { RangeTabs } from '@ui/components/RangeTabs'
 export { Tabs, TabList, Tab, TabPanel } from '@ui/components/Tabs'
 export { WidgetList, WidgetListRow } from '@ui/components/WidgetList'
-export {
-  SkeletonBlock,
-  SkeletonCards,
-  SkeletonRows,
-} from '@ui/components/Skeleton'
+export { SkeletonBlock, SkeletonCards, SkeletonRows } from '@ui/components/Skeleton'
 export type { WidgetProps, WidgetTint, WidgetIcon } from '@ui/components/Widget'
 export type { RangeTabsProps } from '@ui/components/RangeTabs'
 export type { TabsProps, TabListProps, TabProps, TabPanelProps } from '@ui/components/Tabs'

@@ -86,11 +86,7 @@ export function ClassPropertyRow({
   const spacingTokens = useSpacingTokens()
   const typographyTokens = useTypographyTokens()
   const tokens: ReadonlyArray<Token> =
-    tokenSource === 'typography'
-      ? typographyTokens
-      : tokenSource === 'spacing'
-        ? spacingTokens
-        : []
+    tokenSource === 'typography' ? typographyTokens : tokenSource === 'spacing' ? spacingTokens : []
 
   // Translate a control's (propKey, val) onChange signature into a typed
   // CSSPropertyBag value, coercing to number when the property expects one.
@@ -196,58 +192,57 @@ export function ClassPropertyRow({
         label={label}
       />
     )
-  } else switch (type) {
-    case 'color':
-      control = (
-        <ColorControl
-          key={`${String(property)}-${String(value ?? '')}`}
-          propKey={String(property)}
-          value={String(value ?? '')}
-          placeholder={placeholderText}
-          onChange={handleControlChange}
-          label={label}
-          onPreview={onPreview ? (v) => handleControlPreview(String(property), v) : undefined}
-          onClearPreview={onClearPreview}
-        />
-      )
-      break
+  } else
+    switch (type) {
+      case 'color':
+        control = (
+          <ColorControl
+            key={`${String(property)}-${String(value ?? '')}`}
+            propKey={String(property)}
+            value={String(value ?? '')}
+            placeholder={placeholderText}
+            onChange={handleControlChange}
+            label={label}
+            onPreview={onPreview ? (v) => handleControlPreview(String(property), v) : undefined}
+            onClearPreview={onClearPreview}
+          />
+        )
+        break
 
-    case 'select': {
-      const enumOptions = getEnumOptions(property) ?? []
-      const opts = property === 'fontWeight'
-        ? getFontWeightOptions(fontFamilyValue, fonts, enumOptions)
-        : enumOptions
-      control = (
-        <SelectControl
-          propKey={String(property)}
-          value={String(value ?? '')}
-          placeholder={placeholderText}
-          onChange={handleControlChange}
-          label={label}
-          options={[
-            { label: '—', value: '' },
-            ...opts.map((o) => ({ label: o, value: o })),
-          ]}
-          onPreview={onPreview ? (v) => handleControlPreview(String(property), v) : undefined}
-          onClearPreview={onClearPreview}
-        />
-      )
-      break
+      case 'select': {
+        const enumOptions = getEnumOptions(property) ?? []
+        const opts =
+          property === 'fontWeight'
+            ? getFontWeightOptions(fontFamilyValue, fonts, enumOptions)
+            : enumOptions
+        control = (
+          <SelectControl
+            propKey={String(property)}
+            value={String(value ?? '')}
+            placeholder={placeholderText}
+            onChange={handleControlChange}
+            label={label}
+            options={[{ label: '—', value: '' }, ...opts.map((o) => ({ label: o, value: o }))]}
+            onPreview={onPreview ? (v) => handleControlPreview(String(property), v) : undefined}
+            onClearPreview={onClearPreview}
+          />
+        )
+        break
+      }
+
+      case 'text':
+      default:
+        control = (
+          <TextControl
+            propKey={String(property)}
+            value={String(value ?? '')}
+            placeholder={placeholderText}
+            onChange={handleControlChange}
+            label={label}
+          />
+        )
+        break
     }
-
-    case 'text':
-    default:
-      control = (
-        <TextControl
-          propKey={String(property)}
-          value={String(value ?? '')}
-          placeholder={placeholderText}
-          onChange={handleControlChange}
-          label={label}
-        />
-      )
-      break
-  }
 
   return (
     <div

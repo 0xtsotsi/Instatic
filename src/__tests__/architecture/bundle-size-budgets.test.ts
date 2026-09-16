@@ -96,7 +96,8 @@ const BUDGETS: ChunkBudget[] = [
   {
     prefix: 'dnd-vendor-',
     maxBytes: 80_000,
-    rationale: '@dnd-kit/core + @use-gesture lazy editor vendor (current ~70 KB raw / 22 KB gzipped)',
+    rationale:
+      '@dnd-kit/core + @use-gesture lazy editor vendor (current ~70 KB raw / 22 KB gzipped)',
   },
   {
     prefix: 'state-vendor-',
@@ -206,14 +207,12 @@ const BUDGETS: ChunkBudget[] = [
 
 function findChunk(prefix: string): { path: string; size: number } | null {
   if (!existsSync(DIST_ASSETS)) return null
-  const matches = readdirSync(DIST_ASSETS).filter(
-    (f) => f.startsWith(prefix) && f.endsWith('.js'),
-  )
+  const matches = readdirSync(DIST_ASSETS).filter((f) => f.startsWith(prefix) && f.endsWith('.js'))
   if (matches.length === 0) return null
   if (matches.length > 1) {
     throw new Error(
       `[bundle-size-budgets] Found ${matches.length} files matching prefix ` +
-      `"${prefix}" in dist/assets/: ${matches.join(', ')}. Expected exactly one.`,
+        `"${prefix}" in dist/assets/: ${matches.join(', ')}. Expected exactly one.`,
     )
   }
   const path = join(DIST_ASSETS, matches[0]!)
@@ -222,9 +221,7 @@ function findChunk(prefix: string): { path: string; size: number } | null {
 
 function findChunks(prefix: string): string[] {
   if (!existsSync(DIST_ASSETS)) return []
-  return readdirSync(DIST_ASSETS).filter(
-    (f) => f.startsWith(prefix) && f.endsWith('.js'),
-  )
+  return readdirSync(DIST_ASSETS).filter((f) => f.startsWith(prefix) && f.endsWith('.js'))
 }
 
 function regexEscape(value: string): string {
@@ -253,7 +250,7 @@ describe('Bundle size budgets', () => {
     // pattern (console.log when an architecture gate is dormant).
     console.warn(
       '[bundle-size-budgets] dist/assets/ missing — bundle gates skipped. ' +
-      'Run `bun run build` first, or use `bun run test:bundle` to build+test.',
+        'Run `bun run build` first, or use `bun run test:bundle` to build+test.',
     )
     return
   }
@@ -264,19 +261,19 @@ describe('Bundle size budgets', () => {
       if (!chunk) {
         throw new Error(
           `[bundle-size-budgets] Expected chunk "${budget.prefix}*.js" not found ` +
-          `in dist/assets/. If this chunk was intentionally removed or renamed, ` +
-          `update src/__tests__/architecture/bundle-size-budgets.test.ts.`,
+            `in dist/assets/. If this chunk was intentionally removed or renamed, ` +
+            `update src/__tests__/architecture/bundle-size-budgets.test.ts.`,
         )
       }
       if (chunk.size > budget.maxBytes) {
         throw new Error(
           `[bundle-size-budgets] ${budget.prefix}*.js exceeds budget.\n` +
-          `  actual:    ${formatKB(chunk.size)} (${chunk.size} B)\n` +
-          `  budget:    ${formatKB(budget.maxBytes)} (${budget.maxBytes} B)\n` +
-          `  rationale: ${budget.rationale}\n\n` +
-          `Either (a) split the new dependency behind a lazy boundary, or ` +
-          `(b) raise the cap with a one-line note in this test file ` +
-          `explaining why the growth is intentional.`,
+            `  actual:    ${formatKB(chunk.size)} (${chunk.size} B)\n` +
+            `  budget:    ${formatKB(budget.maxBytes)} (${budget.maxBytes} B)\n` +
+            `  rationale: ${budget.rationale}\n\n` +
+            `Either (a) split the new dependency behind a lazy boundary, or ` +
+            `(b) raise the cap with a one-line note in this test file ` +
+            `explaining why the growth is intentional.`,
         )
       }
       expect(chunk.size).toBeLessThanOrEqual(budget.maxBytes)
@@ -288,7 +285,7 @@ describe('Bundle size budgets', () => {
     if (!reactVendor) {
       throw new Error(
         '[bundle-size-budgets] Expected react-vendor*.js in dist/assets/. ' +
-        'Run `bun run build` first.',
+          'Run `bun run build` first.',
       )
     }
     const source = readFileSync(reactVendor.path, 'utf8')

@@ -331,21 +331,21 @@ export interface ImportStylesheet {
  */
 export type PageScript =
   | {
-    kind: 'external'
-    /** FileMap path of the linked JavaScript file. */
-    path: string
-    /** Loader semantics from the source HTML. */
-    format: SiteScriptFormat
-  }
+      kind: 'external'
+      /** FileMap path of the linked JavaScript file. */
+      path: string
+      /** Loader semantics from the source HTML. */
+      format: SiteScriptFormat
+    }
   | {
-    kind: 'inline'
-    /** Stable synthetic SiteFile path derived from the source HTML file. */
-    path: string
-    /** Inline JavaScript source. */
-    content: string
-    /** Loader semantics from the source HTML. */
-    format: SiteScriptFormat
-  }
+      kind: 'inline'
+      /** Stable synthetic SiteFile path derived from the source HTML file. */
+      path: string
+      /** Inline JavaScript source. */
+      content: string
+      /** Loader semantics from the source HTML. */
+      format: SiteScriptFormat
+    }
 
 // ---------------------------------------------------------------------------
 // Phase 2 — Site-import pipeline types
@@ -647,9 +647,7 @@ export class OversizeImportError extends Error {
   readonly sizeBytes: number
   readonly limitBytes: number
   constructor(sizeBytes: number, limitBytes: number) {
-    super(
-      `Import aggregate size ${sizeBytes} bytes exceeds the ${limitBytes}-byte limit`,
-    )
+    super(`Import aggregate size ${sizeBytes} bytes exceeds the ${limitBytes}-byte limit`)
     this.name = 'OversizeImportError'
     this.sizeBytes = sizeBytes
     this.limitBytes = limitBytes

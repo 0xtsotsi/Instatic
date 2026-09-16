@@ -90,9 +90,8 @@ export function makeHtmlPagePlan(
   }
 
   // --- Step 3: derive title ---
-  const title = extractedTitle && extractedTitle.length > 0
-    ? extractedTitle
-    : prettifyTitle(htmlPath)
+  const title =
+    extractedTitle && extractedTitle.length > 0 ? extractedTitle : prettifyTitle(htmlPath)
 
   // --- Step 4: derive slug ---
   const slug = deriveSlug(htmlPath)
@@ -118,16 +117,16 @@ export function makeHtmlPagePlan(
 
 type ScriptRef =
   | {
-    kind: 'external'
-    src: string
-    format: SiteScriptFormat
-  }
+      kind: 'external'
+      src: string
+      format: SiteScriptFormat
+    }
   | {
-    kind: 'inline'
-    path: string
-    content: string
-    format: SiteScriptFormat
-  }
+      kind: 'inline'
+      path: string
+      content: string
+      format: SiteScriptFormat
+    }
 
 interface DocumentMeta {
   title: string | null
@@ -306,7 +305,6 @@ export function resolveHref(href: string, htmlFilePath: string): string | null {
   return normalized
 }
 
-
 // ---------------------------------------------------------------------------
 // Slug and title derivation
 // ---------------------------------------------------------------------------
@@ -351,8 +349,10 @@ export function deriveSlug(htmlPath: string): string {
 export function prettifyTitle(htmlPath: string): string {
   const basename = htmlPath.split('/').pop() ?? htmlPath
   const name = basename.replace(/\.[^.]+$/, '')
-  return name
-    .replace(/[-_]+/g, ' ')
-    .replace(/\b\w/g, (c) => c.toUpperCase())
-    .trim() || 'Untitled'
+  return (
+    name
+      .replace(/[-_]+/g, ' ')
+      .replace(/\b\w/g, (c) => c.toUpperCase())
+      .trim() || 'Untitled'
+  )
 }

@@ -115,10 +115,8 @@ function symmetricDiff<T>(
   const onlyInB = [...setB].filter((x) => !setA.has(x)).sort()
   if (onlyInA.length === 0 && onlyInB.length === 0) return null
   const lines: string[] = ['plugin-host-ui parity mismatch:']
-  if (onlyInA.length > 0)
-    lines.push(`  only in ${labelA}: ${onlyInA.join(', ')}`)
-  if (onlyInB.length > 0)
-    lines.push(`  only in ${labelB}: ${onlyInB.join(', ')}`)
+  if (onlyInA.length > 0) lines.push(`  only in ${labelA}: ${onlyInA.join(', ')}`)
+  if (onlyInB.length > 0) lines.push(`  only in ${labelB}: ${onlyInB.join(', ')}`)
   return lines.join('\n')
 }
 

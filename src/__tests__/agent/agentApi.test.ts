@@ -24,9 +24,9 @@ function message(
 }
 
 function toolCalls(messages: AgentMessage[]): AgentToolCall[] {
-  return messages.flatMap((entry) => entry.blocks.flatMap((block) =>
-    block.kind === 'toolCall' ? [block.toolCall] : [],
-  ))
+  return messages.flatMap((entry) =>
+    entry.blocks.flatMap((block) => (block.kind === 'toolCall' ? [block.toolCall] : [])),
+  )
 }
 
 describe('rehydrateMessages — persisted tool recovery', () => {
@@ -36,12 +36,14 @@ describe('rehydrateMessages — persisted tool recovery', () => {
       message(
         'assistant-complete',
         'assistant',
-        [{
-          kind: 'toolCall',
-          toolCallId: 'snapshot-complete',
-          toolName: 'site_render_snapshot',
-          input: { breakpointId: 'mobile' },
-        }],
+        [
+          {
+            kind: 'toolCall',
+            toolCallId: 'snapshot-complete',
+            toolName: 'site_render_snapshot',
+            input: { breakpointId: 'mobile' },
+          },
+        ],
         'snapshot-complete',
         'site_render_snapshot',
       ),
@@ -55,12 +57,14 @@ describe('rehydrateMessages — persisted tool recovery', () => {
       message(
         'assistant-interrupted',
         'assistant',
-        [{
-          kind: 'toolCall',
-          toolCallId: 'snapshot-interrupted',
-          toolName: 'site_render_snapshot',
-          input: { breakpointId: 'desktop' },
-        }],
+        [
+          {
+            kind: 'toolCall',
+            toolCallId: 'snapshot-interrupted',
+            toolName: 'site_render_snapshot',
+            input: { breakpointId: 'desktop' },
+          },
+        ],
         'snapshot-interrupted',
         'site_render_snapshot',
       ),
@@ -91,12 +95,14 @@ describe('rehydrateMessages — persisted tool recovery', () => {
       message(
         'assistant-1',
         'assistant',
-        [{
-          kind: 'toolCall',
-          toolCallId: 'snapshot-malformed',
-          toolName: 'site_render_snapshot',
-          input: ['invalid', 'params'],
-        }],
+        [
+          {
+            kind: 'toolCall',
+            toolCallId: 'snapshot-malformed',
+            toolName: 'site_render_snapshot',
+            input: ['invalid', 'params'],
+          },
+        ],
         'snapshot-malformed',
         'site_render_snapshot',
       ),
@@ -134,12 +140,14 @@ describe('rehydrateMessages — persisted tool recovery', () => {
       message(
         'assistant-1',
         'assistant',
-        [{
-          kind: 'toolCall',
-          toolCallId: 'snapshot-late',
-          toolName: 'site_render_snapshot',
-          input: {},
-        }],
+        [
+          {
+            kind: 'toolCall',
+            toolCallId: 'snapshot-late',
+            toolName: 'site_render_snapshot',
+            input: {},
+          },
+        ],
         'snapshot-late',
         'site_render_snapshot',
       ),

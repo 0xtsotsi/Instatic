@@ -185,7 +185,11 @@ function buildSlashItems(onExternal: (action: SlashExternalAction) => void): Sla
   ]
 }
 
-function filterSlashItems(items: SlashCommandItem[], query: string, _editor: Editor): SlashCommandItem[] {
+function filterSlashItems(
+  items: SlashCommandItem[],
+  query: string,
+  _editor: Editor,
+): SlashCommandItem[] {
   const q = query.trim().toLowerCase()
   if (!q) return items
   return items.filter((item) => {

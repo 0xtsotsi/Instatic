@@ -7,10 +7,7 @@
  * state, or fail closed when the commit remains ambiguous.
  */
 
-import {
-  getConversation,
-  updateConversationProvider,
-} from '@admin/ai/api'
+import { getConversation, updateConversationProvider } from '@admin/ai/api'
 import { ApiError } from '@core/http'
 import { getErrorMessage } from '@core/utils/errorMessage'
 
@@ -47,17 +44,9 @@ async function updateWithTimeout(
   modelId: string,
 ): Promise<void> {
   const controller = new AbortController()
-  const timeoutId = setTimeout(
-    () => controller.abort(),
-    PROVIDER_UPDATE_TIMEOUT_MS,
-  )
+  const timeoutId = setTimeout(() => controller.abort(), PROVIDER_UPDATE_TIMEOUT_MS)
   try {
-    await updateConversationProvider(
-      conversationId,
-      credentialId,
-      modelId,
-      controller.signal,
-    )
+    await updateConversationProvider(conversationId, credentialId, modelId, controller.signal)
   } catch (err) {
     if (controller.signal.aborted) {
       throw new Error('Model change timed out. Try again.', { cause: err })
@@ -70,10 +59,7 @@ async function updateWithTimeout(
 
 async function readAfterFailedUpdate(conversationId: string) {
   const controller = new AbortController()
-  const timeoutId = setTimeout(
-    () => controller.abort(),
-    PROVIDER_UPDATE_TIMEOUT_MS,
-  )
+  const timeoutId = setTimeout(() => controller.abort(), PROVIDER_UPDATE_TIMEOUT_MS)
   try {
     return await getConversation(conversationId, controller.signal)
   } catch (err) {
@@ -101,25 +87,14 @@ export async function persistConversationProvider(
 
     // Only a handler-originated 4xx is a definite terminal rejection. Network
     // failures, timeouts, and proxy/origin 5xx responses can race a late commit.
-    const commitWasAmbiguous = !(
-      err instanceof ApiError
-      && err.status >= 400
-      && err.status < 500
-    )
+    const commitWasAmbiguous = !(err instanceof ApiError && err.status >= 400 && err.status < 500)
     const authoritative = await readAfterFailedUpdate(conversationId)
 
-    if (
-      authoritative?.credentialId === credentialId
-      && authoritative.modelId === modelId
-    ) {
+    if (authoritative?.credentialId === credentialId && authoritative.modelId === modelId) {
       // The requested state proves the response was lost after the commit.
       return {
         kind: 'confirmed',
-        selection: selection(
-          conversationId,
-          authoritative.credentialId,
-          authoritative.modelId,
-        ),
+        selection: selection(conversationId, authoritative.credentialId, authoritative.modelId),
       }
     }
 
@@ -128,11 +103,7 @@ export async function persistConversationProvider(
       return {
         kind: 'rejected',
         message,
-        selection: selection(
-          conversationId,
-          authoritative.credentialId,
-          authoritative.modelId,
-        ),
+        selection: selection(conversationId, authoritative.credentialId, authoritative.modelId),
       }
     }
 
@@ -156,6 +127,9 @@ export function waitForProviderUpdate(
     }
     const onAbort = () => finish(false)
     signal.addEventListener('abort', onAbort, { once: true })
-    void promise.then(() => finish(true), () => finish(true))
+    void promise.then(
+      () => finish(true),
+      () => finish(true),
+    )
   })
 }

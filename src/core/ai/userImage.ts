@@ -1,13 +1,9 @@
 import { Type, type Static } from '@core/utils/typeboxHelpers'
 
 /** Clipboard formats accepted before the browser normalises an attachment. */
-export const AI_USER_IMAGE_SOURCE_MIME_TYPES = [
-  'image/jpeg',
-  'image/png',
-  'image/webp',
-] as const
+export const AI_USER_IMAGE_SOURCE_MIME_TYPES = ['image/jpeg', 'image/png', 'image/webp'] as const
 
-export type AiUserImageSourceMimeType = typeof AI_USER_IMAGE_SOURCE_MIME_TYPES[number]
+export type AiUserImageSourceMimeType = (typeof AI_USER_IMAGE_SOURCE_MIME_TYPES)[number]
 
 /**
  * User-image policy shared by browser ingestion and the server boundary.
@@ -38,8 +34,6 @@ export const AiUserImageBlockSchema = Type.Object(
 
 export type AiUserImageBlock = Static<typeof AiUserImageBlockSchema>
 
-export function isAiUserImageSourceMimeType(
-  value: string,
-): value is AiUserImageSourceMimeType {
+export function isAiUserImageSourceMimeType(value: string): value is AiUserImageSourceMimeType {
   return AI_USER_IMAGE_SOURCE_MIME_TYPES.some((mimeType) => mimeType === value)
 }

@@ -37,10 +37,7 @@ const ProviderId = Type.Union([
   Type.Literal('openai-compatible'),
 ])
 
-const AuthMode = Type.Union([
-  Type.Literal('apiKey'),
-  Type.Literal('baseUrl'),
-])
+const AuthMode = Type.Union([Type.Literal('apiKey'), Type.Literal('baseUrl')])
 
 const ToolScope = Type.Union([
   Type.Literal('site'),
@@ -88,10 +85,12 @@ const ModelSchema = Type.Object({
   }),
   tier: Type.Optional(Type.String()),
   /** Per-million-token list prices, shown inline in the picker. */
-  pricing: Type.Optional(Type.Object({
-    inputPerMTok: Type.Number(),
-    outputPerMTok: Type.Number(),
-  })),
+  pricing: Type.Optional(
+    Type.Object({
+      inputPerMTok: Type.Number(),
+      outputPerMTok: Type.Number(),
+    }),
+  ),
   /** Max context window (total tokens) — feeds the composer context meter. */
   contextWindow: Type.Optional(Type.Number()),
   /** Whether the server returned a live provider model or a local fallback hint. */
@@ -172,7 +171,10 @@ const ConversationDetailResponseSchema = Type.Object({
 // ---------------------------------------------------------------------------
 
 export async function listCredentials(signal?: AbortSignal): Promise<CredentialView[]> {
-  const body = await apiRequest('/admin/api/ai/credentials', { schema: CredentialListResponseSchema, signal })
+  const body = await apiRequest('/admin/api/ai/credentials', {
+    schema: CredentialListResponseSchema,
+    signal,
+  })
   return body.credentials
 }
 
@@ -305,7 +307,9 @@ export async function clearDefault(scope: 'site' | 'content' | 'data' | 'plugin'
 // Endpoints — conversations
 // ---------------------------------------------------------------------------
 
-export async function listConversations(scope: 'site' | 'content' | 'data' | 'plugin'): Promise<ConversationView[]> {
+export async function listConversations(
+  scope: 'site' | 'content' | 'data' | 'plugin',
+): Promise<ConversationView[]> {
   const body = await apiRequest('/admin/api/ai/conversations', {
     query: { scope },
     schema: ConversationListResponseSchema,
@@ -410,10 +414,7 @@ export type AiAuditResponse = Static<typeof AuditResponseSchema>
  * the daily rollup into the viewer's calendar day (falls back to UTC server-side
  * when omitted or invalid).
  */
-export async function listAiAudit(
-  since?: string,
-  timeZone?: string,
-): Promise<AiAuditResponse> {
+export async function listAiAudit(since?: string, timeZone?: string): Promise<AiAuditResponse> {
   return apiRequest('/admin/api/ai/audit', {
     query: { since, tz: timeZone },
     schema: AuditResponseSchema,
@@ -433,7 +434,9 @@ export async function listMcpConnectors(signal?: AbortSignal): Promise<McpConnec
   return body.connectors
 }
 
-export async function createMcpConnector(body: CreateMcpConnectorBody): Promise<CreateMcpConnectorResult> {
+export async function createMcpConnector(
+  body: CreateMcpConnectorBody,
+): Promise<CreateMcpConnectorResult> {
   return apiRequest(MCP_CONNECTORS_BASE, {
     method: 'POST',
     body,

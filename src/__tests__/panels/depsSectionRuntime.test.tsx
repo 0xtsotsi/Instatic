@@ -23,14 +23,16 @@ function resetStore() {
     site: makeSite({
       packageJson,
       runtime: normalizeSiteRuntimeConfig(undefined),
-      files: [{
-        id: 'script-1',
-        path: 'src/scripts/celebrate.ts',
-        type: 'script',
-        content: `import confetti from 'canvas-confetti'\nimport { animate } from 'motion'`,
-        createdAt: 1,
-        updatedAt: 1,
-      }],
+      files: [
+        {
+          id: 'script-1',
+          path: 'src/scripts/celebrate.ts',
+          type: 'script',
+          content: `import confetti from 'canvas-confetti'\nimport { animate } from 'motion'`,
+          createdAt: 1,
+          updatedAt: 1,
+        },
+      ],
     }),
     packageJson,
     siteRuntime: normalizeSiteRuntimeConfig(undefined),
@@ -142,35 +144,42 @@ describe('DepsSection runtime script dependency usage', () => {
 
   it('resolves runtime dependencies into the site dependency lock via the manual button', async () => {
     globalThis.fetch = (async () =>
-      new Response(JSON.stringify({
-        dependencyLock: {
-          version: 1,
-          packages: {
-            'canvas-confetti': {
-              name: 'canvas-confetti',
-              requested: '^1.9.3',
-              version: '1.9.3',
-              resolvedAt: 123,
+      new Response(
+        JSON.stringify({
+          dependencyLock: {
+            version: 1,
+            packages: {
+              'canvas-confetti': {
+                name: 'canvas-confetti',
+                requested: '^1.9.3',
+                version: '1.9.3',
+                resolvedAt: 123,
+              },
             },
+            updatedAt: 123,
           },
-          updatedAt: 123,
-        },
-      }), { status: 200 })) as typeof fetch
+        }),
+        { status: 200 },
+      )) as typeof fetch
 
     render(<DepsSection />)
 
     fireEvent.click(screen.getByRole('button', { name: 'Re-resolve' }))
     expect(await screen.findByText('1 locked')).toBeDefined()
-    expect(useEditorStore.getState().siteRuntime.dependencyLock.packages['canvas-confetti']?.version).toBe('1.9.3')
-    expect(useEditorStore.getState().site?.runtime?.dependencyLock.packages['canvas-confetti']?.version).toBe('1.9.3')
+    expect(
+      useEditorStore.getState().siteRuntime.dependencyLock.packages['canvas-confetti']?.version,
+    ).toBe('1.9.3')
+    expect(
+      useEditorStore.getState().site?.runtime?.dependencyLock.packages['canvas-confetti']?.version,
+    ).toBe('1.9.3')
   })
 })
 
 describe('evaluateDependencyLockStatus', () => {
   it('returns in-sync when there are no requested packages', () => {
-    expect(
-      evaluateDependencyLockStatus({ dependencies: {}, devDependencies: {} }, {}),
-    ).toEqual({ kind: 'in-sync' })
+    expect(evaluateDependencyLockStatus({ dependencies: {}, devDependencies: {} }, {})).toEqual({
+      kind: 'in-sync',
+    })
   })
 
   it('returns unresolved when packages are requested but the lock is empty', () => {

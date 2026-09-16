@@ -93,9 +93,7 @@ describe('canvas breakpoint activation', () => {
   })
 })
 
-function renderCanvas(
-  overrides: Partial<ReturnType<typeof useEditorStore.getState>> = {},
-) {
+function renderCanvas(overrides: Partial<ReturnType<typeof useEditorStore.getState>> = {}) {
   const page = makePage({
     id: 'page-1',
     rootNodeId: 'root',
@@ -132,4 +130,3 @@ function renderCanvas(
     </DndContext>,
   )
 }
-

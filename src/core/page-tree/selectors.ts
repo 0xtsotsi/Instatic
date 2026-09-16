@@ -17,7 +17,10 @@ import type { PageNode } from './pageNode'
 // ---------------------------------------------------------------------------
 
 /** Get a node by ID — O(1). Returns undefined if not found. */
-export function getNode<TNode extends BaseNode>(tree: NodeTree<TNode>, id: string): TNode | undefined {
+export function getNode<TNode extends BaseNode>(
+  tree: NodeTree<TNode>,
+  id: string,
+): TNode | undefined {
   return tree.nodes[id]
 }
 
@@ -29,12 +32,13 @@ export function getNodeOrThrow<TNode extends BaseNode>(tree: NodeTree<TNode>, id
 }
 
 /** Get all direct children of a node as TNode objects. */
-export function getChildren<TNode extends BaseNode>(tree: NodeTree<TNode>, nodeId: string): TNode[] {
+export function getChildren<TNode extends BaseNode>(
+  tree: NodeTree<TNode>,
+  nodeId: string,
+): TNode[] {
   const node = tree.nodes[nodeId]
   if (!node) return []
-  return node.children
-    .map((id) => tree.nodes[id])
-    .filter((n): n is TNode => n !== undefined)
+  return node.children.map((id) => tree.nodes[id]).filter((n): n is TNode => n !== undefined)
 }
 
 // ---------------------------------------------------------------------------
@@ -51,14 +55,20 @@ export function getChildren<TNode extends BaseNode>(tree: NodeTree<TNode>, nodeI
  * `tree.nodes` — that O(N) scan was the single highest-cost engine hot path
  * (called per pointer-move during drag, and in O(M·D) mutation loops).
  */
-export function getParent<TNode extends BaseNode>(tree: NodeTree<TNode>, nodeId: string): TNode | undefined {
+export function getParent<TNode extends BaseNode>(
+  tree: NodeTree<TNode>,
+  nodeId: string,
+): TNode | undefined {
   const node = tree.nodes[nodeId]
   if (!node || !node.parentId) return undefined
   return tree.nodes[node.parentId]
 }
 
 /** Get ordered ancestor chain from root down to (but not including) nodeId. */
-export function getAncestors<TNode extends BaseNode>(tree: NodeTree<TNode>, nodeId: string): TNode[] {
+export function getAncestors<TNode extends BaseNode>(
+  tree: NodeTree<TNode>,
+  nodeId: string,
+): TNode[] {
   const ancestors: TNode[] = []
   let current = nodeId
   const visited = new Set<string>()
@@ -114,7 +124,10 @@ export function collectSubtreeIds(nodes: Record<string, BaseNode>, rootId: strin
  *
  * Thin NodeTree-typed wrapper over `collectSubtreeIds` — same cycle-safe walk.
  */
-export function flattenSubtree<TNode extends BaseNode>(tree: NodeTree<TNode>, nodeId: string): string[] {
+export function flattenSubtree<TNode extends BaseNode>(
+  tree: NodeTree<TNode>,
+  nodeId: string,
+): string[] {
   return collectSubtreeIds(tree.nodes, nodeId)
 }
 
@@ -122,7 +135,11 @@ export function flattenSubtree<TNode extends BaseNode>(tree: NodeTree<TNode>, no
  * Check whether ancestorId is an ancestor of nodeId.
  * Used to prevent illegal moves in drag-to-reorder (cannot drop a node inside itself).
  */
-export function isAncestor<TNode extends BaseNode>(tree: NodeTree<TNode>, ancestorId: string, nodeId: string): boolean {
+export function isAncestor<TNode extends BaseNode>(
+  tree: NodeTree<TNode>,
+  ancestorId: string,
+  nodeId: string,
+): boolean {
   if (ancestorId === nodeId) return true
   let current = nodeId
   const visited = new Set<string>()
@@ -191,7 +208,7 @@ import type { PropertyCondition, PropertySchema } from '@core/module-engine-sche
  */
 export function evaluateCondition(
   condition: PropertyCondition,
-  props: Record<string, unknown>
+  props: Record<string, unknown>,
 ): boolean {
   if ('and' in condition) {
     return condition.and.every((c) => evaluateCondition(c, props))

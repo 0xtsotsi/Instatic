@@ -8,11 +8,7 @@ interface ColorVariantPreviewProps {
   variables: ColorPreviewVariable[]
 }
 
-export function ColorVariantPreview({
-  kind,
-  tokenSlug,
-  variables,
-}: ColorVariantPreviewProps) {
+export function ColorVariantPreview({ kind, tokenSlug, variables }: ColorVariantPreviewProps) {
   if (variables.length === 0) return null
 
   return (

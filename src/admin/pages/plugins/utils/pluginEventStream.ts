@@ -13,11 +13,7 @@
  */
 
 import { safeParseValue } from '@core/utils/typeboxHelpers'
-import {
-  PLUGIN_EVENT_KINDS,
-  PluginEventSchema,
-  type PluginEvent,
-} from '@core/plugins/events'
+import { PLUGIN_EVENT_KINDS, PluginEventSchema, type PluginEvent } from '@core/plugins/events'
 
 export type { PluginEvent }
 
@@ -39,7 +35,9 @@ function ensureConnected(): void {
         }
         const payload = result.value
         for (const listener of listeners) {
-          try { listener(payload) } catch (err) {
+          try {
+            listener(payload)
+          } catch (err) {
             console.error('[plugin-events] listener threw:', err)
           }
         }

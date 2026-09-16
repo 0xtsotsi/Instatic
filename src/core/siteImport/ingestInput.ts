@@ -36,7 +36,7 @@ import {
 // Default limits
 // ---------------------------------------------------------------------------
 
-const DEFAULT_MAX_BYTES = 1024 * 1024 * 1024        // 1 GB
+const DEFAULT_MAX_BYTES = 1024 * 1024 * 1024 // 1 GB
 const DEFAULT_MAX_FILES = 10_000
 const DEFAULT_MAX_ZIP_UNCOMPRESSED = 5 * 1024 * 1024 * 1024 // 5 GB
 
@@ -44,11 +44,7 @@ const DEFAULT_MAX_ZIP_UNCOMPRESSED = 5 * 1024 * 1024 * 1024 // 5 GB
 // Input type
 // ---------------------------------------------------------------------------
 
-type IngestInput =
-  | File
-  | File[]
-  | { zipBytes: Uint8Array }
-  | { fileMap: FileMap }
+type IngestInput = File | File[] | { zipBytes: Uint8Array } | { fileMap: FileMap }
 
 interface IngestOptions {
   /** Max aggregate compressed bytes across all files. Default: 1 GB */
@@ -121,7 +117,10 @@ function detectSharedTopLevel(paths: string[]): string | undefined {
  * Strip a shared top-level folder from all paths.
  * e.g. `"my-site/index.html"` → `"index.html"` when folder is `"my-site"`.
  */
-function stripTopLevelFolder(paths: Record<string, { bytes: Uint8Array; mimeType?: string }>, folder: string): Record<string, { bytes: Uint8Array; mimeType?: string }> {
+function stripTopLevelFolder(
+  paths: Record<string, { bytes: Uint8Array; mimeType?: string }>,
+  folder: string,
+): Record<string, { bytes: Uint8Array; mimeType?: string }> {
   const prefix = `${folder}/`
   const result: Record<string, { bytes: Uint8Array; mimeType?: string }> = {}
   for (const [path, entry] of Object.entries(paths)) {
@@ -144,10 +143,7 @@ function stripTopLevelFolder(paths: Record<string, { bytes: Uint8Array; mimeType
  * @throws {ZipBombError}         when ZIP uncompressed size exceeds guard.
  * @throws {PathTraversalError}   when any path contains a traversal attempt.
  */
-export async function ingestInput(
-  input: IngestInput,
-  options?: IngestOptions,
-): Promise<FileMap> {
+export async function ingestInput(input: IngestInput, options?: IngestOptions): Promise<FileMap> {
   const maxBytes = options?.maxBytes ?? DEFAULT_MAX_BYTES
   const maxFiles = options?.maxFiles ?? DEFAULT_MAX_FILES
   const maxUncompressed = options?.maxUncompressedZipBytes ?? DEFAULT_MAX_ZIP_UNCOMPRESSED
@@ -229,9 +225,7 @@ async function ingestZip(
   // Detect and strip shared top-level folder
   const allPaths = Object.keys(rawFiles)
   const topLevel = detectSharedTopLevel(allPaths)
-  const files = topLevel
-    ? stripTopLevelFolder(rawFiles, topLevel)
-    : rawFiles
+  const files = topLevel ? stripTopLevelFolder(rawFiles, topLevel) : rawFiles
 
   return { files, ...(topLevel ? { strippedTopLevelFolder: topLevel } : {}) }
 }
@@ -240,11 +234,7 @@ async function ingestZip(
 // File[] ingestion (browser File objects)
 // ---------------------------------------------------------------------------
 
-async function ingestFiles(
-  fileList: File[],
-  maxBytes: number,
-  maxFiles: number,
-): Promise<FileMap> {
+async function ingestFiles(fileList: File[], maxBytes: number, maxFiles: number): Promise<FileMap> {
   if (fileList.length === 0) throw new EmptyImportError()
   if (fileList.length > maxFiles) throw new TooManyFilesError(fileList.length, maxFiles)
 
@@ -255,9 +245,10 @@ async function ingestFiles(
     fileList.map(async (file) => {
       // Use webkitRelativePath when available (folder upload or drag-and-drop
       // of a directory); fall back to file.name for plain file picks.
-      const rawPath = (file.webkitRelativePath && file.webkitRelativePath.length > 0)
-        ? file.webkitRelativePath
-        : file.name
+      const rawPath =
+        file.webkitRelativePath && file.webkitRelativePath.length > 0
+          ? file.webkitRelativePath
+          : file.name
 
       const normalized = normalizeSlashes(rawPath)
       assertSafePath(normalized)

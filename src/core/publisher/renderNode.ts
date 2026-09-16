@@ -277,9 +277,7 @@ export function getSpecialRendererModuleIds(): string[] {
  * and throws here, so a forgotten renderer fails loudly instead of silently
  * falling through to the standard (wrong) render path.
  */
-export function resolveSpecialRenderer(
-  def: AnyModuleDefinition,
-): SpecialRenderer | undefined {
+export function resolveSpecialRenderer(def: AnyModuleDefinition): SpecialRenderer | undefined {
   const impl = SPECIAL_RENDERER_IMPLS.get(def.id)
   if (def.publishBehavior === 'special' && !impl) {
     throw new Error(
@@ -294,11 +292,7 @@ export function resolveSpecialRenderer(
  *
  * @returns HTML string for this node and all its descendants
  */
-export function renderNode(
-  nodeId: string,
-  config: RenderConfig,
-  acc: RenderAccumulators,
-): string {
+export function renderNode(nodeId: string, config: RenderConfig, acc: RenderAccumulators): string {
   const node = config.page.nodes[nodeId]
   if (!node) return ''
   if (node.hidden) return ''

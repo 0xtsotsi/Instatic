@@ -30,9 +30,9 @@ const SITE_IMPORTMAP: RuntimePackageImportmap = {
 
 describe('runtime dependency resolver', () => {
   it('looks up a single package URL in the site importmap', () => {
-    expect(
-      resolveDependencyUrl({ name: 'three' }, { siteImportmap: SITE_IMPORTMAP }),
-    ).toBe('/_instatic/runtime/cache/abc123def456ghi789jkl012/three/build/three.module.js')
+    expect(resolveDependencyUrl({ name: 'three' }, { siteImportmap: SITE_IMPORTMAP })).toBe(
+      '/_instatic/runtime/cache/abc123def456ghi789jkl012/three/build/three.module.js',
+    )
   })
 
   it('returns null when no site importmap is provided', () => {
@@ -40,10 +40,9 @@ describe('runtime dependency resolver', () => {
   })
 
   it('builds an import map filtered to the module declared deps', () => {
-    const importMap = createModuleImportMap(
-      makeModule({ three: '^0.184.0' }),
-      { siteImportmap: SITE_IMPORTMAP },
-    )
+    const importMap = createModuleImportMap(makeModule({ three: '^0.184.0' }), {
+      siteImportmap: SITE_IMPORTMAP,
+    })
     expect(importMap.imports.three).toBe(
       '/_instatic/runtime/cache/abc123def456ghi789jkl012/three/build/three.module.js',
     )
@@ -76,33 +75,27 @@ describe('runtime dependency resolver', () => {
   })
 
   it('drops module deps absent from the site manifest in strict mode', () => {
-    const importMap = createModuleImportMap(
-      makeModule({ three: '^0.184.0' }),
-      {
-        packageJson: {
-          dependencies: {},
-          devDependencies: {},
-        },
-        siteImportmap: SITE_IMPORTMAP,
-        strictSiteManifest: true,
+    const importMap = createModuleImportMap(makeModule({ three: '^0.184.0' }), {
+      packageJson: {
+        dependencies: {},
+        devDependencies: {},
       },
-    )
+      siteImportmap: SITE_IMPORTMAP,
+      strictSiteManifest: true,
+    })
     expect(importMap.imports.three).toBeUndefined()
     expect(importMap.imports['three/']).toBeUndefined()
   })
 
   it('does not resolve runtime dependencies from devDependencies in strict manifest mode', () => {
-    const importMap = createModuleImportMap(
-      makeModule({ three: '^0.184.0' }),
-      {
-        packageJson: {
-          dependencies: {},
-          devDependencies: { three: '^0.185.0' },
-        },
-        siteImportmap: SITE_IMPORTMAP,
-        strictSiteManifest: true,
+    const importMap = createModuleImportMap(makeModule({ three: '^0.184.0' }), {
+      packageJson: {
+        dependencies: {},
+        devDependencies: { three: '^0.185.0' },
       },
-    )
+      siteImportmap: SITE_IMPORTMAP,
+      strictSiteManifest: true,
+    })
     expect(importMap.imports.three).toBeUndefined()
   })
 })

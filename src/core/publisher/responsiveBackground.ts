@@ -93,7 +93,9 @@ function collectBackgroundImagePathsFromStyleRule(rule: StyleRule, paths: Set<st
   }
 }
 
-export function collectSiteStyleBackgroundImagePaths(site: Pick<SiteDocument, 'styleRules'>): Set<string> {
+export function collectSiteStyleBackgroundImagePaths(
+  site: Pick<SiteDocument, 'styleRules'>,
+): Set<string> {
   const paths = new Set<string>()
   for (const rule of Object.values(site.styleRules ?? {})) {
     collectBackgroundImagePathsFromStyleRule(rule, paths)
@@ -101,7 +103,10 @@ export function collectSiteStyleBackgroundImagePaths(site: Pick<SiteDocument, 's
   return paths
 }
 
-export function collectNodeBackgroundImagePaths(node: Pick<BaseNode, 'inlineStyles'>, paths: Set<string>): void {
+export function collectNodeBackgroundImagePaths(
+  node: Pick<BaseNode, 'inlineStyles'>,
+  paths: Set<string>,
+): void {
   collectBackgroundImagePathsFromStyleBag(node.inlineStyles, paths)
 }
 

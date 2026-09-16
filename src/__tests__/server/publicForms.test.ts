@@ -8,17 +8,19 @@ import {
   resetPublicFormChallenges,
   verifyAndConsumePublicFormChallenge,
 } from '../../../server/forms/challenge'
-import { publicFormPerFormRateLimit, publicFormPerIpRateLimit } from '../../../server/forms/rateLimit'
-import { configurePublicOrigins, resetPublicOrigins, stampSocketIp } from '../../../server/auth/security'
+import {
+  publicFormPerFormRateLimit,
+  publicFormPerIpRateLimit,
+} from '../../../server/forms/rateLimit'
+import {
+  configurePublicOrigins,
+  resetPublicOrigins,
+  stampSocketIp,
+} from '../../../server/auth/security'
 import { createFakeDb } from './dbTestFake'
 import type { PublishedPageSnapshot } from '../../../server/repositories/publish'
 
-function makeRequest(
-  path: string,
-  body: unknown,
-  origin = 'http://cms.test',
-  ip?: string,
-) {
+function makeRequest(path: string, body: unknown, origin = 'http://cms.test', ip?: string) {
   const req = new Request(`http://cms.test${path}`, {
     method: 'POST',
     headers: {
@@ -32,7 +34,12 @@ function makeRequest(
   return req
 }
 
-function node(id: string, moduleId: string, props: Record<string, unknown>, children: string[] = []) {
+function node(
+  id: string,
+  moduleId: string,
+  props: Record<string, unknown>,
+  children: string[] = [],
+) {
   return {
     id,
     moduleId,
@@ -51,29 +58,36 @@ function makeSnapshot(targetTableId = 'newsletter_submissions'): PublishedPageSn
       id: 'site',
       name: 'Site',
       settings: {},
-      pages: [{
-        id: 'page-home',
-        slug: 'index',
-        title: 'Home',
-        rootNodeId: 'body',
-        nodes: {
-          body: node('body', 'base.body', {}, ['form']),
-          form: node('form', 'base.form', {
-            mode: 'cms',
-            formId: 'newsletter',
-            targetTableId,
-            honeypotName: 'company',
-            minSubmitSeconds: 0,
-          }, ['input']),
-          input: node('input', 'base.input', {
-            fieldId: 'email',
-            name: 'email',
-            id: 'email-input',
-            inputType: 'email',
-            required: true,
-          }),
+      pages: [
+        {
+          id: 'page-home',
+          slug: 'index',
+          title: 'Home',
+          rootNodeId: 'body',
+          nodes: {
+            body: node('body', 'base.body', {}, ['form']),
+            form: node(
+              'form',
+              'base.form',
+              {
+                mode: 'cms',
+                formId: 'newsletter',
+                targetTableId,
+                honeypotName: 'company',
+                minSubmitSeconds: 0,
+              },
+              ['input'],
+            ),
+            input: node('input', 'base.input', {
+              fieldId: 'email',
+              name: 'email',
+              id: 'email-input',
+              inputType: 'email',
+              required: true,
+            }),
+          },
         },
-      }],
+      ],
       visualComponents: [],
       classes: [],
       breakpoints: [],
@@ -108,10 +122,12 @@ const newsletterTableRow: FakeTableRow = {
   system: 0,
 }
 
-function makeDb(options: {
-  snapshot?: PublishedPageSnapshot
-  tableRows?: Record<string, FakeTableRow>
-} = {}) {
+function makeDb(
+  options: {
+    snapshot?: PublishedPageSnapshot
+    tableRows?: Record<string, FakeTableRow>
+  } = {},
+) {
   const createdRows: Record<string, unknown>[] = []
   const snapshot = options.snapshot ?? makeSnapshot()
   const tableRows = options.tableRows ?? { newsletter_submissions: newsletterTableRow }
@@ -122,13 +138,15 @@ function makeDb(options: {
     // (the snapshot getter's SELECT also starts with `select data_rows.id`).
     if (sql.includes('site_snapshots.site_json')) {
       return {
-        rows: [{
-          row_id: snapshot.pageRowId,
-          site_json: snapshot.site,
-          runtime_assets_json: snapshot.runtimeAssets ?? null,
-          importmap_body: snapshot.runtimePackageImportmap?.body ?? null,
-          importmap_sha256: snapshot.runtimePackageImportmap?.sha256 ?? null,
-        }],
+        rows: [
+          {
+            row_id: snapshot.pageRowId,
+            site_json: snapshot.site,
+            runtime_assets_json: snapshot.runtimeAssets ?? null,
+            importmap_body: snapshot.runtimePackageImportmap?.body ?? null,
+            importmap_sha256: snapshot.runtimePackageImportmap?.sha256 ?? null,
+          },
+        ],
         rowCount: 1,
       }
     }
@@ -136,13 +154,15 @@ function makeDb(options: {
       const row = tableRows[String(params[0])]
       if (!row) return { rows: [], rowCount: 0 }
       return {
-        rows: [{
-          ...row,
-          created_by_user_id: null,
-          updated_by_user_id: null,
-          created_at: new Date('2026-06-01T00:00:00Z'),
-          updated_at: new Date('2026-06-01T00:00:00Z'),
-        }],
+        rows: [
+          {
+            ...row,
+            created_by_user_id: null,
+            updated_by_user_id: null,
+            created_at: new Date('2026-06-01T00:00:00Z'),
+            updated_at: new Date('2026-06-01T00:00:00Z'),
+          },
+        ],
         rowCount: 1,
       }
     }
@@ -163,30 +183,32 @@ function makeDb(options: {
       const row = createdRows.find((candidate) => candidate.id === params[0])
       if (!row) return { rows: [], rowCount: 0 }
       return {
-        rows: [{
-          ...row,
-          author_email: null,
-          author_display_name: null,
-          author_role_slug: null,
-          author_role_name: null,
-          created_by_email: null,
-          created_by_display_name: null,
-          created_by_role_slug: null,
-          created_by_role_name: null,
-          updated_by_email: null,
-          updated_by_display_name: null,
-          updated_by_role_slug: null,
-          updated_by_role_name: null,
-          published_by_email: null,
-          published_by_display_name: null,
-          published_by_role_slug: null,
-          published_by_role_name: null,
-          published_at: null,
-          scheduled_publish_at: null,
-          deleted_at: null,
-          created_at: new Date('2026-06-01T00:00:00Z'),
-          updated_at: new Date('2026-06-01T00:00:00Z'),
-        }],
+        rows: [
+          {
+            ...row,
+            author_email: null,
+            author_display_name: null,
+            author_role_slug: null,
+            author_role_name: null,
+            created_by_email: null,
+            created_by_display_name: null,
+            created_by_role_slug: null,
+            created_by_role_name: null,
+            updated_by_email: null,
+            updated_by_display_name: null,
+            updated_by_role_slug: null,
+            updated_by_role_name: null,
+            published_by_email: null,
+            published_by_display_name: null,
+            published_by_role_slug: null,
+            published_by_role_name: null,
+            published_at: null,
+            scheduled_publish_at: null,
+            deleted_at: null,
+            created_at: new Date('2026-06-01T00:00:00Z'),
+            updated_at: new Date('2026-06-01T00:00:00Z'),
+          },
+        ],
         rowCount: 1,
       }
     }
@@ -210,7 +232,7 @@ function makeThrowingDb(): { db: DbClient; wasQueried: () => boolean } {
 }
 
 async function readJson(response: Response): Promise<Record<string, unknown>> {
-  return await response.json() as Record<string, unknown>
+  return (await response.json()) as Record<string, unknown>
 }
 
 function pageToken(): string {
@@ -255,7 +277,9 @@ describe('public CMS-native form endpoint', () => {
     )
 
     expect(response.status).toBe(403)
-    expect(await readJson(response)).toMatchObject({ error: 'Form submissions must come from this site.' })
+    expect(await readJson(response)).toMatchObject({
+      error: 'Form submissions must come from this site.',
+    })
     expect(wasQueried()).toBe(false)
   })
 
@@ -263,7 +287,12 @@ describe('public CMS-native form endpoint', () => {
     const { db, wasQueried } = makeThrowingDb()
 
     const response = await handleServerRequest(
-      makeRequest('/_instatic/form/unknown', { not: 'a submit payload' }, 'http://cms.test', '203.0.113.41'),
+      makeRequest(
+        '/_instatic/form/unknown',
+        { not: 'a submit payload' },
+        'http://cms.test',
+        '203.0.113.41',
+      ),
       { db },
     )
 
@@ -275,7 +304,11 @@ describe('public CMS-native form endpoint', () => {
   it('rejects challenge requests from foreign origins', async () => {
     const { db } = makeDb()
     const response = await handlePublicFormRequest(
-      makeRequest('/_instatic/form/challenge', { formId: 'newsletter', pageId: 'page-home', pageToken: pageToken() }, 'https://evil.test'),
+      makeRequest(
+        '/_instatic/form/challenge',
+        { formId: 'newsletter', pageId: 'page-home', pageToken: pageToken() },
+        'https://evil.test',
+      ),
       db,
       new URL('http://cms.test/_instatic/form/challenge'),
     )
@@ -309,7 +342,11 @@ describe('public CMS-native form endpoint', () => {
     resetPublicFormChallenges()
     const { db } = makeDb()
     const challenge = await handlePublicFormRequest(
-      makeRequest('/_instatic/form/challenge', { formId: 'newsletter', pageId: 'page-home', pageToken: pageToken() }),
+      makeRequest('/_instatic/form/challenge', {
+        formId: 'newsletter',
+        pageId: 'page-home',
+        pageToken: pageToken(),
+      }),
       db,
       new URL('http://cms.test/_instatic/form/challenge'),
     )
@@ -352,12 +389,17 @@ describe('public CMS-native form endpoint', () => {
     resetPublicFormChallenges()
     const { db } = makeDb()
     const response = await handlePublicFormRequest(
-      makeRequest('/_instatic/form/challenge', {
-        formId: 'newsletter',
-        pageId: 'page-home',
-        pageToken: pageToken(),
-        padding: 'x'.repeat(9 * 1024),
-      }, 'http://cms.test', '203.0.113.20'),
+      makeRequest(
+        '/_instatic/form/challenge',
+        {
+          formId: 'newsletter',
+          pageId: 'page-home',
+          pageToken: pageToken(),
+          padding: 'x'.repeat(9 * 1024),
+        },
+        'http://cms.test',
+        '203.0.113.20',
+      ),
       db,
       new URL('http://cms.test/_instatic/form/challenge'),
     )
@@ -371,11 +413,16 @@ describe('public CMS-native form endpoint', () => {
     const ip = '203.0.113.21'
     for (let i = 0; i < 60; i++) {
       const response = await handlePublicFormRequest(
-        makeRequest('/_instatic/form/challenge', {
-          formId: 'newsletter',
-          pageId: 'page-home',
-          pageToken: pageToken(),
-        }, 'http://cms.test', ip),
+        makeRequest(
+          '/_instatic/form/challenge',
+          {
+            formId: 'newsletter',
+            pageId: 'page-home',
+            pageToken: pageToken(),
+          },
+          'http://cms.test',
+          ip,
+        ),
         db,
         new URL('http://cms.test/_instatic/form/challenge'),
       )
@@ -383,11 +430,16 @@ describe('public CMS-native form endpoint', () => {
     }
 
     const limited = await handlePublicFormRequest(
-      makeRequest('/_instatic/form/challenge', {
-        formId: 'newsletter',
-        pageId: 'page-home',
-        pageToken: pageToken(),
-      }, 'http://cms.test', ip),
+      makeRequest(
+        '/_instatic/form/challenge',
+        {
+          formId: 'newsletter',
+          pageId: 'page-home',
+          pageToken: pageToken(),
+        },
+        'http://cms.test',
+        ip,
+      ),
       db,
       new URL('http://cms.test/_instatic/form/challenge'),
     )
@@ -401,12 +453,14 @@ describe('public CMS-native form endpoint', () => {
       issuePublicFormChallenge({ pageId: 'page-home', formId: `newsletter-${i}` })
     }
 
-    expect(verifyAndConsumePublicFormChallenge({
-      pageId: 'page-home',
-      formId: 'newsletter',
-      challenge: first.challenge,
-      token: first.token,
-    })).toBeNull()
+    expect(
+      verifyAndConsumePublicFormChallenge({
+        pageId: 'page-home',
+        formId: 'newsletter',
+        challenge: first.challenge,
+        token: first.token,
+      }),
+    ).toBeNull()
   })
 
   it('creates a data row for a valid challenged submission', async () => {
@@ -415,7 +469,11 @@ describe('public CMS-native form endpoint', () => {
     publicFormPerFormRateLimit.reset('unknown|newsletter')
     const { db, createdRows } = makeDb()
     const challengeResponse = await handlePublicFormRequest(
-      makeRequest('/_instatic/form/challenge', { formId: 'newsletter', pageId: 'page-home', pageToken: pageToken() }),
+      makeRequest('/_instatic/form/challenge', {
+        formId: 'newsletter',
+        pageId: 'page-home',
+        pageToken: pageToken(),
+      }),
       db,
       new URL('http://cms.test/_instatic/form/challenge'),
     )
@@ -446,13 +504,18 @@ describe('public CMS-native form endpoint', () => {
     const { db } = makeDb()
 
     const response = await handlePublicFormRequest(
-      makeRequest('/_instatic/form/submit', {
-        formId: 'newsletter',
-        pageId: 'page-home',
-        token: 'missing',
-        challenge: 'missing',
-        values: { email: `${'a'.repeat(1024 * 1024)}@example.com` },
-      }, 'http://cms.test', '203.0.113.22'),
+      makeRequest(
+        '/_instatic/form/submit',
+        {
+          formId: 'newsletter',
+          pageId: 'page-home',
+          token: 'missing',
+          challenge: 'missing',
+          values: { email: `${'a'.repeat(1024 * 1024)}@example.com` },
+        },
+        'http://cms.test',
+        '203.0.113.22',
+      ),
       db,
       new URL('http://cms.test/_instatic/form/submit'),
     )
@@ -481,7 +544,11 @@ describe('public CMS-native form endpoint', () => {
       },
     })
     const challengeResponse = await handlePublicFormRequest(
-      makeRequest('/_instatic/form/challenge', { formId: 'newsletter', pageId: 'page-home', pageToken: pageToken() }),
+      makeRequest('/_instatic/form/challenge', {
+        formId: 'newsletter',
+        pageId: 'page-home',
+        pageToken: pageToken(),
+      }),
       db,
       new URL('http://cms.test/_instatic/form/challenge'),
     )

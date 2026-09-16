@@ -43,18 +43,20 @@ export function AgentImageContextMenu({ request, onClose }: AgentImageContextMen
       }
     } catch (err) {
       console.error(`[AgentImageContextMenu] ${action} failed:`, err)
-      const fallback = action === 'copy'
-        ? 'The image could not be copied.'
-        : action === 'download'
-          ? 'The image could not be downloaded.'
-          : 'The image could not be saved to Media.'
+      const fallback =
+        action === 'copy'
+          ? 'The image could not be copied.'
+          : action === 'download'
+            ? 'The image could not be downloaded.'
+            : 'The image could not be saved to Media.'
       pushToast({
         kind: 'error',
-        title: action === 'copy'
-          ? "Couldn't copy image"
-          : action === 'download'
-            ? "Couldn't save image"
-            : "Couldn't save to Media",
+        title:
+          action === 'copy'
+            ? "Couldn't copy image"
+            : action === 'download'
+              ? "Couldn't save image"
+              : "Couldn't save to Media",
         body: getErrorMessage(err, fallback),
       })
     }
@@ -77,7 +79,9 @@ export function AgentImageContextMenu({ request, onClose }: AgentImageContextMen
           void runAction('copy', () => copyAgentImageToClipboard(request.image))
         }}
       >
-        <span aria-hidden="true"><CopySolidIcon size={13} /></span>
+        <span aria-hidden="true">
+          <CopySolidIcon size={13} />
+        </span>
         Copy image
       </ContextMenuItem>
       <ContextMenuItem
@@ -85,16 +89,20 @@ export function AgentImageContextMenu({ request, onClose }: AgentImageContextMen
           void runAction('download', () => downloadAgentImage(request.image))
         }}
       >
-        <span aria-hidden="true"><ArrowDownIcon size={13} /></span>
+        <span aria-hidden="true">
+          <ArrowDownIcon size={13} />
+        </span>
         Save to desktop
       </ContextMenuItem>
       <ContextMenuItem
         disabled={!canSave || mediaSavePending}
-        tooltip={!canSave
-          ? 'Requires permission to upload media'
-          : mediaSavePending
-            ? 'This image is already being saved to Media'
-            : undefined}
+        tooltip={
+          !canSave
+            ? 'Requires permission to upload media'
+            : mediaSavePending
+              ? 'This image is already being saved to Media'
+              : undefined
+        }
         onClick={() => {
           void runAction('media', async () => {
             const asset = await saveAgentImageToMedia(request.image)
@@ -102,7 +110,9 @@ export function AgentImageContextMenu({ request, onClose }: AgentImageContextMen
           })
         }}
       >
-        <span aria-hidden="true"><ImagesSolidIcon size={13} /></span>
+        <span aria-hidden="true">
+          <ImagesSolidIcon size={13} />
+        </span>
         Save to Media
       </ContextMenuItem>
     </ContextMenu>

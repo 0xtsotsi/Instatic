@@ -40,7 +40,9 @@ export function useTemplatePreviewContext(page: Page | null): TemplatePreviewCon
   const tableSlug = page ? primaryTemplateTableSlug(page) : null
   // The post the author picked to preview (TemplateModeControl), or null → the
   // first published row. Session-only; keyed by the template page id.
-  const selectedRowId = useEditorStore((s) => (page ? s.templatePreviewSelection[page.id] ?? null : null))
+  const selectedRowId = useEditorStore((s) =>
+    page ? (s.templatePreviewSelection[page.id] ?? null) : null,
+  )
   // Fetch a window of published rows once per table; the chosen row is picked
   // from it below so changing the preview selection never refetches. A failed
   // load resolves to an empty window so bindings stay empty rather than throw.
@@ -82,9 +84,9 @@ export function useTemplatePreviewContext(page: Page | null): TemplatePreviewCon
   if (tableSlug && previewState?.tableSlug === tableSlug) {
     // Selected row → first published row → synthetic sample (empty table).
     const chosen =
-      (selectedRowId ? previewState.items.find((item) => item.id === selectedRowId) : undefined)
-      ?? previewState.items[0]
-      ?? previewState.synthetic
+      (selectedRowId ? previewState.items.find((item) => item.id === selectedRowId) : undefined) ??
+      previewState.items[0] ??
+      previewState.synthetic
     entryStack = chosen ? [chosen] : []
   }
   const pageFrame = buildPageFrame(page)

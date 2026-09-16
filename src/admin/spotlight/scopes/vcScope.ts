@@ -15,9 +15,7 @@ function getVCCommands(): Command[] {
     const { site, activeDocument } = state
     if (!site) return []
     const vcs = site.visualComponents || []
-    const activeVcId = activeDocument?.kind === 'visualComponent'
-      ? activeDocument.vcId
-      : null
+    const activeVcId = activeDocument?.kind === 'visualComponent' ? activeDocument.vcId : null
 
     return vcs.map((vc): Command => ({
       id: `visualComponents.open.${vc.id}`,

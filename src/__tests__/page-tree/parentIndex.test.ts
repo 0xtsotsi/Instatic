@@ -170,8 +170,10 @@ describe('parentId invariant — per mutation', () => {
   it('holds after pasteSubtree (foreign payload)', () => {
     const tree = buildTree()
     // Build a foreign payload tree: x → [y]
-    const x = createNode('base.container'); x.id = 'x'
-    const y = createNode('base.container'); y.id = 'y'
+    const x = createNode('base.container')
+    x.id = 'x'
+    const y = createNode('base.container')
+    y.id = 'y'
     x.children = ['y']
     const payload = { rootNodeId: 'x', nodes: { x, y } }
     const idMap = buildSubtreeNodeIdMap('x', payload.nodes)
@@ -190,9 +192,33 @@ describe('parentId invariant — per mutation', () => {
 describe('reindexNodeParents', () => {
   it('derives parentId purely from children, ignoring any stored value', () => {
     const nodes: Record<string, BaseNode> = {
-      root: { id: 'root', moduleId: 'base.body', props: {}, breakpointOverrides: {}, children: ['a'], classIds: [], parentId: 'BOGUS' },
-      a: { id: 'a', moduleId: 'base.container', props: {}, breakpointOverrides: {}, children: ['b'], classIds: [], parentId: 'ALSO-BOGUS' },
-      b: { id: 'b', moduleId: 'base.text', props: {}, breakpointOverrides: {}, children: [], classIds: [], parentId: 'root' /* stale */ },
+      root: {
+        id: 'root',
+        moduleId: 'base.body',
+        props: {},
+        breakpointOverrides: {},
+        children: ['a'],
+        classIds: [],
+        parentId: 'BOGUS',
+      },
+      a: {
+        id: 'a',
+        moduleId: 'base.container',
+        props: {},
+        breakpointOverrides: {},
+        children: ['b'],
+        classIds: [],
+        parentId: 'ALSO-BOGUS',
+      },
+      b: {
+        id: 'b',
+        moduleId: 'base.text',
+        props: {},
+        breakpointOverrides: {},
+        children: [],
+        classIds: [],
+        parentId: 'root' /* stale */,
+      },
     }
     reindexNodeParents(nodes)
     expect(nodes.root.parentId).toBeNull()
@@ -202,8 +228,23 @@ describe('reindexNodeParents', () => {
 
   it('sets parentId to null for orphan nodes not listed by anyone', () => {
     const nodes: Record<string, BaseNode> = {
-      root: { id: 'root', moduleId: 'base.body', props: {}, breakpointOverrides: {}, children: [], classIds: [] },
-      orphan: { id: 'orphan', moduleId: 'base.text', props: {}, breakpointOverrides: {}, children: [], classIds: [], parentId: 'root' },
+      root: {
+        id: 'root',
+        moduleId: 'base.body',
+        props: {},
+        breakpointOverrides: {},
+        children: [],
+        classIds: [],
+      },
+      orphan: {
+        id: 'orphan',
+        moduleId: 'base.text',
+        props: {},
+        breakpointOverrides: {},
+        children: [],
+        classIds: [],
+        parentId: 'root',
+      },
     }
     reindexNodeParents(nodes)
     expect(nodes.orphan.parentId).toBeNull()
@@ -255,7 +296,9 @@ describe('selector parity — pointer impl matches O(N) reference', () => {
     const ids = Object.keys(tree.nodes)
     for (const id of ids) {
       expect(getParent(tree, id)?.id).toBe(refParent(tree, id)?.id)
-      expect(getAncestors(tree, id).map((n) => n.id)).toEqual(refAncestors(tree, id).map((n) => n.id))
+      expect(getAncestors(tree, id).map((n) => n.id)).toEqual(
+        refAncestors(tree, id).map((n) => n.id),
+      )
       for (const other of ids) {
         expect(isAncestor(tree, id, other)).toBe(refIsAncestor(tree, id, other))
       }
@@ -293,7 +336,10 @@ describe('getParent perf sanity', () => {
         return Reflect.ownKeys(target)
       },
     })
-    const proxiedTree: NodeTree<PageNode> = { nodes: counting as Record<string, PageNode>, rootNodeId: tree.rootNodeId }
+    const proxiedTree: NodeTree<PageNode> = {
+      nodes: counting as Record<string, PageNode>,
+      rootNodeId: tree.rootNodeId,
+    }
     getParent(proxiedTree, nodeId)
     return reads
   }
@@ -324,7 +370,10 @@ function loadFixtureSite(): string {
   const t1 = makeNode({ id: 't1', moduleId: 'base.text' })
   const t2 = makeNode({ id: 't2', moduleId: 'base.text' })
   const page = makePage({
-    id: 'p1', slug: 'index', title: 'Home', rootNodeId: 'root',
+    id: 'p1',
+    slug: 'index',
+    title: 'Home',
+    rootNodeId: 'root',
     nodes: { root, box, t1, t2 },
   })
   useEditorStore.getState().loadSite(makeSite({ pages: [page], visualComponents: [] }))
@@ -358,12 +407,13 @@ describe('parentId invariant — editor store undo/redo', () => {
       seed = (seed * 1103515245 + 12345) & 0x7fffffff
       return seed / 0x7fffffff
     }
-    const pick = <T,>(arr: T[]): T => arr[Math.floor(rand() * arr.length)]
+    const pick = <T>(arr: T[]): T => arr[Math.floor(rand() * arr.length)]
     /** Pick up to `n` distinct elements (for multi-select ops). */
-    const pickMany = <T,>(arr: T[], n: number): T[] => {
+    const pickMany = <T>(arr: T[], n: number): T[] => {
       const pool = [...arr]
       const out: T[] = []
-      while (pool.length && out.length < n) out.push(pool.splice(Math.floor(rand() * pool.length), 1)[0])
+      while (pool.length && out.length < n)
+        out.push(pool.splice(Math.floor(rand() * pool.length), 1)[0])
       return out
     }
 

@@ -68,7 +68,8 @@ export function StylesheetModeRows({
                 { value: 'file', label: 'Keep as stylesheet' },
               ]}
               onChange={(e) =>
-                onStylesheetModeChange(sheet.path, e.target.value === 'file' ? 'file' : 'convert')}
+                onStylesheetModeChange(sheet.path, e.target.value === 'file' ? 'file' : 'convert')
+              }
             />
           </div>
         )

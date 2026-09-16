@@ -19,8 +19,9 @@ describe('publishCmsDraft', () => {
 
   it('throws when the publish API rejects the request', async () => {
     await expect(
-      publishCmsDraft(async () =>
-        new Response(JSON.stringify({ error: 'Unauthorized' }), { status: 401 })),
+      publishCmsDraft(
+        async () => new Response(JSON.stringify({ error: 'Unauthorized' }), { status: 401 }),
+      ),
     ).rejects.toThrow('Unauthorized')
   })
 
@@ -29,13 +30,16 @@ describe('publishCmsDraft', () => {
 
     const result = await getCmsPublishStatus(async (input, init) => {
       calls.push({ input, init })
-      return new Response(JSON.stringify({
-        hasPublishedVersion: true,
-        draftMatchesPublished: true,
-        draftPages: 1,
-        publishedPages: 1,
-        lastPublishedAt: '2026-01-03T00:00:00.000Z',
-      }), { status: 200 })
+      return new Response(
+        JSON.stringify({
+          hasPublishedVersion: true,
+          draftMatchesPublished: true,
+          draftPages: 1,
+          publishedPages: 1,
+          lastPublishedAt: '2026-01-03T00:00:00.000Z',
+        }),
+        { status: 200 },
+      )
     })
 
     expect(result.draftMatchesPublished).toBe(true)

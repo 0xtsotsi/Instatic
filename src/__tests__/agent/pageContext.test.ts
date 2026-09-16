@@ -70,7 +70,7 @@ describe('buildCurrentPageContext', () => {
     expect(snap!.currentDocument).toEqual({ type: 'visualComponent', id: vcId })
   })
 
-  it('empties non-active pages\' nodes to bound the payload', () => {
+  it("empties non-active pages' nodes to bound the payload", () => {
     const page = freshSite()
     useEditorStore.getState().addPage('About', 'about')
     useEditorStore.setState({ activePageId: page.id })

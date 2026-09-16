@@ -3,11 +3,7 @@
 // ---------------------------------------------------------------------------
 
 export type ServerPluginLifecycleHook =
-  | 'install'
-  | 'activate'
-  | 'deactivate'
-  | 'uninstall'
-  | 'migrate'
+  'install' | 'activate' | 'deactivate' | 'uninstall' | 'migrate'
 
 export const SERVER_PLUGIN_LIFECYCLE_HOOKS: ServerPluginLifecycleHook[] = [
   'install',

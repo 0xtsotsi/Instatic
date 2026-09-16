@@ -126,42 +126,43 @@ export type DuplicateNodeInput = Static<typeof DuplicateNodeInputSchema>
 
 const CssTextInputSchema = Type.String({
   minLength: 1,
-  description: 'Required for merge and replace. Contains complete CSS rules, including their selectors.',
+  description:
+    'Required for merge and replace. Contains complete CSS rules, including their selectors.',
 })
-const CssSelectorListInputSchema = Type.Array(
-  Type.String({ minLength: 1 }),
-  {
-    minItems: 1,
-    maxItems: 100,
-    uniqueItems: true,
-    description: 'Required for delete and remove-properties. Each entry is one exact emitted selector.',
-  },
-)
+const CssSelectorListInputSchema = Type.Array(Type.String({ minLength: 1 }), {
+  minItems: 1,
+  maxItems: 100,
+  uniqueItems: true,
+  description:
+    'Required for delete and remove-properties. Each entry is one exact emitted selector.',
+})
 const CssPropertyNameInputSchema = Type.String({
   minLength: 1,
   pattern: '^-{0,2}[a-zA-Z][a-zA-Z0-9-]*$',
 })
-const CssPropertyListInputSchema = Type.Array(
-  CssPropertyNameInputSchema,
-  {
-    minItems: 1,
-    maxItems: 100,
-    uniqueItems: true,
-    description: 'Required only for remove-properties. Names use CSS kebab-case, including vendor/custom properties.',
-  },
-)
+const CssPropertyListInputSchema = Type.Array(CssPropertyNameInputSchema, {
+  minItems: 1,
+  maxItems: 100,
+  uniqueItems: true,
+  description:
+    'Required only for remove-properties. Names use CSS kebab-case, including vendor/custom properties.',
+})
 const CssMergeOperationSchema = Type.Literal('merge')
 const CssReplaceOperationSchema = Type.Literal('replace')
 const CssDeleteOperationSchema = Type.Literal('delete')
 const CssRemovePropertiesOperationSchema = Type.Literal('remove-properties')
-const CssOperationSchema = Type.Union([
-  CssMergeOperationSchema,
-  CssReplaceOperationSchema,
-  CssDeleteOperationSchema,
-  CssRemovePropertiesOperationSchema,
-], {
-  description: 'The CSS mutation to perform. Its required companion fields are documented on css, selectors, and properties.',
-})
+const CssOperationSchema = Type.Union(
+  [
+    CssMergeOperationSchema,
+    CssReplaceOperationSchema,
+    CssDeleteOperationSchema,
+    CssRemovePropertiesOperationSchema,
+  ],
+  {
+    description:
+      'The CSS mutation to perform. Its required companion fields are documented on css, selectors, and properties.',
+  },
+)
 
 /**
  * Provider-facing tool schema. Tool providers require an ordinary object at
@@ -169,12 +170,15 @@ const CssOperationSchema = Type.Union([
  * The descriptions state each operation's required fields; the browser then
  * enforces the exact discriminated shape with ApplyCssExecutionInputSchema.
  */
-export const ApplyCssInputSchema = Type.Object({
-  operation: CssOperationSchema,
-  css: Type.Optional(CssTextInputSchema),
-  selectors: Type.Optional(CssSelectorListInputSchema),
-  properties: Type.Optional(CssPropertyListInputSchema),
-}, { additionalProperties: false })
+export const ApplyCssInputSchema = Type.Object(
+  {
+    operation: CssOperationSchema,
+    css: Type.Optional(CssTextInputSchema),
+    selectors: Type.Optional(CssSelectorListInputSchema),
+    properties: Type.Optional(CssPropertyListInputSchema),
+  },
+  { additionalProperties: false },
+)
 
 /**
  * Exact CSS-registry mutation accepted at the editor-store boundary. The
@@ -219,10 +223,7 @@ export type RemoveClassInput = Static<typeof RemoveClassInputSchema>
 // Code asset tools
 // ---------------------------------------------------------------------------
 
-const CodeAssetTypeSchema = Type.Union([
-  Type.Literal('script'),
-  Type.Literal('style'),
-])
+const CodeAssetTypeSchema = Type.Union([Type.Literal('script'), Type.Literal('style')])
 
 const CodeAssetRefInputSchema = Type.Object({
   fileId: Type.Optional(Type.String({ minLength: 1 })),
@@ -248,14 +249,12 @@ export const WriteCodeAssetInputSchema = Type.Object({
   type: CodeAssetTypeSchema,
   content: Type.String(),
   runtime: Type.Optional(Type.Record(Type.String(), Type.Unknown())),
-  dependencies: Type.Optional(Type.Record(
-    Type.String(),
-    Type.String({ minLength: 1 }),
-    {
+  dependencies: Type.Optional(
+    Type.Record(Type.String(), Type.String({ minLength: 1 }), {
       description:
         'Runtime npm dependencies required by a module script. Keys are package names, values are semver versions/ranges. Only valid when type is "script".',
-    },
-  )),
+    }),
+  ),
 })
 export type WriteCodeAssetInput = Static<typeof WriteCodeAssetInputSchema>
 

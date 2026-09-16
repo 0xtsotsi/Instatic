@@ -4,8 +4,7 @@ import { readFileSync } from 'fs'
 const SEGMENTED_CONTROL_CSS = 'src/ui/components/SegmentedControl/SegmentedControl.module.css'
 const RANGE_TABS_CSS = 'src/ui/components/RangeTabs/RangeTabs.module.css'
 const BUTTON_CSS = 'src/ui/components/Button/Button.module.css'
-const CANVAS_MODE_TOGGLE_CSS =
-  'src/admin/pages/site/canvas/CanvasModeToggle.module.css'
+const CANVAS_MODE_TOGGLE_CSS = 'src/admin/pages/site/canvas/CanvasModeToggle.module.css'
 const SECTION_CSS = 'src/ui/components/Section/Section.module.css'
 
 function cssRule(css: string, selector: string): string {
@@ -36,10 +35,7 @@ describe('neutral interactive chrome', () => {
 
     const segmentedTrack = cssRule(segmentedCss, '.group')
     const segmentedHover = cssRule(segmentedCss, '.group .segment.segment:hover')
-    const segmentedActive = cssRule(
-      segmentedCss,
-      '.group .segment.segment[aria-pressed="true"]',
-    )
+    const segmentedActive = cssRule(segmentedCss, '.group .segment.segment[aria-pressed="true"]')
     const clearOverlay = cssRule(segmentedCss, '.group .segment .clearOverlay')
     const rangeTrack = cssRule(rangeTabsCss, '.seg')
     const rangeActive = cssRule(rangeTabsCss, '.tab[data-active="true"]')

@@ -34,18 +34,26 @@ export function addImportedScripts(
   ensureRuntime(site)
   site.runtime!.scripts ??= {}
 
-  return commitFiles(site, scripts, 'script', 'src/scripts/', 'script.js', (script, id, pageIds) => {
-    const config = {
-      ...DEFAULT_SCRIPT_RUNTIME_CONFIG,
-      format: script.format,
-      priority: script.priority,
-      scope: pageIds.length > 0
-        ? { type: 'pages' as const, pageIds }
-        : DEFAULT_SCRIPT_RUNTIME_CONFIG.scope,
-    }
-    site.runtime!.scripts[id] = config
-    if (siteRuntime?.scripts) siteRuntime.scripts[id] = { ...config }
-  })
+  return commitFiles(
+    site,
+    scripts,
+    'script',
+    'src/scripts/',
+    'script.js',
+    (script, id, pageIds) => {
+      const config = {
+        ...DEFAULT_SCRIPT_RUNTIME_CONFIG,
+        format: script.format,
+        priority: script.priority,
+        scope:
+          pageIds.length > 0
+            ? { type: 'pages' as const, pageIds }
+            : DEFAULT_SCRIPT_RUNTIME_CONFIG.scope,
+      }
+      site.runtime!.scripts[id] = config
+      if (siteRuntime?.scripts) siteRuntime.scripts[id] = { ...config }
+    },
+  )
 }
 
 export function addImportedScriptDependencies(
@@ -87,17 +95,25 @@ export function addImportedStylesheets(
   ensureRuntime(site)
   site.runtime!.styles ??= {}
 
-  return commitFiles(site, stylesheets, 'style', 'src/styles/', 'styles.css', (sheet, id, pageIds) => {
-    const config = {
-      ...DEFAULT_STYLE_RUNTIME_CONFIG,
-      priority: sheet.priority,
-      scope: pageIds.length > 0
-        ? { type: 'pages' as const, pageIds }
-        : DEFAULT_STYLE_RUNTIME_CONFIG.scope,
-    }
-    site.runtime!.styles[id] = config
-    if (siteRuntime?.styles) siteRuntime.styles[id] = { ...config }
-  })
+  return commitFiles(
+    site,
+    stylesheets,
+    'style',
+    'src/styles/',
+    'styles.css',
+    (sheet, id, pageIds) => {
+      const config = {
+        ...DEFAULT_STYLE_RUNTIME_CONFIG,
+        priority: sheet.priority,
+        scope:
+          pageIds.length > 0
+            ? { type: 'pages' as const, pageIds }
+            : DEFAULT_STYLE_RUNTIME_CONFIG.scope,
+      }
+      site.runtime!.styles[id] = config
+      if (siteRuntime?.styles) siteRuntime.styles[id] = { ...config }
+    },
+  )
 }
 
 // ---------------------------------------------------------------------------
@@ -130,7 +146,9 @@ function commitFiles<T extends ImportedFileItem>(
     site.files.push({ id, path, type, content: item.content, createdAt: now, updatedAt: now })
 
     const pageIds = Array.isArray(item.pageIds)
-      ? item.pageIds.filter((pageId): pageId is string => typeof pageId === 'string' && pageId.length > 0)
+      ? item.pageIds.filter(
+          (pageId): pageId is string => typeof pageId === 'string' && pageId.length > 0,
+        )
       : []
     registerRuntime(item, id, pageIds)
 
@@ -141,7 +159,11 @@ function commitFiles<T extends ImportedFileItem>(
 }
 
 function ensureRuntime(site: Draft<SiteDocument>): void {
-  site.runtime ??= { dependencyLock: { version: 1, packages: {}, updatedAt: 0 }, scripts: {}, styles: {} }
+  site.runtime ??= {
+    dependencyLock: { version: 1, packages: {}, updatedAt: 0 },
+    scripts: {},
+    styles: {},
+  }
 }
 
 /** Normalise a source path into a safe SiteFile path, falling back to the kind's dir. */

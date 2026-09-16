@@ -60,10 +60,7 @@ export const SvgModule: ModuleDefinition<SvgStoredProps> = {
     const label = String(props.title ?? '').trim()
     if (label) {
       // Inject role/aria-label onto the opening <svg> tag.
-      const withLabel = markup.replace(
-        /^(\s*<svg\b)/i,
-        `$1 role="img" aria-label="${label}"`,
-      )
+      const withLabel = markup.replace(/^(\s*<svg\b)/i, `$1 role="img" aria-label="${label}"`)
       return { html: withLabel }
     }
     return { html: markup }

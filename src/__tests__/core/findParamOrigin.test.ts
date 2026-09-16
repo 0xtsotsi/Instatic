@@ -42,11 +42,7 @@ function makeVCNode(
   }
 }
 
-function makeParam(
-  id: string,
-  name: string,
-  type: VCParam['type'],
-): VCParam {
+function makeParam(id: string, name: string, type: VCParam['type']): VCParam {
   return {
     id,
     name,
@@ -57,11 +53,7 @@ function makeParam(
 }
 
 /** Build a flat-tree VisualComponent from an array of VCNodes. */
-function makeVC(
-  rootId: string,
-  nodes: VCNode[],
-  params: VCParam[],
-): VisualComponent {
+function makeVC(rootId: string, nodes: VCNode[], params: VCParam[]): VisualComponent {
   const nodesMap: Record<string, VCNode> = {}
   for (const n of nodes) nodesMap[n.id] = n
   return {

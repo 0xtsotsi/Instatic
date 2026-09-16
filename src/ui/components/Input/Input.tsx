@@ -136,12 +136,18 @@ export function Input({
       )}
       data-disabled={props.disabled ? 'true' : undefined}
     >
-      {prefix && <span className={styles.prefix} aria-hidden="true">{prefix}</span>}
-      {inputElement}
-      {unit && <span className={styles.unit} aria-hidden="true">{unit}</span>}
-      {showTrailingSlot && (
-        <span className={styles.trailingSlot}>{trailingSlot}</span>
+      {prefix && (
+        <span className={styles.prefix} aria-hidden="true">
+          {prefix}
+        </span>
       )}
+      {inputElement}
+      {unit && (
+        <span className={styles.unit} aria-hidden="true">
+          {unit}
+        </span>
+      )}
+      {showTrailingSlot && <span className={styles.trailingSlot}>{trailingSlot}</span>}
       {showSpinner && (
         <span className={styles.spinner} aria-hidden="true">
           <button

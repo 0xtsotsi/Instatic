@@ -61,12 +61,14 @@ export async function lintPlugin(sourceDir: string): Promise<LintResult> {
   } catch (err) {
     return {
       pluginId: '<unknown>',
-      findings: [{
-        severity: 'error',
-        scope: 'config',
-        message: err instanceof Error ? err.message : String(err),
-        file: 'instatic-plugin.config.ts',
-      }],
+      findings: [
+        {
+          severity: 'error',
+          scope: 'config',
+          message: err instanceof Error ? err.message : String(err),
+          file: 'instatic-plugin.config.ts',
+        },
+      ],
     }
   }
 
@@ -163,11 +165,7 @@ export async function lintPlugin(sourceDir: string): Promise<LintResult> {
   // file in `frontend/` to `dist/frontend/<name>.js`, so the source we
   // expect is the same path with `.js` swapped for `.ts`/`.tsx`.
   for (const asset of declaredAssets) {
-    const ref = asset.kind === 'script'
-      ? asset.src
-      : asset.kind === 'style'
-        ? asset.href
-        : null
+    const ref = asset.kind === 'script' ? asset.src : asset.kind === 'style' ? asset.href : null
     if (!ref) continue
     const sourceTs = join(absoluteSource, ref.replace(/\.js$/, '.ts'))
     const sourceTsx = join(absoluteSource, ref.replace(/\.js$/, '.tsx'))
@@ -186,7 +184,10 @@ export async function lintPlugin(sourceDir: string): Promise<LintResult> {
 
   // ---- entrypoint sources exist on disk ----------------------------------
 
-  const entrypointSources: Array<{ kind: 'server' | 'modules' | 'editor' | 'frontend' | 'admin'; path: string }> = []
+  const entrypointSources: Array<{
+    kind: 'server' | 'modules' | 'editor' | 'frontend' | 'admin'
+    path: string
+  }> = []
   if (await findEntrypointSource(absoluteSource, 'server')) {
     entrypointSources.push({ kind: 'server', path: 'server/' })
   }

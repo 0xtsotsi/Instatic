@@ -144,7 +144,7 @@ export function ClassPicker({ nodeId, trailingAction, ref }: ClassPickerProps) {
     highlightedIndex,
   })
 
-  const contextClass = contextMenu ? site?.styleRules[contextMenu.classId] ?? null : null
+  const contextClass = contextMenu ? (site?.styleRules[contextMenu.classId] ?? null) : null
   const contextClassIndex = contextMenu ? visibleAssignedIds.indexOf(contextMenu.classId) : -1
 
   const openSuggestions = () => dispatchUi({ type: 'openSuggestions' })
@@ -400,7 +400,11 @@ export function ClassPicker({ nodeId, trailingAction, ref }: ClassPickerProps) {
           clearPreviewClass={clearPreviewClass}
         />
       </SelectorInputArea>
-      {createError && <p role="alert" className={styles.errorText}>{createError}</p>}
+      {createError && (
+        <p role="alert" className={styles.errorText}>
+          {createError}
+        </p>
+      )}
       {unmatchedSelectorNotice && site?.styleRules[unmatchedSelectorNotice.ruleId] && (
         <UnmatchedSelectorNotice
           selector={unmatchedSelectorNotice.selector}

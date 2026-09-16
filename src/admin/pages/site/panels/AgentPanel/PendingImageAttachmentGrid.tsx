@@ -25,10 +25,7 @@ export function PendingImageAttachmentGrid({
   onOpenImage,
   onOpenImageMenu,
 }: PendingImageAttachmentGridProps) {
-  function openPointerMenu(
-    image: AgentPreviewImage,
-    event: MouseEvent<HTMLButtonElement>,
-  ): void {
+  function openPointerMenu(image: AgentPreviewImage, event: MouseEvent<HTMLButtonElement>): void {
     event.preventDefault()
     event.stopPropagation()
     onOpenImageMenu({

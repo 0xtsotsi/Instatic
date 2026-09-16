@@ -16,10 +16,7 @@ import {
   isFullBundleImportSelection,
   makeFullBundleImportSelection,
 } from '@core/data/bundleSelection'
-import {
-  CMS_SITE_BUNDLE_IMPORTED_EVENT,
-  requestCmsSiteReload,
-} from '@admin/state/adminEvents'
+import { CMS_SITE_BUNDLE_IMPORTED_EVENT, requestCmsSiteReload } from '@admin/state/adminEvents'
 import type {
   BundleImportSelection,
   BundlePreview,
@@ -86,12 +83,12 @@ function selectionHasContent(bundle: SiteBundle, selection: BundleImportSelectio
   if (selection.includeSite && bundle.site) return true
 
   const tableSelections = new Map(selection.tables.map((table) => [table.tableId, table.rowIds]))
-  if (bundle.rows.some((row) => {
-    const rowIds = tableSelections.get(row.tableId)
-    return rowIds === undefined
-      ? tableSelections.has(row.tableId)
-      : rowIds.includes(row.id)
-  })) {
+  if (
+    bundle.rows.some((row) => {
+      const rowIds = tableSelections.get(row.tableId)
+      return rowIds === undefined ? tableSelections.has(row.tableId) : rowIds.includes(row.id)
+    })
+  ) {
     return true
   }
 
@@ -104,9 +101,8 @@ function selectionHasContent(bundle: SiteBundle, selection: BundleImportSelectio
   }
 
   return (
-    selection.includeMediaFolders && (bundle.mediaFolders?.length ?? 0) > 0
-  ) || (
-    selection.includeRedirects && (bundle.redirects?.length ?? 0) > 0
+    (selection.includeMediaFolders && (bundle.mediaFolders?.length ?? 0) > 0) ||
+    (selection.includeRedirects && (bundle.redirects?.length ?? 0) > 0)
   )
 }
 
@@ -116,9 +112,7 @@ export function describeCmsBundleLoadError(err: unknown): string {
     : getErrorMessage(err, 'Failed to read CMS bundle')
 }
 
-export function useCmsBundleImport({
-  onImportComplete,
-}: UseCmsBundleImportInput) {
+export function useCmsBundleImport({ onImportComplete }: UseCmsBundleImportInput) {
   const { runStepUp } = useStepUp()
   const [cmsBundleState, setCmsBundleState] = useState<CmsBundleState | null>(null)
 
@@ -141,19 +135,23 @@ export function useCmsBundleImport({
 
     try {
       const preview = await previewSiteBundle(bundle)
-      setCmsBundleState((prev) => prev?.bundle === bundle
-        ? { ...prev, preview, previewLoading: false, previewError: null }
-        : prev)
+      setCmsBundleState((prev) =>
+        prev?.bundle === bundle
+          ? { ...prev, preview, previewLoading: false, previewError: null }
+          : prev,
+      )
     } catch (err) {
       console.error('[SiteImportModal] bundle preview failed:', err)
-      setCmsBundleState((prev) => prev?.bundle === bundle
-        ? {
-            ...prev,
-            preview: null,
-            previewLoading: false,
-            previewError: getErrorMessage(err, 'Failed to preview bundle'),
-          }
-        : prev)
+      setCmsBundleState((prev) =>
+        prev?.bundle === bundle
+          ? {
+              ...prev,
+              preview: null,
+              previewLoading: false,
+              previewError: getErrorMessage(err, 'Failed to preview bundle'),
+            }
+          : prev,
+      )
     }
   }
 
@@ -180,14 +178,16 @@ export function useCmsBundleImport({
   }
 
   function setCmsStrategy(strategy: ImportStrategy) {
-    setCmsBundleState((prev) => prev ? { ...prev, strategy } : prev)
+    setCmsBundleState((prev) => (prev ? { ...prev, strategy } : prev))
   }
 
   function setCmsSelection(selection: BundleImportSelection) {
-    setCmsBundleState((prev) => prev ? { ...prev, selection } : prev)
+    setCmsBundleState((prev) => (prev ? { ...prev, selection } : prev))
   }
 
-  async function importCmsBundle(selectionOverride?: BundleImportSelection): Promise<CmsImportResult | null> {
+  async function importCmsBundle(
+    selectionOverride?: BundleImportSelection,
+  ): Promise<CmsImportResult | null> {
     if (
       !cmsBundleState ||
       !cmsBundleState.preview ||
@@ -204,9 +204,15 @@ export function useCmsBundleImport({
       const archiveSelection = isFullBundleImportSelection(cmsBundleState.bundle, selection)
         ? undefined
         : selection
-      const importResult = await runStepUp(() => cmsBundleState.archiveFile
-        ? importSiteBundleArchive(cmsBundleState.archiveFile, cmsBundleState.strategy, archiveSelection)
-        : importSiteBundle(selectedBundle, cmsBundleState.strategy))
+      const importResult = await runStepUp(() =>
+        cmsBundleState.archiveFile
+          ? importSiteBundleArchive(
+              cmsBundleState.archiveFile,
+              cmsBundleState.strategy,
+              archiveSelection,
+            )
+          : importSiteBundle(selectedBundle, cmsBundleState.strategy),
+      )
       pushToast({
         kind: 'success',
         title: 'Import complete',
@@ -218,11 +224,11 @@ export function useCmsBundleImport({
       }
       requestCmsSiteReload()
       onImportComplete?.()
-      setCmsBundleState((prev) => prev ? { ...prev, importing: false } : prev)
+      setCmsBundleState((prev) => (prev ? { ...prev, importing: false } : prev))
       return importResult
     } catch (err) {
       if (err instanceof Error && err.message === StepUpCancelledMessage) {
-        setCmsBundleState((prev) => prev ? { ...prev, importing: false } : prev)
+        setCmsBundleState((prev) => (prev ? { ...prev, importing: false } : prev))
         return null
       }
       console.error('[SiteImportModal] bundle import failed:', err)
@@ -232,7 +238,7 @@ export function useCmsBundleImport({
         body: getErrorMessage(err, 'Unknown import error'),
         location: 'site-workspace',
       })
-      setCmsBundleState((prev) => prev ? { ...prev, importing: false } : prev)
+      setCmsBundleState((prev) => (prev ? { ...prev, importing: false } : prev))
       throw err
     }
   }

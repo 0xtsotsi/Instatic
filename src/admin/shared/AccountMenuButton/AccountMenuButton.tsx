@@ -27,11 +27,7 @@
 import { useRef, useState, type ReactNode } from 'react'
 import { createPortal } from 'react-dom'
 import { Button } from '@ui/components/Button'
-import {
-  ContextMenu,
-  ContextMenuItem,
-  ContextMenuSeparator,
-} from '@ui/components/ContextMenu'
+import { ContextMenu, ContextMenuItem, ContextMenuSeparator } from '@ui/components/ContextMenu'
 import { SettingsCogSolidIcon } from 'pixel-art-icons/icons/settings-cog-solid'
 import { PowerOffIcon } from 'pixel-art-icons/icons/power-off'
 import { MonitorSolidIcon } from 'pixel-art-icons/icons/monitor-solid'
@@ -92,9 +88,10 @@ export function AccountMenuButton(): ReactNode {
       const noun = revokedCount === 1 ? 'device' : 'devices'
       setStatus({
         tone: 'info',
-        message: revokedCount === 0
-          ? 'No other devices were signed in.'
-          : `Signed out ${revokedCount} ${noun}.`,
+        message:
+          revokedCount === 0
+            ? 'No other devices were signed in.'
+            : `Signed out ${revokedCount} ${noun}.`,
       })
     } catch (err) {
       setBusy(null)
@@ -126,62 +123,67 @@ export function AccountMenuButton(): ReactNode {
       >
         <UserAvatar user={user} size={26} alt={null} className={styles.triggerAvatar} />
       </Button>
-      {open && typeof document !== 'undefined' && createPortal(
-        <ContextMenu
-          ariaLabel="Account menu"
-          onClose={close}
-          anchorRef={triggerRef}
-          side="bottom"
-          align="end"
-          width={240}
-          zIndex={10000}
-        >
-          <header className={styles.header}>
-            <span className={styles.headerName}>{displayName}</span>
-            <span className={styles.headerEmail}>{user.email}</span>
-            <span className={styles.headerRoleRow}>
-              <span className={styles.roleBadge}>{roleLabel}</span>
-            </span>
-          </header>
-          <ContextMenuSeparator />
-          <ContextMenuItem
-            onClick={() => {
-              close()
-              navigate(ACCOUNT_ROUTE)
-            }}
-            data-testid="account-menu-go-to-account"
+      {open &&
+        typeof document !== 'undefined' &&
+        createPortal(
+          <ContextMenu
+            ariaLabel="Account menu"
+            onClose={close}
+            anchorRef={triggerRef}
+            side="bottom"
+            align="end"
+            width={240}
+            zIndex={10000}
           >
-            <SettingsCogSolidIcon size={12} aria-hidden="true" />
-            <span>Account &amp; security</span>
-          </ContextMenuItem>
-          <ContextMenuItem
-            onClick={() => void handleSignOut()}
-            disabled={busy !== null}
-            data-testid="account-menu-sign-out"
-          >
-            <PowerOffIcon size={12} aria-hidden="true" />
-            <span>{busy === 'logout' ? 'Signing out…' : 'Sign out'}</span>
-          </ContextMenuItem>
-          <ContextMenuItem
-            onClick={() => void handleSignOutAllDevices()}
-            disabled={busy !== null}
-            data-testid="account-menu-sign-out-all"
-          >
-            <MonitorSolidIcon size={12} aria-hidden="true" />
-            <span>{busy === 'logout-all' ? 'Signing out other devices…' : 'Sign out all devices'}</span>
-          </ContextMenuItem>
-          {status && (
-            <p
-              className={status.tone === 'error' ? `${styles.status} ${styles.statusError}` : styles.status}
-              role={status.tone === 'error' ? 'alert' : 'status'}
+            <header className={styles.header}>
+              <span className={styles.headerName}>{displayName}</span>
+              <span className={styles.headerEmail}>{user.email}</span>
+              <span className={styles.headerRoleRow}>
+                <span className={styles.roleBadge}>{roleLabel}</span>
+              </span>
+            </header>
+            <ContextMenuSeparator />
+            <ContextMenuItem
+              onClick={() => {
+                close()
+                navigate(ACCOUNT_ROUTE)
+              }}
+              data-testid="account-menu-go-to-account"
             >
-              {status.message}
-            </p>
-          )}
-        </ContextMenu>,
-        document.body,
-      )}
+              <SettingsCogSolidIcon size={12} aria-hidden="true" />
+              <span>Account &amp; security</span>
+            </ContextMenuItem>
+            <ContextMenuItem
+              onClick={() => void handleSignOut()}
+              disabled={busy !== null}
+              data-testid="account-menu-sign-out"
+            >
+              <PowerOffIcon size={12} aria-hidden="true" />
+              <span>{busy === 'logout' ? 'Signing out…' : 'Sign out'}</span>
+            </ContextMenuItem>
+            <ContextMenuItem
+              onClick={() => void handleSignOutAllDevices()}
+              disabled={busy !== null}
+              data-testid="account-menu-sign-out-all"
+            >
+              <MonitorSolidIcon size={12} aria-hidden="true" />
+              <span>
+                {busy === 'logout-all' ? 'Signing out other devices…' : 'Sign out all devices'}
+              </span>
+            </ContextMenuItem>
+            {status && (
+              <p
+                className={
+                  status.tone === 'error' ? `${styles.status} ${styles.statusError}` : styles.status
+                }
+                role={status.tone === 'error' ? 'alert' : 'status'}
+              >
+                {status.message}
+              </p>
+            )}
+          </ContextMenu>,
+          document.body,
+        )}
     </>
   )
 }
-

@@ -81,10 +81,7 @@ export function getCanvasDropZone(
 ): PageTreeDropPosition {
   const { rect, axis } = candidate
   const size = axis === 'horizontal' ? rect.width : rect.height
-  const edgeBand = Math.max(
-    MIN_EDGE_HIT_ZONE,
-    Math.min(MAX_EDGE_HIT_ZONE, size * EDGE_ZONE_RATIO),
-  )
+  const edgeBand = Math.max(MIN_EDGE_HIT_ZONE, Math.min(MAX_EDGE_HIT_ZONE, size * EDGE_ZONE_RATIO))
 
   if (axis === 'horizontal') {
     const offset = point.x - rect.left
@@ -183,7 +180,7 @@ function resolvePageTreeInsertionTarget({
   if (!over) return null
 
   if (overId === tree.rootNodeId) {
-    const index = zone === 'before' ? 0 : tree.nodes[tree.rootNodeId]?.children.length ?? 0
+    const index = zone === 'before' ? 0 : (tree.nodes[tree.rootNodeId]?.children.length ?? 0)
     return {
       parentId: tree.rootNodeId,
       index,
@@ -253,19 +250,18 @@ function findCanvasDropCandidate(
   const containing = candidates.filter((candidate) => containsPoint(candidate.rect, point))
   if (containing.length === 0) return null
 
-  return containing.sort((a, b) => {
-    const depthDiff = b.depth - a.depth
-    if (depthDiff !== 0) return depthDiff
-    return area(a.rect) - area(b.rect)
-  })[0] ?? null
+  return (
+    containing.sort((a, b) => {
+      const depthDiff = b.depth - a.depth
+      if (depthDiff !== 0) return depthDiff
+      return area(a.rect) - area(b.rect)
+    })[0] ?? null
+  )
 }
 
 function containsPoint(rect: CanvasRect, point: CanvasPoint): boolean {
   return (
-    point.x >= rect.left &&
-    point.x <= rect.right &&
-    point.y >= rect.top &&
-    point.y <= rect.bottom
+    point.x >= rect.left && point.x <= rect.right && point.y >= rect.top && point.y <= rect.bottom
   )
 }
 

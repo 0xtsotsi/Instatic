@@ -70,13 +70,12 @@ export function AdminSectionNavigation({
 }: AdminSectionNavigationProps) {
   // Hydrate from the session cache so the nav links don't flash empty
   // on every re-mount.
-  const [pluginPages, setPluginPages] = useState<PluginAdminPageRoute[]>(
-    () => cachedPluginPages,
-  )
+  const [pluginPages, setPluginPages] = useState<PluginAdminPageRoute[]>(() => cachedPluginPages)
   const sessionUser = useCurrentAdminUser()
   const effectiveUser = currentUser ?? sessionUser ?? null
   const unrestricted = !effectiveUser
-  const canAccess = (workspace: AdminWorkspace) => unrestricted || canAccessWorkspace(effectiveUser, workspace)
+  const canAccess = (workspace: AdminWorkspace) =>
+    unrestricted || canAccessWorkspace(effectiveUser, workspace)
   const canAccessPlugins = canAccess('plugins')
 
   useEffect(() => {
@@ -171,10 +170,7 @@ export function AdminSectionNavigation({
         />
       )}
       {canAccess('plugins') && (
-        <PluginsNavLink
-          active={section === 'plugins'}
-          onNavigateStart={onWorkspaceNavigateStart}
-        />
+        <PluginsNavLink active={section === 'plugins'} onNavigateStart={onWorkspaceNavigateStart} />
       )}
       {canAccess('users') && (
         <NavItem
@@ -185,16 +181,17 @@ export function AdminSectionNavigation({
           onNavigateStart={onWorkspaceNavigateStart}
         />
       )}
-      {canAccessPlugins && pluginPages.map((page) => (
-        <AdminRouteLink
-          key={`${page.pluginId}:${page.id}`}
-          to={page.route}
-          onNavigateStart={onWorkspaceNavigateStart}
-        >
-          <PackageSolidIcon size={NAV_ICON_SIZE} aria-hidden="true" />
-          <span>{page.navLabel ?? page.title}</span>
-        </AdminRouteLink>
-      ))}
+      {canAccessPlugins &&
+        pluginPages.map((page) => (
+          <AdminRouteLink
+            key={`${page.pluginId}:${page.id}`}
+            to={page.route}
+            onNavigateStart={onWorkspaceNavigateStart}
+          >
+            <PackageSolidIcon size={NAV_ICON_SIZE} aria-hidden="true" />
+            <span>{page.navLabel ?? page.title}</span>
+          </AdminRouteLink>
+        ))}
     </>
   )
 }
@@ -251,13 +248,14 @@ function PluginsNavLink({
     getPluginsInErrorCount,
     getPluginsInErrorCount,
   )
-  const dot = issuesCount > 0 ? (
-    <output
-      className={toolbarStyles.pluginsErrorDot}
-      aria-label={`${issuesCount} plugin${issuesCount === 1 ? '' : 's'} in error state`}
-      title={`${issuesCount} plugin${issuesCount === 1 ? '' : 's'} need${issuesCount === 1 ? 's' : ''} attention`}
-    />
-  ) : null
+  const dot =
+    issuesCount > 0 ? (
+      <output
+        className={toolbarStyles.pluginsErrorDot}
+        aria-label={`${issuesCount} plugin${issuesCount === 1 ? '' : 's'} in error state`}
+        title={`${issuesCount} plugin${issuesCount === 1 ? '' : 's'} need${issuesCount === 1 ? 's' : ''} attention`}
+      />
+    ) : null
 
   if (active) {
     return (

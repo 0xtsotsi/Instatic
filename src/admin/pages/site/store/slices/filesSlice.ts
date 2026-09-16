@@ -97,38 +97,38 @@ export const createFilesSlice: EditorStoreSliceCreator<FilesSlice> = (set, get) 
     const id = nanoid()
 
     set((state) => {
-        if (!state.site) return
-        const newFile: SiteFile = {
-          id,
-          path: normalized,
-          type,
-          // For non-asset types, initialize content to provided value or empty string
-          content: type !== 'asset' ? (content ?? '') : undefined,
-          createdAt: now,
-          updatedAt: now,
-        }
-        state.site.files.push(newFile)
-        reconcileSiteExplorerInPlace(state.site)
-        state.site.updatedAt = now
-      })
+      if (!state.site) return
+      const newFile: SiteFile = {
+        id,
+        path: normalized,
+        type,
+        // For non-asset types, initialize content to provided value or empty string
+        content: type !== 'asset' ? (content ?? '') : undefined,
+        createdAt: now,
+        updatedAt: now,
+      }
+      state.site.files.push(newFile)
+      reconcileSiteExplorerInPlace(state.site)
+      state.site.updatedAt = now
+    })
 
     return id
   },
 
   deleteFile(id) {
     set((state) => {
-        if (!state.site) return
-        const idx = state.site.files.findIndex((f) => f.id === id)
-        if (idx === -1) return
-        state.site.files.splice(idx, 1)
-        if (state.site.runtime?.scripts) delete state.site.runtime.scripts[id]
-        if (state.site.runtime?.styles) delete state.site.runtime.styles[id]
-        delete state.siteRuntime.scripts[id]
-        delete state.siteRuntime.styles[id]
-        if (state.activeEditorFileId === id) state.activeEditorFileId = null
-        reconcileSiteExplorerInPlace(state.site)
-        state.site.updatedAt = Date.now()
-      })
+      if (!state.site) return
+      const idx = state.site.files.findIndex((f) => f.id === id)
+      if (idx === -1) return
+      state.site.files.splice(idx, 1)
+      if (state.site.runtime?.scripts) delete state.site.runtime.scripts[id]
+      if (state.site.runtime?.styles) delete state.site.runtime.styles[id]
+      delete state.siteRuntime.scripts[id]
+      delete state.siteRuntime.styles[id]
+      if (state.activeEditorFileId === id) state.activeEditorFileId = null
+      reconcileSiteExplorerInPlace(state.site)
+      state.site.updatedAt = Date.now()
+    })
   },
 
   renameFile(id, newPath) {
@@ -147,36 +147,36 @@ export const createFilesSlice: EditorStoreSliceCreator<FilesSlice> = (set, get) 
     }
 
     set((state) => {
-        if (!state.site) return
-        const file = state.site.files.find((f) => f.id === id)
-        if (!file) return
-        file.path = normalized
-        file.updatedAt = Date.now()
-        state.site.updatedAt = Date.now()
-      })
+      if (!state.site) return
+      const file = state.site.files.find((f) => f.id === id)
+      if (!file) return
+      file.path = normalized
+      file.updatedAt = Date.now()
+      state.site.updatedAt = Date.now()
+    })
   },
 
   updateFileContent(id, content) {
     set((state) => {
-        if (!state.site) return
-        const file = state.site.files.find((f) => f.id === id)
-        if (!file) return
-        file.content = content
-        if (file.generated) file.ejected = true
-        file.updatedAt = Date.now()
-        state.site.updatedAt = Date.now()
-      })
+      if (!state.site) return
+      const file = state.site.files.find((f) => f.id === id)
+      if (!file) return
+      file.content = content
+      if (file.generated) file.ejected = true
+      file.updatedAt = Date.now()
+      state.site.updatedAt = Date.now()
+    })
   },
 
   updateFileBlob(id, blob) {
     set((state) => {
-        if (!state.site) return
-        const file = state.site.files.find((f) => f.id === id)
-        if (!file) return
-        file.blob = blob
-        if (file.generated) file.ejected = true
-        file.updatedAt = Date.now()
-        state.site.updatedAt = Date.now()
-      })
+      if (!state.site) return
+      const file = state.site.files.find((f) => f.id === id)
+      if (!file) return
+      file.blob = blob
+      if (file.generated) file.ejected = true
+      file.updatedAt = Date.now()
+      state.site.updatedAt = Date.now()
+    })
   },
 })

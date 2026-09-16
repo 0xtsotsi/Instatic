@@ -74,21 +74,39 @@ function makeStubPack(pluginId: string, onDispose: () => void): SandboxedModuleP
 describe('sandboxed module-pack VM disposal', () => {
   it('disposes the VM on deactivate', () => {
     let disposed = 0
-    activateSandboxedPluginModulePack(sampleManifest, makeStubPack('acme.canvas', () => { disposed++ }))
+    activateSandboxedPluginModulePack(
+      sampleManifest,
+      makeStubPack('acme.canvas', () => {
+        disposed++
+      }),
+    )
     deactivatePluginModulePack('acme.canvas')
     expect(disposed).toBe(1)
   })
 
   it('disposes the prior VM when the pack is re-activated', () => {
     let disposedFirst = 0
-    activateSandboxedPluginModulePack(sampleManifest, makeStubPack('acme.canvas', () => { disposedFirst++ }))
-    activateSandboxedPluginModulePack(sampleManifest, makeStubPack('acme.canvas', () => {}))
+    activateSandboxedPluginModulePack(
+      sampleManifest,
+      makeStubPack('acme.canvas', () => {
+        disposedFirst++
+      }),
+    )
+    activateSandboxedPluginModulePack(
+      sampleManifest,
+      makeStubPack('acme.canvas', () => {}),
+    )
     expect(disposedFirst).toBe(1)
   })
 
   it('disposes every VM on reset', () => {
     let disposed = 0
-    activateSandboxedPluginModulePack(sampleManifest, makeStubPack('acme.canvas', () => { disposed++ }))
+    activateSandboxedPluginModulePack(
+      sampleManifest,
+      makeStubPack('acme.canvas', () => {
+        disposed++
+      }),
+    )
     resetPluginModulePacks()
     expect(disposed).toBe(1)
   })
@@ -96,7 +114,12 @@ describe('sandboxed module-pack VM disposal', () => {
 
 describe('pluginModuleToHostModule', () => {
   it('produces a host module definition that delegates render to the plugin', () => {
-    const hostModule = pluginModuleToHostModule('acme.canvas', counterDefinition, () => () => null, [])
+    const hostModule = pluginModuleToHostModule(
+      'acme.canvas',
+      counterDefinition,
+      () => () => null,
+      [],
+    )
     expect(hostModule.id).toBe('acme.canvas.counter')
     expect(hostModule.trusted).toBe(false)
     expect(hostModule.render({ count: 5 }, [])).toEqual({
@@ -106,22 +129,35 @@ describe('pluginModuleToHostModule', () => {
 
   it('rejects module ids that do not start with the plugin id', () => {
     expect(() =>
-      pluginModuleToHostModule('acme.canvas', { ...counterDefinition, id: 'evil.canvas.counter' }, () => () => null, []),
+      pluginModuleToHostModule(
+        'acme.canvas',
+        { ...counterDefinition, id: 'evil.canvas.counter' },
+        () => () => null,
+        [],
+      ),
     ).toThrow(PluginModuleValidationError)
     expect(() =>
-      pluginModuleToHostModule('acme.canvas', { ...counterDefinition, id: 'base.text' }, () => () => null, []),
+      pluginModuleToHostModule(
+        'acme.canvas',
+        { ...counterDefinition, id: 'base.text' },
+        () => () => null,
+        [],
+      ),
     ).toThrow(PluginModuleValidationError)
   })
 
   it('accepts the bare plugin-id as namespace and a kebab-case name segment', () => {
-    expect(() =>
-      validatePluginModuleId('acme.canvas', 'acme.canvas.fancy-card'),
-    ).not.toThrow()
+    expect(() => validatePluginModuleId('acme.canvas', 'acme.canvas.fancy-card')).not.toThrow()
   })
 
   it('rejects modules without render', () => {
     expect(() =>
-      pluginModuleToHostModule('acme.canvas', { ...counterDefinition, render: undefined as unknown as typeof counterDefinition.render }, () => () => null, []),
+      pluginModuleToHostModule(
+        'acme.canvas',
+        { ...counterDefinition, render: undefined as unknown as typeof counterDefinition.render },
+        () => () => null,
+        [],
+      ),
     ).toThrow(/must export a render/)
   })
 
@@ -133,7 +169,9 @@ describe('pluginModuleToHostModule', () => {
     }
     const warnings: string[] = []
     const originalWarn = console.warn
-    console.warn = (...args: unknown[]) => { warnings.push(args.map(String).join(' ')) }
+    console.warn = (...args: unknown[]) => {
+      warnings.push(args.map(String).join(' '))
+    }
     try {
       const hostModule = pluginModuleToHostModule('acme.canvas', jsDefinition, () => () => null, [])
       expect(hostModule.render({}, []).js).toBeUndefined()
@@ -151,17 +189,16 @@ describe('pluginModuleToHostModule', () => {
       id: 'acme.canvas.jsy',
       render: () => ({ html: '<div></div>', js: '(function(){})();' }),
     }
-    const hostModule = pluginModuleToHostModule('acme.canvas', jsDefinition, () => () => null, ['frontend.assets'])
+    const hostModule = pluginModuleToHostModule('acme.canvas', jsDefinition, () => () => null, [
+      'frontend.assets',
+    ])
     expect(hostModule.render({}, []).js).toBe('(function(){})();')
   })
 })
 
 describe('activatePluginModulePack', () => {
   it('registers each module from the pack and tracks them by plugin id', () => {
-    activatePluginModulePack(
-      sampleManifest,
-      { default: [counterDefinition] },
-    )
+    activatePluginModulePack(sampleManifest, { default: [counterDefinition] })
 
     expect(listPluginRegisteredModuleIds('acme.canvas')).toEqual(['acme.canvas.counter'])
     const registered = registry.get('acme.canvas.counter')

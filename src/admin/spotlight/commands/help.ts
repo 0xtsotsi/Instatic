@@ -37,7 +37,11 @@ export function getHelpCommands(): Command[] {
       workspaces: ['any'],
       run: (ctx) => {
         ctx.closeSpotlight()
-        window.open('https://github.com/corebunch/instatic/blob/main/docs/', '_blank', 'noopener,noreferrer')
+        window.open(
+          'https://github.com/corebunch/instatic/blob/main/docs/',
+          '_blank',
+          'noopener,noreferrer',
+        )
       },
     },
 
@@ -51,7 +55,11 @@ export function getHelpCommands(): Command[] {
       workspaces: ['any'],
       run: (ctx) => {
         ctx.closeSpotlight()
-        window.open('https://github.com/corebunch/instatic/issues/new', '_blank', 'noopener,noreferrer')
+        window.open(
+          'https://github.com/corebunch/instatic/issues/new',
+          '_blank',
+          'noopener,noreferrer',
+        )
       },
     },
 

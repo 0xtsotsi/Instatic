@@ -33,22 +33,22 @@ import { ZapSolidIcon } from 'pixel-art-icons/icons/zap-solid'
 
 /** Icon name → component lookup, kebab-case keyed to upstream file names. */
 const DASHBOARD_WIDGET_ICONS: Record<string, PixelArtIconComponent> = {
-  'activity': DashboardSolidIcon,
-  'box': BoxSolidIcon,
-  'chart': ChartSolidIcon,
+  activity: DashboardSolidIcon,
+  box: BoxSolidIcon,
+  chart: ChartSolidIcon,
   'cloud-upload': CloudUploadSolidIcon,
-  'dashboard': DashboardSolidIcon,
-  'database': DatabaseSolidIcon,
-  'eye': EyeSolidIcon,
-  'file': FileTextSolidIcon,
-  'globe': GlobeSolidIcon,
-  'image': ImageSolidIcon,
-  'pen': PenSquareSolidIcon,
-  'plug': PlugSolidIcon,
-  'star': StarSolidIcon,
+  dashboard: DashboardSolidIcon,
+  database: DatabaseSolidIcon,
+  eye: EyeSolidIcon,
+  file: FileTextSolidIcon,
+  globe: GlobeSolidIcon,
+  image: ImageSolidIcon,
+  pen: PenSquareSolidIcon,
+  plug: PlugSolidIcon,
+  star: StarSolidIcon,
   'trending-up': TrendingUpIcon,
-  'users': UsersSolidIcon,
-  'zap': ZapSolidIcon,
+  users: UsersSolidIcon,
+  zap: ZapSolidIcon,
 }
 
 /**

@@ -24,12 +24,7 @@ import { Type, type Static } from '@sinclair/typebox'
  * cold-start latency — but is reserved in the enum so the type stays stable
  * if we change that decision later.
  */
-export type MediaAssetRole =
-  | 'original'
-  | 'variant'
-  | 'avatar'
-  | 'font'
-  | 'plugin-pack'
+export type MediaAssetRole = 'original' | 'variant' | 'avatar' | 'font' | 'plugin-pack'
 
 /**
  * How the adapter wants reads served. Picked once at registration; the host
@@ -66,15 +61,23 @@ export interface MediaStorageBeginWriteInput {
   variantOf?: string
 }
 
-export const MediaStorageUploadStepSchema = Type.Object({
-  method: Type.Union([Type.Literal('PUT'), Type.Literal('POST')]),
-  url: Type.String({ minLength: 1 }),
-  headers: Type.Record(Type.String(), Type.String()),
-  range: Type.Optional(Type.Object({
-    start: Type.Number(),
-    end: Type.Number(),
-  }, { additionalProperties: false })),
-}, { additionalProperties: false })
+export const MediaStorageUploadStepSchema = Type.Object(
+  {
+    method: Type.Union([Type.Literal('PUT'), Type.Literal('POST')]),
+    url: Type.String({ minLength: 1 }),
+    headers: Type.Record(Type.String(), Type.String()),
+    range: Type.Optional(
+      Type.Object(
+        {
+          start: Type.Number(),
+          end: Type.Number(),
+        },
+        { additionalProperties: false },
+      ),
+    ),
+  },
+  { additionalProperties: false },
+)
 
 /**
  * One step in the upload plan. Most providers need a single PUT — that's
@@ -83,11 +86,14 @@ export const MediaStorageUploadStepSchema = Type.Object({
  */
 export type MediaStorageUploadStep = Static<typeof MediaStorageUploadStepSchema>
 
-export const MediaStorageUploadPlanSchema = Type.Object({
-  storagePath: Type.String({ minLength: 1 }),
-  steps: Type.Array(MediaStorageUploadStepSchema),
-  expiresAt: Type.Number(),
-}, { additionalProperties: false })
+export const MediaStorageUploadPlanSchema = Type.Object(
+  {
+    storagePath: Type.String({ minLength: 1 }),
+    steps: Type.Array(MediaStorageUploadStepSchema),
+    expiresAt: Type.Number(),
+  },
+  { additionalProperties: false },
+)
 
 /**
  * Adapter upload plan returned from `beginWrite`.
@@ -236,10 +242,7 @@ export interface MediaUrlTransformContext {
  * a media URL. Returning `null` means "no change; pass through to the next
  * transformer in the chain".
  */
-export type MediaUrlTransformer = (
-  path: string,
-  ctx: MediaUrlTransformContext,
-) => string | null
+export type MediaUrlTransformer = (path: string, ctx: MediaUrlTransformContext) => string | null
 
 // ---------------------------------------------------------------------------
 // Media variant delegate — Tier 3.

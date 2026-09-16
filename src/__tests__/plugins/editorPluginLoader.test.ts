@@ -26,18 +26,20 @@ describe('installed editor plugin loader', () => {
   it('loads enabled packaged editor plugins and activates them with granted permissions', async () => {
     const payload: CmsPluginsPayload = {
       adminPages: [],
-      plugins: [{
-        id: workflowManifest.id,
-        name: workflowManifest.name,
-        version: workflowManifest.version,
-        enabled: true,
-        lifecycleStatus: 'active',
-        lastError: null,
-        grantedPermissions: ['editor.code', 'editor.commands', 'editor.toolbar'],
-        manifest: workflowManifest,
-        installedAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-      }],
+      plugins: [
+        {
+          id: workflowManifest.id,
+          name: workflowManifest.name,
+          version: workflowManifest.version,
+          enabled: true,
+          lifecycleStatus: 'active',
+          lastError: null,
+          grantedPermissions: ['editor.code', 'editor.commands', 'editor.toolbar'],
+          manifest: workflowManifest,
+          installedAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+        },
+      ],
     }
     const imported: string[] = []
 
@@ -68,12 +70,14 @@ describe('installed editor plugin loader', () => {
       failed: [],
       modulePacksLoaded: [],
     })
-    expect(pluginRuntime.getToolbarButtons()).toEqual([{
-      id: 'workflow.approve',
-      label: 'Approve',
-      command: 'workflow.approve',
-      pluginId: 'acme.workflow',
-    }])
+    expect(pluginRuntime.getToolbarButtons()).toEqual([
+      {
+        id: 'workflow.approve',
+        label: 'Approve',
+        command: 'workflow.approve',
+        pluginId: 'acme.workflow',
+      },
+    ])
   })
 
   it('resets stale registrations and skips disabled plugins', async () => {
@@ -84,21 +88,24 @@ describe('installed editor plugin loader', () => {
     })
 
     const result = await activateInstalledEditorPlugins({
-      fetchImpl: async () => Response.json({
-        adminPages: [],
-        plugins: [{
-          id: workflowManifest.id,
-          name: workflowManifest.name,
-          version: workflowManifest.version,
-          enabled: false,
-          lifecycleStatus: 'disabled',
-          lastError: null,
-          grantedPermissions: ['editor.code', 'editor.commands', 'editor.toolbar'],
-          manifest: workflowManifest,
-          installedAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
-        }],
-      } satisfies CmsPluginsPayload),
+      fetchImpl: async () =>
+        Response.json({
+          adminPages: [],
+          plugins: [
+            {
+              id: workflowManifest.id,
+              name: workflowManifest.name,
+              version: workflowManifest.version,
+              enabled: false,
+              lifecycleStatus: 'disabled',
+              lastError: null,
+              grantedPermissions: ['editor.code', 'editor.commands', 'editor.toolbar'],
+              manifest: workflowManifest,
+              installedAt: new Date().toISOString(),
+              updatedAt: new Date().toISOString(),
+            },
+          ],
+        } satisfies CmsPluginsPayload),
       importEditorModule: async () => {
         throw new Error('Disabled plugins should not be imported')
       },
@@ -116,21 +123,24 @@ describe('installed editor plugin loader', () => {
     const imported: string[] = []
 
     const result = await activateInstalledEditorPlugins({
-      fetchImpl: async () => Response.json({
-        adminPages: [],
-        plugins: [{
-          id: workflowManifest.id,
-          name: workflowManifest.name,
-          version: workflowManifest.version,
-          enabled: true,
-          lifecycleStatus: 'error',
-          lastError: 'activate exploded',
-          grantedPermissions: ['editor.code', 'editor.commands', 'editor.toolbar'],
-          manifest: workflowManifest,
-          installedAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
-        }],
-      } satisfies CmsPluginsPayload),
+      fetchImpl: async () =>
+        Response.json({
+          adminPages: [],
+          plugins: [
+            {
+              id: workflowManifest.id,
+              name: workflowManifest.name,
+              version: workflowManifest.version,
+              enabled: true,
+              lifecycleStatus: 'error',
+              lastError: 'activate exploded',
+              grantedPermissions: ['editor.code', 'editor.commands', 'editor.toolbar'],
+              manifest: workflowManifest,
+              installedAt: new Date().toISOString(),
+              updatedAt: new Date().toISOString(),
+            },
+          ],
+        } satisfies CmsPluginsPayload),
       importEditorModule: async (url) => {
         imported.push(url)
         return {
@@ -151,22 +161,25 @@ describe('installed editor plugin loader', () => {
     const imported: string[] = []
 
     const result = await activateInstalledEditorPlugins({
-      fetchImpl: async () => Response.json({
-        adminPages: [],
-        plugins: [{
-          id: workflowManifest.id,
-          name: workflowManifest.name,
-          version: workflowManifest.version,
-          enabled: true,
-          lifecycleStatus: 'active',
-          lastError: null,
-          // Tampered / legacy row: entrypoint declared, grant absent.
-          grantedPermissions: ['editor.commands', 'editor.toolbar'],
-          manifest: workflowManifest,
-          installedAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
-        }],
-      } satisfies CmsPluginsPayload),
+      fetchImpl: async () =>
+        Response.json({
+          adminPages: [],
+          plugins: [
+            {
+              id: workflowManifest.id,
+              name: workflowManifest.name,
+              version: workflowManifest.version,
+              enabled: true,
+              lifecycleStatus: 'active',
+              lastError: null,
+              // Tampered / legacy row: entrypoint declared, grant absent.
+              grantedPermissions: ['editor.commands', 'editor.toolbar'],
+              manifest: workflowManifest,
+              installedAt: new Date().toISOString(),
+              updatedAt: new Date().toISOString(),
+            },
+          ],
+        } satisfies CmsPluginsPayload),
       importEditorModule: async (url) => {
         imported.push(url)
         return { activate() {} }
@@ -198,21 +211,24 @@ describe('installed editor plugin loader', () => {
     const imported: string[] = []
 
     const result = await activateInstalledEditorPlugins({
-      fetchImpl: async () => Response.json({
-        adminPages: [],
-        plugins: [{
-          id: modulesManifest.id,
-          name: modulesManifest.name,
-          version: modulesManifest.version,
-          enabled: true,
-          lifecycleStatus: 'active',
-          lastError: null,
-          grantedPermissions: [],
-          manifest: modulesManifest,
-          installedAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
-        }],
-      } satisfies CmsPluginsPayload),
+      fetchImpl: async () =>
+        Response.json({
+          adminPages: [],
+          plugins: [
+            {
+              id: modulesManifest.id,
+              name: modulesManifest.name,
+              version: modulesManifest.version,
+              enabled: true,
+              lifecycleStatus: 'active',
+              lastError: null,
+              grantedPermissions: [],
+              manifest: modulesManifest,
+              installedAt: new Date().toISOString(),
+              updatedAt: new Date().toISOString(),
+            },
+          ],
+        } satisfies CmsPluginsPayload),
       importModulePack: async (url) => {
         imported.push(url)
         return { modules: [] }

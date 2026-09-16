@@ -142,8 +142,9 @@ describe('plugin secret settings repository', () => {
     const [afterSentinel] = await secretRows()
     expect(Buffer.from(afterSentinel.ciphertext).equals(Buffer.from(initial.ciphertext))).toBe(true)
     expect(await storedSettingsJson()).toEqual({ mode: 'slow' })
-    expect(await resolvePluginSecretsForRuntime(testDb.db, manifest.id, declaredSettings))
-      .toEqual({ apiKey: 'first-secret' })
+    expect(await resolvePluginSecretsForRuntime(testDb.db, manifest.id, declaredSettings)).toEqual({
+      apiKey: 'first-secret',
+    })
 
     // Rotation: new ciphertext, new plaintext.
     await setPluginSettings(testDb.db, manifest.id, declaredSettings, {
@@ -152,8 +153,9 @@ describe('plugin secret settings repository', () => {
     })
     const [afterRotate] = await secretRows()
     expect(Buffer.from(afterRotate.ciphertext).equals(Buffer.from(initial.ciphertext))).toBe(false)
-    expect(await resolvePluginSecretsForRuntime(testDb.db, manifest.id, declaredSettings))
-      .toEqual({ apiKey: 'second-secret' })
+    expect(await resolvePluginSecretsForRuntime(testDb.db, manifest.id, declaredSettings)).toEqual({
+      apiKey: 'second-secret',
+    })
 
     // Clear: the row is deleted.
     await setPluginSettings(testDb.db, manifest.id, declaredSettings, {
@@ -161,7 +163,9 @@ describe('plugin secret settings repository', () => {
       mode: 'slow',
     })
     expect(await secretRows()).toHaveLength(0)
-    expect(await resolvePluginSecretsForRuntime(testDb.db, manifest.id, declaredSettings)).toEqual({})
+    expect(await resolvePluginSecretsForRuntime(testDb.db, manifest.id, declaredSettings)).toEqual(
+      {},
+    )
     expect(await listPluginSecretStates(testDb.db, manifest.id)).toEqual([])
   })
 
@@ -177,15 +181,17 @@ describe('plugin secret settings repository', () => {
 
     await installPlugin(testDb.db, withDefault)
     expect(await storedSettingsJson()).toEqual({ mode: 'fast' })
-    expect(await resolvePluginSecretsForRuntime(testDb.db, manifest.id, declared))
-      .toEqual({ apiKey: 'seed-secret' })
+    expect(await resolvePluginSecretsForRuntime(testDb.db, manifest.id, declared)).toEqual({
+      apiKey: 'seed-secret',
+    })
 
     // Owner rotates, then an upgrade re-runs the install upsert — the rotated
     // value must survive (seed is insert-if-absent).
     await setPluginSettings(testDb.db, manifest.id, declared, { apiKey: 'rotated', mode: 'fast' })
     await installPlugin(testDb.db, { ...withDefault, version: '1.1.0' })
-    expect(await resolvePluginSecretsForRuntime(testDb.db, manifest.id, declared))
-      .toEqual({ apiKey: 'rotated' })
+    expect(await resolvePluginSecretsForRuntime(testDb.db, manifest.id, declared)).toEqual({
+      apiKey: 'rotated',
+    })
   })
 
   it('degrades a master-key fingerprint mismatch to needs-re-entry without crashing', async () => {
@@ -204,7 +210,9 @@ describe('plugin secret settings repository', () => {
 
     const originalError = console.error
     const logged: string[] = []
-    console.error = (...args: unknown[]) => { logged.push(args.map(String).join(' ')) }
+    console.error = (...args: unknown[]) => {
+      logged.push(args.map(String).join(' '))
+    }
     try {
       // Runtime read: field absent, no throw.
       const secrets = await resolvePluginSecretsForRuntime(testDb.db, manifest.id, declaredSettings)
@@ -225,10 +233,12 @@ describe('plugin secret settings repository', () => {
       apiKey: 're-entered',
       mode: 'fast',
     })
-    expect(await resolvePluginSecretsForRuntime(testDb.db, manifest.id, declaredSettings))
-      .toEqual({ apiKey: 're-entered' })
-    expect(await listPluginSecretStates(testDb.db, manifest.id))
-      .toEqual([{ settingId: 'apiKey', keyFingerprintCurrent: true }])
+    expect(await resolvePluginSecretsForRuntime(testDb.db, manifest.id, declaredSettings)).toEqual({
+      apiKey: 're-entered',
+    })
+    expect(await listPluginSecretStates(testDb.db, manifest.id)).toEqual([
+      { settingId: 'apiKey', keyFingerprintCurrent: true },
+    ])
   })
 
   it('cascades plugin_secrets rows on uninstall', async () => {

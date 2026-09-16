@@ -12,7 +12,11 @@ import { Button } from '@ui/components/Button'
 import { CanvasModulePlaceholder } from '@ui/components/CanvasModulePlaceholder'
 import { PackageSolidIcon } from 'pixel-art-icons/icons/package-solid'
 import { cn } from '@ui/cn'
-import { collectSiteStyleBackgroundImagePaths, generateClassCSS, type ResponsiveCssOptions } from '@core/publisher'
+import {
+  collectSiteStyleBackgroundImagePaths,
+  generateClassCSS,
+  type ResponsiveCssOptions,
+} from '@core/publisher'
 import { useResponsiveEditorMediaAssets } from '@admin/pages/media/hooks/useResponsiveBackgroundStyle'
 import {
   createSandboxSrcDoc,
@@ -31,7 +35,10 @@ interface ModuleSandboxFrameProps {
   classIds?: readonly string[]
 }
 
-function collectNodeClassRules(site: SiteDocument | null, classIds: readonly string[] | undefined): SiteDocument['styleRules'] {
+function collectNodeClassRules(
+  site: SiteDocument | null,
+  classIds: readonly string[] | undefined,
+): SiteDocument['styleRules'] {
   const classes: SiteDocument['styleRules'] = {}
   if (!site || !classIds?.length) return classes
 
@@ -77,8 +84,11 @@ export function ModuleSandboxFrame({
   const missingDependencies = getMissingModuleDependencies(moduleDefinition, packageJson)
 
   const nodeClassRules = collectNodeClassRules(site, classIds)
-  const classBackgroundPaths = [...collectSiteStyleBackgroundImagePaths({ styleRules: nodeClassRules })]
-  const { mediaAssets: responsiveMediaAssets } = useResponsiveEditorMediaAssets(classBackgroundPaths)
+  const classBackgroundPaths = [
+    ...collectSiteStyleBackgroundImagePaths({ styleRules: nodeClassRules }),
+  ]
+  const { mediaAssets: responsiveMediaAssets } =
+    useResponsiveEditorMediaAssets(classBackgroundPaths)
   const classCSS = getNodeClassCSS(site, classIds, { mediaAssets: responsiveMediaAssets })
 
   // The iframe's import map is filtered from the site's precomputed
@@ -101,8 +111,9 @@ export function ModuleSandboxFrame({
   // iframe in that state so the user sees a clear "resolving" message
   // instead of a "Failed to resolve module specifier" runtime error.
   const importmapIncomplete = (() => {
-    const runtimeDeps = normalizeModuleDependencies(moduleDefinition.dependencies)
-      .filter((dep) => !dep.dev)
+    const runtimeDeps = normalizeModuleDependencies(moduleDefinition.dependencies).filter(
+      (dep) => !dep.dev,
+    )
     if (runtimeDeps.length === 0) return false
     return runtimeDeps.some((dep) => !importMap.imports[dep.name])
   })()
@@ -118,9 +129,7 @@ export function ModuleSandboxFrame({
 
   if (!runtime) {
     return (
-      <div className={styles.fallback}>
-        Missing sandbox runtime for {moduleDefinition.name}
-      </div>
+      <div className={styles.fallback}>Missing sandbox runtime for {moduleDefinition.name}</div>
     )
   }
 
@@ -128,9 +137,10 @@ export function ModuleSandboxFrame({
   // `useAutoResolveDependencies` triggers a fresh resolve in the
   // background; mount nothing until the URLs land.
   if (importmapIncomplete && missingDependencies.length === 0) {
-    const status = dependencyResolveStatus === 'error'
-      ? 'Dependency resolve failed — open the Dependencies panel to retry.'
-      : 'Resolving runtime packages…'
+    const status =
+      dependencyResolveStatus === 'error'
+        ? 'Dependency resolve failed — open the Dependencies panel to retry.'
+        : 'Resolving runtime packages…'
     return (
       <CanvasModulePlaceholder
         className={mcClassName}
@@ -142,12 +152,11 @@ export function ModuleSandboxFrame({
   }
 
   if (missingDependencies.length > 0) {
-    const packagesLabel = missingDependencies
-      .map((dep) => `${dep.name}@${dep.version}`)
-      .join(', ')
-    const buttonLabel = missingDependencies.length === 1
-      ? `Add ${missingDependencies[0]!.name}`
-      : `Add ${missingDependencies.length} packages`
+    const packagesLabel = missingDependencies.map((dep) => `${dep.name}@${dep.version}`).join(', ')
+    const buttonLabel =
+      missingDependencies.length === 1
+        ? `Add ${missingDependencies[0]!.name}`
+        : `Add ${missingDependencies.length} packages`
     // Collapse to the placeholder's natural height — the iframe's
     // `minHeight` was sized for the live preview (320–360 px), which leaves
     // an empty white band below a short placeholder. Letting the empty
@@ -270,12 +279,15 @@ function SandboxIframeBody({
     if (!payload) return
 
     pendingUpdateRef.current = null
-    iframeRef.current?.contentWindow?.postMessage({
-      source: HOST_MESSAGE_SOURCE,
-      type: 'update',
-      context: payload.context,
-      classCSS: payload.classCSS,
-    }, '*')
+    iframeRef.current?.contentWindow?.postMessage(
+      {
+        source: HOST_MESSAGE_SOURCE,
+        type: 'update',
+        context: payload.context,
+        classCSS: payload.classCSS,
+      },
+      '*',
+    )
   }, [])
 
   // useCallback kept: stable identity for the [scheduleUpdate] useEffect dep array (exhaustive-deps).
@@ -302,12 +314,15 @@ function SandboxIframeBody({
     scheduleUpdate()
   }, [scheduleUpdate])
 
-  useEffect(() => () => {
-    if (updateFrameRef.current !== null) {
-      window.cancelAnimationFrame(updateFrameRef.current)
-      updateFrameRef.current = null
-    }
-  }, [])
+  useEffect(
+    () => () => {
+      if (updateFrameRef.current !== null) {
+        window.cancelAnimationFrame(updateFrameRef.current)
+        updateFrameRef.current = null
+      }
+    },
+    [],
+  )
 
   useEffect(() => {
     function handleMessage(event: MessageEvent) {

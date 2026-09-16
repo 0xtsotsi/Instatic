@@ -13,24 +13,26 @@ function makeFakeDb(): DbClient {
     const normalized = sql.replace(/\s+/g, ' ').trim().toLowerCase()
     if (normalized.includes('from sessions') && normalized.includes('join users')) {
       return {
-        rows: [{
-          id: 'admin_1',
-          email: 'owner@example.com',
-          email_normalized: 'owner@example.com',
-          display_name: 'Owner',
-          password_hash: 'hash',
-          status: 'active',
-          role_id: 'owner',
-          last_login_at: null,
-          created_at: new Date('2026-01-01').toISOString(),
-          updated_at: new Date('2026-01-01').toISOString(),
-          deleted_at: null,
-          role_slug: 'owner',
-          role_name: 'Owner',
-          role_description: '',
-          role_is_system: true,
-          role_capabilities_json: ['runtime.dependencies', 'site.read', 'pages.edit'],
-        } as Row],
+        rows: [
+          {
+            id: 'admin_1',
+            email: 'owner@example.com',
+            email_normalized: 'owner@example.com',
+            display_name: 'Owner',
+            password_hash: 'hash',
+            status: 'active',
+            role_id: 'owner',
+            last_login_at: null,
+            created_at: new Date('2026-01-01').toISOString(),
+            updated_at: new Date('2026-01-01').toISOString(),
+            deleted_at: null,
+            role_slug: 'owner',
+            role_name: 'Owner',
+            role_description: '',
+            role_is_system: true,
+            role_capabilities_json: ['runtime.dependencies', 'site.read', 'pages.edit'],
+          } as Row,
+        ],
         rowCount: 1,
       }
     }
@@ -146,10 +148,12 @@ function siteWithVC(): SiteDocument {
 
 describe('CMS runtime handlers', () => {
   it('resolves an empty runtime dependency manifest', async () => {
-    const res = await handleCmsRequest(runtimeRequest(
-      'http://localhost/admin/api/cms/runtime/dependencies/resolve',
-      { packageJson: { dependencies: {}, devDependencies: {} } },
-    ), makeFakeDb())
+    const res = await handleCmsRequest(
+      runtimeRequest('http://localhost/admin/api/cms/runtime/dependencies/resolve', {
+        packageJson: { dependencies: {}, devDependencies: {} },
+      }),
+      makeFakeDb(),
+    )
 
     expect(res.status).toBe(200)
     await expect(res.json()).resolves.toMatchObject({
@@ -158,9 +162,8 @@ describe('CMS runtime handlers', () => {
   })
 
   it('normalizes unsafe and non-runtime dependency manifest entries before resolving', async () => {
-    const res = await handleCmsRequest(runtimeRequest(
-      'http://localhost/admin/api/cms/runtime/dependencies/resolve',
-      {
+    const res = await handleCmsRequest(
+      runtimeRequest('http://localhost/admin/api/cms/runtime/dependencies/resolve', {
         packageJson: {
           dependencies: {
             'bad;pkg': '^1.0.0',
@@ -172,8 +175,9 @@ describe('CMS runtime handlers', () => {
             vite: '^7.0.0',
           },
         },
-      },
-    ), makeFakeDb())
+      }),
+      makeFakeDb(),
+    )
 
     expect(res.status).toBe(200)
     await expect(res.json()).resolves.toEqual({
@@ -186,10 +190,13 @@ describe('CMS runtime handlers', () => {
   })
 
   it('builds a runtime preview document for a provided site and page', async () => {
-    const res = await handleCmsRequest(runtimeRequest(
-      'http://localhost/admin/api/cms/runtime/preview',
-      { site: site(), pageId: 'page_1' },
-    ), makeFakeDb())
+    const res = await handleCmsRequest(
+      runtimeRequest('http://localhost/admin/api/cms/runtime/preview', {
+        site: site(),
+        pageId: 'page_1',
+      }),
+      makeFakeDb(),
+    )
 
     expect(res.status).toBe(200)
     await expect(res.json()).resolves.toMatchObject({
@@ -201,10 +208,13 @@ describe('CMS runtime handlers', () => {
   })
 
   it('builds a runtime preview from a VC virtual page id when the editor is in VC canvas mode', async () => {
-    const res = await handleCmsRequest(runtimeRequest(
-      'http://localhost/admin/api/cms/runtime/preview',
-      { site: siteWithVC(), pageId: 'vc-virtual:vc_hero' },
-    ), makeFakeDb())
+    const res = await handleCmsRequest(
+      runtimeRequest('http://localhost/admin/api/cms/runtime/preview', {
+        site: siteWithVC(),
+        pageId: 'vc-virtual:vc_hero',
+      }),
+      makeFakeDb(),
+    )
 
     expect(res.status).toBe(200)
     await expect(res.json()).resolves.toMatchObject({
@@ -214,10 +224,13 @@ describe('CMS runtime handlers', () => {
   })
 
   it('returns 404 for an unknown VC virtual page id', async () => {
-    const res = await handleCmsRequest(runtimeRequest(
-      'http://localhost/admin/api/cms/runtime/preview',
-      { site: siteWithVC(), pageId: 'vc-virtual:unknown_vc' },
-    ), makeFakeDb())
+    const res = await handleCmsRequest(
+      runtimeRequest('http://localhost/admin/api/cms/runtime/preview', {
+        site: siteWithVC(),
+        pageId: 'vc-virtual:unknown_vc',
+      }),
+      makeFakeDb(),
+    )
 
     expect(res.status).toBe(404)
     await expect(res.json()).resolves.toMatchObject({ error: 'Page not found' })

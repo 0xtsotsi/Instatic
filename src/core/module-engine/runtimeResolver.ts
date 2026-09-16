@@ -87,8 +87,11 @@ export function createModuleImportMap(
     // site's package.json hasn't been adopted into the runtime yet, so we
     // refuse to build URLs for it. The host-side UI surfaces the
     // "missing dep" affordance instead.
-    if (options.strictSiteManifest && options.packageJson
-      && getSiteDependencyVersion(options.packageJson, dependency) === null) {
+    if (
+      options.strictSiteManifest &&
+      options.packageJson &&
+      getSiteDependencyVersion(options.packageJson, dependency) === null
+    ) {
       continue
     }
 

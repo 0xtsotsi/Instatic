@@ -30,7 +30,10 @@ export function escapeHtml(value: unknown): string {
  * normalisation browsers apply during URL parsing.
  */
 export function isSafeUrl(url: string): boolean {
-  const normalized = url.replace(/[\t\n\r]/g, '').trim().toLowerCase()
+  const normalized = url
+    .replace(/[\t\n\r]/g, '')
+    .trim()
+    .toLowerCase()
   return (
     !normalized.startsWith('javascript:') &&
     !normalized.startsWith('vbscript:') &&

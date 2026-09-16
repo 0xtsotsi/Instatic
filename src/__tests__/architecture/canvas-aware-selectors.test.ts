@@ -104,7 +104,11 @@ describe('Canvas-aware selector gate — selectActivePage not imported in editor
       if (SELECT_ACTIVE_PAGE_ALLOWLIST.has(rel)) continue
 
       let src: string
-      try { src = readFileSync(file, 'utf8') } catch { continue }
+      try {
+        src = readFileSync(file, 'utf8')
+      } catch {
+        continue
+      }
 
       if (!IMPORT_RE.test(src)) continue
 
@@ -121,12 +125,12 @@ describe('Canvas-aware selector gate — selectActivePage not imported in editor
     if (violations.length > 0) {
       throw new Error(
         '[canvas-aware-selectors] selectActivePage used in VC-aware editor panel.\n' +
-        'In VC edit mode (activeDocument.kind === "visualComponent") selectActivePage returns\n' +
-        'null — the VC tree is never in site.pages.  Use selectActiveCanvasPage instead.\n' +
-        'If the file is page-mode-only by design, add it to SELECT_ACTIVE_PAGE_ALLOWLIST\n' +
-        'in this test file with a §A.N justification comment.\n' +
-        'Violations:\n' +
-        violations.map((v) => `  ${v}`).join('\n'),
+          'In VC edit mode (activeDocument.kind === "visualComponent") selectActivePage returns\n' +
+          'null — the VC tree is never in site.pages.  Use selectActiveCanvasPage instead.\n' +
+          'If the file is page-mode-only by design, add it to SELECT_ACTIVE_PAGE_ALLOWLIST\n' +
+          'in this test file with a §A.N justification comment.\n' +
+          'Violations:\n' +
+          violations.map((v) => `  ${v}`).join('\n'),
       )
     }
 
@@ -158,7 +162,11 @@ describe('Canvas-aware selector gate — no raw pages.find in VC-aware panel dir
     for (const dir of VC_AWARE_PANEL_DIRS) {
       for (const file of collectTs(dir)) {
         let src: string
-        try { src = readFileSync(file, 'utf8') } catch { continue }
+        try {
+          src = readFileSync(file, 'utf8')
+        } catch {
+          continue
+        }
 
         if (!PAGES_FIND_RE.test(src)) continue
 
@@ -169,7 +177,7 @@ describe('Canvas-aware selector gate — no raw pages.find in VC-aware panel dir
           if (PAGES_FIND_RE.test(line)) {
             violations.push(
               `${relPath(file)}:${i + 1} — uses s.site?.pages.find( (page-tree only; ` +
-              'returns null for VC nodes — use selectActiveCanvasPage instead)',
+                'returns null for VC nodes — use selectActiveCanvasPage instead)',
             )
           }
         }
@@ -179,12 +187,12 @@ describe('Canvas-aware selector gate — no raw pages.find in VC-aware panel dir
     if (violations.length > 0) {
       throw new Error(
         '[canvas-aware-selectors] Raw pages.find pattern in a VC-aware panel directory.\n' +
-        'site.pages only contains page-tree nodes.  VC nodes live in vc.tree.nodes and\n' +
-        'are not present in site.pages at all.  This pattern silently returns null\n' +
-        'for any node selected inside a VC, breaking the Properties/DOM/Selectors panels.\n' +
-        'Required: use selectActiveCanvasPage(s)?.nodes[nodeId] for node lookups.\n' +
-        'Violations:\n' +
-        violations.map((v) => `  ${v}`).join('\n'),
+          'site.pages only contains page-tree nodes.  VC nodes live in vc.tree.nodes and\n' +
+          'are not present in site.pages at all.  This pattern silently returns null\n' +
+          'for any node selected inside a VC, breaking the Properties/DOM/Selectors panels.\n' +
+          'Required: use selectActiveCanvasPage(s)?.nodes[nodeId] for node lookups.\n' +
+          'Violations:\n' +
+          violations.map((v) => `  ${v}`).join('\n'),
       )
     }
 

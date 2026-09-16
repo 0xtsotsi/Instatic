@@ -85,7 +85,11 @@ async function deleteCredentialAction(
 async function testCredentialAction(
   id: string,
   setBusyIds: (updater: (prev: Set<string>) => Set<string>) => void,
-  setTestResults: (updater: (prev: Record<string, TestResult & { ts: number }>) => Record<string, TestResult & { ts: number }>) => void,
+  setTestResults: (
+    updater: (
+      prev: Record<string, TestResult & { ts: number }>,
+    ) => Record<string, TestResult & { ts: number }>,
+  ) => void,
 ): Promise<void> {
   setBusyIds((prev) => new Set(prev).add(id))
   try {
@@ -142,7 +146,11 @@ export function ProvidersTab() {
         </Button>
       </div>
 
-      {error && <p role="alert" className={styles.errorAlert}>{error}</p>}
+      {error && (
+        <p role="alert" className={styles.errorAlert}>
+          {error}
+        </p>
+      )}
 
       {loading ? (
         <div className={styles.emptyState}>Loading…</div>
@@ -246,12 +254,20 @@ async function submitCredential(
   setBusy(true)
   try {
     const body: CreateCredentialBody =
-      effectiveAuthMode === 'apiKey' ? {
-        providerId, authMode: 'apiKey', displayLabel, apiKey,
-      } : {
-        providerId, authMode: 'baseUrl', displayLabel, baseUrl,
-        ...(apiKey ? { apiKey } : {}),
-      }
+      effectiveAuthMode === 'apiKey'
+        ? {
+            providerId,
+            authMode: 'apiKey',
+            displayLabel,
+            apiKey,
+          }
+        : {
+            providerId,
+            authMode: 'baseUrl',
+            displayLabel,
+            baseUrl,
+            ...(apiKey ? { apiKey } : {}),
+          }
     await createCredential(body)
     onCreated()
   } catch (err) {
@@ -292,7 +308,16 @@ function AddCredentialDialog({
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
-    await submitCredential(effectiveAuthMode, providerId, displayLabel, apiKey, baseUrl, onCreated, setError, setBusy)
+    await submitCredential(
+      effectiveAuthMode,
+      providerId,
+      displayLabel,
+      apiKey,
+      baseUrl,
+      onCreated,
+      setError,
+      setBusy,
+    )
   }
 
   return (
@@ -315,7 +340,9 @@ function AddCredentialDialog({
     >
       <form id={formId} className={styles.dialogForm} onSubmit={(e) => void handleSubmit(e)}>
         <div className={styles.dialogField}>
-          <label htmlFor={providerInputId} className={styles.dialogFieldLabel}>Provider</label>
+          <label htmlFor={providerInputId} className={styles.dialogFieldLabel}>
+            Provider
+          </label>
           <Select
             id={providerInputId}
             value={providerId}
@@ -325,7 +352,9 @@ function AddCredentialDialog({
         </div>
 
         <div className={styles.dialogField}>
-          <label htmlFor={labelInputId} className={styles.dialogFieldLabel}>Display label</label>
+          <label htmlFor={labelInputId} className={styles.dialogFieldLabel}>
+            Display label
+          </label>
           <Input
             id={labelInputId}
             value={displayLabel}
@@ -337,7 +366,9 @@ function AddCredentialDialog({
 
         {effectiveAuthMode === 'apiKey' && (
           <div className={styles.dialogField}>
-            <label htmlFor={apiKeyInputId} className={styles.dialogFieldLabel}>API key</label>
+            <label htmlFor={apiKeyInputId} className={styles.dialogFieldLabel}>
+              API key
+            </label>
             <Input
               id={apiKeyInputId}
               type="password"
@@ -360,7 +391,9 @@ function AddCredentialDialog({
         {effectiveAuthMode === 'baseUrl' && (
           <>
             <div className={styles.dialogField}>
-              <label htmlFor={baseUrlInputId} className={styles.dialogFieldLabel}>Base URL</label>
+              <label htmlFor={baseUrlInputId} className={styles.dialogFieldLabel}>
+                Base URL
+              </label>
               <Input
                 id={baseUrlInputId}
                 value={baseUrl}
@@ -391,7 +424,11 @@ function AddCredentialDialog({
           </>
         )}
 
-        {error && <p role="alert" className={styles.dialogError}>{error}</p>}
+        {error && (
+          <p role="alert" className={styles.dialogError}>
+            {error}
+          </p>
+        )}
       </form>
     </Dialog>
   )

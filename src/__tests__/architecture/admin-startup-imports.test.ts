@@ -12,9 +12,7 @@ import { readFileSync, readdirSync, statSync } from 'fs'
 import { join, relative } from 'path'
 
 const REPO_ROOT = join(import.meta.dir, '../../../')
-const STARTUP_DIRS = [
-  join(REPO_ROOT, 'src/admin/preauth'),
-]
+const STARTUP_DIRS = [join(REPO_ROOT, 'src/admin/preauth')]
 
 function listSourceFiles(dir: string): string[] {
   const out: string[] = []
@@ -32,8 +30,7 @@ function listSourceFiles(dir: string): string[] {
 
 describe('admin startup imports', () => {
   it('pre-auth code does not import the full persistence barrel', () => {
-    const offenders = STARTUP_DIRS
-      .flatMap(listSourceFiles)
+    const offenders = STARTUP_DIRS.flatMap(listSourceFiles)
       .filter((file) => readFileSync(file, 'utf8').includes("from '@core/persistence'"))
       .map((file) => relative(REPO_ROOT, file))
 

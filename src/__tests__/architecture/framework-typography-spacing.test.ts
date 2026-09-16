@@ -79,10 +79,12 @@ describe('architecture — framework typography & spacing engine', () => {
 
 describe('architecture — typography / spacing panels', () => {
   it('TypographyPanel and SpacingPanel exist at the expected paths', () => {
-    expect(existsSync(join(ROOT, 'admin/pages/site/panels/TypographyPanel/TypographyPanel.tsx'))).toBe(
+    expect(
+      existsSync(join(ROOT, 'admin/pages/site/panels/TypographyPanel/TypographyPanel.tsx')),
+    ).toBe(true)
+    expect(existsSync(join(ROOT, 'admin/pages/site/panels/SpacingPanel/SpacingPanel.tsx'))).toBe(
       true,
     )
-    expect(existsSync(join(ROOT, 'admin/pages/site/panels/SpacingPanel/SpacingPanel.tsx'))).toBe(true)
     expect(
       existsSync(join(ROOT, 'admin/pages/site/panels/FrameworkScalePanel/FrameworkScalePanel.tsx')),
     ).toBe(true)

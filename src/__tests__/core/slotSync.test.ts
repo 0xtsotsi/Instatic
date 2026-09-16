@@ -319,7 +319,9 @@ describe('SS-6 — non-slot-instance child gets a delete op', () => {
     const result = syncSlotInstances(vcRefNode, vc, treeNodes)
 
     // The invalid child should get a delete op
-    const deleteOps = result.ops.filter((op) => op.kind === 'delete' && op.nodeId === 'invalid-child')
+    const deleteOps = result.ops.filter(
+      (op) => op.kind === 'delete' && op.nodeId === 'invalid-child',
+    )
     expect(deleteOps).toHaveLength(1)
 
     // An insert op should be produced for the 'children' slot

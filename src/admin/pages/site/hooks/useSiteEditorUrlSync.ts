@@ -86,8 +86,5 @@ export function useSiteEditorUrlSync({ enabled, loaded }: UseSiteEditorUrlSyncOp
 
   // Clears the one-shot Data-workspace deep-link params (`table`/`row`) on the
   // first sync and keeps `?page=` current thereafter.
-  useUrlQuerySync(
-    { page: activePageSlug, table: null, row: null },
-    { enabled: enabled && loaded },
-  )
+  useUrlQuerySync({ page: activePageSlug, table: null, row: null }, { enabled: enabled && loaded })
 }

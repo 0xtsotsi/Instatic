@@ -1,4 +1,8 @@
-import { reconcileSiteExplorerOrganization, type SiteDocument, type SiteShell } from '@core/page-tree'
+import {
+  reconcileSiteExplorerOrganization,
+  type SiteDocument,
+  type SiteShell,
+} from '@core/page-tree'
 import type { IPersistenceAdapter, SaveSiteOptions } from './types'
 import { parseJsonResponse } from '@core/utils/jsonValidate'
 import { apiRequest, assertOk, type FetchLike } from '@core/http'
@@ -23,10 +27,7 @@ export class CmsAdapter implements IPersistenceAdapter {
   private readonly fetchImpl: FetchLike
   private readonly basePath: string
 
-  constructor(
-    fetchImpl: FetchLike = defaultFetch,
-    basePath = '/admin/api/cms',
-  ) {
+  constructor(fetchImpl: FetchLike = defaultFetch, basePath = '/admin/api/cms') {
     this.fetchImpl = fetchImpl
     this.basePath = basePath
   }
@@ -123,7 +124,8 @@ export class CmsAdapter implements IPersistenceAdapter {
       pagesRes.status === 404 ||
       componentsRes.status === 404 ||
       layoutsRes.status === 404
-    ) return undefined
+    )
+      return undefined
     await assertOk(shellRes, `CMS shell load failed with ${shellRes.status}`)
     await assertOk(pagesRes, `CMS pages load failed with ${pagesRes.status}`)
     await assertOk(componentsRes, `CMS components load failed with ${componentsRes.status}`)

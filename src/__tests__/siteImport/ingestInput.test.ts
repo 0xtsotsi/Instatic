@@ -108,9 +108,7 @@ describe('ingestInput — File[]', () => {
   })
 
   it('throws TooManyFilesError when count exceeds limit', async () => {
-    const files = Array.from({ length: 5 }, (_, i) =>
-      new File([txt('')], `file${i}.html`),
-    )
+    const files = Array.from({ length: 5 }, (_, i) => new File([txt('')], `file${i}.html`))
     await expect(ingestInput(files, { maxFiles: 3 })).rejects.toBeInstanceOf(TooManyFilesError)
   })
 
@@ -202,9 +200,9 @@ describe('ingestInput — zip bytes', () => {
     const zipBytes = makeZip({
       'page.html': '<html><body>' + 'x'.repeat(200) + '</body></html>',
     })
-    await expect(
-      ingestInput({ zipBytes }, { maxUncompressedZipBytes: 50 }),
-    ).rejects.toBeInstanceOf(ZipBombError)
+    await expect(ingestInput({ zipBytes }, { maxUncompressedZipBytes: 50 })).rejects.toBeInstanceOf(
+      ZipBombError,
+    )
   })
 
   it('traversal-path guard: fflate stores paths verbatim so assertSafePath catches them', async () => {

@@ -23,7 +23,14 @@ interface GridAxisControlProps {
   onClear: () => void
 }
 
-export function GridAxisControl({ label, axis, value, isSet, onChange, onClear }: GridAxisControlProps) {
+export function GridAxisControl({
+  label,
+  axis,
+  value,
+  isSet,
+  onChange,
+  onClear,
+}: GridAxisControlProps) {
   // alignItems (block axis) → items are stacked vertically inside their cell;
   // visualised via horizontal-row icons (start = top, end = bottom).
   // justifyItems (inline axis) → items spread horizontally; visualised via

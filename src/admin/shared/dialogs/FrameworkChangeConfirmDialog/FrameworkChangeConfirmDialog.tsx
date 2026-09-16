@@ -16,10 +16,7 @@
 import { useRef } from 'react'
 import { Button } from '@ui/components/Button'
 import { Dialog } from '@ui/components/Dialog'
-import type {
-  FrameworkChangeImpact,
-  FrameworkClassUsageRef,
-} from '@core/framework'
+import type { FrameworkChangeImpact, FrameworkClassUsageRef } from '@core/framework'
 import styles from './FrameworkChangeConfirmDialog.module.css'
 
 interface FrameworkChangeConfirmDialogProps {
@@ -75,18 +72,15 @@ export function FrameworkChangeConfirmDialog({
       }
     >
       <p className={styles.summary}>
-        <span className={styles.summaryStrong}>{removedInUseCount}</span>
-        {' '}
-        generated {removedInUseCount === 1 ? 'class is' : 'classes are'} still
-        assigned to{' '}
-        <span className={styles.summaryStrong}>{totalUsages}</span>
-        {' '}
+        <span className={styles.summaryStrong}>{removedInUseCount}</span> generated{' '}
+        {removedInUseCount === 1 ? 'class is' : 'classes are'} still assigned to{' '}
+        <span className={styles.summaryStrong}>{totalUsages}</span>{' '}
         {totalUsages === 1 ? 'element' : 'elements'}.
       </p>
       <p className={styles.subline}>
-        Proceeding will remove the {removedInUseCount === 1 ? 'class' : 'classes'} from
-        every element below. The {removedInUseCount === 1 ? 'class itself' : 'classes themselves'} will
-        be deleted from the site.
+        Proceeding will remove the {removedInUseCount === 1 ? 'class' : 'classes'} from every
+        element below. The {removedInUseCount === 1 ? 'class itself' : 'classes themselves'} will be
+        deleted from the site.
       </p>
 
       {grouped.map((group) => (
@@ -100,9 +94,7 @@ export function FrameworkChangeConfirmDialog({
           <ul className={styles.usageList} aria-label={`Uses of .${group.className}`}>
             {group.usages.map((usage) => (
               <li key={usageKey(usage)} className={styles.usageItem}>
-                <span className={styles.usageScope}>
-                  {usageScopeLabel(usage)}
-                </span>
+                <span className={styles.usageScope}>{usageScopeLabel(usage)}</span>
                 <span className={styles.usageNode} title={usage.source.nodeLabel}>
                   {usage.source.nodeLabel}
                 </span>
@@ -135,9 +127,7 @@ function groupUsagesByClass(usages: FrameworkClassUsageRef[]): GroupedUsage[] {
       })
     }
   }
-  return Array.from(byClassId.values()).sort((a, b) =>
-    a.className.localeCompare(b.className),
-  )
+  return Array.from(byClassId.values()).sort((a, b) => a.className.localeCompare(b.className))
 }
 
 function usageScopeLabel(usage: FrameworkClassUsageRef): string {

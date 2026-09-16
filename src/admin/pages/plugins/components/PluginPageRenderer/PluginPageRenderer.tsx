@@ -1,8 +1,4 @@
-import {
-  useEffect,
-  useState,
-  type CSSProperties,
-} from 'react'
+import { useEffect, useState, type CSSProperties } from 'react'
 import { Button } from '@ui/components/Button'
 import { Checkbox } from '@ui/components/Checkbox'
 import { ErrorBoundary } from '@ui/components/ErrorBoundary'
@@ -26,10 +22,7 @@ import {
   getCmsPluginResource,
 } from '@core/persistence'
 import { pluginRuntime } from '@core/plugins/runtime'
-import {
-  PluginContext,
-  type PluginContextValue,
-} from '@admin/plugin-host-hooks'
+import { PluginContext, type PluginContextValue } from '@admin/plugin-host-hooks'
 import { ensurePluginRuntime } from '@admin/pluginRuntimeBootstrap'
 import { SkeletonBlock, SkeletonRows } from '@ui/components/Skeleton'
 import styles from '../../PluginsPage.module.css'
@@ -127,10 +120,7 @@ export function PluginPageRenderer({ page, importModule }: PluginPageRendererPro
   // blank the admin shell. Reset key combines plugin id + page id so
   // navigating between plugin pages naturally clears stuck errors.
   return (
-    <ErrorBoundary
-      location="plugin-page"
-      resetKeys={[page.pluginId, page.id]}
-    >
+    <ErrorBoundary location="plugin-page" resetKeys={[page.pluginId, page.id]}>
       <PluginPageContent page={page} importModule={importModule} />
     </ErrorBoundary>
   )
@@ -230,9 +220,7 @@ function PluginAppPage({
     kind: 'loading',
     key: pageKey,
   })
-  const visibleState: LoadState = loadState.key === pageKey
-    ? loadState
-    : { kind: 'loading' }
+  const visibleState: LoadState = loadState.key === pageKey ? loadState : { kind: 'loading' }
 
   useEffect(() => {
     let cancelled = false
@@ -259,7 +247,9 @@ function PluginAppPage({
           key: pageKey,
         })
       })
-    return () => { cancelled = true }
+    return () => {
+      cancelled = true
+    }
   }, [importModule, page, pageKey])
 
   return (
@@ -272,7 +262,9 @@ function PluginAppPage({
         <SkeletonBlock minHeight={240} ariaLabel="Loading plugin app" />
       )}
       {visibleState.kind === 'error' && (
-        <p className={styles.error} role="alert">{visibleState.message}</p>
+        <p className={styles.error} role="alert">
+          {visibleState.message}
+        </p>
       )}
       {visibleState.kind === 'react' && (
         <PluginReactSubtree Component={visibleState.Component} page={page} />
@@ -283,10 +275,9 @@ function PluginAppPage({
 
 function emptyForm(resource: PluginResource | null): Record<string, string | boolean> {
   if (!resource) return {}
-  return Object.fromEntries(resource.fields.map((field) => [
-    field.id,
-    field.type === 'boolean' ? false : '',
-  ]))
+  return Object.fromEntries(
+    resource.fields.map((field) => [field.id, field.type === 'boolean' ? false : '']),
+  )
 }
 
 function recordValue(record: PluginRecord, field: PluginResourceField): string {
@@ -316,7 +307,9 @@ function PluginResourcePage({ page }: { page: ResourcePluginPageRoute }) {
       setRecords,
       setFormData,
     )
-    return () => { cancelled = true }
+    return () => {
+      cancelled = true
+    }
   }, [page.content.resource, page.pluginId])
 
   function readFormRecord(): Record<string, unknown> {
@@ -361,11 +354,7 @@ function PluginResourcePage({ page }: { page: ResourcePluginPageRoute }) {
       {loading ? (
         // Skeleton for the resource records page — a form-block + a few
         // record rows. Same layout the loaded page renders.
-        <div
-          className={styles.resourceLayout}
-          aria-busy="true"
-          aria-label="Loading records"
-        >
+        <div className={styles.resourceLayout} aria-busy="true" aria-label="Loading records">
           <div className={styles.resourceForm}>
             <SkeletonBlock minHeight={200} />
           </div>
@@ -374,7 +363,9 @@ function PluginResourcePage({ page }: { page: ResourcePluginPageRoute }) {
           </div>
         </div>
       ) : error ? (
-        <p className={styles.error} role="alert">{error}</p>
+        <p className={styles.error} role="alert">
+          {error}
+        </p>
       ) : resource ? (
         <div className={styles.resourceLayout}>
           <form
@@ -392,60 +383,72 @@ function PluginResourcePage({ page }: { page: ResourcePluginPageRoute }) {
                   <textarea
                     value={String(formData[field.id] ?? '')}
                     required={field.required}
-                    onChange={(event) => setFormData((current) => ({
-                      ...current,
-                      [field.id]: event.target.value,
-                    }))}
+                    onChange={(event) =>
+                      setFormData((current) => ({
+                        ...current,
+                        [field.id]: event.target.value,
+                      }))
+                    }
                   />
                 ) : field.type === 'boolean' ? (
                   <Checkbox
                     checked={Boolean(formData[field.id])}
-                    onCheckedChange={(next) => setFormData((current) => ({
-                      ...current,
-                      [field.id]: next,
-                    }))}
+                    onCheckedChange={(next) =>
+                      setFormData((current) => ({
+                        ...current,
+                        [field.id]: next,
+                      }))
+                    }
                   />
                 ) : (
                   <input
-                    type={field.type === 'number' ? 'number' : field.type === 'date' ? 'date' : 'text'}
+                    type={
+                      field.type === 'number' ? 'number' : field.type === 'date' ? 'date' : 'text'
+                    }
                     value={String(formData[field.id] ?? '')}
                     required={field.required}
-                    onChange={(event) => setFormData((current) => ({
-                      ...current,
-                      [field.id]: event.target.value,
-                    }))}
+                    onChange={(event) =>
+                      setFormData((current) => ({
+                        ...current,
+                        [field.id]: event.target.value,
+                      }))
+                    }
                   />
                 )}
               </label>
             ))}
             <Button variant="primary" size="sm" type="submit" disabled={saving}>
-              <span>{saving ? 'Creating' : `Create ${resource.singularLabel ?? resource.title}`}</span>
+              <span>
+                {saving ? 'Creating' : `Create ${resource.singularLabel ?? resource.title}`}
+              </span>
             </Button>
           </form>
 
           <div className={styles.resourceRecords} aria-label={`${resource.title} records`}>
             {records.length === 0 ? (
               <p className={styles.emptyState}>No records yet.</p>
-            ) : records.map((record) => (
-              <article key={record.id} className={styles.resourceRecord}>
-                <dl>
-                  {resource.fields.map((field) => (
-                    <div key={field.id}>
-                      <dt>{field.label}</dt>
-                      <dd>{recordValue(record, field) || '-'}</dd>
-                    </div>
-                  ))}
-                </dl>
-                <Button
-                  variant="secondary"
-                  size="sm"
-                  onClick={() => void deleteRecord(record)}
-                  aria-label={`Delete ${recordValue(record, resource.fields[0]) || record.id}`}
-                >
-                  <span>Delete</span>
-                </Button>
-              </article>
-            ))}
+            ) : (
+              records.map((record) => (
+                <article key={record.id} className={styles.resourceRecord}>
+                  <dl>
+                    {resource.fields.map((field) => (
+                      <div key={field.id}>
+                        <dt>{field.label}</dt>
+                        <dd>{recordValue(record, field) || '-'}</dd>
+                      </div>
+                    ))}
+                  </dl>
+                  <Button
+                    variant="secondary"
+                    size="sm"
+                    onClick={() => void deleteRecord(record)}
+                    aria-label={`Delete ${recordValue(record, resource.fields[0]) || record.id}`}
+                  >
+                    <span>Delete</span>
+                  </Button>
+                </article>
+              ))
+            )}
           </div>
         </div>
       ) : (

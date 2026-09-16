@@ -3,14 +3,17 @@ const HEX_SHORT_RE = /^#([0-9a-f])([0-9a-f])([0-9a-f])$/i
 const HEX_SWATCH_RE = /^#(?:[0-9a-f]{3}|[0-9a-f]{4}|[0-9a-f]{6}|[0-9a-f]{8})$/i
 const FUNCTION_SWATCH_RE = /^(?:rgb|rgba|hsl|hsla)\([0-9a-z.%\s,+/-]+\)$/i
 const CSS_VARIABLE_RE = /^var\(--[a-z0-9_-]+\)$/i
-const RGB_RE = /^rgba?\(\s*([-+]?\d*\.?\d+%?)\s*,\s*([-+]?\d*\.?\d+%?)\s*,\s*([-+]?\d*\.?\d+%?)(?:\s*,\s*[-+]?\d*\.?\d+)?\s*\)$/i
-const HSL_RE = /^hsla?\(\s*([-+]?\d*\.?\d+)(?:deg)?\s*,\s*([-+]?\d*\.?\d+)%\s*,\s*([-+]?\d*\.?\d+)%(?:\s*,\s*[-+]?\d*\.?\d+)?\s*\)$/i
+const RGB_RE =
+  /^rgba?\(\s*([-+]?\d*\.?\d+%?)\s*,\s*([-+]?\d*\.?\d+%?)\s*,\s*([-+]?\d*\.?\d+%?)(?:\s*,\s*[-+]?\d*\.?\d+)?\s*\)$/i
+const HSL_RE =
+  /^hsla?\(\s*([-+]?\d*\.?\d+)(?:deg)?\s*,\s*([-+]?\d*\.?\d+)%\s*,\s*([-+]?\d*\.?\d+)%(?:\s*,\s*[-+]?\d*\.?\d+)?\s*\)$/i
 
 export function getColorInputValue(value: unknown, fallback = '#000000') {
   const next = typeof value === 'string' ? value.trim() : ''
   if (HEX_COLOR_RE.test(next)) return next.toLowerCase()
   const shortHex = next.match(HEX_SHORT_RE)
-  if (shortHex) return `#${shortHex[1]}${shortHex[1]}${shortHex[2]}${shortHex[2]}${shortHex[3]}${shortHex[3]}`.toLowerCase()
+  if (shortHex)
+    return `#${shortHex[1]}${shortHex[1]}${shortHex[2]}${shortHex[2]}${shortHex[3]}${shortHex[3]}`.toLowerCase()
   return colorFunctionToHex(next) ?? fallback
 }
 
@@ -27,11 +30,7 @@ export function getColorSwatchValue(value: unknown, fallback = '#000000') {
 function colorFunctionToHex(value: string): string | null {
   const rgb = value.match(RGB_RE)
   if (rgb) {
-    return formatHex(
-      parseRgbChannel(rgb[1]),
-      parseRgbChannel(rgb[2]),
-      parseRgbChannel(rgb[3]),
-    )
+    return formatHex(parseRgbChannel(rgb[1]), parseRgbChannel(rgb[2]), parseRgbChannel(rgb[3]))
   }
 
   const hsl = value.match(HSL_RE)
@@ -82,7 +81,9 @@ function formatHex(r: number, g: number, b: number): string {
 }
 
 function toHex(value: number): string {
-  return Math.round(clamp(value, 0, 255)).toString(16).padStart(2, '0')
+  return Math.round(clamp(value, 0, 255))
+    .toString(16)
+    .padStart(2, '0')
 }
 
 function normalizeHue(value: number): number {

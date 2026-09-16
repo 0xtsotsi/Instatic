@@ -103,7 +103,11 @@ export function EmptyState({
         className,
       )}
     >
-      {icon ? <span className={styles.icon} aria-hidden="true">{icon}</span> : null}
+      {icon ? (
+        <span className={styles.icon} aria-hidden="true">
+          {icon}
+        </span>
+      ) : null}
       {title ? <p className={styles.title}>{title}</p> : null}
       {description ? <p className={styles.description}>{description}</p> : null}
       {action ? <span className={styles.action}>{action}</span> : null}

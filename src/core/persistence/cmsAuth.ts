@@ -32,10 +32,7 @@ interface CmsProfileInput {
   email: string
 }
 
-const CmsStepUpAuthModeSchema = Type.Union([
-  Type.Literal('required'),
-  Type.Literal('disabled'),
-])
+const CmsStepUpAuthModeSchema = Type.Union([Type.Literal('required'), Type.Literal('disabled')])
 
 export type CmsStepUpAuthMode = Static<typeof CmsStepUpAuthModeSchema>
 
@@ -216,15 +213,9 @@ export async function getCurrentCmsUser(
 
 // ─── Self-profile mutations (Account → Profile tab) ─────────────────────────
 
-const MeAvatarEnvelope = Type.Object(
-  { user: CmsCurrentUserSchema },
-  { additionalProperties: true },
-)
+const MeAvatarEnvelope = Type.Object({ user: CmsCurrentUserSchema }, { additionalProperties: true })
 
-const MeUserEnvelope = Type.Object(
-  { user: CmsCurrentUserSchema },
-  { additionalProperties: true },
-)
+const MeUserEnvelope = Type.Object({ user: CmsCurrentUserSchema }, { additionalProperties: true })
 
 const PasswordChangeEnvelope = Type.Object(
   {
@@ -453,11 +444,14 @@ export async function revokeCmsSession(
 
 // ─── Step-up auth ────────────────────────────────────────────────────────────
 
-const CmsStepUpResponseSchema = Type.Object({
-  ok: Type.Boolean(),
-  stepUpExpiresAt: Type.String(),
-  user: Type.Optional(CmsCurrentUserSchema),
-}, { additionalProperties: true })
+const CmsStepUpResponseSchema = Type.Object(
+  {
+    ok: Type.Boolean(),
+    stepUpExpiresAt: Type.String(),
+    user: Type.Optional(CmsCurrentUserSchema),
+  },
+  { additionalProperties: true },
+)
 
 /**
  * Re-authenticate the current session by re-entering the user's password,

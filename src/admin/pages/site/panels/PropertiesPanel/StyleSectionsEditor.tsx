@@ -153,10 +153,8 @@ function StyleSectionGroup({
   const setCount = section.properties.filter((prop) => hasStyleValue(storedStyles[prop])).length
 
   // Per-property adapter over the patch-shaped section preview channel.
-  const previewProperty = (
-    property: keyof CSSPropertyBag,
-    value: string | number | undefined,
-  ) => onPreview({ [property]: value ?? null } as Partial<CSSPropertyBag>)
+  const previewProperty = (property: keyof CSSPropertyBag, value: string | number | undefined) =>
+    onPreview({ [property]: value ?? null } as Partial<CSSPropertyBag>)
 
   return (
     <Section

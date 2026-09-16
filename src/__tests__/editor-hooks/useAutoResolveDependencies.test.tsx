@@ -13,7 +13,8 @@ const originalFetch = globalThis.fetch
 const CONFETTI_IMPORTMAP = {
   lockHash: 'test-lock',
   imports: {
-    'canvas-confetti': '/_instatic/runtime/cache/test-lock/canvas-confetti/dist/confetti.module.mjs',
+    'canvas-confetti':
+      '/_instatic/runtime/cache/test-lock/canvas-confetti/dist/confetti.module.mjs',
     'canvas-confetti/': '/_instatic/runtime/cache/test-lock/canvas-confetti/',
   },
 }
@@ -50,28 +51,36 @@ describe('useAutoResolveDependencies', () => {
     let calls = 0
     globalThis.fetch = (async () => {
       calls += 1
-      return new Response(JSON.stringify({
-        dependencyLock: {
-          version: 1,
-          packages: {
-            'canvas-confetti': {
-              name: 'canvas-confetti',
-              requested: '^1.9.3',
-              version: '1.9.3',
-              resolvedAt: 1,
+      return new Response(
+        JSON.stringify({
+          dependencyLock: {
+            version: 1,
+            packages: {
+              'canvas-confetti': {
+                name: 'canvas-confetti',
+                requested: '^1.9.3',
+                version: '1.9.3',
+                resolvedAt: 1,
+              },
             },
+            updatedAt: 1,
           },
-          updatedAt: 1,
-        },
-        packageImportmap: CONFETTI_IMPORTMAP,
-      }), { status: 200 })
+          packageImportmap: CONFETTI_IMPORTMAP,
+        }),
+        { status: 200 },
+      )
     }) as typeof fetch
 
     renderHook(() => useAutoResolveDependencies({ debounceMs: 0 }))
 
-    await waitFor(() => {
-      expect(useEditorStore.getState().siteRuntime.dependencyLock.packages['canvas-confetti']?.version).toBe('1.9.3')
-    }, { timeout: 2000 })
+    await waitFor(
+      () => {
+        expect(
+          useEditorStore.getState().siteRuntime.dependencyLock.packages['canvas-confetti']?.version,
+        ).toBe('1.9.3')
+      },
+      { timeout: 2000 },
+    )
     expect(calls).toBe(1)
     expect(useEditorStore.getState().dependencyResolveStatus).toBe('resolved')
   })
@@ -80,7 +89,10 @@ describe('useAutoResolveDependencies', () => {
     let calls = 0
     globalThis.fetch = (async () => {
       calls += 1
-      return new Response(JSON.stringify({ dependencyLock: { version: 1, packages: {}, updatedAt: 0 } }), { status: 200 })
+      return new Response(
+        JSON.stringify({ dependencyLock: { version: 1, packages: {}, updatedAt: 0 } }),
+        { status: 200 },
+      )
     }) as typeof fetch
 
     const runtime = normalizeSiteRuntimeConfig({
@@ -103,7 +115,8 @@ describe('useAutoResolveDependencies', () => {
       packageImportmap: {
         lockHash: 'in-sync-hash',
         imports: {
-          'canvas-confetti': '/_instatic/runtime/cache/in-sync-hash/canvas-confetti/dist/confetti.module.mjs',
+          'canvas-confetti':
+            '/_instatic/runtime/cache/in-sync-hash/canvas-confetti/dist/confetti.module.mjs',
           'canvas-confetti/': '/_instatic/runtime/cache/in-sync-hash/canvas-confetti/',
         },
       },
@@ -124,43 +137,47 @@ describe('useAutoResolveDependencies', () => {
     let calls = 0
     globalThis.fetch = (async () => {
       calls += 1
-      return new Response(JSON.stringify({
-        dependencyLock: {
-          version: 1,
-          packages: {
-            'canvas-confetti': {
-              name: 'canvas-confetti',
-              requested: '^1.9.3',
-              version: '1.9.3',
-              resolvedAt: 1,
+      return new Response(
+        JSON.stringify({
+          dependencyLock: {
+            version: 1,
+            packages: {
+              'canvas-confetti': {
+                name: 'canvas-confetti',
+                requested: '^1.9.3',
+                version: '1.9.3',
+                resolvedAt: 1,
+              },
+              three: {
+                name: 'three',
+                requested: '^0.169.0',
+                version: '0.169.0',
+                resolvedAt: 1,
+              },
+              motion: {
+                name: 'motion',
+                requested: '*',
+                version: '12.0.0',
+                resolvedAt: 1,
+              },
             },
-            three: {
-              name: 'three',
-              requested: '^0.169.0',
-              version: '0.169.0',
-              resolvedAt: 1,
-            },
-            motion: {
-              name: 'motion',
-              requested: '*',
-              version: '12.0.0',
-              resolvedAt: 1,
+            updatedAt: 1,
+          },
+          packageImportmap: {
+            lockHash: 'test-lock-burst',
+            imports: {
+              'canvas-confetti':
+                '/_instatic/runtime/cache/test-lock-burst/canvas-confetti/dist/confetti.module.mjs',
+              'canvas-confetti/': '/_instatic/runtime/cache/test-lock-burst/canvas-confetti/',
+              three: '/_instatic/runtime/cache/test-lock-burst/three/build/three.module.js',
+              'three/': '/_instatic/runtime/cache/test-lock-burst/three/',
+              motion: '/_instatic/runtime/cache/test-lock-burst/motion/dist/index.mjs',
+              'motion/': '/_instatic/runtime/cache/test-lock-burst/motion/',
             },
           },
-          updatedAt: 1,
-        },
-        packageImportmap: {
-          lockHash: 'test-lock-burst',
-          imports: {
-            'canvas-confetti': '/_instatic/runtime/cache/test-lock-burst/canvas-confetti/dist/confetti.module.mjs',
-            'canvas-confetti/': '/_instatic/runtime/cache/test-lock-burst/canvas-confetti/',
-            three: '/_instatic/runtime/cache/test-lock-burst/three/build/three.module.js',
-            'three/': '/_instatic/runtime/cache/test-lock-burst/three/',
-            motion: '/_instatic/runtime/cache/test-lock-burst/motion/dist/index.mjs',
-            'motion/': '/_instatic/runtime/cache/test-lock-burst/motion/',
-          },
-        },
-      }), { status: 200 })
+        }),
+        { status: 200 },
+      )
     }) as typeof fetch
 
     renderHook(() => useAutoResolveDependencies({ debounceMs: 0 }))
@@ -173,9 +190,12 @@ describe('useAutoResolveDependencies', () => {
       useEditorStore.getState().setDependency('motion', '*', false)
     })
 
-    await waitFor(() => {
-      expect(useEditorStore.getState().dependencyResolveStatus).toBe('resolved')
-    }, { timeout: 2000 })
+    await waitFor(
+      () => {
+        expect(useEditorStore.getState().dependencyResolveStatus).toBe('resolved')
+      },
+      { timeout: 2000 },
+    )
     expect(calls).toBe(1)
   })
 
@@ -186,12 +206,15 @@ describe('useAutoResolveDependencies', () => {
     const { unmount } = renderHook(() => useAutoResolveDependencies({ debounceMs: 0 }))
 
     let observedError: string | null = null
-    await waitFor(() => {
-      const state = useEditorStore.getState()
-      expect(state.dependencyResolveStatus).toBe('error')
-      expect(state.dependencyResolveError).toBeTruthy()
-      observedError = state.dependencyResolveError
-    }, { timeout: 2000 })
+    await waitFor(
+      () => {
+        const state = useEditorStore.getState()
+        expect(state.dependencyResolveStatus).toBe('error')
+        expect(state.dependencyResolveError).toBeTruthy()
+        observedError = state.dependencyResolveError
+      },
+      { timeout: 2000 },
+    )
     unmount()
     expect(observedError).toBeTruthy()
   })

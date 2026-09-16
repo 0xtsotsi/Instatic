@@ -46,7 +46,10 @@ const SRC_ROOT = join(import.meta.dir, '../../')
 // File walker (same pattern as no-third-party-icons.test.ts)
 // ---------------------------------------------------------------------------
 
-function collectFiles(dir: string, exts = ['.ts', '.tsx', '.js', '.jsx', '.mts', '.mjs']): string[] {
+function collectFiles(
+  dir: string,
+  exts = ['.ts', '.tsx', '.js', '.jsx', '.mts', '.mjs'],
+): string[] {
   const results: string[] = []
   if (!existsSync(dir)) return results
   for (const entry of readdirSync(dir)) {
@@ -63,9 +66,7 @@ function collectFiles(dir: string, exts = ['.ts', '.tsx', '.js', '.jsx', '.mts',
 
 // Scan production source only — not __tests__ (test files contain the banned
 // pattern as regex strings and would false-positive).
-const PROD_DIRS = ['editor', 'core', 'modules', 'ui', 'app', 'lib'].map((d) =>
-  join(SRC_ROOT, d)
-)
+const PROD_DIRS = ['editor', 'core', 'modules', 'ui', 'app', 'lib'].map((d) => join(SRC_ROOT, d))
 
 function collectProdFiles(): string[] {
   return PROD_DIRS.flatMap((dir) => collectFiles(dir))
@@ -109,7 +110,7 @@ describe('Close-icon correctness — no X/Twitter logo used as close button', ()
           '',
           'Violating files:',
           ...rel.map((f) => `  ${f}`),
-        ].join('\n')
+        ].join('\n'),
       )
     }
 
@@ -132,7 +133,9 @@ describe('Close-icon correctness — no X/Twitter logo used as close button', ()
     }
 
     // Must import CloseIcon
-    expect(src).toMatch(/import\s*\{[^}]*CloseIcon[^}]*\}\s*from\s*['"]pixel-art-icons\/icons\/close['"]/)
+    expect(src).toMatch(
+      /import\s*\{[^}]*CloseIcon[^}]*\}\s*from\s*['"]pixel-art-icons\/icons\/close['"]/,
+    )
 
     // Must NOT use XIcon
     expect(src).not.toMatch(X_LOGO_PATTERN)
@@ -167,7 +170,9 @@ describe('Close-icon correctness — no X/Twitter logo used as close button', ()
       throw new Error(`[CI-4] PreviewOverlay.tsx not found at expected path: ${overlayPath}`)
     }
 
-    expect(src).toMatch(/import\s*\{[^}]*CloseIcon[^}]*\}\s*from\s*['"]pixel-art-icons\/icons\/close['"]/)
+    expect(src).toMatch(
+      /import\s*\{[^}]*CloseIcon[^}]*\}\s*from\s*['"]pixel-art-icons\/icons\/close['"]/,
+    )
     expect(src).not.toMatch(X_LOGO_PATTERN)
     expect(src).toMatch(/<CloseIcon\b/)
   })

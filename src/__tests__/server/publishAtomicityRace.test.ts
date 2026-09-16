@@ -146,45 +146,41 @@ describe('publishAtomicityRace', () => {
     60_000, // 60-second timeout for 200 publish cycles × 4 routes
   )
 
-  it(
-    'readArtefact content is always a coherent HTML string (never partial)',
-    async () => {
-      const ROUTE = '/coherence-check'
-      const SENTINEL = 'SENTINEL-'
+  it('readArtefact content is always a coherent HTML string (never partial)', async () => {
+    const ROUTE = '/coherence-check'
+    const SENTINEL = 'SENTINEL-'
 
-      // Seed both slots
-      const { slot: s1, slotDir: sd1 } = await prepareInactiveSlot(uploadsDir)
-      await writeArtefact(sd1, ROUTE, `<html>${SENTINEL}gen-0</html>`)
-      await swapSlot(uploadsDir, s1)
+    // Seed both slots
+    const { slot: s1, slotDir: sd1 } = await prepareInactiveSlot(uploadsDir)
+    await writeArtefact(sd1, ROUTE, `<html>${SENTINEL}gen-0</html>`)
+    await swapSlot(uploadsDir, s1)
 
-      const { slot: s2, slotDir: sd2 } = await prepareInactiveSlot(uploadsDir)
-      await writeArtefact(sd2, ROUTE, `<html>${SENTINEL}gen-1</html>`)
-      await swapSlot(uploadsDir, s2)
+    const { slot: s2, slotDir: sd2 } = await prepareInactiveSlot(uploadsDir)
+    await writeArtefact(sd2, ROUTE, `<html>${SENTINEL}gen-1</html>`)
+    await swapSlot(uploadsDir, s2)
 
-      let incoherentReads = 0
+    let incoherentReads = 0
 
-      const writeLoop = async (): Promise<void> => {
-        for (let i = 0; i < 100; i++) {
-          const { slot, slotDir } = await prepareInactiveSlot(uploadsDir)
-          await writeArtefact(slotDir, ROUTE, `<html>${SENTINEL}gen-${i + 2}</html>`)
-          await swapSlot(uploadsDir, slot)
+    const writeLoop = async (): Promise<void> => {
+      for (let i = 0; i < 100; i++) {
+        const { slot, slotDir } = await prepareInactiveSlot(uploadsDir)
+        await writeArtefact(slotDir, ROUTE, `<html>${SENTINEL}gen-${i + 2}</html>`)
+        await swapSlot(uploadsDir, slot)
+      }
+    }
+
+    const readLoop = async (): Promise<void> => {
+      for (let i = 0; i < 1000; i++) {
+        const result = await readArtefact(uploadsDir, ROUTE)
+        if (result !== null && !result.includes(SENTINEL)) {
+          incoherentReads++
         }
       }
+    }
 
-      const readLoop = async (): Promise<void> => {
-        for (let i = 0; i < 1000; i++) {
-          const result = await readArtefact(uploadsDir, ROUTE)
-          if (result !== null && !result.includes(SENTINEL)) {
-            incoherentReads++
-          }
-        }
-      }
+    await Promise.all([writeLoop(), readLoop()])
 
-      await Promise.all([writeLoop(), readLoop()])
-
-      // Every non-null read must contain the sentinel (no partial/corrupt HTML)
-      expect(incoherentReads).toBe(0)
-    },
-    60_000,
-  )
+    // Every non-null read must contain the sentinel (no partial/corrupt HTML)
+    expect(incoherentReads).toBe(0)
+  }, 60_000)
 })

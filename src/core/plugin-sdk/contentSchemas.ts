@@ -62,16 +62,19 @@ export const ContentTableSchemaSchema = Type.Composite([
 ])
 export type ContentTableSchema = Static<typeof ContentTableSchemaSchema>
 
-export const CreateContentTableInputSchema = Type.Object({
-  slug: Type.String(),
-  name: Type.String(),
-  kind: Type.Optional(DataTableKindSchema),
-  routeBase: Type.Optional(Type.String()),
-  singularLabel: Type.String(),
-  pluralLabel: Type.String(),
-  primaryFieldId: Type.Optional(Type.String()),
-  fields: Type.Optional(Type.Array(PluginContentFieldSchema)),
-}, { additionalProperties: false })
+export const CreateContentTableInputSchema = Type.Object(
+  {
+    slug: Type.String(),
+    name: Type.String(),
+    kind: Type.Optional(DataTableKindSchema),
+    routeBase: Type.Optional(Type.String()),
+    singularLabel: Type.String(),
+    pluralLabel: Type.String(),
+    primaryFieldId: Type.Optional(Type.String()),
+    fields: Type.Optional(Type.Array(PluginContentFieldSchema)),
+  },
+  { additionalProperties: false },
+)
 export type CreateContentTableInput = Static<typeof CreateContentTableInputSchema>
 
 // ---------------------------------------------------------------------------
@@ -93,37 +96,47 @@ export const ContentEntrySchema = Type.Object({
 })
 export type ContentEntry = Static<typeof ContentEntrySchema>
 
-export const CreateContentEntryInputSchema = Type.Object({
-  slug: Type.Optional(Type.String()),
-  cells: Type.Record(Type.String(), Type.Unknown()),
-}, { additionalProperties: false })
+export const CreateContentEntryInputSchema = Type.Object(
+  {
+    slug: Type.Optional(Type.String()),
+    cells: Type.Record(Type.String(), Type.Unknown()),
+  },
+  { additionalProperties: false },
+)
 export type CreateContentEntryInput = Static<typeof CreateContentEntryInputSchema>
 
-export const UpdateContentEntryInputSchema = Type.Object({
-  slug: Type.Optional(Type.String()),
-  cells: Type.Optional(Type.Record(Type.String(), Type.Unknown())),
-}, { additionalProperties: false })
+export const UpdateContentEntryInputSchema = Type.Object(
+  {
+    slug: Type.Optional(Type.String()),
+    cells: Type.Optional(Type.Record(Type.String(), Type.Unknown())),
+  },
+  { additionalProperties: false },
+)
 export type UpdateContentEntryInput = Static<typeof UpdateContentEntryInputSchema>
 
 // ---------------------------------------------------------------------------
 // List options / result
 // ---------------------------------------------------------------------------
 
-export const ContentListOptionsSchema = Type.Object({
-  filter: Type.Optional(Type.Record(Type.String(), StorageFilterValueSchema)),
-  orderBy: Type.Optional(Type.Record(
-    Type.String(),
-    Type.Union([Type.Literal('asc'), Type.Literal('desc')]),
-  )),
-  status: Type.Optional(Type.Union([
-    Type.Literal('any'),
-    Type.Literal('draft'),
-    Type.Literal('published'),
-    Type.Literal('scheduled'),
-  ])),
-  limit: Type.Optional(Type.Integer({ minimum: 1, maximum: 500 })),
-  offset: Type.Optional(Type.Integer({ minimum: 0 })),
-}, { additionalProperties: false })
+export const ContentListOptionsSchema = Type.Object(
+  {
+    filter: Type.Optional(Type.Record(Type.String(), StorageFilterValueSchema)),
+    orderBy: Type.Optional(
+      Type.Record(Type.String(), Type.Union([Type.Literal('asc'), Type.Literal('desc')])),
+    ),
+    status: Type.Optional(
+      Type.Union([
+        Type.Literal('any'),
+        Type.Literal('draft'),
+        Type.Literal('published'),
+        Type.Literal('scheduled'),
+      ]),
+    ),
+    limit: Type.Optional(Type.Integer({ minimum: 1, maximum: 500 })),
+    offset: Type.Optional(Type.Integer({ minimum: 0 })),
+  },
+  { additionalProperties: false },
+)
 export type ContentListOptions = Static<typeof ContentListOptionsSchema>
 
 export const ContentListResultSchema = Type.Object({
@@ -178,8 +191,11 @@ export const ContentAccessModeSchema = Type.Union([
 ])
 export type ContentAccessMode = Static<typeof ContentAccessModeSchema>
 
-export const ContentAccessEntrySchema = Type.Object({
-  table: Type.String(),
-  modes: Type.Array(ContentAccessModeSchema, { minItems: 1 }),
-}, { additionalProperties: false })
+export const ContentAccessEntrySchema = Type.Object(
+  {
+    table: Type.String(),
+    modes: Type.Array(ContentAccessModeSchema, { minItems: 1 }),
+  },
+  { additionalProperties: false },
+)
 export type ContentAccessEntry = Static<typeof ContentAccessEntrySchema>

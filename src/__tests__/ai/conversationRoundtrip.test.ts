@@ -74,14 +74,18 @@ describe('conversation detail round-trip', () => {
       credentialId: 'cred_1',
       modelId: 'model_1',
     })
-    const imageData = (await sharp({
-      create: {
-        width: 8,
-        height: 8,
-        channels: 3,
-        background: { r: 20, g: 40, b: 60 },
-      },
-    }).jpeg().toBuffer()).toString('base64')
+    const imageData = (
+      await sharp({
+        create: {
+          width: 8,
+          height: 8,
+          channels: 3,
+          background: { r: 20, g: 40, b: 60 },
+        },
+      })
+        .jpeg()
+        .toBuffer()
+    ).toString('base64')
     const image = { kind: 'image' as const, mimeType: 'image/jpeg', data: imageData }
 
     await appendMessage(testDb.db, conv.id, {
@@ -116,11 +120,13 @@ describe('conversation detail round-trip', () => {
           url: `/images/${messages[0]!.id}/1`,
         },
       ],
-      [{
-        kind: 'image',
-        mimeType: 'image/jpeg',
-        url: `/images/${messages[1]!.id}/0`,
-      }],
+      [
+        {
+          kind: 'image',
+          mimeType: 'image/jpeg',
+          url: `/images/${messages[1]!.id}/0`,
+        },
+      ],
     ])
     expect(JSON.stringify(detail)).not.toContain(imageData)
   })
@@ -135,13 +141,9 @@ describe('conversation detail round-trip', () => {
       title: 'My reference review',
     })
 
-    expect(await replaceDefaultConversationTitle(
-      testDb.db,
-      'user_1',
-      conv.id,
-      'Image',
-    )).toBe(false)
-    expect((await readConversationForUser(testDb.db, 'user_1', conv.id))?.title)
-      .toBe('My reference review')
+    expect(await replaceDefaultConversationTitle(testDb.db, 'user_1', conv.id, 'Image')).toBe(false)
+    expect((await readConversationForUser(testDb.db, 'user_1', conv.id))?.title).toBe(
+      'My reference review',
+    )
   })
 })

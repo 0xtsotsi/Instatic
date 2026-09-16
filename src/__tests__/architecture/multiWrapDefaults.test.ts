@@ -83,11 +83,9 @@ afterEach(() => {
 describe('multi-wrap — wrapNodes defaults', () => {
   it('wrapNodes creates a defaulted wrapper with caller overrides', () => {
     const { a, b } = setupPage()
-    const wrapperId = useEditorStore.getState().wrapNodes(
-      [a, b],
-      TEST_MODULE_ID,
-      { tag: 'section', gap: 8 },
-    )
+    const wrapperId = useEditorStore
+      .getState()
+      .wrapNodes([a, b], TEST_MODULE_ID, { tag: 'section', gap: 8 })
     expect(wrapperId).toBeTruthy()
     const wrapper = useEditorStore.getState().site!.pages[0].nodes[wrapperId!]
     expect(wrapper.props).toMatchObject({

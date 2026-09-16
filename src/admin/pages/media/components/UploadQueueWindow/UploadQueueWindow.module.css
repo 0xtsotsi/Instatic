@@ -117,7 +117,15 @@
   letter-spacing: 0.04em;
 }
 
-.badgeBusy { color: var(--text-subtle); }
-.badgeSuccess { color: var(--success-bright); }
-.badgeError { color: var(--danger); }
-.badgeMuted { color: var(--text-subtle); }
+.badgeBusy {
+  color: var(--text-subtle);
+}
+.badgeSuccess {
+  color: var(--success-bright);
+}
+.badgeError {
+  color: var(--danger);
+}
+.badgeMuted {
+  color: var(--text-subtle);
+}

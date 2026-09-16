@@ -46,7 +46,13 @@
 
 import { describe, it, expect } from 'bun:test'
 import { collectClassCSS, publishPage } from '@core/publisher'
-import { classKindSelector, type Page, type PageNode, type SiteDocument, type StyleRule } from '@core/page-tree'
+import {
+  classKindSelector,
+  type Page,
+  type PageNode,
+  type SiteDocument,
+  type StyleRule,
+} from '@core/page-tree'
 import { makeModule, makeRegistry, makePage, makeSite } from '../publisher/helpers'
 
 // ---------------------------------------------------------------------------
@@ -163,10 +169,7 @@ describe('Gate 1 — makePage helper passes classIds to generated nodes', () => 
 
   it('Gate1c: makePage passes multiple classIds correctly', () => {
     const ids = ['cls-1', 'cls-2', 'cls-3']
-    const page = makePage(
-      { root: { moduleId: 'base.body', classIds: ids } },
-      'root',
-    )
+    const page = makePage({ root: { moduleId: 'base.body', classIds: ids } }, 'root')
     expect(page.nodes['root'].classIds).toEqual(ids)
   })
 })
@@ -205,21 +208,30 @@ describe('Gate 3 — collectClassCSS is defensive against missing site.styleRule
   it('Gate3: does not throw when site.styleRules is undefined but nodes have classIds', () => {
     // Construct a site where classes is explicitly missing.
     const page: Page = {
-      id: 'p1', slug: 'index', title: 'Home', rootNodeId: 'root',
+      id: 'p1',
+      slug: 'index',
+      title: 'Home',
+      rootNodeId: 'root',
       nodes: {
         root: {
-          id: 'root', moduleId: 'base.body', props: {}, children: [],
-          breakpointOverrides: {}, classIds: ['orphan-class-id'],
+          id: 'root',
+          moduleId: 'base.body',
+          props: {},
+          children: [],
+          breakpointOverrides: {},
+          classIds: ['orphan-class-id'],
         },
       },
     }
     const brokenSite = {
-      id: 'proj1', name: 'Test',
+      id: 'proj1',
+      name: 'Test',
       pages: [page],
       breakpoints: [],
       settings: { colorTokens: {}, shortcuts: {} },
-      classes: undefined as unknown as SiteDocument['classes'],  // simulates the makeSite() gap
-      createdAt: 0, updatedAt: 0,
+      classes: undefined as unknown as SiteDocument['classes'], // simulates the makeSite() gap
+      createdAt: 0,
+      updatedAt: 0,
     }
     // Should NOT throw — should return '' gracefully
     expect(() => collectClassCSS(brokenSite)).not.toThrow()
@@ -424,13 +436,15 @@ describe('Gate 8 — class breakpoint overrides emit @media blocks in published 
     const bpId = 'mobile'
     const page = directPage([classId])
     const site: SiteDocument = {
-      id: 'proj-1', name: 'Test',
+      id: 'proj-1',
+      name: 'Test',
       pages: [page],
       breakpoints: [{ id: bpId, label: 'Mobile', width: 375, icon: 'smartphone' }],
       settings: { colorTokens: {}, shortcuts: {} },
       styleRules: {
         [classId]: {
-          id: classId, name: classId,
+          id: classId,
+          name: classId,
           kind: 'class',
           selector: classKindSelector(classId),
           order: 0,
@@ -438,10 +452,12 @@ describe('Gate 8 — class breakpoint overrides emit @media blocks in published 
           contextStyles: {
             [bpId]: { fontSize: '0.875rem' },
           },
-          createdAt: 0, updatedAt: 0,
+          createdAt: 0,
+          updatedAt: 0,
         },
       },
-      createdAt: 0, updatedAt: 0,
+      createdAt: 0,
+      updatedAt: 0,
     }
     const { html } = publishPage(page, site, reg)
     // Should contain @media (max-width: 375px) { .{className} { ... } }
@@ -455,28 +471,32 @@ describe('Gate 8 — class breakpoint overrides emit @media blocks in published 
     const bpId = 'mobile'
     const page = directPage([classId])
     const site: SiteDocument = {
-      id: 'proj-1', name: 'Test',
+      id: 'proj-1',
+      name: 'Test',
       pages: [page],
       breakpoints: [{ id: bpId, label: 'Mobile', width: 375, icon: 'smartphone' }],
       settings: { colorTokens: {}, shortcuts: {} },
       styleRules: {
         [classId]: {
-          id: classId, name: classId,
+          id: classId,
+          name: classId,
           kind: 'class',
           selector: classKindSelector(classId),
           order: 0,
           styles: { color: 'black' },
           contextStyles: { [bpId]: { color: 'white' } },
-          createdAt: 0, updatedAt: 0,
+          createdAt: 0,
+          updatedAt: 0,
         },
       },
-      createdAt: 0, updatedAt: 0,
+      createdAt: 0,
+      updatedAt: 0,
     }
     const { html } = publishPage(page, site, reg)
     const styleBlock = (html.match(/<style>([\s\S]*?)<\/style>/) ?? [])[1] ?? ''
     // Both the base rule and the media query must be present
-    expect(styleBlock).toContain('color: black')   // base styles
-    expect(styleBlock).toContain('color: white')   // breakpoint override
+    expect(styleBlock).toContain('color: black') // base styles
+    expect(styleBlock).toContain('color: white') // breakpoint override
     expect(styleBlock).toContain('@media')
   })
 })

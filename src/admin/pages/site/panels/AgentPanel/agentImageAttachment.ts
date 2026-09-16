@@ -18,8 +18,7 @@ export interface AgentImageSize {
 }
 
 const JPEG_START_OF_FRAME_MARKERS = new Set([
-  0xc0, 0xc1, 0xc2, 0xc3, 0xc5, 0xc6, 0xc7,
-  0xc9, 0xca, 0xcb, 0xcd, 0xce, 0xcf,
+  0xc0, 0xc1, 0xc2, 0xc3, 0xc5, 0xc6, 0xc7, 0xc9, 0xca, 0xcb, 0xcd, 0xce, 0xcf,
 ])
 
 /** Fit an image inside both the long-edge and total-pixel policy. */
@@ -48,16 +47,18 @@ export async function normaliseAgentImage(
     throw new Error('Use a PNG, JPEG, or WebP image.')
   }
   if (file.size > AI_USER_IMAGE_MAX_SOURCE_BYTES) {
-    throw new Error(`Source image must be smaller than ${formatMegabytes(AI_USER_IMAGE_MAX_SOURCE_BYTES)} MB.`)
+    throw new Error(
+      `Source image must be smaller than ${formatMegabytes(AI_USER_IMAGE_MAX_SOURCE_BYTES)} MB.`,
+    )
   }
 
   const sourceBytes = new Uint8Array(await file.arrayBuffer())
   signal?.throwIfAborted()
   const sourceSize = readAgentImageSourceSize(sourceBytes, file.type)
   if (
-    sourceSize.width > AI_USER_IMAGE_MAX_SOURCE_EDGE
-    || sourceSize.height > AI_USER_IMAGE_MAX_SOURCE_EDGE
-    || sourceSize.width * sourceSize.height > AI_USER_IMAGE_MAX_SOURCE_PIXELS
+    sourceSize.width > AI_USER_IMAGE_MAX_SOURCE_EDGE ||
+    sourceSize.height > AI_USER_IMAGE_MAX_SOURCE_EDGE ||
+    sourceSize.width * sourceSize.height > AI_USER_IMAGE_MAX_SOURCE_PIXELS
   ) {
     throw new Error(
       `Source image dimensions exceed the ${AI_USER_IMAGE_MAX_SOURCE_EDGE}px / ${AI_USER_IMAGE_MAX_SOURCE_PIXELS.toLocaleString()}px limit.`,
@@ -112,21 +113,21 @@ export async function normaliseAgentImage(
     bitmap.close()
   }
 
-  throw new Error(`Image could not be reduced below ${formatMegabytes(AI_USER_IMAGE_MAX_BYTES)} MB.`)
+  throw new Error(
+    `Image could not be reduced below ${formatMegabytes(AI_USER_IMAGE_MAX_BYTES)} MB.`,
+  )
 }
 
 /** Read raster dimensions from bounded source bytes before allocating a decoder. */
-export function readAgentImageSourceSize(
-  bytes: Uint8Array,
-  mimeType: string,
-): AgentImageSize {
-  const size = mimeType === 'image/png'
-    ? readPngSize(bytes)
-    : mimeType === 'image/jpeg'
-      ? readJpegSize(bytes)
-      : mimeType === 'image/webp'
-        ? readWebpSize(bytes)
-        : null
+export function readAgentImageSourceSize(bytes: Uint8Array, mimeType: string): AgentImageSize {
+  const size =
+    mimeType === 'image/png'
+      ? readPngSize(bytes)
+      : mimeType === 'image/jpeg'
+        ? readJpegSize(bytes)
+        : mimeType === 'image/webp'
+          ? readWebpSize(bytes)
+          : null
   if (!size || size.width < 1 || size.height < 1) {
     throw new Error('Image dimensions could not be read safely.')
   }
@@ -135,13 +136,14 @@ export function readAgentImageSourceSize(
 
 function readPngSize(bytes: Uint8Array): AgentImageSize | null {
   if (
-    bytes.length < 24
-    || bytes[0] !== 0x89
-    || bytes[1] !== 0x50
-    || bytes[2] !== 0x4e
-    || bytes[3] !== 0x47
-    || ascii(bytes, 12, 4) !== 'IHDR'
-  ) return null
+    bytes.length < 24 ||
+    bytes[0] !== 0x89 ||
+    bytes[1] !== 0x50 ||
+    bytes[2] !== 0x4e ||
+    bytes[3] !== 0x47 ||
+    ascii(bytes, 12, 4) !== 'IHDR'
+  )
+    return null
   const view = dataView(bytes)
   return { width: view.getUint32(16), height: view.getUint32(20) }
 }
@@ -204,9 +206,9 @@ function readExifOrientation(
     const entryOffset = directoryOffset + 2 + index * 12
     if (entryOffset + 12 > payloadEnd) return null
     if (
-      view.getUint16(entryOffset, littleEndian) === 0x0112
-      && view.getUint16(entryOffset + 2, littleEndian) === 3
-      && view.getUint32(entryOffset + 4, littleEndian) === 1
+      view.getUint16(entryOffset, littleEndian) === 0x0112 &&
+      view.getUint16(entryOffset + 2, littleEndian) === 3 &&
+      view.getUint32(entryOffset + 4, littleEndian) === 1
     ) {
       const orientation = view.getUint16(entryOffset + 8, littleEndian)
       return orientation >= 1 && orientation <= 8 ? orientation : null
@@ -216,11 +218,8 @@ function readExifOrientation(
 }
 
 function readWebpSize(bytes: Uint8Array): AgentImageSize | null {
-  if (
-    bytes.length < 20
-    || ascii(bytes, 0, 4) !== 'RIFF'
-    || ascii(bytes, 8, 4) !== 'WEBP'
-  ) return null
+  if (bytes.length < 20 || ascii(bytes, 0, 4) !== 'RIFF' || ascii(bytes, 8, 4) !== 'WEBP')
+    return null
   const view = dataView(bytes)
   let offset = 12
   while (offset + 8 <= bytes.length) {
@@ -236,11 +235,11 @@ function readWebpSize(bytes: Uint8Array): AgentImageSize | null {
       }
     }
     if (
-      kind === 'VP8 '
-      && chunkSize >= 10
-      && bytes[dataOffset + 3] === 0x9d
-      && bytes[dataOffset + 4] === 0x01
-      && bytes[dataOffset + 5] === 0x2a
+      kind === 'VP8 ' &&
+      chunkSize >= 10 &&
+      bytes[dataOffset + 3] === 0x9d &&
+      bytes[dataOffset + 4] === 0x01 &&
+      bytes[dataOffset + 5] === 0x2a
     ) {
       return {
         width: view.getUint16(dataOffset + 6, true) & 0x3fff,
@@ -289,10 +288,14 @@ function drawBitmap(bitmap: ImageBitmap, size: AgentImageSize): HTMLCanvasElemen
 
 function canvasToJpeg(canvas: HTMLCanvasElement, quality: number): Promise<Blob> {
   return new Promise((resolve, reject) => {
-    canvas.toBlob((blob) => {
-      if (blob) resolve(blob)
-      else reject(new Error('This browser could not encode the pasted image.'))
-    }, 'image/jpeg', quality)
+    canvas.toBlob(
+      (blob) => {
+        if (blob) resolve(blob)
+        else reject(new Error('This browser could not encode the pasted image.'))
+      },
+      'image/jpeg',
+      quality,
+    )
   })
 }
 

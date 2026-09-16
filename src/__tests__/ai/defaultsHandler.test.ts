@@ -1,5 +1,9 @@
 import { afterEach, beforeEach, describe, expect, it } from 'bun:test'
-import { createCapabilityTestHarness, readJson, type CapabilityTestHarness } from '../helpers/capabilityHarness'
+import {
+  createCapabilityTestHarness,
+  readJson,
+  type CapabilityTestHarness,
+} from '../helpers/capabilityHarness'
 import { __resetMasterKeyCacheForTesting } from '../../../server/secrets/masterKey'
 
 describe('AI defaults handler', () => {
@@ -29,11 +33,8 @@ describe('AI defaults handler', () => {
     console.warn = () => {}
     console.error = () => {}
     globalThis.fetch = async (input) => {
-      const url = typeof input === 'string'
-        ? input
-        : input instanceof URL
-          ? input.toString()
-          : input.url
+      const url =
+        typeof input === 'string' ? input : input instanceof URL ? input.toString() : input.url
       if (url === 'http://127.0.0.1:1/api/tags') {
         throw new Error('ollama offline')
       }

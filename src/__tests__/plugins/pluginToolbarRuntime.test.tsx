@@ -24,9 +24,9 @@ function adminUser(): CmsCurrentUser {
       name: 'Admin',
       description: '',
       isSystem: true,
-      capabilities: ['site.read', 'site.structure.edit','site.content.edit','site.style.edit'],
+      capabilities: ['site.read', 'site.structure.edit', 'site.content.edit', 'site.style.edit'],
     },
-    capabilities: ['site.read', 'site.structure.edit','site.content.edit','site.style.edit'],
+    capabilities: ['site.read', 'site.structure.edit', 'site.content.edit', 'site.style.edit'],
     lastLoginAt: null,
     failedLoginCount: 0,
     lockedUntil: null,
@@ -79,7 +79,9 @@ describe('Toolbar plugin runtime buttons', () => {
     pluginRuntime.registerCommand('acme.workflow', {
       id: 'workflow.approve',
       label: 'Approve Page',
-      run: () => { ran = true },
+      run: () => {
+        ran = true
+      },
     })
     pluginRuntime.registerToolbarButton('acme.workflow', {
       id: 'workflow.approve',

@@ -113,7 +113,9 @@ export function DynamicBindingControl({
     // Pre-load meta so bound-state labels resolve on next render.
     loadDataMeta()
       .then((m) => setResolvedMeta(m))
-      .catch(() => { /* ignore — label falls back to field id */ })
+      .catch(() => {
+        /* ignore — label falls back to field id */
+      })
   }, [])
 
   // ── Bound state (structured whole-prop binding) ─────────────────────────
@@ -124,10 +126,7 @@ export function DynamicBindingControl({
     const bindingLabel = resolveBindingLabel(binding, availableFields, sourceLabel, resolvedMeta)
     return (
       <div
-        className={cn(
-          styles.boundWrapper,
-          layout === 'stacked' && styles.boundWrapperStacked,
-        )}
+        className={cn(styles.boundWrapper, layout === 'stacked' && styles.boundWrapperStacked)}
         data-bound="true"
       >
         <div className={controlStyles.labelRow}>

@@ -52,10 +52,14 @@ describe('canvas breakpoint rendering', () => {
     const site = useEditorStore.getState().createSite('Breakpoint Props')
     const page = site.pages[0]
     const rootId = page.rootNodeId
-    const textId = useEditorStore.getState().insertNode('base.text', {
-      text: 'Desktop headline',
-      tag: 'h1',
-    }, rootId)
+    const textId = useEditorStore.getState().insertNode(
+      'base.text',
+      {
+        text: 'Desktop headline',
+        tag: 'h1',
+      },
+      rootId,
+    )
     // Direct mutation simulating stale data — the Properties Panel and agent
     // executor both reject this kind of write at the boundary now.
     useEditorStore.getState().setBreakpointOverride(textId, 'mobile', {
@@ -83,10 +87,14 @@ describe('canvas breakpoint rendering', () => {
   it('selects the clicked node on an inactive breakpoint when no layer is already being edited', async () => {
     const site = useEditorStore.getState().createSite('Breakpoint Selection')
     const page = site.pages[0]
-    const textId = useEditorStore.getState().insertNode('base.text', {
-      text: 'Shared headline',
-      tag: 'h1',
-    }, page.rootNodeId)
+    const textId = useEditorStore.getState().insertNode(
+      'base.text',
+      {
+        text: 'Shared headline',
+        tag: 'h1',
+      },
+      page.rootNodeId,
+    )
     useEditorStore.getState().setActiveBreakpoint('desktop')
 
     renderCanvas()
@@ -105,10 +113,14 @@ describe('canvas breakpoint rendering', () => {
   it('scopes canvas hover to the concrete breakpoint frame under the pointer', async () => {
     const site = useEditorStore.getState().createSite('Breakpoint Hover Scope')
     const page = site.pages[0]
-    const textId = useEditorStore.getState().insertNode('base.text', {
-      text: 'Shared headline',
-      tag: 'h1',
-    }, page.rootNodeId)
+    const textId = useEditorStore.getState().insertNode(
+      'base.text',
+      {
+        text: 'Shared headline',
+        tag: 'h1',
+      },
+      page.rootNodeId,
+    )
 
     renderCanvas()
     const mobileNode = await waitForCanvasNodeInFrame('mobile', textId)
@@ -133,10 +145,14 @@ describe('canvas breakpoint rendering', () => {
   it('dims inactive breakpoint frames only while editing a selected node in the open properties panel', async () => {
     const site = useEditorStore.getState().createSite('Breakpoint Editing Focus')
     const page = site.pages[0]
-    const textId = useEditorStore.getState().insertNode('base.text', {
-      text: 'Shared headline',
-      tag: 'h1',
-    }, page.rootNodeId)
+    const textId = useEditorStore.getState().insertNode(
+      'base.text',
+      {
+        text: 'Shared headline',
+        tag: 'h1',
+      },
+      page.rootNodeId,
+    )
     useEditorStore.setState({
       activeBreakpointId: 'tablet',
       selectedNodeId: textId,

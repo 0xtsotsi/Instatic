@@ -12,16 +12,7 @@
 import type { CommandGroup } from './types'
 
 type SpotlightAccent =
-  | 'mint'
-  | 'lilac'
-  | 'sky'
-  | 'peach'
-  | 'rose'
-  | 'lime'
-  | 'gold'
-  | 'cyan'
-  | 'violet'
-  | 'coral'
+  'mint' | 'lilac' | 'sky' | 'peach' | 'rose' | 'lime' | 'gold' | 'cyan' | 'violet' | 'coral'
 
 const GROUP_ACCENT: Record<CommandGroup, SpotlightAccent> = {
   navigation: 'sky',

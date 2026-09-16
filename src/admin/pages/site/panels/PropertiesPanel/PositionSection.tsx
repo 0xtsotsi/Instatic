@@ -114,7 +114,9 @@ export function PositionSection({
         allOptions={POSITION_OPTIONS}
         onChange={(v) => onChange('position', v)}
         onClear={() => onClearProperty('position')}
-        onPreview={onPreview ? (v) => onPreview({ position: v } as Partial<CSSPropertyBag>) : undefined}
+        onPreview={
+          onPreview ? (v) => onPreview({ position: v } as Partial<CSSPropertyBag>) : undefined
+        }
         onClearPreview={onClearPreview}
       />
       {positionIsActive && (
@@ -282,4 +284,3 @@ function DirectionInput({
     </div>
   )
 }
-

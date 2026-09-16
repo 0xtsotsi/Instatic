@@ -27,11 +27,7 @@ import type { CoreCapability } from '@core/capabilities'
 import type { McpConnectorView, McpConnectorType, CreateMcpConnectorResult } from '@core/ai'
 import { CapabilityPicker, type CapabilityPickerGroup } from '@admin/shared/CapabilityPicker'
 import { StepUpCancelledMessage, useStepUp } from '@admin/shared/StepUp'
-import {
-  listMcpConnectors,
-  createMcpConnector,
-  revokeMcpConnector,
-} from '../../../ai/api'
+import { listMcpConnectors, createMcpConnector, revokeMcpConnector } from '../../../ai/api'
 import dialogStyles from '../../../shared/dialogs/SiteCreateDialog/SiteCreateDialog.module.css'
 import styles from '../AiPage.module.css'
 import mcpStyles from './McpTab.module.css'
@@ -45,7 +41,13 @@ import mcpStyles from './McpTab.module.css'
 const MCP_CAPABILITY_GROUPS: readonly CapabilityPickerGroup[] = [
   {
     title: 'Read',
-    capabilities: ['site.read', 'content.manage', 'data.custom.tables.read', 'data.system.tables.read', 'media.read'],
+    capabilities: [
+      'site.read',
+      'content.manage',
+      'data.custom.tables.read',
+      'data.system.tables.read',
+      'media.read',
+    ],
   },
   {
     title: 'Allow writes',
@@ -61,7 +63,13 @@ const MCP_CAPABILITY_GROUPS: readonly CapabilityPickerGroup[] = [
   },
   {
     title: 'Content',
-    capabilities: ['content.create', 'content.edit.own', 'content.edit.any', 'content.publish.own', 'content.publish.any'],
+    capabilities: [
+      'content.create',
+      'content.edit.own',
+      'content.edit.any',
+      'content.publish.own',
+      'content.publish.any',
+    ],
   },
   {
     title: 'Media',
@@ -140,7 +148,11 @@ export function McpTab() {
         </Button>
       </div>
 
-      {error && <p role="alert" className={styles.errorAlert}>{error}</p>}
+      {error && (
+        <p role="alert" className={styles.errorAlert}>
+          {error}
+        </p>
+      )}
 
       {loading ? (
         <div className={styles.emptyState}>Loading…</div>
@@ -230,13 +242,15 @@ function AddConnectorDialog({
   // (the unrestricted dev/owner session — currentUser null — sees everything).
   // Render only the capabilities the current admin can actually grant (the
   // unrestricted dev/owner session — currentUser null — sees everything).
-  const groups: CapabilityPickerGroup[] = MCP_CAPABILITY_GROUPS
-    .map((group) => ({
-      title: group.title,
-      capabilities: group.capabilities.filter((cap) => !currentUser || hasCapability(currentUser, cap)),
-    }))
-    .filter((group) => group.capabilities.length > 0)
-  const readDefaults = groups.flatMap((g) => g.capabilities).filter((cap) => READ_GROUP_CAPS.includes(cap))
+  const groups: CapabilityPickerGroup[] = MCP_CAPABILITY_GROUPS.map((group) => ({
+    title: group.title,
+    capabilities: group.capabilities.filter(
+      (cap) => !currentUser || hasCapability(currentUser, cap),
+    ),
+  })).filter((group) => group.capabilities.length > 0)
+  const readDefaults = groups
+    .flatMap((g) => g.capabilities)
+    .filter((cap) => READ_GROUP_CAPS.includes(cap))
 
   const [label, setLabel] = useState('')
   const [type, setType] = useState<McpConnectorType>('local')
@@ -254,20 +268,27 @@ function AddConnectorDialog({
       // `ai.chat` marks the connector as an AI caller, mirroring the built-in
       // panel. Always granted when the admin holds it.
       const capabilities = [...selected]
-      if ((!currentUser || hasCapability(currentUser, 'ai.chat')) && !capabilities.includes('ai.chat')) {
+      if (
+        (!currentUser || hasCapability(currentUser, 'ai.chat')) &&
+        !capabilities.includes('ai.chat')
+      ) {
         capabilities.push('ai.chat')
       }
-      const result = await runStepUp(() => createMcpConnector({
-        label,
-        type,
-        capabilities,
-        ttlDays: ttlDays === 'never' ? null : parseInt(ttlDays, 10),
-      }))
+      const result = await runStepUp(() =>
+        createMcpConnector({
+          label,
+          type,
+          capabilities,
+          ttlDays: ttlDays === 'never' ? null : parseInt(ttlDays, 10),
+        }),
+      )
       setCreated(result)
       onCreated()
     } catch (err) {
       if (err instanceof Error && err.message === StepUpCancelledMessage) return
-      setError(err instanceof ApiError ? err.message : getErrorMessage(err, 'Failed to create connector.'))
+      setError(
+        err instanceof ApiError ? err.message : getErrorMessage(err, 'Failed to create connector.'),
+      )
     } finally {
       setBusy(false)
     }
@@ -288,16 +309,28 @@ function AddConnectorDialog({
           <Button type="button" variant="secondary" size="sm" onClick={onClose} disabled={busy}>
             <span>Cancel</span>
           </Button>
-          <Button type="submit" form={CONNECTOR_FORM_ID} variant="primary" size="sm" disabled={busy || selected.size === 0}>
+          <Button
+            type="submit"
+            form={CONNECTOR_FORM_ID}
+            variant="primary"
+            size="sm"
+            disabled={busy || selected.size === 0}
+          >
             <PlusIcon size={14} aria-hidden="true" />
             <span>Create connector</span>
           </Button>
         </>
       }
     >
-      <form id={CONNECTOR_FORM_ID} className={dialogStyles.form} onSubmit={(e) => void handleSubmit(e)}>
+      <form
+        id={CONNECTOR_FORM_ID}
+        className={dialogStyles.form}
+        onSubmit={(e) => void handleSubmit(e)}
+      >
         <div className={dialogStyles.field}>
-          <label htmlFor={labelInputId} className={dialogStyles.label}>Label</label>
+          <label htmlFor={labelInputId} className={dialogStyles.label}>
+            Label
+          </label>
           <Input
             id={labelInputId}
             value={label}
@@ -307,7 +340,9 @@ function AddConnectorDialog({
           />
         </div>
         <div className={dialogStyles.field}>
-          <label htmlFor={typeInputId} className={dialogStyles.label}>Type</label>
+          <label htmlFor={typeInputId} className={dialogStyles.label}>
+            Type
+          </label>
           <Select
             id={typeInputId}
             value={type}
@@ -316,7 +351,9 @@ function AddConnectorDialog({
           />
         </div>
         <div className={dialogStyles.field}>
-          <label htmlFor={ttlInputId} className={dialogStyles.label}>Expires after</label>
+          <label htmlFor={ttlInputId} className={dialogStyles.label}>
+            Expires after
+          </label>
           <Select
             id={ttlInputId}
             value={ttlDays}
@@ -327,7 +364,11 @@ function AddConnectorDialog({
 
         <CapabilityPicker groups={groups} selected={selected} onChange={setSelected} />
 
-        {error && <p role="alert" className={dialogStyles.errorText}>{error}</p>}
+        {error && (
+          <p role="alert" className={dialogStyles.errorText}>
+            {error}
+          </p>
+        )}
       </form>
     </Dialog>
   )
@@ -375,7 +416,12 @@ function TokenResultDialog({
           <span className={dialogStyles.label}>Token</span>
           <div className={mcpStyles.copyRow}>
             <code className={mcpStyles.codeBlock}>{result.token}</code>
-            <Button type="button" variant="secondary" size="sm" onClick={() => void copy(result.token, 'token')}>
+            <Button
+              type="button"
+              variant="secondary"
+              size="sm"
+              onClick={() => void copy(result.token, 'token')}
+            >
               <span>{copied === 'token' ? 'Copied' : 'Copy'}</span>
             </Button>
           </div>
@@ -386,7 +432,12 @@ function TokenResultDialog({
             <span className={dialogStyles.label}>Add to Claude Code / Codex</span>
             <div className={mcpStyles.copyRow}>
               <code className={mcpStyles.codeBlock}>{claudeCommand}</code>
-              <Button type="button" variant="secondary" size="sm" onClick={() => void copy(claudeCommand, 'cmd')}>
+              <Button
+                type="button"
+                variant="secondary"
+                size="sm"
+                onClick={() => void copy(claudeCommand, 'cmd')}
+              >
                 <span>{copied === 'cmd' ? 'Copied' : 'Copy'}</span>
               </Button>
             </div>
@@ -396,7 +447,12 @@ function TokenResultDialog({
             <span className={dialogStyles.label}>Endpoint</span>
             <div className={mcpStyles.copyRow}>
               <code className={mcpStyles.codeBlock}>{endpoint}</code>
-              <Button type="button" variant="secondary" size="sm" onClick={() => void copy(endpoint, 'url')}>
+              <Button
+                type="button"
+                variant="secondary"
+                size="sm"
+                onClick={() => void copy(endpoint, 'url')}
+              >
                 <span>{copied === 'url' ? 'Copied' : 'Copy'}</span>
               </Button>
             </div>

@@ -51,9 +51,21 @@ export type Breakpoint = Static<typeof BreakpointSchema>
 // ---------------------------------------------------------------------------
 
 export const DEFAULT_BREAKPOINTS: Breakpoint[] = [
-  { id: 'mobile',  label: 'Mobile',  width: 375,  mediaQuery: '(max-width: 375px)',  icon: 'smartphone' },
-  { id: 'tablet',  label: 'Tablet',  width: 768,  mediaQuery: '(max-width: 768px)',  icon: 'tablet'     },
-  { id: 'desktop', label: 'Desktop', width: 1440, mediaQuery: '(max-width: 1440px)', icon: 'monitor'    },
+  {
+    id: 'mobile',
+    label: 'Mobile',
+    width: 375,
+    mediaQuery: '(max-width: 375px)',
+    icon: 'smartphone',
+  },
+  { id: 'tablet', label: 'Tablet', width: 768, mediaQuery: '(max-width: 768px)', icon: 'tablet' },
+  {
+    id: 'desktop',
+    label: 'Desktop',
+    width: 1440,
+    mediaQuery: '(max-width: 1440px)',
+    icon: 'monitor',
+  },
 ]
 
 // ---------------------------------------------------------------------------
@@ -76,9 +88,10 @@ export function parseBreakpoint(raw: unknown): Breakpoint | null {
   if (typeof r.id !== 'string') return null
   if (typeof r.label !== 'string') return null
   if (typeof r.width !== 'number') return null
-  const mediaQuery = typeof r.mediaQuery === 'string' && r.mediaQuery.trim().length > 0
-    ? r.mediaQuery.trim()
-    : defaultBreakpointMediaQuery(r.width)
+  const mediaQuery =
+    typeof r.mediaQuery === 'string' && r.mediaQuery.trim().length > 0
+      ? r.mediaQuery.trim()
+      : defaultBreakpointMediaQuery(r.width)
   return {
     id: r.id,
     label: r.label,

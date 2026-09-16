@@ -12,10 +12,7 @@ import { createPortal } from 'react-dom'
 import { Button } from '@ui/components/Button'
 import { ChevronRightIcon } from 'pixel-art-icons/icons/chevron-right'
 import { cn } from '@ui/cn'
-import {
-  computeFloatingPosition,
-  type ResolvedFloatingSide,
-} from '@ui/lib/floatingPosition'
+import { computeFloatingPosition, type ResolvedFloatingSide } from '@ui/lib/floatingPosition'
 import styles from './ContextMenu.module.css'
 
 interface ContextMenuSubmenuProps {
@@ -115,9 +112,8 @@ export function ContextMenuSubmenu({
     // (CSS `max-height` is applied before getBoundingClientRect). Defensively
     // clamp here too so position math agrees with the rendered size on the
     // very first measurement.
-    const effectiveHeight = maxHeight != null
-      ? Math.min(menuRect.height, maxHeight)
-      : menuRect.height
+    const effectiveHeight =
+      maxHeight != null ? Math.min(menuRect.height, maxHeight) : menuRect.height
     const next = computeFloatingPosition(triggerRect, {
       floatingWidth: width,
       floatingHeight: effectiveHeight,
@@ -260,48 +256,50 @@ export function ContextMenuSubmenu({
           <ChevronRightIcon size={10} color="currentColor" />
         </span>
       </Button>
-      {open && typeof document !== 'undefined' && createPortal(
-        // The panel is portaled to document.body so its viewport-pixel
-        // positioning (set via CSS custom properties on `style`) escapes
-        // any `overflow: hidden` / `transform` / `contain` ancestor that
-        // would otherwise clip or re-anchor it. The DOM-tree relationship
-        // between trigger and panel is unchanged for accessibility — the
-        // ARIA wiring lives on attributes (aria-haspopup / role="menu"),
-        // not the DOM hierarchy.
-        //
-        // While `position` is null we render with `visibility: hidden` so
-        // the panel doesn't flash at (0, 0) before the layout effect has
-        // measured it — same trick as the anchored ContextMenu mode.
-        <div
-          ref={submenuRef}
-          role="menu"
-          aria-label={typeof label === 'string' ? label : undefined}
-          className={styles.menu}
-          data-scrollable={maxHeight != null ? '' : undefined}
-          data-side={position?.side}
-          // Play the entrance keyframes once the panel is measured and shown.
-          data-open={position !== null ? '' : undefined}
-          style={{
-            '--context-menu-x': `${position?.x ?? 0}px`,
-            '--context-menu-y': `${position?.y ?? 0}px`,
-            '--context-menu-z-index': zIndex + 10,
-            '--context-menu-min-width': `${resolvedMinWidth}px`,
-            '--context-menu-width': `${width}px`,
-            '--context-menu-max-width': 'calc(100vw - 16px)',
-            ...(maxHeight != null
-              ? { '--context-menu-max-height': `${maxHeight}px` }
-              : null),
-            ...(position === null ? { visibility: 'hidden' as const } : null),
-          } as CSSProperties}
-          onMouseEnter={cancelClose}
-          onMouseLeave={scheduleClose}
-          onKeyDown={handleSubmenuKeyDown}
-          onClick={handleSubmenuClick}
-        >
-          {children}
-        </div>,
-        document.body,
-      )}
+      {open &&
+        typeof document !== 'undefined' &&
+        createPortal(
+          // The panel is portaled to document.body so its viewport-pixel
+          // positioning (set via CSS custom properties on `style`) escapes
+          // any `overflow: hidden` / `transform` / `contain` ancestor that
+          // would otherwise clip or re-anchor it. The DOM-tree relationship
+          // between trigger and panel is unchanged for accessibility — the
+          // ARIA wiring lives on attributes (aria-haspopup / role="menu"),
+          // not the DOM hierarchy.
+          //
+          // While `position` is null we render with `visibility: hidden` so
+          // the panel doesn't flash at (0, 0) before the layout effect has
+          // measured it — same trick as the anchored ContextMenu mode.
+          <div
+            ref={submenuRef}
+            role="menu"
+            aria-label={typeof label === 'string' ? label : undefined}
+            className={styles.menu}
+            data-scrollable={maxHeight != null ? '' : undefined}
+            data-side={position?.side}
+            // Play the entrance keyframes once the panel is measured and shown.
+            data-open={position !== null ? '' : undefined}
+            style={
+              {
+                '--context-menu-x': `${position?.x ?? 0}px`,
+                '--context-menu-y': `${position?.y ?? 0}px`,
+                '--context-menu-z-index': zIndex + 10,
+                '--context-menu-min-width': `${resolvedMinWidth}px`,
+                '--context-menu-width': `${width}px`,
+                '--context-menu-max-width': 'calc(100vw - 16px)',
+                ...(maxHeight != null ? { '--context-menu-max-height': `${maxHeight}px` } : null),
+                ...(position === null ? { visibility: 'hidden' as const } : null),
+              } as CSSProperties
+            }
+            onMouseEnter={cancelClose}
+            onMouseLeave={scheduleClose}
+            onKeyDown={handleSubmenuKeyDown}
+            onClick={handleSubmenuClick}
+          >
+            {children}
+          </div>,
+          document.body,
+        )}
     </div>
   )
 }

@@ -93,10 +93,7 @@ function deriveStatusTone(args: {
   return 'neutral'
 }
 
-function derivePublishLabel(args: {
-  saveMessage: SaveMessage
-  isCleanPublished: boolean
-}): string {
+function derivePublishLabel(args: { saveMessage: SaveMessage; isCleanPublished: boolean }): string {
   const { saveMessage, isCleanPublished } = args
   if (saveMessage === 'publishing') return 'Publishing'
   if (isCleanPublished) return 'Published'
@@ -112,10 +109,13 @@ function derivePublishIcon(args: {
   // Kept as a flat ternary chain (rather than early-return ifs) so the
   // architecture gate at contentAdmin.test.tsx:1672 can detect the
   // `isCleanPublished ? CheckIcon` proof-of-shape.
-  return saveMessage === 'publishing' ? LoaderIcon
-    : isCleanPublished ? CheckIcon
-    : saveMessage === 'error' ? CircleAlertSolidIcon
-    : SendSolidIcon
+  return saveMessage === 'publishing'
+    ? LoaderIcon
+    : isCleanPublished
+      ? CheckIcon
+      : saveMessage === 'error'
+        ? CircleAlertSolidIcon
+        : SendSolidIcon
 }
 
 function derivePublishState(args: {
@@ -138,7 +138,13 @@ function deriveToolbarViewState(args: {
   const { contentLoading, saveMessage, isDirty, selectedEntry } = args
   const isCleanPublished = isCleanPublishedEntry(selectedEntry, isDirty, saveMessage)
   return {
-    statusText: deriveStatusText({ contentLoading, saveMessage, isDirty, selectedEntry, isCleanPublished }),
+    statusText: deriveStatusText({
+      contentLoading,
+      saveMessage,
+      isDirty,
+      selectedEntry,
+      isCleanPublished,
+    }),
     statusTone: deriveStatusTone({ saveMessage, isDirty, isCleanPublished }),
     publishLabel: derivePublishLabel({ saveMessage, isCleanPublished }),
     PublishIcon: derivePublishIcon({ saveMessage, isCleanPublished }),

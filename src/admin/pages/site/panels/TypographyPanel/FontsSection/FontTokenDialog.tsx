@@ -24,15 +24,12 @@ interface FontTokenDialogProps {
   }) => void
 }
 
-export function FontTokenDialog({
-  token,
-  fonts,
-  onCancel,
-  onSave,
-}: FontTokenDialogProps) {
+export function FontTokenDialog({ token, fonts, onCancel, onSave }: FontTokenDialogProps) {
   const firstFont = fonts[0]
   const [name, setName] = useState(token?.name ?? 'Primary')
-  const [variable, setVariable] = useState(token?.variable ?? suggestFontTokenVariable(token?.name ?? 'Primary'))
+  const [variable, setVariable] = useState(
+    token?.variable ?? suggestFontTokenVariable(token?.name ?? 'Primary'),
+  )
   const [familyId, setFamilyId] = useState(token?.familyId ?? firstFont?.id ?? '')
   const [fallback, setFallback] = useState(token?.fallback ?? defaultFontTokenFallback(firstFont))
   const [error, setError] = useState<string | null>(null)
@@ -47,7 +44,10 @@ export function FontTokenDialog({
     createdAt: token?.createdAt ?? 0,
     updatedAt: token?.updatedAt ?? 0,
   }
-  const previewFamily = resolveFontTokenStack(previewToken, { items: fonts, tokens: [previewToken] })
+  const previewFamily = resolveFontTokenStack(previewToken, {
+    items: fonts,
+    tokens: [previewToken],
+  })
   const variableChanged = Boolean(token && variable.trim() !== token.variable)
 
   const handleSave = () => {
@@ -73,7 +73,9 @@ export function FontTokenDialog({
       bodyClassName={styles.tokenDialogBody}
       footer={
         <>
-          <Button variant="secondary" onClick={onCancel}>Cancel</Button>
+          <Button variant="secondary" onClick={onCancel}>
+            Cancel
+          </Button>
           <Button variant="primary" onClick={handleSave}>
             {token ? 'Save token' : 'Create token'}
           </Button>
@@ -85,14 +87,9 @@ export function FontTokenDialog({
           <span className={styles.previewFamilyName}>
             {variable.trim() ? `--${variable.replace(/^-+/, '')}` : 'Font variable'}
           </span>
-          <span className={styles.previewCategory}>
-            {assigned?.family ?? 'Fallback'}
-          </span>
+          <span className={styles.previewCategory}>{assigned?.family ?? 'Fallback'}</span>
         </div>
-        <p
-          className={styles.previewSample}
-          style={{ fontFamily: previewFamily } as CSSProperties}
-        >
+        <p className={styles.previewSample} style={{ fontFamily: previewFamily } as CSSProperties}>
           Typography lives here
         </p>
       </div>
@@ -158,7 +155,11 @@ export function FontTokenDialog({
         />
       </label>
 
-      {error && <p role="alert" className={styles.errorAlert}>{error}</p>}
+      {error && (
+        <p role="alert" className={styles.errorAlert}>
+          {error}
+        </p>
+      )}
     </Dialog>
   )
 }

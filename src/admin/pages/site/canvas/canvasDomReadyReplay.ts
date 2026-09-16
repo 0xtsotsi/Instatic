@@ -10,10 +10,7 @@ function callEventListener(
   listener.handleEvent(event)
 }
 
-export function withCanvasDomReadyReplay<T>(
-  targetDocument: Document,
-  run: () => T,
-): T {
+export function withCanvasDomReadyReplay<T>(targetDocument: Document, run: () => T): T {
   const originalAddEventListener = targetDocument.addEventListener
   const replayDomReady = targetDocument.readyState !== 'loading'
 

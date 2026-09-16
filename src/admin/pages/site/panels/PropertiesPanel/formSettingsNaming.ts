@@ -47,16 +47,16 @@ function stripGeneratedSuffix(value: string): string {
 }
 
 function isGeneratedIdToken(token: string): boolean {
-  return token.length >= 8
-    && /[a-z]/.test(token)
-    && /[A-Z]/.test(token)
-    && (/\d/.test(token) || token.length >= 16)
+  return (
+    token.length >= 8 &&
+    /[a-z]/.test(token) &&
+    /[A-Z]/.test(token) &&
+    (/\d/.test(token) || token.length >= 16)
+  )
 }
 
 function isGeneratedIdFragment(token: string): boolean {
-  return token.length >= 8
-    && /[a-z]/.test(token)
-    && uppercaseCount(token) >= 2
+  return token.length >= 8 && /[a-z]/.test(token) && uppercaseCount(token) >= 2
 }
 
 function uppercaseCount(value: string): number {

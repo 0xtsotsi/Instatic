@@ -70,12 +70,14 @@ export const VideoModule: ModuleDefinition<VideoProps> = {
       type: 'media',
       mediaKind: 'video',
       label: 'Video',
-      description: 'Pick a file from the media library, paste an external URL, or paste a YouTube link.',
+      description:
+        'Pick a file from the media library, paste an external URL, or paste a YouTube link.',
     },
     poster: {
       type: 'image',
       label: 'Poster image',
-      description: 'Shown before the video starts. For YouTube, also shown while the player lazy-loads.',
+      description:
+        'Shown before the video starts. For YouTube, also shown while the player lazy-loads.',
     },
     autoplay: { type: 'toggle', label: 'Autoplay' },
     loop: { type: 'toggle', label: 'Loop' },
@@ -91,8 +93,16 @@ export const VideoModule: ModuleDefinition<VideoProps> = {
         { label: 'Auto', value: 'auto' },
       ],
     },
-    title: { type: 'text', label: 'Video title', description: 'Accessibility label for the embedded YouTube player iframe.' },
-    noRelatedVideos: { type: 'toggle', label: 'Hide related videos', description: 'Adds rel=0 to suppress YouTube recommended videos after playback.' },
+    title: {
+      type: 'text',
+      label: 'Video title',
+      description: 'Accessibility label for the embedded YouTube player iframe.',
+    },
+    noRelatedVideos: {
+      type: 'toggle',
+      label: 'Hide related videos',
+      description: 'Adds rel=0 to suppress YouTube recommended videos after playback.',
+    },
   },
 
   // Single source of truth: defaults are derived from the schema's `default`
@@ -141,8 +151,9 @@ export const VideoModule: ModuleDefinition<VideoProps> = {
     // own width — keeps the still file lightweight while staying sharp
     // at the rendered size. Falls back to the raw publicPath if no
     // variant ladder is available yet.
-    const posterSrc = pickMediaVariantUrl(posterMedia, videoMedia?.width ?? null)
-      ?? safeUrl(String(props.poster ?? ''))
+    const posterSrc =
+      pickMediaVariantUrl(posterMedia, videoMedia?.width ?? null) ??
+      safeUrl(String(props.poster ?? ''))
 
     const width = videoMedia?.width ?? null
     const height = videoMedia?.height ?? null
@@ -229,8 +240,7 @@ function renderYoutube(input: YoutubeRenderInput): RenderOutput {
   // 16:9 by default, so 1280 is the sensible "rendered hero width" hint.
   const posterTargetWidth = input.posterMedia?.width ?? 1280
   const posterSrc =
-    pickMediaVariantUrl(input.posterMedia, posterTargetWidth)
-    ?? safeUrl(input.posterUrl)
+    pickMediaVariantUrl(input.posterMedia, posterTargetWidth) ?? safeUrl(input.posterUrl)
 
   if (!posterSrc) {
     // Poster prop set but URL didn't survive safeUrl — fall back to
@@ -257,10 +267,10 @@ function renderYoutube(input: YoutubeRenderInput): RenderOutput {
   if (posterHeight !== null) imgAttrs.push(`height="${posterHeight}"`)
 
   const html =
-    `<div class="bv-yt">`
-    + `<img ${imgAttrs.join(' ')}>`
-    + `<iframe class="bv-yt-frame" ${iframeAttrs.join(' ')}></iframe>`
-    + `</div>`
+    `<div class="bv-yt">` +
+    `<img ${imgAttrs.join(' ')}>` +
+    `<iframe class="bv-yt-frame" ${iframeAttrs.join(' ')}></iframe>` +
+    `</div>`
 
   return { html, css: YOUTUBE_FACADE_CSS, cspSources: YOUTUBE_CSP_SOURCES }
 }

@@ -53,7 +53,9 @@ describe('OnboardingPanel framework import', () => {
     const saveSpy = spyOn(cmsAdapter, 'saveSite').mockResolvedValue(undefined)
 
     let reloadFired = false
-    const onReload = () => { reloadFired = true }
+    const onReload = () => {
+      reloadFired = true
+    }
     window.addEventListener(CMS_SITE_RELOAD_EVENT, onReload)
 
     const onFrameworkImported = mock(() => {})

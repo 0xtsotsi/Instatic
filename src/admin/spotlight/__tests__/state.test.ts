@@ -87,7 +87,10 @@ describe('ENTER_ARG_MODE', () => {
   it('enters arg mode and resets query and highlight', () => {
     let state = makeOpenState()
     state = spotlightReducer(state, { type: 'SET_QUERY', query: 'hello' }) as SpotlightOpenState
-    state = spotlightReducer(state, { type: 'ENTER_ARG_MODE', command: CMD_WITH_ARGS }) as SpotlightOpenState
+    state = spotlightReducer(state, {
+      type: 'ENTER_ARG_MODE',
+      command: CMD_WITH_ARGS,
+    }) as SpotlightOpenState
 
     expect(state.phase).toBe('open')
     expect(state.argMode).not.toBeNull()
@@ -106,8 +109,14 @@ describe('ENTER_ARG_MODE', () => {
 
   it('clears pendingConfirm when entering arg mode', () => {
     let state = makeOpenState()
-    state = spotlightReducer(state, { type: 'SET_PENDING_CONFIRM', commandId: 'x' }) as SpotlightOpenState
-    state = spotlightReducer(state, { type: 'ENTER_ARG_MODE', command: CMD_WITH_ARGS }) as SpotlightOpenState
+    state = spotlightReducer(state, {
+      type: 'SET_PENDING_CONFIRM',
+      commandId: 'x',
+    }) as SpotlightOpenState
+    state = spotlightReducer(state, {
+      type: 'ENTER_ARG_MODE',
+      command: CMD_WITH_ARGS,
+    }) as SpotlightOpenState
     expect(state.pendingConfirm).toBeNull()
   })
 })
@@ -115,8 +124,15 @@ describe('ENTER_ARG_MODE', () => {
 describe('SAVE_ARG_AND_ADVANCE', () => {
   it('advances argIndex and stores the value', () => {
     let state = makeOpenState()
-    state = spotlightReducer(state, { type: 'ENTER_ARG_MODE', command: CMD_WITH_ARGS }) as SpotlightOpenState
-    state = spotlightReducer(state, { type: 'SAVE_ARG_AND_ADVANCE', argId: 'a', value: 'hello' }) as SpotlightOpenState
+    state = spotlightReducer(state, {
+      type: 'ENTER_ARG_MODE',
+      command: CMD_WITH_ARGS,
+    }) as SpotlightOpenState
+    state = spotlightReducer(state, {
+      type: 'SAVE_ARG_AND_ADVANCE',
+      argId: 'a',
+      value: 'hello',
+    }) as SpotlightOpenState
 
     expect(state.argMode!.argIndex).toBe(1)
     expect(state.argMode!.values).toEqual({ a: 'hello' })
@@ -125,7 +141,11 @@ describe('SAVE_ARG_AND_ADVANCE', () => {
   })
 
   it('is a no-op when phase is not open', () => {
-    const next = spotlightReducer(initialState, { type: 'SAVE_ARG_AND_ADVANCE', argId: 'a', value: 'x' })
+    const next = spotlightReducer(initialState, {
+      type: 'SAVE_ARG_AND_ADVANCE',
+      argId: 'a',
+      value: 'x',
+    })
     expect(next.phase).toBe('closed')
   })
 
@@ -139,8 +159,15 @@ describe('SAVE_ARG_AND_ADVANCE', () => {
 describe('BACK_ARG', () => {
   it('steps back one arg index', () => {
     let state = makeOpenState()
-    state = spotlightReducer(state, { type: 'ENTER_ARG_MODE', command: CMD_WITH_ARGS }) as SpotlightOpenState
-    state = spotlightReducer(state, { type: 'SAVE_ARG_AND_ADVANCE', argId: 'a', value: 'v' }) as SpotlightOpenState
+    state = spotlightReducer(state, {
+      type: 'ENTER_ARG_MODE',
+      command: CMD_WITH_ARGS,
+    }) as SpotlightOpenState
+    state = spotlightReducer(state, {
+      type: 'SAVE_ARG_AND_ADVANCE',
+      argId: 'a',
+      value: 'v',
+    }) as SpotlightOpenState
     expect(state.argMode!.argIndex).toBe(1)
 
     state = spotlightReducer(state, { type: 'BACK_ARG' }) as SpotlightOpenState
@@ -149,7 +176,10 @@ describe('BACK_ARG', () => {
 
   it('exits arg mode when backing past the first arg', () => {
     let state = makeOpenState()
-    state = spotlightReducer(state, { type: 'ENTER_ARG_MODE', command: CMD_WITH_ARGS }) as SpotlightOpenState
+    state = spotlightReducer(state, {
+      type: 'ENTER_ARG_MODE',
+      command: CMD_WITH_ARGS,
+    }) as SpotlightOpenState
     state = spotlightReducer(state, { type: 'BACK_ARG' }) as SpotlightOpenState
     expect(state.argMode).toBeNull()
   })
@@ -164,7 +194,10 @@ describe('BACK_ARG', () => {
 describe('EXIT_ARG_MODE', () => {
   it('clears argMode and resets query', () => {
     let state = makeOpenState()
-    state = spotlightReducer(state, { type: 'ENTER_ARG_MODE', command: CMD_WITH_ARGS }) as SpotlightOpenState
+    state = spotlightReducer(state, {
+      type: 'ENTER_ARG_MODE',
+      command: CMD_WITH_ARGS,
+    }) as SpotlightOpenState
     state = spotlightReducer(state, { type: 'EXIT_ARG_MODE' }) as SpotlightOpenState
     expect(state.argMode).toBeNull()
     expect(state.query).toBe('')
@@ -177,13 +210,19 @@ describe('EXIT_ARG_MODE', () => {
 describe('SET_PENDING_CONFIRM / CLEAR_PENDING_CONFIRM', () => {
   it('sets pendingConfirm to the command id', () => {
     let state = makeOpenState()
-    state = spotlightReducer(state, { type: 'SET_PENDING_CONFIRM', commandId: CMD_DESTRUCTIVE.id }) as SpotlightOpenState
+    state = spotlightReducer(state, {
+      type: 'SET_PENDING_CONFIRM',
+      commandId: CMD_DESTRUCTIVE.id,
+    }) as SpotlightOpenState
     expect(state.pendingConfirm).toBe(CMD_DESTRUCTIVE.id)
   })
 
   it('clears pendingConfirm', () => {
     let state = makeOpenState()
-    state = spotlightReducer(state, { type: 'SET_PENDING_CONFIRM', commandId: CMD_DESTRUCTIVE.id }) as SpotlightOpenState
+    state = spotlightReducer(state, {
+      type: 'SET_PENDING_CONFIRM',
+      commandId: CMD_DESTRUCTIVE.id,
+    }) as SpotlightOpenState
     state = spotlightReducer(state, { type: 'CLEAR_PENDING_CONFIRM' }) as SpotlightOpenState
     expect(state.pendingConfirm).toBeNull()
   })
@@ -199,8 +238,14 @@ describe('SET_PENDING_CONFIRM / CLEAR_PENDING_CONFIRM', () => {
 describe('PUSH_SCOPE clears arg mode and pending confirm', () => {
   it('clears argMode and pendingConfirm on PUSH_SCOPE', () => {
     let state = makeOpenState()
-    state = spotlightReducer(state, { type: 'ENTER_ARG_MODE', command: CMD_WITH_ARGS }) as SpotlightOpenState
-    state = spotlightReducer(state, { type: 'SET_PENDING_CONFIRM', commandId: 'x' }) as SpotlightOpenState
+    state = spotlightReducer(state, {
+      type: 'ENTER_ARG_MODE',
+      command: CMD_WITH_ARGS,
+    }) as SpotlightOpenState
+    state = spotlightReducer(state, {
+      type: 'SET_PENDING_CONFIRM',
+      commandId: 'x',
+    }) as SpotlightOpenState
     state = spotlightReducer(state, { type: 'PUSH_SCOPE', scopeId: 'pages' }) as SpotlightOpenState
 
     expect(state.argMode).toBeNull()
@@ -211,8 +256,14 @@ describe('PUSH_SCOPE clears arg mode and pending confirm', () => {
   it('clears argMode and pendingConfirm on POP_SCOPE', () => {
     let state = makeOpenState()
     state = spotlightReducer(state, { type: 'PUSH_SCOPE', scopeId: 'pages' }) as SpotlightOpenState
-    state = spotlightReducer(state, { type: 'ENTER_ARG_MODE', command: CMD_WITH_ARGS }) as SpotlightOpenState
-    state = spotlightReducer(state, { type: 'SET_PENDING_CONFIRM', commandId: 'x' }) as SpotlightOpenState
+    state = spotlightReducer(state, {
+      type: 'ENTER_ARG_MODE',
+      command: CMD_WITH_ARGS,
+    }) as SpotlightOpenState
+    state = spotlightReducer(state, {
+      type: 'SET_PENDING_CONFIRM',
+      commandId: 'x',
+    }) as SpotlightOpenState
     state = spotlightReducer(state, { type: 'POP_SCOPE' }) as SpotlightOpenState
 
     expect(state.argMode).toBeNull()
@@ -227,21 +278,30 @@ describe('RESULT_COUNT_CHANGED', () => {
   it('clamps highlightedIndex when count shrinks below current index', () => {
     let state = makeOpenState()
     state = spotlightReducer(state, { type: 'SET_HIGHLIGHTED', index: 5 }) as SpotlightOpenState
-    state = spotlightReducer(state, { type: 'RESULT_COUNT_CHANGED', count: 3 }) as SpotlightOpenState
+    state = spotlightReducer(state, {
+      type: 'RESULT_COUNT_CHANGED',
+      count: 3,
+    }) as SpotlightOpenState
     expect(state.highlightedIndex).toBe(2)
   })
 
   it('clamps to 0 when count is 0', () => {
     let state = makeOpenState()
     state = spotlightReducer(state, { type: 'SET_HIGHLIGHTED', index: 3 }) as SpotlightOpenState
-    state = spotlightReducer(state, { type: 'RESULT_COUNT_CHANGED', count: 0 }) as SpotlightOpenState
+    state = spotlightReducer(state, {
+      type: 'RESULT_COUNT_CHANGED',
+      count: 0,
+    }) as SpotlightOpenState
     expect(state.highlightedIndex).toBe(0)
   })
 
   it('does not change index when count is larger than index', () => {
     let state = makeOpenState()
     state = spotlightReducer(state, { type: 'SET_HIGHLIGHTED', index: 2 }) as SpotlightOpenState
-    state = spotlightReducer(state, { type: 'RESULT_COUNT_CHANGED', count: 10 }) as SpotlightOpenState
+    state = spotlightReducer(state, {
+      type: 'RESULT_COUNT_CHANGED',
+      count: 10,
+    }) as SpotlightOpenState
     expect(state.highlightedIndex).toBe(2)
   })
 })

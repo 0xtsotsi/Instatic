@@ -8,7 +8,12 @@
 import { describe, it, expect } from 'bun:test'
 import { readFileSync } from 'fs'
 import { join } from 'path'
-import { validateSite, validatePages, validateVisualComponents, SiteValidationError } from '@core/persistence/validate'
+import {
+  validateSite,
+  validatePages,
+  validateVisualComponents,
+  SiteValidationError,
+} from '@core/persistence/validate'
 
 // ---------------------------------------------------------------------------
 // Fixture loader
@@ -28,8 +33,8 @@ function loadFixture(): unknown {
 describe('validateSite — round-trip with representative fixture', () => {
   it('survives three-phase validation and deep-equals the source fixture', () => {
     const raw = loadFixture() as Record<string, unknown>
-    const rawPages = Array.isArray(raw.pages) ? raw.pages as unknown[] : []
-    const rawVCs = Array.isArray(raw.visualComponents) ? raw.visualComponents as unknown[] : []
+    const rawPages = Array.isArray(raw.pages) ? (raw.pages as unknown[]) : []
+    const rawVCs = Array.isArray(raw.visualComponents) ? (raw.visualComponents as unknown[]) : []
     const shell = validateSite(raw)
     const visualComponents = validateVisualComponents(rawVCs)
     const pages = validatePages(shell, rawPages, visualComponents)
@@ -49,17 +54,17 @@ describe('validateSite — round-trip with representative fixture', () => {
   it('preserves propBindings on page nodes', () => {
     const raw = loadFixture() as Record<string, unknown>
     const shell = validateSite(raw)
-    const pages = validatePages(shell, Array.isArray(raw.pages) ? raw.pages as unknown[] : [])
+    const pages = validatePages(shell, Array.isArray(raw.pages) ? (raw.pages as unknown[]) : [])
     const node = pages[0].nodes['heading-1']
     expect(node.propBindings).toEqual({
-      text:  { paramId: 'param-title' },
+      text: { paramId: 'param-title' },
       extra: { paramId: 'param-desc' },
     })
   })
 
   it('preserves the VC flat tree (tree.nodes + rootNodeId)', () => {
     const raw = loadFixture() as Record<string, unknown>
-    const rawVCs = Array.isArray(raw.visualComponents) ? raw.visualComponents as unknown[] : []
+    const rawVCs = Array.isArray(raw.visualComponents) ? (raw.visualComponents as unknown[]) : []
     const vcs = validateVisualComponents(rawVCs)
     const vc = vcs[0]
     expect(vc.tree.rootNodeId).toBe('vc-root')
@@ -74,7 +79,7 @@ describe('validateSite — round-trip with representative fixture', () => {
   it('preserves the page template config (target + priority)', () => {
     const raw = loadFixture() as Record<string, unknown>
     const shell = validateSite(raw)
-    const pages = validatePages(shell, Array.isArray(raw.pages) ? raw.pages as unknown[] : [])
+    const pages = validatePages(shell, Array.isArray(raw.pages) ? (raw.pages as unknown[]) : [])
     expect(pages[0].template?.enabled).toBe(true)
     expect(pages[0].template?.target).toEqual({ kind: 'postTypes', tableSlugs: ['posts'] })
     expect(pages[0].template?.priority).toBe(10)
@@ -118,9 +123,30 @@ describe('validateSite — round-trip with representative fixture', () => {
 describe('validateVisualComponents — negative: bad VC name is silently dropped (rule 4)', () => {
   it('VC with empty name is dropped; valid VCs survive', () => {
     const raw = loadFixture() as Record<string, unknown>
-    const rawVCs = Array.isArray(raw.visualComponents) ? [...raw.visualComponents as Array<Record<string, unknown>>] : []
+    const rawVCs = Array.isArray(raw.visualComponents)
+      ? [...(raw.visualComponents as Array<Record<string, unknown>>)]
+      : []
     // Prepend an invalid VC (whitespace-only name) before the valid one
-    const vcBad = { id: 'vc-bad', name: '   ', tree: { rootNodeId: 'n', nodes: { n: { id: 'n', moduleId: 'base.text', props: {}, breakpointOverrides: {}, children: [], classIds: [] } } }, params: [], classIds: [], createdAt: 1700000000000 }
+    const vcBad = {
+      id: 'vc-bad',
+      name: '   ',
+      tree: {
+        rootNodeId: 'n',
+        nodes: {
+          n: {
+            id: 'n',
+            moduleId: 'base.text',
+            props: {},
+            breakpointOverrides: {},
+            children: [],
+            classIds: [],
+          },
+        },
+      },
+      params: [],
+      classIds: [],
+      createdAt: 1700000000000,
+    }
     const vcs = validateVisualComponents([vcBad, ...rawVCs])
     expect(vcs.some((vc) => vc.name.trim().length === 0)).toBe(false)
     expect(vcs.some((vc) => vc.name === 'MyCard')).toBe(true)
@@ -137,7 +163,14 @@ describe('validateSite — negative: duplicate page slug throws (rules 1–2)', 
       title: 'Duplicate Home',
       rootNodeId: 'root-dup',
       nodes: {
-        'root-dup': { id: 'root-dup', moduleId: 'base.body', props: {}, breakpointOverrides: {}, children: [], classIds: [] },
+        'root-dup': {
+          id: 'root-dup',
+          moduleId: 'base.body',
+          props: {},
+          breakpointOverrides: {},
+          children: [],
+          classIds: [],
+        },
       },
     })
     const shell = validateSite(raw)
@@ -156,19 +189,21 @@ describe('validateSite — negative: duplicate page slug throws (rules 1–2)', 
 
 describe('validateSite — negative: malformed propBindings entry silently dropped (rule 5.3)', () => {
   it('bad entry is dropped; valid entry survives intact', () => {
-    const raw = loadFixture() as { pages: Array<{ nodes: Record<string, Record<string, unknown>> }> } & Record<string, unknown>
+    const raw = loadFixture() as {
+      pages: Array<{ nodes: Record<string, Record<string, unknown>> }>
+    } & Record<string, unknown>
     // Inject a mix of good + bad propBindings on heading-1
     raw.pages[0].nodes['heading-1'].propBindings = {
-      text:    { paramId: 'param-title' },   // valid
-      badKey:  'not-an-object',              // invalid — should be dropped
-      anotherBad: { wrongField: 'x' },       // invalid — missing paramId
-      extra:   { paramId: 'param-desc' },    // valid
+      text: { paramId: 'param-title' }, // valid
+      badKey: 'not-an-object', // invalid — should be dropped
+      anotherBad: { wrongField: 'x' }, // invalid — missing paramId
+      extra: { paramId: 'param-desc' }, // valid
     }
     const shell = validateSite(raw)
     const pages = validatePages(shell, raw.pages as unknown[])
     const bindings = pages[0].nodes['heading-1'].propBindings
     expect(bindings).toEqual({
-      text:  { paramId: 'param-title' },
+      text: { paramId: 'param-title' },
       extra: { paramId: 'param-desc' },
     })
   })

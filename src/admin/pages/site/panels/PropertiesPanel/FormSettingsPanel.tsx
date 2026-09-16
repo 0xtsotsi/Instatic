@@ -65,11 +65,7 @@ interface FormSettingsPanelViewProps {
   onPreviewStateChange: (state: FormPreviewState) => void
 }
 
-export function FormSettingsPanel({
-  page,
-  nodeId,
-  onPatchProps,
-}: FormSettingsPanelProps) {
+export function FormSettingsPanel({ page, nodeId, onPatchProps }: FormSettingsPanelProps) {
   const preliminary = analyzeFormSettings({ page, nodeId })
   const targetTableId = preliminary.form?.mode === 'cms' ? preliminary.form.targetTableId : ''
   const insertImportedNodes = useEditorStore((s) => s.insertImportedNodes)
@@ -77,24 +73,21 @@ export function FormSettingsPanel({
   const { runStepUp } = useStepUp()
   const previewState = useEditorStore((s) => {
     const formNodeId = preliminary.form?.nodeId
-    return formNodeId ? s.formPreviewStates[formNodeId] ?? 'default' : 'default'
+    return formNodeId ? (s.formPreviewStates[formNodeId] ?? 'default') : 'default'
   })
   const setFormPreviewState = useEditorStore((s) => s.setFormPreviewState)
   const [actionError, setActionError] = useState('')
   const creatingTableRef = useRef(false)
-  const tablesResource = useAsyncResource<DataTableListItem[]>(
-    () => listCmsDataTables(),
-    [],
-    { fallbackError: 'Failed to load data tables.' },
-  )
+  const tablesResource = useAsyncResource<DataTableListItem[]>(() => listCmsDataTables(), [], {
+    fallbackError: 'Failed to load data tables.',
+  })
   const tableResource = useAsyncResource<DataTable | null>(
-    () => targetTableId ? getCmsDataTable(targetTableId) : Promise.resolve(null),
+    () => (targetTableId ? getCmsDataTable(targetTableId) : Promise.resolve(null)),
     [targetTableId],
     { fallbackError: 'Failed to load target data table.' },
   )
-  const table = targetTableId && tableResource.data?.id === targetTableId
-    ? tableResource.data
-    : null
+  const table =
+    targetTableId && tableResource.data?.id === targetTableId ? tableResource.data : null
 
   const analysis = analyzeFormSettings({ page, nodeId, table })
 
@@ -123,11 +116,9 @@ export function FormSettingsPanel({
     const formNode = page.nodes[analysis.form.nodeId]
     if (!formNode) return
     const fragment = formFieldFragmentForDataField(field)
-    const inserted = insertImportedNodes(
-      formNode.id,
-      fragment,
-      { index: fieldInsertIndex(page, formNode.id) },
-    )
+    const inserted = insertImportedNodes(formNode.id, fragment, {
+      index: fieldInsertIndex(page, formNode.id),
+    })
     if (inserted[0]) selectNode(inserted[0])
   }
 
@@ -139,7 +130,7 @@ export function FormSettingsPanel({
       tablesError={tablesResource.error ?? ''}
       previewState={previewState}
       loading={Boolean(targetTableId && tableResource.loading)}
-      error={actionError || (targetTableId ? tableResource.error ?? '' : '')}
+      error={actionError || (targetTableId ? (tableResource.error ?? '') : '')}
       onPatchProps={onPatchProps}
       onTargetTableChange={(nextTableId) => onPatchProps({ targetTableId: nextTableId })}
       onCreateTable={(tableName) => {
@@ -183,10 +174,7 @@ export function FormSettingsPanelView({
       </div>
 
       {analysis.kind === 'form' && analysis.form && (
-        <FormIdentityRows
-          form={analysis.form}
-          onPatchProps={onPatchProps}
-        />
+        <FormIdentityRows form={analysis.form} onPatchProps={onPatchProps} />
       )}
 
       {showMeta && (
@@ -194,20 +182,12 @@ export function FormSettingsPanelView({
           {analysis.form && (
             <span className={styles.metaItem}>{formDisplayName(analysis.form.formId)}</span>
           )}
-          {analysis.table && (
-            <span className={styles.metaItem}>{analysis.table.name}</span>
-          )}
-          {analysis.field && (
-            <span className={styles.metaItem}>{analysis.field.label}</span>
-          )}
+          {analysis.table && <span className={styles.metaItem}>{analysis.table.name}</span>}
+          {analysis.field && <span className={styles.metaItem}>{analysis.field.label}</span>}
         </div>
       )}
 
-      {loading && (
-        <output className={styles.inlineStatus}>
-          Loading target table
-        </output>
-      )}
+      {loading && <output className={styles.inlineStatus}>Loading target table</output>}
 
       {tablesError && (
         <div className={cn(styles.warning, styles.danger)} role="alert">
@@ -223,10 +203,7 @@ export function FormSettingsPanelView({
 
       {analysis.kind === 'form' && analysis.form && (
         <>
-          <PreviewStateRow
-            value={previewState}
-            onChange={onPreviewStateChange}
-          />
+          <PreviewStateRow value={previewState} onChange={onPreviewStateChange} />
 
           {analysis.form.mode === 'cms' && (
             <FormTargetTableRow
@@ -248,15 +225,10 @@ export function FormSettingsPanelView({
       )}
 
       {analysis.kind === 'control' && analysis.table && (
-        <FieldBindingRow
-          analysis={analysis}
-          onPatchProps={onPatchProps}
-        />
+        <FieldBindingRow analysis={analysis} onPatchProps={onPatchProps} />
       )}
 
-      {relationship && (
-        <div className={styles.relationship}>{relationship}</div>
-      )}
+      {relationship && <div className={styles.relationship}>{relationship}</div>}
 
       {analysis.warnings.length > 0 && (
         <div className={styles.warnings}>
@@ -286,11 +258,7 @@ function FormIdentityRows({
 
   return (
     <div className={styles.primaryControls}>
-      <ControlRow
-        propKey="form-mode"
-        label="Mode"
-        layout="stacked"
-      >
+      <ControlRow propKey="form-mode" label="Mode" layout="stacked">
         <SegmentedControl
           value={form.mode}
           options={FORM_MODE_OPTIONS}
@@ -301,12 +269,7 @@ function FormIdentityRows({
           data-testid="form-mode"
         />
       </ControlRow>
-      <ControlRow
-        propKey="form-id"
-        inputId={formIdInputId}
-        label="Form ID"
-        layout="stacked"
-      >
+      <ControlRow propKey="form-id" inputId={formIdInputId} label="Form ID" layout="stacked">
         <Input
           id={formIdInputId}
           fieldSize="sm"
@@ -314,8 +277,12 @@ function FormIdentityRows({
           autoCapitalize="none"
           autoComplete="off"
           spellCheck={false}
-          onChange={(event) => onPatchProps({ formId: normalizeIdentifierInput(event.target.value) })}
-          onBlur={(event) => onPatchProps({ formId: normalizeIdentifierValue(event.target.value, 'form') })}
+          onChange={(event) =>
+            onPatchProps({ formId: normalizeIdentifierInput(event.target.value) })
+          }
+          onBlur={(event) =>
+            onPatchProps({ formId: normalizeIdentifierValue(event.target.value, 'form') })
+          }
         />
       </ControlRow>
     </div>
@@ -330,11 +297,7 @@ function PreviewStateRow({
   onChange: (state: FormPreviewState) => void
 }) {
   return (
-    <ControlRow
-      propKey="form-preview-state"
-      label="Preview state"
-      layout="stacked"
-    >
+    <ControlRow propKey="form-preview-state" label="Preview state" layout="stacked">
       <SegmentedControl
         value={value}
         options={FORM_PREVIEW_STATES}
@@ -480,7 +443,9 @@ function CreateFormTableDialog({
     >
       <form id="form-table-create" className={styles.createTableForm} onSubmit={handleSubmit}>
         <div className={styles.dialogField}>
-          <label htmlFor={inputId} className={styles.dialogLabel}>Table name</label>
+          <label htmlFor={inputId} className={styles.dialogLabel}>
+            Table name
+          </label>
           <Input
             id={inputId}
             ref={inputRef}
@@ -579,9 +544,7 @@ function FieldBindingRow({
         />
       </ControlRow>
       {analysis.compatibleFields.length === 0 && (
-        <div className={styles.inlineStatus}>
-          No compatible fields in the target table.
-        </div>
+        <div className={styles.inlineStatus}>No compatible fields in the target table.</div>
       )}
     </div>
   )

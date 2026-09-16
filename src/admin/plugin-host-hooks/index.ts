@@ -202,9 +202,8 @@ export function useCanvasNodeRect(nodeId: string | null): CanvasNodeRect | null 
       // in the IFRAME's coordinate space. `measureCanvasElementRect` recovers
       // the canvas zoom from the iframe element, translates into editor
       // coordinates, and makes the result relative to the overlay layer.
-      const measured = node && layer
-        ? measureCanvasElementRect(node.element, node.frame, layer)
-        : null
+      const measured =
+        node && layer ? measureCanvasElementRect(node.element, node.frame, layer) : null
       if (!measured) {
         setRect((prev) => (prev === null ? prev : null))
         return
@@ -216,11 +215,11 @@ export function useCanvasNodeRect(nodeId: string | null): CanvasNodeRect | null 
         height: measured.height,
       }
       setRect((prev) =>
-        prev !== null
-        && prev.top === next.top
-        && prev.left === next.left
-        && prev.width === next.width
-        && prev.height === next.height
+        prev !== null &&
+        prev.top === next.top &&
+        prev.left === next.left &&
+        prev.width === next.width &&
+        prev.height === next.height
           ? prev
           : next,
       )
@@ -284,9 +283,8 @@ export function useCanvasViewport(): CanvasViewport | null {
     measure()
 
     const layer = findCanvasOverlayLayer()
-    const observer = typeof ResizeObserver !== 'undefined'
-      ? new ResizeObserver(() => measure())
-      : null
+    const observer =
+      typeof ResizeObserver !== 'undefined' ? new ResizeObserver(() => measure()) : null
     if (observer && layer) observer.observe(layer)
     window.addEventListener('resize', measure)
 

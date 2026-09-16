@@ -115,8 +115,9 @@ function parseStructuralSection(raw: unknown): StructuralExplorerSection {
   const record = raw as Record<string, unknown>
   const expandedFolders = parseFolderPaths(record.expandedFolders)
   const expandedSet = new Set(expandedFolders)
-  const emptyFolders = parseFolderPaths(record.emptyFolders)
-    .filter((path) => !expandedSet.has(path))
+  const emptyFolders = parseFolderPaths(record.emptyFolders).filter(
+    (path) => !expandedSet.has(path),
+  )
   const rowOrder = parseStructuralRowOrder(record.rowOrder)
   return { expandedFolders, emptyFolders, rowOrder }
 }
@@ -223,16 +224,20 @@ export function reconcileSiteExplorerOrganization(
   return {
     pages: reconcileStructuralSection(base.pages, structuralRowsForPages(sources.pages)),
     styles: reconcileStructuralSection(base.styles, structuralRowsForFiles(sources.files, 'style')),
-    scripts: reconcileStructuralSection(base.scripts, structuralRowsForFiles(sources.files, 'script')),
+    scripts: reconcileStructuralSection(
+      base.scripts,
+      structuralRowsForFiles(sources.files, 'script'),
+    ),
     templates: reconcileSection(base.templates, pageIds(sources.pages, true)),
-    components: reconcileSection(base.components, sources.visualComponents.map((component) => component.id)),
+    components: reconcileSection(
+      base.components,
+      sources.visualComponents.map((component) => component.id),
+    ),
   }
 }
 
 function pageIds(pages: readonly Page[], templates: boolean): string[] {
-  return pages
-    .filter((page) => Boolean(page.template) === templates)
-    .map((page) => page.id)
+  return pages.filter((page) => Boolean(page.template) === templates).map((page) => page.id)
 }
 
 interface StructuralRows {
@@ -254,7 +259,10 @@ function structuralRowsForPages(pages: readonly Page[]): StructuralRows {
   return { folders, items, itemPaths }
 }
 
-function structuralRowsForFiles(files: readonly SiteFile[], type: 'style' | 'script'): StructuralRows {
+function structuralRowsForFiles(
+  files: readonly SiteFile[],
+  type: 'style' | 'script',
+): StructuralRows {
   const folders = new Set<string>()
   const items = new Map<string, string | undefined>()
   const itemPaths = new Set<string>()
@@ -271,26 +279,31 @@ function reconcileStructuralSection(
   section: StructuralExplorerSection,
   rows: StructuralRows,
 ): StructuralExplorerSection {
-  const keptEmptyFolders = section.emptyFolders.filter((path) =>
-    !rows.folders.has(path) && !rows.itemPaths.has(path)
+  const keptEmptyFolders = section.emptyFolders.filter(
+    (path) => !rows.folders.has(path) && !rows.itemPaths.has(path),
   )
   const keptEmptyFolderSet = new Set(keptEmptyFolders)
   return {
-    expandedFolders: section.expandedFolders.filter((path) =>
-      rows.folders.has(path) || keptEmptyFolderSet.has(path)
+    expandedFolders: section.expandedFolders.filter(
+      (path) => rows.folders.has(path) || keptEmptyFolderSet.has(path),
     ),
     emptyFolders: keptEmptyFolders,
     rowOrder: section.rowOrder.filter((entry) => {
       if (entry.kind === 'folder') {
-        return (rows.folders.has(entry.id) || keptEmptyFolderSet.has(entry.id))
-          && parentPathForPath(entry.id) === entry.parentPath
+        return (
+          (rows.folders.has(entry.id) || keptEmptyFolderSet.has(entry.id)) &&
+          parentPathForPath(entry.id) === entry.parentPath
+        )
       }
       return rows.items.has(entry.id) && rows.items.get(entry.id) === entry.parentPath
     }),
   }
 }
 
-function reconcileSection(section: DecorativeExplorerSection, sourceIds: readonly string[]): DecorativeExplorerSection {
+function reconcileSection(
+  section: DecorativeExplorerSection,
+  sourceIds: readonly string[],
+): DecorativeExplorerSection {
   const sourceSet = new Set(sourceIds)
   const folderIds = new Set(section.folders.map((folder) => folder.id))
   const seen = new Set<string>()
@@ -299,9 +312,8 @@ function reconcileSection(section: DecorativeExplorerSection, sourceIds: readonl
   for (const item of sortItems(section.items)) {
     if (!sourceSet.has(item.id) || seen.has(item.id)) continue
     seen.add(item.id)
-    const parentFolderId = item.parentFolderId && folderIds.has(item.parentFolderId)
-      ? item.parentFolderId
-      : undefined
+    const parentFolderId =
+      item.parentFolderId && folderIds.has(item.parentFolderId) ? item.parentFolderId : undefined
     items.push({
       id: item.id,
       ...(parentFolderId ? { parentFolderId } : {}),
@@ -369,8 +381,9 @@ export function moveExplorerFolder(
   const folder = section.folders.find((candidate) => candidate.id === folderId)
   if (!folder) return
 
-  const rootEntries = rootEntriesForSection(section)
-    .filter((entry) => entry.kind !== 'folder' || entry.folder.id !== folderId)
+  const rootEntries = rootEntriesForSection(section).filter(
+    (entry) => entry.kind !== 'folder' || entry.folder.id !== folderId,
+  )
   rootEntries.splice(clampIndex(nextIndex, rootEntries.length), 0, {
     kind: 'folder',
     folder,
@@ -391,14 +404,16 @@ export function moveExplorerItem(
   normalizeSectionInPlace(section)
   const item = section.items.find((candidate) => candidate.id === itemId)
   if (!item) return
-  const targetParentId = parentFolderId && section.folders.some((folder) => folder.id === parentFolderId)
-    ? parentFolderId
-    : undefined
+  const targetParentId =
+    parentFolderId && section.folders.some((folder) => folder.id === parentFolderId)
+      ? parentFolderId
+      : undefined
 
   if (!targetParentId) {
     delete item.parentFolderId
-    const rootEntries = rootEntriesForSection(section)
-      .filter((entry) => entry.kind !== 'item' || entry.item.id !== itemId)
+    const rootEntries = rootEntriesForSection(section).filter(
+      (entry) => entry.kind !== 'item' || entry.item.id !== itemId,
+    )
     rootEntries.splice(clampIndex(nextIndex, rootEntries.length), 0, {
       kind: 'item',
       item,
@@ -430,16 +445,18 @@ export function moveExplorerItems(
   const selectedIds = uniqueExistingItemIds(section, itemIds)
   if (selectedIds.length === 0) return
 
-  const targetParentId = parentFolderId && section.folders.some((folder) => folder.id === parentFolderId)
-    ? parentFolderId
-    : undefined
+  const targetParentId =
+    parentFolderId && section.folders.some((folder) => folder.id === parentFolderId)
+      ? parentFolderId
+      : undefined
   const selected = orderedSelectedItems(section, selectedIds)
 
   if (!targetParentId) {
     for (const item of selected) delete item.parentFolderId
     const selectedSet = new Set(selectedIds)
-    const rootEntries = rootEntriesForSection(section)
-      .filter((entry) => entry.kind !== 'item' || !selectedSet.has(entry.item.id))
+    const rootEntries = rootEntriesForSection(section).filter(
+      (entry) => entry.kind !== 'item' || !selectedSet.has(entry.item.id),
+    )
     rootEntries.splice(
       clampIndex(nextIndex, rootEntries.length),
       0,
@@ -454,7 +471,10 @@ export function moveExplorerItems(
     for (const item of selected) item.parentFolderId = targetParentId
     const selectedSet = new Set(selectedIds)
     const siblings = section.items
-      .filter((candidate) => candidate.parentFolderId === targetParentId && !selectedSet.has(candidate.id))
+      .filter(
+        (candidate) =>
+          candidate.parentFolderId === targetParentId && !selectedSet.has(candidate.id),
+      )
       .sort((a, b) => a.order - b.order)
     siblings.splice(clampIndex(nextIndex, siblings.length), 0, ...selected)
     siblings.forEach((candidate, order) => {
@@ -481,19 +501,21 @@ export function wrapExplorerItemsInFolder(
   const rootEntries = rootEntriesForSection(section)
   const firstSelectedRootIndex = rootEntries.findIndex((entry) => {
     if (entry.kind === 'item') return selectedSet.has(entry.item.id)
-    return section.items.some((item) => item.parentFolderId === entry.folder.id && selectedSet.has(item.id))
+    return section.items.some(
+      (item) => item.parentFolderId === entry.folder.id && selectedSet.has(item.id),
+    )
   })
   const insertIndex = rootEntries
     .slice(0, firstSelectedRootIndex === -1 ? rootEntries.length : firstSelectedRootIndex)
-    .filter((entry) => entry.kind !== 'item' || !selectedSet.has(entry.item.id))
-    .length
+    .filter((entry) => entry.kind !== 'item' || !selectedSet.has(entry.item.id)).length
 
   const folderId = nanoid()
   const folder: SiteExplorerFolder = { id: folderId, name: name.trim() || 'Folder', order: 0 }
   section.folders.push(folder)
 
-  const nextRootEntries = rootEntries
-    .filter((entry) => entry.kind !== 'item' || !selectedSet.has(entry.item.id))
+  const nextRootEntries = rootEntries.filter(
+    (entry) => entry.kind !== 'item' || !selectedSet.has(entry.item.id),
+  )
   nextRootEntries.splice(clampIndex(insertIndex, nextRootEntries.length), 0, {
     kind: 'folder',
     folder,
@@ -518,7 +540,9 @@ function normalizeSection(section: DecorativeExplorerSection): DecorativeExplore
   const folderIds = new Set(folders.map((folder) => folder.id))
   const items = section.items.map((item) => ({
     id: item.id,
-    ...(item.parentFolderId && folderIds.has(item.parentFolderId) ? { parentFolderId: item.parentFolderId } : {}),
+    ...(item.parentFolderId && folderIds.has(item.parentFolderId)
+      ? { parentFolderId: item.parentFolderId }
+      : {}),
     order: Number.isFinite(item.order) ? item.order : 0,
   }))
 

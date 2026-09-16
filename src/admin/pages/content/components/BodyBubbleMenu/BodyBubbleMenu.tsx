@@ -435,7 +435,10 @@ const INSERT_BELOW_OPTIONS: InsertBelowOption[] = [
     icon: <BulletlistSolidIcon size={14} aria-hidden="true" />,
     apply: (chain) =>
       chain
-        .insertContent({ type: 'bulletList', content: [{ type: 'listItem', content: [{ type: 'paragraph' }] }] })
+        .insertContent({
+          type: 'bulletList',
+          content: [{ type: 'listItem', content: [{ type: 'paragraph' }] }],
+        })
         .run(),
   },
   {
@@ -554,14 +557,22 @@ function readActiveBlockLabel(editor: Editor): string {
 
 function readActiveBlockKindLabel(kind: BlockKind): string {
   switch (kind) {
-    case 'paragraph': return 'Paragraph'
-    case 'heading-2': return 'Heading 2'
-    case 'heading-3': return 'Heading 3'
-    case 'heading-4': return 'Heading 4'
-    case 'bullet-list': return 'Bullet list'
-    case 'ordered-list': return 'Numbered list'
-    case 'blockquote': return 'Quote'
-    case 'code-block': return 'Code block'
+    case 'paragraph':
+      return 'Paragraph'
+    case 'heading-2':
+      return 'Heading 2'
+    case 'heading-3':
+      return 'Heading 3'
+    case 'heading-4':
+      return 'Heading 4'
+    case 'bullet-list':
+      return 'Bullet list'
+    case 'ordered-list':
+      return 'Numbered list'
+    case 'blockquote':
+      return 'Quote'
+    case 'code-block':
+      return 'Code block'
   }
 }
 

@@ -1,8 +1,5 @@
 import { useEffect, useState } from 'react'
-import {
-  listCmsMediaAssets,
-  type CmsMediaAsset,
-} from '@core/persistence'
+import { listCmsMediaAssets, type CmsMediaAsset } from '@core/persistence'
 import { readFeaturedMediaCell } from '@core/data/cells'
 import type { DataRow } from '@core/data/schemas'
 import { mediaTypeFromAsset } from '@content/utils/contentEntryUtils'
@@ -63,13 +60,13 @@ export function useContentMediaPicker({
   const assetsById = new Map<string, CmsMediaAsset>()
   for (const asset of mediaAssets) assetsById.set(asset.id, asset)
 
-  const featuredMediaAsset = featuredMediaId ? assetsById.get(featuredMediaId) ?? null : null
+  const featuredMediaAsset = featuredMediaId ? (assetsById.get(featuredMediaId) ?? null) : null
 
   // True when at least one shown entry references a featured media asset, so
   // the explorer list can render a thumbnail. Combined with the active entry's
   // own `featuredMediaId` so the right-rail preview also triggers a load.
-  const needsAssetList = featuredMediaId !== null
-    || entries.some((entry) => readFeaturedMediaCell(entry.cells) !== null)
+  const needsAssetList =
+    featuredMediaId !== null || entries.some((entry) => readFeaturedMediaCell(entry.cells) !== null)
 
   // Fetch the asset list once the page actually needs to resolve a featured
   // media reference — either for the right-rail preview of the selected entry
@@ -95,7 +92,9 @@ export function useContentMediaPicker({
       .finally(() => {
         if (!cancelled) setMediaAssetsLoaded(true)
       })
-    return () => { cancelled = true }
+    return () => {
+      cancelled = true
+    }
   }, [needsAssetList, mediaAssetsLoaded])
 
   const getFeaturedMediaAssetForEntry = (entry: DataRow): CmsMediaAsset | null => {
@@ -121,7 +120,7 @@ export function useContentMediaPicker({
   }
 
   const viewerAsset = viewerAssetId
-    ? mediaAssets.find((asset) => asset.id === viewerAssetId) ?? null
+    ? (mediaAssets.find((asset) => asset.id === viewerAssetId) ?? null)
     : null
 
   const viewerEditor: MediaAssetEditor | null = useStandaloneMediaEditor({

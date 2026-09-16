@@ -39,9 +39,7 @@ export const siteFilesProvider: SpotlightProvider = {
       const q = query.toLowerCase()
       const files = q
         ? site.files.filter(
-            (f) =>
-              f.path.toLowerCase().includes(q) ||
-              f.type.toLowerCase().includes(q),
+            (f) => f.path.toLowerCase().includes(q) || f.type.toLowerCase().includes(q),
           )
         : site.files
 

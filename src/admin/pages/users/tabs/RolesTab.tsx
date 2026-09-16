@@ -26,12 +26,7 @@ import { TrashSolidIcon } from 'pixel-art-icons/icons/trash-solid'
 import { EditSolidIcon } from 'pixel-art-icons/icons/edit-solid'
 import { EyeSolidIcon } from 'pixel-art-icons/icons/eye-solid'
 import { PlusIcon } from 'pixel-art-icons/icons/plus'
-import {
-  createCmsRole,
-  deleteCmsRole,
-  updateCmsRole,
-  type CmsRole,
-} from '@core/persistence'
+import { createCmsRole, deleteCmsRole, updateCmsRole, type CmsRole } from '@core/persistence'
 import { StepUpCancelledMessage, useStepUp } from '@admin/shared/StepUp'
 import { Badge } from '../components/Badge'
 import { RowActionMenu } from '../components/RowActionMenu'
@@ -66,13 +61,14 @@ async function saveRole(
   setBusy(true)
   setError(null)
   try {
-    const role = dialogMode === 'edit' && editingRoleId
-      ? await runStepUp(() => updateCmsRole(editingRoleId, roleForm))
-      : await runStepUp(() => createCmsRole(roleForm))
+    const role =
+      dialogMode === 'edit' && editingRoleId
+        ? await runStepUp(() => updateCmsRole(editingRoleId, roleForm))
+        : await runStepUp(() => createCmsRole(roleForm))
     setRoles((current) => {
       const exists = current.some((candidate) => candidate.id === role.id)
       return exists
-        ? current.map((candidate) => candidate.id === role.id ? role : candidate)
+        ? current.map((candidate) => (candidate.id === role.id ? role : candidate))
         : [...current, role]
     })
     closeDialog()
@@ -180,7 +176,17 @@ export function RolesTab({ data, canManageRoles }: RolesTabProps) {
   async function handleSave(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
     if (!canManageRoles || !dialogMode) return
-    await saveRole(dialogMode, editingRoleId, roleForm, runStepUp, setRoles, closeDialog, refresh, setBusy, setError)
+    await saveRole(
+      dialogMode,
+      editingRoleId,
+      roleForm,
+      runStepUp,
+      setRoles,
+      closeDialog,
+      refresh,
+      setBusy,
+      setError,
+    )
   }
 
   async function remove(role: CmsRole) {
@@ -190,7 +196,6 @@ export function RolesTab({ data, canManageRoles }: RolesTabProps) {
     if (!canManageRoles || role.isSystem) return
     await deleteRole(role.id, runStepUp, setRoles, refresh, setBusy, setError)
   }
-
 
   return (
     <section className={styles.section} aria-labelledby="roles-list-title">
@@ -214,16 +219,26 @@ export function RolesTab({ data, canManageRoles }: RolesTabProps) {
               <DataTableHeader scope="col">Description</DataTableHeader>
               <DataTableHeader scope="col">Capabilities</DataTableHeader>
               <DataTableHeader scope="col">Type</DataTableHeader>
-              <DataTableHeader scope="col" className={styles.actionsHeader}>Actions</DataTableHeader>
+              <DataTableHeader scope="col" className={styles.actionsHeader}>
+                Actions
+              </DataTableHeader>
             </DataTableRow>
           </DataTableHead>
           <DataTableBody>
             {Array.from({ length: 3 }, (_, i) => (
               <DataTableRow key={`skeleton-${i}`}>
-                <DataTableCell><Skeleton width={120} height={13} /></DataTableCell>
-                <DataTableCell><Skeleton width="80%" height={12} /></DataTableCell>
-                <DataTableCell><Skeleton width={140} height={12} /></DataTableCell>
-                <DataTableCell><Skeleton width={56} height={18} radius={999} /></DataTableCell>
+                <DataTableCell>
+                  <Skeleton width={120} height={13} />
+                </DataTableCell>
+                <DataTableCell>
+                  <Skeleton width="80%" height={12} />
+                </DataTableCell>
+                <DataTableCell>
+                  <Skeleton width={140} height={12} />
+                </DataTableCell>
+                <DataTableCell>
+                  <Skeleton width={56} height={18} radius={999} />
+                </DataTableCell>
                 <DataTableCell className={styles.actionsCell}>
                   <Skeleton width={24} height={24} radius={6} />
                 </DataTableCell>
@@ -239,7 +254,9 @@ export function RolesTab({ data, canManageRoles }: RolesTabProps) {
               <DataTableHeader scope="col">Description</DataTableHeader>
               <DataTableHeader scope="col">Capabilities</DataTableHeader>
               <DataTableHeader scope="col">Type</DataTableHeader>
-              <DataTableHeader scope="col" className={styles.actionsHeader}>Actions</DataTableHeader>
+              <DataTableHeader scope="col" className={styles.actionsHeader}>
+                Actions
+              </DataTableHeader>
             </DataTableRow>
           </DataTableHead>
           <DataTableBody>
@@ -249,18 +266,25 @@ export function RolesTab({ data, canManageRoles }: RolesTabProps) {
                   <strong className={styles.tableTitle}>{role.name}</strong>
                 </DataTableCell>
                 <DataTableCell>
-                  <span className={styles.secondaryText}>{role.description || 'No description'}</span>
+                  <span className={styles.secondaryText}>
+                    {role.description || 'No description'}
+                  </span>
                 </DataTableCell>
                 <DataTableCell>
                   {role.capabilities.length > 0 ? (
-                    <span className={styles.secondaryText}>{formatCapabilitySummary(role.capabilities)}</span>
+                    <span className={styles.secondaryText}>
+                      {formatCapabilitySummary(role.capabilities)}
+                    </span>
                   ) : (
                     <Badge label="No admin capabilities" muted />
                   )}
                 </DataTableCell>
                 <DataTableCell>
                   <div className={styles.badges}>
-                    <Badge label={role.isSystem ? 'System role' : 'Custom role'} muted={role.isSystem} />
+                    <Badge
+                      label={role.isSystem ? 'System role' : 'Custom role'}
+                      muted={role.isSystem}
+                    />
                   </div>
                 </DataTableCell>
                 <DataTableCell className={styles.actionsCell}>
@@ -281,21 +305,23 @@ export function RolesTab({ data, canManageRoles }: RolesTabProps) {
                         // expected role registry. Custom roles can be edited
                         // and deleted.
                         ...(role.slug !== 'owner'
-                          ? [
+                          ? ([
                               {
                                 label: 'Edit',
                                 icon: <EditSolidIcon size={12} aria-hidden="true" />,
                                 onSelect: () => openEdit(role),
                               },
                               ...(!role.isSystem
-                                ? [{
-                                    label: 'Delete',
-                                    icon: <TrashSolidIcon size={12} aria-hidden="true" />,
-                                    danger: true,
-                                    onSelect: () => void remove(role),
-                                  }] satisfies RowActionMenuItem[]
+                                ? ([
+                                    {
+                                      label: 'Delete',
+                                      icon: <TrashSolidIcon size={12} aria-hidden="true" />,
+                                      danger: true,
+                                      onSelect: () => void remove(role),
+                                    },
+                                  ] satisfies RowActionMenuItem[])
                                 : []),
-                            ] satisfies RowActionMenuItem[]
+                            ] satisfies RowActionMenuItem[])
                           : []),
                       ]}
                     />

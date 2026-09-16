@@ -10,8 +10,8 @@
  */
 // checkSizeLimit — soft (10 MB) and hard (50 MB) upload limits
 
-const SOFT_LIMIT_BYTES = 10 * 1024 * 1024  // 10 MB
-const HARD_LIMIT_BYTES = 50 * 1024 * 1024  // 50 MB
+const SOFT_LIMIT_BYTES = 10 * 1024 * 1024 // 10 MB
+const HARD_LIMIT_BYTES = 50 * 1024 * 1024 // 50 MB
 
 interface SizeLimitResult {
   ok: boolean

@@ -36,18 +36,10 @@ const toneClass: Record<AlertTone, string> = {
   danger: 'alertDanger',
 }
 
-export function Alert({
-  tone = 'info',
-  title,
-  className,
-  children,
-}: AlertProps) {
+export function Alert({ tone = 'info', title, className, children }: AlertProps) {
   const role = tone === 'danger' || tone === 'warning' ? 'alert' : 'status'
   return (
-    <div
-      className={cn(styles.alert, styles[toneClass[tone]], className)}
-      role={role}
-    >
+    <div className={cn(styles.alert, styles[toneClass[tone]], className)} role={role}>
       {title ? <strong className={styles.alertTitle}>{title}</strong> : null}
       <div className={styles.alertBody}>{children}</div>
     </div>

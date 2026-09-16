@@ -79,7 +79,7 @@ describe('duplicateNode — scoped class cloning (F-0005)', () => {
     expect(refreshedSourceClass.scope?.nodeId).toBe(sourceId)
   })
 
-  it('editing the duplicate\'s scoped class does NOT mutate the source\'s class', () => {
+  it("editing the duplicate's scoped class does NOT mutate the source's class", () => {
     const store = useEditorStore.getState()
     const site = store.createSite('Dup Site')
     const rootId = site.pages[0].rootNodeId
@@ -167,7 +167,7 @@ describe('duplicateNodes — scoped class cloning (F-0005)', () => {
 // ---------------------------------------------------------------------------
 
 describe('duplicatePage — scoped class cloning (F-0005)', () => {
-  it('cloned page\'s nodes reference fresh scoped classes pointing at the new node ids', () => {
+  it("cloned page's nodes reference fresh scoped classes pointing at the new node ids", () => {
     const store = useEditorStore.getState()
     const site = store.createSite('Dup Site')
     const sourcePage = site.pages[0]

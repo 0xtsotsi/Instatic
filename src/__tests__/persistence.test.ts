@@ -19,7 +19,7 @@ import type { SiteDocument } from '@core/page-tree'
 function validateFull(raw: unknown): SiteDocument {
   const r = raw as Record<string, unknown>
   const shell = validateSite(r)
-  const rawPages = Array.isArray(r?.pages) ? r.pages as unknown[] : []
+  const rawPages = Array.isArray(r?.pages) ? (r.pages as unknown[]) : []
   const pages = validatePages(shell, rawPages)
   // VCs are stored separately in data_rows; the fixture omits them so we default to [].
   return { ...shell, pages, visualComponents: [] }
@@ -40,9 +40,7 @@ function validSite(): SiteDocument {
       scripts: {},
       styles: {},
     },
-    breakpoints: [
-      { id: 'desktop', label: 'Desktop', width: 1440, icon: 'monitor' },
-    ],
+    breakpoints: [{ id: 'desktop', label: 'Desktop', width: 1440, icon: 'monitor' }],
     settings: {
       shortcuts: {},
     },
@@ -153,7 +151,9 @@ describe('validateSite — rejects invalid data', () => {
     const p = validSite() as Record<string, unknown>
     delete p.id
     expect(() => validateSite(p)).toThrow(SiteValidationError)
-    try { validateSite(p) } catch (e) {
+    try {
+      validateSite(p)
+    } catch (e) {
       expect((e as SiteValidationError).path).toBe('site.id')
     }
   })
@@ -184,7 +184,9 @@ describe('validateSite — rejects invalid data', () => {
     p.pages[0].rootNodeId = 'nonexistent-id'
     const shell = validateSite(p)
     expect(() => validatePages(shell, p.pages)).toThrow(SiteValidationError)
-    try { validatePages(shell, p.pages) } catch (e) {
+    try {
+      validatePages(shell, p.pages)
+    } catch (e) {
       expect((e as SiteValidationError).path).toBe('site.pages[0].rootNodeId')
     }
   })
@@ -215,7 +217,9 @@ describe('validateSite — rejects invalid data', () => {
     p.pages[0].slug = 'About Us'
     const shell = validateSite(p)
     expect(() => validatePages(shell, p.pages)).toThrow(SiteValidationError)
-    try { validatePages(shell, p.pages) } catch (e) {
+    try {
+      validatePages(shell, p.pages)
+    } catch (e) {
       expect((e as SiteValidationError).path).toBe('site.pages[0].slug')
     }
   })
@@ -225,7 +229,9 @@ describe('validateSite — rejects invalid data', () => {
     p.pages[0].slug = 'admin'
     const shell = validateSite(p)
     expect(() => validatePages(shell, p.pages)).toThrow(SiteValidationError)
-    try { validatePages(shell, p.pages) } catch (e) {
+    try {
+      validatePages(shell, p.pages)
+    } catch (e) {
       expect((e as SiteValidationError).message).toContain('reserved')
     }
   })
@@ -235,7 +241,9 @@ describe('validateSite — rejects invalid data', () => {
     p.pages.push({ ...structuredClone(p.pages[0]), id: 'page-2', title: 'Duplicate Home' })
     const shell = validateSite(p)
     expect(() => validatePages(shell, p.pages)).toThrow(SiteValidationError)
-    try { validatePages(shell, p.pages) } catch (e) {
+    try {
+      validatePages(shell, p.pages)
+    } catch (e) {
       expect((e as SiteValidationError).message).toContain('duplicate slug')
     }
   })
@@ -321,12 +329,15 @@ describe('validateSite — richtext prop sanitization on hydration', () => {
       '<em>ok</em><iframe src="evil.com"></iframe>'
     const result = validateFull(p)
     expect(result.pages[0].nodes['heading-1'].props.bodyHtml as string).not.toContain('<script>')
-    expect(result.pages[0].nodes['heading-1'].props.contentRichtext as string).not.toContain('<iframe>')
+    expect(result.pages[0].nodes['heading-1'].props.contentRichtext as string).not.toContain(
+      '<iframe>',
+    )
   })
 
   it('preserves safe formatting HTML in richtext props', () => {
     const p = validSite()
-    const safe = '<p><strong>Bold</strong> and <em>italic</em> <a href="https://example.com">link</a></p>'
+    const safe =
+      '<p><strong>Bold</strong> and <em>italic</em> <a href="https://example.com">link</a></p>'
     ;(p.pages[0].nodes['heading-1'].props as Record<string, unknown>).richtext = safe
     const result = validateFull(p)
     const sanitized = result.pages[0].nodes['heading-1'].props.richtext as string

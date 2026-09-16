@@ -17,7 +17,8 @@ export function DateCell({
 }: CellEditorProps<DateField>): ReactElement {
   // Store as ISO date string (YYYY-MM-DD). The <input type="date"> native
   // value is already in this format, so no conversion needed.
-  const strValue = typeof value === 'string' ? value : readStringCell({ [field.id]: value }, field.id)
+  const strValue =
+    typeof value === 'string' ? value : readStringCell({ [field.id]: value }, field.id)
 
   return (
     <Input

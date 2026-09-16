@@ -114,7 +114,7 @@ describe('resolveAutoSizes — pixel caps', () => {
     expect(resolveAutoSizes('img', page, site)).toBe('min(100vw, 600px)')
   })
 
-  it('uses the image\'s OWN class when one is set directly on the <img>', () => {
+  it("uses the image's OWN class when one is set directly on the <img>", () => {
     const page = makePage({
       root: { moduleId: 'base.body', children: ['img'] },
       img: { moduleId: 'base.image', classIds: ['pinned'] },
@@ -319,7 +319,7 @@ describe('resolveAutoSizes — flex rows bail conservatively', () => {
     expect(resolveAutoSizes('img', page, site)).toBe('min(100vw, 1000px)')
   })
 
-  it('still honors the child\'s own percentage width inside a flex row', () => {
+  it("still honors the child's own percentage width inside a flex row", () => {
     const page = makePage({
       root: { moduleId: 'base.body', children: ['wrap'] },
       wrap: { moduleId: 'base.container', classIds: ['cap'], children: ['row'] },
@@ -366,7 +366,11 @@ describe('resolveAutoSizes — per-breakpoint overrides', () => {
   it('collapses a grid to one column on mobile', () => {
     const page = makePage({
       root: { moduleId: 'base.body', children: ['grid'] },
-      grid: { moduleId: 'base.container', classIds: ['responsiveGrid'], children: ['img', 'b', 'c'] },
+      grid: {
+        moduleId: 'base.container',
+        classIds: ['responsiveGrid'],
+        children: ['img', 'b', 'c'],
+      },
       img: { moduleId: 'base.image' },
       b: { moduleId: 'base.container' },
       c: { moduleId: 'base.container' },
@@ -401,9 +405,27 @@ describe('resolveAutoSizes — per-breakpoint overrides', () => {
     })
     const site = makeSite({
       breakpoints: [
-        { id: 'mobile', label: 'Mobile', width: 375, mediaQuery: '(min-width: 375px)', icon: 'smartphone' },
-        { id: 'tablet', label: 'Tablet', width: 768, mediaQuery: '(min-width: 768px)', icon: 'tablet' },
-        { id: 'desktop', label: 'Desktop', width: 1440, mediaQuery: '(min-width: 1440px)', icon: 'monitor' },
+        {
+          id: 'mobile',
+          label: 'Mobile',
+          width: 375,
+          mediaQuery: '(min-width: 375px)',
+          icon: 'smartphone',
+        },
+        {
+          id: 'tablet',
+          label: 'Tablet',
+          width: 768,
+          mediaQuery: '(min-width: 768px)',
+          icon: 'tablet',
+        },
+        {
+          id: 'desktop',
+          label: 'Desktop',
+          width: 1440,
+          mediaQuery: '(min-width: 1440px)',
+          icon: 'monitor',
+        },
       ],
       styleRules: {
         responsive: makeClass('responsive', {
@@ -644,7 +666,7 @@ describe('resolveAutoSizes — min-width floors', () => {
     expect(resolveAutoSizes('img', page, site)).toBe('max(280px, 30vw)')
   })
 
-  it('a non-px min-width skips the node\'s narrowing instead of under-estimating', () => {
+  it("a non-px min-width skips the node's narrowing instead of under-estimating", () => {
     const page = makePage({
       root: { moduleId: 'base.body', children: ['wrap'] },
       wrap: { moduleId: 'base.container', classIds: ['cap'], children: ['img'] },
@@ -672,8 +694,20 @@ describe('resolveAutoSizes — emission safety', () => {
     })
     const site = makeSite({
       breakpoints: [
-        { id: 'small', label: 'Small', width: 600, mediaQuery: '(max-width: 600px)', icon: 'smartphone' },
-        { id: 'large', label: 'Large', width: 1000, mediaQuery: '(min-width: 1000px)', icon: 'monitor' },
+        {
+          id: 'small',
+          label: 'Small',
+          width: 600,
+          mediaQuery: '(max-width: 600px)',
+          icon: 'smartphone',
+        },
+        {
+          id: 'large',
+          label: 'Large',
+          width: 1000,
+          mediaQuery: '(min-width: 1000px)',
+          icon: 'monitor',
+        },
       ],
       styleRules: {
         mixed: makeClass('mixed', {

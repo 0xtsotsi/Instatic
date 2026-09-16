@@ -66,7 +66,12 @@ describe('buildMessageHistory', () => {
     expect(history).toEqual([
       { role: 'user', content: [{ kind: 'text', text: 'hi' }] },
       { role: 'assistant', content: [{ kind: 'text', text: 'ok' }] },
-      { role: 'assistant', content: [{ kind: 'toolCall', toolCallId: 't1', toolName: 'site_insert_html', input: { a: 1 } }] },
+      {
+        role: 'assistant',
+        content: [
+          { kind: 'toolCall', toolCallId: 't1', toolName: 'site_insert_html', input: { a: 1 } },
+        ],
+      },
       { role: 'tool', toolCallId: 't1', output: { ok: true, error: undefined } },
       { role: 'assistant', content: [{ kind: 'text', text: 'done' }] },
     ])
@@ -139,7 +144,10 @@ describe('buildMessageHistory', () => {
     const toolMsgs = history.filter((m) => m.role === 'tool')
     expect(toolMsgs).toHaveLength(5)
     for (const m of toolMsgs) {
-      expect(m).toMatchObject({ role: 'tool', output: { ok: false, error: INTERRUPTED_TOOL_RESULT_ERROR } })
+      expect(m).toMatchObject({
+        role: 'tool',
+        output: { ok: false, error: INTERRUPTED_TOOL_RESULT_ERROR },
+      })
     }
     expect(history.filter((m) => m.role === 'assistant')).toHaveLength(5)
   })
@@ -175,8 +183,15 @@ describe('buildMessageHistory', () => {
 
     expect(history).toEqual([
       { role: 'user', content: [{ kind: 'text', text: 'continue' }] },
-      { role: 'assistant', content: [{ kind: 'toolCall', toolCallId: 'a', toolName: 'tool', input: {} }] },
-      { role: 'tool', toolCallId: 'a', output: { ok: false, error: INTERRUPTED_TOOL_RESULT_ERROR } },
+      {
+        role: 'assistant',
+        content: [{ kind: 'toolCall', toolCallId: 'a', toolName: 'tool', input: {} }],
+      },
+      {
+        role: 'tool',
+        toolCallId: 'a',
+        output: { ok: false, error: INTERRUPTED_TOOL_RESULT_ERROR },
+      },
       { role: 'user', content: [{ kind: 'text', text: 'next prompt' }] },
     ])
   })
@@ -195,7 +210,11 @@ describe('buildMessageHistory', () => {
         role: 'assistant',
         content: [{ kind: 'toolCall', toolCallId: 'late', toolName: 'tool', input: {} }],
       },
-      { role: 'tool', toolCallId: 'late', output: { ok: false, error: INTERRUPTED_TOOL_RESULT_ERROR } },
+      {
+        role: 'tool',
+        toolCallId: 'late',
+        output: { ok: false, error: INTERRUPTED_TOOL_RESULT_ERROR },
+      },
       { role: 'user', content: [{ kind: 'text', text: 'next prompt' }] },
     ])
   })

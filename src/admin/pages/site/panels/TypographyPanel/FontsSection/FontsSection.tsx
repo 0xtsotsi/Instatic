@@ -21,11 +21,7 @@ import { useEditorStore } from '@site/store/store'
 import { useInstalledFontFaces } from '@site/hooks/useInstalledFontFaces'
 import type { FontEntry, FontToken } from '@core/fonts'
 import { compareVariants } from '@core/fonts'
-import {
-  defaultFontTokenFallback,
-  resolveFontTokenStack,
-  sortFontTokens,
-} from '@core/fonts'
+import { defaultFontTokenFallback, resolveFontTokenStack, sortFontTokens } from '@core/fonts'
 import { deleteCmsFontFamily } from '@core/persistence/cmsFonts'
 import { EditSolidIcon } from 'pixel-art-icons/icons/edit-solid'
 import { TrashSolidIcon } from 'pixel-art-icons/icons/trash-solid'
@@ -115,7 +111,12 @@ export function FontsSection() {
     }
   }
 
-  function handleTokenSave(input: { name: string; variable: string; familyId?: string | null; fallback: string }) {
+  function handleTokenSave(input: {
+    name: string
+    variable: string
+    familyId?: string | null
+    fallback: string
+  }) {
     if (editToken) {
       updateFontToken(editToken.id, input)
       setEditToken(null)
@@ -172,23 +173,13 @@ export function FontsSection() {
         // section so the two empty states inside the Typography panel read
         // consistently. The CTA is the same split add-font control used in the
         // "Installed font files" header.
-        <EmptyState
-          plain
-          compact
-          title="No fonts installed yet."
-          action={addFontButton}
-        />
+        <EmptyState plain compact title="No fonts installed yet." action={addFontButton} />
       ) : (
         <>
           <div className={styles.tokenToolbar}>
             <span className={styles.tokenToolbarTitle}>Font tokens</span>
             {sortedTokens.length > 0 && (
-              <Button
-                variant="secondary"
-                size="sm"
-                type="button"
-                onClick={openCreateTokenDialog}
-              >
+              <Button variant="secondary" size="sm" type="button" onClick={openCreateTokenDialog}>
                 Create token
               </Button>
             )}
@@ -200,12 +191,7 @@ export function FontsSection() {
               compact
               title="No font tokens yet."
               action={
-                <Button
-                  variant="secondary"
-                  size="sm"
-                  type="button"
-                  onClick={openCreateTokenDialog}
-                >
+                <Button variant="secondary" size="sm" type="button" onClick={openCreateTokenDialog}>
                   Create token
                 </Button>
               }
@@ -218,7 +204,9 @@ export function FontsSection() {
                   token={token}
                   fonts={fonts}
                   onEdit={() => setEditToken(token)}
-                  onRemove={() => { deleteFontToken(token.id) }}
+                  onRemove={() => {
+                    deleteFontToken(token.id)
+                  }}
                 />
               ))}
             </ul>
@@ -238,7 +226,9 @@ export function FontsSection() {
                   key={entry.id}
                   entry={entry}
                   onEdit={() => setEditEntry(entry)}
-                  onRemove={() => { void handleRemove(entry) }}
+                  onRemove={() => {
+                    void handleRemove(entry)
+                  }}
                 />
               ))}
             </ul>
@@ -308,12 +298,7 @@ interface FontTokenRowProps {
   onRemove: () => void
 }
 
-function FontTokenRow({
-  token,
-  fonts,
-  onEdit,
-  onRemove,
-}: FontTokenRowProps) {
+function FontTokenRow({ token, fonts, onEdit, onRemove }: FontTokenRowProps) {
   const familyStack = resolveFontTokenStack(token, { items: fonts, tokens: [token] })
   const assigned = token.familyId ? fonts.find((entry) => entry.id === token.familyId) : undefined
   const variable = `--${token.variable}`
@@ -321,10 +306,7 @@ function FontTokenRow({
   return (
     <li className={styles.row}>
       <div className={styles.rowMain}>
-        <span
-          className={styles.rowFamily}
-          style={{ fontFamily: familyStack } as CSSProperties}
-        >
+        <span className={styles.rowFamily} style={{ fontFamily: familyStack } as CSSProperties}>
           {token.name}
         </span>
         <span className={styles.rowMeta}>
@@ -386,7 +368,8 @@ function FontRow({ entry, onEdit, onRemove }: FontRowProps) {
         <span className={styles.rowMeta}>
           {entry.source === 'google' ? 'Google' : 'Custom'}
           {variantSummary && ` · ${variantSummary}`}
-          {entry.subsets.length > 0 && ` · ${entry.subsets.length} subset${entry.subsets.length === 1 ? '' : 's'}`}
+          {entry.subsets.length > 0 &&
+            ` · ${entry.subsets.length} subset${entry.subsets.length === 1 ? '' : 's'}`}
         </span>
       </div>
       <div className={styles.rowActions}>

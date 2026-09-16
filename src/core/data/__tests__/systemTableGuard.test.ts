@@ -20,10 +20,7 @@ function table(overrides: Partial<DataTable> = {}): DataTable {
     singularLabel: 'Layout',
     pluralLabel: 'Layouts',
     primaryFieldId: 'name',
-    fields: [
-      field('name', { builtIn: true }),
-      field('body', { builtIn: true, type: 'pageTree' }),
-    ],
+    fields: [field('name', { builtIn: true }), field('body', { builtIn: true, type: 'pageTree' })],
     system: true,
     ...overrides,
   } as DataTable
@@ -81,11 +78,16 @@ describe('assertSystemTableUpdateAllowed', () => {
   it('rejects removing or editing a built-in field', () => {
     const t = table()
     // Drop the built-in `body`.
-    expect(assertSystemTableUpdateAllowed(t, { fields: [field('name', { builtIn: true })] })).toMatch(/body/)
+    expect(
+      assertSystemTableUpdateAllowed(t, { fields: [field('name', { builtIn: true })] }),
+    ).toMatch(/body/)
     // Edit the built-in `body` (change its label).
     expect(
       assertSystemTableUpdateAllowed(t, {
-        fields: [field('name', { builtIn: true }), field('body', { builtIn: true, type: 'pageTree', label: 'Hacked' })],
+        fields: [
+          field('name', { builtIn: true }),
+          field('body', { builtIn: true, type: 'pageTree', label: 'Hacked' }),
+        ],
       }),
     ).toMatch(/body/)
   })

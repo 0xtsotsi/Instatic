@@ -60,7 +60,9 @@ export function CanvasRenameDialog({
     >
       <form className={styles.renameForm} onSubmit={handleSubmit}>
         <div className={styles.renameField}>
-          <label htmlFor={nameId} className={styles.renameLabel}>Name</label>
+          <label htmlFor={nameId} className={styles.renameLabel}>
+            Name
+          </label>
           <Input
             id={nameId}
             ref={inputRef}

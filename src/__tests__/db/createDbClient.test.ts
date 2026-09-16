@@ -44,7 +44,9 @@ describe('createDbClient — DATABASE_URL dialect selection', () => {
         await runMigrations(db, migrations)
         await runMigrations(db, migrations)
 
-        const { rows } = await db<{ count: number }>`select count(*) as count from schema_migrations`
+        const { rows } = await db<{
+          count: number
+        }>`select count(*) as count from schema_migrations`
         expect(rows[0]?.count).toBe(sqliteMigrations.length)
       }
     })
@@ -63,7 +65,8 @@ describe('createDbClient — DATABASE_URL dialect selection', () => {
   })
 
   test('rejects unsupported DATABASE_URL schemes with an operator-facing message', () => {
-    expect(() => createDbClient('mysql://instatic:secret@localhost/instatic'))
-      .toThrow('Unsupported DATABASE_URL: mysql:. Expected sqlite:..., file:..., postgres://..., or postgresql://...')
+    expect(() => createDbClient('mysql://instatic:secret@localhost/instatic')).toThrow(
+      'Unsupported DATABASE_URL: mysql:. Expected sqlite:..., file:..., postgres://..., or postgresql://...',
+    )
   })
 })

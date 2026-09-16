@@ -44,16 +44,12 @@ export function PreferencesSection() {
       {groups.map((group) => (
         <section key={group.id} className={s.sectionBlock}>
           <h4 className={s.subHeading}>{group.label}</h4>
-          {group.description && (
-            <p className={s.preferenceCategoryDesc}>{group.description}</p>
-          )}
+          {group.description && <p className={s.preferenceCategoryDesc}>{group.description}</p>}
           <div className={s.cardGroup}>
             {group.preferences.map((pref) => (
               <PreferenceRow key={pref.id} pref={pref} />
             ))}
-            {group.id === 'spotlight' && (
-              <SpotlightHistoryControls />
-            )}
+            {group.id === 'spotlight' && <SpotlightHistoryControls />}
           </div>
         </section>
       ))}
@@ -91,9 +87,7 @@ function BooleanPreferenceRow({ pref }: { pref: BooleanCatalogDef }) {
   )
 }
 
-function SelectPreferenceRow({
-  pref,
-}: { pref: Extract<SelectCatalogDef, { type: 'select' }> }) {
+function SelectPreferenceRow({ pref }: { pref: Extract<SelectCatalogDef, { type: 'select' }> }) {
   const value = useEditorSelectPreference(pref.id)
   const id = `pref-${pref.id}`
 
@@ -159,8 +153,8 @@ function SpotlightHistoryControls() {
       <div className={s.toggleRowContent}>
         <span className={s.toggleRowLabel}>Clear command history</span>
         <p className={s.toggleRowDesc}>
-          Removes the list of recently run commands shown when the palette opens
-          with an empty query, and erases any local usage counts.
+          Removes the list of recently run commands shown when the palette opens with an empty
+          query, and erases any local usage counts.
         </p>
       </div>
       <Button
@@ -179,7 +173,9 @@ function SpotlightHistoryControls() {
 
 function DynamicSelectPreferenceRow({
   pref,
-}: { pref: Extract<SelectCatalogDef, { type: 'select-dynamic' }> }) {
+}: {
+  pref: Extract<SelectCatalogDef, { type: 'select-dynamic' }>
+}) {
   const value = useEditorSelectPreference(pref.id)
   const dynamicOptions = useDynamicSelectOptions(pref.optionsSource)
   const id = `pref-${pref.id}`

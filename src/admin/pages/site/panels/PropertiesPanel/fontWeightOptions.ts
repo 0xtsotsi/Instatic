@@ -73,10 +73,7 @@ function resolveDefaultBodyFontEntry(
 
 function weightOptionsForEntry(entry: FontEntry): string[] {
   const weights = new Set<number>()
-  const variants = [
-    ...entry.variants,
-    ...entry.files.map((file) => file.variant),
-  ]
+  const variants = [...entry.variants, ...entry.files.map((file) => file.variant)]
   for (const variant of variants) {
     const parsed = parseVariant(variant)
     if (parsed) weights.add(parsed.weight)
@@ -99,7 +96,12 @@ function readCssVariableReference(value: string): string | undefined {
 
 function isUnsetFontFamilyValue(value: string): boolean {
   const normalized = value.toLowerCase()
-  return normalized === 'inherit' || normalized === 'initial' || normalized === 'unset' || normalized === 'revert'
+  return (
+    normalized === 'inherit' ||
+    normalized === 'initial' ||
+    normalized === 'unset' ||
+    normalized === 'revert'
+  )
 }
 
 function readFirstCssFamily(value: string): string {
@@ -123,5 +125,8 @@ function normalizeCssFamilyStack(value: string): string {
 }
 
 function normalizeCssFamilyName(value: string): string {
-  return value.trim().replace(/^['"]|['"]$/g, '').toLowerCase()
+  return value
+    .trim()
+    .replace(/^['"]|['"]$/g, '')
+    .toLowerCase()
 }

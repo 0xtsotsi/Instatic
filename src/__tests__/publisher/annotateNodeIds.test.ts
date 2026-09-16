@@ -59,14 +59,11 @@ describe('renderNode — annotateNodeIds off (default)', () => {
 })
 
 describe('renderNode — annotateNodeIds on', () => {
-  it('annotates every node\'s outermost element with its uid', () => {
+  it("annotates every node's outermost element with its uid", () => {
     const page = nestedPage()
     const html = renderNode('root', ctx(page, true), makeAccumulators())
     expect(html).toBe(
-      '<div uid="root" class="wrapper">' +
-        '<h2 uid="c1">A</h2>' +
-        '<h3 uid="c2">B</h3>' +
-        '</div>',
+      '<div uid="root" class="wrapper">' + '<h2 uid="c1">A</h2>' + '<h3 uid="c2">B</h3>' + '</div>',
     )
   })
 

@@ -20,8 +20,7 @@ export interface SiteExplorerMenuSelection {
 const EMPTY_EXPLORER_SELECTION: SiteExplorerSelectionState = { sectionId: null, itemIds: [] }
 
 type SiteExplorerAnySectionModel<TTarget> =
-  | SiteExplorerTreeSectionModel<TTarget>
-  | SiteExplorerStructuralSectionModel<TTarget>
+  SiteExplorerTreeSectionModel<TTarget> | SiteExplorerStructuralSectionModel<TTarget>
 
 export function useSiteExplorerSelection<TTarget>() {
   const [selection, setSelection] = useState<SiteExplorerSelectionState>(EMPTY_EXPLORER_SELECTION)
@@ -49,9 +48,10 @@ export function useSiteExplorerSelection<TTarget>() {
     }
 
     if (event.shiftKey) {
-      const anchorId = selection.sectionId === model.sectionId
-        ? selection.itemIds[selection.itemIds.length - 1] ?? null
-        : null
+      const anchorId =
+        selection.sectionId === model.sectionId
+          ? (selection.itemIds[selection.itemIds.length - 1] ?? null)
+          : null
       setSelectionForIds(model.sectionId, rangeSelectionIds(model, anchorId, item.id))
       return true
     }

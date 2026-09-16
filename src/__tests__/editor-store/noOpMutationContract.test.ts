@@ -121,11 +121,13 @@ describe('No-op mutation contract', () => {
     })
 
     expectNoDocumentMutation(() => {
-      useEditorStore.getState().addNodeToVc(
-        'vc-card',
-        'missing-parent',
-        makeVCNode({ id: 'new-node', moduleId: 'base.text' }),
-      )
+      useEditorStore
+        .getState()
+        .addNodeToVc(
+          'vc-card',
+          'missing-parent',
+          makeVCNode({ id: 'new-node', moduleId: 'base.text' }),
+        )
     })
   })
 

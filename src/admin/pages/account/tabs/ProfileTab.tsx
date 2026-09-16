@@ -88,8 +88,7 @@ export function ProfileTab({ user }: ProfileTabProps) {
   const displayName = user.displayName.trim() || user.email
   const hasUploadedAvatar = user.avatarUrl !== null
   const profileDirty =
-    profileForm.displayName.trim() !== user.displayName ||
-    profileForm.email.trim() !== user.email
+    profileForm.displayName.trim() !== user.displayName || profileForm.email.trim() !== user.email
 
   function openFilePicker(): void {
     if (busy) return
@@ -128,10 +127,12 @@ export function ProfileTab({ user }: ProfileTabProps) {
     setBusy('profile')
     setStatus(null)
     try {
-      const updated = await runStepUp(() => updateCurrentUserProfile({
-        displayName: profileForm.displayName,
-        email,
-      }))
+      const updated = await runStepUp(() =>
+        updateCurrentUserProfile({
+          displayName: profileForm.displayName,
+          email,
+        }),
+      )
       setSessionUser(updated)
       setProfileForm({
         displayName: updated.displayName,
@@ -208,10 +209,15 @@ export function ProfileTab({ user }: ProfileTabProps) {
               data-testid="profile-avatar-file"
             />
           </div>
-          <form className={styles.profileForm} onSubmit={(event) => void handleProfileSubmit(event)}>
+          <form
+            className={styles.profileForm}
+            onSubmit={(event) => void handleProfileSubmit(event)}
+          >
             <div className={styles.profileFields}>
               <div className={styles.profileField}>
-                <label className={styles.profileFieldLabel} htmlFor={displayNameId}>Name</label>
+                <label className={styles.profileFieldLabel} htmlFor={displayNameId}>
+                  Name
+                </label>
                 <Input
                   id={displayNameId}
                   value={profileForm.displayName}
@@ -225,7 +231,9 @@ export function ProfileTab({ user }: ProfileTabProps) {
                 />
               </div>
               <div className={styles.profileField}>
-                <label className={styles.profileFieldLabel} htmlFor={emailId}>Email</label>
+                <label className={styles.profileFieldLabel} htmlFor={emailId}>
+                  Email
+                </label>
                 <Input
                   id={emailId}
                   type="email"

@@ -128,7 +128,9 @@ describe('page slugs', () => {
   })
 
   it('rejects empty path segments', () => {
-    expect(pageSlugError('docs//api')).toBe('Page slug must use lowercase letters, numbers, single hyphens, and optional single slashes.')
+    expect(pageSlugError('docs//api')).toBe(
+      'Page slug must use lowercase letters, numbers, single hyphens, and optional single slashes.',
+    )
   })
 })
 

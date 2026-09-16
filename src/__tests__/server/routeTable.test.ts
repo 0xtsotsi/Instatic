@@ -129,17 +129,26 @@ describe('runRouteTable', () => {
       {
         method: 'POST',
         pattern: new RegExp(`^${ITEM}/publish$`),
-        handler: async (_r, _d, p) => { calls.push(`publish:${p.id}`); return ok({}) },
+        handler: async (_r, _d, p) => {
+          calls.push(`publish:${p.id}`)
+          return ok({})
+        },
       },
       {
         method: 'GET',
         pattern: new RegExp(`^${ITEM}$`),
-        handler: async (_r, _d, p) => { calls.push(`get:${p.id}`); return ok({}) },
+        handler: async (_r, _d, p) => {
+          calls.push(`get:${p.id}`)
+          return ok({})
+        },
       },
       {
         method: 'PATCH',
         pattern: new RegExp(`^${ITEM}$`),
-        handler: async (_r, _d, p) => { calls.push(`patch:${p.id}`); return ok({}) },
+        handler: async (_r, _d, p) => {
+          calls.push(`patch:${p.id}`)
+          return ok({})
+        },
       },
     ]
 
@@ -166,12 +175,18 @@ describe('runRouteTable', () => {
       {
         method: 'GET',
         pattern: '/admin/api/cms/plugins/events',
-        handler: async () => { calls.push('events'); return ok({}) },
+        handler: async () => {
+          calls.push('events')
+          return ok({})
+        },
       },
       {
         method: 'PATCH',
         pattern: /^\/admin\/api\/cms\/plugins\/(?<id>(?!events$)[^/]+)$/,
-        handler: async (_r, _d, p) => { calls.push(`item:${p.id}`); return ok({}) },
+        handler: async (_r, _d, p) => {
+          calls.push(`item:${p.id}`)
+          return ok({})
+        },
       },
     ]
 

@@ -34,7 +34,7 @@ import type { AnyModuleDefinition, PropertyControl } from '@core/module-engine'
 export function renderModule(
   def: AnyModuleDefinition,
   props: Record<string, unknown> = {},
-  renderedChildren: string[] = []
+  renderedChildren: string[] = [],
 ) {
   return def.render({ ...def.defaults, ...props }, renderedChildren)
 }
@@ -51,29 +51,26 @@ const BANNED_IN_RENDER = ['document', 'fetch', 'eval'] as const
 type BannedGlobal = (typeof BANNED_IN_RENDER)[number]
 
 function makeBannedProxy(globalName: string): object {
-  return new Proxy(
-    function () {} as object,
-    {
-      get(_target, prop) {
-        throw new Error(
-          `[Constraint #179] render() accessed banned global ` +
-            `"${globalName}.${String(prop)}" — render() must be a pure function.`
-        )
-      },
-      apply(_target, _thisArg, _args) {
-        throw new Error(
-          `[Constraint #179] render() called banned global "${globalName}" — ` +
-            `render() must be a pure function.`
-        )
-      },
-      construct(_target, _args) {
-        throw new Error(
-          `[Constraint #179] render() constructed banned global "${globalName}" — ` +
-            `render() must be a pure function.`
-        )
-      },
-    }
-  )
+  return new Proxy(function () {} as object, {
+    get(_target, prop) {
+      throw new Error(
+        `[Constraint #179] render() accessed banned global ` +
+          `"${globalName}.${String(prop)}" — render() must be a pure function.`,
+      )
+    },
+    apply(_target, _thisArg, _args) {
+      throw new Error(
+        `[Constraint #179] render() called banned global "${globalName}" — ` +
+          `render() must be a pure function.`,
+      )
+    },
+    construct(_target, _args) {
+      throw new Error(
+        `[Constraint #179] render() constructed banned global "${globalName}" — ` +
+          `render() must be a pure function.`,
+      )
+    },
+  })
 }
 
 /**
@@ -126,7 +123,7 @@ function activateCondition(condition: Record<string, unknown>): Record<string, u
     // AND: satisfy all branches
     return Object.assign(
       {},
-      ...(condition['and'] as Record<string, unknown>[]).map(activateCondition)
+      ...(condition['and'] as Record<string, unknown>[]).map(activateCondition),
     )
   }
   if (Array.isArray(condition['or']) && (condition['or'] as unknown[]).length > 0) {
@@ -200,15 +197,13 @@ export function runModuleConformanceSuite(def: AnyModuleDefinition): void {
       expect(r1.html).toBe(r2.html)
       expect(r1.css).toBe(r2.css)
 
-      expect(() =>
-        withBannedGlobals(() => def.render(def.defaults, []))
-      ).not.toThrow()
+      expect(() => withBannedGlobals(() => def.render(def.defaults, []))).not.toThrow()
 
       expect(/<script[\s>]/i.test(result.html)).toBe(false)
       expect(/\bon\w+\s*=/i.test(result.html)).toBe(false)
 
       const urlPropEntries = Object.entries(def.schema).filter(([, ctrl]) =>
-        new Set<PropertyControl['type']>(['url', 'image', 'media']).has(ctrl.type)
+        new Set<PropertyControl['type']>(['url', 'image', 'media']).has(ctrl.type),
       )
       const unsafeVectors: Array<{ scheme: string; payload: string }> = [
         { scheme: 'javascript:', payload: 'javascript:alert(1)' },
@@ -229,7 +224,10 @@ export function runModuleConformanceSuite(def: AnyModuleDefinition): void {
         }
       }
 
-      if (def.canHaveChildren && !new Set(['special', 'transparent']).has(def.publishBehavior ?? 'standard')) {
+      if (
+        def.canHaveChildren &&
+        !new Set(['special', 'transparent']).has(def.publishBehavior ?? 'standard')
+      ) {
         const childHtml = '<p data-test-child="true">child content</p>'
         const { html } = def.render(def.defaults, [childHtml])
         expect(html).toContain(childHtml)

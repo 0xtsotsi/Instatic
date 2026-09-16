@@ -70,7 +70,9 @@ describe('media signed-redirect serving', () => {
       /adapter\.servingMode === 'public-url'[\s\S]*?result\.publicUrl[\s\S]*?buildSignedRedirectUrl/,
     )
     // The built URL must match the router's expected shape.
-    expect(source).toMatch(/`\/_instatic\/media\/\$\{encodeURIComponent\(adapterId\)\}\/\$\{encodeURIComponent\(storagePath\)\}`/)
+    expect(source).toMatch(
+      /`\/_instatic\/media\/\$\{encodeURIComponent\(adapterId\)\}\/\$\{encodeURIComponent\(storagePath\)\}`/,
+    )
   })
 
   it('the route encoding round-trips correctly', async () => {
@@ -82,7 +84,9 @@ describe('media signed-redirect serving', () => {
     const dispatch = await read('server/handlers/cms/mediaUploadDispatch.ts')
     // Two occurrences of decodeURIComponent in the route handler — one for
     // adapterId, one for storagePath.
-    expect((router.match(/decodeURIComponent\(match\[\d+\]\)/g) ?? []).length).toBeGreaterThanOrEqual(2)
+    expect(
+      (router.match(/decodeURIComponent\(match\[\d+\]\)/g) ?? []).length,
+    ).toBeGreaterThanOrEqual(2)
     expect(dispatch).toContain('encodeURIComponent(adapterId)')
     expect(dispatch).toContain('encodeURIComponent(storagePath)')
   })

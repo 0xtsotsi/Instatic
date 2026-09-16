@@ -20,10 +20,7 @@ describe('CanvasModulePlaceholder', () => {
     }
 
     const { container } = render(
-      <CanvasModulePlaceholder
-        {...rootProps}
-        label="No image selected"
-      />,
+      <CanvasModulePlaceholder {...rootProps} label="No image selected" />,
     )
 
     const root = container.querySelector('[data-canvas-module-placeholder]')
@@ -36,7 +33,10 @@ describe('CanvasModulePlaceholder', () => {
 
   it('does not rely on global placeholder icon sizing rules', () => {
     const moduleCss = readFileSync(
-      new URL('../../ui/components/CanvasModulePlaceholder/CanvasModulePlaceholder.module.css', import.meta.url),
+      new URL(
+        '../../ui/components/CanvasModulePlaceholder/CanvasModulePlaceholder.module.css',
+        import.meta.url,
+      ),
       'utf8',
     )
     const chromeInjector = readFileSync(
@@ -50,7 +50,10 @@ describe('CanvasModulePlaceholder', () => {
 
   it('keeps block placeholder content stack rules in module and iframe chrome CSS', () => {
     const moduleCss = readFileSync(
-      new URL('../../ui/components/CanvasModulePlaceholder/CanvasModulePlaceholder.module.css', import.meta.url),
+      new URL(
+        '../../ui/components/CanvasModulePlaceholder/CanvasModulePlaceholder.module.css',
+        import.meta.url,
+      ),
       'utf8',
     )
     const chromeInjector = readFileSync(
@@ -75,11 +78,7 @@ describe('CanvasModulePlaceholder', () => {
   })
 
   it('renders the empty image placeholder as a compact centered row', () => {
-    const { container } = render(
-      <ImageEditor
-        props={ImageModule.defaults}
-      />,
-    )
+    const { container } = render(<ImageEditor props={ImageModule.defaults} />)
 
     const root = container.querySelector('[data-canvas-module-placeholder]')
     const icon = container.querySelector('[data-instatic-placeholder-icon]')
@@ -92,16 +91,15 @@ describe('CanvasModulePlaceholder', () => {
 
   it('keeps empty-state icon and label inside an isolated content stack', () => {
     const { container } = render(
-      <CanvasModulePlaceholder
-        icon={<svg aria-hidden="true" />}
-        label="No image selected"
-      />,
+      <CanvasModulePlaceholder icon={<svg aria-hidden="true" />} label="No image selected" />,
     )
 
     const root = container.querySelector('[data-canvas-module-placeholder]')
     const content = root?.querySelector('[data-instatic-placeholder-content]')
     expect(content).not.toBeNull()
     expect(content?.querySelector('[data-instatic-placeholder-icon]')).not.toBeNull()
-    expect(content?.querySelector('[data-instatic-placeholder-label]')?.textContent).toBe('No image selected')
+    expect(content?.querySelector('[data-instatic-placeholder-label]')?.textContent).toBe(
+      'No image selected',
+    )
   })
 })

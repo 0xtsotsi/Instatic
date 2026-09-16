@@ -175,9 +175,10 @@ export function TableSettings({
   }
 
   function requestDeleteTable() {
-    const rowDescription = rows.length > 0
-      ? `This will permanently delete ${rows.length} row${rows.length === 1 ? '' : 's'} and cannot be undone.`
-      : 'This cannot be undone.'
+    const rowDescription =
+      rows.length > 0
+        ? `This will permanently delete ${rows.length} row${rows.length === 1 ? '' : 's'} and cannot be undone.`
+        : 'This cannot be undone.'
     confirmDelete({
       title: `Delete table "${table.name}"?`,
       description: rowDescription,
@@ -207,73 +208,77 @@ export function TableSettings({
       {/* ── Save status banner (above all sections) ── */}
       {saveError && (
         <div className={styles.statusBanner}>
-          <p role="alert" className={styles.errorBanner}>{saveError}</p>
+          <p role="alert" className={styles.errorBanner}>
+            {saveError}
+          </p>
         </div>
       )}
       {saving && (
         <div className={styles.statusBanner}>
-          <p className={styles.savingText} aria-live="polite">Saving…</p>
+          <p className={styles.savingText} aria-live="polite">
+            Saving…
+          </p>
         </div>
       )}
 
       {/* ── General (hidden for system tables — identity is frozen) ── */}
       {!isSystem && (
-      <Section title="General" icon={Settings2SolidIcon} defaultOpen>
-        <div className={sectionStyles.sectionBody}>
-          <ControlRow propKey="name" label="Name">
-            <Input
-              id="ctrl-name"
-              fieldSize="sm"
-              value={draft.name}
-              disabled={!canEdit}
-              onChange={(e) => patchDraft('name', e.target.value)}
-              onBlur={() => void handleBlurField('name')}
-              autoComplete="off"
-            />
-          </ControlRow>
+        <Section title="General" icon={Settings2SolidIcon} defaultOpen>
+          <div className={sectionStyles.sectionBody}>
+            <ControlRow propKey="name" label="Name">
+              <Input
+                id="ctrl-name"
+                fieldSize="sm"
+                value={draft.name}
+                disabled={!canEdit}
+                onChange={(e) => patchDraft('name', e.target.value)}
+                onBlur={() => void handleBlurField('name')}
+                autoComplete="off"
+              />
+            </ControlRow>
 
-          <ControlRow
-            propKey="slug"
-            label="Slug"
-            description="Changing the slug will break existing links."
-          >
-            <Input
-              id="ctrl-slug"
-              fieldSize="sm"
-              value={draft.slug}
-              disabled={!canEdit}
-              onChange={(e) => patchDraft('slug', e.target.value)}
-              onBlur={() => void handleBlurField('slug')}
-              autoComplete="off"
-              monospace
-            />
-          </ControlRow>
+            <ControlRow
+              propKey="slug"
+              label="Slug"
+              description="Changing the slug will break existing links."
+            >
+              <Input
+                id="ctrl-slug"
+                fieldSize="sm"
+                value={draft.slug}
+                disabled={!canEdit}
+                onChange={(e) => patchDraft('slug', e.target.value)}
+                onBlur={() => void handleBlurField('slug')}
+                autoComplete="off"
+                monospace
+              />
+            </ControlRow>
 
-          <ControlRow propKey="singularLabel" label="Singular label">
-            <Input
-              id="ctrl-singularLabel"
-              fieldSize="sm"
-              value={draft.singularLabel}
-              disabled={!canEdit}
-              onChange={(e) => patchDraft('singularLabel', e.target.value)}
-              onBlur={() => void handleBlurField('singularLabel')}
-              autoComplete="off"
-            />
-          </ControlRow>
+            <ControlRow propKey="singularLabel" label="Singular label">
+              <Input
+                id="ctrl-singularLabel"
+                fieldSize="sm"
+                value={draft.singularLabel}
+                disabled={!canEdit}
+                onChange={(e) => patchDraft('singularLabel', e.target.value)}
+                onBlur={() => void handleBlurField('singularLabel')}
+                autoComplete="off"
+              />
+            </ControlRow>
 
-          <ControlRow propKey="pluralLabel" label="Plural label">
-            <Input
-              id="ctrl-pluralLabel"
-              fieldSize="sm"
-              value={draft.pluralLabel}
-              disabled={!canEdit}
-              onChange={(e) => patchDraft('pluralLabel', e.target.value)}
-              onBlur={() => void handleBlurField('pluralLabel')}
-              autoComplete="off"
-            />
-          </ControlRow>
-        </div>
-      </Section>
+            <ControlRow propKey="pluralLabel" label="Plural label">
+              <Input
+                id="ctrl-pluralLabel"
+                fieldSize="sm"
+                value={draft.pluralLabel}
+                disabled={!canEdit}
+                onChange={(e) => patchDraft('pluralLabel', e.target.value)}
+                onBlur={() => void handleBlurField('pluralLabel')}
+                autoComplete="off"
+              />
+            </ControlRow>
+          </div>
+        </Section>
       )}
 
       {/* ── Routing ──
@@ -284,27 +289,27 @@ export function TableSettings({
         kinds default to an empty `routeBase` (not routable).
         Hidden for system tables — their route base is fixed. */}
       {!isSystem && (
-      <Section title="Routing" icon={LinkIcon}>
-        <div className={sectionStyles.sectionBody}>
-          <ControlRow
-            propKey="routeBase"
-            label="Route base"
-            description="Public URL prefix for entries. Empty = not publicly routable."
-          >
-            <Input
-              id="ctrl-routeBase"
-              fieldSize="sm"
-              value={draft.routeBase}
-              disabled={!canEdit}
-              onChange={(e) => patchDraft('routeBase', e.target.value)}
-              onBlur={() => void handleBlurField('routeBase')}
-              autoComplete="off"
-              monospace
-              placeholder={table.kind === 'postType' ? '/posts' : `/${draft.slug || 'items'}`}
-            />
-          </ControlRow>
-        </div>
-      </Section>
+        <Section title="Routing" icon={LinkIcon}>
+          <div className={sectionStyles.sectionBody}>
+            <ControlRow
+              propKey="routeBase"
+              label="Route base"
+              description="Public URL prefix for entries. Empty = not publicly routable."
+            >
+              <Input
+                id="ctrl-routeBase"
+                fieldSize="sm"
+                value={draft.routeBase}
+                disabled={!canEdit}
+                onChange={(e) => patchDraft('routeBase', e.target.value)}
+                onBlur={() => void handleBlurField('routeBase')}
+                autoComplete="off"
+                monospace
+                placeholder={table.kind === 'postType' ? '/posts' : `/${draft.slug || 'items'}`}
+              />
+            </ControlRow>
+          </div>
+        </Section>
       )}
 
       {/* ── Display ── */}
@@ -340,24 +345,19 @@ export function TableSettings({
 
       {/* ── Kind (read-only; hidden for system tables) ── */}
       {!isSystem && (
-      <Section title="Kind" icon={BoxSolidIcon}>
-        <div className={styles.kindRow}>
-          <span className={styles.kindBadge}>{KIND_LABELS[table.kind]}</span>
-          <span className={styles.kindCaption}>Table kind cannot be changed after creation.</span>
-        </div>
-      </Section>
+        <Section title="Kind" icon={BoxSolidIcon}>
+          <div className={styles.kindRow}>
+            <span className={styles.kindBadge}>{KIND_LABELS[table.kind]}</span>
+            <span className={styles.kindCaption}>Table kind cannot be changed after creation.</span>
+          </div>
+        </Section>
       )}
 
       {/* ── Danger zone ── */}
       {canDelete && (
         <Section title="Danger zone" icon={TrashSolidIcon}>
           <div className={styles.dangerZoneBody}>
-            <Button
-              variant="destructive"
-              size="sm"
-              type="button"
-              onClick={requestDeleteTable}
-            >
+            <Button variant="destructive" size="sm" type="button" onClick={requestDeleteTable}>
               Delete table
             </Button>
           </div>

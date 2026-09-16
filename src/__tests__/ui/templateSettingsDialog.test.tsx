@@ -1,20 +1,32 @@
 import { afterEach, describe, expect, it } from 'bun:test'
 import React from 'react'
 import { cleanup, fireEvent, render, screen } from '@testing-library/react'
-import { TemplateSettingsDialog, type TemplateSettingsPayload } from '@admin/shared/dialogs/TemplateSettingsDialog/TemplateSettingsDialog'
+import {
+  TemplateSettingsDialog,
+  type TemplateSettingsPayload,
+} from '@admin/shared/dialogs/TemplateSettingsDialog/TemplateSettingsDialog'
 import type { Page } from '@core/page-tree'
 
 afterEach(cleanup)
 
-const node = (id: string, moduleId: string, children: string[] = []) =>
-  ({ id, moduleId, props: {}, breakpointOverrides: {}, children })
+const node = (id: string, moduleId: string, children: string[] = []) => ({
+  id,
+  moduleId,
+  props: {},
+  breakpointOverrides: {},
+  children,
+})
 
 // A plain page with no base.outlet — a template can still be saved from it; the
 // outlet is added later in the editor. The dialog does NOT gate on outlets.
-const plainPage = (): Page => ({
-  id: 'p1', slug: 'tpl', title: 'Tpl', rootNodeId: 'body',
-  nodes: { body: node('body', 'base.body') },
-} as unknown as Page)
+const plainPage = (): Page =>
+  ({
+    id: 'p1',
+    slug: 'tpl',
+    title: 'Tpl',
+    rootNodeId: 'body',
+    nodes: { body: node('body', 'base.body') },
+  }) as unknown as Page
 
 function submit() {
   const form = document.getElementById('template-settings-form') as HTMLFormElement
@@ -29,7 +41,9 @@ describe('TemplateSettingsDialog', () => {
         page={plainPage()}
         pages={[plainPage()]}
         onCancel={() => {}}
-        onSave={(p) => { saved = p }}
+        onSave={(p) => {
+          saved = p
+        }}
       />,
     )
     // No outlet on the page, but Save is enabled — no guard.
@@ -50,7 +64,9 @@ describe('TemplateSettingsDialog', () => {
         page={plainPage()}
         pages={[plainPage()]}
         onCancel={() => {}}
-        onSave={(p) => { saved = p }}
+        onSave={(p) => {
+          saved = p
+        }}
       />,
     )
     // Switch "Applies to" from Everywhere → Post types via keyboard.
@@ -78,7 +94,9 @@ describe('TemplateSettingsDialog', () => {
         page={plainPage()}
         pages={[plainPage()]}
         onCancel={() => {}}
-        onSave={(p) => { saved = p }}
+        onSave={(p) => {
+          saved = p
+        }}
       />,
     )
     // Switch "Applies to" from Everywhere → Not found via keyboard: open,

@@ -83,9 +83,7 @@ export function injectNodeClassIds(
   site: SiteDocument,
 ): string {
   if (!classIds?.length) return html
-  const classAttr = classNamesForClassIds(site.styleRules, classIds)
-    .map(escapeHtml)
-    .join(' ')
+  const classAttr = classNamesForClassIds(site.styleRules, classIds).map(escapeHtml).join(' ')
   if (!classAttr) return html
   return injectClassIntoRootElement(html, classAttr)
 }

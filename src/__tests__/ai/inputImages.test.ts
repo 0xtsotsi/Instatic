@@ -25,11 +25,7 @@ function imageBlock(data = smallJpegBase64): AiUserImageBlock {
   return { kind: 'image', mimeType: 'image/jpeg', data }
 }
 
-function makeImage(
-  width: number,
-  height: number,
-  format: 'jpeg' | 'png',
-): Promise<Buffer> {
+function makeImage(width: number, height: number, format: 'jpeg' | 'png'): Promise<Buffer> {
   const source = sharp({
     create: {
       width,
@@ -93,25 +89,27 @@ describe('validateAiUserContent', () => {
   })
 
   test('rejects an empty turn, duplicate text, and more than eight images', async () => {
-    await expect(validateAiUserContent([
-      { kind: 'text', text: '   ' },
-    ])).rejects.toMatchObject({
+    await expect(validateAiUserContent([{ kind: 'text', text: '   ' }])).rejects.toMatchObject({
       name: 'AiImageInputError',
       status: 400,
       message: 'Message must contain text or an image.',
     })
 
-    await expect(validateAiUserContent([
-      { kind: 'text', text: 'one' },
-      { kind: 'text', text: 'two' },
-    ])).rejects.toMatchObject({
+    await expect(
+      validateAiUserContent([
+        { kind: 'text', text: 'one' },
+        { kind: 'text', text: 'two' },
+      ]),
+    ).rejects.toMatchObject({
       status: 400,
       message: 'A message can contain at most one text block.',
     })
 
-    await expect(validateAiUserContent([
-      ...Array.from({ length: AI_USER_IMAGE_MAX_PER_MESSAGE + 1 }, () => imageBlock()),
-    ])).rejects.toMatchObject({
+    await expect(
+      validateAiUserContent([
+        ...Array.from({ length: AI_USER_IMAGE_MAX_PER_MESSAGE + 1 }, () => imageBlock()),
+      ]),
+    ).rejects.toMatchObject({
       status: 400,
       message: `A message can contain at most ${AI_USER_IMAGE_MAX_PER_MESSAGE} images.`,
     })
@@ -149,9 +147,9 @@ describe('validateAiUserImage', () => {
 
   test('rejects corrupt data even when it starts with the JPEG signature', async () => {
     const corrupt = Buffer.from([0xff, 0xd8, 0xff, 0x00, 0x01, 0x02, 0x03])
-    await expect(validateAiUserImage(imageBlock(corrupt.toString('base64')))).rejects.toBeInstanceOf(
-      AiImageInputError,
-    )
+    await expect(
+      validateAiUserImage(imageBlock(corrupt.toString('base64'))),
+    ).rejects.toBeInstanceOf(AiImageInputError)
   })
 
   test('rejects a truncated JPEG whose header metadata is still readable', async () => {
@@ -159,8 +157,9 @@ describe('validateAiUserImage', () => {
     const truncated = complete.subarray(0, complete.byteLength - 2)
     expect((await sharp(truncated).metadata()).format).toBe('jpeg')
 
-    await expect(validateAiUserImage(imageBlock(truncated.toString('base64'))))
-      .rejects.toMatchObject({ status: 400, message: 'Image data could not be fully decoded.' })
+    await expect(
+      validateAiUserImage(imageBlock(truncated.toString('base64'))),
+    ).rejects.toMatchObject({ status: 400, message: 'Image data could not be fully decoded.' })
   })
 
   test('strips source metadata before persistence', async () => {
@@ -171,7 +170,10 @@ describe('validateAiUserImage', () => {
         channels: 3,
         background: { r: 45, g: 90, b: 135 },
       },
-    }).jpeg().withMetadata({ orientation: 6 }).toBuffer()
+    })
+      .jpeg()
+      .withMetadata({ orientation: 6 })
+      .toBuffer()
     expect((await sharp(tagged).metadata()).exif).toBeDefined()
 
     const canonical = await validateAiUserImage(imageBlock(tagged.toString('base64')))
@@ -187,7 +189,9 @@ describe('validateAiUserImage', () => {
     oversized[1] = 0xd8
     oversized[2] = 0xff
 
-    await expect(validateAiUserImage(imageBlock(oversized.toString('base64')))).rejects.toMatchObject({
+    await expect(
+      validateAiUserImage(imageBlock(oversized.toString('base64'))),
+    ).rejects.toMatchObject({
       status: 413,
       message: 'Image exceeds the 1.5 MB limit.',
     })
@@ -195,14 +199,18 @@ describe('validateAiUserImage', () => {
 
   test('rejects an excessive edge or pixel area with 413 semantics', async () => {
     const tooWide = await makeImage(AI_USER_IMAGE_MAX_EDGE + 1, 1, 'jpeg')
-    await expect(validateAiUserImage(imageBlock(tooWide.toString('base64')))).rejects.toMatchObject({
-      status: 413,
-    })
+    await expect(validateAiUserImage(imageBlock(tooWide.toString('base64')))).rejects.toMatchObject(
+      {
+        status: 413,
+      },
+    )
 
     const areaWidth = 1500
     const areaHeight = Math.floor(AI_USER_IMAGE_MAX_PIXELS / areaWidth) + 1
     const tooManyPixels = await makeImage(areaWidth, areaHeight, 'jpeg')
-    await expect(validateAiUserImage(imageBlock(tooManyPixels.toString('base64')))).rejects.toMatchObject({
+    await expect(
+      validateAiUserImage(imageBlock(tooManyPixels.toString('base64'))),
+    ).rejects.toMatchObject({
       status: 413,
     })
   })

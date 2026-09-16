@@ -10,7 +10,12 @@ import {
   formFieldFragmentForDataField,
 } from '@site/panels/PropertiesPanel/formSettingsAnalysis'
 
-function node(id: string, moduleId: string, props: Record<string, unknown> = {}, children: string[] = []): PageNode {
+function node(
+  id: string,
+  moduleId: string,
+  props: Record<string, unknown> = {},
+  children: string[] = [],
+): PageNode {
   return {
     id,
     moduleId,
@@ -38,10 +43,15 @@ const table: DataTable = {
   fields: [
     { id: 'email', label: 'Email', type: 'email', required: true, maxLength: 320 },
     { id: 'message', label: 'Message', type: 'longText', required: true },
-    { id: 'plan', label: 'Plan', type: 'select', options: [
-      { id: 'free', label: 'Free', value: 'free' },
-      { id: 'pro', label: 'Pro', value: 'pro' },
-    ] },
+    {
+      id: 'plan',
+      label: 'Plan',
+      type: 'select',
+      options: [
+        { id: 'free', label: 'Free', value: 'free' },
+        { id: 'pro', label: 'Pro', value: 'pro' },
+      ],
+    },
     { id: 'consent', label: 'Consent', type: 'boolean', required: true },
   ],
 }
@@ -54,19 +64,30 @@ function makePage(): Page {
     rootNodeId: 'body',
     nodes: {
       body: node('body', 'base.body', {}, ['form', 'outside-input']),
-      form: node('form', 'base.form', {
-        mode: 'cms',
-        formId: 'contact',
-        targetTableId: 'contact_submissions',
-      }, ['field-email', 'field-email-duplicate', 'submit']),
+      form: node(
+        'form',
+        'base.form',
+        {
+          mode: 'cms',
+          formId: 'contact',
+          targetTableId: 'contact_submissions',
+        },
+        ['field-email', 'field-email-duplicate', 'submit'],
+      ),
       'field-email': node('field-email', 'base.container', {}, ['label-email', 'input-email']),
-      'label-email': node('label-email', 'base.label', { text: 'Email', targetMode: 'auto', targetId: '' }),
+      'label-email': node('label-email', 'base.label', {
+        text: 'Email',
+        targetMode: 'auto',
+        targetId: '',
+      }),
       'input-email': node('input-email', 'base.input', {
         fieldId: 'email',
         name: 'email',
         inputType: 'email',
       }),
-      'field-email-duplicate': node('field-email-duplicate', 'base.container', {}, ['duplicate-email']),
+      'field-email-duplicate': node('field-email-duplicate', 'base.container', {}, [
+        'duplicate-email',
+      ]),
       'duplicate-email': node('duplicate-email', 'base.input', {
         fieldId: 'missing_field',
         name: 'email',
@@ -157,13 +178,22 @@ describe('analyzeFormSettings', () => {
       rootNodeId: 'body',
       nodes: {
         body: node('body', 'base.body', {}, ['form']),
-        form: node('form', 'base.form', {
-          mode: 'cms',
-          formId: 'contact-mWEtu0Bh00K-EXHQjOspN',
-          targetTableId: '',
-        }, ['field-name', 'field-email', 'field-message', 'field-consent']),
+        form: node(
+          'form',
+          'base.form',
+          {
+            mode: 'cms',
+            formId: 'contact-mWEtu0Bh00K-EXHQjOspN',
+            targetTableId: '',
+          },
+          ['field-name', 'field-email', 'field-message', 'field-consent'],
+        ),
         'field-name': node('field-name', 'base.container', {}, ['label-name', 'name']),
-        'label-name': node('label-name', 'base.label', { text: 'Name', targetMode: 'auto', targetId: '' }),
+        'label-name': node('label-name', 'base.label', {
+          text: 'Name',
+          targetMode: 'auto',
+          targetId: '',
+        }),
         name: node('name', 'base.input', {
           name: 'name',
           inputType: 'text',
@@ -171,13 +201,25 @@ describe('analyzeFormSettings', () => {
           maxLength: 120,
         }),
         'field-email': node('field-email', 'base.container', {}, ['label-email', 'email']),
-        'label-email': node('label-email', 'base.label', { text: 'Email', targetMode: 'auto', targetId: '' }),
+        'label-email': node('label-email', 'base.label', {
+          text: 'Email',
+          targetMode: 'auto',
+          targetId: '',
+        }),
         email: node('email', 'base.input', { name: 'email', inputType: 'email', required: true }),
         'field-message': node('field-message', 'base.container', {}, ['label-message', 'message']),
-        'label-message': node('label-message', 'base.label', { text: 'Message', targetMode: 'auto', targetId: '' }),
+        'label-message': node('label-message', 'base.label', {
+          text: 'Message',
+          targetMode: 'auto',
+          targetId: '',
+        }),
         message: node('message', 'base.textarea', { name: 'message', required: false }),
         'field-consent': node('field-consent', 'base.container', {}, ['label-consent', 'consent']),
-        'label-consent': node('label-consent', 'base.label', { text: 'Consent', targetMode: 'auto', targetId: '' }),
+        'label-consent': node('label-consent', 'base.label', {
+          text: 'Consent',
+          targetMode: 'auto',
+          targetId: '',
+        }),
         consent: node('consent', 'base.checkbox', { name: 'consent', required: true }),
       },
     })

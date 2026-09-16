@@ -138,10 +138,7 @@ export interface StyleRuleSlice {
    * Remove storage-key CSS properties from base and every context of every
    * exact selector match, as one atomic history entry.
    */
-  removeCssRuleProperties(
-    selectors: string[],
-    properties: string[],
-  ): CssRulePropertyRemovalResult
+  removeCssRuleProperties(selectors: string[], properties: string[]): CssRulePropertyRemovalResult
 
   // ── Per-context overrides (unified viewport-context + custom-condition axis) ─
   /**
@@ -151,11 +148,7 @@ export interface StyleRuleSlice {
    * are removed. Replaces the old `setClassBreakpointStyles` +
    * `updateConditionalLayerStyles` (they were the same operation twice).
    */
-  setClassContextStyles(
-    classId: string,
-    contextId: string,
-    patch: Partial<CSSPropertyBag>,
-  ): void
+  setClassContextStyles(classId: string, contextId: string, patch: Partial<CSSPropertyBag>): void
 
   // ── Site-level reusable conditions (custom @media / @container / @supports) ─
   /**

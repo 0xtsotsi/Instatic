@@ -33,9 +33,7 @@ export function ColorInput({
   ...props
 }: ColorInputProps) {
   const [uncontrolledValue, setUncontrolledValue] = useState(getColorInputValue(defaultValue))
-  const currentValue = value === undefined
-    ? uncontrolledValue
-    : getColorInputValue(value)
+  const currentValue = value === undefined ? uncontrolledValue : getColorInputValue(value)
   const displayValue = getColorSwatchValue(swatchValue ?? currentValue)
   const frameStyle: ColorInputStyle = {
     ...style,

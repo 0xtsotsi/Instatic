@@ -25,9 +25,7 @@ import type { EditorStore } from '@site/store/types'
 
 export const siteAgentSliceConfig: AgentSliceConfig = {
   scope: 'site',
-  buildSnapshot: () => buildCurrentPageContext(
-    () => getAgentStoreApi<EditorStore>().getState(),
-  ),
+  buildSnapshot: () => buildCurrentPageContext(() => getAgentStoreApi<EditorStore>().getState()),
   dispatchTool: executeAgentTool,
   // Keep the site-editor wording — the AgentPanel recognises this string
   // prefix and renders the setup CTA.

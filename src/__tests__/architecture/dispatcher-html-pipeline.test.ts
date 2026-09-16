@@ -51,9 +51,7 @@ describe('dispatcher HTML pipeline', () => {
   it('the publish.* lifecycle bus is owned by exactly one server file', () => {
     // Files that legitimately call publish.before / publish.after / publish.html
     // on the hookBus. There must be exactly one — the dispatcher pipeline.
-    const allowedOwners = new Set([
-      'server/publish/publishedHtmlPipeline.ts',
-    ])
+    const allowedOwners = new Set(['server/publish/publishedHtmlPipeline.ts'])
 
     const violations: string[] = []
     for (const file of walk(join(ROOT, 'server'))) {
@@ -72,13 +70,15 @@ describe('dispatcher HTML pipeline', () => {
     if (violations.length > 0) {
       throw new Error(
         `publish.* lifecycle is driven outside the single pipeline owner:\n` +
-        violations.map((v) => `  - ${v}`).join('\n') +
-        `\nMove the calls into server/publish/publishedHtmlPipeline.ts and ` +
-        `feed renderer output through applyPublishedHtmlPipeline(rendered, db).`,
+          violations.map((v) => `  - ${v}`).join('\n') +
+          `\nMove the calls into server/publish/publishedHtmlPipeline.ts and ` +
+          `feed renderer output through applyPublishedHtmlPipeline(rendered, db).`,
       )
     }
     // Sanity: the owner file must actually exist.
-    expect(() => readFileSync(join(ROOT, 'server/publish/publishedHtmlPipeline.ts'), 'utf-8')).not.toThrow()
+    expect(() =>
+      readFileSync(join(ROOT, 'server/publish/publishedHtmlPipeline.ts'), 'utf-8'),
+    ).not.toThrow()
   })
 
   it('the dispatcher emits public HTML only through applyPublishedHtmlPipeline', () => {

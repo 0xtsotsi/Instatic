@@ -5,10 +5,7 @@
  *
  * No JSX lives here — FieldEditForm renders this state, FieldsSection owns it.
  */
-import {
-  type DataField,
-  type DataSelectOption,
-} from '@core/data/schemas'
+import { type DataField, type DataSelectOption } from '@core/data/schemas'
 
 // ---------------------------------------------------------------------------
 // Types
@@ -116,7 +113,7 @@ export function applyEditState(
 ): DataField {
   const common = {
     id: field.id,
-    label: labelLocked ? field.label : (state.label.trim() || field.label),
+    label: labelLocked ? field.label : state.label.trim() || field.label,
     ...(state.required ? { required: true as const } : {}),
     ...(state.description.trim() ? { description: state.description.trim() } : {}),
     ...(field.builtIn ? { builtIn: true as const } : {}),

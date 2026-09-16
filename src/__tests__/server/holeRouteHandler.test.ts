@@ -95,13 +95,15 @@ function makeFakeDb(snapshot: ReturnType<typeof makeSnapshot> | null): DbClient 
     if (normalized.includes('site_snapshots.site_json')) {
       return {
         rows: snapshot
-          ? [{
-              row_id: snapshot.pageRowId,
-              site_json: snapshot.site,
-              runtime_assets_json: null,
-              importmap_body: null,
-              importmap_sha256: null,
-            } as unknown as Row]
+          ? [
+              {
+                row_id: snapshot.pageRowId,
+                site_json: snapshot.site,
+                runtime_assets_json: null,
+                importmap_body: null,
+                importmap_sha256: null,
+              } as unknown as Row,
+            ]
           : [],
         rowCount: snapshot ? 1 : 0,
       }
@@ -137,13 +139,15 @@ function makeCountingDb(snapshot: ReturnType<typeof makeSnapshot>): {
       loads++
       await Promise.resolve() // let other in-flight callers join before resolving
       return {
-        rows: [{
-          row_id: snapshot.pageRowId,
-          site_json: snapshot.site,
-          runtime_assets_json: null,
-          importmap_body: null,
-          importmap_sha256: null,
-        } as unknown as Row],
+        rows: [
+          {
+            row_id: snapshot.pageRowId,
+            site_json: snapshot.site,
+            runtime_assets_json: null,
+            importmap_body: null,
+            importmap_sha256: null,
+          } as unknown as Row,
+        ],
         rowCount: 1,
       }
     }
@@ -266,10 +270,9 @@ describe('server router — hole namespace ownership', () => {
   it('keeps malformed hole fragment URLs inside the exclusive namespace', async () => {
     const { db, wasQueried } = makeThrowingDb()
 
-    const res = await handleServerRequest(
-      new Request('http://localhost/_instatic/hole/?v=0'),
-      { db },
-    )
+    const res = await handleServerRequest(new Request('http://localhost/_instatic/hole/?v=0'), {
+      db,
+    })
 
     expect(res.status).toBe(400)
     expect(await res.text()).toContain('Missing node id')
@@ -350,7 +353,7 @@ describe('handleHoleRequest — stale version', () => {
     const req = new Request(url)
     const res = await handleHoleRequest(req, url, { db })
 
-    expect((await res.text())).toContain('instatic-hole-stale')
+    expect(await res.text()).toContain('instatic-hole-stale')
   })
 })
 

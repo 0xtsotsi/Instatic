@@ -100,7 +100,11 @@ async function seedAuth(db: DbClient): Promise<string> {
 // Helpers
 // ---------------------------------------------------------------------------
 
-function bundleTableEntry(id: string, name: string, kind: DataTable['kind'] = 'postType'): DataTable {
+function bundleTableEntry(
+  id: string,
+  name: string,
+  kind: DataTable['kind'] = 'postType',
+): DataTable {
   const now = new Date().toISOString()
   return {
     id,
@@ -156,14 +160,11 @@ function makeImportRequest(
 ): Request {
   // The `cookie` header is a forbidden header per WHATWG Fetch spec and is
   // stripped by Bun's Request constructor in test mode. Set it after construction.
-  const req = new Request(
-    `http://localhost/admin/api/cms/import?strategy=${strategy}`,
-    {
-      method: 'POST',
-      headers: { 'content-type': 'application/json' },
-      body: JSON.stringify(bundle),
-    },
-  )
+  const req = new Request(`http://localhost/admin/api/cms/import?strategy=${strategy}`, {
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify(bundle),
+  })
   req.headers.set('cookie', cookie)
   return req
 }
@@ -308,9 +309,9 @@ describe('handleImportRoute — strategy: merge-add', () => {
 
     expect(result.ok).toBe(true)
     expect(result.strategy).toBe('merge-add')
-    expect(result.rowsInserted).toBe(2)   // the 2 new rows
-    expect(result.rowsSkipped).toBe(1)    // the overlap row
-    expect(result.rowsReplaced).toBe(0)   // merge-add never replaces
+    expect(result.rowsInserted).toBe(2) // the 2 new rows
+    expect(result.rowsSkipped).toBe(1) // the overlap row
+    expect(result.rowsReplaced).toBe(0) // merge-add never replaces
   })
 
   test('local-only row is still present after merge-add (untouched)', async () => {
@@ -393,9 +394,9 @@ describe('handleImportRoute — strategy: merge-overwrite', () => {
 
     expect(result.ok).toBe(true)
     expect(result.strategy).toBe('merge-overwrite')
-    expect(result.rowsReplaced).toBe(1)   // the overlap row was overwritten
-    expect(result.rowsInserted).toBe(2)   // the 2 new rows
-    expect(result.rowsSkipped).toBe(0)    // merge-overwrite never skips
+    expect(result.rowsReplaced).toBe(1) // the overlap row was overwritten
+    expect(result.rowsInserted).toBe(2) // the 2 new rows
+    expect(result.rowsSkipped).toBe(0) // merge-overwrite never skips
   })
 
   test('local-only row is still present after merge-overwrite (untouched)', async () => {

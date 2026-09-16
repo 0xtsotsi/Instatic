@@ -65,12 +65,7 @@ describe('settingsSlice', () => {
   })
 
   it('accepts every settings section and preserves modal openness while navigating', () => {
-    const sections: SettingsSection[] = [
-      'general',
-      'preferences',
-      'shortcuts',
-      'publishing',
-    ]
+    const sections: SettingsSection[] = ['general', 'preferences', 'shortcuts', 'publishing']
 
     useEditorStore.getState().openSettings('shortcuts')
 

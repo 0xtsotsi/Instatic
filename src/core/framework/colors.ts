@@ -57,10 +57,12 @@ interface FrameworkColorVariant {
 
 const TRANSPARENT_STEPS = [5, 10, 20, 30, 40, 50, 60, 70, 80, 90] as const
 const UTILITY_ORDER: FrameworkColorUtilityType[] = ['text', 'background', 'border', 'fill']
-const HSLA_RE = /^hsla?\(\s*([-+]?\d*\.?\d+)(?:deg)?\s*,\s*([-+]?\d*\.?\d+)%\s*,\s*([-+]?\d*\.?\d+)%(?:\s*,\s*([-+]?\d*\.?\d+))?\s*\)$/i
+const HSLA_RE =
+  /^hsla?\(\s*([-+]?\d*\.?\d+)(?:deg)?\s*,\s*([-+]?\d*\.?\d+)%\s*,\s*([-+]?\d*\.?\d+)%(?:\s*,\s*([-+]?\d*\.?\d+))?\s*\)$/i
 const HEX_RE = /^#([0-9a-f]{3}|[0-9a-f]{6})$/i
 // rgb()/rgba(), both comma and space syntax, alpha as number or percentage.
-const RGBA_RE = /^rgba?\(\s*(\d*\.?\d+)\s*[, ]\s*(\d*\.?\d+)\s*[, ]\s*(\d*\.?\d+)\s*(?:[,/]\s*(\d*\.?\d+%?))?\s*\)$/i
+const RGBA_RE =
+  /^rgba?\(\s*(\d*\.?\d+)\s*[, ]\s*(\d*\.?\d+)\s*[, ]\s*(\d*\.?\d+)\s*(?:[,/]\s*(\d*\.?\d+%?))?\s*\)$/i
 
 export function normalizeFrameworkColorSlug(input: string): string {
   const slug = input
@@ -78,9 +80,7 @@ export function normalizeFrameworkColorSlug(input: string): string {
  * expand each token's variants. Both the variable-sets and utility-class passes
  * consume this so the work is not duplicated.
  */
-function planColorTokens(
-  settings: FrameworkColorSettings | null | undefined,
-): ColorTokenPlan[] {
+function planColorTokens(settings: FrameworkColorSettings | null | undefined): ColorTokenPlan[] {
   if (!settings) return []
   const tokens = orderedTokens(settings)
   const slugById = buildColorSlugMap(tokens)
@@ -328,10 +328,7 @@ function utilityClassName(utility: FrameworkColorUtilityType, tokenName: string)
   }
 }
 
-function utilityStyles(
-  utility: FrameworkColorUtilityType,
-  value: string,
-): Partial<CSSPropertyBag> {
+function utilityStyles(utility: FrameworkColorUtilityType, value: string): Partial<CSSPropertyBag> {
   switch (utility) {
     case 'text':
       return { color: value }
@@ -383,9 +380,10 @@ function shiftLightness(
   const channels = parseColor(value)
   if (!channels) return null
   const ratio = index / (count + 1)
-  const nextLightness = mode === 'shade'
-    ? channels.l * (1 - ratio * 0.8)
-    : channels.l + (100 - channels.l) * ratio * 0.8
+  const nextLightness =
+    mode === 'shade'
+      ? channels.l * (1 - ratio * 0.8)
+      : channels.l + (100 - channels.l) * ratio * 0.8
   return formatHsla({ ...channels, l: nextLightness })
 }
 
@@ -409,11 +407,12 @@ function parseColor(value: string): ColorChannels | null {
   const rgbaMatch = input.match(RGBA_RE)
   if (rgbaMatch) {
     const alphaRaw = rgbaMatch[4]
-    const alpha = alphaRaw === undefined
-      ? 1
-      : alphaRaw.endsWith('%')
-        ? clamp(Number(alphaRaw.slice(0, -1)) / 100, 0, 1)
-        : clamp(Number(alphaRaw), 0, 1)
+    const alpha =
+      alphaRaw === undefined
+        ? 1
+        : alphaRaw.endsWith('%')
+          ? clamp(Number(alphaRaw.slice(0, -1)) / 100, 0, 1)
+          : clamp(Number(alphaRaw), 0, 1)
     return {
       ...rgbToHsl(
         clamp(Number(rgbaMatch[1]), 0, 255),

@@ -159,8 +159,7 @@ function groupWidgetsByOwner(widgets: readonly DashboardWidgetDefinition[]): Cat
       group = {
         label: w.ownerId === 'core' ? 'System' : w.ownerId,
         ownerId: w.ownerId,
-        description:
-          w.ownerId === 'core' ? 'Built-in blocks' : 'Plugin-provided blocks',
+        description: w.ownerId === 'core' ? 'Built-in blocks' : 'Plugin-provided blocks',
         widgets: [],
       }
       groups.set(w.ownerId, group)
@@ -208,9 +207,7 @@ export function BlockLibrary({
           exiting={panelExiting}
         />
       )}
-      {dragging && (
-        <MinimizedPill draggingFromGrid={draggingFromGrid} />
-      )}
+      {dragging && <MinimizedPill draggingFromGrid={draggingFromGrid} />}
     </>
   )
 }
@@ -251,10 +248,11 @@ function ExpandedPanel({
   const q = query.toLowerCase().trim()
 
   const filtered = q
-    ? availableWidgets.filter((w) =>
-        w.name.toLowerCase().includes(q) ||
-        w.description.toLowerCase().includes(q) ||
-        w.ownerId.toLowerCase().includes(q),
+    ? availableWidgets.filter(
+        (w) =>
+          w.name.toLowerCase().includes(q) ||
+          w.description.toLowerCase().includes(q) ||
+          w.ownerId.toLowerCase().includes(q),
       )
     : availableWidgets
   const filteredGroups = groupWidgetsByOwner(filtered)
@@ -392,7 +390,9 @@ function MinimizedPill({ draggingFromGrid }: MinimizedPillProps) {
       </span>
       <span className={styles.pillLabel}>
         {draggingFromGrid
-          ? (isOver ? 'Drop to put back in library' : 'Library — drop here to remove')
+          ? isOver
+            ? 'Drop to put back in library'
+            : 'Library — drop here to remove'
           : 'Drop on grid to add'}
       </span>
     </aside>
@@ -413,12 +413,9 @@ function LibraryItem({ widget, onAdd }: LibraryItemProps) {
   // see property accesses on the same object that carries `setNodeRef`.
   // (Reading `.listeners` / `.isDragging` off the umbrella object trips
   // `react-hooks/refs` once `setNodeRef` has been treated as a ref.)
-  const {
-    setNodeRef,
-    listeners,
-    attributes,
-    isDragging,
-  } = useDraggable({ id: `${LIBRARY_DRAG_PREFIX}${widget.id}` })
+  const { setNodeRef, listeners, attributes, isDragging } = useDraggable({
+    id: `${LIBRARY_DRAG_PREFIX}${widget.id}`,
+  })
   const Render = widget.render
 
   // Preview height in pixels, matching what the same widget will occupy
@@ -430,8 +427,7 @@ function LibraryItem({ widget, onAdd }: LibraryItemProps) {
   // dashboard's `repeat(12, 1fr)` so a `size: 6` widget here is the
   // same pixel width as a `size: 6` widget there.
   const previewHeightPx =
-    PREVIEW_DEFAULT_ROWS * GRID_ROW_HEIGHT
-    + (PREVIEW_DEFAULT_ROWS - 1) * LIBRARY_GRID_GAP
+    PREVIEW_DEFAULT_ROWS * GRID_ROW_HEIGHT + (PREVIEW_DEFAULT_ROWS - 1) * LIBRARY_GRID_GAP
 
   // The source element stays put during a drag — dnd-kit's DragOverlay
   // renders the visual at the pointer in a portal, so applying the

@@ -24,11 +24,7 @@ export {
   validatePluginSettingsDefinitions,
   SECRET_SETTING_MASK,
 } from './settings'
-export type {
-  PluginSettingDefinition,
-  PluginSettingValue,
-  PluginSettingsValues,
-} from './settings'
+export type { PluginSettingDefinition, PluginSettingValue, PluginSettingsValues } from './settings'
 export { defineModule } from './defineModule'
 export { defineComponent, vc, h } from './tree'
 export { definePack } from './definePack'

@@ -136,10 +136,7 @@ const renderSnapshotSchema = Type.Composite([
  * class identifier (site_assign_class/site_remove_class), without needing to remember the
  * generated nanoid from a previous site_apply_css call.
  */
-function resolveClassId(
-  store: EditorStore,
-  classIdOrName: string,
-): string | null {
+function resolveClassId(store: EditorStore, classIdOrName: string): string | null {
   const classes = store.site?.styleRules
   if (!classes) return null
   if (classes[classIdOrName]) return classIdOrName
@@ -150,10 +147,7 @@ function resolveClassId(
   return matches[0]?.id ?? null
 }
 
-function validateBreakpointId(
-  store: EditorStore,
-  breakpointId: string,
-): string | null {
+function validateBreakpointId(store: EditorStore, breakpointId: string): string | null {
   const site = store.site
   if (!site) return `Breakpoint not found: ${breakpointId}`
   return site.breakpoints.some((breakpoint) => breakpoint.id === breakpointId)
@@ -251,9 +245,10 @@ function runInsertHtml(input: InsertHtmlInput): AiToolOutput {
       }
       return aiToolOk({ cssRulesCreated: result.created, cssRulesUpdated: result.updated })
     }
-    const scriptHint = stripped.scripts > 0 || stripped.inlineHandlers > 0
-      ? ' Scripts and inline event handlers are stripped from HTML imports; create runtime behavior with site_write_code_asset({ type:"script", ... }) instead.'
-      : ''
+    const scriptHint =
+      stripped.scripts > 0 || stripped.inlineHandlers > 0
+        ? ' Scripts and inline event handlers are stripped from HTML imports; create runtime behavior with site_write_code_asset({ type:"script", ... }) instead.'
+        : ''
     return aiToolError(`HTML contained no importable elements or style rules.${scriptHint}`)
   }
 
@@ -372,9 +367,10 @@ function runReplaceNodeHtml(input: ReplaceNodeHtmlInput): AiToolOutput {
       }
       return aiToolOk({ cssRulesCreated: result.created, cssRulesUpdated: result.updated })
     }
-    const scriptHint = stripped.scripts > 0 || stripped.inlineHandlers > 0
-      ? ' Scripts and inline event handlers are stripped from HTML imports; create runtime behavior with site_write_code_asset({ type:"script", ... }) instead.'
-      : ''
+    const scriptHint =
+      stripped.scripts > 0 || stripped.inlineHandlers > 0
+        ? ' Scripts and inline event handlers are stripped from HTML imports; create runtime behavior with site_write_code_asset({ type:"script", ... }) instead.'
+        : ''
     return aiToolError(`HTML contained no importable elements or style rules.${scriptHint}`)
   }
 
@@ -405,9 +401,8 @@ function runUpdateNodeProps(input: UpdateNodePropsInput): AiToolOutput {
   const store = getStoreState()
   const sanitizedPatch: Record<string, unknown> = {}
   for (const [key, value] of Object.entries(input.patch)) {
-    sanitizedPatch[key] = isRichtextPropKey(key) && typeof value === 'string'
-      ? sanitizeRichtext(value)
-      : value
+    sanitizedPatch[key] =
+      isRichtextPropKey(key) && typeof value === 'string' ? sanitizeRichtext(value) : value
   }
   if (input.breakpointId) {
     const breakpointError = validateBreakpointId(store, input.breakpointId)
@@ -576,10 +571,7 @@ function runDuplicateNode(input: DuplicateNodeInput): AiToolOutput {
  * dispatches the tool here, and POSTs the canonical result back to
  * /admin/api/ai/tool-result so the driver loop can return it to the model.
  */
-export async function executeAgentTool(
-  toolName: string,
-  rawInput: unknown,
-): Promise<AiToolOutput> {
+export async function executeAgentTool(toolName: string, rawInput: unknown): Promise<AiToolOutput> {
   try {
     // Auto-navigate: if a node-targeting tool references a node that lives in a
     // different document, switch the canvas to that document BEFORE running, so

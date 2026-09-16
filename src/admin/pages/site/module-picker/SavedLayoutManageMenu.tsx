@@ -8,10 +8,7 @@
  * mutation) and confirms via toast, keeping the inserter open.
  */
 
-import {
-  ContextMenu as UIContextMenu,
-  ContextMenuItem,
-} from '@ui/components/ContextMenu'
+import { ContextMenu as UIContextMenu, ContextMenuItem } from '@ui/components/ContextMenu'
 import { pushToast } from '@ui/components/Toast'
 import { PenSquareSolidIcon } from 'pixel-art-icons/icons/pen-square-solid'
 import { TrashSolidIcon } from 'pixel-art-icons/icons/trash-solid'
@@ -66,11 +63,15 @@ export function SavedLayoutManageMenu({
       zIndex={10000}
     >
       <ContextMenuItem onClick={handleRename}>
-        <span aria-hidden="true"><PenSquareSolidIcon size={13} /></span>
+        <span aria-hidden="true">
+          <PenSquareSolidIcon size={13} />
+        </span>
         Rename…
       </ContextMenuItem>
       <ContextMenuItem danger onClick={handleDelete}>
-        <span aria-hidden="true"><TrashSolidIcon size={13} /></span>
+        <span aria-hidden="true">
+          <TrashSolidIcon size={13} />
+        </span>
         Delete
       </ContextMenuItem>
     </UIContextMenu>

@@ -40,11 +40,7 @@ import { useEditorStore, selectActiveCanvasPage } from '@site/store/store'
 import { flattenSubtree } from '@core/page-tree'
 import { getAncestorIds } from '@site/hooks/useTreeWalkOrder'
 import { registry } from '@core/module-engine'
-import {
-  getNodeDisplayName,
-  getNodeHtmlTag,
-  getNodeClassNames,
-} from '@core/page-tree'
+import { getNodeDisplayName, getNodeHtmlTag, getNodeClassNames } from '@core/page-tree'
 import { TreeNode } from './TreeNode'
 import { TreeBackgroundContextMenu } from './TreeBackgroundContextMenu'
 import { useExpansionStore } from './DomTreeContext'
@@ -91,11 +87,7 @@ interface SearchResultsProps {
 
 function SearchResults({ rows, showTag, showClasses, onSelect }: SearchResultsProps) {
   if (rows.length === 0) {
-    return (
-      <div className={styles.noMatchMsg}>
-        No elements match
-      </div>
-    )
+    return <div className={styles.noMatchMsg}>No elements match</div>
   }
   return (
     <>
@@ -188,10 +180,11 @@ function DomPanelInner({ editable = true }: { editable?: boolean }) {
   // empty space (padding around / below the rendered rows).
   const [bgContextMenu, setBgContextMenu] = useState<{ x: number; y: number } | null>(null)
   const rootNode = page?.nodes[page.rootNodeId] ?? null
-  const hideStructuralRoot = activeDocument?.kind === 'visualComponent' && rootNode?.moduleId === 'base.body'
+  const hideStructuralRoot =
+    activeDocument?.kind === 'visualComponent' && rootNode?.moduleId === 'base.body'
   const visibleRootNodeIds = page
     ? hideStructuralRoot
-      ? rootNode?.children ?? []
+      ? (rootNode?.children ?? [])
       : [page.rootNodeId]
     : []
 
@@ -202,12 +195,17 @@ function DomPanelInner({ editable = true }: { editable?: boolean }) {
   // ─── DnD sensors ──────────────────────────────────────────────────────────
   const sensors = useSensors(
     useSensor(PointerSensor, {
-      activationConstraint: { distance: 5 },  // small threshold prevents accidental drags
+      activationConstraint: { distance: 5 }, // small threshold prevents accidental drags
     }),
   )
 
   const treeAreaRef = useRef<HTMLDivElement>(null)
-  const dnd = useDomPanelDnd({ page, treeAreaRef, expandNode: store.expand, isExpanded: store.isExpanded })
+  const dnd = useDomPanelDnd({
+    page,
+    treeAreaRef,
+    expandNode: store.expand,
+    isExpanded: store.isExpanded,
+  })
 
   // ─── Ancestor auto-expand + scroll-to-selected ────────────────────────────
   // When the canvas selection changes, ensure the selected node is visible in
@@ -330,40 +328,39 @@ function DomPanelInner({ editable = true }: { editable?: boolean }) {
     // Normalize the query: strip a leading `<` / trailing `>` so users can
     // type "<div>" and still match the haystack which stores the bare tag.
     // Strip a leading `.` so ".container" matches "container" in class names.
-    const query = rawQuery
-      .replace(/^[<.]/, '')
-      .replace(/>$/, '')
+    const query = rawQuery.replace(/^[<.]/, '').replace(/>$/, '')
 
-    return flattenSubtree(page, page.rootNodeId)
-      .flatMap((nodeId) => {
-        if (hideStructuralRoot && nodeId === page.rootNodeId) return []
+    return flattenSubtree(page, page.rootNodeId).flatMap((nodeId) => {
+      if (hideStructuralRoot && nodeId === page.rootNodeId) return []
 
-        const node = page.nodes[nodeId]
-        if (!node) return []
-        const def = registry.get(node.moduleId)
-        const displayName = getNodeDisplayName(node, def, visualComponents)
-        const htmlTag = getNodeHtmlTag(node, def)
-        const classNames = getNodeClassNames(node, classes)
-        const classChip = classNames.length > 0 ? `.${classNames.join('.')}` : null
+      const node = page.nodes[nodeId]
+      if (!node) return []
+      const def = registry.get(node.moduleId)
+      const displayName = getNodeDisplayName(node, def, visualComponents)
+      const htmlTag = getNodeHtmlTag(node, def)
+      const classNames = getNodeClassNames(node, classes)
+      const classChip = classNames.length > 0 ? `.${classNames.join('.')}` : null
 
-        // Build the searchable haystack from every visible piece of metadata.
-        // Joined with spaces so substring matching works across fields without
-        // accidentally matching across boundaries (e.g. "headerfooter").
-        const haystackParts: string[] = [displayName.toLowerCase()]
-        if (htmlTag) haystackParts.push(htmlTag)
-        for (const name of classNames) haystackParts.push(name.toLowerCase())
-        const haystack = haystackParts.join(' ')
+      // Build the searchable haystack from every visible piece of metadata.
+      // Joined with spaces so substring matching works across fields without
+      // accidentally matching across boundaries (e.g. "headerfooter").
+      const haystackParts: string[] = [displayName.toLowerCase()]
+      if (htmlTag) haystackParts.push(htmlTag)
+      for (const name of classNames) haystackParts.push(name.toLowerCase())
+      const haystack = haystackParts.join(' ')
 
-        if (!haystack.includes(query)) return []
+      if (!haystack.includes(query)) return []
 
-        return [{
+      return [
+        {
           nodeId,
           displayName,
           moduleId: node.moduleId,
           htmlTag,
           classChip,
-        } satisfies SearchRow]
-      })
+        } satisfies SearchRow,
+      ]
+    })
   })()
 
   const dragOverlay = (
@@ -454,7 +451,8 @@ function DomPanelInner({ editable = true }: { editable?: boolean }) {
                 onSelect={(nodeId) =>
                   useEditorStore.getState().selectNode(nodeId, undefined, {
                     preservePropertiesPanelCollapse: isNarrowEditorChromeViewport(),
-                  })}
+                  })
+                }
               />
             </TreeContainer>
           ) : (
@@ -499,14 +497,16 @@ function DomPanelInner({ editable = true }: { editable?: boolean }) {
           to escape the panel's transform: translateZ(0) stacking context.
           Without the portal, position:fixed inside a transformed ancestor is
           positioned relative to that ancestor, not the viewport. */}
-      {editable && bgContextMenu && createPortal(
-        <TreeBackgroundContextMenu
-          x={bgContextMenu.x}
-          y={bgContextMenu.y}
-          onClose={() => setBgContextMenu(null)}
-        />,
-        document.body,
-      )}
+      {editable &&
+        bgContextMenu &&
+        createPortal(
+          <TreeBackgroundContextMenu
+            x={bgContextMenu.x}
+            y={bgContextMenu.y}
+            onClose={() => setBgContextMenu(null)}
+          />,
+          document.body,
+        )}
 
       {/* Module inserter — same command surface + target resolution as the
           canvas "+" and toolbar "+ Add". */}

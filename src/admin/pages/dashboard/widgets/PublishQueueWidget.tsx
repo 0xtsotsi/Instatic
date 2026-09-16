@@ -14,10 +14,7 @@ import { CloudUploadSolidIcon } from 'pixel-art-icons/icons/cloud-upload-solid'
 import type { DashboardWidgetRendererProps } from '@core/dashboard'
 import { Widget } from '@ui/components/Widget'
 import { cn } from '@ui/cn'
-import {
-  usePublishLineupStats,
-  type DashboardPublishLineupRow,
-} from '../hooks/useDashboardStats'
+import { usePublishLineupStats, type DashboardPublishLineupRow } from '../hooks/useDashboardStats'
 import styles from './widgets.module.css'
 
 function badgeClass(status: DashboardPublishLineupRow['status']): string {
@@ -90,8 +87,7 @@ export function PublishQueueWidget({ span, editing }: DashboardWidgetRendererPro
     >
       {isEmpty && (
         <p className={cn(styles.feedTime, styles.feedEmpty)}>
-          Nothing in the lineup yet — schedule, publish, or draft a row to
-          see it here.
+          Nothing in the lineup yet — schedule, publish, or draft a row to see it here.
         </p>
       )}
       {!isLoading && !isEmpty && (
@@ -102,7 +98,9 @@ export function PublishQueueWidget({ span, editing }: DashboardWidgetRendererPro
                 <span className={styles.wlistPath}>{r.path}</span>
               </span>
               <span className={styles.wlistMeta}>
-                <span className={`${styles.badge} ${badgeClass(r.status)}`}>{badgeLabel(r.status)}</span>
+                <span className={`${styles.badge} ${badgeClass(r.status)}`}>
+                  {badgeLabel(r.status)}
+                </span>
                 <span>{formatRelative(r.at)}</span>
               </span>
             </li>

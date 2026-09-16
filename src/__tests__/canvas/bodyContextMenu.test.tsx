@@ -5,10 +5,7 @@ import { DndContext } from '@dnd-kit/core'
 import { CanvasRoot } from '@site/canvas/CanvasRoot'
 import { useEditorStore } from '@site/store/store'
 import { makeNode, makePage, makeSite } from '../fixtures'
-import {
-  waitForCanvasFrameDocument,
-  waitForCanvasNodeInFrame,
-} from './iframeCanvasQuery'
+import { waitForCanvasFrameDocument, waitForCanvasNodeInFrame } from './iframeCanvasQuery'
 import '@modules/base'
 
 afterEach(() => {
@@ -70,7 +67,9 @@ describe('canvas body context menu', () => {
 
     fireEvent.click(pasteItem)
 
-    const page = useEditorStore.getState().site?.pages.find((candidate) => candidate.id === 'page-empty')
+    const page = useEditorStore
+      .getState()
+      .site?.pages.find((candidate) => candidate.id === 'page-empty')
     const root = page?.nodes['empty-root']
     expect(root?.children.length).toBe(1)
     const pastedId = root?.children[0]
@@ -87,7 +86,11 @@ function seedClipboardAndActivateEmptyPage() {
     slug: 'source',
     rootNodeId: 'source-root',
     nodes: {
-      'source-root': makeNode({ id: 'source-root', moduleId: 'base.body', children: ['clip-text'] }),
+      'source-root': makeNode({
+        id: 'source-root',
+        moduleId: 'base.body',
+        children: ['clip-text'],
+      }),
       'clip-text': makeNode({
         id: 'clip-text',
         moduleId: 'base.text',
