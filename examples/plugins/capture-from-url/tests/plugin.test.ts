@@ -9,13 +9,15 @@ describe('capture-from-url plugin manifest', () => {
       name: 'Capture from URL',
       version: '1.0.0',
       permissions: ['cms.routes', 'admin.navigation', 'editor.code', 'cms.capture'],
-  networkAllowedHosts: ['example.com'],
-      adminPages: [{
-        id: 'capture',
-        title: 'Capture',
-        route: '/capture',
-        content: { kind: 'app', heading: 'Capture from URL', entry: './admin/workflow.js' },
-      }],
+      networkAllowedHosts: ['example.com'],
+      adminPages: [
+        {
+          id: 'capture',
+          title: 'Capture',
+          route: '/capture',
+          content: { kind: 'app', heading: 'Capture from URL', entry: './admin/workflow.js' },
+        },
+      ],
     })
 
     const parsed = parsePluginManifest(JSON.parse(JSON.stringify(plugin.manifest)))

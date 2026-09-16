@@ -8,16 +8,16 @@ Instatic is one Bun server packaged by the root `Dockerfile`. The server reads r
 
 ## TL;DR
 
-| Target | Use when | Database | Persistent storage | Docs |
-|---|---|---|---|---|
-| Railway SQLite template | Fastest managed install for a single site | SQLite file | One Railway app volume mounted at `/app/storage` | [railway.md](railway.md) |
-| Railway Postgres template | Managed install for teams or horizontal scale later | Railway Postgres | App volume for uploads, Postgres service volume for DB | [railway.md](railway.md), [railway/postgres/template.json](railway/postgres/template.json) |
-| Railway Postgres (fork build) | Same as above but built from a fork's GitHub source instead of the upstream image | Railway Postgres | App volume for uploads, Postgres service volume for DB | [railway/postgres/template.json](railway/postgres/template.json) |
-| Render SQLite template | Managed Docker install outside Railway | SQLite file | One Render disk mounted at `/app/storage` | [render.md](render.md) |
-| Render Postgres template | Managed Postgres install outside Railway | Render Postgres | Render disk for uploads, Render Postgres storage for DB | [render.md](render.md) |
-| VPS Docker Compose | Self-hosted server, full control | SQLite or bundled Postgres | Docker named volumes | [vps.md](vps.md) |
-| Generic Docker host | Any platform that runs the Dockerfile/image | SQLite or external Postgres | A mounted directory/volume for DB/uploads | [docker-image.md](docker-image.md) |
-| VPS HTTPS | Public domain on a VPS | Unchanged | Caddy cert volume plus app volumes | [tls-caddy.md](tls-caddy.md) |
+| Target                        | Use when                                                                          | Database                    | Persistent storage                                      | Docs                                                                                       |
+| ----------------------------- | --------------------------------------------------------------------------------- | --------------------------- | ------------------------------------------------------- | ------------------------------------------------------------------------------------------ |
+| Railway SQLite template       | Fastest managed install for a single site                                         | SQLite file                 | One Railway app volume mounted at `/app/storage`        | [railway.md](railway.md)                                                                   |
+| Railway Postgres template     | Managed install for teams or horizontal scale later                               | Railway Postgres            | App volume for uploads, Postgres service volume for DB  | [railway.md](railway.md), [railway/postgres/template.json](railway/postgres/template.json) |
+| Railway Postgres (fork build) | Same as above but built from a fork's GitHub source instead of the upstream image | Railway Postgres            | App volume for uploads, Postgres service volume for DB  | [railway/postgres/template.json](railway/postgres/template.json)                           |
+| Render SQLite template        | Managed Docker install outside Railway                                            | SQLite file                 | One Render disk mounted at `/app/storage`               | [render.md](render.md)                                                                     |
+| Render Postgres template      | Managed Postgres install outside Railway                                          | Render Postgres             | Render disk for uploads, Render Postgres storage for DB | [render.md](render.md)                                                                     |
+| VPS Docker Compose            | Self-hosted server, full control                                                  | SQLite or bundled Postgres  | Docker named volumes                                    | [vps.md](vps.md)                                                                           |
+| Generic Docker host           | Any platform that runs the Dockerfile/image                                       | SQLite or external Postgres | A mounted directory/volume for DB/uploads               | [docker-image.md](docker-image.md)                                                         |
+| VPS HTTPS                     | Public domain on a VPS                                                            | Unchanged                   | Caddy cert volume plus app volumes                      | [tls-caddy.md](tls-caddy.md)                                                               |
 
 Back up both the database and uploaded media. See [backup-restore.md](backup-restore.md).
 
@@ -73,13 +73,13 @@ The maintainer release target is `ghcr.io/corebunch/instatic`, documented in [re
 
 The database engine is selected only by `DATABASE_URL`:
 
-| URL shape | Engine |
-|---|---|
-| `sqlite:/path/to/cms.db` | SQLite |
-| `file:/path/to/cms.db` | SQLite |
-| `/path/to/cms.db` | SQLite |
-| `postgres://...` | Postgres |
-| `postgresql://...` | Postgres |
+| URL shape                | Engine   |
+| ------------------------ | -------- |
+| `sqlite:/path/to/cms.db` | SQLite   |
+| `file:/path/to/cms.db`   | SQLite   |
+| `/path/to/cms.db`        | SQLite   |
+| `postgres://...`         | Postgres |
+| `postgresql://...`       | Postgres |
 
 SQLite is the default for single-site installs. Postgres is for multiple simultaneous admin writers, more than one app container, or operators who already want managed Postgres.
 
@@ -96,15 +96,15 @@ SQLite installs also need the SQLite database file on persistent storage. On pla
 
 ## Docs Inventory
 
-| File | Role |
-|---|---|
-| [railway.md](railway.md) | Railway templates for SQLite and Postgres |
-| [render.md](render.md) | Render Blueprint templates for SQLite and Postgres |
-| [vps.md](vps.md) | Docker Compose on a VPS, both SQLite and Postgres |
-| [docker-image.md](docker-image.md) | Generic Docker image contract and `docker run` examples |
-| [tls-caddy.md](tls-caddy.md) | Caddy TLS overlay for VPS Compose installs |
-| [backup-restore.md](backup-restore.md) | Database and uploads backup/restore |
-| [release-workflow.md](release-workflow.md) | Maintainer image publishing workflow |
+| File                                       | Role                                                    |
+| ------------------------------------------ | ------------------------------------------------------- |
+| [railway.md](railway.md)                   | Railway templates for SQLite and Postgres               |
+| [render.md](render.md)                     | Render Blueprint templates for SQLite and Postgres      |
+| [vps.md](vps.md)                           | Docker Compose on a VPS, both SQLite and Postgres       |
+| [docker-image.md](docker-image.md)         | Generic Docker image contract and `docker run` examples |
+| [tls-caddy.md](tls-caddy.md)               | Caddy TLS overlay for VPS Compose installs              |
+| [backup-restore.md](backup-restore.md)     | Database and uploads backup/restore                     |
+| [release-workflow.md](release-workflow.md) | Maintainer image publishing workflow                    |
 
 ## Related
 

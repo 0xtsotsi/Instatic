@@ -29,12 +29,21 @@ import type { HostPluginRecord } from './types'
 import { handleRoutesRegister } from './handlers/routes'
 import { handleHooksOn, handleHooksFilter, handleHooksEmit } from './handlers/hooks'
 import { handleLoopsRegisterSource } from './handlers/loops'
-import { handleStorageList, handleStorageCreate, handleStorageUpdate, handleStorageDelete } from './handlers/storage'
+import {
+  handleStorageList,
+  handleStorageCreate,
+  handleStorageUpdate,
+  handleStorageDelete,
+} from './handlers/storage'
 import { handleSettingsReplace } from './handlers/settings'
 import { handleNetworkFetch, handleNetworkAbort } from './handlers/network'
 import { handleCaptureFromUrl } from './handlers/capture'
 import { handleScheduleRegister, handleScheduleCancel } from './handlers/schedule'
-import { handleMediaRegisterStorageAdapter, handleMediaRegisterUrlTransformer, handleMediaRegisterVariantDelegate } from './handlers/media'
+import {
+  handleMediaRegisterStorageAdapter,
+  handleMediaRegisterUrlTransformer,
+  handleMediaRegisterVariantDelegate,
+} from './handlers/media'
 import { handleCryptoDigest, handleCryptoSignHmac } from './handlers/crypto'
 import {
   handleContentEntriesCreate,

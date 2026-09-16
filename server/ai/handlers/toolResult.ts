@@ -57,7 +57,10 @@ async function handleAiToolResult(req: Request, db: DbClient): Promise<Response>
     // old response instead of silently waiting 90 seconds and letting the
     // model retry the same tool repeatedly.
     return jsonResponse(
-      { error: 'The AI tool bridge is no longer active. The server may have restarted; send the message again.' },
+      {
+        error:
+          'The AI tool bridge is no longer active. The server may have restarted; send the message again.',
+      },
       { status: 404 },
     )
   }

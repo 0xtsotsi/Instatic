@@ -22,13 +22,13 @@ The CMS supports **Postgres** (production, multi-author teams, horizontal scale)
 
 Files under `server/` that import `DbClient` use **only ANSI-standard SQL** that works on both engines. Five specific Postgres-isms are banned:
 
-| Forbidden                          | Reason                                                 | Use instead                                    |
-|------------------------------------|--------------------------------------------------------|------------------------------------------------|
-| `now()` in DML                     | SQLite has no `now()`                                  | `current_timestamp`                            |
-| `::int` (PG cast syntax)           | SQLite doesn't recognize `::`                          | `cast(x as integer)` (rarely needed — Bun's drivers infer types) |
-| `::jsonb`                          | SQLite has no JSONB                                    | Use `_json` columns; both adapters handle the conversion |
-| `any($N::...)`                     | PG-specific array binding                              | Compose an `in (?, ?, ?)` list in JS           |
-| `distinct on`                      | PG-specific                                            | Window-function subquery (`row_number() over (...)`) |
+| Forbidden                | Reason                        | Use instead                                                      |
+| ------------------------ | ----------------------------- | ---------------------------------------------------------------- |
+| `now()` in DML           | SQLite has no `now()`         | `current_timestamp`                                              |
+| `::int` (PG cast syntax) | SQLite doesn't recognize `::` | `cast(x as integer)` (rarely needed — Bun's drivers infer types) |
+| `::jsonb`                | SQLite has no JSONB           | Use `_json` columns; both adapters handle the conversion         |
+| `any($N::...)`           | PG-specific array binding     | Compose an `in (?, ?, ?)` list in JS                             |
+| `distinct on`            | PG-specific                   | Window-function subquery (`row_number() over (...)`)             |
 
 Gated by `src/__tests__/architecture/db-postgres-isms.test.ts` — scans every file under `server/` that imports `DbClient` and rejects any of the patterns above.
 
@@ -65,22 +65,22 @@ Gated by `src/__tests__/architecture/db-json-column-naming.test.ts`:
 
 ```ts
 type Migration = {
-  id:    string       // e.g. '0042-add-media-folders'
+  id: string // e.g. '0042-add-media-folders'
   label: string
-  sql:   string       // dialect-specific DDL
+  sql: string // dialect-specific DDL
 }
 ```
 
 The two arrays must have **identical IDs in the same order**. Each migration has the same **semantic effect** on both engines — just expressed in each dialect's DDL.
 
-| Postgres                 | SQLite              | Used for                                |
-|--------------------------|---------------------|-----------------------------------------|
-| `jsonb`                  | `text`              | JSON payloads                           |
-| `timestamptz`            | `text`              | Timestamps (stored as ISO 8601 in SQLite) |
-| `bytea`                  | `blob`              | Binary blobs                            |
-| `bigint`                 | `integer`           | Large integers                          |
-| `boolean`                | `integer`           | Booleans (`0` / `1` in SQLite)          |
-| `distinct on (...)`      | `row_number() over (...)` subquery | "Latest per group" queries |
+| Postgres            | SQLite                             | Used for                                  |
+| ------------------- | ---------------------------------- | ----------------------------------------- |
+| `jsonb`             | `text`                             | JSON payloads                             |
+| `timestamptz`       | `text`                             | Timestamps (stored as ISO 8601 in SQLite) |
+| `bytea`             | `blob`                             | Binary blobs                              |
+| `bigint`            | `integer`                          | Large integers                            |
+| `boolean`           | `integer`                          | Booleans (`0` / `1` in SQLite)            |
+| `distinct on (...)` | `row_number() over (...)` subquery | "Latest per group" queries                |
 
 The parity gate (`src/__tests__/architecture/migration-parity.test.ts`) compares the two arrays element-by-element and fails the build if IDs drift.
 
@@ -123,13 +123,13 @@ Interpolations are bound as parameters — never string-concatenated. The Postgr
 
 `server/db/index.ts → createDbClient(DATABASE_URL)`:
 
-| `DATABASE_URL`           | Adapter      |
-|--------------------------|--------------|
-| `sqlite:<path>`          | SQLite       |
-| `file:<path>`            | SQLite       |
-| `<path>.db` (bare)       | SQLite       |
-| `postgres://...`         | Postgres     |
-| `postgresql://...`       | Postgres     |
+| `DATABASE_URL`     | Adapter  |
+| ------------------ | -------- |
+| `sqlite:<path>`    | SQLite   |
+| `file:<path>`      | SQLite   |
+| `<path>.db` (bare) | SQLite   |
+| `postgres://...`   | Postgres |
+| `postgresql://...` | Postgres |
 
 For SQLite, the parent directory of the DB file is created automatically.
 
@@ -196,11 +196,13 @@ The Postgres adapter relies on `Bun.sql`'s native handling of `jsonb` columns an
 SQLite doesn't support `ALTER TABLE DROP CONSTRAINT` or `ALTER TABLE DROP COLUMN`. To remove or change a constraint, rebuild the table:
 
 **Postgres** (migration SQL):
+
 ```sql
 alter table my_table drop constraint if exists my_constraint_name;
 ```
 
 **SQLite** (migration SQL — the table-rebuild dance):
+
 ```sql
 pragma defer_foreign_keys = on;
 
@@ -272,12 +274,13 @@ const { rows } = await db.unsafe<SubscriberRow>(
 `placeholder(db.dialect, N)` returns `$N` on Postgres and `?` on SQLite. Every
 parameter position must use it — never concatenate the value directly into the
 string. The tagged-template API (`db\`...\``) handles dialect differences
-automatically and is preferred; `db.unsafe()` + `placeholder()` is the fallback
+automatically and is preferred; `db.unsafe()`+`placeholder()` is the fallback
 for column-list splice scenarios only.
 
 ### "Latest per group" (the `distinct on` replacement)
 
 Postgres:
+
 ```sql
 select distinct on (page_id) page_id, snapshot_id, created_at
 from snapshots
@@ -285,6 +288,7 @@ order by page_id, created_at desc
 ```
 
 ANSI-portable (works on both):
+
 ```sql
 select page_id, snapshot_id, created_at
 from (
@@ -342,17 +346,17 @@ The callback receives a `DbClient` scoped to the transaction. If it throws, the 
 
 ## Forbidden patterns
 
-| Pattern                                                | Use instead                                                   |
-|--------------------------------------------------------|---------------------------------------------------------------|
-| `now()` in DML (`server/` files importing `DbClient`)  | `current_timestamp`                                           |
-| `cast(x as int)` via `x::int`                          | Drivers usually infer; use `cast(x as integer)` when needed   |
-| `where col = any($1::text[])`                          | Build an `in (...)` list in JS                                |
-| `select distinct on (col) ...`                         | `row_number() over (partition by ...)` subquery               |
-| `column_name jsonb` without the `_json` suffix         | Rename to `column_name_json`                                  |
-| Writing a JSON value as `${JSON.stringify(obj)}`       | Pass the object directly — both adapters handle it            |
-| Reading a JSON value as a string and then `JSON.parse`ing | Read it as `Record<string, unknown>` — auto-parsed in SQLite, auto-decoded in PG |
-| Adding a migration to only one dialect's file          | Mirror it to the other — `migration-parity.test.ts` enforces this |
-| Hand-running `db.unsafe(...)` for queryable statements | Use the tagged-template form — `unsafe` is for stored migration blocks |
+| Pattern                                                                                                                     | Use instead                                                                                                                                                                                                                                                     |
+| --------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `now()` in DML (`server/` files importing `DbClient`)                                                                       | `current_timestamp`                                                                                                                                                                                                                                             |
+| `cast(x as int)` via `x::int`                                                                                               | Drivers usually infer; use `cast(x as integer)` when needed                                                                                                                                                                                                     |
+| `where col = any($1::text[])`                                                                                               | Build an `in (...)` list in JS                                                                                                                                                                                                                                  |
+| `select distinct on (col) ...`                                                                                              | `row_number() over (partition by ...)` subquery                                                                                                                                                                                                                 |
+| `column_name jsonb` without the `_json` suffix                                                                              | Rename to `column_name_json`                                                                                                                                                                                                                                    |
+| Writing a JSON value as `${JSON.stringify(obj)}`                                                                            | Pass the object directly — both adapters handle it                                                                                                                                                                                                              |
+| Reading a JSON value as a string and then `JSON.parse`ing                                                                   | Read it as `Record<string, unknown>` — auto-parsed in SQLite, auto-decoded in PG                                                                                                                                                                                |
+| Adding a migration to only one dialect's file                                                                               | Mirror it to the other — `migration-parity.test.ts` enforces this                                                                                                                                                                                               |
+| Hand-running `db.unsafe(...)` for queryable statements                                                                      | Use the tagged-template form — `unsafe` is for stored migration blocks                                                                                                                                                                                          |
 | DB-level CHECK constraints that enumerate application domain values (e.g. `check (provider_id in ('anthropic', 'openai'))`) | Put the validation at the application boundary via a TypeBox `Type.Union` / `Type.Literal` — see `server/ai/handlers/credentials.ts`. A DB enum that duplicates the list forces a destructive migration (especially on SQLite) every time a new value is added. |
 
 ---

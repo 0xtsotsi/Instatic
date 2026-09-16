@@ -10,7 +10,10 @@ const PREFIX = '[test-scheduler]'
  * Minimal DbClient stub that only honors the two advisory-lock statements the
  * module issues. `throwOnLock` simulates SQLite (the PG function is absent).
  */
-function makeFakeDb(opts: { got?: boolean; throwOnLock?: boolean }): DbClient & { calls: string[] } {
+function makeFakeDb(opts: {
+  got?: boolean
+  throwOnLock?: boolean
+}): DbClient & { calls: string[] } {
   const calls: string[] = []
   const db = (async (strings: TemplateStringsArray) => {
     const sql = strings.join('?')

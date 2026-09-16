@@ -49,11 +49,7 @@ import {
   requestAuditContext,
   type CmsHandlerOptions,
 } from './shared'
-import {
-  IMAGE_MIMES,
-  acceptUploadedMedia,
-  readUploadedFile,
-} from './mediaUpload'
+import { IMAGE_MIMES, acceptUploadedMedia, readUploadedFile } from './mediaUpload'
 import { Type } from '@core/utils/typeboxHelpers'
 
 /**
@@ -77,10 +73,7 @@ const EnableTotpBodySchema = Type.Object({
   code: Type.String({ minLength: 6 }),
 })
 
-const StepUpAuthModeSchema = Type.Union([
-  Type.Literal('required'),
-  Type.Literal('disabled'),
-])
+const StepUpAuthModeSchema = Type.Union([Type.Literal('required'), Type.Literal('disabled')])
 const StepUpWindowMinutesSchema = Type.Union([
   Type.Literal(5),
   Type.Literal(15),

@@ -24,12 +24,12 @@ This doc shows the type, the mutation API, and how to correctly route mutations 
 
 ```ts
 export interface NodeTree<TNode extends BaseNode = BaseNode> {
-  nodes: Record<string, TNode>     // flat map for O(1) lookup
-  rootNodeId: string                // entry point for traversal
+  nodes: Record<string, TNode> // flat map for O(1) lookup
+  rootNodeId: string // entry point for traversal
 }
 
 export const NodeTreeSchema = Type.Object({
-  nodes:      Type.Record(Type.String(), BaseNodeSchema),
+  nodes: Type.Record(Type.String(), BaseNodeSchema),
   rootNodeId: Type.String(),
 })
 ```
@@ -46,17 +46,20 @@ Why a flat map plus a root id:
 
 ```ts
 export const BaseNodeSchema = Type.Object({
-  id:                  Type.String(),
-  moduleId:            Type.String(),         // 'base.container', 'base.text', etc.
-  props:               withFallback(Type.Record(Type.String(), Type.Unknown()), {}),
-  breakpointOverrides: withFallback(Type.Record(Type.String(), Type.Record(Type.String(), Type.Unknown())), {}),
-  children:            Type.Array(Type.String()),   // ordered child node IDs
-  parentId:            Type.Optional(Type.Union([Type.String(), Type.Null()])), // O(1) parent pointer; see invariant below
-  label:               Type.Optional(Type.String()),
-  locked:              Type.Optional(Type.Boolean()),
-  hidden:              Type.Optional(Type.Boolean()),
-  classIds:            withFallback(Type.Array(Type.String()), []),
-  inlineStyles:        Type.Optional(Type.Record(Type.String(), Type.Unknown())),
+  id: Type.String(),
+  moduleId: Type.String(), // 'base.container', 'base.text', etc.
+  props: withFallback(Type.Record(Type.String(), Type.Unknown()), {}),
+  breakpointOverrides: withFallback(
+    Type.Record(Type.String(), Type.Record(Type.String(), Type.Unknown())),
+    {},
+  ),
+  children: Type.Array(Type.String()), // ordered child node IDs
+  parentId: Type.Optional(Type.Union([Type.String(), Type.Null()])), // O(1) parent pointer; see invariant below
+  label: Type.Optional(Type.String()),
+  locked: Type.Optional(Type.Boolean()),
+  hidden: Type.Optional(Type.Boolean()),
+  classIds: withFallback(Type.Array(Type.String()), []),
+  inlineStyles: Type.Optional(Type.Record(Type.String(), Type.Unknown())),
   // ... propBindings, etc.
 })
 ```
@@ -78,11 +81,11 @@ The rules:
 
 ### Where each kind of tree lives
 
-| Tree kind                | Type                  | Stored where                            |
-|--------------------------|-----------------------|-----------------------------------------|
-| `Page` (a page's tree)   | `NodeTree<PageNode>`  | `data_rows` row, table `pages`, cell `body` |
-| `VisualComponent.tree`   | `NodeTree<BaseNode>`  | `data_rows` row, table `components`, cell `body` |
-| Slot fill                | Children of `base.slot-instance` | Same page tree as its consumer  |
+| Tree kind              | Type                             | Stored where                                     |
+| ---------------------- | -------------------------------- | ------------------------------------------------ |
+| `Page` (a page's tree) | `NodeTree<PageNode>`             | `data_rows` row, table `pages`, cell `body`      |
+| `VisualComponent.tree` | `NodeTree<BaseNode>`             | `data_rows` row, table `components`, cell `body` |
+| Slot fill              | Children of `base.slot-instance` | Same page tree as its consumer                   |
 
 There is no separate `pages` table, no `page_versions` table. Everything content-shaped is in `data_tables` + `data_rows`.
 
@@ -106,36 +109,36 @@ All mutations live in `src/core/page-tree/mutations.ts`. They take a `NodeTree<P
 
 ### Node mutations (operate on a single `NodeTree`)
 
-| Function                                                          | What it does                                                |
-|-------------------------------------------------------------------|-------------------------------------------------------------|
-| `createNode(moduleId, defaults?) → PageNode`                      | Build a new node with a generated id (not yet inserted)     |
-| `insertNode(tree, node, parentId, index?)`                        | Insert under `parentId` at `index` (append if omitted)      |
-| `deleteNode(tree, nodeId)`                                        | Remove a node and its entire subtree                        |
-| `updateNodeProps(tree, nodeId, patch)`                            | Shallow merge `patch` into the node's `props`               |
-| `setBreakpointOverride(tree, nodeId, breakpointId, patch)`        | Shallow-merge `patch` into the node's breakpoint overrides for `breakpointId` |
-| `clearBreakpointOverride(tree, nodeId, breakpointId)`             | Remove ALL overrides for `breakpointId` on that node       |
-| `renameNode(tree, nodeId, label)`                                 | Set the user-facing `label`                                 |
-| `toggleNodeLocked(tree, nodeId)`                                  | Flip `locked`                                               |
-| `toggleNodeHidden(tree, nodeId)`                                  | Flip `hidden`                                               |
-| `moveNode(tree, nodeId, newParentId, newIndex)`                   | Re-parent + re-order                                        |
-| `moveNodes(tree, nodeIds, newParentId, newIndex)`                 | Same, multi-select                                          |
-| `buildSubtreeNodeIdMap(rootNodeId, nodes)`                        | Build a `Map<oldId, newId>` for all nodes reachable from `rootNodeId`. Used by callers that need the id map before pasting (e.g. to remap scoped class `scope.nodeId`). |
-| `duplicateNode(tree, nodeId, ...)`                                | Deep-clone with fresh ids, place after the original         |
-| `wrapNode(tree, nodeId, wrapperModuleId)`                         | Wrap a node in a new container                              |
-| `wrapNodes(tree, nodeIds, wrapperModuleId)`                       | Same, multi-select                                          |
-| `pasteSubtree(tree, subtree, parentId, index?)`                   | Insert a previously-copied subtree with new ids             |
-| `deleteSubtree(nodes, rootId, options?)`                          | THE single subtree-deletion primitive. Removes `rootId` and all its descendants from a flat node map. `options.unlinkParent` (default `true`) controls whether the root is also spliced from its parent's `children[]` — slot-sync passes `false` because it overwrites the parent's children array wholesale afterwards. Takes `Record<string, BaseNode>` directly. Works on both Mutative drafts and plain object maps. |
-| `removeNodeSubtrees(nodes, rootNodeIds)`                          | Cascade-delete multiple root nodes and their entire subtrees. Calls `deleteSubtree(..., { unlinkParent: true })` for each root. Used to splice every `base.visual-component-ref` pointing at a deleted VC (plus all its slot-instance children and user content) from page trees and VC definition trees. Takes `Record<string, BaseNode>` directly. |
+| Function                                                   | What it does                                                                                                                                                                                                                                                                                                                                                                                                              |
+| ---------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `createNode(moduleId, defaults?) → PageNode`               | Build a new node with a generated id (not yet inserted)                                                                                                                                                                                                                                                                                                                                                                   |
+| `insertNode(tree, node, parentId, index?)`                 | Insert under `parentId` at `index` (append if omitted)                                                                                                                                                                                                                                                                                                                                                                    |
+| `deleteNode(tree, nodeId)`                                 | Remove a node and its entire subtree                                                                                                                                                                                                                                                                                                                                                                                      |
+| `updateNodeProps(tree, nodeId, patch)`                     | Shallow merge `patch` into the node's `props`                                                                                                                                                                                                                                                                                                                                                                             |
+| `setBreakpointOverride(tree, nodeId, breakpointId, patch)` | Shallow-merge `patch` into the node's breakpoint overrides for `breakpointId`                                                                                                                                                                                                                                                                                                                                             |
+| `clearBreakpointOverride(tree, nodeId, breakpointId)`      | Remove ALL overrides for `breakpointId` on that node                                                                                                                                                                                                                                                                                                                                                                      |
+| `renameNode(tree, nodeId, label)`                          | Set the user-facing `label`                                                                                                                                                                                                                                                                                                                                                                                               |
+| `toggleNodeLocked(tree, nodeId)`                           | Flip `locked`                                                                                                                                                                                                                                                                                                                                                                                                             |
+| `toggleNodeHidden(tree, nodeId)`                           | Flip `hidden`                                                                                                                                                                                                                                                                                                                                                                                                             |
+| `moveNode(tree, nodeId, newParentId, newIndex)`            | Re-parent + re-order                                                                                                                                                                                                                                                                                                                                                                                                      |
+| `moveNodes(tree, nodeIds, newParentId, newIndex)`          | Same, multi-select                                                                                                                                                                                                                                                                                                                                                                                                        |
+| `buildSubtreeNodeIdMap(rootNodeId, nodes)`                 | Build a `Map<oldId, newId>` for all nodes reachable from `rootNodeId`. Used by callers that need the id map before pasting (e.g. to remap scoped class `scope.nodeId`).                                                                                                                                                                                                                                                   |
+| `duplicateNode(tree, nodeId, ...)`                         | Deep-clone with fresh ids, place after the original                                                                                                                                                                                                                                                                                                                                                                       |
+| `wrapNode(tree, nodeId, wrapperModuleId)`                  | Wrap a node in a new container                                                                                                                                                                                                                                                                                                                                                                                            |
+| `wrapNodes(tree, nodeIds, wrapperModuleId)`                | Same, multi-select                                                                                                                                                                                                                                                                                                                                                                                                        |
+| `pasteSubtree(tree, subtree, parentId, index?)`            | Insert a previously-copied subtree with new ids                                                                                                                                                                                                                                                                                                                                                                           |
+| `deleteSubtree(nodes, rootId, options?)`                   | THE single subtree-deletion primitive. Removes `rootId` and all its descendants from a flat node map. `options.unlinkParent` (default `true`) controls whether the root is also spliced from its parent's `children[]` — slot-sync passes `false` because it overwrites the parent's children array wholesale afterwards. Takes `Record<string, BaseNode>` directly. Works on both Mutative drafts and plain object maps. |
+| `removeNodeSubtrees(nodes, rootNodeIds)`                   | Cascade-delete multiple root nodes and their entire subtrees. Calls `deleteSubtree(..., { unlinkParent: true })` for each root. Used to splice every `base.visual-component-ref` pointing at a deleted VC (plus all its slot-instance children and user content) from page trees and VC definition trees. Takes `Record<string, BaseNode>` directly.                                                                      |
 
 ### Site-level mutations (operate on a `SiteDocument`)
 
-| Function                                       | What it does                                  |
-|------------------------------------------------|-----------------------------------------------|
-| `addPage(site, title, slug) → Page`            | Append a new page to `site.pages`. Slug is auto-uniqued via `uniquePageSlug` — a collision never bricks the save. |
-| `deletePage(site, pageId)`                     | Remove a page                                 |
-| `renamePage(site, pageId, title, slug?)`       | Update title (and slug). Slug is auto-uniqued (skipping self-collision); `'index'` is always set verbatim. |
-| `reorderPages(site, fromIndex, toIndex)`       | Reorder the page list                         |
-| `duplicatePage(site, pageId, ...)`             | Clone a page with a fresh id. Slug is auto-uniqued so the copy never collides with the source. |
+| Function                                 | What it does                                                                                                      |
+| ---------------------------------------- | ----------------------------------------------------------------------------------------------------------------- |
+| `addPage(site, title, slug) → Page`      | Append a new page to `site.pages`. Slug is auto-uniqued via `uniquePageSlug` — a collision never bricks the save. |
+| `deletePage(site, pageId)`               | Remove a page                                                                                                     |
+| `renamePage(site, pageId, title, slug?)` | Update title (and slug). Slug is auto-uniqued (skipping self-collision); `'index'` is always set verbatim.        |
+| `reorderPages(site, fromIndex, toIndex)` | Reorder the page list                                                                                             |
+| `duplicatePage(site, pageId, ...)`       | Clone a page with a fresh id. Slug is auto-uniqued so the copy never collides with the source.                    |
 
 ### Helpers and selectors
 
@@ -243,7 +246,7 @@ The flat map plus children-as-ids makes traversal trivial in either direction.
 ```ts
 import { getParent } from '@core/page-tree'
 
-const parent = getParent(tree, nodeId)        // the parent node, or undefined
+const parent = getParent(tree, nodeId) // the parent node, or undefined
 if (parent) {
   const index = parent.children.indexOf(nodeId)
   console.log('node', nodeId, 'lives under', parent.id, 'at index', index)
@@ -258,7 +261,7 @@ if (parent) {
 import { createNode, insertNode } from '@core/page-tree'
 
 const heading = createNode('base.heading', { level: 2, text: 'Hello' })
-insertNode(tree, heading, parentId)   // appended
+insertNode(tree, heading, parentId) // appended
 // or
 insertNode(tree, heading, parentId, 0) // first child
 ```
@@ -272,6 +275,7 @@ insertNode(tree, heading, parentId, 0) // first child
    yourMutation: (...args) =>
      set((s) => mutateActiveTree((tree) => yourMutation(tree, ...args))),
    ```
+
 3. **Don't branch on VC mode.** The gate will fail your build if you do.
 
 ### Validate a tree loaded from disk
@@ -290,17 +294,17 @@ const tree = parsePageNodeTree(raw)
 
 ## Forbidden patterns
 
-| Pattern                                                         | Use instead                                                |
-|-----------------------------------------------------------------|------------------------------------------------------------|
-| Maintaining a parallel local copy of node data inside a panel   | Read from the store via a selector (Constraint #182)       |
-| Branching on `kind === 'visualComponent'` inside a store mutation | Let `mutateActiveTree` route — keep the mutation generic |
-| Treating slot fills as a separate "slotContent" prop            | Slot fills are children of a `base.slot-instance` node in the same tree |
-| Adding a parallel `interface NodeTree` type                     | `NodeTreeSchema` and `NodeTree<TNode>` in `treeSchema.ts` are the source of truth |
-| Using a non-flat tree representation (nested `children: PageNode[]`) | Flat map + `children: string[]` — covered by `src/__tests__/persistence/treeSchemaShape.test.ts` |
-| Writing a mutation that takes a `Page` specifically             | Take `NodeTree<TNode>` — pages and VCs both pass            |
-| Rolling a custom DFS walk to collect descendants                 | Use `collectSubtreeIds(nodes, rootId)` — it is THE single walker with a hard cycle guard; hand-rolled walks skip the guard and loop forever on corrupt trees |
+| Pattern                                                                                     | Use instead                                                                                                                                                   |
+| ------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Maintaining a parallel local copy of node data inside a panel                               | Read from the store via a selector (Constraint #182)                                                                                                          |
+| Branching on `kind === 'visualComponent'` inside a store mutation                           | Let `mutateActiveTree` route — keep the mutation generic                                                                                                      |
+| Treating slot fills as a separate "slotContent" prop                                        | Slot fills are children of a `base.slot-instance` node in the same tree                                                                                       |
+| Adding a parallel `interface NodeTree` type                                                 | `NodeTreeSchema` and `NodeTree<TNode>` in `treeSchema.ts` are the source of truth                                                                             |
+| Using a non-flat tree representation (nested `children: PageNode[]`)                        | Flat map + `children: string[]` — covered by `src/__tests__/persistence/treeSchemaShape.test.ts`                                                              |
+| Writing a mutation that takes a `Page` specifically                                         | Take `NodeTree<TNode>` — pages and VCs both pass                                                                                                              |
+| Rolling a custom DFS walk to collect descendants                                            | Use `collectSubtreeIds(nodes, rootId)` — it is THE single walker with a hard cycle guard; hand-rolled walks skip the guard and loop forever on corrupt trees  |
 | Calling `deleteSubtree` / `removeNodeSubtrees` without the `parentId` cache being populated | `parentId` is stamped by every mutation and by `reindexNodeParents` on load — it is always populated for any in-system tree; the delete primitives rely on it |
-| Deep-importing a concrete file: `import X from '@core/page-tree/mutations'` | Import through the barrel: `import { X } from '@core/page-tree'` — gated by `no-core-barrel-deep-imports.test.ts` |
+| Deep-importing a concrete file: `import X from '@core/page-tree/mutations'`                 | Import through the barrel: `import { X } from '@core/page-tree'` — gated by `no-core-barrel-deep-imports.test.ts`                                             |
 
 ---
 

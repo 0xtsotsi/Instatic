@@ -28,11 +28,7 @@ import { Type, parseValue } from '@core/utils/typeboxHelpers'
 import { validatePluginRecordData } from '@core/plugins/manifest'
 import { badRequest, jsonResponse, methodNotAllowed, readValidatedBody } from '../../../http'
 import { getErrorMessage } from '@core/utils/errorMessage'
-import {
-  getEnabledPluginResource,
-  pluginRecordNotFound,
-  pluginResourceNotFound,
-} from './shared'
+import { getEnabledPluginResource, pluginRecordNotFound, pluginResourceNotFound } from './shared'
 
 /**
  * Parse list options from URL search params. Returns `null` on a validation
@@ -100,7 +96,9 @@ export async function handlePluginRecordsCollection(
     try {
       options = parseValue(StorageListOptionsSchema, parsed.options)
     } catch {
-      return badRequest('Invalid list options: filter, orderBy, limit, and offset must match the expected types')
+      return badRequest(
+        'Invalid list options: filter, orderBy, limit, and offset must match the expected types',
+      )
     }
 
     const { records, totalCount } = await listPluginRecords(db, pluginId, resourceId, options)

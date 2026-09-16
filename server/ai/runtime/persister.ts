@@ -15,11 +15,7 @@ import type { AiContentBlock, AiProviderId } from './types'
 
 export interface ConversationsPersister {
   appendAssistantText(text: string): Promise<void>
-  appendToolCall(args: {
-    toolCallId: string
-    toolName: string
-    input: unknown
-  }): Promise<void>
+  appendToolCall(args: { toolCallId: string; toolName: string; input: unknown }): Promise<void>
   appendToolResult(args: {
     toolCallId: string
     toolName: string
@@ -79,12 +75,14 @@ export function createConversationsPersister(
     },
 
     async appendToolCall({ toolCallId, toolName, input }) {
-      const blocks: AiContentBlock[] = [{
-        kind: 'toolCall',
-        toolCallId,
-        toolName,
-        input,
-      }]
+      const blocks: AiContentBlock[] = [
+        {
+          kind: 'toolCall',
+          toolCallId,
+          toolName,
+          input,
+        },
+      ]
       const row = await appendMessage(db, conversationId, {
         role: 'assistant',
         content: blocks,
@@ -135,28 +133,27 @@ export function createConversationsPersister(
       // cost). When absent (Anthropic, OpenAI) we price from the live
       // OpenRouter catalogue, cache-aware; Ollama is free. Token counts are
       // always trusted as reported by the driver.
-      const costUsd = usage.costUsd ?? await resolveCostUsd(
-        db,
-        ctx.providerId,
-        ctx.modelId,
-        {
+      const costUsd =
+        usage.costUsd ??
+        (await resolveCostUsd(db, ctx.providerId, ctx.modelId, {
           promptTokens: usage.promptTokens,
           completionTokens: usage.completionTokens,
           cacheReadTokens: usage.cacheReadTokens ?? 0,
           cacheCreationTokens: usage.cacheCreationTokens ?? 0,
-        },
-      )
+        }))
       if (!lastAssistantMessageId) return costUsd
       // Provider-normalised "context used now" snapshot for the conversation
       // row, restored by the meter on reload. Prefer the LAST round's context
       // (tracked via recordContext) — the true current context size. Fall back
       // to this turn's input only if no context event arrived (e.g. a provider
       // that never reported per-round usage).
-      const contextTokens = latestContextTokens ?? normalizeContextTokens(ctx.providerId, {
-        promptTokens: usage.promptTokens,
-        cacheReadTokens: usage.cacheReadTokens ?? 0,
-        cacheCreationTokens: usage.cacheCreationTokens ?? 0,
-      })
+      const contextTokens =
+        latestContextTokens ??
+        normalizeContextTokens(ctx.providerId, {
+          promptTokens: usage.promptTokens,
+          cacheReadTokens: usage.cacheReadTokens ?? 0,
+          cacheCreationTokens: usage.cacheCreationTokens ?? 0,
+        })
       // Lightweight UPDATE — bypasses the repository because there's no
       // public-facing API for "patch the latest message". Single-table
       // write, no FK touch.

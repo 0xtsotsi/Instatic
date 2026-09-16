@@ -90,10 +90,19 @@ export async function runPluginLifecycleHook(
     // Activate failure leaves us in a half-loaded state — drop the worker
     // entry and the canvas module pack so the next attempt starts clean.
     if (hook === 'activate') {
-      try { await unloadPlugin(plugin.id) } catch { /* noop */ }
+      try {
+        await unloadPlugin(plugin.id)
+      } catch {
+        /* noop */
+      }
       deactivatePluginModulePack(plugin.id)
     }
-    const updatedResult = await setPluginLifecycleStatus(db, plugin.id, 'error', lifecycleErrorMessage(err))
+    const updatedResult = await setPluginLifecycleStatus(
+      db,
+      plugin.id,
+      'error',
+      lifecycleErrorMessage(err),
+    )
     const updated = updatedResult?.kind === 'ok' ? updatedResult.plugin : null
     return { plugin: updated ?? plugin, ok: false }
   }

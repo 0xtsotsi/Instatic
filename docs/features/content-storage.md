@@ -24,53 +24,53 @@ There are **no other content tables**. There is no `pages` table, no `page_versi
 
 The schema for a collection. One row per collection.
 
-| Column            | Type      | Notes                                                            |
-|-------------------|-----------|------------------------------------------------------------------|
-| `id`              | text PK   |                                                                  |
-| `name`            | text      | Human-readable                                                   |
-| `slug`            | text      | URL-safe (kebab-case)                                            |
-| `kind`            | text      | `'postType' \| 'data' \| 'page' \| 'component' \| 'layout'`      |
-| `singular_label`  | text      | "Post"                                                           |
-| `plural_label`    | text      | "Posts"                                                          |
-| `route_base`      | text      | Empty = not publicly routable. Post-types default to `/<slug>`. |
-| `primary_field_id`| text      | Field id used as the row's display name in grids / pickers      |
-| `fields_json`     | jsonb     | `DataField[]` — the schema                                       |
-| `system`          | boolean   | `true` for seeded tables (`posts`, `pages`, `components`, `layouts`) |
-| `created_*`, `updated_*` | -  | Standard audit fields                                            |
+| Column                   | Type    | Notes                                                                |
+| ------------------------ | ------- | -------------------------------------------------------------------- |
+| `id`                     | text PK |                                                                      |
+| `name`                   | text    | Human-readable                                                       |
+| `slug`                   | text    | URL-safe (kebab-case)                                                |
+| `kind`                   | text    | `'postType' \| 'data' \| 'page' \| 'component' \| 'layout'`          |
+| `singular_label`         | text    | "Post"                                                               |
+| `plural_label`           | text    | "Posts"                                                              |
+| `route_base`             | text    | Empty = not publicly routable. Post-types default to `/<slug>`.      |
+| `primary_field_id`       | text    | Field id used as the row's display name in grids / pickers           |
+| `fields_json`            | jsonb   | `DataField[]` — the schema                                           |
+| `system`                 | boolean | `true` for seeded tables (`posts`, `pages`, `components`, `layouts`) |
+| `created_*`, `updated_*` | -       | Standard audit fields                                                |
 
 ### `data_rows`
 
 One row per content row.
 
-| Column                  | Type       | Notes                                                           |
-|-------------------------|------------|-----------------------------------------------------------------|
-| `id`                    | text PK    |                                                                 |
-| `table_id`              | text FK    | → `data_tables.id`                                              |
-| `cells_json`            | jsonb      | `Record<fieldId, cellValue>`                                    |
-| `slug`                  | text       | Denormalized from `cells_json.slug` for fast route lookup       |
-| `status`                | text       | `'draft' \| 'published' \| 'unpublished' \| 'scheduled'`        |
-| `author_user_id`        | text FK    | The post's author (nullable)                                    |
-| `created_by_user_id`    | text FK    | Who created the row                                             |
-| `updated_by_user_id`    | text FK    |                                                                 |
-| `published_by_user_id`  | text FK    |                                                                 |
-| `created_at`            | timestamp  |                                                                 |
-| `updated_at`            | timestamp  |                                                                 |
-| `published_at`          | timestamp  | Nullable                                                        |
-| `scheduled_publish_at`  | timestamp  | Set when `status = 'scheduled'`; tick by `publishScheduler.ts`  |
-| `deleted_at`            | timestamp  | Non-null = soft-deleted                                         |
+| Column                 | Type      | Notes                                                          |
+| ---------------------- | --------- | -------------------------------------------------------------- |
+| `id`                   | text PK   |                                                                |
+| `table_id`             | text FK   | → `data_tables.id`                                             |
+| `cells_json`           | jsonb     | `Record<fieldId, cellValue>`                                   |
+| `slug`                 | text      | Denormalized from `cells_json.slug` for fast route lookup      |
+| `status`               | text      | `'draft' \| 'published' \| 'unpublished' \| 'scheduled'`       |
+| `author_user_id`       | text FK   | The post's author (nullable)                                   |
+| `created_by_user_id`   | text FK   | Who created the row                                            |
+| `updated_by_user_id`   | text FK   |                                                                |
+| `published_by_user_id` | text FK   |                                                                |
+| `created_at`           | timestamp |                                                                |
+| `updated_at`           | timestamp |                                                                |
+| `published_at`         | timestamp | Nullable                                                       |
+| `scheduled_publish_at` | timestamp | Set when `status = 'scheduled'`; tick by `publishScheduler.ts` |
+| `deleted_at`           | timestamp | Non-null = soft-deleted                                        |
 
 ### `data_row_versions`
 
 Snapshot of a published row at publish time. One row per version.
 
-| Column          | Type   | Notes                                                  |
-|-----------------|--------|--------------------------------------------------------|
-| `id`            | text PK|                                                        |
-| `row_id`        | text FK| → `data_rows.id`                                       |
-| `version_number`| int    | Monotonic per row                                      |
-| `cells_json`    | jsonb  | Snapshot at publish time                               |
-| `created_at`    | timestamp |                                                     |
-| `created_by_user_id` | text FK | Who published this version                       |
+| Column               | Type      | Notes                      |
+| -------------------- | --------- | -------------------------- |
+| `id`                 | text PK   |                            |
+| `row_id`             | text FK   | → `data_rows.id`           |
+| `version_number`     | int       | Monotonic per row          |
+| `cells_json`         | jsonb     | Snapshot at publish time   |
+| `created_at`         | timestamp |                            |
+| `created_by_user_id` | text FK   | Who published this version |
 
 Used to render the **currently-published** page (vs. the in-progress draft on the row). The publish handler writes a new version on each `Publish`.
 
@@ -78,13 +78,13 @@ Used to render the **currently-published** page (vs. the in-progress draft on th
 
 ## Five kinds
 
-| `kind`       | Authored in                       | Built-in fields | Workflow | Notes                                          |
-|--------------|-----------------------------------|-----------------|----------|------------------------------------------------|
-| `postType`   | Content workspace (`/admin/content`) | `title`, `slug`, `body` (text), `featuredMedia`, `seoTitle`, `seoDescription` | `draft / published / unpublished / scheduled` + versions | Built-in fields cannot be renamed or deleted, only enabled / disabled. |
-| `data`       | Data workspace grid (`/admin/data`) | none           | none     | Pure user-defined fields. Like a database table.|
-| `page`       | Site workspace (`/admin/site`)    | `title`, `slug`, `body` (pageTree) | same as `postType` | Each row is a CMS page. `body` cell holds the `NodeTree<PageNode>`. |
-| `component`  | Site workspace, VC mode           | `name`, `slug`, `body` (pageTree), `params` (fieldSchema), `classIds` | none | Each row is a Visual Component. See [docs/features/visual-components.md](visual-components.md). |
-| `layout`     | Site workspace saved layouts      | `name`, `slug`, `body` (pageTree), `classes` | none | Each row is a saved layout snapshot. See [docs/editor.md](../editor.md) → "Saved layouts". |
+| `kind`      | Authored in                          | Built-in fields                                                               | Workflow                                                 | Notes                                                                                           |
+| ----------- | ------------------------------------ | ----------------------------------------------------------------------------- | -------------------------------------------------------- | ----------------------------------------------------------------------------------------------- |
+| `postType`  | Content workspace (`/admin/content`) | `title`, `slug`, `body` (text), `featuredMedia`, `seoTitle`, `seoDescription` | `draft / published / unpublished / scheduled` + versions | Built-in fields cannot be renamed or deleted, only enabled / disabled.                          |
+| `data`      | Data workspace grid (`/admin/data`)  | none                                                                          | none                                                     | Pure user-defined fields. Like a database table.                                                |
+| `page`      | Site workspace (`/admin/site`)       | `title`, `slug`, `body` (pageTree)                                            | same as `postType`                                       | Each row is a CMS page. `body` cell holds the `NodeTree<PageNode>`.                             |
+| `component` | Site workspace, VC mode              | `name`, `slug`, `body` (pageTree), `params` (fieldSchema), `classIds`         | none                                                     | Each row is a Visual Component. See [docs/features/visual-components.md](visual-components.md). |
+| `layout`    | Site workspace saved layouts         | `name`, `slug`, `body` (pageTree), `classes`                                  | none                                                     | Each row is a saved layout snapshot. See [docs/editor.md](../editor.md) → "Saved layouts".      |
 
 System tables protect their `kind`:
 
@@ -101,23 +101,23 @@ Users can add their own custom fields to system tables.
 
 `DataFieldType` (`src/core/data/schemas.ts`):
 
-| Field type     | `cells_json[fieldId]` shape                | Notes                                       |
-|----------------|-------------------------------------------|---------------------------------------------|
-| `text`         | `string \| null`                          | Single-line                                 |
-| `longText`     | `string \| null`                          | Multi-line                                  |
-| `richText`     | `string \| null`                          | HTML (sanitized at publish)                 |
-| `number`       | `number \| null`                          |                                             |
-| `boolean`      | `boolean \| null`                         |                                             |
-| `date`         | ISO date string \| null                   | Date only                                   |
-| `dateTime`     | ISO datetime string \| null               |                                             |
-| `select`       | option id (string) \| null                | Options stored on the field definition      |
-| `multiSelect`  | option ids (`string[]`)                   |                                             |
-| `url`          | `string \| null`                          |                                             |
-| `email`        | `string \| null`                          |                                             |
-| `media`        | single: `mediaId \| null`; multi: `string[]` | References `media_assets`                |
-| `relation`     | single: `rowId \| null`; multi: `string[]`| Relates to rows in another `data_table`     |
-| `pageTree`     | `NodeTree<PageNode>` JSON                 | The visual tree (pages, VC trees)           |
-| `fieldSchema`  | JSON describing fields                    | Used by VCs to declare `params`             |
+| Field type    | `cells_json[fieldId]` shape                  | Notes                                   |
+| ------------- | -------------------------------------------- | --------------------------------------- |
+| `text`        | `string \| null`                             | Single-line                             |
+| `longText`    | `string \| null`                             | Multi-line                              |
+| `richText`    | `string \| null`                             | HTML (sanitized at publish)             |
+| `number`      | `number \| null`                             |                                         |
+| `boolean`     | `boolean \| null`                            |                                         |
+| `date`        | ISO date string \| null                      | Date only                               |
+| `dateTime`    | ISO datetime string \| null                  |                                         |
+| `select`      | option id (string) \| null                   | Options stored on the field definition  |
+| `multiSelect` | option ids (`string[]`)                      |                                         |
+| `url`         | `string \| null`                             |                                         |
+| `email`       | `string \| null`                             |                                         |
+| `media`       | single: `mediaId \| null`; multi: `string[]` | References `media_assets`               |
+| `relation`    | single: `rowId \| null`; multi: `string[]`   | Relates to rows in another `data_table` |
+| `pageTree`    | `NodeTree<PageNode>` JSON                    | The visual tree (pages, VC trees)       |
+| `fieldSchema` | JSON describing fields                       | Used by VCs to declare `params`         |
 
 The `DataField` discriminated union (`DataFieldSchema`) carries type-specific fields (e.g. `options` on `select`, `targetTableId` on `relation`).
 
@@ -126,17 +126,17 @@ The `DataField` discriminated union (`DataFieldSchema`) carries type-specific fi
 Cells are typed `unknown` at the schema level. Use the reader helpers in `src/core/data/cells.ts`:
 
 ```ts
-readStringCell(cells, 'title')                  // → string ('' fallback)
-readNumberCell(cells, 'price')                  // → number | null
-readBooleanCell(cells, 'featured')              // → boolean
-readStringArrayCell(cells, 'tags')              // → string[]
-readTitleCell(cells)                            // → string  (reads 'title')
-readSlugCell(cells)                             // → string  (reads 'slug')
-readBodyCell(cells)                             // → string  (reads 'body')
-readFeaturedMediaCell(cells)                    // → string | null
-readSeoTitleCell(cells), readSeoDescriptionCell(cells)
-readNodeTreeCell(cells, 'body')                 // → NodeTree<PageNode> | null
-readFieldSchemaCell(cells, 'params')            // → DataField[] | null
+readStringCell(cells, 'title') // → string ('' fallback)
+readNumberCell(cells, 'price') // → number | null
+readBooleanCell(cells, 'featured') // → boolean
+readStringArrayCell(cells, 'tags') // → string[]
+readTitleCell(cells) // → string  (reads 'title')
+readSlugCell(cells) // → string  (reads 'slug')
+readBodyCell(cells) // → string  (reads 'body')
+readFeaturedMediaCell(cells) // → string | null
+;(readSeoTitleCell(cells), readSeoDescriptionCell(cells))
+readNodeTreeCell(cells, 'body') // → NodeTree<PageNode> | null
+readFieldSchemaCell(cells, 'params') // → DataField[] | null
 ```
 
 These do the boundary validation — handlers and modules read through them rather than typing `cells.foo as string`.
@@ -144,7 +144,7 @@ These do the boundary validation — handlers and modules read through them rath
 To compute the denormalized, URL-normalized slug for a row (empty string when the table has no `slug` field):
 
 ```ts
-slugForTable(table, cells)   // → string  (applies slugFromTitle; empty for tables without a slug field)
+slugForTable(table, cells) // → string  (applies slugFromTitle; empty for tables without a slug field)
 ```
 
 This is the single source of truth for slug derivation used by all admin write paths (`rows.ts`, `tables.ts`). Pass the result directly to `createDataRow` / `saveDataRowDraft`.
@@ -155,33 +155,33 @@ This is the single source of truth for slug derivation used by all admin write p
 
 ### Repositories
 
-| File                                             | Owns                                                                  |
-|--------------------------------------------------|-----------------------------------------------------------------------|
-| `server/repositories/data/tables.ts`             | CRUD on `data_tables`: list (system tables first: pages → posts → components → layouts, then custom by `created_at`), get, get-by-slug (indexed via `data_tables_slug_active_idx`), create, update, delete (system-protected) |
-| `server/repositories/data/rows/read.ts`          | Hydrated read queries: `listDataRows`, `getDataRow`, `getDataRowMany` (one IN-list query for bulk validation), `getDataRowBySlug`, `countDataRows`, `listDataAuthorOptions` |
-| `server/repositories/data/rows/mutations.ts`     | Single-row writes: create, save draft, soft-delete, move to table, update status / author. `softDeleteDataRow` returns the narrow `DeletedRowSummary` (not a full `DataRow`) — the row's `deleted_at is null` filter makes re-reading impossible, and callers only need `id / tableId / slug / status / deletedAt`. |
-| `server/repositories/data/rows/bulk.ts`          | Transactional batch writes: `createDataRowMany`, `saveDataRowDraftMany`, `softDeleteDataRowMany` |
-| `server/repositories/data/rows/filter.ts`        | Operator-object filter querying with pagination (`listDataRowsWithFilter`) — used by the plugin content surface |
-| `server/repositories/data/rows/search.ts`        | Cross-table slug search (`searchDataRows`) — used by the spotlight content provider |
-| `server/repositories/data/rows/schedule.ts`      | Scheduled-publish lifecycle: schedule, cancel, list due rows         |
-| `server/repositories/data/rows/import.ts`        | Bundle-import upserts (id-preserving): `upsertDataRow`, `insertDataRowIfAbsent`, `replaceDataRow` |
-| `server/repositories/data/rows/mapper.ts`        | Internal: hydrated SELECT builder + `DataRowRow → DataRow` mapper (not part of the public barrel) |
-| `server/repositories/data/rows/index.ts`         | Barrel for the `rows/` directory                                     |
-| `server/repositories/data/publish.ts`            | Publish persistence (`persistDataRowPublish` writes `data_row_versions`) + public-route lookups; the orchestration (lock, artefacts, cache bump) is `server/publish/publishRow.ts` |
-| `server/repositories/data/shared.ts`             | Shared helpers: `userRefAt` (typed accessor per prefix — unknown prefix is a compile error), `userRefColumns` / `userRefJoin` (SQL fragment builders — the single source for the four `<prefix>_*` user-ref join columns and LEFT JOIN clauses, spliced verbatim by both `rows/mapper.ts` and `publish.ts`), `UserJoinColumns` (interface for all four `<prefix>_*` column groups — always present via LEFT JOIN, `null` when no user matched) |
-| `server/repositories/data/index.ts`              | Barrel for the whole `data/` directory                               |
+| File                                         | Owns                                                                                                                                                                                                                                                                                                                                                                                                                                           |
+| -------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `server/repositories/data/tables.ts`         | CRUD on `data_tables`: list (system tables first: pages → posts → components → layouts, then custom by `created_at`), get, get-by-slug (indexed via `data_tables_slug_active_idx`), create, update, delete (system-protected)                                                                                                                                                                                                                  |
+| `server/repositories/data/rows/read.ts`      | Hydrated read queries: `listDataRows`, `getDataRow`, `getDataRowMany` (one IN-list query for bulk validation), `getDataRowBySlug`, `countDataRows`, `listDataAuthorOptions`                                                                                                                                                                                                                                                                    |
+| `server/repositories/data/rows/mutations.ts` | Single-row writes: create, save draft, soft-delete, move to table, update status / author. `softDeleteDataRow` returns the narrow `DeletedRowSummary` (not a full `DataRow`) — the row's `deleted_at is null` filter makes re-reading impossible, and callers only need `id / tableId / slug / status / deletedAt`.                                                                                                                            |
+| `server/repositories/data/rows/bulk.ts`      | Transactional batch writes: `createDataRowMany`, `saveDataRowDraftMany`, `softDeleteDataRowMany`                                                                                                                                                                                                                                                                                                                                               |
+| `server/repositories/data/rows/filter.ts`    | Operator-object filter querying with pagination (`listDataRowsWithFilter`) — used by the plugin content surface                                                                                                                                                                                                                                                                                                                                |
+| `server/repositories/data/rows/search.ts`    | Cross-table slug search (`searchDataRows`) — used by the spotlight content provider                                                                                                                                                                                                                                                                                                                                                            |
+| `server/repositories/data/rows/schedule.ts`  | Scheduled-publish lifecycle: schedule, cancel, list due rows                                                                                                                                                                                                                                                                                                                                                                                   |
+| `server/repositories/data/rows/import.ts`    | Bundle-import upserts (id-preserving): `upsertDataRow`, `insertDataRowIfAbsent`, `replaceDataRow`                                                                                                                                                                                                                                                                                                                                              |
+| `server/repositories/data/rows/mapper.ts`    | Internal: hydrated SELECT builder + `DataRowRow → DataRow` mapper (not part of the public barrel)                                                                                                                                                                                                                                                                                                                                              |
+| `server/repositories/data/rows/index.ts`     | Barrel for the `rows/` directory                                                                                                                                                                                                                                                                                                                                                                                                               |
+| `server/repositories/data/publish.ts`        | Publish persistence (`persistDataRowPublish` writes `data_row_versions`) + public-route lookups; the orchestration (lock, artefacts, cache bump) is `server/publish/publishRow.ts`                                                                                                                                                                                                                                                             |
+| `server/repositories/data/shared.ts`         | Shared helpers: `userRefAt` (typed accessor per prefix — unknown prefix is a compile error), `userRefColumns` / `userRefJoin` (SQL fragment builders — the single source for the four `<prefix>_*` user-ref join columns and LEFT JOIN clauses, spliced verbatim by both `rows/mapper.ts` and `publish.ts`), `UserJoinColumns` (interface for all four `<prefix>_*` column groups — always present via LEFT JOIN, `null` when no user matched) |
+| `server/repositories/data/index.ts`          | Barrel for the whole `data/` directory                                                                                                                                                                                                                                                                                                                                                                                                         |
 
 All repository functions are dialect-naive ANSI SQL. JSON columns end in `_json`; the SQLite adapter auto-parses on read. See [docs/reference/database-dialects.md](../reference/database-dialects.md).
 
 ### Handlers
 
-| File                                          | Owns                                                                    |
-|-----------------------------------------------|-------------------------------------------------------------------------|
-| `server/handlers/cms/data/`                   | Generic `/admin/api/cms/data/tables[/:id]` + `/admin/api/cms/data/rows[/:id]` endpoints |
-| `server/handlers/cms/pages.ts`                | `pages` read endpoint (raw DataRow list for the editor's loader). Writes go through the transactional site-document save (`server/handlers/cms/siteDocument.ts`) with explicit deleted-row ids — a saving client can never delete a page a sibling session created concurrently, because deletion-by-omission no longer exists |
-| `server/handlers/cms/components.ts`           | `components`-specific endpoints                                        |
-| `server/handlers/cms/layouts.ts`              | `layouts` read endpoint for saved layout rows                          |
-| `server/handlers/cms/publish.ts`              | Publish a row, write a version, emit `publish.before/.html/.after` hooks |
+| File                                | Owns                                                                                                                                                                                                                                                                                                                           |
+| ----------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `server/handlers/cms/data/`         | Generic `/admin/api/cms/data/tables[/:id]` + `/admin/api/cms/data/rows[/:id]` endpoints                                                                                                                                                                                                                                        |
+| `server/handlers/cms/pages.ts`      | `pages` read endpoint (raw DataRow list for the editor's loader). Writes go through the transactional site-document save (`server/handlers/cms/siteDocument.ts`) with explicit deleted-row ids — a saving client can never delete a page a sibling session created concurrently, because deletion-by-omission no longer exists |
+| `server/handlers/cms/components.ts` | `components`-specific endpoints                                                                                                                                                                                                                                                                                                |
+| `server/handlers/cms/layouts.ts`    | `layouts` read endpoint for saved layout rows                                                                                                                                                                                                                                                                                  |
+| `server/handlers/cms/publish.ts`    | Publish a row, write a version, emit `publish.before/.html/.after` hooks                                                                                                                                                                                                                                                       |
 
 Pages, components, and layouts have their own typed endpoints (because the editor mutates trees/snapshots, not arbitrary cells), but they still **write to `data_rows`**.
 
@@ -191,15 +191,15 @@ Pages, components, and layouts have their own typed endpoints (because the edito
 
 The data store holds `cells_json` keyed by field id. The editor and publisher work with strongly-typed `Page` and `VisualComponent` objects. The conversion layer lives in `src/core/data/`:
 
-| File                            | Function                                       | Direction                                   |
-|---------------------------------|------------------------------------------------|---------------------------------------------|
-| `src/core/data/pageFromRow.ts`  | `pageFromRow(row, table)`                      | `DataRow` → `Page` (reads `title`, `slug`, `body`)  |
-| `src/core/data/pageFromRow.ts`  | `pageToCells(page)`                            | `Page` → `DataRowCells`                     |
-| `src/core/data/componentFromRow.ts` | `visualComponentFromRow(row)`              | `DataRow` → `VisualComponent`               |
-| `src/core/data/componentFromRow.ts` | `visualComponentToCells(vc)`               | `VisualComponent` → `DataRowCells`          |
-| `src/core/data/fields.ts`       | `normalizeDataTableFields(value)`              | Tolerant parse of `fields_json`             |
-| `src/core/data/fields.ts`       | `dataTableHasField(table, fieldId)`            |                                              |
-| `src/core/data/fields.ts`       | `isPostTypeBuiltInFieldId(fieldId)`            | Identify the reserved post-type field ids   |
+| File                                | Function                            | Direction                                          |
+| ----------------------------------- | ----------------------------------- | -------------------------------------------------- |
+| `src/core/data/pageFromRow.ts`      | `pageFromRow(row, table)`           | `DataRow` → `Page` (reads `title`, `slug`, `body`) |
+| `src/core/data/pageFromRow.ts`      | `pageToCells(page)`                 | `Page` → `DataRowCells`                            |
+| `src/core/data/componentFromRow.ts` | `visualComponentFromRow(row)`       | `DataRow` → `VisualComponent`                      |
+| `src/core/data/componentFromRow.ts` | `visualComponentToCells(vc)`        | `VisualComponent` → `DataRowCells`                 |
+| `src/core/data/fields.ts`           | `normalizeDataTableFields(value)`   | Tolerant parse of `fields_json`                    |
+| `src/core/data/fields.ts`           | `dataTableHasField(table, fieldId)` |                                                    |
+| `src/core/data/fields.ts`           | `isPostTypeBuiltInFieldId(fieldId)` | Identify the reserved post-type field ids          |
 
 Handlers use these — repositories don't. Repositories return raw `DataRow` objects (with `cells: DataRowCells`); handlers convert to `Page` / `VisualComponent` before returning to the client.
 
@@ -272,7 +272,7 @@ Plugins access content via the SDK's `api.cms.storage.collection(id)`:
 
 ```ts
 const posts = api.cms.storage.collection('posts')
-const rows  = await posts.list()
+const rows = await posts.list()
 ```
 
 See [docs/features/plugin-system.md](plugin-system.md). Note the collection id matches the `data_tables.slug`.
@@ -285,16 +285,16 @@ When a published row has a non-empty `data_tables.route_base`, the public URL is
 
 ## Forbidden patterns
 
-| Pattern                                                       | Use instead                                                  |
-|---------------------------------------------------------------|--------------------------------------------------------------|
-| Creating a new content table outside `data_tables`            | Add a row to `data_tables`. There are no other content tables. |
-| Reading `cells.foo as string`                                 | Use the readers in `src/core/data/cells.ts`                  |
-| Renaming or deleting a system table                           | Blocked at the repository layer; UI hides the affordance     |
-| Renaming a `builtIn: true` field on a postType                | Disable instead — the underlying field id is reserved        |
-| Writing into `cells_json` directly without re-denormalizing `slug` | Use `slugForTable(table, cells)` from `src/core/data/cells.ts`, then pass the result to the repository function |
-| Computing the published URL by stringing `id` together        | Use `routeBase` + the row's `slug`                           |
-| Skipping the version write on publish                         | `publishDataRow` always writes a `data_row_versions` row     |
-| Manually setting `status: 'published'` without going through the publish path | The publish path runs the renderer, writes a version, and fires hooks |
+| Pattern                                                                       | Use instead                                                                                                     |
+| ----------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------- |
+| Creating a new content table outside `data_tables`                            | Add a row to `data_tables`. There are no other content tables.                                                  |
+| Reading `cells.foo as string`                                                 | Use the readers in `src/core/data/cells.ts`                                                                     |
+| Renaming or deleting a system table                                           | Blocked at the repository layer; UI hides the affordance                                                        |
+| Renaming a `builtIn: true` field on a postType                                | Disable instead — the underlying field id is reserved                                                           |
+| Writing into `cells_json` directly without re-denormalizing `slug`            | Use `slugForTable(table, cells)` from `src/core/data/cells.ts`, then pass the result to the repository function |
+| Computing the published URL by stringing `id` together                        | Use `routeBase` + the row's `slug`                                                                              |
+| Skipping the version write on publish                                         | `publishDataRow` always writes a `data_row_versions` row                                                        |
+| Manually setting `status: 'published'` without going through the publish path | The publish path runs the renderer, writes a version, and fires hooks                                           |
 
 ---
 
@@ -302,19 +302,17 @@ When a published row has a non-empty `data_tables.route_base`, the public URL is
 
 Every successful content write fires one of three events on the hook bus alongside an `actor` field plugins can use to skip their own writes:
 
-| Event                       | Fires when                                                                 | Payload                                                                                  |
-|-----------------------------|-----------------------------------------------------------------------------|------------------------------------------------------------------------------------------|
-| `content.entry.created`     | A new row is inserted (admin CMS, plugin via `api.cms.content`)              | `{ tableSlug, entryId, actor }`                                                          |
-| `content.entry.updated`     | A row's cells / slug / status change (draft save, publish, schedule, move)  | `{ tableSlug, entryId, changedFieldIds, actor }`                                         |
-| `content.entry.deleted`     | A row is soft-deleted                                                       | `{ tableSlug, entryId, actor }`                                                          |
+| Event                   | Fires when                                                                 | Payload                                          |
+| ----------------------- | -------------------------------------------------------------------------- | ------------------------------------------------ |
+| `content.entry.created` | A new row is inserted (admin CMS, plugin via `api.cms.content`)            | `{ tableSlug, entryId, actor }`                  |
+| `content.entry.updated` | A row's cells / slug / status change (draft save, publish, schedule, move) | `{ tableSlug, entryId, changedFieldIds, actor }` |
+| `content.entry.deleted` | A row is soft-deleted                                                      | `{ tableSlug, entryId, actor }`                  |
 
 The `actor` shape:
 
 ```ts
 type ContentEntryActor =
-  | { kind: 'user'; userId: string }
-  | { kind: 'plugin'; pluginId: string }
-  | { kind: 'system' }  // schedulers, scheduled-publish tick
+  { kind: 'user'; userId: string } | { kind: 'plugin'; pluginId: string } | { kind: 'system' } // schedulers, scheduled-publish tick
 ```
 
 There's also one filter — `content.entry.cells` — that runs over the cell bag BEFORE persistence. All write paths — admin HTTP handlers (`rows.ts`, `tables.ts`) and the plugin `api.cms.content.*` surface — apply it via `applyContentEntryCellsFilter` from `server/publish/contentEvents.ts`. Plugins use it to validate, normalize, or auto-fill cells:

@@ -100,7 +100,9 @@ function makeEmitter(controller: ReadableStreamDefaultController<Uint8Array>): E
     send(event: ProgressEvent) {
       if (closed) return
       try {
-        controller.enqueue(encoder.encode(`event: ${event.kind}\ndata: ${JSON.stringify(event)}\n\n`))
+        controller.enqueue(
+          encoder.encode(`event: ${event.kind}\ndata: ${JSON.stringify(event)}\n\n`),
+        )
       } catch {
         closed = true
       }
@@ -108,7 +110,11 @@ function makeEmitter(controller: ReadableStreamDefaultController<Uint8Array>): E
     close() {
       if (closed) return
       closed = true
-      try { controller.close() } catch { /* already closed */ }
+      try {
+        controller.close()
+      } catch {
+        /* already closed */
+      }
     },
   }
 }
@@ -426,7 +432,9 @@ async function migrateOneVariant(
     // The row got rewritten under us — clean up the destination bytes we
     // just wrote so they don't leak. The next migration run will pick
     // up the row's new shape.
-    await dispatchDelete(dispatched.storageAdapterId, dispatched.storagePath).catch(() => {/* noop */})
+    await dispatchDelete(dispatched.storageAdapterId, dispatched.storagePath).catch(() => {
+      /* noop */
+    })
     throw new Error(
       `Variant row for "${container.id}" changed during migration; this variant will be migrated on the next run.`,
     )
@@ -451,13 +459,20 @@ async function migrateOneVariant(
 
 function extensionForMime(mime: string): string {
   switch (mime) {
-    case 'image/jpeg': return '.jpg'
-    case 'image/png': return '.png'
-    case 'image/gif': return '.gif'
-    case 'image/webp': return '.webp'
-    case 'image/avif': return '.avif'
-    case 'video/mp4': return '.mp4'
-    case 'video/webm': return '.webm'
+    case 'image/jpeg':
+      return '.jpg'
+    case 'image/png':
+      return '.png'
+    case 'image/gif':
+      return '.gif'
+    case 'image/webp':
+      return '.webp'
+    case 'image/avif':
+      return '.avif'
+    case 'video/mp4':
+      return '.mp4'
+    case 'video/webm':
+      return '.webm'
     default:
       // Unknown MIME (shouldn't happen — uploads are filtered to the
       // whitelist) — fall back to '.bin' so we never produce a
@@ -470,4 +485,3 @@ function extensionForMime(mime: string): string {
 // `mediaStorageReader.ts` linked to this module's call site — useful
 // when future cleanup wants to surface source-read errors distinctly
 // from upload errors in the UI.
-

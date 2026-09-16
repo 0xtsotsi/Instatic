@@ -59,30 +59,30 @@ It walks an ordered `routes` array of `RouteHandler` functions. Each handler ret
 
 ```ts
 const routes: readonly RouteHandler[] = [
-  tryServeHealth,                  // /health
-  tryServeAi,                      // /admin/api/ai/*         → server/ai/handlers/
-  tryServeCmsApi,                  // /admin/api/cms/*        → handlers/cms/index.ts
-  tryServeLoopRuntimeAsset,        // /_instatic/loop-runtime.js (fixed CMS asset)
-  tryServeLoop,                    // /_instatic/loop/*       → handlers/cms/loop.ts
-  tryServeHoleRuntimeAsset,        // /_instatic/hole-runtime.js (fixed CMS asset)
-  tryServeHole,                    // /_instatic/hole/*       → handlers/cms/hole.ts
-  tryServeModuleJsAsset,           // /_instatic/module-js/*  → handlers/cms/moduleJs.ts
-  tryServePublicForm,              // /_instatic/form/*       → forms/handler.ts
-  tryServeRuntimeAsset,            // /_instatic/assets/*     → published runtime assets
+  tryServeHealth, // /health
+  tryServeAi, // /admin/api/ai/*         → server/ai/handlers/
+  tryServeCmsApi, // /admin/api/cms/*        → handlers/cms/index.ts
+  tryServeLoopRuntimeAsset, // /_instatic/loop-runtime.js (fixed CMS asset)
+  tryServeLoop, // /_instatic/loop/*       → handlers/cms/loop.ts
+  tryServeHoleRuntimeAsset, // /_instatic/hole-runtime.js (fixed CMS asset)
+  tryServeHole, // /_instatic/hole/*       → handlers/cms/hole.ts
+  tryServeModuleJsAsset, // /_instatic/module-js/*  → handlers/cms/moduleJs.ts
+  tryServePublicForm, // /_instatic/form/*       → forms/handler.ts
+  tryServeRuntimeAsset, // /_instatic/assets/*     → published runtime assets
   tryServeRuntimePackageNamespace, // /_instatic/runtime/cache/<hash>/<...> → bun install workspace
-  tryServeSiteCssNamespace,        // /_instatic/css/*        → hashed CSS bundles
-  tryServeMediaRedirect,           // /_instatic/media/<adapterId>/<path> → 302 to signed read URL
-  tryServeStaticAsset,             // /assets/* → dist/ (admin app)
-  tryServeUpload,                  // /uploads/* → uploadsDir (with nosniff hardening)
-  tryServeAdminApp,                // /admin/* → dist/index.html (SPA fallback)
-  tryServePublicRoute,             // /<slug> OR /<route-base>/<row-slug>
-                                   //   → server/publish/publicRouter.ts
-                                   //   resolves to page snapshot OR data row + template,
-                                   //   live-renders, runs publish.html pipeline
-  trySetupRedirect,                // first-run redirect → /admin/setup
-  tryServeNotFoundPage,            // fall-through GET → site's 404 page (notFound
-                                   //   template; baked 404.html artefact, else live
-                                   //   render) with status 404; null → JSON 404
+  tryServeSiteCssNamespace, // /_instatic/css/*        → hashed CSS bundles
+  tryServeMediaRedirect, // /_instatic/media/<adapterId>/<path> → 302 to signed read URL
+  tryServeStaticAsset, // /assets/* → dist/ (admin app)
+  tryServeUpload, // /uploads/* → uploadsDir (with nosniff hardening)
+  tryServeAdminApp, // /admin/* → dist/index.html (SPA fallback)
+  tryServePublicRoute, // /<slug> OR /<route-base>/<row-slug>
+  //   → server/publish/publicRouter.ts
+  //   resolves to page snapshot OR data row + template,
+  //   live-renders, runs publish.html pipeline
+  trySetupRedirect, // first-run redirect → /admin/setup
+  tryServeNotFoundPage, // fall-through GET → site's 404 page (notFound
+  //   template; baked 404.html artefact, else live
+  //   render) with status 404; null → JSON 404
 ]
 ```
 
@@ -203,9 +203,13 @@ export async function handleFontsRoutes(
 Every per-route handler in `server/handlers/cms/` follows the same skeleton:
 
 ```ts
-async function handleListPages(req: Request, db: DbClient, _params: RouteParams): Promise<Response> {
+async function handleListPages(
+  req: Request,
+  db: DbClient,
+  _params: RouteParams,
+): Promise<Response> {
   const user = await requireCapability(req, db, 'site.read')
-  if (user instanceof Response) return user      // 401 / 403 — return early
+  if (user instanceof Response) return user // 401 / 403 — return early
 
   const rows = await listDataRows(db, 'pages')
   return jsonResponse({ rows })
@@ -219,7 +223,7 @@ async function handleUpdatePages(
   const user = await requireCapability(req, db, 'site.structure.edit')
   if (user instanceof Response) return user
 
-  const BodySchema = Type.Object({ pages: Type.Array(Type.Unknown()), /* … */ })
+  const BodySchema = Type.Object({ pages: Type.Array(Type.Unknown()) /* … */ })
   const body = await readValidatedBody(req, BodySchema)
   if (!body) return badRequest('Invalid request body')
   // … mutate via repository, return jsonResponse(…)
@@ -240,13 +244,13 @@ Conventions:
 
 `server/http.ts` owns the small set of cross-handler helpers:
 
-| Helper                           | Purpose                                                              |
-|----------------------------------|----------------------------------------------------------------------|
-| `jsonResponse(body, init?)`      | Returns a `Response` with `content-type: application/json`           |
+| Helper                           | Purpose                                                                                                                                                                                           |
+| -------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `jsonResponse(body, init?)`      | Returns a `Response` with `content-type: application/json`                                                                                                                                        |
 | `readValidatedBody(req, schema)` | Parses the request body and validates it against a TypeBox schema. Returns the typed value on success, `null` on JSON parse failure or schema mismatch. Callers return `badRequest(msg)` on null. |
-| `methodNotAllowed()`             | `405` with `{ error: 'Method not allowed' }`                         |
-| `badRequest(message)`            | `400` with `{ error: message }`                                      |
-| `setCookieHeader(res, value)`    | Appends a `Set-Cookie` header                                        |
+| `methodNotAllowed()`             | `405` with `{ error: 'Method not allowed' }`                                                                                                                                                      |
+| `badRequest(message)`            | `400` with `{ error: message }`                                                                                                                                                                   |
+| `setCookieHeader(res, value)`    | Appends a `Set-Cookie` header                                                                                                                                                                     |
 
 `readValidatedBody` is the canonical body parser: it parses JSON and validates the shape against a TypeBox schema in one step, so handlers receive a fully typed value or return `badRequest` immediately.
 
@@ -254,10 +258,10 @@ Conventions:
 
 `server/binary.ts` provides two helpers for safely handing `Uint8Array` bytes to `Response` bodies and worker `postMessage` transfers:
 
-| Helper                             | Purpose                                                              |
-|------------------------------------|----------------------------------------------------------------------|
+| Helper                             | Purpose                                                                                                                                                                                                                                                                       |
+| ---------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `toArrayBuffer(bytes: Uint8Array)` | Copies the view's logical range into a fresh, exactly-sized `ArrayBuffer`. Required because a `Uint8Array` is only a view — its `.buffer` may be larger (pooled or sliced backing store) and resolves to `ArrayBuffer \| SharedArrayBuffer` which transfer/body slots reject. |
-| `binaryResponse(bytes, init?)`     | Convenience wrapper: calls `toArrayBuffer` then wraps the result in a `new Response(...)`. Use for every "serve raw bytes" response in route handlers. |
+| `binaryResponse(bytes, init?)`     | Convenience wrapper: calls `toArrayBuffer` then wraps the result in a `new Response(...)`. Use for every "serve raw bytes" response in route handlers.                                                                                                                        |
 
 Use `binaryResponse` whenever a route handler returns binary content (runtime assets, CSS bundles, images). Use `toArrayBuffer` when bytes must cross a worker `postMessage` boundary as a transferable.
 
@@ -269,17 +273,17 @@ Use `binaryResponse` whenever a route handler returns binary content (runtime as
 
 `server/auth/` owns the entire authentication surface.
 
-| File              | Owns                                                                       |
-|-------------------|----------------------------------------------------------------------------|
-| `tokens.ts`       | Session cookie name, token hashing                                         |
-| `sessions.ts`     | Session lookup, MFA gate, step-up timer                                    |
-| `authz.ts`        | `requireAuthenticatedUser`, `requireCapability`, `requireAnyCapability`    |
-| `capabilities.ts` | `CoreCapability` enum and per-capability membership rules                  |
-| `lockout.ts`      | Failed-login lockout policy                                                |
-| `mfa.ts`          | TOTP enrollment, verification                                              |
-| `rateLimit.ts`    | Token-bucket rate limiters                                                 |
+| File              | Owns                                                                                                 |
+| ----------------- | ---------------------------------------------------------------------------------------------------- |
+| `tokens.ts`       | Session cookie name, token hashing                                                                   |
+| `sessions.ts`     | Session lookup, MFA gate, step-up timer                                                              |
+| `authz.ts`        | `requireAuthenticatedUser`, `requireCapability`, `requireAnyCapability`                              |
+| `capabilities.ts` | `CoreCapability` enum and per-capability membership rules                                            |
+| `lockout.ts`      | Failed-login lockout policy                                                                          |
+| `mfa.ts`          | TOTP enrollment, verification                                                                        |
+| `rateLimit.ts`    | Token-bucket rate limiters                                                                           |
 | `security.ts`     | `isStateChangingMethod`, `originAllowed`, `configurePublicOrigins`, `DEV_ORIGIN_ALLOWLIST`, IP stamp |
-| `deviceLabel.ts`  | Device-fingerprint label for the sessions panel                            |
+| `deviceLabel.ts`  | Device-fingerprint label for the sessions panel                                                      |
 
 ### The session flow
 
@@ -316,7 +320,7 @@ already-resolved user (see below). No handler should hydrate the session twice.
 
 ```ts
 const user = await requireCapability(req, db, 'site.read')
-if (user instanceof Response) return user   // 401 or 403 already encoded
+if (user instanceof Response) return user // 401 or 403 already encoded
 // ... user is now AuthUser
 ```
 
@@ -344,27 +348,27 @@ Step-up is required by default with a 15-minute window, can be configured per us
 
 All SQL lives in `server/repositories/`. Each file owns one resource:
 
-| File                       | Owns                                              |
-|----------------------------|---------------------------------------------------|
-| `audit.ts`                 | Audit log writes and queries                      |
-| `data/`                    | `data_tables` + `data_rows` (the universal store) |
-| `fonts.ts`                 | Font assets                                       |
-| `loginAttempts.ts`         | Failed-login records for lockout                  |
-| `media.ts`                 | Media assets                                      |
-| `mediaFolders.ts`          | Folder tree for media                             |
-| `mediaMigration.ts`        | Migration of media between storage adapters      |
-| `mediaStorageAdapters.ts`  | Registered storage backends                       |
-| `pluginSchedules.ts`       | Plugin-registered scheduled jobs                  |
-| `plugins.ts`               | Installed plugins + lifecycle state               |
-| `publish.ts`               | Published-page roster: snapshot getters + the transactional publish write (orchestration lives in `server/publish/publishSite.ts`) |
-| `roles.ts`                 | System and custom roles                           |
-| `runtimeAsset.ts`          | Published runtime assets (JS, CSS, fonts)         |
-| `sessions.ts`              | User sessions                                     |
-| `setup.ts`                 | Setup wizard state (`isSetup`, first-run owner)   |
-| `site.ts`                  | The single site shell row                         |
-| `syncSequence.ts`          | Site-global sync sequence counter (multi-admin sync substrate — stamped on every row the site-document save writes or deletes) |
-| `userPreferences.ts`       | Per-user editor preferences                       |
-| `users.ts`                 | Users + auth fields                               |
+| File                      | Owns                                                                                                                               |
+| ------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
+| `audit.ts`                | Audit log writes and queries                                                                                                       |
+| `data/`                   | `data_tables` + `data_rows` (the universal store)                                                                                  |
+| `fonts.ts`                | Font assets                                                                                                                        |
+| `loginAttempts.ts`        | Failed-login records for lockout                                                                                                   |
+| `media.ts`                | Media assets                                                                                                                       |
+| `mediaFolders.ts`         | Folder tree for media                                                                                                              |
+| `mediaMigration.ts`       | Migration of media between storage adapters                                                                                        |
+| `mediaStorageAdapters.ts` | Registered storage backends                                                                                                        |
+| `pluginSchedules.ts`      | Plugin-registered scheduled jobs                                                                                                   |
+| `plugins.ts`              | Installed plugins + lifecycle state                                                                                                |
+| `publish.ts`              | Published-page roster: snapshot getters + the transactional publish write (orchestration lives in `server/publish/publishSite.ts`) |
+| `roles.ts`                | System and custom roles                                                                                                            |
+| `runtimeAsset.ts`         | Published runtime assets (JS, CSS, fonts)                                                                                          |
+| `sessions.ts`             | User sessions                                                                                                                      |
+| `setup.ts`                | Setup wizard state (`isSetup`, first-run owner)                                                                                    |
+| `site.ts`                 | The single site shell row                                                                                                          |
+| `syncSequence.ts`         | Site-global sync sequence counter (multi-admin sync substrate — stamped on every row the site-document save writes or deletes)     |
+| `userPreferences.ts`      | Per-user editor preferences                                                                                                        |
+| `users.ts`                | Users + auth fields                                                                                                                |
 
 ### Repository rules
 
@@ -503,23 +507,23 @@ Authors don't toggle anything. `src/core/publisher/dynamicDetection.ts:findDynam
 
 Server-side publishing helpers live in `server/publish/`:
 
-| File                              | Role                                                                |
-|-----------------------------------|---------------------------------------------------------------------|
-| `publicRouter.ts`                 | Visitor URL → resolution → Response. Composes Layer A disk-read + Layer B cache. Single entry for every visitor HTML request. |
-| `staticArtefact.ts`               | Layer A. Two-slot symlink swap (`current → slot-{a,b}`), atomic per-file `tmp + rename`, slot-aware read/write/purge. |
-| `renderCache.ts`                  | Layer B. Bounded LRU keyed by `(urlPath, canonicalQuery)`, entries versioned. Single-flight on cache miss. `bumpPublishVersion()` invalidates lazily; version captured at render start so mid-flight publishes discard without caching stale HTML. |
-| `holeRuntime.ts`                  | Layer C client-side runtime (~1.1 KB). Exports `runInstaticHoleRuntime` (TS source) and `HOLE_RUNTIME_JS` (IIFE-serialized for browser delivery). |
-| `publishSite.ts`                  | Full-site publish orchestrator (`publishDraftSite`): phase-1 builds, the short `persistSitePublish` transaction, Layer A bake + slot swap, Layer B bump. |
-| `publishRow.ts`                   | Per-row publish orchestrator (`publishDataRow`) + `removeDataRowArtefact`: persist via the data repository, in-place artefact update, Layer B bump. |
-| `publicRenderer.ts`               | `renderPublishedSnapshot`, `renderPublishedDataRowTemplate` — snapshot-aware wrappers around `publishPage`. |
-| `publishedHtmlPipeline.ts`        | Plugin frontend-asset injection + `publish.html` filter chain. Runs at publish time for every baked page (complete doc or hole shell); also runs in the Layer B factory for query-string / live renders (cached). |
-| `siteCssBundle.ts`                | Per-site reset / framework / style CSS bundles (hashed filenames).  |
-| `republish.ts`                    | Bulk re-publish (after a settings change touches all pages).        |
-| `publishScheduler.ts`             | Scheduled publish jobs.                                             |
-| `frontendInjections.ts`           | Plugin-contributed frontend scripts injected into published HTML.   |
-| `mediaPresentation.ts`            | `<picture>` / `<img srcset>` materialization at publish time.       |
-| `mediaPrefetch.ts`, `loopPrefetch.ts` | Pre-warm caches needed by published pages.                      |
-| `runtime/packageServer.ts`        | Serve per-site `bun install` workspace under `/_instatic/runtime/cache/`. |
+| File                                  | Role                                                                                                                                                                                                                                               |
+| ------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `publicRouter.ts`                     | Visitor URL → resolution → Response. Composes Layer A disk-read + Layer B cache. Single entry for every visitor HTML request.                                                                                                                      |
+| `staticArtefact.ts`                   | Layer A. Two-slot symlink swap (`current → slot-{a,b}`), atomic per-file `tmp + rename`, slot-aware read/write/purge.                                                                                                                              |
+| `renderCache.ts`                      | Layer B. Bounded LRU keyed by `(urlPath, canonicalQuery)`, entries versioned. Single-flight on cache miss. `bumpPublishVersion()` invalidates lazily; version captured at render start so mid-flight publishes discard without caching stale HTML. |
+| `holeRuntime.ts`                      | Layer C client-side runtime (~1.1 KB). Exports `runInstaticHoleRuntime` (TS source) and `HOLE_RUNTIME_JS` (IIFE-serialized for browser delivery).                                                                                                  |
+| `publishSite.ts`                      | Full-site publish orchestrator (`publishDraftSite`): phase-1 builds, the short `persistSitePublish` transaction, Layer A bake + slot swap, Layer B bump.                                                                                           |
+| `publishRow.ts`                       | Per-row publish orchestrator (`publishDataRow`) + `removeDataRowArtefact`: persist via the data repository, in-place artefact update, Layer B bump.                                                                                                |
+| `publicRenderer.ts`                   | `renderPublishedSnapshot`, `renderPublishedDataRowTemplate` — snapshot-aware wrappers around `publishPage`.                                                                                                                                        |
+| `publishedHtmlPipeline.ts`            | Plugin frontend-asset injection + `publish.html` filter chain. Runs at publish time for every baked page (complete doc or hole shell); also runs in the Layer B factory for query-string / live renders (cached).                                  |
+| `siteCssBundle.ts`                    | Per-site reset / framework / style CSS bundles (hashed filenames).                                                                                                                                                                                 |
+| `republish.ts`                        | Bulk re-publish (after a settings change touches all pages).                                                                                                                                                                                       |
+| `publishScheduler.ts`                 | Scheduled publish jobs.                                                                                                                                                                                                                            |
+| `frontendInjections.ts`               | Plugin-contributed frontend scripts injected into published HTML.                                                                                                                                                                                  |
+| `mediaPresentation.ts`                | `<picture>` / `<img srcset>` materialization at publish time.                                                                                                                                                                                      |
+| `mediaPrefetch.ts`, `loopPrefetch.ts` | Pre-warm caches needed by published pages.                                                                                                                                                                                                         |
+| `runtime/packageServer.ts`            | Serve per-site `bun install` workspace under `/_instatic/runtime/cache/`.                                                                                                                                                                          |
 
 Plus the hole endpoint at `server/handlers/cms/hole.ts` — registered in the router BEFORE `tryServePublicRoute` so `/_instatic/hole/*` requests never fall through to slug resolution.
 
@@ -551,11 +555,11 @@ See [docs/features/plugin-system.md](features/plugin-system.md) for the full fea
 
 Three static handlers, in order:
 
-| Handler                | Owns                                                                  |
-|------------------------|-----------------------------------------------------------------------|
-| `tryServeStaticAsset`  | `/assets/*` from `dist/` (Vite-built admin SPA assets)                |
-| `tryServeUpload`       | `/uploads/*` from `uploadsDir` with `hardenUploadResponse` (nosniff, attachment for non-inert MIMEs, CORS for plugin bundles) |
-| `tryServeAdminApp`     | `/admin/*` — serves the admin shell from `dist/index.html` with path-specific injections (see below) |
+| Handler               | Owns                                                                                                                          |
+| --------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
+| `tryServeStaticAsset` | `/assets/*` from `dist/` (Vite-built admin SPA assets)                                                                        |
+| `tryServeUpload`      | `/uploads/*` from `uploadsDir` with `hardenUploadResponse` (nosniff, attachment for non-inert MIMEs, CORS for plugin bundles) |
+| `tryServeAdminApp`    | `/admin/*` — serves the admin shell from `dist/index.html` with path-specific injections (see below)                          |
 
 `server/static.ts` owns all three. Key behaviors:
 

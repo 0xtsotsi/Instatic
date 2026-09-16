@@ -95,7 +95,12 @@ function renderRowsTable(rows: BenchRow[]): string {
     for (const k of metricCols) cells.push(String(row.metrics[k] ?? ''))
     lines.push(`| ${cells.map(escapeCell).join(' | ')} |`)
     if (row.notes) {
-      lines.push(`| _${escapeCell(row.notes)}_ | ${headers.slice(1).map(() => '').join(' | ')} |`)
+      lines.push(
+        `| _${escapeCell(row.notes)}_ | ${headers
+          .slice(1)
+          .map(() => '')
+          .join(' | ')} |`,
+      )
     }
   }
   return lines.join('\n')

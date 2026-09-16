@@ -29,8 +29,12 @@ const CadenceSchema = Type.Union([
       interval: Type.Literal('weekly'),
       at: Type.String({ pattern: TimeOfDayPattern }),
       day: Type.Union([
-        Type.Literal('mon'), Type.Literal('tue'), Type.Literal('wed'),
-        Type.Literal('thu'), Type.Literal('fri'), Type.Literal('sat'),
+        Type.Literal('mon'),
+        Type.Literal('tue'),
+        Type.Literal('wed'),
+        Type.Literal('thu'),
+        Type.Literal('fri'),
+        Type.Literal('sat'),
         Type.Literal('sun'),
       ]),
     },
@@ -63,11 +67,7 @@ export const ScheduleRegisterArgSchema = Type.Object(
   {
     scheduleId: Type.String({ minLength: 1, maxLength: 120 }),
     cadence: CadenceSchema,
-    overlap: Type.Union([
-      Type.Literal('skip'),
-      Type.Literal('queue'),
-      Type.Literal('parallel'),
-    ]),
+    overlap: Type.Union([Type.Literal('skip'), Type.Literal('queue'), Type.Literal('parallel')]),
     // Per-schedule wall-clock budget. Bounded so a plugin can't pin a
     // worker indefinitely; longer work should chunk and yield.
     maxDurationMs: Type.Integer({ minimum: 100, maximum: 5 * 60_000 }),

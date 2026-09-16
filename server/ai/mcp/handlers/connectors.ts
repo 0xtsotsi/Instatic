@@ -99,7 +99,10 @@ async function handleCreate(req: Request, db: DbClient): Promise<Response> {
     return jsonResponse({ connector: toConnectorView(record), token }, { status: 201 })
   } catch (err) {
     console.error('[ai:mcp] failed to create connector:', err)
-    return jsonResponse({ error: getErrorMessage(err, 'Failed to create connector.') }, { status: 500 })
+    return jsonResponse(
+      { error: getErrorMessage(err, 'Failed to create connector.') },
+      { status: 500 },
+    )
   }
 }
 

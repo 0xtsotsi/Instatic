@@ -84,37 +84,37 @@ scripts/        Build, dev, icon sync, benchmark, audit report scripts
 
 The repo is organized by responsibility, not by feature. Every file has one reason to exist.
 
-| Layer                        | Lives in                              | Owns                                                                 |
-|------------------------------|---------------------------------------|----------------------------------------------------------------------|
-| HTTP & routing               | `server/router.ts`, `server/http.ts`  | Request dispatch, body parsing, error envelopes                      |
-| CMS endpoints                | `server/handlers/cms/*.ts`            | Per-resource handlers (pages, posts, components, media, plugins, …)  |
-| Auth & sessions              | `server/auth/*`                       | Session validation, capability checks, login flow                    |
-| Repositories                 | `server/repositories/*.ts`            | Database access; dialect-naive ANSI SQL only                         |
-| Database adapters            | `server/db/postgres.ts`, `sqlite.ts`  | Engine-specific `DbClient` implementation                            |
-| Migrations                   | `server/db/migrations-*.ts`           | Schema in both dialects, parity-gated                                |
-| Publisher                    | `src/core/publisher/*`                | Page tree → clean HTML/CSS (`publishPage`, deterministic, no host I/O). Includes `dynamicDetection.ts`, the single walker for the auto-detection rules that power Layer A shell-vs-complete bakes and Layer C holes. |
-| Public-route surface         | `server/publish/publicRouter.ts`      | Resolve URL → page snapshot or data row + template. Layer A disk fast-path + Layer B in-memory LRU live here. |
-| Static artefact IO           | `server/publish/staticArtefact.ts`    | Layer A: two-slot symlink swap, atomic per-file rename, slot-aware read/write/purge. |
-| Render cache                 | `server/publish/renderCache.ts`       | Layer B: bounded LRU keyed by `(urlPath, queryString)`, where public page renders pass `canonicalRenderQuery(...)` rather than the raw URL search string. Each entry is versioned. Single-flight, `bumpPublishVersion()` invalidates lazily; version captured at render start so a publish landing mid-render discards the result rather than caching stale HTML. |
-| Server-island runtime        | `server/publish/holeRuntime.ts`       | Layer C: ~1.1 KB hand-written `IntersectionObserver` runtime served at `/_instatic/hole-runtime.js`. |
-| Hole endpoint                | `server/handlers/cms/hole.ts`         | `GET /_instatic/hole/<nodeId>?v=<publishVersion>&u=<page-url>` renders one node subtree with the originating page route/query; shared responses cache via Layer B, per-visitor holes bypass it with `Cache-Control: no-store`. |
-| Plugin SDK                   | `src/core/plugin-sdk/*`               | Author-facing API + `instatic-plugin` CLI                                  |
-| Plugin runtime (host)        | `src/core/plugins/*`                  | In-process plugin lifecycle: install/activate/uninstall              |
-| Plugin sandbox (worker)      | `server/plugins/*`                    | QuickJS-WASM execution of plugin server code + module packs          |
-| Image-variant worker         | `server/handlers/cms/imageVariant*`   | `Bun.Worker` pool running sharp + blurhash off the main thread       |
-| Page tree primitive          | `src/core/page-tree/*`                | `NodeTree<TNode>` + tree-agnostic mutations                          |
-| Framework engine             | `src/core/framework/*`                | Color token CSS generation, fluid typography/spacing scales, CSS variable output; imports from `@core/framework-schema` for persisted shapes and from `@core/css-sanitize` for value sanitization |
-| Framework schemas (leaf)     | `src/core/framework-schema/*`         | Pure TypeBox schemas + derived types for persisted framework settings (`FrameworkSettings`, `GeneratedClassMetadata`, etc.); no dependency on the engine or page-tree |
-| CSS value sanitiser (leaf)   | `src/core/css-sanitize/*`             | Single canonical `sanitiseCssValue` — dependency-free leaf shared by `@core/publisher` and `@core/framework`; blocks `expression()` / `javascript:` / `{}` / `</` injection at the CSS value level |
-| Visual components            | `src/core/visualComponents/*`         | VC tree shape, slot synchronization, recursion checks                |
-| Persistence (client-side)    | `src/core/persistence/*`              | HTTP envelopes, response schemas, site validation                    |
-| Validation utilities         | `src/core/utils/*`                    | TypeBox helpers, JSON boundary helpers, sanitization                 |
-| Admin shell                  | `src/admin/*` (excluding `pages/site/`)| Auth, routing, workspaces, plugin host UI, modals                   |
-| Visual editor                | `src/admin/pages/site/*`              | Canvas, panels, toolbar, editor store                                |
-| First-party modules          | `src/modules/*`                       | Built-in block modules (container, text, image, …)                   |
-| UI primitives                | `src/ui/components/*`                 | Button, Input, Switch, Tree, etc. — shared across admin + editor     |
-| Design tokens                | `src/styles/globals.css`              | All CSS custom properties                                            |
-| Architecture gates           | `src/__tests__/architecture/*.test.ts`| Structural rules executed as part of `bun test`                      |
+| Layer                      | Lives in                                | Owns                                                                                                                                                                                                                                                                                                                                                              |
+| -------------------------- | --------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| HTTP & routing             | `server/router.ts`, `server/http.ts`    | Request dispatch, body parsing, error envelopes                                                                                                                                                                                                                                                                                                                   |
+| CMS endpoints              | `server/handlers/cms/*.ts`              | Per-resource handlers (pages, posts, components, media, plugins, …)                                                                                                                                                                                                                                                                                               |
+| Auth & sessions            | `server/auth/*`                         | Session validation, capability checks, login flow                                                                                                                                                                                                                                                                                                                 |
+| Repositories               | `server/repositories/*.ts`              | Database access; dialect-naive ANSI SQL only                                                                                                                                                                                                                                                                                                                      |
+| Database adapters          | `server/db/postgres.ts`, `sqlite.ts`    | Engine-specific `DbClient` implementation                                                                                                                                                                                                                                                                                                                         |
+| Migrations                 | `server/db/migrations-*.ts`             | Schema in both dialects, parity-gated                                                                                                                                                                                                                                                                                                                             |
+| Publisher                  | `src/core/publisher/*`                  | Page tree → clean HTML/CSS (`publishPage`, deterministic, no host I/O). Includes `dynamicDetection.ts`, the single walker for the auto-detection rules that power Layer A shell-vs-complete bakes and Layer C holes.                                                                                                                                              |
+| Public-route surface       | `server/publish/publicRouter.ts`        | Resolve URL → page snapshot or data row + template. Layer A disk fast-path + Layer B in-memory LRU live here.                                                                                                                                                                                                                                                     |
+| Static artefact IO         | `server/publish/staticArtefact.ts`      | Layer A: two-slot symlink swap, atomic per-file rename, slot-aware read/write/purge.                                                                                                                                                                                                                                                                              |
+| Render cache               | `server/publish/renderCache.ts`         | Layer B: bounded LRU keyed by `(urlPath, queryString)`, where public page renders pass `canonicalRenderQuery(...)` rather than the raw URL search string. Each entry is versioned. Single-flight, `bumpPublishVersion()` invalidates lazily; version captured at render start so a publish landing mid-render discards the result rather than caching stale HTML. |
+| Server-island runtime      | `server/publish/holeRuntime.ts`         | Layer C: ~1.1 KB hand-written `IntersectionObserver` runtime served at `/_instatic/hole-runtime.js`.                                                                                                                                                                                                                                                              |
+| Hole endpoint              | `server/handlers/cms/hole.ts`           | `GET /_instatic/hole/<nodeId>?v=<publishVersion>&u=<page-url>` renders one node subtree with the originating page route/query; shared responses cache via Layer B, per-visitor holes bypass it with `Cache-Control: no-store`.                                                                                                                                    |
+| Plugin SDK                 | `src/core/plugin-sdk/*`                 | Author-facing API + `instatic-plugin` CLI                                                                                                                                                                                                                                                                                                                         |
+| Plugin runtime (host)      | `src/core/plugins/*`                    | In-process plugin lifecycle: install/activate/uninstall                                                                                                                                                                                                                                                                                                           |
+| Plugin sandbox (worker)    | `server/plugins/*`                      | QuickJS-WASM execution of plugin server code + module packs                                                                                                                                                                                                                                                                                                       |
+| Image-variant worker       | `server/handlers/cms/imageVariant*`     | `Bun.Worker` pool running sharp + blurhash off the main thread                                                                                                                                                                                                                                                                                                    |
+| Page tree primitive        | `src/core/page-tree/*`                  | `NodeTree<TNode>` + tree-agnostic mutations                                                                                                                                                                                                                                                                                                                       |
+| Framework engine           | `src/core/framework/*`                  | Color token CSS generation, fluid typography/spacing scales, CSS variable output; imports from `@core/framework-schema` for persisted shapes and from `@core/css-sanitize` for value sanitization                                                                                                                                                                 |
+| Framework schemas (leaf)   | `src/core/framework-schema/*`           | Pure TypeBox schemas + derived types for persisted framework settings (`FrameworkSettings`, `GeneratedClassMetadata`, etc.); no dependency on the engine or page-tree                                                                                                                                                                                             |
+| CSS value sanitiser (leaf) | `src/core/css-sanitize/*`               | Single canonical `sanitiseCssValue` — dependency-free leaf shared by `@core/publisher` and `@core/framework`; blocks `expression()` / `javascript:` / `{}` / `</` injection at the CSS value level                                                                                                                                                                |
+| Visual components          | `src/core/visualComponents/*`           | VC tree shape, slot synchronization, recursion checks                                                                                                                                                                                                                                                                                                             |
+| Persistence (client-side)  | `src/core/persistence/*`                | HTTP envelopes, response schemas, site validation                                                                                                                                                                                                                                                                                                                 |
+| Validation utilities       | `src/core/utils/*`                      | TypeBox helpers, JSON boundary helpers, sanitization                                                                                                                                                                                                                                                                                                              |
+| Admin shell                | `src/admin/*` (excluding `pages/site/`) | Auth, routing, workspaces, plugin host UI, modals                                                                                                                                                                                                                                                                                                                 |
+| Visual editor              | `src/admin/pages/site/*`                | Canvas, panels, toolbar, editor store                                                                                                                                                                                                                                                                                                                             |
+| First-party modules        | `src/modules/*`                         | Built-in block modules (container, text, image, …)                                                                                                                                                                                                                                                                                                                |
+| UI primitives              | `src/ui/components/*`                   | Button, Input, Switch, Tree, etc. — shared across admin + editor                                                                                                                                                                                                                                                                                                  |
+| Design tokens              | `src/styles/globals.css`                | All CSS custom properties                                                                                                                                                                                                                                                                                                                                         |
+| Architecture gates         | `src/__tests__/architecture/*.test.ts`  | Structural rules executed as part of `bun test`                                                                                                                                                                                                                                                                                                                   |
 
 ---
 
@@ -161,13 +161,13 @@ Everything content-shaped lives in two tables.
 
 A user-defined collection — a "post type" in WordPress terms. Has a `kind`:
 
-| `kind`       | Used for                                      |
-|--------------|-----------------------------------------------|
-| `postType`   | Blog posts, products, anything list-like      |
-| `data`       | Plain user-defined data tables                |
-| `page`       | Stand-alone pages with URLs                   |
-| `component`  | Visual components (reusable subtrees)         |
-| `layout`     | Saved layout snapshots                        |
+| `kind`      | Used for                                 |
+| ----------- | ---------------------------------------- |
+| `postType`  | Blog posts, products, anything list-like |
+| `data`      | Plain user-defined data tables           |
+| `page`      | Stand-alone pages with URLs              |
+| `component` | Visual components (reusable subtrees)    |
+| `layout`    | Saved layout snapshots                   |
 
 The four system tables (`posts`, `pages`, `components`, `layouts`) are seeded by migrations and are locked from rename/delete.
 
@@ -324,16 +324,16 @@ See [docs/editor.md](editor.md) for the visual editor deep-dive.
 
 The codebase enforces "validate, then trust": every untyped input goes through a [TypeBox](https://github.com/sinclairzx81/typebox) schema. Inside the boundary, code trusts the parsed value.
 
-| Boundary                             | Helper                                                | Lives in                              |
-|--------------------------------------|-------------------------------------------------------|---------------------------------------|
-| HTTP request (client, canonical JSON) | `apiRequest(path, { schema, … })` → throws `ApiError` | `src/core/http/apiClient.ts`          |
-| HTTP request (client, binary body)   | `apiBlobRequest(path, …)` → `Blob` / throws `ApiError` | `src/core/http/apiClient.ts`          |
-| HTTP response from a held `Response`  | `readEnvelope(res, Schema, fallbackMessage)`          | `src/core/http/apiClient.ts`          |
-| Raw JSON response validation         | `parseJsonResponse(res, Schema)`                      | `src/core/utils/jsonValidate.ts`      |
-| `JSON.parse` of persisted strings    | `safeParseJson(raw, Schema)` / `parseJsonWithFallback`| `src/core/utils/jsonValidate.ts`      |
-| Request body (server)                | TypeBox schema in handler                             | `server/http.ts` helpers              |
-| Plugin manifest                      | `parsePluginManifest`                                 | `src/core/plugins/manifest.ts`        |
-| Site document on load                | `validateSite`                                        | `src/core/persistence/validate.ts`    |
+| Boundary                              | Helper                                                 | Lives in                           |
+| ------------------------------------- | ------------------------------------------------------ | ---------------------------------- |
+| HTTP request (client, canonical JSON) | `apiRequest(path, { schema, … })` → throws `ApiError`  | `src/core/http/apiClient.ts`       |
+| HTTP request (client, binary body)    | `apiBlobRequest(path, …)` → `Blob` / throws `ApiError` | `src/core/http/apiClient.ts`       |
+| HTTP response from a held `Response`  | `readEnvelope(res, Schema, fallbackMessage)`           | `src/core/http/apiClient.ts`       |
+| Raw JSON response validation          | `parseJsonResponse(res, Schema)`                       | `src/core/utils/jsonValidate.ts`   |
+| `JSON.parse` of persisted strings     | `safeParseJson(raw, Schema)` / `parseJsonWithFallback` | `src/core/utils/jsonValidate.ts`   |
+| Request body (server)                 | TypeBox schema in handler                              | `server/http.ts` helpers           |
+| Plugin manifest                       | `parsePluginManifest`                                  | `src/core/plugins/manifest.ts`     |
+| Site document on load                 | `validateSite`                                         | `src/core/persistence/validate.ts` |
 
 Domain types come from `Static<typeof Schema>`. There is no parallel `interface Foo` next to `FooSchema`. **Schemas are the source of truth.**
 
@@ -349,20 +349,20 @@ See [docs/reference/typebox-patterns.md](reference/typebox-patterns.md) for the 
 
 When making a change, this table answers "where does it go?"
 
-| You're adding…                                         | Put it in                                                  |
-|--------------------------------------------------------|------------------------------------------------------------|
-| A new HTTP endpoint                                    | `server/handlers/cms/<resource>.ts` + route in `router.ts` |
-| A new database table                                   | Both `server/db/migrations-pg.ts` and `migrations-sqlite.ts` (same ID) |
-| A new repository function                              | `server/repositories/<resource>.ts`                        |
-| A new editor mutation                                  | `src/core/page-tree/mutations.ts` (tree-agnostic, takes `NodeTree`) |
-| A new tree-mutation store action                       | `src/admin/pages/site/store/slices/site/nodeActions.ts` (one-liner calling `mutateActiveTree`) |
-| A new first-party module (block)                       | `src/modules/<module-name>/`                               |
-| A new UI primitive                                     | `src/ui/components/<Component>/`                           |
-| A new plugin SDK surface                               | `src/core/plugin-sdk/` + update `examples/plugins/template`|
-| A new design token                                     | `src/styles/globals.css`                                   |
-| A new icon                                             | Import from `pixel-art-icons/icons/<name>`, then `bun run icons:sync` |
-| A new admin route                                      | `src/admin/pages/<route>/` + register in `src/admin/router.tsx` |
-| A new structural rule                                  | `src/__tests__/architecture/<rule>.test.ts`                |
+| You're adding…                   | Put it in                                                                                      |
+| -------------------------------- | ---------------------------------------------------------------------------------------------- |
+| A new HTTP endpoint              | `server/handlers/cms/<resource>.ts` + route in `router.ts`                                     |
+| A new database table             | Both `server/db/migrations-pg.ts` and `migrations-sqlite.ts` (same ID)                         |
+| A new repository function        | `server/repositories/<resource>.ts`                                                            |
+| A new editor mutation            | `src/core/page-tree/mutations.ts` (tree-agnostic, takes `NodeTree`)                            |
+| A new tree-mutation store action | `src/admin/pages/site/store/slices/site/nodeActions.ts` (one-liner calling `mutateActiveTree`) |
+| A new first-party module (block) | `src/modules/<module-name>/`                                                                   |
+| A new UI primitive               | `src/ui/components/<Component>/`                                                               |
+| A new plugin SDK surface         | `src/core/plugin-sdk/` + update `examples/plugins/template`                                    |
+| A new design token               | `src/styles/globals.css`                                                                       |
+| A new icon                       | Import from `pixel-art-icons/icons/<name>`, then `bun run icons:sync`                          |
+| A new admin route                | `src/admin/pages/<route>/` + register in `src/admin/router.tsx`                                |
+| A new structural rule            | `src/__tests__/architecture/<rule>.test.ts`                                                    |
 
 ---
 
@@ -370,22 +370,22 @@ When making a change, this table answers "where does it go?"
 
 Architectural rules live as tests in `src/__tests__/architecture/*.test.ts` and run as part of `bun test`. Changing a structural rule means updating the matching test. The most load-bearing gates:
 
-| Rule                                                                                                  | Gate                                                            |
-|-------------------------------------------------------------------------------------------------------|-----------------------------------------------------------------|
-| Migrations parity between PG and SQLite                                                               | `migration-parity.test.ts`                                      |
-| JSON columns end in `_json`                                                                           | `db-json-column-naming.test.ts`                                 |
-| No Postgres-isms in repositories                                                                      | `db-postgres-isms.test.ts`                                      |
-| Page tree uses the flat `NodeTree<TNode>` shape                                                       | `src/__tests__/persistence/treeSchemaShape.test.ts`             |
-| Store mutations don't branch on VC mode                                                               | `no-vc-mode-branches-in-mutations.test.ts`                      |
-| No Tailwind utility classes (covers all palette names: `bg-zinc-*`, `text-blue-*`, etc.)              | `noTailwindUtilities.test.ts`, `no-tailwind-deps.test.ts`       |
-| Every color in admin / ui CSS modules comes from a token (no hardcoded hex / rgb / hsl)               | `css-token-policy.test.ts`                                      |
-| Admin navigation uses the in-house router; no raw `/admin` anchors or `react-router-dom`              | `admin-router-usage.test.ts`                                    |
-| All buttons go through the `Button` primitive                                                         | `button-primitive-usage.test.ts`                                |
-| Icons come from `pixel-art-icons`                                                                     | `no-third-party-icons.test.ts`, `direct-icon-imports.test.ts`   |
-| Vendored icon set is fresh                                                                            | `vendor-icons-fresh.test.ts`                                    |
-| Plugin sandbox invariants (no `node:`, `bun:`, `require`, etc.)                                       | `plugin-sandbox-invariants.test.ts`                             |
-| All provider SDKs banned repo-wide (no exceptions); drivers talk directly to each provider's REST API  | `ai-driver-isolation.test.ts`                                   |
-| UI primitives live in `src/ui/components/`                                                            | `ui-primitives-location.test.ts`                                |
+| Rule                                                                                                  | Gate                                                          |
+| ----------------------------------------------------------------------------------------------------- | ------------------------------------------------------------- |
+| Migrations parity between PG and SQLite                                                               | `migration-parity.test.ts`                                    |
+| JSON columns end in `_json`                                                                           | `db-json-column-naming.test.ts`                               |
+| No Postgres-isms in repositories                                                                      | `db-postgres-isms.test.ts`                                    |
+| Page tree uses the flat `NodeTree<TNode>` shape                                                       | `src/__tests__/persistence/treeSchemaShape.test.ts`           |
+| Store mutations don't branch on VC mode                                                               | `no-vc-mode-branches-in-mutations.test.ts`                    |
+| No Tailwind utility classes (covers all palette names: `bg-zinc-*`, `text-blue-*`, etc.)              | `noTailwindUtilities.test.ts`, `no-tailwind-deps.test.ts`     |
+| Every color in admin / ui CSS modules comes from a token (no hardcoded hex / rgb / hsl)               | `css-token-policy.test.ts`                                    |
+| Admin navigation uses the in-house router; no raw `/admin` anchors or `react-router-dom`              | `admin-router-usage.test.ts`                                  |
+| All buttons go through the `Button` primitive                                                         | `button-primitive-usage.test.ts`                              |
+| Icons come from `pixel-art-icons`                                                                     | `no-third-party-icons.test.ts`, `direct-icon-imports.test.ts` |
+| Vendored icon set is fresh                                                                            | `vendor-icons-fresh.test.ts`                                  |
+| Plugin sandbox invariants (no `node:`, `bun:`, `require`, etc.)                                       | `plugin-sandbox-invariants.test.ts`                           |
+| All provider SDKs banned repo-wide (no exceptions); drivers talk directly to each provider's REST API | `ai-driver-isolation.test.ts`                                 |
+| UI primitives live in `src/ui/components/`                                                            | `ui-primitives-location.test.ts`                              |
 
 See [docs/reference/architecture-tests.md](reference/architecture-tests.md) for the complete catalog (81 gate files).
 

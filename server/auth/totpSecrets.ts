@@ -42,9 +42,7 @@ export async function encryptTotpSecret(plaintext: string): Promise<EncryptedTot
   }
 }
 
-async function decryptTotpSecret(
-  encrypted: EncryptedTotpSecret,
-): Promise<string> {
+async function decryptTotpSecret(encrypted: EncryptedTotpSecret): Promise<string> {
   const currentFingerprint = await getMasterKeyFingerprint()
   if (encrypted.keyFingerprint && encrypted.keyFingerprint !== currentFingerprint) {
     throw new TotpSecretError(
@@ -81,7 +79,9 @@ export async function verifyEncryptedTotpCode(
 export function totpSecretErrorResponse(err: unknown): Response | null {
   if (err instanceof MasterKeyConfigurationError) {
     return jsonResponse(
-      { error: `MFA secret encryption is not configured: ${err.message.replace('[secrets/masterKey] ', '')}` },
+      {
+        error: `MFA secret encryption is not configured: ${err.message.replace('[secrets/masterKey] ', '')}`,
+      },
       { status: 500 },
     )
   }

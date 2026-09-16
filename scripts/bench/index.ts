@@ -58,11 +58,7 @@ const DEFAULT_BENCHES: readonly BenchModule[] = [
   healthBench,
 ]
 
-const ALL_BENCHES: readonly BenchModule[] = [
-  ...DEFAULT_BENCHES,
-  browserBench,
-  snapshotTokensBench,
-]
+const ALL_BENCHES: readonly BenchModule[] = [...DEFAULT_BENCHES, browserBench, snapshotTokensBench]
 
 interface CliFlags {
   only: string[] | null
@@ -178,7 +174,9 @@ async function main(): Promise<void> {
   }
 
   log.section('Instatic benchmark suite')
-  log.detail(`Running ${benches.length} bench${benches.length === 1 ? '' : 'es'}: ${benches.map((b) => b.name).join(', ')}`)
+  log.detail(
+    `Running ${benches.length} bench${benches.length === 1 ? '' : 'es'}: ${benches.map((b) => b.name).join(', ')}`,
+  )
   if (flags.quick) log.detail('Quick mode — reduced iteration counts.')
   if (flags.baseUrl) log.detail(`Targeting external server: ${flags.baseUrl}`)
 

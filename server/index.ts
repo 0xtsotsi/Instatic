@@ -2,7 +2,12 @@ import { createDbClient } from './db'
 import { runMigrations } from './db/runMigrations'
 import { syncSystemRoles } from './repositories/roles'
 import { readServerConfig } from './config'
-import { DEV_ORIGIN_ALLOWLIST, configurePublicOrigins, configureTrustedProxyCidrs, stampSocketIp } from './auth/security'
+import {
+  DEV_ORIGIN_ALLOWLIST,
+  configurePublicOrigins,
+  configureTrustedProxyCidrs,
+  stampSocketIp,
+} from './auth/security'
 import { applySecurityHeaders } from './securityHeaders'
 import { startConversationPurgeTick } from './ai/boot'
 
@@ -54,7 +59,7 @@ function corsHeaders(origin: string | null): Record<string, string> {
     // The response body varies by Origin (we either include ACAO or don't),
     // so caches must key on Origin to avoid serving a permissive response to
     // a non-allowlisted origin.
-    'Vary': 'Origin',
+    Vary: 'Origin',
   }
 }
 
@@ -82,10 +87,7 @@ Bun.serve({
 
     // Handle CORS preflight
     if (req.method === 'OPTIONS') {
-      return applySecurityHeaders(
-        new Response(null, { status: 204, headers: cors }),
-        pathname,
-      )
+      return applySecurityHeaders(new Response(null, { status: 204, headers: cors }), pathname)
     }
 
     try {

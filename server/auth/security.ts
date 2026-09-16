@@ -162,9 +162,8 @@ export function resetTrustedProxyCidrs(): void {
 
 function normalizeIpLiteral(raw: string): string {
   const trimmed = raw.trim()
-  const unbracketed = trimmed.startsWith('[') && trimmed.endsWith(']')
-    ? trimmed.slice(1, -1)
-    : trimmed
+  const unbracketed =
+    trimmed.startsWith('[') && trimmed.endsWith(']') ? trimmed.slice(1, -1) : trimmed
   const withoutZone = unbracketed.split('%', 1)[0] ?? unbracketed
   const lower = withoutZone.toLowerCase()
 
@@ -330,7 +329,10 @@ export function clientIp(req: Request): string | null {
 
   const forwardedFor = req.headers.get('x-forwarded-for')
   if (forwardedFor && isTrustedProxyPeer(socketIp)) {
-    const chain = forwardedFor.split(',').map((entry) => entry.trim()).filter(Boolean)
+    const chain = forwardedFor
+      .split(',')
+      .map((entry) => entry.trim())
+      .filter(Boolean)
     for (let i = chain.length - 1; i >= 0; i--) {
       const candidate = chain[i]
       if (!candidate || !parseIpAddress(candidate)) continue

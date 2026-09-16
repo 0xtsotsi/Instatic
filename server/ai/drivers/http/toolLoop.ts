@@ -162,7 +162,10 @@ export async function* runToolLoop<TMessage>(
 
     if (!res.ok) {
       const bodyText = await res.text().catch(() => '')
-      console.error(`[ai/${adapter.label.toLowerCase()}] HTTP ${res.status}:`, bodyText.slice(0, 500))
+      console.error(
+        `[ai/${adapter.label.toLowerCase()}] HTTP ${res.status}:`,
+        bodyText.slice(0, 500),
+      )
       const failure = classifyHttpFailure(adapter.label, res.status, bodyText)
       if (initialProviderRound && !replayOverflowRetried && failure.kind === 'replayOverflow') {
         const projected = elideHistoricalUserImages(req.messages)
@@ -262,7 +265,7 @@ export async function* runToolLoop<TMessage>(
         toolCallId: call.id,
         toolName: call.name,
         ok: output.ok,
-        error: output.ok ? undefined : output.error ?? 'Tool call failed.',
+        error: output.ok ? undefined : (output.error ?? 'Tool call failed.'),
       }
       results.push({ id: call.id, name: call.name, output })
       if (req.signal.aborted) return
@@ -346,7 +349,11 @@ function prepareToolInput(call: TurnToolCall, req: AiStreamRequest): unknown {
  * model has since mutated — useless to re-send. Any result with an image
  * attachment is heavy regardless of tool name.
  */
-const HEAVY_TOOL_NAMES = new Set(['site_render_snapshot', 'site_read_document', 'site_get_node_html'])
+const HEAVY_TOOL_NAMES = new Set([
+  'site_render_snapshot',
+  'site_read_document',
+  'site_get_node_html',
+])
 
 function isHeavyResult(r: TurnToolResult): boolean {
   return (r.output.images?.length ?? 0) > 0 || HEAVY_TOOL_NAMES.has(r.name)

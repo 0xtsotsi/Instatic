@@ -3,6 +3,7 @@
 Modules are the building blocks the visual editor places on the canvas — `base.container`, `base.text`, `base.image`, `base.button`, `base.loop`, `base.visual-component-ref`, plugin-shipped modules, etc. Each module is a single `ModuleDefinition` registered in the global `ModuleRegistry`.
 
 A module declares:
+
 - A unique `id` (namespaced: `base.text`, `acme.product-card`)
 - A `PropertySchema` describing its props (drives the right-panel form)
 - A pure `render(props, renderedChildren)` function that returns `{ html, css? }`
@@ -167,36 +168,43 @@ The schema drives the right-panel Properties UI. Each prop key maps to a `Proper
 
 ```ts
 schema: PropertySchema = {
-  text:  { type: 'text',  label: 'Text' },
+  text: { type: 'text', label: 'Text' },
   color: { type: 'color', label: 'Color' },
-  size:  { type: 'select',   label: 'Size', options: [
-            { value: 'sm', label: 'Small' },
-            { value: 'md', label: 'Medium' },
-            { value: 'lg', label: 'Large' },
-          ]},
-  alignment: { type: 'select', label: 'Align',
-               options: ['left', 'center', 'right'].map(v => ({ value: v, label: v })),
-               layout: 'inline' },
+  size: {
+    type: 'select',
+    label: 'Size',
+    options: [
+      { value: 'sm', label: 'Small' },
+      { value: 'md', label: 'Medium' },
+      { value: 'lg', label: 'Large' },
+    ],
+  },
+  alignment: {
+    type: 'select',
+    label: 'Align',
+    options: ['left', 'center', 'right'].map((v) => ({ value: v, label: v })),
+    layout: 'inline',
+  },
 }
 ```
 
 ### Control types
 
-| `type`      | Renders as                                                | Cell value                      |
-|-------------|-----------------------------------------------------------|---------------------------------|
-| `text`      | `<Input>`                                                 | `string`                        |
-| `textarea`  | `<Textarea>`                                              | `string`                        |
-| `richtext`  | No visible site-editor control; hidden/internal sanitized HTML prop | HTML string                     |
-| `number`    | `<Input type="number">`                                   | `number`                        |
-| `toggle`    | `<Switch>`                                                | `boolean`                       |
-| `select`    | `<Select>` (short list) or `<ContextMenu>` (long)         | option value string             |
-| `color`     | `<ColorInput>`                                            | `string` (hex / token name)     |
-| `url`       | URL text input (validated)                                | `string`                        |
-| `dataTable` | Data table picker                                         | table id string                 |
-| `image`     | Media picker                                              | media id or URL                 |
-| `media`     | Media picker (any media type)                             | media id                        |
-| `svg`       | Inline SVG editor                                         | SVG markup string               |
-| `group`     | Collapsible section header (visual grouping only)         | — (no data shape change)        |
+| `type`      | Renders as                                                          | Cell value                  |
+| ----------- | ------------------------------------------------------------------- | --------------------------- |
+| `text`      | `<Input>`                                                           | `string`                    |
+| `textarea`  | `<Textarea>`                                                        | `string`                    |
+| `richtext`  | No visible site-editor control; hidden/internal sanitized HTML prop | HTML string                 |
+| `number`    | `<Input type="number">`                                             | `number`                    |
+| `toggle`    | `<Switch>`                                                          | `boolean`                   |
+| `select`    | `<Select>` (short list) or `<ContextMenu>` (long)                   | option value string         |
+| `color`     | `<ColorInput>`                                                      | `string` (hex / token name) |
+| `url`       | URL text input (validated)                                          | `string`                    |
+| `dataTable` | Data table picker                                                   | table id string             |
+| `image`     | Media picker                                                        | media id or URL             |
+| `media`     | Media picker (any media type)                                       | media id                    |
+| `svg`       | Inline SVG editor                                                   | SVG markup string           |
+| `group`     | Collapsible section header (visual grouping only)                   | — (no data shape change)    |
 
 `PropertyControl` is a discriminated union — `propertySchema.ts` has the full schema.
 
@@ -234,14 +242,14 @@ schema: {
 import { registry } from '@core/module-engine'
 
 registry.registerOrReplace(MyModuleDefinition) // first-party: always overwrite on hot reload
-registry.register(MyModuleDefinition)          // throws if already registered
-registry.get('base.text')                      // → AnyModuleDefinition | undefined
-registry.getOrThrow('base.text')               // → AnyModuleDefinition (throws on miss)
-registry.has('base.text')                      // → boolean
-registry.list()                                // → AnyModuleDefinition[]
-registry.listByCategory()                      // → Record<string, AnyModuleDefinition[]>
-registry.subscribe(listener)                   // notified on register/unregister
-registry.generation()                          // monotonic counter — pair with useSyncExternalStore
+registry.register(MyModuleDefinition) // throws if already registered
+registry.get('base.text') // → AnyModuleDefinition | undefined
+registry.getOrThrow('base.text') // → AnyModuleDefinition (throws on miss)
+registry.has('base.text') // → boolean
+registry.list() // → AnyModuleDefinition[]
+registry.listByCategory() // → Record<string, AnyModuleDefinition[]>
+registry.subscribe(listener) // notified on register/unregister
+registry.generation() // monotonic counter — pair with useSyncExternalStore
 ```
 
 The registry is type-erased — every module is held as `AnyModuleDefinition` (props typed as `Record<string, unknown>`). The narrow → erased cast happens once at the registry boundary so user code never needs to widen its types.
@@ -259,8 +267,8 @@ the file is the registration. `base/index.ts` uses side-effect imports:
 
 ```ts
 // src/modules/base/index.ts
-import './container'   // ContainerModule self-registers on load
-import './text'        // TextModule self-registers on load
+import './container' // ContainerModule self-registers on load
+import './text' // TextModule self-registers on load
 // ...
 ```
 
@@ -303,21 +311,21 @@ String props arrive HTML-escaped by step 4. If you need to emit a raw unescaped 
 
 The canvas renders modules inside per-breakpoint iframes. Two render paths:
 
-| Path                                                                       | When used                                                  |
-|----------------------------------------------------------------------------|------------------------------------------------------------|
-| The module's `render()` HTML inserted into the iframe (default)            | All modules with no `component`                            |
-| The module's React `component` rendered in a host-managed iframe           | When the module needs DOM access or interactive runtime    |
+| Path                                                             | When used                                               |
+| ---------------------------------------------------------------- | ------------------------------------------------------- |
+| The module's `render()` HTML inserted into the iframe (default)  | All modules with no `component`                         |
+| The module's React `component` rendered in a host-managed iframe | When the module needs DOM access or interactive runtime |
 
 The React component receives `ModuleComponentProps<TProps>`:
 
 ```ts
 interface ModuleComponentProps<TProps> {
-  props:             TProps
-  nodeId:            string
-  isSelected:        boolean
-  children?:         React.ReactNode
+  props: TProps
+  nodeId: string
+  isSelected: boolean
+  children?: React.ReactNode
   /** Space-separated CSS class string from node.classIds — spread onto the root element. */
-  mcClassName?:      string
+  mcClassName?: string
   /**
    * Editor attributes and event handlers — MUST be spread onto the root element.
    * Wires selection, hover, double-click, context-menu, and keyboard activation.
@@ -331,14 +339,21 @@ interface ModuleComponentProps<TProps> {
 
 ```tsx
 export const HeadingEditor: React.FC<ModuleComponentProps<HeadingProps>> = ({
-  props, children, mcClassName, nodeWrapperProps,
+  props,
+  children,
+  mcClassName,
+  nodeWrapperProps,
 }) => {
   const tag = `h${Math.max(1, Math.min(6, Number(props.level) || 2))}`
-  return React.createElement(tag, {
-    ...nodeWrapperProps,
-    className: mcClassName,
-    'data-align': props.align,
-  }, props.text)
+  return React.createElement(
+    tag,
+    {
+      ...nodeWrapperProps,
+      className: mcClassName,
+      'data-align': props.align,
+    },
+    props.text,
+  )
 }
 ```
 
@@ -371,13 +386,15 @@ When a page uses such a module, the publisher emits a `<script type="importmap">
 import type { ModuleDefinition } from '@core/module-engine'
 import { registry } from '@core/module-engine'
 import { Type, Value, type Static } from '@core/utils/typeboxHelpers'
-import { HeadingIcon } from 'pixel-art-icons/icons/heading'  // example icon
+import { HeadingIcon } from 'pixel-art-icons/icons/heading' // example icon
 import { HeadingEditor } from './HeadingEditor'
 
 const HeadingPropsSchema = Type.Object({
   level: Type.Number({ default: 2 }),
-  text:  Type.String({ default: 'Heading' }),
-  align: Type.Union([Type.Literal('left'), Type.Literal('center'), Type.Literal('right')], { default: 'left' }),
+  text: Type.String({ default: 'Heading' }),
+  align: Type.Union([Type.Literal('left'), Type.Literal('center'), Type.Literal('right')], {
+    default: 'left',
+  }),
 })
 
 type HeadingProps = Static<typeof HeadingPropsSchema>
@@ -399,15 +416,15 @@ export const HeadingModule: ModuleDefinition<HeadingProps> = {
       label: 'Level',
       options: [1, 2, 3, 4, 5, 6].map((n) => ({ value: String(n), label: `h${n}` })),
     },
-    text:  { type: 'text', label: 'Text' },
+    text: { type: 'text', label: 'Text' },
     align: {
       type: 'select',
       label: 'Align',
       layout: 'inline',
       options: [
-        { value: 'left',   label: 'Left' },
+        { value: 'left', label: 'Left' },
         { value: 'center', label: 'Center' },
-        { value: 'right',  label: 'Right' },
+        { value: 'right', label: 'Right' },
       ],
     },
   },
@@ -451,8 +468,8 @@ Modules don't need to know — they just receive resolved props.
   "moduleId": "base.heading",
   "props": { "text": "Default heading", "level": 2 },
   "dynamicBindings": {
-    "text": { "source": "currentEntry", "field": "title" }
-  }
+    "text": { "source": "currentEntry", "field": "title" },
+  },
 }
 ```
 
@@ -462,17 +479,17 @@ At render time, `resolveDynamicProps(...)` substitutes the bound value. Used ins
 
 ## Forbidden patterns
 
-| Pattern                                                       | Use instead                                                  |
-|---------------------------------------------------------------|--------------------------------------------------------------|
-| `render` calling `document.querySelector` / `window.foo`      | Render is pure — no DOM. Compute, don't read.                |
-| `await fetch(...)` inside `render`                            | Render is sync. Pre-fetch via loop prefetch / media prefetch.|
-| Mutating `props` inside `render`                              | Treat as immutable input.                                    |
-| Hand-escaping with `String.replace(/</g, '&lt;')`             | Use `escapeHtml(value)` from `@modules/base/utils/escape` — string props are pre-escaped by the publisher, but explicit values (URLs, raw attributes) need manual escaping. |
-| Returning `{ html: '<script>...</script>' }`                  | Scripts in module HTML are stripped at publish-time sanitize. Use plugin frontend assets for runtime JS. |
-| Emitting unique CSS per instance (with hardcoded ids)         | Use stable selectors / `[data-*]` attrs — CSS is deduped per `moduleId`. |
+| Pattern                                                       | Use instead                                                                                                                                                                                                                             |
+| ------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `render` calling `document.querySelector` / `window.foo`      | Render is pure — no DOM. Compute, don't read.                                                                                                                                                                                           |
+| `await fetch(...)` inside `render`                            | Render is sync. Pre-fetch via loop prefetch / media prefetch.                                                                                                                                                                           |
+| Mutating `props` inside `render`                              | Treat as immutable input.                                                                                                                                                                                                               |
+| Hand-escaping with `String.replace(/</g, '&lt;')`             | Use `escapeHtml(value)` from `@modules/base/utils/escape` — string props are pre-escaped by the publisher, but explicit values (URLs, raw attributes) need manual escaping.                                                             |
+| Returning `{ html: '<script>...</script>' }`                  | Scripts in module HTML are stripped at publish-time sanitize. Use plugin frontend assets for runtime JS.                                                                                                                                |
+| Emitting unique CSS per instance (with hardcoded ids)         | Use stable selectors / `[data-*]` attrs — CSS is deduped per `moduleId`.                                                                                                                                                                |
 | Hardcoding hex colors in module CSS                           | Module CSS ships to published pages, where editor tokens aren't available. Use site `framework` tokens (`var(--site-primary)` style) if exposed, or accept the hex literal. (`src/modules/` is exempt from `css-token-policy.test.ts`.) |
-| Importing from `@admin/...` inside a module                   | Modules are publisher-side. Admin imports break boot. Stay inside `@core/...` and `@ui/...` (for icons). |
-| Duplicating render logic between `render()` and `*Editor.tsx` | Extract to a sibling `.ts` leaf (e.g. `anchor.ts`, `items.ts`) or `base/shared/` for cross-module vocabulary. Canvas/publisher drift is the most visible bug a CMS can ship. |
+| Importing from `@admin/...` inside a module                   | Modules are publisher-side. Admin imports break boot. Stay inside `@core/...` and `@ui/...` (for icons).                                                                                                                                |
+| Duplicating render logic between `render()` and `*Editor.tsx` | Extract to a sibling `.ts` leaf (e.g. `anchor.ts`, `items.ts`) or `base/shared/` for cross-module vocabulary. Canvas/publisher drift is the most visible bug a CMS can ship.                                                            |
 
 ---
 

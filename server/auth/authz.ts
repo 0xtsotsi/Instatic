@@ -45,7 +45,7 @@ export async function requireAuthenticatedUser(
   const idHash = await getSessionHash(req)
   const user = idHash ? await findUserBySessionHash(db, idHash) : null
   if (!user) {
-    if (idHash && await sessionRequiresMfa(db, idHash)) {
+    if (idHash && (await sessionRequiresMfa(db, idHash))) {
       return jsonResponse({ error: 'mfa_required' }, { status: 401 })
     }
     return jsonResponse({ error: 'Unauthorized' }, { status: 401 })
@@ -66,7 +66,10 @@ export async function requireCapability(
   return user
 }
 
-export function userHasCapability(user: Pick<AuthUser, 'capabilities'>, capability: CoreCapability): boolean {
+export function userHasCapability(
+  user: Pick<AuthUser, 'capabilities'>,
+  capability: CoreCapability,
+): boolean {
   return roleHasCapability(user.capabilities, capability)
 }
 

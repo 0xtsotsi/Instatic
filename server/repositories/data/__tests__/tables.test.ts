@@ -53,7 +53,10 @@ describe('data_tables.system column', () => {
 
   it('list and read agree on system flags', async () => {
     const tables = await listDataTables(db)
-    const systemSlugs = tables.filter((t) => t.system).map((t) => t.slug).sort()
+    const systemSlugs = tables
+      .filter((t) => t.system)
+      .map((t) => t.slug)
+      .sort()
     expect(systemSlugs).toEqual(['components', 'layouts', 'pages', 'posts'])
   })
 })

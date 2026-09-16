@@ -150,10 +150,18 @@ function dispatchValidatedApiCall(apiCall: ValidatedApiCall): void {
   try {
     const result = apiCallDispatcher(apiCall)
     void Promise.resolve(result).catch((err: unknown) => {
-      replyApiError(apiCall.pluginId, apiCall.correlationId, err instanceof Error ? err.message : String(err))
+      replyApiError(
+        apiCall.pluginId,
+        apiCall.correlationId,
+        err instanceof Error ? err.message : String(err),
+      )
     })
   } catch (err) {
-    replyApiError(apiCall.pluginId, apiCall.correlationId, err instanceof Error ? err.message : String(err))
+    replyApiError(
+      apiCall.pluginId,
+      apiCall.correlationId,
+      err instanceof Error ? err.message : String(err),
+    )
   }
 }
 
@@ -204,7 +212,11 @@ function handleWorkerMessage(workerPluginId: string, msg: unknown): void {
  */
 export async function resetPluginWorker(): Promise<void> {
   for (const [, w] of workers) {
-    try { w.terminate() } catch {/* noop */}
+    try {
+      w.terminate()
+    } catch {
+      /* noop */
+    }
   }
   workers.clear()
   // Reject pending; respawn happens on next call.

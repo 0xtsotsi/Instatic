@@ -17,11 +17,7 @@
 
 import { isIP } from 'node:net'
 import { lookup } from 'node:dns/promises'
-import {
-  decodeBodyBytes,
-  encodeBodyBytes,
-  type BodyEncoding,
-} from '../protocol/bodyEncoding'
+import { decodeBodyBytes, encodeBodyBytes, type BodyEncoding } from '../protocol/bodyEncoding'
 import type { HostPluginRecord } from './types'
 
 export interface SerializedNetworkResponse {
@@ -135,7 +131,9 @@ async function assertOutboundAllowed(
     throw new Error(`Invalid URL: "${urlString}"`)
   }
   if (parsed.protocol !== 'https:' && parsed.protocol !== 'http:') {
-    throw new Error(`Plugin network.fetch only supports http: and https: URLs (got "${parsed.protocol}")`)
+    throw new Error(
+      `Plugin network.fetch only supports http: and https: URLs (got "${parsed.protocol}")`,
+    )
   }
   const allowlist = manifest.networkAllowedHosts ?? []
   if (!hostMatchesAllowlist(parsed.host, allowlist)) {
@@ -164,7 +162,9 @@ async function defaultResolveHost(host: string): Promise<string[]> {
 }
 
 /** Drop entity-body headers when a redirect downgrades the method to GET. */
-function withoutBodyHeaders(headers: Record<string, string> | undefined): Record<string, string> | undefined {
+function withoutBodyHeaders(
+  headers: Record<string, string> | undefined,
+): Record<string, string> | undefined {
   if (!headers) return headers
   const next: Record<string, string> = {}
   for (const [k, v] of Object.entries(headers)) {
@@ -234,7 +234,9 @@ export async function performGatedFetch(
         // non-GET/HEAD request to GET and drop the body.
         if (
           response.status === 303 ||
-          ((response.status === 301 || response.status === 302) && method !== 'GET' && method !== 'HEAD')
+          ((response.status === 301 || response.status === 302) &&
+            method !== 'GET' &&
+            method !== 'HEAD')
         ) {
           method = 'GET'
           body = undefined
@@ -245,7 +247,9 @@ export async function performGatedFetch(
       }
 
       const respHeaders: Record<string, string> = {}
-      response.headers.forEach((v, k) => { respHeaders[k] = v })
+      response.headers.forEach((v, k) => {
+        respHeaders[k] = v
+      })
       // Read the upstream body as raw bytes — `response.text()` would
       // lossily UTF-8-decode binary payloads (images, gzip, protobuf).
       const bytes = new Uint8Array(await response.arrayBuffer())

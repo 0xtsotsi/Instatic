@@ -195,9 +195,9 @@ describe('applyDataRowChanges', () => {
       seq: 7,
     })
 
-    expect(await rowSeq(db, 'keep')).toBe(7)   // updated in place
-    expect(await rowSeq(db, 'fresh')).toBe(7)  // created
-    expect(await rowSeq(db, 'gone')).toBe(7)   // soft-deleted rows are stamped too
+    expect(await rowSeq(db, 'keep')).toBe(7) // updated in place
+    expect(await rowSeq(db, 'fresh')).toBe(7) // created
+    expect(await rowSeq(db, 'gone')).toBe(7) // soft-deleted rows are stamped too
   })
 })
 
@@ -238,7 +238,7 @@ describe('applyDataRowChanges — table scoping', () => {
       select id, deleted_at from data_rows where id in ('post-row', 'vc-a')
     `
     const byId = new Map(rows.map((r) => [r.id, r.deleted_at]))
-    expect(byId.get('post-row')).toBeNull()      // untouched
-    expect(byId.get('vc-a')).not.toBeNull()      // same-table delete applied
+    expect(byId.get('post-row')).toBeNull() // untouched
+    expect(byId.get('vc-a')).not.toBeNull() // same-table delete applied
   })
 })

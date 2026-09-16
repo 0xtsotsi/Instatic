@@ -341,8 +341,7 @@ export async function updateConversationForUser(
   const nextTitle = patch.title?.trim() || existing.title
   const nextCredentialId =
     patch.credentialId !== undefined ? patch.credentialId : existing.credentialId
-  const nextModelId =
-    patch.modelId !== undefined ? patch.modelId : existing.modelId
+  const nextModelId = patch.modelId !== undefined ? patch.modelId : existing.modelId
 
   const { rows } = await db<ConversationRow>`
     update ai_conversations

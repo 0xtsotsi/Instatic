@@ -3,7 +3,8 @@ import { createHmac, randomBytes, timingSafeEqual } from 'node:crypto'
 const CHALLENGE_TTL_MS = 5 * 60 * 1000
 const MAX_PUBLIC_FORM_CHALLENGES = 2_000
 const fallbackSecret = randomBytes(32).toString('hex')
-const signingSecret = process.env.INSTATIC_FORM_SECRET ?? process.env.INSTATIC_SECRET_KEY ?? fallbackSecret
+const signingSecret =
+  process.env.INSTATIC_FORM_SECRET ?? process.env.INSTATIC_SECRET_KEY ?? fallbackSecret
 
 type PublicFormChallengeRecord = {
   pageId: string
@@ -16,8 +17,10 @@ type PublicFormChallengeRecord = {
 
 const challenges = new Map<string, PublicFormChallengeRecord>()
 
-type VerifiedPublicFormChallenge =
-  Pick<PublicFormChallengeRecord, 'pageId' | 'formId' | 'issuedAt' | 'expiresAt'>
+type VerifiedPublicFormChallenge = Pick<
+  PublicFormChallengeRecord,
+  'pageId' | 'formId' | 'issuedAt' | 'expiresAt'
+>
 
 export function issuePublicFormChallenge(input: {
   pageId: string
@@ -73,10 +76,7 @@ export function verifyAndConsumePublicFormChallenge(input: {
   }
 }
 
-export function issuePublicFormPageToken(input: {
-  pageId: string
-  formId: string
-}): string {
+export function issuePublicFormPageToken(input: { pageId: string; formId: string }): string {
   return signPageToken(input)
 }
 
@@ -126,10 +126,7 @@ function signChallenge(input: {
     .digest('base64url')
 }
 
-function signPageToken(input: {
-  pageId: string
-  formId: string
-}): string {
+function signPageToken(input: { pageId: string; formId: string }): string {
   return createHmac('sha256', signingSecret)
     .update('page-form')
     .update('\0')

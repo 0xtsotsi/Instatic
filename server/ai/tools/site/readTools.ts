@@ -72,9 +72,7 @@ const listModulesTool: AiTool = {
     const { category } = input as Static<typeof ListModulesInput>
     const normalized = category?.toLowerCase()
     const all = describeAgentModules()
-    const modules = normalized
-      ? all.filter((m) => m.category.toLowerCase() === normalized)
-      : all
+    const modules = normalized ? all.filter((m) => m.category.toLowerCase() === normalized) : all
     return { modules }
   },
 }
@@ -105,7 +103,9 @@ const listTokensTool: AiTool = {
   handler: async (input, ctx) => {
     const { family } = input as Static<typeof ListTokensInput>
     const snap = asSnap(ctx.snapshot)
-    return { tokens: filterTokenFamily(describeAgentTokens(snap.site), family as TokenFamily | undefined) }
+    return {
+      tokens: filterTokenFamily(describeAgentTokens(snap.site), family as TokenFamily | undefined),
+    }
   },
 }
 
@@ -121,7 +121,7 @@ const listPostTypesTool: AiTool = {
   execution: 'server',
   requiredCapabilities: ['site.read'],
   description:
-    'List the post types (routable collections) a `postTypes` template can target. Each entry has { slug, label, routeBase, kind }; pass the `slug` values to site_set_page_template\'s `target.tableSlugs`. Only collections with a public route appear — non-routable data tables are excluded.',
+    "List the post types (routable collections) a `postTypes` template can target. Each entry has { slug, label, routeBase, kind }; pass the `slug` values to site_set_page_template's `target.tableSlugs`. Only collections with a public route appear — non-routable data tables are excluded.",
   inputSchema: ListPostTypesInput,
   handler: async (_input, ctx) => {
     const tables = await listDataTablesWithCounts(ctx.db)
@@ -221,7 +221,8 @@ const listLoopSourcesTool: AiTool = {
     const dataRowsFields = dataRowsSource?.fields.map(loopFieldToAgentField) ?? []
     return {
       usage: {
-        loopElement: '<instatic-loop data-source-id="data.rows" data-table-id="<table id>" data-order-by="publishedAt" data-direction="desc" data-limit="3">...</instatic-loop>',
+        loopElement:
+          '<instatic-loop data-source-id="data.rows" data-table-id="<table id>" data-order-by="publishedAt" data-direction="desc" data-limit="3">...</instatic-loop>',
         tokenSyntax: '{currentEntry.field}',
         invalidTokenSyntax: '{{post.field}}',
       },

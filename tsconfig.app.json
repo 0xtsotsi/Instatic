@@ -34,10 +34,5 @@
     }
   },
   "include": ["src"],
-  "exclude": [
-    "src/__tests__",
-    "**/*.test.ts",
-    "**/*.test.tsx",
-    "src/core/plugin-sdk/cli"
-  ]
+  "exclude": ["src/__tests__", "**/*.test.ts", "**/*.test.tsx", "src/core/plugin-sdk/cli"]
 }

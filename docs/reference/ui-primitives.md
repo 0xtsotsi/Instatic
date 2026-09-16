@@ -20,99 +20,99 @@ Every interactive control in `src/admin/` goes through one of these. Bare `<butt
 
 ### Action / interactive
 
-| Primitive          | When to use                                                          | Key props                                                  |
-|--------------------|----------------------------------------------------------------------|------------------------------------------------------------|
-| `Button`           | **Every** action button                                              | `variant: 'ghost' \| 'secondary' \| 'primary' \| 'destructive'`, `size: 'micro' \| 'xs' \| 'sm' \| 'md' \| 'lg'`, `iconOnly`, `pressed`, `tooltip` |
-| `SplitButton`      | A primary action fused to a chevron that opens a dropdown of related actions (Publish ▾, Add Google font ▾). Composes `Button` + `ContextMenu`. | `label`, `onClick`, `menuItems`, `icon?`, `variant?`, `size?`, `busy?`, `disabled?` |
-| `Switch`           | Boolean toggle (on / off)                                            | `checked`, `onChange`, `disabled`                          |
-| `Checkbox`         | Boolean inside a list / form                                         | `checked`, `onChange`, `indeterminate`                     |
-| `SegmentedControl` | A few mutually exclusive options shown inline; `value` can be `undefined` for an unset state where no segment appears pressed | `options`, `value`, `onChange`, `onClear?` (deselectable — clicking the active segment fires `onClear` and shows a hover close-icon overlay) |
-| `Tabs`             | Top-level tab navigation within a workspace. Compound component: `<Tabs value onChange>` → `<TabList ariaLabel>` → `<Tab value>` + `<TabPanel value>`. WAI-ARIA automatic-activation pattern; arrow keys move focus and change the active value simultaneously. | `value`, `onChange` on `<Tabs>`; `ariaLabel` on `<TabList>`; `value` on `<Tab>` / `<TabPanel>` |
-| `RangeTabs`        | Tabbed numeric range selectors (spacing scales, etc.)                | `ranges`, `value`, `onChange`                              |
+| Primitive          | When to use                                                                                                                                                                                                                                                     | Key props                                                                                                                                          |
+| ------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `Button`           | **Every** action button                                                                                                                                                                                                                                         | `variant: 'ghost' \| 'secondary' \| 'primary' \| 'destructive'`, `size: 'micro' \| 'xs' \| 'sm' \| 'md' \| 'lg'`, `iconOnly`, `pressed`, `tooltip` |
+| `SplitButton`      | A primary action fused to a chevron that opens a dropdown of related actions (Publish ▾, Add Google font ▾). Composes `Button` + `ContextMenu`.                                                                                                                 | `label`, `onClick`, `menuItems`, `icon?`, `variant?`, `size?`, `busy?`, `disabled?`                                                                |
+| `Switch`           | Boolean toggle (on / off)                                                                                                                                                                                                                                       | `checked`, `onChange`, `disabled`                                                                                                                  |
+| `Checkbox`         | Boolean inside a list / form                                                                                                                                                                                                                                    | `checked`, `onChange`, `indeterminate`                                                                                                             |
+| `SegmentedControl` | A few mutually exclusive options shown inline; `value` can be `undefined` for an unset state where no segment appears pressed                                                                                                                                   | `options`, `value`, `onChange`, `onClear?` (deselectable — clicking the active segment fires `onClear` and shows a hover close-icon overlay)       |
+| `Tabs`             | Top-level tab navigation within a workspace. Compound component: `<Tabs value onChange>` → `<TabList ariaLabel>` → `<Tab value>` + `<TabPanel value>`. WAI-ARIA automatic-activation pattern; arrow keys move focus and change the active value simultaneously. | `value`, `onChange` on `<Tabs>`; `ariaLabel` on `<TabList>`; `value` on `<Tab>` / `<TabPanel>`                                                     |
+| `RangeTabs`        | Tabbed numeric range selectors (spacing scales, etc.)                                                                                                                                                                                                           | `ranges`, `value`, `onChange`                                                                                                                      |
 
 ### Form controls
 
-| Primitive          | When to use                                                          | Key props                                                  |
-|--------------------|----------------------------------------------------------------------|------------------------------------------------------------|
-| `Input`            | Single-line text input. Pill radius, transparent fill                | `value`, `onChange`, `placeholder`, `type`, `error`        |
-| `Textarea`         | Multi-line text input (exported from same module as `Input`)         | `value`, `onChange`, `rows`                                |
-| `FormField`        | Label + description shell around a form control                      | `label`, `description`, `layout: 'stacked' \| 'inline-end' \| 'inline-start'`, `htmlFor` |
-| `Select`           | Dropdown selection of fixed options                                  | `options`, `value`, `onChange`                             |
-| `ColorInput`       | Color picker — swatch + hex input                                    | `value`, `onChange`                                        |
-| `DateTimePicker`   | Date / time inputs                                                   | `value`, `onChange`, `mode: 'date' \| 'datetime'`          |
-| `FileUpload`       | Drop-zone + browse                                                   | `onSelect`, `accept`, `multiple`                           |
-| `SearchBar`        | Search input with magnifier icon + clear affordance                  | `value`, `onChange`, `placeholder`                         |
-| `FilterBar`        | Panel filter strip: filter chips + optional search bar + action slots | `items`, `value`, `onValueChange`, `search?`, `searchLeading?`, `searchTrailing?`, `inlineActions?`, `trailing?`, `groupLabel?` |
+| Primitive        | When to use                                                           | Key props                                                                                                                       |
+| ---------------- | --------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------- |
+| `Input`          | Single-line text input. Pill radius, transparent fill                 | `value`, `onChange`, `placeholder`, `type`, `error`                                                                             |
+| `Textarea`       | Multi-line text input (exported from same module as `Input`)          | `value`, `onChange`, `rows`                                                                                                     |
+| `FormField`      | Label + description shell around a form control                       | `label`, `description`, `layout: 'stacked' \| 'inline-end' \| 'inline-start'`, `htmlFor`                                        |
+| `Select`         | Dropdown selection of fixed options                                   | `options`, `value`, `onChange`                                                                                                  |
+| `ColorInput`     | Color picker — swatch + hex input                                     | `value`, `onChange`                                                                                                             |
+| `DateTimePicker` | Date / time inputs                                                    | `value`, `onChange`, `mode: 'date' \| 'datetime'`                                                                               |
+| `FileUpload`     | Drop-zone + browse                                                    | `onSelect`, `accept`, `multiple`                                                                                                |
+| `SearchBar`      | Search input with magnifier icon + clear affordance                   | `value`, `onChange`, `placeholder`                                                                                              |
+| `FilterBar`      | Panel filter strip: filter chips + optional search bar + action slots | `items`, `value`, `onValueChange`, `search?`, `searchLeading?`, `searchTrailing?`, `inlineActions?`, `trailing?`, `groupLabel?` |
 
 ### Layout / structural
 
-| Primitive          | When to use                                                          | Key props                                                  |
-|--------------------|----------------------------------------------------------------------|------------------------------------------------------------|
-| `Stack`            | Small vertical / horizontal flex layouts, especially plugin admin UI  | `direction`, `gap`, `align`, `justify`, `wrap`, `height`   |
-| `Section`          | Collapsible titled section inside a panel (accordion)                | `title`, `children`, `defaultOpen`, `icon`, `meta`, `indicator`, `forceOpen`, `flush` |
-| `ControlRow`       | Label + control row in property panels                               | `label`, `description`, `children`                         |
-| `Separator`        | Visual divider between sections                                      | `orientation: 'horizontal' \| 'vertical'`                  |
-| `Card`             | Token-backed panel surface for plugin/admin grouped content          | `padding`, `bordered`                                      |
-| `Widget`           | Borderless tile card on a darker parent (the dashboard pattern)      | `tint`, `title`, `children`                                |
-| `WidgetSkeleton`   | Loading placeholder for a dashboard widget slot                      | `widgetId`, `span`                                         |
-| `WidgetList`       | List layout for rows inside a widget                                 | `children`; `WidgetListRow` takes `primary`, `meta`        |
-| `EmptyState`       | Empty list / page placeholder                                        | `icon`, `title`, `description`, `actions`                  |
+| Primitive        | When to use                                                          | Key props                                                                             |
+| ---------------- | -------------------------------------------------------------------- | ------------------------------------------------------------------------------------- |
+| `Stack`          | Small vertical / horizontal flex layouts, especially plugin admin UI | `direction`, `gap`, `align`, `justify`, `wrap`, `height`                              |
+| `Section`        | Collapsible titled section inside a panel (accordion)                | `title`, `children`, `defaultOpen`, `icon`, `meta`, `indicator`, `forceOpen`, `flush` |
+| `ControlRow`     | Label + control row in property panels                               | `label`, `description`, `children`                                                    |
+| `Separator`      | Visual divider between sections                                      | `orientation: 'horizontal' \| 'vertical'`                                             |
+| `Card`           | Token-backed panel surface for plugin/admin grouped content          | `padding`, `bordered`                                                                 |
+| `Widget`         | Borderless tile card on a darker parent (the dashboard pattern)      | `tint`, `title`, `children`                                                           |
+| `WidgetSkeleton` | Loading placeholder for a dashboard widget slot                      | `widgetId`, `span`                                                                    |
+| `WidgetList`     | List layout for rows inside a widget                                 | `children`; `WidgetListRow` takes `primary`, `meta`                                   |
+| `EmptyState`     | Empty list / page placeholder                                        | `icon`, `title`, `description`, `actions`                                             |
 
 ### Overlay / feedback
 
-| Primitive          | When to use                                                          | Key props                                                  |
-|--------------------|----------------------------------------------------------------------|------------------------------------------------------------|
-| `Alert`            | Inline non-blocking message in host/plugin admin UI                  | `tone: 'info' \| 'success' \| 'warning' \| 'danger'`, `title` |
-| `Dialog`           | Modal dialog with title + content                                    | `open`, `onClose`, `title`, `children`                     |
-| `Tooltip`          | Hover hint — replaces `title=`; `CursorTooltip` anchors to a pointer | `content`, `side: 'top' \| 'bottom' \| 'left' \| 'right' \| 'auto'`, `children`; `CursorTooltip` takes `point` |
-| `Toast`            | Transient confirmation / error notification                          | Used via `pushToast({ kind, title, body, location? })`     |
-| `ContextMenu`      | Right-click and overflow (`…`) menus; searchable and nested menus use companion exports | `ariaLabel`, `onClose`, `children`; `x`/`y` (point) or `anchorRef` (anchor); `ContextMenuItem`, `ContextMenuSubmenu`, `MenuSearchHeader` |
-| `FloatingActionBar`| Multi-select bulk-action bar                                         | `selection`, `actions`                                     |
-| `ErrorBoundary`    | Component-level error containment                                    | `location: string`, `resetKeys?`, `children`               |
+| Primitive           | When to use                                                                             | Key props                                                                                                                                |
+| ------------------- | --------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| `Alert`             | Inline non-blocking message in host/plugin admin UI                                     | `tone: 'info' \| 'success' \| 'warning' \| 'danger'`, `title`                                                                            |
+| `Dialog`            | Modal dialog with title + content                                                       | `open`, `onClose`, `title`, `children`                                                                                                   |
+| `Tooltip`           | Hover hint — replaces `title=`; `CursorTooltip` anchors to a pointer                    | `content`, `side: 'top' \| 'bottom' \| 'left' \| 'right' \| 'auto'`, `children`; `CursorTooltip` takes `point`                           |
+| `Toast`             | Transient confirmation / error notification                                             | Used via `pushToast({ kind, title, body, location? })`                                                                                   |
+| `ContextMenu`       | Right-click and overflow (`…`) menus; searchable and nested menus use companion exports | `ariaLabel`, `onClose`, `children`; `x`/`y` (point) or `anchorRef` (anchor); `ContextMenuItem`, `ContextMenuSubmenu`, `MenuSearchHeader` |
+| `FloatingActionBar` | Multi-select bulk-action bar                                                            | `selection`, `actions`                                                                                                                   |
+| `ErrorBoundary`     | Component-level error containment                                                       | `location: string`, `resetKeys?`, `children`                                                                                             |
 
 ### Data / display
 
-| Primitive                  | When to use                                                  | Key props                                                |
-|----------------------------|--------------------------------------------------------------|----------------------------------------------------------|
-| `DataTable`                | Token-backed table shell; caller owns rows, sorting, and selection | `density`, `wrapperClassName`; compose `DataTableHead`, `DataTableBody`, `DataTableRow`, `DataTableHeader`, `DataTableCell` |
-| `TagPill`                  | Compact tinted labels, selector chips, removable tag pills   | `label`, `active`, `muted`, `size: 'xs' \| 'sm'`, `monospace`, `leading` (ReactNode prefix slot), `colorKey`, `onClick`, `onRemove`, `onContextMenu`, `mainAriaLabel`, `removeAriaLabel`, `removeTooltip` |
-| `Heading`                  | Semantic h1-h6 using editor typography tokens                | `level`, `children`                                      |
-| `Text`                     | Body, muted, strong, or monospace text in host/plugin UI     | `variant`, `size`, `children`                            |
-| `Code`                     | Preformatted snippets or logs                                | `children`                                               |
-| `Image`                    | Image with built-in blurhash fallback                        | `src`, `blurhash`, `alt`, `width`, `height`              |
-| `CanvasModulePlaceholder`  | Diagonal-stripe placeholder for empty modules on the canvas  | `label`                                                  |
-| `Kbd`                      | Single keyboard keycap. Use anywhere a key name appears as a hint. | `children`, `className`                             |
-| `ShortcutKeys`             | Full shortcut sequence ("⌘K", "Ctrl+Shift+P") — splits the label into individual `Kbd` spans. | `label`, `aria-hidden`, `className` |
+| Primitive                 | When to use                                                                                   | Key props                                                                                                                                                                                                 |
+| ------------------------- | --------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `DataTable`               | Token-backed table shell; caller owns rows, sorting, and selection                            | `density`, `wrapperClassName`; compose `DataTableHead`, `DataTableBody`, `DataTableRow`, `DataTableHeader`, `DataTableCell`                                                                               |
+| `TagPill`                 | Compact tinted labels, selector chips, removable tag pills                                    | `label`, `active`, `muted`, `size: 'xs' \| 'sm'`, `monospace`, `leading` (ReactNode prefix slot), `colorKey`, `onClick`, `onRemove`, `onContextMenu`, `mainAriaLabel`, `removeAriaLabel`, `removeTooltip` |
+| `Heading`                 | Semantic h1-h6 using editor typography tokens                                                 | `level`, `children`                                                                                                                                                                                       |
+| `Text`                    | Body, muted, strong, or monospace text in host/plugin UI                                      | `variant`, `size`, `children`                                                                                                                                                                             |
+| `Code`                    | Preformatted snippets or logs                                                                 | `children`                                                                                                                                                                                                |
+| `Image`                   | Image with built-in blurhash fallback                                                         | `src`, `blurhash`, `alt`, `width`, `height`                                                                                                                                                               |
+| `CanvasModulePlaceholder` | Diagonal-stripe placeholder for empty modules on the canvas                                   | `label`                                                                                                                                                                                                   |
+| `Kbd`                     | Single keyboard keycap. Use anywhere a key name appears as a hint.                            | `children`, `className`                                                                                                                                                                                   |
+| `ShortcutKeys`            | Full shortcut sequence ("⌘K", "Ctrl+Shift+P") — splits the label into individual `Kbd` spans. | `label`, `aria-hidden`, `className`                                                                                                                                                                       |
 
 ### Loading / skeleton
 
 Four named shapes cover nearly every loading region in the admin:
 
-| Primitive       | When to use                                                                               | Key props                          |
-|-----------------|-------------------------------------------------------------------------------------------|------------------------------------|
-| `SkeletonBlock` | A single three-bar (title / sub / fill) block. For confined surfaces: widget body, dialog body, inline slot. | `minHeight?`, `className?`, `ariaLabel?` |
-| `SkeletonCards` | Stack of N card-shaped containers, each with a three-bar block. For full-page loads and card lists (Plugins, Users, Posts pages). `<AdminPageLayout loading>` renders this automatically. | `count?` (default 3), `className?`, `ariaLabel?` |
-| `SkeletonRows`  | Stack of N thin shimmer rows. For list-style sidebars (Data tables, Content collections), table rows, and compact item lists. | `count?` (default 6), `rowHeight?` (default 24), `className?`, `ariaLabel?` |
+| Primitive       | When to use                                                                                                                                                                                                                                                                                        | Key props                                                                    |
+| --------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------- |
+| `SkeletonBlock` | A single three-bar (title / sub / fill) block. For confined surfaces: widget body, dialog body, inline slot.                                                                                                                                                                                       | `minHeight?`, `className?`, `ariaLabel?`                                     |
+| `SkeletonCards` | Stack of N card-shaped containers, each with a three-bar block. For full-page loads and card lists (Plugins, Users, Posts pages). `<AdminPageLayout loading>` renders this automatically.                                                                                                          | `count?` (default 3), `className?`, `ariaLabel?`                             |
+| `SkeletonRows`  | Stack of N thin shimmer rows. For list-style sidebars (Data tables, Content collections), table rows, and compact item lists.                                                                                                                                                                      | `count?` (default 6), `rowHeight?` (default 24), `className?`, `ariaLabel?`  |
 | `SkeletonTree`  | Depth-aware placeholder tree: each row is indented and carries a chevron slot (branch rows), an icon square, and a varying-width label bar. Shimmer cascades top-to-bottom. Use for tree-of-nodes surfaces (Layers panel, Selectors tree) where flat rows would misrepresent the nested structure. | `count?` (default 10), `rowHeight?` (default 28), `className?`, `ariaLabel?` |
 
 Low-level escape hatches (use only when the three named shapes don't fit):
 
-| Primitive       | When to use                                                  | Key props                                    |
-|-----------------|--------------------------------------------------------------|----------------------------------------------|
-| `Skeleton`      | A single shimmer bar with configurable width, height, radius | `width?`, `height?`, `radius?`, `className?`, `ariaLabel?` |
-| `SkeletonCircle`| Circular skeleton — avatars, status dots, round thumbnails   | `size` (px diameter), `className?`           |
+| Primitive        | When to use                                                  | Key props                                                  |
+| ---------------- | ------------------------------------------------------------ | ---------------------------------------------------------- |
+| `Skeleton`       | A single shimmer bar with configurable width, height, radius | `width?`, `height?`, `radius?`, `className?`, `ariaLabel?` |
+| `SkeletonCircle` | Circular skeleton — avatars, status dots, round thumbnails   | `size` (px diameter), `className?`                         |
 
 ### Charts (`@ui/components/charts`)
 
 A small chart kit used by dashboard widgets and the framework scale UI. Strictly achromatic by default; consumer provides a `tint`.
 
-| Component   | What it draws                          |
-|-------------|----------------------------------------|
-| `Bars`      | Horizontal / vertical bar chart        |
-| `Sparkline` | Inline sparkline                       |
-| `StackedBar`| Stacked horizontal segments (storage breakdown) |
-| `StatValue` | Large numeric headline for stat widgets |
-| `Delta`     | Small trend / change badge, usually inside `StatValue` |
+| Component    | What it draws                                          |
+| ------------ | ------------------------------------------------------ |
+| `Bars`       | Horizontal / vertical bar chart                        |
+| `Sparkline`  | Inline sparkline                                       |
+| `StackedBar` | Stacked horizontal segments (storage breakdown)        |
+| `StatValue`  | Large numeric headline for stat widgets                |
+| `Delta`      | Small trend / change badge, usually inside `StatValue` |
 
 ---
 
@@ -141,14 +141,14 @@ import { SkeletonBlock, SkeletonCards, SkeletonRows, SkeletonTree, Skeleton } fr
 
 **Picking the right shape:**
 
-| Surface type                                          | Use                |
-|-------------------------------------------------------|--------------------|
-| Full-page card list (Plugins, Users, Posts)           | `SkeletonCards`    |
-| Single confined region (widget body, dialog)          | `SkeletonBlock`    |
-| Sidebar list, table rows, compact item list           | `SkeletonRows`     |
-| Tree-of-nodes panel (Layers panel, Selectors tree)    | `SkeletonTree`     |
-| One-off bar that doesn't fit any of the above         | `Skeleton`         |
-| Avatar / round image placeholder                      | `SkeletonCircle`   |
+| Surface type                                       | Use              |
+| -------------------------------------------------- | ---------------- |
+| Full-page card list (Plugins, Users, Posts)        | `SkeletonCards`  |
+| Single confined region (widget body, dialog)       | `SkeletonBlock`  |
+| Sidebar list, table rows, compact item list        | `SkeletonRows`   |
+| Tree-of-nodes panel (Layers panel, Selectors tree) | `SkeletonTree`   |
+| One-off bar that doesn't fit any of the above      | `Skeleton`       |
+| Avatar / round image placeholder                   | `SkeletonCircle` |
 
 **Accessibility:** The three named shapes forward `ariaLabel` → `aria-label` + `role="status"` on the wrapper. The underlying `<Skeleton>` span is `aria-hidden` by default (pure visual chrome). The **surrounding host** (`Widget`, `Dialog`, `AdminPageLayout`) is responsible for setting `aria-busy="true"` — don't duplicate that on the skeleton itself.
 
@@ -173,35 +173,35 @@ import { Button } from '@ui/components/Button'
 
 ### Variants
 
-| Variant       | Use for                                                              |
-|---------------|----------------------------------------------------------------------|
-| `primary`     | The dominant action on the screen (Publish, Save, Confirm)           |
-| `secondary`   | Same-tier alternative (Cancel, Discard)                              |
-| `ghost`       | Toolbar buttons, list-row actions, low-emphasis controls             |
-| `destructive` | Delete, Remove, Revoke (irreversible-feeling actions)                |
+| Variant       | Use for                                                    |
+| ------------- | ---------------------------------------------------------- |
+| `primary`     | The dominant action on the screen (Publish, Save, Confirm) |
+| `secondary`   | Same-tier alternative (Cancel, Discard)                    |
+| `ghost`       | Toolbar buttons, list-row actions, low-emphasis controls   |
+| `destructive` | Delete, Remove, Revoke (irreversible-feeling actions)      |
 
 ### Sizes
 
-| Size    | Height | Use for                                                            |
-|---------|--------|--------------------------------------------------------------------|
-| `micro` | 18px   | Inline chips                                                       |
-| `xs`    | 26px   | Property panel rows                                                |
-| `sm`    | 28px   | **Default** — toolbar, dialogs                                     |
-| `md`    | 32px   | Primary CTAs in modals                                             |
-| `lg`    | 44px   | Touch targets, mobile                                              |
+| Size    | Height | Use for                        |
+| ------- | ------ | ------------------------------ |
+| `micro` | 18px   | Inline chips                   |
+| `xs`    | 26px   | Property panel rows            |
+| `sm`    | 28px   | **Default** — toolbar, dialogs |
+| `md`    | 32px   | Primary CTAs in modals         |
+| `lg`    | 44px   | Touch targets, mobile          |
 
 ### Flags
 
-| Flag          | Effect                                                              |
-|---------------|---------------------------------------------------------------------|
-| `iconOnly`    | Square button. **Requires `aria-label`.**                           |
-| `pressed`     | Toolbar-toggle state — sets `aria-pressed` + active background      |
-| `active`      | Active state for nav items                                          |
-| `fullWidth`   | Stretches to container width                                        |
-| `menuItem`    | Style override for dropdown menu rows                               |
-| `navItem`     | Style override for top-level nav items                              |
+| Flag          | Effect                                                                                                                                                                                              |
+| ------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `iconOnly`    | Square button. **Requires `aria-label`.**                                                                                                                                                           |
+| `pressed`     | Toolbar-toggle state — sets `aria-pressed` + active background                                                                                                                                      |
+| `active`      | Active state for nav items                                                                                                                                                                          |
+| `fullWidth`   | Stretches to container width                                                                                                                                                                        |
+| `menuItem`    | Style override for dropdown menu rows                                                                                                                                                               |
+| `navItem`     | Style override for top-level nav items                                                                                                                                                              |
 | `dangerHover` | Ghost buttons only: hover brightens the foreground without adding a background box — use for inline remove/close controls on tinted chips where a colored background would clash with the chip tint |
-| `tooltip`     | Wraps with `Tooltip` — works even when disabled. Auto-suppressed while `aria-expanded={true}` (open dropdown/menu) so the tooltip never overlays the open popup. |
+| `tooltip`     | Wraps with `Tooltip` — works even when disabled. Auto-suppressed while `aria-expanded={true}` (open dropdown/menu) so the tooltip never overlays the open popup.                                    |
 
 `type="button"` is the default — Button never accidentally submits a form. Pass `type="submit"` explicitly when needed.
 
@@ -246,7 +246,7 @@ Renders an accessible toggle that announces its state. **Always** pair with a vi
 ```tsx
 import { Select } from '@ui/components/Select'
 
-<Select
+;<Select
   value={size}
   onChange={setSize}
   options={[
@@ -308,11 +308,15 @@ Use `active` for selected/editing chips, `muted` when the label is informational
 ```tsx
 import { Dialog } from '@ui/components/Dialog'
 
-<Dialog open={open} onClose={onClose} title="Delete page?">
+;<Dialog open={open} onClose={onClose} title="Delete page?">
   <p>Are you sure? This can't be undone.</p>
   <Dialog.Actions>
-    <Button variant="ghost" onClick={onClose}>Cancel</Button>
-    <Button variant="destructive" onClick={onConfirm}>Delete</Button>
+    <Button variant="ghost" onClick={onClose}>
+      Cancel
+    </Button>
+    <Button variant="destructive" onClick={onConfirm}>
+      Delete
+    </Button>
   </Dialog.Actions>
 </Dialog>
 ```
@@ -326,8 +330,10 @@ import { Dialog } from '@ui/components/Dialog'
 ```tsx
 import { Tooltip } from '@ui/components/Tooltip'
 
-<Tooltip content="Toggle preview mode">
-  <Button variant="ghost" iconOnly aria-label="Preview"><PreviewIcon /></Button>
+;<Tooltip content="Toggle preview mode">
+  <Button variant="ghost" iconOnly aria-label="Preview">
+    <PreviewIcon />
+  </Button>
 </Tooltip>
 ```
 
@@ -343,16 +349,16 @@ Replaces native `title="..."` (gated by `no-native-title-tooltips.test.ts`). Wor
 
 ```tsx
 // 1. Mount once in your app root
-<ToastProvider />
+;<ToastProvider />
 
 // 2. Push from anywhere
 import { pushToast } from '@ui/components/Toast'
 
 pushToast({
-  kind: 'success',           // 'success' | 'error' | 'info' | 'warning'
+  kind: 'success', // 'success' | 'error' | 'info' | 'warning'
   title: 'Page published',
   body: 'Live at /about',
-  location: 'toolbar',       // optional source tag for logs
+  location: 'toolbar', // optional source tag for logs
 })
 ```
 
@@ -371,20 +377,24 @@ Two positioning modes:
 ```tsx
 import { ContextMenu, ContextMenuItem, ContextMenuSeparator } from '@ui/components/ContextMenu'
 
-{menu && (
-  <ContextMenu
-    x={menu.x}
-    y={menu.y}
-    ariaLabel="Layer actions"
-    animateExit
-    onClose={() => setMenu(null)}
-  >
-    <ContextMenuItem onClick={onRename}>Rename</ContextMenuItem>
-    <ContextMenuItem onClick={onDuplicate}>Duplicate</ContextMenuItem>
-    <ContextMenuSeparator />
-    <ContextMenuItem danger onClick={onDelete}>Delete</ContextMenuItem>
-  </ContextMenu>
-)}
+{
+  menu && (
+    <ContextMenu
+      x={menu.x}
+      y={menu.y}
+      ariaLabel="Layer actions"
+      animateExit
+      onClose={() => setMenu(null)}
+    >
+      <ContextMenuItem onClick={onRename}>Rename</ContextMenuItem>
+      <ContextMenuItem onClick={onDuplicate}>Duplicate</ContextMenuItem>
+      <ContextMenuSeparator />
+      <ContextMenuItem danger onClick={onDelete}>
+        Delete
+      </ContextMenuItem>
+    </ContextMenu>
+  )
+}
 ```
 
 **Anchor mode** — overflow `…` button that opens a dropdown below its trigger. Skip `animateExit` for instant close (the default):
@@ -419,12 +429,14 @@ const triggerRef = useRef<HTMLButtonElement>(null)
 import { ContextMenu, ContextMenuItem, ContextMenuSubmenu } from '@ui/components/ContextMenu'
 import { PlusIcon } from 'pixel-art-icons/icons/plus'
 
-<ContextMenu x={menu.x} y={menu.y} ariaLabel="Insert" animateExit onClose={close}>
+;<ContextMenu x={menu.x} y={menu.y} ariaLabel="Insert" animateExit onClose={close}>
   <ContextMenuSubmenu label="Insert here" icon={<PlusIcon size={12} />} onClose={close}>
     <ContextMenuItem onClick={onInsertText}>Text block</ContextMenuItem>
     <ContextMenuItem onClick={onInsertImage}>Image</ContextMenuItem>
   </ContextMenuSubmenu>
-  <ContextMenuItem danger onClick={onDelete}>Delete</ContextMenuItem>
+  <ContextMenuItem danger onClick={onDelete}>
+    Delete
+  </ContextMenuItem>
 </ContextMenu>
 ```
 
@@ -442,7 +454,7 @@ Layout primitives for property panels.
 import { Section } from '@ui/components/Section'
 import { ControlRow } from '@ui/components/ControlRow'
 
-<Section title="Spacing" defaultOpen>
+;<Section title="Spacing" defaultOpen>
   <ControlRow label="Margin top">
     <Input value={mt} onChange={setMt} suffix="px" />
   </ControlRow>
@@ -451,8 +463,10 @@ import { ControlRow } from '@ui/components/ControlRow'
   </ControlRow>
 </Section>
 
-{/* With indicator dot, icon, and flush (Properties panel pattern) */}
-<Section
+{
+  /* With indicator dot, icon, and flush (Properties panel pattern) */
+}
+;<Section
   title="Layout"
   icon={LayoutIcon}
   defaultOpen={sectionsExpanded}
@@ -479,12 +493,12 @@ import { Widget } from '@ui/components/Widget'
 </Widget>
 ```
 
-| `tint`    | Color           | Typical category                        |
-|-----------|-----------------|-----------------------------------------|
-| `mint`    | `#8ee6c8`       | "Saved / system / status"                |
-| `lilac`   | `#c8b6ff`       | "Pages / structure"                     |
-| `sky`     | `#9bdcff`       | "Storage / data / configuration"        |
-| `peach`   | `#ffc7a8`       | "Posts / media / activity"              |
+| `tint`  | Color     | Typical category                 |
+| ------- | --------- | -------------------------------- |
+| `mint`  | `#8ee6c8` | "Saved / system / status"        |
+| `lilac` | `#c8b6ff` | "Pages / structure"              |
+| `sky`   | `#9bdcff` | "Storage / data / configuration" |
+| `peach` | `#ffc7a8` | "Posts / media / activity"       |
 
 `Widget` is the **canonical implementation** of the tile-card pattern — see [docs/design.md](../design.md). Build any equivalent tile by reusing `Widget`, not by recreating the pattern.
 
@@ -513,12 +527,12 @@ const [activeTab, setActiveTab] = useState<'overview' | 'settings'>('overview')
 </Tabs>
 ```
 
-| Component | Required props | Notes |
-|-----------|---------------|-------|
-| `Tabs`    | `value`, `onChange` | Context provider. Generic on `TValue extends string`. |
-| `TabList` | `ariaLabel` | Renders `role="tablist"`, owns arrow-key navigation. |
-| `Tab`     | `value` | Renders a `<button role="tab">`. Active tab is in the natural focus order; inactive tabs use `tabIndex={-1}`. |
-| `TabPanel`| `value` | Renders `role="tabpanel"`, `hidden={!isActive}`. DOM stays mounted. |
+| Component  | Required props      | Notes                                                                                                         |
+| ---------- | ------------------- | ------------------------------------------------------------------------------------------------------------- |
+| `Tabs`     | `value`, `onChange` | Context provider. Generic on `TValue extends string`.                                                         |
+| `TabList`  | `ariaLabel`         | Renders `role="tablist"`, owns arrow-key navigation.                                                          |
+| `Tab`      | `value`             | Renders a `<button role="tab">`. Active tab is in the natural focus order; inactive tabs use `tabIndex={-1}`. |
+| `TabPanel` | `value`             | Renders `role="tabpanel"`, `hidden={!isActive}`. DOM stays mounted.                                           |
 
 **Do not** hand-roll a `role="tablist"` div — this is gated by `no-plugin-tab-shells.test.ts`. Use `<Tabs>` / `<TabList>` from `@ui/components/Tabs` instead.
 
@@ -582,10 +596,7 @@ import { cn } from '@ui/cn'
 The only legitimate use of inline `style` is **dynamic CSS custom properties** the static CSS Module reads back:
 
 ```tsx
-<div
-  className={styles.surface}
-  style={{ '--surface-min-h': `${minHeight}px` } as CSSProperties}
-/>
+<div className={styles.surface} style={{ '--surface-min-h': `${minHeight}px` } as CSSProperties} />
 ```
 
 ```css
@@ -615,21 +626,21 @@ The primitive must work entirely with existing design tokens. If you need a new 
 
 ## Forbidden patterns
 
-| Pattern                                          | Use instead                                  |
-|--------------------------------------------------|----------------------------------------------|
-| `<button>` in admin code                         | `<Button variant="...">`                     |
+| Pattern                                                            | Use instead                                                                                 |
+| ------------------------------------------------------------------ | ------------------------------------------------------------------------------------------- |
+| `<button>` in admin code                                           | `<Button variant="...">`                                                                    |
 | `react-loading-skeleton` / `<Skeleton>` from a third-party package | `Skeleton*` from `@ui/components/Skeleton` — the local primitive owns the shimmer animation |
-| `<input className="...">`                        | `<Input>`                                    |
-| `<input type="checkbox">`                        | `<Checkbox>` or `<Switch>`                   |
-| `<select>`                                       | `<Select>`                                   |
-| Native `alert('...')` / `confirm('...')`         | `<Dialog>` or `pushToast({ kind: 'error' })` |
-| `title="..."` for a hover hint                   | `<Tooltip>` or Button's `tooltip` prop       |
-| `lucide-react`, `heroicons`, inline SVG strings  | `pixel-art-icons/icons/<name>`               |
-| `clsx`, `tailwind-merge`, `cva`, `@radix-ui/*`   | `cn` from `@ui/cn`                           |
-| `style={{ color: 'white' }}`                     | CSS Module class                             |
-| `style={{ '--x': value }}` for static values     | Use a CSS Module class — `--x` is for runtime-only values |
-| Recreating the tile-card look manually           | `<Widget tint="...">`                        |
-| Building tree rows from scratch                  | `Tree*` from `@site/ui/Tree`                 |
+| `<input className="...">`                                          | `<Input>`                                                                                   |
+| `<input type="checkbox">`                                          | `<Checkbox>` or `<Switch>`                                                                  |
+| `<select>`                                                         | `<Select>`                                                                                  |
+| Native `alert('...')` / `confirm('...')`                           | `<Dialog>` or `pushToast({ kind: 'error' })`                                                |
+| `title="..."` for a hover hint                                     | `<Tooltip>` or Button's `tooltip` prop                                                      |
+| `lucide-react`, `heroicons`, inline SVG strings                    | `pixel-art-icons/icons/<name>`                                                              |
+| `clsx`, `tailwind-merge`, `cva`, `@radix-ui/*`                     | `cn` from `@ui/cn`                                                                          |
+| `style={{ color: 'white' }}`                                       | CSS Module class                                                                            |
+| `style={{ '--x': value }}` for static values                       | Use a CSS Module class — `--x` is for runtime-only values                                   |
+| Recreating the tile-card look manually                             | `<Widget tint="...">`                                                                       |
+| Building tree rows from scratch                                    | `Tree*` from `@site/ui/Tree`                                                                |
 
 ---
 

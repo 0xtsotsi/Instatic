@@ -12,7 +12,6 @@
  */
 import { CORE_CAPABILITIES, type CoreCapability } from '@core/capabilities'
 
-
 export type { CoreCapability }
 
 interface SystemRoleDefinition {
@@ -155,6 +154,9 @@ export function normalizeCapabilities(value: unknown): CoreCapability[] {
   return [...seen].sort((a, b) => CORE_CAPABILITIES.indexOf(a) - CORE_CAPABILITIES.indexOf(b))
 }
 
-export function roleHasCapability(capabilities: readonly CoreCapability[], capability: CoreCapability): boolean {
+export function roleHasCapability(
+  capabilities: readonly CoreCapability[],
+  capability: CoreCapability,
+): boolean {
   return capabilities.includes(capability)
 }

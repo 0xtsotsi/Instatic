@@ -1,6 +1,6 @@
 name: Deployment help
 description: Ask for help with Docker, Railway, Render, or another host.
-title: "[Deploy]: "
+title: '[Deploy]: '
 labels:
   - deployment
 body:

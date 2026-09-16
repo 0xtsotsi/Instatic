@@ -88,24 +88,24 @@ DataPage.tsx
 
 Tiers enforced by the guard functions:
 
-| Tier | Field IDs | Edit affordance | Delete affordance |
-|------|-----------|-----------------|-------------------|
-| Mandatory built-in (postType) | `title`, `slug` | None — locked row, no edit/delete buttons | Blocked |
-| Optional built-in (postType) | `body`, `featuredMedia`, `seoTitle`, `seoDescription` | Description + required only; label locked | Allowed |
-| Built-in on a **system table** | every `builtIn` field | None — fully locked row | Blocked |
-| Custom | all others | Fully editable | Allowed if not the primary field |
+| Tier                           | Field IDs                                             | Edit affordance                           | Delete affordance                |
+| ------------------------------ | ----------------------------------------------------- | ----------------------------------------- | -------------------------------- |
+| Mandatory built-in (postType)  | `title`, `slug`                                       | None — locked row, no edit/delete buttons | Blocked                          |
+| Optional built-in (postType)   | `body`, `featuredMedia`, `seoTitle`, `seoDescription` | Description + required only; label locked | Allowed                          |
+| Built-in on a **system table** | every `builtIn` field                                 | None — fully locked row                   | Blocked                          |
+| Custom                         | all others                                            | Fully editable                            | Allowed if not the primary field |
 
 ```ts
-isMandatoryField(fieldId)           // title or slug on a postType
-isOptionalBuiltIn(field)            // builtIn: true but not mandatory
-isSystemBuiltInField(field, table)  // builtIn on a system table — frozen
-isFieldFullyLocked(field, table)    // postType mandatory OR system built-in → no edit/delete/reorder
-isFieldDeletable(field, table)      // false for primaryField or any fully-locked field
-isLabelLocked(field, table)         // true for built-in postType fields and system built-ins
-deleteTooltip(field, table)         // disabled-button tooltip text, or undefined
+isMandatoryField(fieldId) // title or slug on a postType
+isOptionalBuiltIn(field) // builtIn: true but not mandatory
+isSystemBuiltInField(field, table) // builtIn on a system table — frozen
+isFieldFullyLocked(field, table) // postType mandatory OR system built-in → no edit/delete/reorder
+isFieldDeletable(field, table) // false for primaryField or any fully-locked field
+isLabelLocked(field, table) // true for built-in postType fields and system built-ins
+deleteTooltip(field, table) // disabled-button tooltip text, or undefined
 ```
 
-Built-in field **values** (row cells) are additionally read-only on the *structural* system tables (pages/components/layouts) via `isBuiltInValueLocked` (`@core/data/systemTableGuard`); `posts` built-in values stay editable. The same predicate backs the server's row-write rejection (`lockedBuiltInCellKey`).
+Built-in field **values** (row cells) are additionally read-only on the _structural_ system tables (pages/components/layouts) via `isBuiltInValueLocked` (`@core/data/systemTableGuard`); `posts` built-in values stay editable. The same predicate backs the server's row-write rejection (`lockedBuiltInCellKey`).
 
 `FIELD_TYPE_LABELS` maps every `DataFieldType` to a human-readable string and is shared by `FieldRow` and `FieldEditForm`.
 
@@ -132,19 +132,19 @@ applyEditState(field, state, labelLocked): DataField // draft → persisted
 
 ### Sub-component breakdown
 
-| File | Responsibility |
-|------|----------------|
-| `DataGridToolbar.tsx` | Two-row toolbar: title + row-count subtitle, search box, Add row button. Bottom row (publish-workflow tables): `DataGridViewChips` + active-sort indicator. |
-| `DataGridViewChips.tsx` | Pill-style filter chips (All / Published / Scheduled / Drafts / Archived; Pages / Templates for page tables). |
-| `DataGridHeaderRow.tsx` | Column header row: leading select-all checkbox, one `DataGridHeaderCell` per ordered field, trailing actions column. |
-| `DataGridHeaderCell.tsx` | Single column header cell: field type icon + label + sort direction caret. Uses bare `<button>` (§8.8 exception — `role="columnheader"` inside CSS-Grid). |
-| `DataGridGroupHeader.tsx` | Full-width collapsible section header (status dot + label + count). Uses bare `<button>` (§8.8 exception — grid-spanning disclosure toggle). |
-| `DataGridRow.tsx` | One data row: checkbox, primary cell, field cells via `CellDisplayRenderer`, trailing action buttons. |
-| `DataGridSkeletonRows.tsx` | Per-row shimmer cells shown while `loading === true`. Shared with `DataGridSkeleton` for identical column ladder + sticky positioning. |
-| `DataGridEmptyState.tsx` | "No rows" message inside the grid. Distinguishes an empty table from a filter that matched nothing. |
-| `DataGridBulkActionBar.tsx` | Floating action bar (via `FloatingActionBar`) visible when one or more rows are checked. Publish / draft / export / delete actions. |
-| `DataGridSkeleton.tsx` | Full-canvas skeleton rendered by `DataCanvas` before any table is selected. Mirrors the grid chrome (toolbar, column header, rows) with generic column count. |
-| `DataRowContextMenu.tsx` | Right-click row action menu — see [Context menus](#context-menus) below. |
+| File                        | Responsibility                                                                                                                                                |
+| --------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `DataGridToolbar.tsx`       | Two-row toolbar: title + row-count subtitle, search box, Add row button. Bottom row (publish-workflow tables): `DataGridViewChips` + active-sort indicator.   |
+| `DataGridViewChips.tsx`     | Pill-style filter chips (All / Published / Scheduled / Drafts / Archived; Pages / Templates for page tables).                                                 |
+| `DataGridHeaderRow.tsx`     | Column header row: leading select-all checkbox, one `DataGridHeaderCell` per ordered field, trailing actions column.                                          |
+| `DataGridHeaderCell.tsx`    | Single column header cell: field type icon + label + sort direction caret. Uses bare `<button>` (§8.8 exception — `role="columnheader"` inside CSS-Grid).     |
+| `DataGridGroupHeader.tsx`   | Full-width collapsible section header (status dot + label + count). Uses bare `<button>` (§8.8 exception — grid-spanning disclosure toggle).                  |
+| `DataGridRow.tsx`           | One data row: checkbox, primary cell, field cells via `CellDisplayRenderer`, trailing action buttons.                                                         |
+| `DataGridSkeletonRows.tsx`  | Per-row shimmer cells shown while `loading === true`. Shared with `DataGridSkeleton` for identical column ladder + sticky positioning.                        |
+| `DataGridEmptyState.tsx`    | "No rows" message inside the grid. Distinguishes an empty table from a filter that matched nothing.                                                           |
+| `DataGridBulkActionBar.tsx` | Floating action bar (via `FloatingActionBar`) visible when one or more rows are checked. Publish / draft / export / delete actions.                           |
+| `DataGridSkeleton.tsx`      | Full-canvas skeleton rendered by `DataCanvas` before any table is selected. Mirrors the grid chrome (toolbar, column header, rows) with generic column count. |
+| `DataRowContextMenu.tsx`    | Right-click row action menu — see [Context menus](#context-menus) below.                                                                                      |
 
 ### Pure helpers — `dataGridRows.ts`
 
@@ -196,17 +196,17 @@ Both actions are opened from `DataSidebar`.
 
 ## Forbidden patterns
 
-| Pattern | Why |
-|---------|-----|
-| Reaching into `cells_json` directly | Use the readers in `src/core/data/cells.ts` |
-| Reimplementing title copy naming or slug collision logic when duplicating rows | Use `buildDuplicateRowCells` from `src/core/data/duplicateRow.ts` |
-| Comparing field classification inline | Import from `fieldGuards.ts` |
-| Adding a `kind === 'postType'` branch inside `FieldsSection` | Classification belongs in `fieldGuards.ts`; `FieldsSection` reads `isMandatoryField`, `isOptionalBuiltIn`, etc. |
-| Editing a field's `type` after creation | Type is immutable; `FieldEditForm` shows it read-only with "(cannot be changed)" |
-| Writing manual `useMemo`/`useCallback` in any of these components | React Compiler auto-memoizes; the only exception is the async helper extraction pattern above |
-| Putting filter / sort / group logic in `DataGrid.tsx` | That logic lives in `dataGridRows.ts` (pure, side-effect free). `DataGrid.tsx` only holds interaction state and wires sub-components. |
-| Treating the DataGrid as an inline cell editor | The grid is read-only. `CellEditorRenderer.tsx` belongs to the inspector (`RowDetail.tsx`), not to the grid. |
-| Adding a "Table settings" shortcut to the `DataPage` toolbar | `TableSettings` is reached by deselecting a row — the inspector switches automatically. A duplicate toolbar affordance was removed; `src/__tests__/admin/data/dataPageToolbar.test.ts` prevents it from returning. |
+| Pattern                                                                        | Why                                                                                                                                                                                                                |
+| ------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Reaching into `cells_json` directly                                            | Use the readers in `src/core/data/cells.ts`                                                                                                                                                                        |
+| Reimplementing title copy naming or slug collision logic when duplicating rows | Use `buildDuplicateRowCells` from `src/core/data/duplicateRow.ts`                                                                                                                                                  |
+| Comparing field classification inline                                          | Import from `fieldGuards.ts`                                                                                                                                                                                       |
+| Adding a `kind === 'postType'` branch inside `FieldsSection`                   | Classification belongs in `fieldGuards.ts`; `FieldsSection` reads `isMandatoryField`, `isOptionalBuiltIn`, etc.                                                                                                    |
+| Editing a field's `type` after creation                                        | Type is immutable; `FieldEditForm` shows it read-only with "(cannot be changed)"                                                                                                                                   |
+| Writing manual `useMemo`/`useCallback` in any of these components              | React Compiler auto-memoizes; the only exception is the async helper extraction pattern above                                                                                                                      |
+| Putting filter / sort / group logic in `DataGrid.tsx`                          | That logic lives in `dataGridRows.ts` (pure, side-effect free). `DataGrid.tsx` only holds interaction state and wires sub-components.                                                                              |
+| Treating the DataGrid as an inline cell editor                                 | The grid is read-only. `CellEditorRenderer.tsx` belongs to the inspector (`RowDetail.tsx`), not to the grid.                                                                                                       |
+| Adding a "Table settings" shortcut to the `DataPage` toolbar                   | `TableSettings` is reached by deselecting a row — the inspector switches automatically. A duplicate toolbar affordance was removed; `src/__tests__/admin/data/dataPageToolbar.test.ts` prevents it from returning. |
 
 ---
 

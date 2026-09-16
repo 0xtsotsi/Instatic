@@ -21,10 +21,7 @@ import type { AiBrowserBridge, AiTool, AiToolOutput } from '../runtime/types'
 import { executeAiTool } from '../drivers/http/execTool'
 import { mcpToolsForCapabilities } from './registry'
 import { authorizeMcpContentTool } from './contentAuthorization'
-import {
-  getEditorBridgeForUser,
-  type EditorBridgeScope,
-} from './editorBridge'
+import { getEditorBridgeForUser, type EditorBridgeScope } from './editorBridge'
 
 export interface McpServerContext {
   db: DbClient
@@ -43,20 +40,16 @@ const NOOP_BRIDGE: AiBrowserBridge = {
 
 const NO_WORKSPACE_MESSAGE: Record<EditorBridgeScope, string> = {
   site: 'This tool runs in the Instatic Site editor. Open the Site editor in a browser (signed in as the connector owner) and try again.',
-  content: 'This tool runs in the Instatic Content workspace. Open the Content workspace in a browser (signed in as the connector owner) and try again.',
+  content:
+    'This tool runs in the Instatic Content workspace. Open the Content workspace in a browser (signed in as the connector owner) and try again.',
 }
 
 export function buildMcpServer(ctx: McpServerContext): Server {
-  const server = new Server(
-    { name: 'instatic', version: '1.0.0' },
-    { capabilities: { tools: {} } },
-  )
+  const server = new Server({ name: 'instatic', version: '1.0.0' }, { capabilities: { tools: {} } })
 
   const tools = mcpToolsForCapabilities(
     ctx.capabilities,
-    ctx.uploadsDir
-      ? { connectorId: ctx.connectorId, uploadsDir: ctx.uploadsDir }
-      : undefined,
+    ctx.uploadsDir ? { connectorId: ctx.connectorId, uploadsDir: ctx.uploadsDir } : undefined,
   )
   const byName = new Map<string, AiTool>(tools.map((t) => [t.name, t]))
 
@@ -68,7 +61,10 @@ export function buildMcpServer(ctx: McpServerContext): Server {
       // `AiTool.inputSchema` field is the general `TSchema`, so we adapt it to
       // the SDK's object-schema shape (a type-level adaptation, not a runtime
       // data boundary — every MCP tool's schema is a `Type.Object`).
-      inputSchema: t.inputSchema as unknown as { type: 'object'; properties?: Record<string, unknown> },
+      inputSchema: t.inputSchema as unknown as {
+        type: 'object'
+        properties?: Record<string, unknown>
+      },
     })),
   }))
 
@@ -88,30 +84,33 @@ export function buildMcpServer(ctx: McpServerContext): Server {
       if (tool.scope !== 'site' && tool.scope !== 'content') {
         return {
           isError: true,
-          content: [{ type: 'text', text: `Browser tool "${tool.name}" has unsupported scope "${tool.scope}".` }],
+          content: [
+            {
+              type: 'text',
+              text: `Browser tool "${tool.name}" has unsupported scope "${tool.scope}".`,
+            },
+          ],
         }
       }
       const browserScope: EditorBridgeScope = tool.scope
       const live = getEditorBridgeForUser(ctx.userId, browserScope)
       if (!live) {
-        return { isError: true, content: [{ type: 'text', text: NO_WORKSPACE_MESSAGE[browserScope] }] }
+        return {
+          isError: true,
+          content: [{ type: 'text', text: NO_WORKSPACE_MESSAGE[browserScope] }],
+        }
       }
-      bridge = browserScope === 'content'
-        ? {
-            callBrowser: async (toolName, input) => {
-              await authorizeMcpContentTool(
-                ctx.db,
-                ctx.userId,
-                ctx.capabilities,
-                toolName,
-                input,
-              )
-              const current = getEditorBridgeForUser(ctx.userId, browserScope)
-              if (!current) throw new Error(NO_WORKSPACE_MESSAGE[browserScope])
-              return current.callBrowser(toolName, input)
-            },
-          }
-        : live
+      bridge =
+        browserScope === 'content'
+          ? {
+              callBrowser: async (toolName, input) => {
+                await authorizeMcpContentTool(ctx.db, ctx.userId, ctx.capabilities, toolName, input)
+                const current = getEditorBridgeForUser(ctx.userId, browserScope)
+                if (!current) throw new Error(NO_WORKSPACE_MESSAGE[browserScope])
+                return current.callBrowser(toolName, input)
+              },
+            }
+          : live
     }
 
     const controller = new AbortController()
@@ -132,10 +131,12 @@ export function buildMcpServer(ctx: McpServerContext): Server {
       // letting the request handler reject with an internal MCP error.
       return {
         isError: true,
-        content: [{
-          type: 'text',
-          text: getErrorMessage(err, `Browser tool "${tool.name}" could not return a result.`),
-        }],
+        content: [
+          {
+            type: 'text',
+            text: getErrorMessage(err, `Browser tool "${tool.name}" could not return a result.`),
+          },
+        ],
       }
     }
 

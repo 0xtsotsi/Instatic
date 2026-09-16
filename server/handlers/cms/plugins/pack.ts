@@ -23,11 +23,7 @@ import {
   PluginPackError,
 } from '../../../plugins/pack'
 import { getDraftSite, saveDraftSite } from '../../../repositories/site'
-import {
-  listDataRows,
-  createDataRow,
-  saveDataRowDraft,
-} from '../../../repositories/data'
+import { listDataRows, createDataRow, saveDataRowDraft } from '../../../repositories/data'
 import { pageFromRow, pageToCells } from '../../../../src/core/data/pageFromRow'
 import { visualComponentToCells } from '../../../../src/core/data/componentFromRow'
 import { savedLayoutFromRow, savedLayoutToCells } from '../../../../src/core/data/layoutFromRow'
@@ -63,7 +59,11 @@ async function installPluginPackToSite(
 ): Promise<PluginPackSummary | null> {
   if (!plugin.manifest.pack) return null
   if (!plugin.manifest.assetBasePath) return null
-  const raw = await loadPluginPackFile(uploadsDir, plugin.manifest.assetBasePath, plugin.manifest.pack.path)
+  const raw = await loadPluginPackFile(
+    uploadsDir,
+    plugin.manifest.assetBasePath,
+    plugin.manifest.pack.path,
+  )
   const pack = parsePluginPack(plugin.id, raw)
 
   const shell = await getDraftSite(db)
@@ -106,7 +106,11 @@ async function installPluginPackToSite(
     if (existingPagesById.has(page.id)) {
       await saveDataRowDraft(db, page.id, { cells, slug: page.slug }, actorUserId)
     } else {
-      await createDataRow(db, { id: page.id, tableId: 'pages', cells, slug: page.slug }, actorUserId)
+      await createDataRow(
+        db,
+        { id: page.id, tableId: 'pages', cells, slug: page.slug },
+        actorUserId,
+      )
     }
   }
 
@@ -218,7 +222,9 @@ export async function handlePluginPackInstall(
     return badRequest(`Plugin "${pluginId}" is disabled — enable it before re-syncing its pack`)
   }
   if (!plugin.grantedPermissions.includes('visualComponents.register')) {
-    return badRequest(`Plugin "${pluginId}" requires the visualComponents.register permission to install a pack`)
+    return badRequest(
+      `Plugin "${pluginId}" requires the visualComponents.register permission to install a pack`,
+    )
   }
   if (!plugin.manifest.pack) {
     return badRequest(`Plugin "${pluginId}" does not declare a pack`)

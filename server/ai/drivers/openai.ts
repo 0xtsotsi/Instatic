@@ -23,17 +23,8 @@
  */
 
 import { Type, parseValue } from '@core/utils/typeboxHelpers'
-import type {
-  AiAuthMode,
-  AiProviderId,
-  AiStreamEvent,
-} from '../runtime/types'
-import type {
-  AiProvider,
-  AiProviderModel,
-  AiResolvedCredential,
-  AiStreamRequest,
-} from './types'
+import type { AiAuthMode, AiProviderId, AiStreamEvent } from '../runtime/types'
+import type { AiProvider, AiProviderModel, AiResolvedCredential, AiStreamRequest } from './types'
 import { runToolLoop } from './http/toolLoop'
 import { createResponsesAdapter } from './responses-shared'
 
@@ -53,7 +44,10 @@ const openaiAdapter = createResponsesAdapter({
     }
   },
   promptCacheKey(req) {
-    const toolNames = req.tools.map((t) => t.name).sort().join(',')
+    const toolNames = req.tools
+      .map((t) => t.name)
+      .sort()
+      .join(',')
     return `instatic:${req.toolContextBase.scope}:${stableHash(toolNames)}`
   },
 })
@@ -104,10 +98,7 @@ export const openaiDriver: AiProvider = {
 
 // OpenAI's list endpoint returns only `{ id }` per model (plus `object`,
 // `created`, `owned_by` we ignore) — no display name, capabilities, or tier.
-const OpenAiModelSchema = Type.Object(
-  { id: Type.String() },
-  { additionalProperties: true },
-)
+const OpenAiModelSchema = Type.Object({ id: Type.String() }, { additionalProperties: true })
 
 const OpenAiModelsResponseSchema = Type.Object(
   { data: Type.Array(OpenAiModelSchema) },
@@ -155,18 +146,21 @@ async function fetchOpenAiModels(
 
   return parsed.data
     .filter((m) => isChatModel(m.id))
-    .map((m) => ({
-      id: m.id,
-      label: deriveLabel(m.id),
-      tier: deriveTier(m.id),
-      capabilities: {
-        toolCalling: true,
-        visionInput: true,
-        toolResultImages: false,
-        promptCache: false,
-        streaming: true,
-      },
-    } satisfies AiProviderModel))
+    .map(
+      (m) =>
+        ({
+          id: m.id,
+          label: deriveLabel(m.id),
+          tier: deriveTier(m.id),
+          capabilities: {
+            toolCalling: true,
+            visionInput: true,
+            toolResultImages: false,
+            promptCache: false,
+            streaming: true,
+          },
+        }) satisfies AiProviderModel,
+    )
     .sort((a, b) => {
       const rank = (TIER_RANK[a.tier ?? ''] ?? 9) - (TIER_RANK[b.tier ?? ''] ?? 9)
       // Within a tier, newest-id-first (descending) so e.g. gpt-5.5 precedes gpt-4o.
@@ -182,8 +176,16 @@ async function fetchOpenAiModels(
 function isChatModel(id: string): boolean {
   if (!/^(gpt-|chatgpt-|o[1-9])/.test(id)) return false
   const EXCLUDED = [
-    'embedding', 'whisper', 'tts', 'audio', 'realtime', 'image',
-    'transcribe', 'moderation', 'search', 'dall-e',
+    'embedding',
+    'whisper',
+    'tts',
+    'audio',
+    'realtime',
+    'image',
+    'transcribe',
+    'moderation',
+    'search',
+    'dall-e',
   ]
   return !EXCLUDED.some((kw) => id.includes(kw))
 }

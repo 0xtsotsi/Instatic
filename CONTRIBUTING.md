@@ -64,10 +64,10 @@ Do not report vulnerabilities in public issues. Follow [SECURITY.md](SECURITY.md
 
 This checkout is a **fork** configured as the agent's working copy. Two remotes exist:
 
-| Remote | URL | Role | Push allowed? |
-|---|---|---|---|
-| `origin` | `https://github.com/0xtsotsi/Instatic.git` | Personal fork — default push target | yes |
-| `upstream` | `https://github.com/corebunch/instatic.git` | Release repository (`corebunch/instatic`) | **no** |
+| Remote     | URL                                         | Role                                      | Push allowed? |
+| ---------- | ------------------------------------------- | ----------------------------------------- | ------------- |
+| `origin`   | `https://github.com/0xtsotsi/Instatic.git`  | Personal fork — default push target       | yes           |
+| `upstream` | `https://github.com/corebunch/instatic.git` | Release repository (`corebunch/instatic`) | **no**        |
 
 ### Push destination rules
 

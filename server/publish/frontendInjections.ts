@@ -32,11 +32,7 @@ import { listInstalledPlugins, type InstalledPluginResult } from '../repositorie
 import { mediaStorageRegistry } from '@core/plugins/mediaStorageRegistry'
 import { listElectedAdapters } from '../repositories/mediaStorageAdapters'
 import { addCspSources, rewriteCspMeta, setCspDirective } from '@core/publisher'
-import type {
-  FrontendAsset,
-  FrontendAssetPlacement,
-  InstalledPlugin,
-} from '@core/plugin-sdk'
+import type { FrontendAsset, FrontendAssetPlacement, InstalledPlugin } from '@core/plugin-sdk'
 
 // ---------------------------------------------------------------------------
 // Plan shape
@@ -106,7 +102,7 @@ export interface FrontendInjections {
 export async function collectFrontendInjections(db: DbClient): Promise<FrontendInjections> {
   const results = await listInstalledPlugins(db)
   const tags: Record<FrontendAssetPlacement, string[]> = {
-    'head': [],
+    head: [],
     'head-end': [],
     'body-start': [],
     'body-end': [],
@@ -303,10 +299,7 @@ function formatAttrs(attrs: Record<string, string> | undefined): string {
  * Identical shape applies to both real-publish output and the editor's
  * preview iframe (`buildRuntimePreviewDocument`).
  */
-export function injectFrontendAssets(
-  html: string,
-  injections: FrontendInjections,
-): string {
+export function injectFrontendAssets(html: string, injections: FrontendInjections): string {
   let next = html
 
   // Splice tags at each anchor in document order.

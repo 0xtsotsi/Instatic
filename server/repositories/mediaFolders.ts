@@ -68,10 +68,7 @@ export async function listMediaFolders(db: DbClient): Promise<MediaFolder[]> {
   return rows.map(mapFolder)
 }
 
-export async function getMediaFolder(
-  db: DbClient,
-  id: string,
-): Promise<MediaFolder | null> {
+export async function getMediaFolder(db: DbClient, id: string): Promise<MediaFolder | null> {
   const { rows } = await db<MediaFolderRow>`
     select id, parent_id, name, slug, sort_order, created_by_user_id, created_at
     from media_folders
@@ -146,10 +143,7 @@ export async function updateMediaFolder(
  * membership rows automatically — the assets themselves stay (they just
  * become Uncategorized).
  */
-export async function deleteMediaFolder(
-  db: DbClient,
-  id: string,
-): Promise<boolean> {
+export async function deleteMediaFolder(db: DbClient, id: string): Promise<boolean> {
   const result = await db`
     delete from media_folders where id = ${id}
   `
@@ -192,10 +186,7 @@ export async function deleteAllMediaFolders(db: DbClient): Promise<void> {
  * authorship is instance-local and is not carried in the bundle. Used by the
  * bundle import handler.
  */
-export async function importMediaFolder(
-  db: DbClient,
-  input: ExportableMediaFolder,
-): Promise<void> {
+export async function importMediaFolder(db: DbClient, input: ExportableMediaFolder): Promise<void> {
   await db`
     insert into media_folders (id, parent_id, name, slug, sort_order, created_by_user_id)
     values (

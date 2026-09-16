@@ -46,13 +46,15 @@ const UserCreateBodySchema = Type.Object({
   status: Type.Optional(UserStatusSchema),
 })
 
-const UserPatchBodySchema = Type.Partial(Type.Object({
-  email: Type.String(),
-  displayName: Type.String(),
-  password: Type.String(),
-  roleId: Type.String(),
-  status: UserStatusSchema,
-}))
+const UserPatchBodySchema = Type.Partial(
+  Type.Object({
+    email: Type.String(),
+    displayName: Type.String(),
+    password: Type.String(),
+    roleId: Type.String(),
+    status: UserStatusSchema,
+  }),
+)
 
 // ---------------------------------------------------------------------------
 // Owner-guard helpers
@@ -66,9 +68,9 @@ async function rejectsLastOwnerRemoval(
   const current = await findUserById(db, userId)
   if (!current) return false
   if (current.role.slug !== 'owner' || current.status !== 'active') return false
-  const removesOwnerRole = next.delete || next.roleId !== undefined && next.roleId !== 'owner'
+  const removesOwnerRole = next.delete || (next.roleId !== undefined && next.roleId !== 'owner')
   const deactivatesOwner = next.status !== undefined && next.status !== 'active'
-  return (removesOwnerRole || deactivatesOwner) && await countActiveOwners(db) <= 1
+  return (removesOwnerRole || deactivatesOwner) && (await countActiveOwners(db)) <= 1
 }
 
 function rejectsOwnerRoleAssignment(roleId: string | undefined): Response | null {
@@ -199,19 +201,21 @@ async function handleUserPatch(
       status: body.status,
     })
     if (!user) return userNotFound()
-    const revokedSessions = body.password !== undefined
-      ? await revokeAllOtherSessions(
-        db,
-        userId,
-        userId === actor.id ? await getSessionHash(req) : null,
-      )
-      : 0
+    const revokedSessions =
+      body.password !== undefined
+        ? await revokeAllOtherSessions(
+            db,
+            userId,
+            userId === actor.id ? await getSessionHash(req) : null,
+          )
+        : 0
 
-    const action = body.password !== undefined
-      ? 'password.change'
-      : body.status === 'suspended'
-        ? 'user.suspend'
-        : 'user.update'
+    const action =
+      body.password !== undefined
+        ? 'password.change'
+        : body.status === 'suspended'
+          ? 'user.suspend'
+          : 'user.update'
     await createAuditEvent(db, {
       actorUserId: actor.id,
       action,

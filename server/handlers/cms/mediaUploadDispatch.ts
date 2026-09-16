@@ -25,11 +25,7 @@
 
 import { nanoid } from 'nanoid'
 import type { DbClient } from '../../db/client'
-import type {
-  MediaAssetRole,
-  MediaStorageAdapter,
-  MediaStorageWriteResult,
-} from '@core/plugin-sdk'
+import type { MediaAssetRole, MediaStorageAdapter, MediaStorageWriteResult } from '@core/plugin-sdk'
 import { mediaStorageRegistry } from '@core/plugins/mediaStorageRegistry'
 import { getElectedAdapterId } from '../../repositories/mediaStorageAdapters'
 import { executeUploadPlan, type StepReceipt } from './mediaUploadExecutor'
@@ -149,10 +145,7 @@ export async function dispatchUpload(
     receipts = await executeUploadPlan(plan, input.bytes)
   } catch (err) {
     await adapter.abortWrite({ storagePath: plan.storagePath }).catch((abortErr) => {
-      console.error(
-        `[mediaUploadDispatch] abortWrite failed for "${adapter.id}":`,
-        abortErr,
-      )
+      console.error(`[mediaUploadDispatch] abortWrite failed for "${adapter.id}":`, abortErr)
     })
     throw err
   }
@@ -167,10 +160,7 @@ export async function dispatchUpload(
     })
   } catch (err) {
     await adapter.abortWrite({ storagePath: plan.storagePath }).catch((abortErr) => {
-      console.error(
-        `[mediaUploadDispatch] abortWrite failed for "${adapter.id}":`,
-        abortErr,
-      )
+      console.error(`[mediaUploadDispatch] abortWrite failed for "${adapter.id}":`, abortErr)
     })
     throw err
   }
@@ -183,9 +173,10 @@ export async function dispatchUpload(
   // URL here (not in the plugin) keeps signing latency off the page render
   // critical path AND prevents stale signed URLs from being stored on
   // disk in `media_assets.public_path`.
-  const publicUrl = adapter.servingMode === 'public-url'
-    ? result.publicUrl
-    : buildSignedRedirectUrl(adapter.id, plan.storagePath)
+  const publicUrl =
+    adapter.servingMode === 'public-url'
+      ? result.publicUrl
+      : buildSignedRedirectUrl(adapter.id, plan.storagePath)
   return {
     storagePath: plan.storagePath,
     publicUrl,

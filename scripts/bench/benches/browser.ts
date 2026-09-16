@@ -60,7 +60,14 @@ function readArg(name: string): string | undefined {
 
 function readSet(name: string): Set<string> {
   const raw = readArg(name)
-  return new Set(raw ? raw.split(',').map((s) => s.trim()).filter(Boolean) : [])
+  return new Set(
+    raw
+      ? raw
+          .split(',')
+          .map((s) => s.trim())
+          .filter(Boolean)
+      : [],
+  )
 }
 
 function readBenchCredentials(): { email: string; password: string } | null {
@@ -114,12 +121,16 @@ async function scenarioSpotlightChurn(
       // Wait for the spotlight DOM root (the modal). The Spotlight component
       // mounts a portal — we wait for ANY element with role='dialog' that
       // contains the spotlight input.
-      await session.page.waitForSelector('[role="dialog"]', { state: 'visible', timeout: 2000 }).catch(() => {})
+      await session.page
+        .waitForSelector('[role="dialog"]', { state: 'visible', timeout: 2000 })
+        .catch(() => {})
       openTimes.push(performance.now() - tOpen)
 
       const tClose = performance.now()
       await session.page.keyboard.press('Escape')
-      await session.page.waitForSelector('[role="dialog"]', { state: 'hidden', timeout: 2000 }).catch(() => {})
+      await session.page
+        .waitForSelector('[role="dialog"]', { state: 'hidden', timeout: 2000 })
+        .catch(() => {})
       closeTimes.push(performance.now() - tClose)
     }
   }
@@ -134,7 +145,10 @@ async function scenarioAdminRouteCycle(
   session: BrowserSession,
   baseUrl: string,
   iterations: number,
-): Promise<{ totalMs: number; perRouteMs: Array<{ route: string; mean: number; samples: number }> }> {
+): Promise<{
+  totalMs: number
+  perRouteMs: Array<{ route: string; mean: number; samples: number }>
+}> {
   // Frame stability isn't measured across navigations — each goto wipes the
   // in-page accumulator. Instead we measure per-route transition latency,
   // which is what the user-facing question actually is.
@@ -146,7 +160,9 @@ async function scenarioAdminRouteCycle(
   for (let i = 0; i < iterations; i++) {
     const route = routes[i % routes.length]
     const t0 = performance.now()
-    await session.page.goto(`${baseUrl}${route}`, { waitUntil: 'load', timeout: 8_000 }).catch(() => {})
+    await session.page
+      .goto(`${baseUrl}${route}`, { waitUntil: 'load', timeout: 8_000 })
+      .catch(() => {})
     perRoute[route].push(performance.now() - t0)
   }
   const totalMs = performance.now() - totalStart
@@ -170,7 +186,9 @@ async function scenarioSelectorsPanelToggle(
   //
   // Fallback: look for a button with aria-label containing "Selectors" /
   // "selectors panel" or use the panel-rail tab.
-  const button = session.page.locator('[aria-label*="Selectors" i], [data-panel-id="selectors"]').first()
+  const button = session.page
+    .locator('[aria-label*="Selectors" i], [data-panel-id="selectors"]')
+    .first()
   const present = (await button.count()) > 0
   if (!present) {
     return {
@@ -190,7 +208,9 @@ async function scenarioSelectorsPanelToggle(
     }
   }
   const frame = await measureFramesDuring(session.page, action)
-  const meanCycleMs = cycleTimes.length ? cycleTimes.reduce((s, v) => s + v, 0) / cycleTimes.length : 0
+  const meanCycleMs = cycleTimes.length
+    ? cycleTimes.reduce((s, v) => s + v, 0) / cycleTimes.length
+    : 0
   return { frame, meanCycleMs }
 }
 
@@ -199,7 +219,9 @@ async function scenarioClassCreationViaUI(
   iterations: number,
 ): Promise<{ frame: FrameStability; meanCreateMs: number; created: number }> {
   // Open the Selectors panel via the rail (best effort).
-  const panelTab = session.page.locator('[data-panel-id="selectors"], [aria-label*="Selectors" i]').first()
+  const panelTab = session.page
+    .locator('[data-panel-id="selectors"], [aria-label*="Selectors" i]')
+    .first()
   if ((await panelTab.count()) > 0) {
     await panelTab.click().catch(() => {})
   }
@@ -209,7 +231,11 @@ async function scenarioClassCreationViaUI(
   const createButton = session.page.locator('button[aria-label="Create selector"]').first()
   const buttonAvailable = (await createButton.count()) > 0
   if (!buttonAvailable) {
-    return { frame: { frames: 0, droppedFrames: 0, worstFrameMs: 0, meanFrameMs: 0, meanFps: 0 }, meanCreateMs: 0, created: 0 }
+    return {
+      frame: { frames: 0, droppedFrames: 0, worstFrameMs: 0, meanFrameMs: 0, meanFps: 0 },
+      meanCreateMs: 0,
+      created: 0,
+    }
   }
 
   const samples: number[] = []
@@ -241,7 +267,10 @@ async function scenarioClassCreationViaUI(
   return { frame, meanCreateMs, created }
 }
 
-async function scenarioIdleFrames(session: BrowserSession, durationMs: number): Promise<FrameStability> {
+async function scenarioIdleFrames(
+  session: BrowserSession,
+  durationMs: number,
+): Promise<FrameStability> {
   return measureFramesDuring(session.page, async () => {
     await session.page.waitForTimeout(durationMs)
   })
@@ -297,7 +326,8 @@ async function measureAuthenticatedColdLoad(
 export const browserBench: BenchModule = {
   name: 'browser',
   title: 'Browser (real Chromium, paint + frame + interaction)',
-  description: 'Cold-load timings + idle/interaction frame stability in real Chromium via Playwright. Skips gracefully if Chromium not installed.',
+  description:
+    'Cold-load timings + idle/interaction frame stability in real Chromium via Playwright. Skips gracefully if Chromium not installed.',
 
   async run(ctx: BenchContext): Promise<BenchResult> {
     const overrideChrome = readArg('chrome-path')
@@ -308,8 +338,13 @@ export const browserBench: BenchModule = {
     if (ctx.baseUrl) {
       baseUrl = ctx.baseUrl
     } else {
-      const staticDir = existsSync(resolve(REPO_ROOT, 'dist')) ? resolve(REPO_ROOT, 'dist') : undefined
-      log.step('Spawning production server on a free port' + (staticDir ? '' : ' (no dist/ — UI may not render correctly)'))
+      const staticDir = existsSync(resolve(REPO_ROOT, 'dist'))
+        ? resolve(REPO_ROOT, 'dist')
+        : undefined
+      log.step(
+        'Spawning production server on a free port' +
+          (staticDir ? '' : ' (no dist/ — UI may not render correctly)'),
+      )
       server = await startServer({ staticDir })
       baseUrl = server.baseUrl
       log.ok(`Server up in ${fmtMs(server.bootMs)} at ${baseUrl}`)
@@ -317,9 +352,13 @@ export const browserBench: BenchModule = {
 
     let session: BrowserSession | null = null
     try {
-      log.step('Launching Chromium (headless)' + (overrideChrome ? ` (system: ${overrideChrome})` : ''))
+      log.step(
+        'Launching Chromium (headless)' + (overrideChrome ? ` (system: ${overrideChrome})` : ''),
+      )
       try {
-        session = await launchBrowser({ executablePath: overrideChrome ?? findSystemChrome() ?? undefined })
+        session = await launchBrowser({
+          executablePath: overrideChrome ?? findSystemChrome() ?? undefined,
+        })
       } catch (err) {
         log.warn((err as Error).message)
         return {
@@ -346,7 +385,8 @@ export const browserBench: BenchModule = {
       const traces: Array<{ name: string; path: string }> = []
       const tracesDir = join(ctx.outputDir, 'browser-traces')
       mkdirSync(tracesDir, { recursive: true })
-      const shouldTrace = (name: string): boolean => traceSelection.has('ALL') || traceSelection.has(name)
+      const shouldTrace = (name: string): boolean =>
+        traceSelection.has('ALL') || traceSelection.has(name)
       const traced = async <T>(name: string, runner: () => Promise<T>): Promise<T> => {
         if (!session) throw new Error('session lost')
         if (!shouldTrace(name)) return runner()
@@ -363,7 +403,9 @@ export const browserBench: BenchModule = {
       // ── 1. Cold load metrics ────────────────────────────────────────────
       log.step('Page load metrics')
       const loadScenarios: LoadScenario[] = []
-      loadScenarios.push(await runLoadScenario(session, baseUrl, 'cold /admin (login screen)', '/admin'))
+      loadScenarios.push(
+        await runLoadScenario(session, baseUrl, 'cold /admin (login screen)', '/admin'),
+      )
 
       const credentials = readBenchCredentials()
       let authOk = false
@@ -376,7 +418,9 @@ export const browserBench: BenchModule = {
             return false
           })
       } else {
-        log.warn(`Authenticated browser scenarios skipped: set ${ADMIN_EMAIL_ENV} and ${ADMIN_PASSWORD_ENV}.`)
+        log.warn(
+          `Authenticated browser scenarios skipped: set ${ADMIN_EMAIL_ENV} and ${ADMIN_PASSWORD_ENV}.`,
+        )
       }
 
       // Capture the session cookie so we can spawn a *fresh* browser
@@ -391,8 +435,17 @@ export const browserBench: BenchModule = {
       }
 
       if (authOk) {
-        loadScenarios.push(await runLoadScenario(session, baseUrl, 'warm /admin/dashboard (same context)', '/admin/dashboard'))
-        loadScenarios.push(await runLoadScenario(session, baseUrl, 'warm /admin/site (same context)', '/admin/site'))
+        loadScenarios.push(
+          await runLoadScenario(
+            session,
+            baseUrl,
+            'warm /admin/dashboard (same context)',
+            '/admin/dashboard',
+          ),
+        )
+        loadScenarios.push(
+          await runLoadScenario(session, baseUrl, 'warm /admin/site (same context)', '/admin/site'),
+        )
       }
 
       // ── 1b. Authenticated COLD-LOAD scenarios ───────────────────────────
@@ -427,11 +480,15 @@ export const browserBench: BenchModule = {
       if (authOk) {
         log.step('Admin-route navigation cycle')
         const cycleIters = ctx.quick ? 4 : 8
-        routeCycle = await traced('route-cycle', () => scenarioAdminRouteCycle(session!, baseUrl, cycleIters))
+        routeCycle = await traced('route-cycle', () =>
+          scenarioAdminRouteCycle(session!, baseUrl, cycleIters),
+        )
       }
 
       // ── 3. Idle frame stability ─────────────────────────────────────────
-      log.step(authOk ? 'Idle frame stability (5s on /admin/site)' : 'Idle frame stability (login screen)')
+      log.step(
+        authOk ? 'Idle frame stability (5s on /admin/site)' : 'Idle frame stability (login screen)',
+      )
       if (authOk) await session.page.goto(`${baseUrl}/admin/site`, { waitUntil: 'load' })
       const idleFrames = await scenarioIdleFrames(session, ctx.quick ? 2000 : 5000)
 
@@ -448,7 +505,9 @@ export const browserBench: BenchModule = {
       if (authOk) {
         log.step('Selectors panel open/close storm')
         const iters = ctx.quick ? 5 : 20
-        panelToggle = await traced('selectors-panel-toggle', () => scenarioSelectorsPanelToggle(session!, iters))
+        panelToggle = await traced('selectors-panel-toggle', () =>
+          scenarioSelectorsPanelToggle(session!, iters),
+        )
       }
 
       // ── 6. Class creation via UI ────────────────────────────────────────
@@ -456,7 +515,9 @@ export const browserBench: BenchModule = {
       if (authOk) {
         log.step('Class creation via dialog UI')
         const iters = ctx.quick ? 5 : 25
-        classCreation = await traced('class-creation', () => scenarioClassCreationViaUI(session!, iters))
+        classCreation = await traced('class-creation', () =>
+          scenarioClassCreationViaUI(session!, iters),
+        )
       }
 
       // ── 7. Final heap + DOM size ────────────────────────────────────────
@@ -484,7 +545,9 @@ export const browserBench: BenchModule = {
 
       const interactionRows: BenchRow[] = []
       interactionRows.push({
-        label: authOk ? 'Idle frame stability on /admin/site' : 'Idle frame stability on login screen',
+        label: authOk
+          ? 'Idle frame stability on /admin/site'
+          : 'Idle frame stability on login screen',
         inputs: { window_ms: ctx.quick ? 2000 : 5000 },
         metrics: {
           frames: fmtNum(idleFrames.frames),
@@ -505,7 +568,8 @@ export const browserBench: BenchModule = {
               .map((r) => `${r.route.split('/').pop()}:${fmtMs(r.mean)}`)
               .join(' '),
           },
-          notes: 'Frame stability not measured across navigations — each goto wipes the in-page accumulator. Per-route transition latency is what matters here.',
+          notes:
+            'Frame stability not measured across navigations — each goto wipes the in-page accumulator. Per-route transition latency is what matters here.',
         })
       }
       if (spotlight) {
@@ -530,7 +594,10 @@ export const browserBench: BenchModule = {
             worst_frame: fmtMs(panelToggle.frame.worstFrameMs),
             dropped: `${panelToggle.frame.droppedFrames}/${panelToggle.frame.frames}`,
           },
-          notes: panelToggle.frame.frames === 0 ? 'Selectors panel tab not found in DOM — scenario skipped.' : undefined,
+          notes:
+            panelToggle.frame.frames === 0
+              ? 'Selectors panel tab not found in DOM — scenario skipped.'
+              : undefined,
         })
       }
       if (classCreation) {
@@ -543,9 +610,10 @@ export const browserBench: BenchModule = {
             worst_frame: fmtMs(classCreation.frame.worstFrameMs),
             dropped: `${classCreation.frame.droppedFrames}/${classCreation.frame.frames}`,
           },
-          notes: classCreation.created === 0
-            ? 'Create-selector button not found — Selectors panel may not have opened. Try `--trace=class-creation` to debug.'
-            : undefined,
+          notes:
+            classCreation.created === 0
+              ? 'Create-selector button not found — Selectors panel may not have opened. Try `--trace=class-creation` to debug.'
+              : undefined,
         })
       }
 
@@ -569,7 +637,9 @@ export const browserBench: BenchModule = {
       }))
 
       const coldLogin = loadScenarios.find((s) => s.label.startsWith('cold /admin (login'))
-      const authedColdSite = loadScenarios.find((s) => s.label.includes('AUTHENTICATED COLD /admin/site'))
+      const authedColdSite = loadScenarios.find((s) =>
+        s.label.includes('AUTHENTICATED COLD /admin/site'),
+      )
       const totalTbt = loadScenarios.reduce((sum, s) => sum + s.metrics.totalBlockingMs, 0)
 
       return {
@@ -577,9 +647,12 @@ export const browserBench: BenchModule = {
         title: this.title,
         headline: {
           chromium: 'playwright-core ' + (await session.browser.version()),
-          'login LCP (cold)': coldLogin?.metrics.lcpMs != null ? fmtMs(coldLogin.metrics.lcpMs) : '—',
-          'editor LCP (auth cold)': authedColdSite?.metrics.lcpMs != null ? fmtMs(authedColdSite.metrics.lcpMs) : '—',
-          'editor FCP (auth cold)': authedColdSite?.metrics.fcpMs != null ? fmtMs(authedColdSite.metrics.fcpMs) : '—',
+          'login LCP (cold)':
+            coldLogin?.metrics.lcpMs != null ? fmtMs(coldLogin.metrics.lcpMs) : '—',
+          'editor LCP (auth cold)':
+            authedColdSite?.metrics.lcpMs != null ? fmtMs(authedColdSite.metrics.lcpMs) : '—',
+          'editor FCP (auth cold)':
+            authedColdSite?.metrics.fcpMs != null ? fmtMs(authedColdSite.metrics.fcpMs) : '—',
           total_blocking_time: fmtMs(totalTbt),
           idle_fps: idleFrames.meanFps.toFixed(1),
           spotlight_open: spotlight ? fmtMs(spotlight.meanOpenMs) : '—',

@@ -40,12 +40,15 @@ export default defineConfig([
       // reads it through `typeof`). Eslint's `no-unused-vars` does not count
       // `typeof` references as a "use" of the value, so non-exported leaf
       // schemas would otherwise trip the rule. We allow that pattern by name.
-      '@typescript-eslint/no-unused-vars': ['error', {
-        argsIgnorePattern: '^_',
-        varsIgnorePattern: '(^_|Schema$)',
-        caughtErrorsIgnorePattern: '^_',
-        destructuredArrayIgnorePattern: '^_',
-      }],
+      '@typescript-eslint/no-unused-vars': [
+        'error',
+        {
+          argsIgnorePattern: '^_',
+          varsIgnorePattern: '(^_|Schema$)',
+          caughtErrorsIgnorePattern: '^_',
+          destructuredArrayIgnorePattern: '^_',
+        },
+      ],
       // The editor store uses TypeScript declaration merging: `EditorStore` is
       // declared as an empty interface in `src/admin/pages/site/store/types.ts` and
       // each slice file augments it via
@@ -56,9 +59,12 @@ export default defineConfig([
       // empty-extends form. They are not redundant — the empty body is the
       // augmentation point, removing it would break the type. Allowlist the
       // one identifier this pattern uses, project-wide.
-      '@typescript-eslint/no-empty-object-type': ['error', {
-        allowWithName: '^EditorStore$',
-      }],
+      '@typescript-eslint/no-empty-object-type': [
+        'error',
+        {
+          allowWithName: '^EditorStore$',
+        },
+      ],
     },
   },
   {

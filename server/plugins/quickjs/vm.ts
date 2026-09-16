@@ -28,9 +28,18 @@
  *     `runtime.executePendingJobs()` after each settle and during eval polling.
  */
 
-import { getQuickJS, type QuickJSContext, type QuickJSHandle, type QuickJSWASMModule } from 'quickjs-emscripten'
+import {
+  getQuickJS,
+  type QuickJSContext,
+  type QuickJSHandle,
+  type QuickJSWASMModule,
+} from 'quickjs-emscripten'
 import { BOOTSTRAP_SOURCE } from './bootstrap/index'
-import { DEFAULT_EVAL_TIMEOUT_MS, DEFAULT_MEMORY_LIMIT_BYTES, DEFAULT_STACK_SIZE_BYTES } from './limits'
+import {
+  DEFAULT_EVAL_TIMEOUT_MS,
+  DEFAULT_MEMORY_LIMIT_BYTES,
+  DEFAULT_STACK_SIZE_BYTES,
+} from './limits'
 import { jsToHandle } from './marshal'
 import { callString, callVoid, evalJson, withSyncDeadline } from './eval'
 import type { PluginVm, PluginVmEnv } from './types'
@@ -177,11 +186,11 @@ export async function createPluginVm(args: {
       const result = ctx.runtime.executePendingJobs()
       if ('error' in result && result.error) {
         const dumped = result.error.consume((handle) => ctx.dump(handle)) as
-          | { message?: string; stack?: string }
-          | string
-          | undefined
-        const message = typeof dumped === 'object' && dumped?.message ? dumped.message : String(dumped)
-        const stack = typeof dumped === 'object' && typeof dumped?.stack === 'string' ? `\n${dumped.stack}` : ''
+          { message?: string; stack?: string } | string | undefined
+        const message =
+          typeof dumped === 'object' && dumped?.message ? dumped.message : String(dumped)
+        const stack =
+          typeof dumped === 'object' && typeof dumped?.stack === 'string' ? `\n${dumped.stack}` : ''
         console.error(`[plugin:${args.env.pluginId}] VM job aborted: ${message}${stack}`)
       }
     })
@@ -213,12 +222,19 @@ export async function createPluginVm(args: {
           try {
             const valueHandle = jsToHandle(ctx, value)
             deferred.resolve(valueHandle)
-            if (valueHandle !== ctx.undefined && valueHandle !== ctx.null && valueHandle !== ctx.true && valueHandle !== ctx.false) {
+            if (
+              valueHandle !== ctx.undefined &&
+              valueHandle !== ctx.null &&
+              valueHandle !== ctx.true &&
+              valueHandle !== ctx.false
+            ) {
               valueHandle.dispose()
             }
             // Drain plugin-side microtasks queued by the resolve.
             pumpPendingJobs()
-          } catch { /* VM gone — silent drop. */ }
+          } catch {
+            /* VM gone — silent drop. */
+          }
           pendingDeferreds.delete(deferred)
         },
         (err) => {
@@ -232,7 +248,9 @@ export async function createPluginVm(args: {
             deferred.reject(errHandle)
             errHandle.dispose()
             pumpPendingJobs()
-          } catch { /* VM gone — silent drop. */ }
+          } catch {
+            /* VM gone — silent drop. */
+          }
           pendingDeferreds.delete(deferred)
         },
       )
@@ -259,7 +277,9 @@ export async function createPluginVm(args: {
         try {
           deferred.resolve(ctx.undefined)
           pumpPendingJobs()
-        } catch { /* VM gone — silent drop. */ }
+        } catch {
+          /* VM gone — silent drop. */
+        }
         pendingDeferreds.delete(deferred)
       }, safeMs)
       pendingTimers.add(timer)
@@ -315,11 +335,9 @@ export async function createPluginVm(args: {
     })
 
     // 5. Detect which lifecycle hooks the plugin exported.
-    const exportedHooks = await evalJson<Array<'install' | 'activate' | 'deactivate' | 'uninstall' | 'migrate'>>(
-      ctx,
-      `__detectExportedHooks()`,
-      evalTimeoutMs,
-    )
+    const exportedHooks = await evalJson<
+      Array<'install' | 'activate' | 'deactivate' | 'uninstall' | 'migrate'>
+    >(ctx, `__detectExportedHooks()`, evalTimeoutMs)
 
     const pluginId = args.env.pluginId
 
@@ -360,7 +378,9 @@ export async function createPluginVm(args: {
         // re-adds it from __plugin_meta so we don't double-carry it over the
         // wire. The 'null' JSON string parses to a clean empty context.
         const contextExtras = context
-          ? (({ pluginId: _p, ...rest }) => Object.keys(rest).length > 0 ? rest : undefined)(context as Record<string, unknown>)
+          ? (({ pluginId: _p, ...rest }) => (Object.keys(rest).length > 0 ? rest : undefined))(
+              context as Record<string, unknown>,
+            )
           : undefined
         const contextJson = contextExtras !== undefined ? JSON.stringify(contextExtras) : 'null'
         const resultJson = await callString(
@@ -401,7 +421,12 @@ export async function createPluginVm(args: {
         // Per-schedule deadline replaces the VM's default 5s budget for
         // this single call only — its registry token is released when the
         // call settles, so subsequent calls fall back to the default.
-        await callVoid(ctx, dispatcher('__runSchedule'), [scheduleId], maxDurationMs ?? evalTimeoutMs)
+        await callVoid(
+          ctx,
+          dispatcher('__runSchedule'),
+          [scheduleId],
+          maxDurationMs ?? evalTimeoutMs,
+        )
       },
 
       async updateSettings(next) {
@@ -439,7 +464,11 @@ export async function createPluginVm(args: {
         // callback are belt-and-suspenders, but cancelling up front avoids
         // even calling them.
         for (const timer of pendingTimers) {
-          try { clearTimeout(timer) } catch {/* ignore */}
+          try {
+            clearTimeout(timer)
+          } catch {
+            /* ignore */
+          }
         }
         pendingTimers.clear()
         // Dispose any still-pending deferreds. Each one owns VM-tracked
@@ -447,37 +476,73 @@ export async function createPluginVm(args: {
         // leaving them alive trips a `list_empty(&rt->gc_obj_list)` assertion
         // at runtime-free time.
         for (const deferred of pendingDeferreds) {
-          try { deferred.dispose() } catch {/* already disposed */}
+          try {
+            deferred.dispose()
+          } catch {
+            /* already disposed */
+          }
         }
         pendingDeferreds.clear()
         for (const h of dispatcherHandles.values()) {
-          try { if (h.alive) h.dispose() } catch {/* already disposed */}
+          try {
+            if (h.alive) h.dispose()
+          } catch {
+            /* already disposed */
+          }
         }
         dispatcherHandles.clear()
         for (const h of hostFunctionHandles) {
-          try { if (h.alive) h.dispose() } catch {/* already disposed */}
+          try {
+            if (h.alive) h.dispose()
+          } catch {
+            /* already disposed */
+          }
         }
-        try { ctx.dispose() } catch {/* already disposed */}
+        try {
+          ctx.dispose()
+        } catch {
+          /* already disposed */
+        }
       },
     }
   } catch (err) {
     vmDisposed = true
     for (const timer of pendingTimers) {
-      try { clearTimeout(timer) } catch {/* ignore */}
+      try {
+        clearTimeout(timer)
+      } catch {
+        /* ignore */
+      }
     }
     pendingTimers.clear()
     for (const deferred of pendingDeferreds) {
-      try { deferred.dispose() } catch {/* ignore */}
+      try {
+        deferred.dispose()
+      } catch {
+        /* ignore */
+      }
     }
     pendingDeferreds.clear()
     for (const h of dispatcherHandles.values()) {
-      try { if (h.alive) h.dispose() } catch {/* ignore */}
+      try {
+        if (h.alive) h.dispose()
+      } catch {
+        /* ignore */
+      }
     }
     dispatcherHandles.clear()
     for (const h of hostFunctionHandles) {
-      try { if (h.alive) h.dispose() } catch {/* ignore */}
+      try {
+        if (h.alive) h.dispose()
+      } catch {
+        /* ignore */
+      }
     }
-    try { ctx.dispose() } catch {/* ignore */}
+    try {
+      ctx.dispose()
+    } catch {
+      /* ignore */
+    }
     throw err
   }
 }

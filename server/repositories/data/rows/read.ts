@@ -59,10 +59,7 @@ interface DataRowIdSlug {
  * and the cross-row slug-uniqueness check — so they must not pay the hydrated
  * SELECT's full `cells_json` parse per row per save.
  */
-export async function listDataRowIdSlugs(
-  db: DbClient,
-  tableId: string,
-): Promise<DataRowIdSlug[]> {
+export async function listDataRowIdSlugs(db: DbClient, tableId: string): Promise<DataRowIdSlug[]> {
   const { rows } = await db<DataRowIdSlug>`
     select id, slug from data_rows
     where table_id = ${tableId}
@@ -77,10 +74,7 @@ export async function listDataRowIdSlugs(
  * re-submitted" (undo of a delete) — a plain insert on the latter would hit
  * the soft-deleted row's primary key.
  */
-export async function listSoftDeletedDataRowIds(
-  db: DbClient,
-  tableId: string,
-): Promise<string[]> {
+export async function listSoftDeletedDataRowIds(db: DbClient, tableId: string): Promise<string[]> {
   const { rows } = await db<{ id: string }>`
     select id from data_rows
     where table_id = ${tableId}
@@ -89,10 +83,7 @@ export async function listSoftDeletedDataRowIds(
   return rows.map((r) => r.id)
 }
 
-export async function getDataRow(
-  db: DbClient,
-  rowId: string,
-): Promise<DataRow | null> {
+export async function getDataRow(db: DbClient, rowId: string): Promise<DataRow | null> {
   const rows = await selectHydratedDataRows(db, {
     where: `data_rows.id = ${placeholder(db.dialect, 1)} and data_rows.deleted_at is null`,
     params: [rowId],
@@ -151,9 +142,15 @@ export async function countDataRows(db: DbClient, tableId: string): Promise<numb
   return Number(rows[0]?.count ?? 0)
 }
 
-export async function listDataAuthorOptions(
-  db: DbClient,
-): Promise<Array<{ id: string; email: string; displayName: string; roleSlug: string | null; roleName: string | null }>> {
+export async function listDataAuthorOptions(db: DbClient): Promise<
+  Array<{
+    id: string
+    email: string
+    displayName: string
+    roleSlug: string | null
+    roleName: string | null
+  }>
+> {
   const { rows } = await db<DataAuthorRow>`
     select users.id,
            users.email,

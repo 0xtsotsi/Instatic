@@ -27,7 +27,9 @@ const CONTEXT_READ_CAPS: readonly CoreCapability[] = [
 const GetContextInput = Type.Object(
   {
     entryId: Type.Optional(
-      Type.String({ description: 'Optional page/post entry id — also reports whether a template wraps it.' }),
+      Type.String({
+        description: 'Optional page/post entry id — also reports whether a template wraps it.',
+      }),
     ),
   },
   { additionalProperties: false },

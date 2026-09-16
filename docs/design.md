@@ -87,18 +87,18 @@ This split (cards = filled & borderless, inputs = unfilled & bordered) is the lo
 
 Categories of things have an associated color drawn from the numbered **accent** scale. Each widget category has a tint; each panel rail icon has a tint; each storage breakdown segment has a tint. Color is the at-a-glance label that lets the eye sort the screen.
 
-| Token              | Hex       | Role                                                    |
-|--------------------|-----------|---------------------------------------------------------|
-| `--accent-1` | `#8ee6c8` | "Saved / system / status" categories                    |
-| `--accent-2`| `#c8b6ff` | "Pages / structure" categories                          |
-| `--accent-3`  | `#9bdcff` | "Storage / data / configuration" categories             |
-| `--accent-4`| `#ffc7a8` | "Posts / media / activity" categories                   |
-| `--accent-5` | `#ffb6cd` | Secondary warm identity tint                          |
-| `--accent-6` | `#b8f28b` | Secondary green identity tint                         |
-| `--accent-7` | `#f7df72` | Secondary yellow identity tint                        |
-| `--accent-8` | `#83e7ff` | Secondary blue identity tint                          |
-| `--accent-9` | `#f0a6ff` | Secondary violet identity tint                      |
-| `--accent-10` | `#ff9f9f` | Secondary red identity tint                          |
+| Token         | Hex       | Role                                        |
+| ------------- | --------- | ------------------------------------------- |
+| `--accent-1`  | `#8ee6c8` | "Saved / system / status" categories        |
+| `--accent-2`  | `#c8b6ff` | "Pages / structure" categories              |
+| `--accent-3`  | `#9bdcff` | "Storage / data / configuration" categories |
+| `--accent-4`  | `#ffc7a8` | "Posts / media / activity" categories       |
+| `--accent-5`  | `#ffb6cd` | Secondary warm identity tint                |
+| `--accent-6`  | `#b8f28b` | Secondary green identity tint               |
+| `--accent-7`  | `#f7df72` | Secondary yellow identity tint              |
+| `--accent-8`  | `#83e7ff` | Secondary blue identity tint                |
+| `--accent-9`  | `#f0a6ff` | Secondary violet identity tint              |
+| `--accent-10` | `#ff9f9f` | Secondary red identity tint                 |
 
 Accent tokens don't live in `src/styles/globals.css` to be decorative — they're part of the design system. Panel rails assign these accents automatically using `assignRailAccents` (multi-item surfaces, avoids repeats inside the visible group) or `railAccent` (single item) from `src/ui/railAccent.ts`. Primitives like `Widget` can still accept an explicit tint when the category is product-defined. The light theme overrides the same accent names with darker foreground colors so rail icons and badges keep contrast on white surfaces. New identity colors are added by extending the `--accent-*` group, not by inlining a color.
 
@@ -201,13 +201,13 @@ Charts:
 
 ### Text tokens — meaning hierarchy
 
-| Token                       | Hex       | Means                          |
-|-----------------------------|-----------|--------------------------------|
-| `--text-bright`      | `#f4f4f5` | Titles, headings, KPIs         |
-| `--text`             | `#ededed` | Primary body text              |
-| `--text-muted`   | `#a1a1aa` | Labels, secondary UI           |
-| `--text-subtle`       | `#787878` | Muted / placeholder            |
-| `--text-disabled`      | `#52525b` | Disabled / very subtle         |
+| Token             | Hex       | Means                  |
+| ----------------- | --------- | ---------------------- |
+| `--text-bright`   | `#f4f4f5` | Titles, headings, KPIs |
+| `--text`          | `#ededed` | Primary body text      |
+| `--text-muted`    | `#a1a1aa` | Labels, secondary UI   |
+| `--text-subtle`   | `#787878` | Muted / placeholder    |
+| `--text-disabled` | `#52525b` | Disabled / very subtle |
 
 These five are the entire text palette. Add a new tone only by adding a new token.
 
@@ -225,14 +225,14 @@ These are admin tokens. The published-site Framework engine also emits short spa
 
 ### Radius
 
-| Token                | Value | Use                                                          |
-|----------------------|-------|--------------------------------------------------------------|
-| `--radius-sm` | 3px   | Tight chips, micro-badges, segmented control inner indicator |
-| `--radius`    | 6px   | Default editor controls, toolbar buttons, ghost menu items   |
-| `--panel-radius`     | 12px  | Floating overlay panels (Spotlight, modals, popovers)        |
-| `--card-radius`      | 16px  | Borderless tile cards (Widget, dashboard cells, module inserter tiles) |
-| `--input-radius`     | 1em   | Pill-shaped inputs, classes / property chips                 |
-| `--tooltip-radius`   | 6px   | Tooltips                                                     |
+| Token              | Value | Use                                                                    |
+| ------------------ | ----- | ---------------------------------------------------------------------- |
+| `--radius-sm`      | 3px   | Tight chips, micro-badges, segmented control inner indicator           |
+| `--radius`         | 6px   | Default editor controls, toolbar buttons, ghost menu items             |
+| `--panel-radius`   | 12px  | Floating overlay panels (Spotlight, modals, popovers)                  |
+| `--card-radius`    | 16px  | Borderless tile cards (Widget, dashboard cells, module inserter tiles) |
+| `--input-radius`   | 1em   | Pill-shaped inputs, classes / property chips                           |
+| `--tooltip-radius` | 6px   | Tooltips                                                               |
 
 Do not introduce ad-hoc radius values. Tile-card surfaces use `--card-radius`.
 
@@ -242,22 +242,22 @@ Editor scrollbars are global chrome and stay achromatic. `globals.css` owns `--s
 
 ### Shadow and elevation
 
-| Token                       | Use                                                     |
-|-----------------------------|---------------------------------------------------------|
-| `--focus-ring`       | Achromatic 1px focus ring (`0 0 0 1px var(--overlay-20)`) |
-| `--shadow-panel`            | Composite for floating panels: bottom-inset shadow + drop shadow |
-| `--shadow-panel-inset-bottom`| Sub-token: bottom inner shadow                         |
-| `--shadow-panel-drop`       | Sub-token: drop shadow                                  |
-| `--shadow-input-focus`      | Inset composite for focused inputs (achromatic glow)    |
-| `--shadow-tooltip`          | Tooltip drop + inner highlight                          |
+| Token                         | Use                                                              |
+| ----------------------------- | ---------------------------------------------------------------- |
+| `--focus-ring`                | Achromatic 1px focus ring (`0 0 0 1px var(--overlay-20)`)        |
+| `--shadow-panel`              | Composite for floating panels: bottom-inset shadow + drop shadow |
+| `--shadow-panel-inset-bottom` | Sub-token: bottom inner shadow                                   |
+| `--shadow-panel-drop`         | Sub-token: drop shadow                                           |
+| `--shadow-input-focus`        | Inset composite for focused inputs (achromatic glow)             |
+| `--shadow-tooltip`            | Tooltip drop + inner highlight                                   |
 
 Use `--shadow-panel` directly when you need a floating-panel feel; don't recompose from the sub-tokens.
 
 ### Typography
 
 ```css
---font-sans: "Inter Variable", system-ui, sans-serif;
---font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+--font-sans: 'Inter Variable', system-ui, sans-serif;
+--font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', monospace;
 ```
 
 Type **sizes** are per-component and don't yet have a token scale. The patterns in actual use:
@@ -299,7 +299,7 @@ The dashboard pattern. Borderless tiles on a darker parent, 1px grid gap, 16px r
 .parent {
   background: var(--bg-surface);
   display: grid;
-  gap: 1px;              /* the gap that becomes the visual divider */
+  gap: 1px; /* the gap that becomes the visual divider */
 }
 
 .tile {
@@ -327,11 +327,11 @@ Spotlight, popovers, modals, and command palettes. These sit above the editor wi
 
 ```css
 .panel {
-  background: var(--bg-surface);              /* rgb(30 30 30) */
-  border: 1px solid var(--overlay-10);    /* rgba(255,255,255,0.10) */
-  border-radius: var(--panel-radius);       /* 12px */
+  background: var(--bg-surface); /* rgb(30 30 30) */
+  border: 1px solid var(--overlay-10); /* rgba(255,255,255,0.10) */
+  border-radius: var(--panel-radius); /* 12px */
   backdrop-filter: blur(var(--panel-blur)); /* 24px */
-  box-shadow: var(--shadow-panel);          /* composite */
+  box-shadow: var(--shadow-panel); /* composite */
 }
 ```
 
@@ -343,13 +343,18 @@ Bordered, transparent, pill-shaped:
 
 ```css
 .input {
-  background: transparent;              /* transparent */
-  border: 1px solid var(--overlay-20);    /* rgba(255,255,255,0.20) */
-  border-radius: var(--input-radius);       /* 1em */
+  background: transparent; /* transparent */
+  border: 1px solid var(--overlay-20); /* rgba(255,255,255,0.20) */
+  border-radius: var(--input-radius); /* 1em */
   color: var(--text);
 }
-.input:hover  { border-color: var(--overlay-30); }
-.input:focus  { border-color: var(--overlay-50); box-shadow: var(--shadow-input-focus); }
+.input:hover {
+  border-color: var(--overlay-30);
+}
+.input:focus {
+  border-color: var(--overlay-50);
+  box-shadow: var(--shadow-input-focus);
+}
 ```
 
 The border is the input's identity. Don't fill them. Don't square the corners.
@@ -380,43 +385,43 @@ Scrollable admin surfaces use a shared, quiet scrollbar: transparent track, mute
 
 Every interactive control in the admin and editor goes through a primitive from `src/ui/components/`. Bare `<button>` in `src/admin/*` is gated by `button-primitive-usage.test.ts` — the allowlist in that file documents the §8 exceptions.
 
-| Primitive            | When to use                                                                 |
-|----------------------|-----------------------------------------------------------------------------|
-| `Button`             | Every action button. Variants for primary / secondary / ghost / danger.     |
-| `Input`              | Single-line text input. Pill radius, transparent fill, bordered.            |
-| `FormField`          | Label + description shell for form controls.                               |
-| `Switch`             | Boolean toggle.                                                             |
-| `Checkbox`           | Boolean within a list / form.                                               |
-| `Select`             | Dropdown selection of fixed options.                                        |
-| `SearchBar`          | Search input with magnifier icon and clear affordance.                      |
-| `ColorInput`         | Color picker with swatch + hex.                                             |
-| `FileUpload`         | Drop-zone + browse for file inputs.                                         |
-| `DateTimePicker`     | Date / time inputs.                                                         |
-| `RangeTabs`          | Tabbed numeric range selectors (e.g. spacing scales).                       |
-| `SegmentedControl`   | A few mutually exclusive options shown inline.                              |
-| `Tabs`               | Top-level tab navigation within a workspace.                                |
-| `Stack`              | Small flex layouts for host/admin and plugin UI.                            |
-| `Separator`          | Visual divider between sections.                                            |
-| `Section`            | Titled section block in panels.                                             |
-| `ControlRow`         | Standard label + control row in property panels.                            |
-| `Card`               | Token-backed panel surface for grouped host/admin content.                  |
-| `ContextMenu`        | Right-click and `…` overflow menus.                                         |
-| `FilterBar`          | Compound filter row (type + folder + date + query).                         |
-| `TagPill`            | Compact tinted labels, selector chips, removable tag pills. It derives a token-backed tint from the first meaningful alphanumeric character. |
-| `FloatingActionBar`  | Multi-select bulk-action bar.                                               |
-| `EmptyState`         | Empty-list / empty-page placeholder.                                        |
-| `Alert`              | Inline non-blocking status/error message.                                   |
-| `Dialog`             | Modal dialog with a title and content.                                      |
-| `Tooltip`            | Hover and cursor-anchored tooltips. Replaces the native `title` attribute (gated). |
-| `Toast`              | Transient confirmation / error notifications.                               |
-| `DataTable`          | Token-backed table shell; callers own row state, sorting, and selection.    |
-| `Widget`, `WidgetSkeleton`, `WidgetList` | Borderless tile card and dashboard/widget list helpers. Accepts a `tint`. |
-| `Heading`, `Text`, `Code` | Typography primitives for host/admin and plugin UI.                   |
-| `Image`              | Image with built-in blurhash fallback.                                      |
-| `CanvasModulePlaceholder`| Diagonal-stripe placeholder for empty modules.                          |
-| `ErrorBoundary`      | Component-level error containment.                                          |
-| `SkeletonBlock`, `SkeletonCards`, `SkeletonRows`, `SkeletonTree` | Loading-state shimmer primitives. Four named shapes cover nearly every loading region. `SkeletonTree` renders depth-indented placeholder rows with cascading shimmer for tree panels (Layers, Selectors). Shimmer uses `--bg-surface-3/4` tokens. |
-| `Kbd`, `ShortcutKeys` | Keyboard keycap and shortcut-sequence primitives. `Kbd` renders a single keycap; `ShortcutKeys` splits a full label ("⌘K", "Ctrl+Shift+P") into per-key `Kbd` spans. Single canonical style across all keyboard hint surfaces (Spotlight footer, module inserter legend, keybindings help screen). |
+| Primitive                                                        | When to use                                                                                                                                                                                                                                                                                        |
+| ---------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `Button`                                                         | Every action button. Variants for primary / secondary / ghost / danger.                                                                                                                                                                                                                            |
+| `Input`                                                          | Single-line text input. Pill radius, transparent fill, bordered.                                                                                                                                                                                                                                   |
+| `FormField`                                                      | Label + description shell for form controls.                                                                                                                                                                                                                                                       |
+| `Switch`                                                         | Boolean toggle.                                                                                                                                                                                                                                                                                    |
+| `Checkbox`                                                       | Boolean within a list / form.                                                                                                                                                                                                                                                                      |
+| `Select`                                                         | Dropdown selection of fixed options.                                                                                                                                                                                                                                                               |
+| `SearchBar`                                                      | Search input with magnifier icon and clear affordance.                                                                                                                                                                                                                                             |
+| `ColorInput`                                                     | Color picker with swatch + hex.                                                                                                                                                                                                                                                                    |
+| `FileUpload`                                                     | Drop-zone + browse for file inputs.                                                                                                                                                                                                                                                                |
+| `DateTimePicker`                                                 | Date / time inputs.                                                                                                                                                                                                                                                                                |
+| `RangeTabs`                                                      | Tabbed numeric range selectors (e.g. spacing scales).                                                                                                                                                                                                                                              |
+| `SegmentedControl`                                               | A few mutually exclusive options shown inline.                                                                                                                                                                                                                                                     |
+| `Tabs`                                                           | Top-level tab navigation within a workspace.                                                                                                                                                                                                                                                       |
+| `Stack`                                                          | Small flex layouts for host/admin and plugin UI.                                                                                                                                                                                                                                                   |
+| `Separator`                                                      | Visual divider between sections.                                                                                                                                                                                                                                                                   |
+| `Section`                                                        | Titled section block in panels.                                                                                                                                                                                                                                                                    |
+| `ControlRow`                                                     | Standard label + control row in property panels.                                                                                                                                                                                                                                                   |
+| `Card`                                                           | Token-backed panel surface for grouped host/admin content.                                                                                                                                                                                                                                         |
+| `ContextMenu`                                                    | Right-click and `…` overflow menus.                                                                                                                                                                                                                                                                |
+| `FilterBar`                                                      | Compound filter row (type + folder + date + query).                                                                                                                                                                                                                                                |
+| `TagPill`                                                        | Compact tinted labels, selector chips, removable tag pills. It derives a token-backed tint from the first meaningful alphanumeric character.                                                                                                                                                       |
+| `FloatingActionBar`                                              | Multi-select bulk-action bar.                                                                                                                                                                                                                                                                      |
+| `EmptyState`                                                     | Empty-list / empty-page placeholder.                                                                                                                                                                                                                                                               |
+| `Alert`                                                          | Inline non-blocking status/error message.                                                                                                                                                                                                                                                          |
+| `Dialog`                                                         | Modal dialog with a title and content.                                                                                                                                                                                                                                                             |
+| `Tooltip`                                                        | Hover and cursor-anchored tooltips. Replaces the native `title` attribute (gated).                                                                                                                                                                                                                 |
+| `Toast`                                                          | Transient confirmation / error notifications.                                                                                                                                                                                                                                                      |
+| `DataTable`                                                      | Token-backed table shell; callers own row state, sorting, and selection.                                                                                                                                                                                                                           |
+| `Widget`, `WidgetSkeleton`, `WidgetList`                         | Borderless tile card and dashboard/widget list helpers. Accepts a `tint`.                                                                                                                                                                                                                          |
+| `Heading`, `Text`, `Code`                                        | Typography primitives for host/admin and plugin UI.                                                                                                                                                                                                                                                |
+| `Image`                                                          | Image with built-in blurhash fallback.                                                                                                                                                                                                                                                             |
+| `CanvasModulePlaceholder`                                        | Diagonal-stripe placeholder for empty modules.                                                                                                                                                                                                                                                     |
+| `ErrorBoundary`                                                  | Component-level error containment.                                                                                                                                                                                                                                                                 |
+| `SkeletonBlock`, `SkeletonCards`, `SkeletonRows`, `SkeletonTree` | Loading-state shimmer primitives. Four named shapes cover nearly every loading region. `SkeletonTree` renders depth-indented placeholder rows with cascading shimmer for tree panels (Layers, Selectors). Shimmer uses `--bg-surface-3/4` tokens.                                                  |
+| `Kbd`, `ShortcutKeys`                                            | Keyboard keycap and shortcut-sequence primitives. `Kbd` renders a single keycap; `ShortcutKeys` splits a full label ("⌘K", "Ctrl+Shift+P") into per-key `Kbd` spans. Single canonical style across all keyboard hint surfaces (Spotlight footer, module inserter legend, keybindings help screen). |
 
 For tree-shaped controls (DOM panel, layers panel, site tree), use `Tree*` from `src/admin/pages/site/ui/Tree/`.
 
@@ -439,7 +444,7 @@ Icons are TSX components from the vendored `pixel-art-icons` package. Each icon 
 ```tsx
 import { ChevronRightIcon } from 'pixel-art-icons/icons/chevron-right'
 
-<ChevronRightIcon />
+;<ChevronRightIcon />
 ```
 
 Rules:
@@ -510,7 +515,9 @@ Inline `style` is banned. The only legitimate use is **dynamic CSS custom proper
 ```
 
 ```css
-.module { min-height: var(--module-min-height); }
+.module {
+  min-height: var(--module-min-height);
+}
 ```
 
 ### No `!important`
@@ -550,25 +557,25 @@ The HTML `title` attribute is banned for hover hints — gated by `no-native-tit
 
 ## Forbidden patterns
 
-| Pattern                                                  | Use instead                                              |
-|----------------------------------------------------------|----------------------------------------------------------|
-| `<button>` in editor / admin code                        | `<Button>` from `src/ui/components/Button`               |
-| `color: #ededed;` (hardcoded color)                      | `color: var(--text);`                             |
-| `border: 1px solid #333;` (hardcoded border)             | `border: 1px solid var(--border);`                |
-| `var(--text, #ededed)` (var with fallback)        | `var(--text)` — define the token in `globals.css` |
-| `className="text-zinc-400"` (Tailwind utility)           | CSS Module class                                         |
-| `className="bg-blue-500"`, `min-h-[44px]`, etc.          | CSS Module class with a token                            |
-| `import { cn } from 'clsx'`                              | `import { cn } from '@ui/cn'`                            |
-| `import { X } from 'lucide-react'`                       | `import { XIcon } from 'pixel-art-icons/icons/<name>'`   |
-| `style={{ color: 'white' }}`                             | CSS Module class — `style` is only for CSS custom properties |
-| `!important` in a component CSS module                   | Restructure selectors                                    |
-| `alert('Saved!')`                                        | Toast or `role="status"` element                         |
-| `<input title="Help text">` (hover hint)                 | `<Tooltip>` primitive                                    |
-| Inline SVG icon string                                   | `pixel-art-icons/icons/<name>`                           |
-| Card with a colored border                               | Borderless tile on a darker parent (1px gap pattern)     |
-| Hover that changes a card's border color                 | Hover that lifts the surface tone (`-surface-2` → `-3`)  |
-| Filling an input with a tinted background                | Transparent fill, white-alpha border                     |
-| Inventing a one-off color for a category                 | Use `assignRailAccents` / `railAccent` from `@ui/railAccent`, or add a new tint token in `globals.css`|
+| Pattern                                         | Use instead                                                                                            |
+| ----------------------------------------------- | ------------------------------------------------------------------------------------------------------ |
+| `<button>` in editor / admin code               | `<Button>` from `src/ui/components/Button`                                                             |
+| `color: #ededed;` (hardcoded color)             | `color: var(--text);`                                                                                  |
+| `border: 1px solid #333;` (hardcoded border)    | `border: 1px solid var(--border);`                                                                     |
+| `var(--text, #ededed)` (var with fallback)      | `var(--text)` — define the token in `globals.css`                                                      |
+| `className="text-zinc-400"` (Tailwind utility)  | CSS Module class                                                                                       |
+| `className="bg-blue-500"`, `min-h-[44px]`, etc. | CSS Module class with a token                                                                          |
+| `import { cn } from 'clsx'`                     | `import { cn } from '@ui/cn'`                                                                          |
+| `import { X } from 'lucide-react'`              | `import { XIcon } from 'pixel-art-icons/icons/<name>'`                                                 |
+| `style={{ color: 'white' }}`                    | CSS Module class — `style` is only for CSS custom properties                                           |
+| `!important` in a component CSS module          | Restructure selectors                                                                                  |
+| `alert('Saved!')`                               | Toast or `role="status"` element                                                                       |
+| `<input title="Help text">` (hover hint)        | `<Tooltip>` primitive                                                                                  |
+| Inline SVG icon string                          | `pixel-art-icons/icons/<name>`                                                                         |
+| Card with a colored border                      | Borderless tile on a darker parent (1px gap pattern)                                                   |
+| Hover that changes a card's border color        | Hover that lifts the surface tone (`-surface-2` → `-3`)                                                |
+| Filling an input with a tinted background       | Transparent fill, white-alpha border                                                                   |
+| Inventing a one-off color for a category        | Use `assignRailAccents` / `railAccent` from `@ui/railAccent`, or add a new tint token in `globals.css` |
 
 ---
 

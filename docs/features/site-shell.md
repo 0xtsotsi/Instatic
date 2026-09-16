@@ -30,33 +30,33 @@ The shell is stored in a single `site` row. Pages and VCs live separately in `da
 
 ```ts
 export type SiteShell = {
-  id:           string
-  name:         string
-  breakpoints:  Breakpoint[]
-  conditions?:  ConditionDef[]   // reusable custom @media/@container/@supports registry
-  settings:     SiteSettings
-  styleRules:   Record<string, StyleRule>
-  files:        SiteFile[]
-  explorer:     SiteExplorerOrganization
-  packageJson:  SitePackageJson
-  runtime:      SiteRuntimeConfig
-  createdAt:    number
-  updatedAt:    number
+  id: string
+  name: string
+  breakpoints: Breakpoint[]
+  conditions?: ConditionDef[] // reusable custom @media/@container/@supports registry
+  settings: SiteSettings
+  styleRules: Record<string, StyleRule>
+  files: SiteFile[]
+  explorer: SiteExplorerOrganization
+  packageJson: SitePackageJson
+  runtime: SiteRuntimeConfig
+  createdAt: number
+  updatedAt: number
 }
 
 export type SiteDocument = SiteShell & {
-  pages:             Page[]
-  visualComponents:  VisualComponent[]
+  pages: Page[]
+  visualComponents: VisualComponent[]
 }
 ```
 
 `SiteDocument` is the **in-memory** view the editor and publisher work with. The DB persists three things separately:
 
-| Persisted shape    | DB location                                                    |
-|--------------------|----------------------------------------------------------------|
-| `SiteShell`        | `site` row, `settings_json` column                             |
-| `Page[]`           | `data_rows` rows where `table_id = 'pages'`                    |
-| `VisualComponent[]`| `data_rows` rows where `table_id = 'components'`               |
+| Persisted shape     | DB location                                      |
+| ------------------- | ------------------------------------------------ |
+| `SiteShell`         | `site` row, `settings_json` column               |
+| `Page[]`            | `data_rows` rows where `table_id = 'pages'`      |
+| `VisualComponent[]` | `data_rows` rows where `table_id = 'components'` |
 
 The site shell schema **does not** include pages or VCs — gated by `no-vc-in-site-shell.test.ts`.
 
@@ -70,21 +70,21 @@ The site shell schema **does not** include pages or VCs — gated by `no-vc-in-s
 
 ```ts
 type Breakpoint = {
-  id:            string     // 'mobile' | 'tablet' | 'desktop' | custom
-  label:         string
-  width:         number     // canvas frame width in px
-  mediaQuery?:   string     // published CSS condition; defaults to `(max-width: ${width}px)`
-  icon:          string     // pixel-art-icons name
-  previewFrame?: boolean    // false keeps the context selectable without rendering a frame
+  id: string // 'mobile' | 'tablet' | 'desktop' | custom
+  label: string
+  width: number // canvas frame width in px
+  mediaQuery?: string // published CSS condition; defaults to `(max-width: ${width}px)`
+  icon: string // pixel-art-icons name
+  previewFrame?: boolean // false keeps the context selectable without rendering a frame
 }
 ```
 
 The default set (`DEFAULT_BREAKPOINTS`):
 
-| id        | label   | width | mediaQuery |
-|-----------|---------|-------|------------|
-| `mobile`  | Mobile  | 375   | `(max-width: 375px)` |
-| `tablet`  | Tablet  | 768   | `(max-width: 768px)` |
+| id        | label   | width | mediaQuery            |
+| --------- | ------- | ----- | --------------------- |
+| `mobile`  | Mobile  | 375   | `(max-width: 375px)`  |
+| `tablet`  | Tablet  | 768   | `(max-width: 768px)`  |
 | `desktop` | Desktop | 1440  | `(max-width: 1440px)` |
 
 Viewport contexts power three things:
@@ -101,9 +101,9 @@ Viewport contexts can be added / removed / reordered through Settings → Viewpo
 
 ```ts
 type ConditionDef = {
-  id:        string      // deterministic from content: 'media:<q>', 'container:<name>:<q>', 'supports:<q>'
-  label:     string      // human label in the context switcher (e.g. "Dark", "Card ≥400")
-  condition: Condition   // { kind: 'media' | 'container' | 'supports', query, name? }
+  id: string // deterministic from content: 'media:<q>', 'container:<name>:<q>', 'supports:<q>'
+  label: string // human label in the context switcher (e.g. "Dark", "Card ≥400")
+  condition: Condition // { kind: 'media' | 'container' | 'supports', query, name? }
 }
 ```
 
@@ -121,17 +121,18 @@ CRUD actions on `classSlice`: `addCondition`, `updateCondition`, `removeConditio
 
 ```ts
 type SiteSettings = {
-  metaTitle?:       string
+  metaTitle?: string
   metaDescription?: string
-  faviconUrl?:      string
-  language?:        string
-  framework?:       FrameworkSettings       // colors, typography, spacing, preferences — absent when disabled
-  fonts?:           SiteFontsSettings       // installed font library + editable font tokens
-  shortcuts:        Record<string, string>  // keyboard shortcut overrides
+  faviconUrl?: string
+  language?: string
+  framework?: FrameworkSettings // colors, typography, spacing, preferences — absent when disabled
+  fonts?: SiteFontsSettings // installed font library + editable font tokens
+  shortcuts: Record<string, string> // keyboard shortcut overrides
 }
 ```
 
 `framework` holds the structured design token system (`src/core/framework/`). When present it carries:
+
 - `colors.tokens` — `FrameworkColorToken[]`, each with a slug (becomes a CSS var like `--primary`), light/dark values, utility generation flags (text/background/border/fill), shade/tint variant counts. Slugs are normalized by `normalizeFrameworkColorSlug` (trim, lowercase, strip leading `--`, replace non-alphanumeric runs with `-`). When two tokens normalize to the same root slug, the second receives a `-2` suffix, the third `-3`, and so on — resolved in generation order via `buildColorSlugMap` so the earlier token keeps the base name.
 - `typography` — `FrameworkTypographySettings` with fluid scale groups, each emitting `font-size` vars + optional utility classes.
 - `spacing` — `FrameworkSpacingSettings` with fluid spacing scale groups, each emitting spacing vars + optional utility classes.
@@ -183,15 +184,15 @@ Arbitrary files attached to the site: CSS stylesheets, TypeScript scripts, React
 
 ```ts
 type SiteFile = {
-  id:         string          // nanoid-generated; stable (path is mutable on rename)
-  path:       string          // POSIX-style path relative to site root, e.g. 'src/styles/main.css'
-  type:       SiteFileType    // 'component' | 'script' | 'style' | 'asset' | 'config' | 'doc'
-  content?:   string          // text content; absent for 'asset' files
-  blob?:      { mimeType: string; base64: string }  // binary payload for 'asset' only
-  generated?: boolean         // auto-generated by scaffold; hidden until ejected
-  ejected?:   boolean         // user has edited a generated file
-  createdAt:  number
-  updatedAt:  number
+  id: string // nanoid-generated; stable (path is mutable on rename)
+  path: string // POSIX-style path relative to site root, e.g. 'src/styles/main.css'
+  type: SiteFileType // 'component' | 'script' | 'style' | 'asset' | 'config' | 'doc'
+  content?: string // text content; absent for 'asset' files
+  blob?: { mimeType: string; base64: string } // binary payload for 'asset' only
+  generated?: boolean // auto-generated by scaffold; hidden until ejected
+  ejected?: boolean // user has edited a generated file
+  createdAt: number
+  updatedAt: number
 }
 ```
 
@@ -208,29 +209,19 @@ Generated files (e.g. `package.json`, `vite.config.ts`) are hidden in the Site E
 
 Site Explorer organization is split by whether a section owns URL/file paths.
 
-Pages, styles, and scripts are structural sections: folders are derived from page slugs or file paths, and changing a folder or item path rewrites those slugs/paths. The confirmation dialog only appears when there is something to review — actual slug/path rewrites, or a blocker to explain. Renaming, moving, or deleting an *empty* folder rewrites no content paths, so it applies directly (its new/removed path is still persisted in the section's `emptyFolders`/`expandedFolders`/`rowOrder` bookkeeping via the plan commit). Deleting a non-empty structural folder deletes every page or file under that path. Templates and Visual Components stay decorative: folders only organize rows in the editor and do not change template routing or component identity.
+Pages, styles, and scripts are structural sections: folders are derived from page slugs or file paths, and changing a folder or item path rewrites those slugs/paths. The confirmation dialog only appears when there is something to review — actual slug/path rewrites, or a blocker to explain. Renaming, moving, or deleting an _empty_ folder rewrites no content paths, so it applies directly (its new/removed path is still persisted in the section's `emptyFolders`/`expandedFolders`/`rowOrder` bookkeeping via the plan commit). Deleting a non-empty structural folder deletes every page or file under that path. Templates and Visual Components stay decorative: folders only organize rows in the editor and do not change template routing or component identity.
 
 ```ts
-type SiteExplorerSectionId =
-  | 'pages'
-  | 'templates'
-  | 'components'
-  | 'styles'
-  | 'scripts'
+type SiteExplorerSectionId = 'pages' | 'templates' | 'components' | 'styles' | 'scripts'
 
-type StructuralSiteExplorerSectionId =
-  | 'pages'
-  | 'styles'
-  | 'scripts'
+type StructuralSiteExplorerSectionId = 'pages' | 'styles' | 'scripts'
 
-type DecorativeSiteExplorerSectionId =
-  | 'templates'
-  | 'components'
+type DecorativeSiteExplorerSectionId = 'templates' | 'components'
 
 type SiteExplorerFolder = {
   id: string
   name: string
-  order: number  // root-level ordering among folders and unpinned items
+  order: number // root-level ordering among folders and unpinned items
 }
 
 type SiteExplorerItemPlacement = {
@@ -280,7 +271,7 @@ Structural page folders create parent routes because page slugs are URL paths. S
 
 ```ts
 type SitePackageJson = {
-  dependencies:    Record<string, string>
+  dependencies: Record<string, string>
   devDependencies: Record<string, string>
 }
 ```
@@ -299,25 +290,31 @@ type SiteAssetScope =
 
 type SiteRuntimeConfig = {
   dependencyLock: {
-    version:   1
-    packages:  Record<string, { resolved: string; integrity?: string }>
+    version: 1
+    packages: Record<string, { resolved: string; integrity?: string }>
     updatedAt: number
   }
   // Per-script targeting + load behaviour, keyed by SiteFile id.
-  scripts: Record<string, {
-    enabled: boolean
-    runInCanvas: boolean
-    placement: 'head' | 'body-end'
-    timing: 'immediate' | 'dom-ready' | 'idle'
-    scope: SiteAssetScope
-    priority: number
-  }>
+  scripts: Record<
+    string,
+    {
+      enabled: boolean
+      runInCanvas: boolean
+      placement: 'head' | 'body-end'
+      timing: 'immediate' | 'dom-ready' | 'idle'
+      scope: SiteAssetScope
+      priority: number
+    }
+  >
   // Per-stylesheet targeting + cascade, keyed by SiteFile id.
-  styles: Record<string, {
-    enabled: boolean
-    scope: SiteAssetScope
-    priority: number
-  }>
+  styles: Record<
+    string,
+    {
+      enabled: boolean
+      scope: SiteAssetScope
+      priority: number
+    }
+  >
 }
 ```
 
@@ -351,19 +348,19 @@ Editor store: siteSlice initial state
 
 The shell's `parseSiteDocument(raw)` is **tolerant in the right places**:
 
-| Field         | Behavior on invalid input                        |
-|---------------|--------------------------------------------------|
-| `id`          | Throw (required identity)                        |
-| `name`        | Throw                                            |
-| `breakpoints` | Throw (default would silently destroy customization) |
-| `createdAt`, `updatedAt` | Throw                                  |
-| `settings`    | Fall back to `DEFAULT_SITE_SETTINGS`             |
-| `conditions`  | Per-entry: drop invalid entries; absent → `[]`   |
-| `classes`     | Per-entry: drop entries missing `id` or `name`   |
-| `files`       | Per-entry: drop invalid entries                  |
-| `explorer`    | Fall back to empty folders / current item order  |
-| `packageJson` | Fall back to `{ dependencies: {}, devDependencies: {} }` |
-| `runtime`     | Fall back to empty lock + scripts                |
+| Field                    | Behavior on invalid input                                |
+| ------------------------ | -------------------------------------------------------- |
+| `id`                     | Throw (required identity)                                |
+| `name`                   | Throw                                                    |
+| `breakpoints`            | Throw (default would silently destroy customization)     |
+| `createdAt`, `updatedAt` | Throw                                                    |
+| `settings`               | Fall back to `DEFAULT_SITE_SETTINGS`                     |
+| `conditions`             | Per-entry: drop invalid entries; absent → `[]`           |
+| `classes`                | Per-entry: drop entries missing `id` or `name`           |
+| `files`                  | Per-entry: drop invalid entries                          |
+| `explorer`               | Fall back to empty folders / current item order          |
+| `packageJson`            | Fall back to `{ dependencies: {}, devDependencies: {} }` |
+| `runtime`                | Fall back to empty lock + scripts                        |
 
 Hard fallbacks let the editor render a partially-corrupt site instead of hard-failing; identity-field throws prevent the editor from rendering against the wrong site.
 
@@ -482,8 +479,8 @@ problem.
 import { useEditorStore } from '@site/store/store'
 
 const settings = useEditorStore((s) => s.site.settings)
-const colorTokens   = settings.framework?.colors.tokens ?? []
-const fontTokens    = settings.fonts?.tokens ?? []
+const colorTokens = settings.framework?.colors.tokens ?? []
+const fontTokens = settings.fonts?.tokens ?? []
 ```
 
 ### Add a new viewport context
@@ -522,7 +519,7 @@ Site → Dependencies panel edits `packageJson.dependencies`:
 
 ```jsonc
 {
-  "dependencies": { "three": "^0.171.0" }
+  "dependencies": { "three": "^0.171.0" },
 }
 ```
 
@@ -534,15 +531,15 @@ A plugin canvas module can then `import * as THREE from 'three'` and it resolves
 
 ## Forbidden patterns
 
-| Pattern                                                              | Use instead                                                 |
-|----------------------------------------------------------------------|-------------------------------------------------------------|
-| Adding `pages: ...` or `visualComponents: ...` to `SiteShellSchema`  | They're stored separately. Gated by `no-vc-in-site-shell.test.ts`. |
+| Pattern                                                                | Use instead                                                                                |
+| ---------------------------------------------------------------------- | ------------------------------------------------------------------------------------------ |
+| Adding `pages: ...` or `visualComponents: ...` to `SiteShellSchema`    | They're stored separately. Gated by `no-vc-in-site-shell.test.ts`.                         |
 | Reading `site.settings.colorTokens.primary as string` without fallback | `parseSiteSettings` already applies defaults; the type is `string`. Don't add `as string`. |
-| Persisting the in-memory `SiteDocument` directly as JSON              | Split into shell / pages / VCs before save                  |
-| Hard-failing the entire editor on a corrupt `settings_json`           | The parser falls back; the editor renders with defaults     |
-| Hardcoding the breakpoint list                                       | Read from `site.breakpoints` — users can add custom ones    |
-| Writing CSS for a user class manually                                | Add a `StyleRule` to the registry; the publisher compiles it |
-| Editing `runtime.dependencyLock` by hand                             | It's the output of `bun install` — let the install handler write it |
+| Persisting the in-memory `SiteDocument` directly as JSON               | Split into shell / pages / VCs before save                                                 |
+| Hard-failing the entire editor on a corrupt `settings_json`            | The parser falls back; the editor renders with defaults                                    |
+| Hardcoding the breakpoint list                                         | Read from `site.breakpoints` — users can add custom ones                                   |
+| Writing CSS for a user class manually                                  | Add a `StyleRule` to the registry; the publisher compiles it                               |
+| Editing `runtime.dependencyLock` by hand                               | It's the output of `bun install` — let the install handler write it                        |
 
 ---
 

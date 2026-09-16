@@ -17,16 +17,14 @@ const DOCUMENT_EDIT_TOOLS = new Set([
   'content_set_document_fields',
 ])
 
-const DOCUMENT_PUBLISH_TOOLS = new Set([
-  'content_set_document_status',
-])
+const DOCUMENT_PUBLISH_TOOLS = new Set(['content_set_document_status'])
 
 function inputDocumentId(input: unknown): string {
   if (
-    input === null
-    || typeof input !== 'object'
-    || !('documentId' in input)
-    || typeof input.documentId !== 'string'
+    input === null ||
+    typeof input !== 'object' ||
+    !('documentId' in input) ||
+    typeof input.documentId !== 'string'
   ) {
     throw new Error('Validated content tool input is missing documentId.')
   }

@@ -113,7 +113,10 @@ export function publicDataPath(routeBase: string, slug: string): string {
 }
 
 /** True when the previously-published route differs from the current slug's. */
-export function previousRouteChanged(previous: PreviousPublishedRoute, currentSlug: string): boolean {
+export function previousRouteChanged(
+  previous: PreviousPublishedRoute,
+  currentSlug: string,
+): boolean {
   return (
     previous.slug.length > 0 &&
     publicDataPath(previous.routeBase, previous.slug) !==
@@ -229,9 +232,7 @@ async function readPreviousPublishedRoute(
       and data_tables.deleted_at is null
     limit 1
   `
-  return rows[0]
-    ? { slug: rows[0].previous_slug, routeBase: rows[0].previous_route_base }
-    : null
+  return rows[0] ? { slug: rows[0].previous_slug, routeBase: rows[0].previous_route_base } : null
 }
 
 // ---------------------------------------------------------------------------
@@ -270,10 +271,7 @@ export async function getRowTableRouteInfo(
  * `deleted_at is null` filters — artefact removal must still resolve the
  * route after a soft delete (ISS-039).
  */
-export async function getRowTableRouteBase(
-  db: DbClient,
-  rowId: string,
-): Promise<string | null> {
+export async function getRowTableRouteBase(db: DbClient, rowId: string): Promise<string | null> {
   const { rows } = await db<{ route_base: string }>`
     select data_tables.route_base
     from data_rows
@@ -515,7 +513,10 @@ export async function deleteAllDataRowRedirects(db: DbClient): Promise<void> {
  * Insert a redirect preserving its original id, upserting on the unique
  * (from_route_base, from_slug) source key. Used by the bundle import handler.
  */
-export async function importDataRowRedirect(db: DbClient, input: ExportableRedirect): Promise<void> {
+export async function importDataRowRedirect(
+  db: DbClient,
+  input: ExportableRedirect,
+): Promise<void> {
   await db`
     insert into data_row_redirects (id, table_id, from_route_base, from_slug, target_row_id)
     values (

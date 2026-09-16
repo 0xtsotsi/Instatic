@@ -11,10 +11,7 @@
  * return 404).
  */
 
-import {
-  AI_USER_IMAGE_MAX_BASE64_CHARS,
-  AI_USER_IMAGE_MAX_BYTES,
-} from '@core/ai'
+import { AI_USER_IMAGE_MAX_BASE64_CHARS, AI_USER_IMAGE_MAX_BYTES } from '@core/ai'
 import { Type } from '@core/utils/typeboxHelpers'
 import { binaryResponse } from '../../binary'
 import { jsonResponse, readValidatedBody, badRequest } from '../../http'
@@ -61,13 +58,7 @@ export function tryHandleAiConversations(
     /^\/admin\/api\/ai\/conversations\/([^/]+)\/messages\/([^/]+)\/images\/(\d+)$/,
   )
   if (imageMatch) {
-    return handleMessageImage(
-      req,
-      db,
-      imageMatch[1]!,
-      imageMatch[2]!,
-      Number(imageMatch[3]),
-    )
+    return handleMessageImage(req, db, imageMatch[1]!, imageMatch[2]!, Number(imageMatch[3]))
   }
   const match = pathname.match(/^\/admin\/api\/ai\/conversations\/([^/]+)$/)
   if (match) {
@@ -89,12 +80,7 @@ async function handleMessageImage(
   const userOrResponse = await requireCapability(req, db, 'ai.chat')
   if (userOrResponse instanceof Response) return userOrResponse
 
-  const message = await readMessageForUser(
-    db,
-    userOrResponse.id,
-    conversationId,
-    messageId,
-  )
+  const message = await readMessageForUser(db, userOrResponse.id, conversationId, messageId)
   const block = message?.content[blockIndex]
   if (block?.kind !== 'image' || block.mimeType !== 'image/jpeg') return imageNotFound()
 
@@ -114,13 +100,14 @@ function decodeStoredJpeg(data: string): Buffer | null {
   if (!data || data.length > AI_USER_IMAGE_MAX_BASE64_CHARS || data.length % 4 !== 0) return null
   const bytes = Buffer.from(data, 'base64')
   if (
-    bytes.byteLength === 0
-    || bytes.byteLength > AI_USER_IMAGE_MAX_BYTES
-    || bytes.toString('base64') !== data
-    || bytes[0] !== 0xff
-    || bytes[1] !== 0xd8
-    || bytes[2] !== 0xff
-  ) return null
+    bytes.byteLength === 0 ||
+    bytes.byteLength > AI_USER_IMAGE_MAX_BYTES ||
+    bytes.toString('base64') !== data ||
+    bytes[0] !== 0xff ||
+    bytes[1] !== 0xd8 ||
+    bytes[2] !== 0xff
+  )
+    return null
   return bytes
 }
 
@@ -189,10 +176,8 @@ async function handleRead(req: Request, db: DbClient, id: string): Promise<Respo
   const messages = await listMessagesForConversation(db, id)
   return jsonResponse(
     {
-      conversation: toConversationDetailView(
-        conv,
-        messages,
-        (messageId, blockIndex) => conversationImageUrl(id, messageId, blockIndex),
+      conversation: toConversationDetailView(conv, messages, (messageId, blockIndex) =>
+        conversationImageUrl(id, messageId, blockIndex),
       ),
     },
     { headers: { 'Cache-Control': 'private, no-store' } },

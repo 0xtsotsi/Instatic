@@ -46,10 +46,7 @@ function mapRow(row: ElectedAdapterRow): ElectedAdapter {
  * Resolve the elected adapter id for a given role. Returns `''` (= local-disk)
  * when no row exists for the role — that's the post-fresh-install default.
  */
-export async function getElectedAdapterId(
-  db: DbClient,
-  role: MediaAssetRole,
-): Promise<string> {
+export async function getElectedAdapterId(db: DbClient, role: MediaAssetRole): Promise<string> {
   const { rows } = await db<{ adapter_id: string }>`
     select adapter_id from active_media_storage_adapter where role = ${role}
   `
@@ -100,10 +97,7 @@ export async function electAdapter(
  * this to (a) display "this adapter owns 1,247 assets" in the picker, and
  * (b) block uninstalling a plugin whose adapter still has live rows.
  */
-export async function countAssetsForAdapter(
-  db: DbClient,
-  adapterId: string,
-): Promise<number> {
+export async function countAssetsForAdapter(db: DbClient, adapterId: string): Promise<number> {
   const { rows } = await db<{ n: number | string }>`
     select count(*) as n from media_assets where storage_adapter_id = ${adapterId}
   `
@@ -136,7 +130,13 @@ function parseWidths(value: unknown): number[] {
   const raw = Array.isArray(value)
     ? value
     : typeof value === 'string'
-      ? (() => { try { return JSON.parse(value) } catch { return [] } })()
+      ? (() => {
+          try {
+            return JSON.parse(value)
+          } catch {
+            return []
+          }
+        })()
       : []
   return Array.isArray(raw)
     ? raw.filter((n): n is number => typeof n === 'number' && Number.isFinite(n))
@@ -149,12 +149,17 @@ function parseFormats(value: unknown): ReadonlyArray<'webp' | 'jpeg' | 'avif'> {
   const raw = Array.isArray(value)
     ? value
     : typeof value === 'string'
-      ? (() => { try { return JSON.parse(value) } catch { return [] } })()
+      ? (() => {
+          try {
+            return JSON.parse(value)
+          } catch {
+            return []
+          }
+        })()
       : []
   if (!Array.isArray(raw)) return []
   return raw.filter(
-    (f): f is 'webp' | 'jpeg' | 'avif' =>
-      typeof f === 'string' && ALLOWED_VARIANT_FORMATS.has(f),
+    (f): f is 'webp' | 'jpeg' | 'avif' => typeof f === 'string' && ALLOWED_VARIANT_FORMATS.has(f),
   )
 }
 

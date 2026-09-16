@@ -31,8 +31,7 @@ import { mcpToolsForCapabilities } from '../registry'
 const mockNodes = [
   {
     selector: 'div.hero',
-    outerHTML:
-      '<div class="hero" data-uid="">Hello world</div>',
+    outerHTML: '<div class="hero" data-uid="">Hello world</div>',
     computedStyles: {
       color: 'rgb(255, 0, 0)',
       'background-image': 'url("https://example.test/bg.png")',
@@ -56,7 +55,9 @@ const mockFetchedPage = {
 }
 
 const mockFetcherInstance = {
-  fetch: mock(async (_url: string, _target?: unknown, _opts?: { interactions?: unknown }) => mockFetchedPage),
+  fetch: mock(
+    async (_url: string, _target?: unknown, _opts?: { interactions?: unknown }) => mockFetchedPage,
+  ),
   close: async () => {},
 }
 
@@ -166,9 +167,7 @@ describe('mcp capture_from_url', () => {
       const detail = violations
         .map((v) => `  - ${v.file}: import from "${v.specifier}"\n      ${v.line}`)
         .join('\n')
-      throw new Error(
-        `core/ must stay free of Instatic imports. Offending imports:\n${detail}`,
-      )
+      throw new Error(`core/ must stay free of Instatic imports. Offending imports:\n${detail}`)
     }
     expect(violations).toHaveLength(0)
   })
@@ -618,10 +617,7 @@ describe('capture_from_url mode gates', () => {
       { action: 'fill', selector: 'input[name=email]', value: 'x@y.z' },
       { action: 'wait_for_url', pattern: '/dashboard' },
     ] as never
-    await captureTool.handler(
-      { url: 'https://example.test/', interactions } as never,
-      stubCtx,
-    )
+    await captureTool.handler({ url: 'https://example.test/', interactions } as never, stubCtx)
     expect(mockFetcherInstance.fetch).toHaveBeenCalledTimes(1)
     const fetchArgs = mockFetcherInstance.fetch.mock.calls[0]
     // The fetcher's fetch signature is (url, target, opts?) where opts

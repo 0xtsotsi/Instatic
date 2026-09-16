@@ -9,7 +9,14 @@ import { mcpToolsForCapabilities } from '../registry'
 const PAGE_TREE = {
   rootNodeId: 'root',
   nodes: {
-    root: { id: 'root', moduleId: 'base.body', props: {}, breakpointOverrides: {}, classIds: [], children: [] },
+    root: {
+      id: 'root',
+      moduleId: 'base.body',
+      props: {},
+      breakpointOverrides: {},
+      classIds: [],
+      children: [],
+    },
   },
 }
 
@@ -49,7 +56,9 @@ describe('mcp site_list_documents (headless)', () => {
   })
 
   it('the MCP registry exposes a server-resolved site_list_documents that does not need a snapshot', async () => {
-    const tool = mcpToolsForCapabilities(['site.read']).find((t) => t.name === 'site_list_documents')
+    const tool = mcpToolsForCapabilities(['site.read']).find(
+      (t) => t.name === 'site_list_documents',
+    )
     if (!tool?.handler) throw new Error('Expected site_list_documents handler')
     expect(tool.execution).toBe('server')
 

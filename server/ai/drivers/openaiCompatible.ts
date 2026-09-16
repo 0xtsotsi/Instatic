@@ -13,12 +13,7 @@
 import { Type, parseValue } from '@core/utils/typeboxHelpers'
 import { isAbortError } from '@core/http'
 import type { AiAuthMode, AiStreamEvent } from '../runtime/types'
-import type {
-  AiProvider,
-  AiProviderModel,
-  AiResolvedCredential,
-  AiStreamRequest,
-} from './types'
+import type { AiProvider, AiProviderModel, AiResolvedCredential, AiStreamRequest } from './types'
 import { runToolLoop } from './http/toolLoop'
 import { makeChatCompletionsAdapter, normalizeOpenAiBaseUrl } from './http/chatCompletions'
 

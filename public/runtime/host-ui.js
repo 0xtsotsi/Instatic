@@ -16,7 +16,7 @@
 const G = globalThis.__instatic?.hostUi
 if (!G) {
   throw new Error(
-    "[@instatic/runtime] Host UI not initialized. Did the host bundle finish loading before the plugin import?",
+    '[@instatic/runtime] Host UI not initialized. Did the host bundle finish loading before the plugin import?',
   )
 }
 

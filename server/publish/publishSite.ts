@@ -33,10 +33,7 @@ import {
 } from '../repositories/publish'
 import { buildSiteRuntimeScripts } from './runtime/bundleScripts'
 import { ensureRuntimeDependencyCache } from './runtime/dependencyCache'
-import {
-  buildRuntimePackageImportmap,
-  serializeImportmapForCsp,
-} from './runtime/packageImportmap'
+import { buildRuntimePackageImportmap, serializeImportmapForCsp } from './runtime/packageImportmap'
 import { renderPublishedNotFound, renderPublishedSnapshot } from './publicRenderer'
 import { prefetchMediaAssets } from './mediaPrefetch'
 import { applyPublishedHtmlPipeline } from './publishedHtmlPipeline'
@@ -102,9 +99,10 @@ async function publishDraftSiteLocked(
   if (!site) throw new Error('draft site not found')
 
   const runtime = normalizeSiteRuntimeConfig(site.runtime)
-  const dependencyCache = Object.keys(runtime.dependencyLock.packages).length > 0
-    ? await ensureRuntimeDependencyCache(runtime.dependencyLock)
-    : undefined
+  const dependencyCache =
+    Object.keys(runtime.dependencyLock.packages).length > 0
+      ? await ensureRuntimeDependencyCache(runtime.dependencyLock)
+      : undefined
   // Build the package importmap once per publish — the JSON is identical
   // for every page sharing the same lock, so its SHA-256 stays stable
   // across snapshots. Module plugins use bare imports (`import "three"`)
@@ -214,17 +212,27 @@ async function publishDraftSiteLocked(
       const assetsByPath = new Map<string, Uint8Array>()
       const encoder = new TextEncoder()
       const collectCssFiles = (cssBundle: SiteCssBundle): void => {
-        for (const file of [cssBundle.reset, cssBundle.framework, cssBundle.style, cssBundle.userStyles]) {
+        for (const file of [
+          cssBundle.reset,
+          cssBundle.framework,
+          cssBundle.style,
+          cssBundle.userStyles,
+        ]) {
           if (file.content.length === 0) continue
           const publicPath = `/_instatic/css/${file.filename}`
-          if (!assetsByPath.has(publicPath)) assetsByPath.set(publicPath, encoder.encode(file.content))
+          if (!assetsByPath.has(publicPath))
+            assetsByPath.set(publicPath, encoder.encode(file.content))
         }
       }
       for (const snapshot of snapshots) {
         const page = snapshot.site.pages.find((p) => p.id === snapshot.pageRowId)
         if (!page || isTemplatePage(page)) continue // template pages only ever wrap; never baked at their own slug
         const mediaAssets = await prefetchMediaAssets(page, snapshot.site, registry, db)
-        collectCssFiles(buildPublishedSiteCssBundle(snapshot.site, registry, page, nextPublishVersion, { mediaAssets }))
+        collectCssFiles(
+          buildPublishedSiteCssBundle(snapshot.site, registry, page, nextPublishVersion, {
+            mediaAssets,
+          }),
+        )
       }
       for (const asset of runtimeAssetFiles) {
         if (!assetsByPath.has(asset.publicPath)) assetsByPath.set(asset.publicPath, asset.bytes)
@@ -251,7 +259,10 @@ async function publishDraftSiteLocked(
             collectCssFiles(rendered.cssBundle)
           }
         } catch (err) {
-          console.error('[publish:site] failed to bake the 404 artefact (falls through to live renderer):', err)
+          console.error(
+            '[publish:site] failed to bake the 404 artefact (falls through to live renderer):',
+            err,
+          )
         }
       }
 
@@ -275,7 +286,12 @@ async function publishDraftSiteLocked(
           // page bundle above cannot (the merged page's userStyles).
           collectCssFiles(rendered.cssBundle)
         } catch (err) {
-          console.error('[publish:site] failed to bake artefact for', urlPath, '(falls through to live renderer):', err)
+          console.error(
+            '[publish:site] failed to bake artefact for',
+            urlPath,
+            '(falls through to live renderer):',
+            err,
+          )
         }
       }
 
@@ -291,7 +307,10 @@ async function publishDraftSiteLocked(
       }
       await swapSlot(uploadsDir, slot)
     } catch (err) {
-      console.error('[publish:site] static artefact write failed (live renderer remains active):', err)
+      console.error(
+        '[publish:site] static artefact write failed (live renderer remains active):',
+        err,
+      )
     }
   }
 

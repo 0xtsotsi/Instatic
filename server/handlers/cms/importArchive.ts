@@ -122,13 +122,16 @@ export async function handleImportArchiveRoute(
     const dataImportReq = makeInternalImportRequest(req, strategy, dataBundle)
     const dataImportRes = await handleImportRoute(dataImportReq, db, options)
     if (!dataImportRes || !dataImportRes.ok) {
-      return dataImportRes ?? jsonResponse({ error: 'Import route did not handle archive manifest' }, { status: 500 })
+      return (
+        dataImportRes ??
+        jsonResponse({ error: 'Import route did not handle archive manifest' }, { status: 500 })
+      )
     }
 
     const baseResult = parseValue(ImportResultSchema, await dataImportRes.json())
     const importedFolderIds = new Set(
       strategy === 'replace'
-        ? selectedManifest.mediaFolders?.map((folder) => folder.id) ?? []
+        ? (selectedManifest.mediaFolders?.map((folder) => folder.id) ?? [])
         : [],
     )
 
@@ -246,12 +249,7 @@ async function moveFile(source: string, target: string): Promise<void> {
 }
 
 function errorHasCode(err: unknown, code: string): boolean {
-  return (
-    typeof err === 'object' &&
-    err !== null &&
-    'code' in err &&
-    err.code === code
-  )
+  return typeof err === 'object' && err !== null && 'code' in err && err.code === code
 }
 
 async function stageArchiveMediaEntries(input: {
@@ -301,10 +299,16 @@ async function readArchiveMediaEntries(input: {
   ) => Promise<number>
 }): Promise<void> {
   const allMediaByArchivePath = new Map(
-    (input.archiveManifest.media ?? []).map((asset) => [mediaArchivePath(asset.storagePath), asset]),
+    (input.archiveManifest.media ?? []).map((asset) => [
+      mediaArchivePath(asset.storagePath),
+      asset,
+    ]),
   )
   const selectedMediaByArchivePath = new Map(
-    (input.selectedManifest.media ?? []).map((asset) => [mediaArchivePath(asset.storagePath), asset]),
+    (input.selectedManifest.media ?? []).map((asset) => [
+      mediaArchivePath(asset.storagePath),
+      asset,
+    ]),
   )
 
   while (true) {
@@ -317,7 +321,9 @@ async function readArchiveMediaEntries(input: {
       return
     }
     if (header.compression !== ZIP_STORED_METHOD) {
-      throw new Error(`Archive entry "${header.path}" is compressed; CMS bundle media must be stored`)
+      throw new Error(
+        `Archive entry "${header.path}" is compressed; CMS bundle media must be stored`,
+      )
     }
 
     const archivedAsset = allMediaByArchivePath.get(header.path)
@@ -325,7 +331,10 @@ async function readArchiveMediaEntries(input: {
       throw new Error(`Unexpected entry in CMS bundle archive: ${header.path}`)
     }
     if ((header.flags & ZIP_DATA_DESCRIPTOR_FLAG) === 0) {
-      if (header.compressedSize !== archivedAsset.sizeBytes || header.uncompressedSize !== archivedAsset.sizeBytes) {
+      if (
+        header.compressedSize !== archivedAsset.sizeBytes ||
+        header.uncompressedSize !== archivedAsset.sizeBytes
+      ) {
         throw new Error(`Archive entry "${header.path}" size does not match the manifest`)
       }
     }
@@ -374,13 +383,19 @@ function parseImportSelection(url: URL): BundleImportSelection | null | Response
     return parseValue(BundleImportSelectionSchema, parsed)
   } catch {
     return jsonResponse(
-      { error: `Invalid import selection: ${formatValueErrors(BundleImportSelectionSchema, parsed)}` },
+      {
+        error: `Invalid import selection: ${formatValueErrors(BundleImportSelectionSchema, parsed)}`,
+      },
       { status: 400 },
     )
   }
 }
 
-function makeInternalImportRequest(req: Request, strategy: ImportStrategy, bundle: SiteBundle): Request {
+function makeInternalImportRequest(
+  req: Request,
+  strategy: ImportStrategy,
+  bundle: SiteBundle,
+): Request {
   const url = new URL(`${CMS_API_PREFIX}/import`, req.url)
   url.searchParams.set('strategy', strategy)
   const headers = new Headers(req.headers)
@@ -419,9 +434,10 @@ function filterArchiveManifestForSelection(
     .map((row) => applyRowSlugOverride(row, slugOverrides.get(rowOverrideKey(row.tableId, row.id))))
   const selectedRowIds = new Set(rows.map((row) => row.id))
   const media = filterArchiveManifestMedia(manifest, selection)
-  const redirects = selection.includeRedirects && manifest.redirects
-    ? manifest.redirects.filter((redirect) => selectedRowIds.has(redirect.targetRowId))
-    : undefined
+  const redirects =
+    selection.includeRedirects && manifest.redirects
+      ? manifest.redirects.filter((redirect) => selectedRowIds.has(redirect.targetRowId))
+      : undefined
 
   return parseValue(SiteBundleArchiveManifestSchema, {
     schemaVersion: manifest.schemaVersion,
@@ -431,16 +447,20 @@ function filterArchiveManifestForSelection(
     tables,
     rows,
     ...(media ? { media } : {}),
-    ...(selection.includeMediaFolders && manifest.mediaFolders ? { mediaFolders: manifest.mediaFolders } : {}),
+    ...(selection.includeMediaFolders && manifest.mediaFolders
+      ? { mediaFolders: manifest.mediaFolders }
+      : {}),
     ...(redirects ? { redirects } : {}),
   })
 }
 
 function rowSlugOverrideMap(selection: BundleImportSelection): Map<string, string> {
-  return new Map((selection.rowSlugOverrides ?? []).map((override) => [
-    rowOverrideKey(override.tableId, override.rowId),
-    override.slug,
-  ]))
+  return new Map(
+    (selection.rowSlugOverrides ?? []).map((override) => [
+      rowOverrideKey(override.tableId, override.rowId),
+      override.slug,
+    ]),
+  )
 }
 
 function rowOverrideKey(tableId: string, rowId: string): string {
@@ -455,9 +475,7 @@ function applyRowSlugOverride(
   return {
     ...row,
     slug,
-    cells: typeof row.cells.slug === 'string'
-      ? { ...row.cells, slug }
-      : row.cells,
+    cells: typeof row.cells.slug === 'string' ? { ...row.cells, slug } : row.cells,
   }
 }
 
@@ -506,7 +524,9 @@ async function readArchiveManifest(reader: ZipBodyReader): Promise<SiteBundleArc
     return parseValue(SiteBundleArchiveManifestSchema, parsed)
   } catch {
     const firstPath = compiled(SiteBundleArchiveManifestSchema).Errors(parsed).First()?.path ?? ''
-    throw new Error(`Archive manifest does not match schema at ${firstPath}: ${formatValueErrors(SiteBundleArchiveManifestSchema, parsed)}`)
+    throw new Error(
+      `Archive manifest does not match schema at ${firstPath}: ${formatValueErrors(SiteBundleArchiveManifestSchema, parsed)}`,
+    )
   }
 }
 
@@ -578,16 +598,21 @@ class ZipBodyReader {
 
     const path = textDecoder.decode(metadata.subarray(0, fileNameLength))
     const extra = metadata.subarray(fileNameLength)
-    const zip64Sizes = compressedSize32 === UINT32_MAX || uncompressedSize32 === UINT32_MAX
-      ? readZip64LocalSizes(extra)
-      : null
+    const zip64Sizes =
+      compressedSize32 === UINT32_MAX || uncompressedSize32 === UINT32_MAX
+        ? readZip64LocalSizes(extra)
+        : null
 
     return {
       path,
       flags,
       compression,
-      compressedSize: compressedSize32 === UINT32_MAX ? zip64Sizes?.compressedSize ?? null : compressedSize32,
-      uncompressedSize: uncompressedSize32 === UINT32_MAX ? zip64Sizes?.uncompressedSize ?? null : uncompressedSize32,
+      compressedSize:
+        compressedSize32 === UINT32_MAX ? (zip64Sizes?.compressedSize ?? null) : compressedSize32,
+      uncompressedSize:
+        uncompressedSize32 === UINT32_MAX
+          ? (zip64Sizes?.uncompressedSize ?? null)
+          : uncompressedSize32,
     }
   }
 
@@ -630,7 +655,10 @@ class ZipBodyReader {
     }
   }
 
-  async readAndValidateDataDescriptor(expected: { crc32: number; sizeBytes: number }): Promise<void> {
+  async readAndValidateDataDescriptor(expected: {
+    crc32: number
+    sizeBytes: number
+  }): Promise<void> {
     const descriptorSize = expected.sizeBytes > UINT32_MAX ? 24 : 16
     const descriptor = await this.readExact(descriptorSize)
     if (!descriptor) throw new Error('CMS bundle archive media descriptor is missing')
@@ -638,12 +666,14 @@ class ZipBodyReader {
       throw new Error('CMS bundle archive media descriptor is invalid')
     }
     const actualCrc = readUint32(descriptor, 4)
-    const actualCompressedSize = expected.sizeBytes > UINT32_MAX
-      ? Number(readUint64(descriptor, 8))
-      : readUint32(descriptor, 8)
-    const actualUncompressedSize = expected.sizeBytes > UINT32_MAX
-      ? Number(readUint64(descriptor, 16))
-      : readUint32(descriptor, 12)
+    const actualCompressedSize =
+      expected.sizeBytes > UINT32_MAX
+        ? Number(readUint64(descriptor, 8))
+        : readUint32(descriptor, 8)
+    const actualUncompressedSize =
+      expected.sizeBytes > UINT32_MAX
+        ? Number(readUint64(descriptor, 16))
+        : readUint32(descriptor, 12)
     if (
       actualCrc !== expected.crc32 ||
       actualCompressedSize !== expected.sizeBytes ||
@@ -654,7 +684,9 @@ class ZipBodyReader {
   }
 }
 
-function readZip64LocalSizes(extra: Uint8Array): { uncompressedSize: number; compressedSize: number } | null {
+function readZip64LocalSizes(
+  extra: Uint8Array,
+): { uncompressedSize: number; compressedSize: number } | null {
   let offset = 0
   while (offset + 4 <= extra.byteLength) {
     const headerId = readUint16(extra, offset)

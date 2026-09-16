@@ -22,18 +22,18 @@ export async function listProviderModels(
     controller.abort(new Error('Model catalogue request timed out.'))
   }, MODEL_LIST_TIMEOUT_MS)
   let rejectAborted!: (reason?: unknown) => void
-  const aborted = new Promise<never>((_resolve, reject) => { rejectAborted = reject })
-  const rejectAbort = () => rejectAborted(
-    controller.signal.reason ?? new DOMException('The operation was aborted.', 'AbortError'),
-  )
+  const aborted = new Promise<never>((_resolve, reject) => {
+    rejectAborted = reject
+  })
+  const rejectAbort = () =>
+    rejectAborted(
+      controller.signal.reason ?? new DOMException('The operation was aborted.', 'AbortError'),
+    )
   if (controller.signal.aborted) rejectAbort()
   else controller.signal.addEventListener('abort', rejectAbort, { once: true })
 
   try {
-    return await Promise.race([
-      driver.listModels(credentials, controller.signal),
-      aborted,
-    ])
+    return await Promise.race([driver.listModels(credentials, controller.signal), aborted])
   } finally {
     clearTimeout(timeoutId)
     parentSignal?.removeEventListener('abort', abortFromParent)

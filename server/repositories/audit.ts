@@ -55,7 +55,13 @@ const AuditActionSchema = Type.Union([
 
 const AuditMetadataSchema = Type.Record(
   Type.String(),
-  Type.Union([Type.String(), Type.Number(), Type.Boolean(), Type.Null(), Type.Array(Type.String())]),
+  Type.Union([
+    Type.String(),
+    Type.Number(),
+    Type.Boolean(),
+    Type.Null(),
+    Type.Array(Type.String()),
+  ]),
 )
 
 export type AuditAction = Static<typeof AuditActionSchema>
@@ -118,7 +124,11 @@ function metadataString(metadata: AuditMetadata, key: string): string | null {
   return typeof value === 'string' && value.trim() ? value : null
 }
 
-function rowToAuditEvent(row: AuditEventRow, metadata: AuditMetadata, labels: AuditEventLabels): AuditEvent {
+function rowToAuditEvent(
+  row: AuditEventRow,
+  metadata: AuditMetadata,
+  labels: AuditEventLabels,
+): AuditEvent {
   return {
     id: row.id,
     actorUserId: row.actor_user_id,
@@ -169,12 +179,15 @@ function labelsForAuditEvent(
     if (roleLabel) metadataLabels.roleId = roleLabel
   }
 
-  const actorLabel = row.actor_user_id ? maps.usersById.get(row.actor_user_id) ?? null : null
-  const targetLabel = row.target_type === 'user' && row.target_id
-    ? maps.usersById.get(row.target_id) ?? null
-    : row.target_type === 'role' && row.target_id
-      ? maps.rolesById.get(row.target_id) ?? metadataString(metadata, 'name') ?? metadataString(metadata, 'slug')
-      : null
+  const actorLabel = row.actor_user_id ? (maps.usersById.get(row.actor_user_id) ?? null) : null
+  const targetLabel =
+    row.target_type === 'user' && row.target_id
+      ? (maps.usersById.get(row.target_id) ?? null)
+      : row.target_type === 'role' && row.target_id
+        ? (maps.rolesById.get(row.target_id) ??
+          metadataString(metadata, 'name') ??
+          metadataString(metadata, 'slug'))
+        : null
 
   return { actorLabel, targetLabel, metadataLabels }
 }

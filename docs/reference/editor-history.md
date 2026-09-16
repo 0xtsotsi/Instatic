@@ -22,11 +22,11 @@ Every undoable mutation captures a `HistoryEntry` — a pair of Mutative patch a
 Per-mutation wall time is flat at ~0.25–0.4 ms regardless of site size:
 
 | Nodes  | Patch-based | structuredClone (old) | Speedup |
-|--------|-------------|----------------------|---------|
-| 500    | 0.25 ms     | 0.76 ms              | 3×      |
-| 5,000  | 0.28 ms     | 8.8 ms               | 31×     |
-| 20,000 | 0.32 ms     | 34 ms                | 106×    |
-| 50,000 | 0.40 ms     | 98 ms                | ~245×   |
+| ------ | ----------- | --------------------- | ------- |
+| 500    | 0.25 ms     | 0.76 ms               | 3×      |
+| 5,000  | 0.28 ms     | 8.8 ms                | 31×     |
+| 20,000 | 0.32 ms     | 34 ms                 | 106×    |
+| 50,000 | 0.40 ms     | 98 ms                 | ~245×   |
 
 A full 50-deep history stores ~240 small patches (KB total) instead of 50 whole-site clones (hundreds of MB).
 
@@ -67,19 +67,28 @@ _historyCoalesceKey: string | null  // identity of the in-progress burst
 
 ```ts
 function runHistoricMutation(recipe, coalesceKey) {
-  const [next, patches, inverse] = create(cur, (draft) => {
-    result = recipe(draft)
-    if (result !== false) draft.site.updatedAt = Date.now()
-  }, { enablePatches: true })
+  const [next, patches, inverse] = create(
+    cur,
+    (draft) => {
+      result = recipe(draft)
+      if (result !== false) draft.site.updatedAt = Date.now()
+    },
+    { enablePatches: true },
+  )
 
   // History stores patches relative to `site` (strip the leading path segment)
-  const siteForward = patches .filter(p => p.path[0] === 'site').map(p => ({ ...p, path: p.path.slice(1) }))
-  const siteInverse = inverse.filter(p => p.path[0] === 'site').map(p => ({ ...p, path: p.path.slice(1) }))
+  const siteForward = patches
+    .filter((p) => p.path[0] === 'site')
+    .map((p) => ({ ...p, path: p.path.slice(1) }))
+  const siteInverse = inverse
+    .filter((p) => p.path[0] === 'site')
+    .map((p) => ({ ...p, path: p.path.slice(1) }))
 
-  set(state => {
+  set((state) => {
     // Apply all changed fields to the live store (site + any editor fields)
     for (const key of touched) live[key] = produced[key]
-    if (siteForward.length > 0) commitHistory(state, { inverse: siteInverse, forward: siteForward, coalesceKey })
+    if (siteForward.length > 0)
+      commitHistory(state, { inverse: siteInverse, forward: siteForward, coalesceKey })
     state.hasUnsavedChanges = true
   })
 }
@@ -93,14 +102,14 @@ function runHistoricMutation(recipe, coalesceKey) {
 
 All six helpers in `SiteSliceHelpers` delegate to `runHistoricMutation`:
 
-| Helper | Recipe receives | Coalescing |
-|---|---|---|
-| `mutateSite(fn, opts?)` | `SiteDocument` draft | `opts.coalesceKey` |
-| `mutateSiteWithExplorerReconcile(fn)` | `SiteDocument` draft; calls `reconcileSiteExplorerInPlace` after | none |
-| `mutatePage(fn)` | Active `Page` draft | none |
-| `mutateActiveTree(fn, opts?)` | Active `NodeTree<PageNode>` draft; routes page vs. VC | `opts.coalesceKey` |
-| `mutateActiveTreeAndSite(fn)` | Active `NodeTree<PageNode>` + `SiteDocument` drafts | none |
-| `mutateAllPagesAndSite(fn)` | `SiteDocument` + `SuperImportHelpers` | none |
+| Helper                                | Recipe receives                                                  | Coalescing         |
+| ------------------------------------- | ---------------------------------------------------------------- | ------------------ |
+| `mutateSite(fn, opts?)`               | `SiteDocument` draft                                             | `opts.coalesceKey` |
+| `mutateSiteWithExplorerReconcile(fn)` | `SiteDocument` draft; calls `reconcileSiteExplorerInPlace` after | none               |
+| `mutatePage(fn)`                      | Active `Page` draft                                              | none               |
+| `mutateActiveTree(fn, opts?)`         | Active `NodeTree<PageNode>` draft; routes page vs. VC            | `opts.coalesceKey` |
+| `mutateActiveTreeAndSite(fn)`         | Active `NodeTree<PageNode>` + `SiteDocument` drafts              | none               |
+| `mutateAllPagesAndSite(fn)`           | `SiteDocument` + `SuperImportHelpers`                            | none               |
 
 `mutateActiveTree` is the only place that branches on page-mode vs. VC-mode. Gated by `no-vc-mode-branches-in-mutations.test.ts`.
 
@@ -128,7 +137,7 @@ Any non-coalescing mutation, `undo`, `redo`, or a site (re)load resets `_history
 const restored = apply(site, entry.inverse)
 const packageJson = clonePackageJson(restored.packageJson)
 const siteRuntime = cloneSiteRuntimeConfig(restored.runtime)
-set(state => {
+set((state) => {
   state._historyPast.pop()
   state._historyFuture.push(entry)
   state._historyCoalesceKey = null

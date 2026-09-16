@@ -113,11 +113,12 @@ function describeTokenDigest(tokens: SnapshotTokens): string {
 function buildDynamicSuffix(snap: SiteAgentSnapshot): string {
   const selected = snap.selectedNodeId ?? 'none'
   const active = snap.activeBreakpointId || '(none)'
-  const breakpoints = snap.site.breakpoints.length > 0
-    ? snap.site.breakpoints
-        .map((bp) => `${bp.id}@${bp.width}px${bp.mediaQuery ? `:${bp.mediaQuery}` : ''}`)
-        .join(', ')
-    : '(none)'
+  const breakpoints =
+    snap.site.breakpoints.length > 0
+      ? snap.site.breakpoints
+          .map((bp) => `${bp.id}@${bp.width}px${bp.mediaQuery ? `:${bp.mediaQuery}` : ''}`)
+          .join(', ')
+      : '(none)'
   // Inline document refs and page ids so the agent has concrete handles for
   // document reads plus site_duplicate_page / site_rename_page / site_delete_page without an
   // extra catalog round-trip. The markers distinguish the active page from the
@@ -128,22 +129,27 @@ function buildDynamicSuffix(snap: SiteAgentSnapshot): string {
       doc.current ? 'current' : '',
       doc.active ? 'active-page' : '',
       `root=${doc.rootNodeId || '(empty)'}`,
-    ].filter(Boolean).join(', ')
+    ]
+      .filter(Boolean)
+      .join(', ')
     return `${doc.document.type}:${doc.document.id}="${doc.title}" (${markers}; ${doc.summary})`
   })
-  const pages = snap.site.pages.length > 0
-    ? snap.site.pages
-        .map((p) => {
-          const active = p.id === snap.page.id ? ' (active)' : ''
-          const tpl = p.template
-            ? ` [template:${p.template.target.kind === 'postTypes'
-                ? p.template.target.tableSlugs.join(',')
-                : p.template.target.kind}]`
-            : ''
-          return `${p.id}=${p.slug || '(no-slug)'}${active}${tpl}`
-        })
-        .join(', ')
-    : '(none)'
+  const pages =
+    snap.site.pages.length > 0
+      ? snap.site.pages
+          .map((p) => {
+            const active = p.id === snap.page.id ? ' (active)' : ''
+            const tpl = p.template
+              ? ` [template:${
+                  p.template.target.kind === 'postTypes'
+                    ? p.template.target.tableSlugs.join(',')
+                    : p.template.target.kind
+                }]`
+              : ''
+            return `${p.id}=${p.slug || '(no-slug)'}${active}${tpl}`
+          })
+          .join(', ')
+      : '(none)'
   return [
     `Page: "${snap.page.title}"`,
     `current document: ${snap.currentDocument.type}:${snap.currentDocument.id}`,
@@ -162,9 +168,5 @@ function buildDynamicSuffix(snap: SiteAgentSnapshot): string {
  * Drivers consume `string[]` directly — see `AiStreamRequest.systemPrompt`.
  */
 export function buildSiteSystemPrompt(snap: SiteAgentSnapshot): string[] {
-  return [
-    STATIC_PROMPT_PREFIX,
-    SYSTEM_PROMPT_DYNAMIC_BOUNDARY,
-    buildDynamicSuffix(snap),
-  ]
+  return [STATIC_PROMPT_PREFIX, SYSTEM_PROMPT_DYNAMIC_BOUNDARY, buildDynamicSuffix(snap)]
 }

@@ -40,8 +40,11 @@ beforeEach(async () => {
   `
   token = generateConnectorToken()
   await createConnector(db, {
-    userId: 'u1', label: 'L', type: 'local',
-    capabilities: ['ai.chat', 'content.manage', 'site.read'], tokenHash: await hashConnectorToken(token),
+    userId: 'u1',
+    label: 'L',
+    type: 'local',
+    capabilities: ['ai.chat', 'content.manage', 'site.read'],
+    tokenHash: await hashConnectorToken(token),
   })
 })
 

@@ -14,7 +14,7 @@ export function normalizeStepUpAuthMode(value: unknown): StepUpAuthMode {
 export function normalizeStepUpWindowMinutes(value: unknown): StepUpWindowMinutes {
   const minutes = Number(value)
   return STEP_UP_WINDOW_MINUTES.includes(minutes as StepUpWindowMinutes)
-    ? minutes as StepUpWindowMinutes
+    ? (minutes as StepUpWindowMinutes)
     : STEP_UP_DEFAULT_WINDOW_MINUTES
 }
 

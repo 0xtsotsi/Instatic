@@ -181,9 +181,9 @@ export async function buildRuntimePackageImportmap(
  * raw script tag contents, so we serialise once and hand the same string to
  * both the CSP builder and the HTML emitter.
  */
-export async function serializeImportmapForCsp(
-  importmap: { imports: Record<string, string> },
-): Promise<{ body: string; sha256: string }> {
+export async function serializeImportmapForCsp(importmap: {
+  imports: Record<string, string>
+}): Promise<{ body: string; sha256: string }> {
   // Deterministic JSON: 2-space pretty-print to match what we emit into the
   // page. The browser hashes the literal script tag text bytes.
   const body = JSON.stringify(importmap, null, 2)

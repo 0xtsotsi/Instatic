@@ -44,9 +44,7 @@ async function executeStep(
   // local-disk adapter is the only producer of this method value.
   if ((step.method as string) === LOCAL_DISK_STEP_METHOD) {
     if (!step.url.startsWith('file://')) {
-      throw new Error(
-        `[mediaUploadExecutor] LOCAL step requires a file:// URL, got "${step.url}"`,
-      )
+      throw new Error(`[mediaUploadExecutor] LOCAL step requires a file:// URL, got "${step.url}"`)
     }
     const absolutePath = step.url.slice('file://'.length)
     await mkdir(dirname(absolutePath), { recursive: true })
@@ -107,9 +105,7 @@ export async function executeUploadPlan(
   const receipts: StepReceipt[] = []
   for (let i = 0; i < plan.steps.length; i++) {
     const step = plan.steps[i]
-    const slice = step.range
-      ? bytes.subarray(step.range.start, step.range.end)
-      : bytes
+    const slice = step.range ? bytes.subarray(step.range.start, step.range.end) : bytes
     receipts.push(await executeStep(step, slice, i + 1))
   }
   return receipts

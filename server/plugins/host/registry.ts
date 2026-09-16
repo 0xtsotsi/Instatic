@@ -17,10 +17,7 @@ import type { HostPluginRecord } from './types'
 
 export const hostPlugins = new Map<string, HostPluginRecord>()
 
-function hasGrantedPermission(
-  manifest: PluginManifest,
-  permission: PluginPermission,
-): boolean {
+function hasGrantedPermission(manifest: PluginManifest, permission: PluginPermission): boolean {
   return new Set(manifest.grantedPermissions ?? []).has(permission)
 }
 

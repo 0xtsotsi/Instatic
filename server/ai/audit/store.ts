@@ -113,10 +113,7 @@ function userLabel(email: string | null, displayName: string | null, userId: str
 // month registers `chatCount = 3` even if those chats started months ago.
 // ---------------------------------------------------------------------------
 
-export async function getUsageTotals(
-  db: DbClient,
-  sinceIso: string,
-): Promise<UsageRow> {
+export async function getUsageTotals(db: DbClient, sinceIso: string): Promise<UsageRow> {
   const { rows } = await db<AggregateRow>`
     select coalesce(sum(m.prompt_tokens), 0)            as prompt_tokens,
            coalesce(sum(m.completion_tokens), 0)        as completion_tokens,
@@ -138,10 +135,7 @@ export async function getUsageTotals(
   }
 }
 
-export async function getUsageByUser(
-  db: DbClient,
-  sinceIso: string,
-): Promise<UsageByUserRow[]> {
+export async function getUsageByUser(db: DbClient, sinceIso: string): Promise<UsageByUserRow[]> {
   const { rows } = await db<UserAggregateRow>`
     select c.user_id                                  as user_id,
            u.email                                    as email,
@@ -171,10 +165,7 @@ export async function getUsageByUser(
   }))
 }
 
-export async function getUsageByScope(
-  db: DbClient,
-  sinceIso: string,
-): Promise<UsageByScopeRow[]> {
+export async function getUsageByScope(db: DbClient, sinceIso: string): Promise<UsageByScopeRow[]> {
   const { rows } = await db<ScopeAggregateRow>`
     select c.scope                                  as scope,
            coalesce(sum(m.prompt_tokens), 0)        as prompt_tokens,
@@ -210,10 +201,7 @@ export async function getUsageByScope(
  * A credential whose row was deleted mid-window still shows up here — the
  * left join preserves history. Such rows carry `provider_id = 'unknown'`.
  */
-export async function getUsageByModel(
-  db: DbClient,
-  sinceIso: string,
-): Promise<UsageByModelRow[]> {
+export async function getUsageByModel(db: DbClient, sinceIso: string): Promise<UsageByModelRow[]> {
   const { rows } = await db<ModelAggregateRow>`
     select coalesce(cred.provider_id, 'unknown')      as provider_id,
            c.model_id                                 as model_id,

@@ -70,7 +70,13 @@ function parseVariantsFromJson(value: unknown): MediaVariant[] {
   const raw = Array.isArray(value)
     ? value
     : typeof value === 'string'
-      ? (() => { try { return JSON.parse(value) } catch { return [] } })()
+      ? (() => {
+          try {
+            return JSON.parse(value)
+          } catch {
+            return []
+          }
+        })()
       : []
   if (!Array.isArray(raw)) return []
   const out: MediaVariant[] = []
@@ -79,12 +85,14 @@ function parseVariantsFromJson(value: unknown): MediaVariant[] {
     const e = entry as Record<string, unknown>
     if (typeof e.width !== 'number' || typeof e.height !== 'number') continue
     if (typeof e.path !== 'string' || typeof e.sizeBytes !== 'number') continue
-    if (e.format !== 'webp' && e.format !== 'jpeg' && e.format !== 'png' && e.format !== 'avif') continue
-    const storagePath = typeof e.storagePath === 'string' && e.storagePath
-      ? e.storagePath
-      : e.path.startsWith('/uploads/')
-        ? e.path.slice('/uploads/'.length)
-        : e.path
+    if (e.format !== 'webp' && e.format !== 'jpeg' && e.format !== 'png' && e.format !== 'avif')
+      continue
+    const storagePath =
+      typeof e.storagePath === 'string' && e.storagePath
+        ? e.storagePath
+        : e.path.startsWith('/uploads/')
+          ? e.path.slice('/uploads/'.length)
+          : e.path
     const storageAdapterId = typeof e.storageAdapterId === 'string' ? e.storageAdapterId : ''
     out.push({
       width: e.width,

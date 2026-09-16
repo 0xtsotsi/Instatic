@@ -44,14 +44,14 @@ Default URLs:
 
 Before destructive reset, confirm the target is disposable:
 
-| Target | Reset Allowed By Default |
-|---|---:|
-| `.tmp/e2e-*` | Yes |
-| `.tmp/dev.db` | Yes |
-| `.tmp/e2e-uploads` | Yes |
-| `uploads/` | No, unless the run explicitly owns it |
-| Postgres URL | No, unless explicitly provided for this run |
-| Any non-local URL | No |
+| Target             |                    Reset Allowed By Default |
+| ------------------ | ------------------------------------------: |
+| `.tmp/e2e-*`       |                                         Yes |
+| `.tmp/dev.db`      |                                         Yes |
+| `.tmp/e2e-uploads` |                                         Yes |
+| `uploads/`         |       No, unless the run explicitly owns it |
+| Postgres URL       | No, unless explicitly provided for this run |
+| Any non-local URL  |                                          No |
 
 ## Run Lifecycle
 
@@ -88,38 +88,38 @@ Capture screenshots during autonomous runs so the user can audit what happened w
 
 Minimum screenshot points for the Core Owner Lifecycle:
 
-| Moment | Purpose |
-|---|---|
-| First loaded admin/setup screen | Proves the run started from the expected state. |
-| Completed setup or logged-in landing state | Proves authentication/setup succeeded. |
-| Editor before the main edit | Establishes baseline UI state. |
-| Editor after each major user-visible edit | Proves the intended change appeared in the UI. |
-| Save/reload result | Proves persistence from the user's perspective. |
-| Publish feedback | Proves the publish flow completed or failed visibly. |
-| Public page after publish | Proves visitor-facing output. |
-| Any bug, friction, visual issue, or confusing state | Provides evidence for the finding. |
+| Moment                                              | Purpose                                              |
+| --------------------------------------------------- | ---------------------------------------------------- |
+| First loaded admin/setup screen                     | Proves the run started from the expected state.      |
+| Completed setup or logged-in landing state          | Proves authentication/setup succeeded.               |
+| Editor before the main edit                         | Establishes baseline UI state.                       |
+| Editor after each major user-visible edit           | Proves the intended change appeared in the UI.       |
+| Save/reload result                                  | Proves persistence from the user's perspective.      |
+| Publish feedback                                    | Proves the publish flow completed or failed visibly. |
+| Public page after publish                           | Proves visitor-facing output.                        |
+| Any bug, friction, visual issue, or confusing state | Provides evidence for the finding.                   |
 
 Store screenshot paths or inline image references in the run log. Prefer screenshots for visual/layout claims and browser snapshots for control discovery or text/state claims.
 
 ## Result Values
 
-| Result | Meaning |
-|---|---|
-| Pass | User goal completed cleanly. |
-| Pass with friction | Goal completed, but the experience had meaningful friction. |
-| Fail | User goal did not complete. |
-| Blocked | The scenario could not proceed because of an environment or upstream blocker. |
-| Needs retest | A fix landed or the result was inconclusive. |
-| Product question | Behavior may be intentional but needs a product decision. |
+| Result             | Meaning                                                                       |
+| ------------------ | ----------------------------------------------------------------------------- |
+| Pass               | User goal completed cleanly.                                                  |
+| Pass with friction | Goal completed, but the experience had meaningful friction.                   |
+| Fail               | User goal did not complete.                                                   |
+| Blocked            | The scenario could not proceed because of an environment or upstream blocker. |
+| Needs retest       | A fix landed or the result was inconclusive.                                  |
+| Product question   | Behavior may be intentional but needs a product decision.                     |
 
 ## Severity
 
-| Severity | Meaning |
-|---|---|
-| P0 | Data loss, security exposure, or app-wide unusability. |
-| P1 | Blocks a core user journey. |
-| P2 | User-visible defect or serious friction with a workaround. |
-| P3 | Polish, wording, low-risk visual issue, or minor friction. |
+| Severity | Meaning                                                    |
+| -------- | ---------------------------------------------------------- |
+| P0       | Data loss, security exposure, or app-wide unusability.     |
+| P1       | Blocks a core user journey.                                |
+| P2       | User-visible defect or serious friction with a workaround. |
+| P3       | Polish, wording, low-risk visual issue, or minor friction. |
 
 ## Categories
 

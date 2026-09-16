@@ -17,10 +17,7 @@ import type { DbClient } from '../../../db/client'
 import type { AuthUser } from '../../../repositories/users'
 import { createAuditEvent } from '../../../repositories/audit'
 import { getInstalledPlugin } from '../../../repositories/plugins'
-import {
-  listPluginSecretStates,
-  PluginSecretError,
-} from '../../../repositories/pluginSecrets'
+import { listPluginSecretStates, PluginSecretError } from '../../../repositories/pluginSecrets'
 import { validatePluginSettingsRecord, type PluginSettingsValues } from '@core/plugin-sdk'
 import { persistAndSyncPluginSettings } from '../../../plugins/host/settingsSync'
 import { badRequest, jsonResponse, methodNotAllowed, readValidatedBody } from '../../../http'
@@ -39,7 +36,10 @@ export async function handlePluginSettings(
   if (!result) return pluginNotFound()
   if (result.kind === 'broken') {
     return jsonResponse(
-      { error: 'Cannot manage settings for a plugin with a corrupt manifest — remove and reinstall it.' },
+      {
+        error:
+          'Cannot manage settings for a plugin with a corrupt manifest — remove and reinstall it.',
+      },
       { status: 409 },
     )
   }

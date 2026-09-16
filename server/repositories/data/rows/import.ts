@@ -27,10 +27,7 @@ export interface DataRowImportInput {
  * Upsert a row preserving its original id, status, and timestamps. Used by
  * the `merge-overwrite` and `replace` import strategies.
  */
-export async function upsertDataRow(
-  db: DbClient,
-  input: DataRowImportInput,
-): Promise<void> {
+export async function upsertDataRow(db: DbClient, input: DataRowImportInput): Promise<void> {
   const createdAt = input.createdAt ?? new Date().toISOString()
   const updatedAt = input.updatedAt ?? new Date().toISOString()
   await db`
@@ -87,10 +84,7 @@ export async function insertDataRowIfAbsent(
  * the table (as the `replace` strategy does). Returns void — the caller does
  * not need the inserted row shape.
  */
-export async function replaceDataRow(
-  db: DbClient,
-  input: DataRowImportInput,
-): Promise<void> {
+export async function replaceDataRow(db: DbClient, input: DataRowImportInput): Promise<void> {
   const createdAt = input.createdAt ?? new Date().toISOString()
   const updatedAt = input.updatedAt ?? new Date().toISOString()
   await db`

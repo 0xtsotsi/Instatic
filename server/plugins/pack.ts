@@ -21,11 +21,7 @@
 
 import { readFile } from 'node:fs/promises'
 import { join } from 'node:path'
-import type {
-  StyleRule,
-  Page,
-  SiteDocument,
-} from '@core/page-tree'
+import type { StyleRule, Page, SiteDocument } from '@core/page-tree'
 import { assertValidNodeTree } from '@core/page-tree'
 import { parseVisualComponent } from '@core/visualComponents'
 import type { VisualComponent } from '@core/visualComponents'
@@ -81,21 +77,27 @@ export async function loadPluginPackFile(
   try {
     return JSON.parse(text)
   } catch (err) {
-    throw new PluginPackError(`Plugin pack file is not valid JSON: ${err instanceof Error ? err.message : String(err)}`)
+    throw new PluginPackError(
+      `Plugin pack file is not valid JSON: ${err instanceof Error ? err.message : String(err)}`,
+    )
   }
 }
 
 export function parsePluginPack(pluginId: string, raw: unknown): PluginPackContents {
   const parsed = safeParseValue(PluginPackFileSchema, raw)
   if (!parsed.ok) {
-    throw new PluginPackError(`Plugin pack manifest is malformed: ${parsed.errors[0]?.message ?? 'unknown error'}`)
+    throw new PluginPackError(
+      `Plugin pack manifest is malformed: ${parsed.errors[0]?.message ?? 'unknown error'}`,
+    )
   }
 
   const visualComponents: VisualComponent[] = []
   for (const rawVc of parsed.value.visualComponents ?? []) {
     const vc = parseVisualComponent(rawVc)
     if (!vc) {
-      throw new PluginPackError(`Plugin "${pluginId}" pack contains an invalid Visual Component entry`)
+      throw new PluginPackError(
+        `Plugin "${pluginId}" pack contains an invalid Visual Component entry`,
+      )
     }
     visualComponents.push(vc)
   }
@@ -174,8 +176,14 @@ function isValidCssClassName(name: string): boolean {
 
 function suggestClassName(pluginId: string, classId: string): string {
   const tail = classId.replace(`${pluginId}/`, '').replace(`${pluginId}.`, '')
-  const safeTail = tail.toLowerCase().replace(/[^a-z0-9-]+/g, '-').replace(/^-+|-+$/g, '')
-  const safePrefix = pluginId.toLowerCase().replace(/[^a-z0-9-]+/g, '-').replace(/^-+|-+$/g, '')
+  const safeTail = tail
+    .toLowerCase()
+    .replace(/[^a-z0-9-]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+  const safePrefix = pluginId
+    .toLowerCase()
+    .replace(/[^a-z0-9-]+/g, '-')
+    .replace(/^-+|-+$/g, '')
   return `${safePrefix}-${safeTail || 'class'}`
 }
 

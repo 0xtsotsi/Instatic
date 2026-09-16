@@ -21,8 +21,17 @@ Use it for every internal admin navigation, including links rendered by the site
 
 ```ts
 import {
-  Router, MemoryRouter, Routes, Route, Navigate, Link,
-  matchPath, useLocation, useNavigate, useParams, useInRouterContext,
+  Router,
+  MemoryRouter,
+  Routes,
+  Route,
+  Navigate,
+  Link,
+  matchPath,
+  useLocation,
+  useNavigate,
+  useParams,
+  useInRouterContext,
 } from '@admin/lib/routing'
 ```
 
@@ -49,19 +58,19 @@ Don't import from `react-router-dom`. It's removed from `package.json`.
 ```tsx
 // src/admin/router.tsx
 <Routes>
-  <Route path="/"                                element={<Navigate to="/admin/dashboard" replace />} />
-  <Route path="/admin"                           element={<Navigate to="/admin/dashboard" replace />} />
-  <Route path="/admin/dashboard"                 element={<AdminEntry section="dashboard" />} />
-  <Route path="/admin/site"                      element={<AdminEntry section="site" />} />
-  <Route path="/admin/content"                   element={<AdminEntry section="content" />} />
-  <Route path="/admin/data"                      element={<AdminEntry section="data" />} />
-  <Route path="/admin/media"                     element={<AdminEntry section="media" />} />
-  <Route path="/admin/plugins"                   element={<AdminEntry section="plugins" />} />
-  <Route path="/admin/users"                     element={<AdminEntry section="users" />} />
-  <Route path="/admin/ai"                        element={<AdminEntry section="ai" />} />
-  <Route path="/admin/account"                   element={<AdminEntry section="account" />} />
+  <Route path="/" element={<Navigate to="/admin/dashboard" replace />} />
+  <Route path="/admin" element={<Navigate to="/admin/dashboard" replace />} />
+  <Route path="/admin/dashboard" element={<AdminEntry section="dashboard" />} />
+  <Route path="/admin/site" element={<AdminEntry section="site" />} />
+  <Route path="/admin/content" element={<AdminEntry section="content" />} />
+  <Route path="/admin/data" element={<AdminEntry section="data" />} />
+  <Route path="/admin/media" element={<AdminEntry section="media" />} />
+  <Route path="/admin/plugins" element={<AdminEntry section="plugins" />} />
+  <Route path="/admin/users" element={<AdminEntry section="users" />} />
+  <Route path="/admin/ai" element={<AdminEntry section="ai" />} />
+  <Route path="/admin/account" element={<AdminEntry section="account" />} />
   <Route path="/admin/plugins/:pluginId/:pageId" element={<AdminEntry section="pluginPage" />} />
-  <Route path="/admin/*"                         element={<Navigate to="/admin/dashboard" replace />} />
+  <Route path="/admin/*" element={<Navigate to="/admin/dashboard" replace />} />
 </Routes>
 ```
 
@@ -112,10 +121,10 @@ Imperative-style redirect rendered as a component. Fires once on mount and trigg
 <Navigate to="/admin/dashboard" replace />
 ```
 
-| Prop      | Default | Behavior                                                |
-|-----------|---------|---------------------------------------------------------|
-| `to`      | -       | Target path                                             |
-| `replace` | `false` | Use `history.replaceState` instead of `pushState`       |
+| Prop      | Default | Behavior                                          |
+| --------- | ------- | ------------------------------------------------- |
+| `to`      | -       | Target path                                       |
+| `replace` | `false` | Use `history.replaceState` instead of `pushState` |
 
 Used for index redirects (`/` → `/admin/dashboard`) and access-denied redirects (`<Navigate to={firstAccessibleWorkspace} replace />`).
 
@@ -124,7 +133,9 @@ Used for index redirects (`/` → `/admin/dashboard`) and access-denied redirect
 ## `<Link>`
 
 ```tsx
-<Link to="/admin/media" className={styles.navLink}>Media</Link>
+<Link to="/admin/media" className={styles.navLink}>
+  Media
+</Link>
 ```
 
 Renders an `<a href={to}>` that intercepts the click and navigates via the router (no page reload). Falls back to native navigation on:
@@ -152,8 +163,8 @@ Returns the current location. Re-renders the component on every navigation.
 ```ts
 const navigate = useNavigate()
 
-navigate('/admin/site')                // push
-navigate('/admin/site', { replace: true })   // replace
+navigate('/admin/site') // push
+navigate('/admin/site', { replace: true }) // replace
 ```
 
 Returns a function. Calling it triggers a navigation through `startTransition` (so React 19 can defer Suspense fallbacks smoothly).
@@ -288,7 +299,11 @@ function MyComponent() {
 ```tsx
 function PluginPage() {
   const { pluginId, pageId } = useParams<{ pluginId: string; pageId: string }>()
-  return <div>Plugin: {pluginId} · Page: {pageId}</div>
+  return (
+    <div>
+      Plugin: {pluginId} · Page: {pageId}
+    </div>
+  )
 }
 ```
 
@@ -332,17 +347,17 @@ render(
 
 ## Forbidden patterns
 
-| Pattern                                                          | Use instead                                          |
-|------------------------------------------------------------------|------------------------------------------------------|
-| `import { ... } from 'react-router-dom'`                         | `@admin/lib/routing`. The package isn't installed.   |
-| Raw `<a href="/admin/...">` in admin UI                          | `<Link to="/admin/...">` or `useAdminNavigate()`.    |
-| Router imports from `src/core/`                                  | Gated.                                               |
-| Router imports from `src/modules/`                               | Gated.                                               |
-| `window.location.href = '...'` for navigation                    | `useNavigate()` / `useAdminNavigate()` — full reloads kill the SPA state |
-| `history.pushState` directly                                     | Use the router — it fires `instatic:locationchange` for you|
-| Nested routes (`<Route path="/admin/site"><Route ...>...`)       | Flat route table only. Compose with workspace internal state. |
-| Optional URL segments / wildcards                                 | Restructure the route tree.                          |
-| Catch-all 404 route                                              | Keep the scoped `/admin/*` redirect last — invalid admin paths route to the dashboard/login flow. |
+| Pattern                                                    | Use instead                                                                                       |
+| ---------------------------------------------------------- | ------------------------------------------------------------------------------------------------- |
+| `import { ... } from 'react-router-dom'`                   | `@admin/lib/routing`. The package isn't installed.                                                |
+| Raw `<a href="/admin/...">` in admin UI                    | `<Link to="/admin/...">` or `useAdminNavigate()`.                                                 |
+| Router imports from `src/core/`                            | Gated.                                                                                            |
+| Router imports from `src/modules/`                         | Gated.                                                                                            |
+| `window.location.href = '...'` for navigation              | `useNavigate()` / `useAdminNavigate()` — full reloads kill the SPA state                          |
+| `history.pushState` directly                               | Use the router — it fires `instatic:locationchange` for you                                       |
+| Nested routes (`<Route path="/admin/site"><Route ...>...`) | Flat route table only. Compose with workspace internal state.                                     |
+| Optional URL segments / wildcards                          | Restructure the route tree.                                                                       |
+| Catch-all 404 route                                        | Keep the scoped `/admin/*` redirect last — invalid admin paths route to the dashboard/login flow. |
 
 ---
 
@@ -354,9 +369,9 @@ A companion module at `src/admin/lib/urlState/` provides URL state primitives fo
 import { useInitialQueryParams, useUrlQuerySync } from '@admin/lib/urlState'
 ```
 
-| Hook | Purpose |
-|------|---------|
-| `useInitialQueryParams()` | Returns the query params present at first mount (stable, read-once). |
+| Hook                             | Purpose                                                                                                                        |
+| -------------------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
+| `useInitialQueryParams()`        | Returns the query params present at first mount (stable, read-once).                                                           |
 | `useUrlQuerySync(params, opts?)` | Mirrors the given key→value map into the URL via `replaceState`. `null` values remove the key; unspecified keys are untouched. |
 
 These hooks operate on `window.history.replaceState` directly and deliberately do **not** dispatch `instatic:locationchange` — query-string updates for selection state must never trigger a route re-match. Three workspaces use them: the site editor (`useSiteEditorUrlSync`), the Content workspace, and the Data workspace.

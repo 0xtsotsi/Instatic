@@ -6,11 +6,7 @@
  */
 
 import { registry } from '@core/module-engine'
-import type {
-  AnyModuleDefinition,
-  PropertyControl,
-  PropertySchema,
-} from '@core/module-engine'
+import type { AnyModuleDefinition, PropertyControl, PropertySchema } from '@core/module-engine'
 import { describeFrameworkTokens } from '@core/framework'
 import { describeFontTokens } from '@core/fonts'
 import type { SiteDocument } from '@core/page-tree'
@@ -72,25 +68,75 @@ function moduleDefinitionToModuleInfo(mod: AnyModuleDefinition): ModuleInfo {
 function genericStyleHintsForModule(mod: AnyModuleDefinition): ModuleStyleInfo[] {
   if (mod.id === 'base.text' || mod.category.toLowerCase() === 'typography') {
     return [
-      { key: 'fontFamily', type: 'text', label: 'Font family', defaultValue: 'inherit', cssProperties: ['fontFamily'] },
-      { key: 'fontSize', type: 'text', label: 'Font size', defaultValue: '16px', cssProperties: ['fontSize'] },
-      { key: 'fontWeight', type: 'select', label: 'Font weight', defaultValue: '400', cssProperties: ['fontWeight'], options: [
-        { label: 'Regular', value: '400' },
-        { label: 'Medium', value: '500' },
-        { label: 'Semi bold', value: '600' },
-        { label: 'Bold', value: '700' },
-        { label: 'Black', value: '900' },
-      ] },
-      { key: 'lineHeight', type: 'text', label: 'Line height', defaultValue: '1.4', cssProperties: ['lineHeight'] },
-      { key: 'letterSpacing', type: 'text', label: 'Letter spacing', defaultValue: '0px', cssProperties: ['letterSpacing'] },
-      { key: 'color', type: 'color', label: 'Text color', defaultValue: 'inherit', cssProperties: ['color'] },
-      { key: 'textAlign', type: 'select', label: 'Text align', defaultValue: 'left', cssProperties: ['textAlign'], options: [
-        { label: 'Left', value: 'left' },
-        { label: 'Center', value: 'center' },
-        { label: 'Right', value: 'right' },
-        { label: 'Justify', value: 'justify' },
-      ] },
-      { key: 'marginBottom', type: 'text', label: 'Bottom margin', defaultValue: '0px', cssProperties: ['marginBottom'] },
+      {
+        key: 'fontFamily',
+        type: 'text',
+        label: 'Font family',
+        defaultValue: 'inherit',
+        cssProperties: ['fontFamily'],
+      },
+      {
+        key: 'fontSize',
+        type: 'text',
+        label: 'Font size',
+        defaultValue: '16px',
+        cssProperties: ['fontSize'],
+      },
+      {
+        key: 'fontWeight',
+        type: 'select',
+        label: 'Font weight',
+        defaultValue: '400',
+        cssProperties: ['fontWeight'],
+        options: [
+          { label: 'Regular', value: '400' },
+          { label: 'Medium', value: '500' },
+          { label: 'Semi bold', value: '600' },
+          { label: 'Bold', value: '700' },
+          { label: 'Black', value: '900' },
+        ],
+      },
+      {
+        key: 'lineHeight',
+        type: 'text',
+        label: 'Line height',
+        defaultValue: '1.4',
+        cssProperties: ['lineHeight'],
+      },
+      {
+        key: 'letterSpacing',
+        type: 'text',
+        label: 'Letter spacing',
+        defaultValue: '0px',
+        cssProperties: ['letterSpacing'],
+      },
+      {
+        key: 'color',
+        type: 'color',
+        label: 'Text color',
+        defaultValue: 'inherit',
+        cssProperties: ['color'],
+      },
+      {
+        key: 'textAlign',
+        type: 'select',
+        label: 'Text align',
+        defaultValue: 'left',
+        cssProperties: ['textAlign'],
+        options: [
+          { label: 'Left', value: 'left' },
+          { label: 'Center', value: 'center' },
+          { label: 'Right', value: 'right' },
+          { label: 'Justify', value: 'justify' },
+        ],
+      },
+      {
+        key: 'marginBottom',
+        type: 'text',
+        label: 'Bottom margin',
+        defaultValue: '0px',
+        cssProperties: ['marginBottom'],
+      },
     ]
   }
 

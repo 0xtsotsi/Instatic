@@ -25,7 +25,9 @@ async function freshDb(): Promise<DbClient> {
 }
 
 let db: DbClient
-beforeEach(async () => { db = await freshDb() })
+beforeEach(async () => {
+  db = await freshDb()
+})
 
 describe('connector store', () => {
   it('creates, lists, and projects to a token-free view', async () => {
@@ -53,7 +55,11 @@ describe('connector store', () => {
   it('finds an active connector by token hash and skips revoked', async () => {
     const hash = await hashConnectorToken('imcp_y')
     const rec = await createConnector(db, {
-      userId: 'u1', label: 'L', type: 'remote', capabilities: ['ai.chat'], tokenHash: hash,
+      userId: 'u1',
+      label: 'L',
+      type: 'remote',
+      capabilities: ['ai.chat'],
+      tokenHash: hash,
     })
     const found = await findConnectorByTokenHash(db, hash)
     expect(found?.id).toBe(rec.id)
@@ -65,16 +71,24 @@ describe('connector store', () => {
     expect(await revokeConnector(db, rec.id, 'u1')).toBe(false)
   })
 
-  it('does not revoke another user\'s connector', async () => {
+  it("does not revoke another user's connector", async () => {
     const rec = await createConnector(db, {
-      userId: 'u1', label: 'L', type: 'local', capabilities: ['ai.chat'], tokenHash: await hashConnectorToken('imcp_z'),
+      userId: 'u1',
+      label: 'L',
+      type: 'local',
+      capabilities: ['ai.chat'],
+      tokenHash: await hashConnectorToken('imcp_z'),
     })
     expect(await revokeConnector(db, rec.id, 'someone-else')).toBe(false)
   })
 
   it('touches last_used_at', async () => {
     const rec = await createConnector(db, {
-      userId: 'u1', label: 'L', type: 'local', capabilities: ['ai.chat'], tokenHash: await hashConnectorToken('imcp_w'),
+      userId: 'u1',
+      label: 'L',
+      type: 'local',
+      capabilities: ['ai.chat'],
+      tokenHash: await hashConnectorToken('imcp_w'),
     })
     expect(rec.lastUsedAt).toBeNull()
     await touchConnectorLastUsed(db, rec.id)
@@ -87,7 +101,11 @@ describe('connector store', () => {
   it('a freshly created token is accepted by findConnectorByTokenHash (not yet expired)', async () => {
     const hash = await hashConnectorToken('imcp_fresh')
     await createConnector(db, {
-      userId: 'u1', label: 'Fresh', type: 'local', capabilities: ['ai.chat'], tokenHash: hash,
+      userId: 'u1',
+      label: 'Fresh',
+      type: 'local',
+      capabilities: ['ai.chat'],
+      tokenHash: hash,
     })
     // Default now = new Date() — the token expires 90 days from creation, so it is valid.
     const found = await findConnectorByTokenHash(db, hash)
@@ -98,7 +116,11 @@ describe('connector store', () => {
   it('an expired token is rejected by findConnectorByTokenHash', async () => {
     const hash = await hashConnectorToken('imcp_expired')
     await createConnector(db, {
-      userId: 'u1', label: 'Expired', type: 'local', capabilities: ['ai.chat'], tokenHash: hash,
+      userId: 'u1',
+      label: 'Expired',
+      type: 'local',
+      capabilities: ['ai.chat'],
+      tokenHash: hash,
       ttlDays: 30,
     })
     // Inject a `now` 31 days in the future — past the 30-day TTL.
@@ -110,7 +132,11 @@ describe('connector store', () => {
   it('a non-expired token is still accepted when now is before expires_at', async () => {
     const hash = await hashConnectorToken('imcp_valid')
     await createConnector(db, {
-      userId: 'u1', label: 'Valid', type: 'local', capabilities: ['ai.chat'], tokenHash: hash,
+      userId: 'u1',
+      label: 'Valid',
+      type: 'local',
+      capabilities: ['ai.chat'],
+      tokenHash: hash,
       ttlDays: 30,
     })
     // Inject a `now` 29 days in the future — still within the 30-day TTL.
@@ -121,7 +147,10 @@ describe('connector store', () => {
 
   it('createConnector always sets a non-null expiresAt on the returned record', async () => {
     const rec = await createConnector(db, {
-      userId: 'u1', label: 'E', type: 'local', capabilities: ['ai.chat'],
+      userId: 'u1',
+      label: 'E',
+      type: 'local',
+      capabilities: ['ai.chat'],
       tokenHash: await hashConnectorToken('imcp_ttl'),
     })
     expect(rec.expiresAt).not.toBeNull()
@@ -135,7 +164,10 @@ describe('connector store', () => {
 
   it('toConnectorView includes expiresAt (non-null for new tokens) and never tokenHash', async () => {
     const rec = await createConnector(db, {
-      userId: 'u1', label: 'V', type: 'local', capabilities: ['ai.chat'],
+      userId: 'u1',
+      label: 'V',
+      type: 'local',
+      capabilities: ['ai.chat'],
       tokenHash: await hashConnectorToken('imcp_view'),
     })
     const view = toConnectorView(rec)
@@ -150,7 +182,10 @@ describe('connector store', () => {
 
   it('custom ttlDays is honoured', async () => {
     const rec = await createConnector(db, {
-      userId: 'u1', label: 'Custom TTL', type: 'local', capabilities: ['ai.chat'],
+      userId: 'u1',
+      label: 'Custom TTL',
+      type: 'local',
+      capabilities: ['ai.chat'],
       tokenHash: await hashConnectorToken('imcp_custom'),
       ttlDays: 7,
     })
@@ -163,7 +198,10 @@ describe('connector store', () => {
   it('createConnector with ttlDays: null creates a non-expiring token', async () => {
     const hash = await hashConnectorToken('imcp_no_expiry')
     const rec = await createConnector(db, {
-      userId: 'u1', label: 'No Expiry', type: 'local', capabilities: ['ai.chat'],
+      userId: 'u1',
+      label: 'No Expiry',
+      type: 'local',
+      capabilities: ['ai.chat'],
       tokenHash: hash,
       ttlDays: null,
     })
@@ -180,7 +218,11 @@ describe('connector store', () => {
   it('a connector row with NULL expires_at (grandfathered) is accepted as non-expiring', async () => {
     const hash = await hashConnectorToken('imcp_null_expiry')
     const rec = await createConnector(db, {
-      userId: 'u1', label: 'Legacy', type: 'local', capabilities: ['ai.chat'], tokenHash: hash,
+      userId: 'u1',
+      label: 'Legacy',
+      type: 'local',
+      capabilities: ['ai.chat'],
+      tokenHash: hash,
     })
     // Simulate a pre-migration 019 row by clearing expires_at.
     await db`update ai_mcp_connectors set expires_at = null where id = ${rec.id}`

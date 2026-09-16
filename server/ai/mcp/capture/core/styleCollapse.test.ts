@@ -44,7 +44,7 @@ describe('collapseStyles', () => {
       'margin-left': '10px',
       'padding-right': '0px',
       'border-radius': '0px',
-      'opacity': '1',
+      opacity: '1',
       'font-weight': '400',
     })
     expect(out).toEqual({

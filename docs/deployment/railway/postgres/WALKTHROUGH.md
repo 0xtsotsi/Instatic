@@ -72,10 +72,10 @@ After the template repo is public, open
 
 Railway will prompt for the template variables:
 
-| Variable          | Default                                          | When to change |
-|-------------------|--------------------------------------------------|----------------|
-| `INSTATIC_REPO`   | `https://github.com/0xtsotsi/Instatic`           | Point at a different fork or `corebunch/instatic` for upstream builds. |
-| `INSTATIC_BRANCH` | `main`                                           | Pin to a semver tag like `v0.0.11` for reproducible upgrades. |
+| Variable          | Default                                | When to change                                                         |
+| ----------------- | -------------------------------------- | ---------------------------------------------------------------------- |
+| `INSTATIC_REPO`   | `https://github.com/0xtsotsi/Instatic` | Point at a different fork or `corebunch/instatic` for upstream builds. |
+| `INSTATIC_BRANCH` | `main`                                 | Pin to a semver tag like `v0.0.11` for reproducible upgrades.          |
 
 Leave them at defaults for a fresh deploy. Click **Deploy**.
 
@@ -93,12 +93,12 @@ Railway will:
 
 If any of these steps fail, the most likely causes are:
 
-| Symptom | Fix |
-|---|---|
-| Build fails: `Cannot find module ...` | Fork `main` is mid-rebase. Set `INSTATIC_BRANCH` to a known-good tag (e.g. `v0.0.11`). |
-| Build fails: `Dockerfile not found` | Railway is reading from the wrong repo. Confirm `INSTATIC_REPO` is exactly `https://github.com/0xtsotsi/Instatic` (no `.git`, no SSH scheme). |
-| Postgres stays in "waiting" forever | Template `"template": "postgres"` may have been renamed in Railway's template catalogue. In the Railway UI, add a Postgres database manually and reference its `DATABASE_URL` on the app service instead of using the templated Postgres service. |
-| App health check fails on first boot | Check the deploy logs for `EACCES: permission denied, mkdir '/app/storage/...'`. If present, `RAILWAY_RUN_UID=0` is missing — confirm the env var is set. |
+| Symptom                                      | Fix                                                                                                                                                                                                                                                                                                                                                                                                          |
+| -------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Build fails: `Cannot find module ...`        | Fork `main` is mid-rebase. Set `INSTATIC_BRANCH` to a known-good tag (e.g. `v0.0.11`).                                                                                                                                                                                                                                                                                                                       |
+| Build fails: `Dockerfile not found`          | Railway is reading from the wrong repo. Confirm `INSTATIC_REPO` is exactly `https://github.com/0xtsotsi/Instatic` (no `.git`, no SSH scheme).                                                                                                                                                                                                                                                                |
+| Postgres stays in "waiting" forever          | Template `"template": "postgres"` may have been renamed in Railway's template catalogue. In the Railway UI, add a Postgres database manually and reference its `DATABASE_URL` on the app service instead of using the templated Postgres service.                                                                                                                                                            |
+| App health check fails on first boot         | Check the deploy logs for `EACCES: permission denied, mkdir '/app/storage/...'`. If present, `RAILWAY_RUN_UID=0` is missing — confirm the env var is set.                                                                                                                                                                                                                                                    |
 | First page load: `Forbidden: invalid origin` | `PUBLIC_ORIGIN` is intentionally unset by the template — the server auto-detects from `RAILWAY_PUBLIC_DOMAIN`. If you set `PUBLIC_ORIGIN` to a literal value, it must match the URL exactly (`https://`, no trailing slash). Do **not** set `PUBLIC_ORIGIN=https://${{RAILWAY_PUBLIC_DOMAIN}}` — Railway does not resolve `${{...}}` inside service env var values, only inside template `reference` fields. |
 
 ## 5. First-run setup
@@ -129,11 +129,11 @@ You opted out of a custom domain for this deploy. To add one later:
 
 ## 7. Backups
 
-| Data | How to back up |
-|---|---|
-| Postgres database | Enable Railway's managed backups / PITR on the `instatic-postgres` service, or add a sidecar `pg_dump` job for off-platform archives. |
-| Uploads + published artefacts (`/app/storage/uploads`, `/app/storage/published`) | Snapshot the `instatic-storage` Railway volume. Trigger a snapshot before any major upgrade. |
-| Admin users + reversible secrets (AI credentials, MFA seeds) | Backed up via Postgres dump above, **but only decryptable if** you have a copy of `INSTATIC_SECRET_KEY`. Lose both = lose encrypted secrets. |
+| Data                                                                             | How to back up                                                                                                                               |
+| -------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
+| Postgres database                                                                | Enable Railway's managed backups / PITR on the `instatic-postgres` service, or add a sidecar `pg_dump` job for off-platform archives.        |
+| Uploads + published artefacts (`/app/storage/uploads`, `/app/storage/published`) | Snapshot the `instatic-storage` Railway volume. Trigger a snapshot before any major upgrade.                                                 |
+| Admin users + reversible secrets (AI credentials, MFA seeds)                     | Backed up via Postgres dump above, **but only decryptable if** you have a copy of `INSTATIC_SECRET_KEY`. Lose both = lose encrypted secrets. |
 
 ## 8. Updates
 

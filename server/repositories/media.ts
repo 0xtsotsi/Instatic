@@ -71,11 +71,11 @@ async function loadFolderIdsForAssets(
   return map
 }
 
-async function hydrateAssets(
-  db: DbClient,
-  rows: MediaAssetRow[],
-): Promise<MediaAsset[]> {
-  const folderMap = await loadFolderIdsForAssets(db, rows.map((r) => r.id))
+async function hydrateAssets(db: DbClient, rows: MediaAssetRow[]): Promise<MediaAsset[]> {
+  const folderMap = await loadFolderIdsForAssets(
+    db,
+    rows.map((r) => r.id),
+  )
   return rows.map((row) => mapMediaAssetRow(row, folderMap.get(row.id) ?? []))
 }
 
@@ -104,7 +104,9 @@ export async function createMediaAsset(
     externally_hosted: input.externallyHosted,
   }
   const params = MEDIA_ASSET_INSERT_COLUMNS.map((column) => valuesByColumn[column])
-  const placeholders = MEDIA_ASSET_INSERT_COLUMNS.map((_, i) => placeholder(db.dialect, i + 1)).join(', ')
+  const placeholders = MEDIA_ASSET_INSERT_COLUMNS.map((_, i) =>
+    placeholder(db.dialect, i + 1),
+  ).join(', ')
   const { rows } = await db.unsafe<MediaAssetRow>(
     `insert into media_assets (${MEDIA_ASSET_INSERT_COLUMNS.join(', ')})
      values (${placeholders})
@@ -114,10 +116,7 @@ export async function createMediaAsset(
   return mapMediaAssetRow(rows[0])
 }
 
-export async function getMediaAsset(
-  db: DbClient,
-  id: string,
-): Promise<MediaAsset | null> {
+export async function getMediaAsset(db: DbClient, id: string): Promise<MediaAsset | null> {
   const { rows } = await db.unsafe<MediaAssetRow>(
     `select ${MEDIA_ASSET_COLUMNS}
      from media_assets
@@ -258,10 +257,7 @@ export async function setMediaAssetVariants(
  * Soft delete: stamp `deleted_at`. Restore un-stamps; `deleteMediaAsset`
  * finishes the job by removing the row (and caller removes the on-disk file).
  */
-export async function softDeleteMediaAsset(
-  db: DbClient,
-  id: string,
-): Promise<MediaAsset | null> {
+export async function softDeleteMediaAsset(db: DbClient, id: string): Promise<MediaAsset | null> {
   const nowIso = new Date().toISOString()
   const { rows } = await db.unsafe<MediaAssetRow>(
     `update media_assets set deleted_at = ${placeholder(db.dialect, 1)}
@@ -274,10 +270,7 @@ export async function softDeleteMediaAsset(
   return assets[0] ?? null
 }
 
-export async function restoreMediaAsset(
-  db: DbClient,
-  id: string,
-): Promise<MediaAsset | null> {
+export async function restoreMediaAsset(db: DbClient, id: string): Promise<MediaAsset | null> {
   const { rows } = await db.unsafe<MediaAssetRow>(
     `update media_assets set deleted_at = null
      where id = ${placeholder(db.dialect, 1)}
@@ -366,10 +359,7 @@ export async function replaceMediaAssetBinary(
  * replace-file handler to remove the previous binary after writing the new
  * one.
  */
-export async function getMediaAssetStoragePath(
-  db: DbClient,
-  id: string,
-): Promise<string | null> {
+export async function getMediaAssetStoragePath(db: DbClient, id: string): Promise<string | null> {
   const { rows } = await db<{ storage_path: string }>`
     select storage_path from media_assets where id = ${id}
   `
@@ -382,10 +372,7 @@ export async function getMediaAssetStoragePath(
  * array for assets that never had variants (non-image uploads, very small
  * images that didn't need a ladder).
  */
-export async function getMediaAssetVariants(
-  db: DbClient,
-  id: string,
-): Promise<MediaVariant[]> {
+export async function getMediaAssetVariants(db: DbClient, id: string): Promise<MediaVariant[]> {
   const { rows } = await db<{ variants_json: unknown }>`
     select variants_json from media_assets where id = ${id}
   `
@@ -445,14 +432,19 @@ export async function countMediaAssetsForExport(db: DbClient): Promise<number> {
   return Number(rows[0]?.n ?? 0)
 }
 
-export async function listMediaAssetsForExport(db: DbClient): Promise<Array<MediaAsset & { storagePath: string }>> {
+export async function listMediaAssetsForExport(
+  db: DbClient,
+): Promise<Array<MediaAsset & { storagePath: string }>> {
   const { rows } = await db.unsafe<MediaAssetExportRow>(
     `select ${MEDIA_ASSET_COLUMNS}, storage_path
      from media_assets
      where deleted_at is null
      order by created_at asc`,
   )
-  const folderMap = await loadFolderIdsForAssets(db, rows.map((r) => r.id))
+  const folderMap = await loadFolderIdsForAssets(
+    db,
+    rows.map((r) => r.id),
+  )
   return rows.map((row) => ({
     ...mapMediaAssetRow(row, folderMap.get(row.id) ?? []),
     storagePath: row.storage_path,
@@ -493,11 +485,10 @@ interface ImportMediaAssetInput {
  *
  * If an asset with the same id already exists it is replaced.
  */
-export async function importMediaAsset(
-  db: DbClient,
-  input: ImportMediaAssetInput,
-): Promise<void> {
-  const tags = Array.from(new Set(input.tags.map((t) => t.trim().toLowerCase()).filter(Boolean))).sort()
+export async function importMediaAsset(db: DbClient, input: ImportMediaAssetInput): Promise<void> {
+  const tags = Array.from(
+    new Set(input.tags.map((t) => t.trim().toLowerCase()).filter(Boolean)),
+  ).sort()
   const storageAdapterId = input.storageAdapterId ?? ''
   const externallyHosted = input.externallyHosted ?? false
   await db`

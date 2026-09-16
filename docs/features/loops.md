@@ -42,12 +42,12 @@ server/publish/loopPrefetch.ts    — server-side pre-fetch before render
 ```ts
 interface LoopEntitySource {
   /** Namespaced id — 'data.rows', 'site.pages', 'site.media', 'acme.products' */
-  id:           string
-  label:        string
+  id: string
+  label: string
   description?: string
 
   /** Field metadata — what's available to dynamic bindings inside the loop. */
-  fields:       LoopSourceField[]
+  fields: LoopSourceField[]
 
   /** PropertySchema of filter controls shown in the Properties panel. */
   filterSchema: PropertySchema
@@ -86,19 +86,19 @@ interface LoopEntitySource {
 }
 
 interface LoopSourceField {
-  id:      string            // 'title', 'slug', 'featuredMedia', ...
-  label:   string
+  id: string // 'title', 'slug', 'featuredMedia', ...
+  label: string
   format?: 'plain' | 'html' | 'url' | 'media'
 }
 
 interface LoopItem {
-  id:     string             // unique within the loop result
+  id: string // unique within the loop result
   fields: Record<string, unknown>
 }
 
 interface LoopFetchResult {
-  items:      LoopItem[]
-  totalItems: number         // total across all pages — used for hasMore + paginators
+  items: LoopItem[]
+  totalItems: number // total across all pages — used for hasMore + paginators
 }
 ```
 
@@ -272,12 +272,12 @@ The map is passed into `RenderConfig.loopData`. The walker reads from it; no asy
 
 In the editor, `useLoopPreviewItems` (`src/admin/pages/site/canvas/useLoopPreviewItems.ts`) provides loop iteration data for the canvas. It dispatches per source:
 
-| Source | Canvas path |
-|---|---|
-| `data.rows` | GETs `/data/tables/:id/loop-preview` — same projection as the publisher. Falls back to synthetic items from the table's field definitions when no published rows exist yet. |
-| `site.pages` | Reads pages from the in-memory site document via `selectSitePagesLoopItems`. Applies `filterPagesForLoop` + `pageToLoopItem` imported from `@core/loops` — identical to the publisher path. |
-| `site.media` | Fetches via `listCmsMediaAssets()`, filters by MIME prefix, sorts + slices client-side. |
-| Plugin sources | Calls `source.preview(ctx)` synchronously. |
+| Source         | Canvas path                                                                                                                                                                                 |
+| -------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `data.rows`    | GETs `/data/tables/:id/loop-preview` — same projection as the publisher. Falls back to synthetic items from the table's field definitions when no published rows exist yet.                 |
+| `site.pages`   | Reads pages from the in-memory site document via `selectSitePagesLoopItems`. Applies `filterPagesForLoop` + `pageToLoopItem` imported from `@core/loops` — identical to the publisher path. |
+| `site.media`   | Fetches via `listCmsMediaAssets()`, filters by MIME prefix, sorts + slices client-side.                                                                                                     |
+| Plugin sources | Calls `source.preview(ctx)` synchronously.                                                                                                                                                  |
 
 The canvas caps preview results at 6 items (`CANVAS_MAX_ITEMS`) regardless of the loop's configured `limit`. Published pages render the full set.
 
@@ -303,10 +303,16 @@ Subscription granularity: the hook never subscribes to the whole `site` document
 The site-scope AI agent stays on the HTML-native edit surface. It calls `list_loop_sources` to get valid source ids, table ids, order options, and `{currentEntry.field}` tokens, then inserts an `<instatic-loop>` marker through `insertHtml` / `replaceNodeHtml`:
 
 ```html
-<instatic-loop data-source-id="data.rows" data-table-id="tbl_posts" data-order-by="publishedAt" data-direction="desc" data-limit="3">
+<instatic-loop
+  data-source-id="data.rows"
+  data-table-id="tbl_posts"
+  data-order-by="publishedAt"
+  data-direction="desc"
+  data-limit="3"
+>
   <article>
     <a href="{currentEntry.permalink}">
-      <img src="{currentEntry.featuredMedia}">
+      <img src="{currentEntry.featuredMedia}" />
       <h3>{currentEntry.title}</h3>
     </a>
   </article>
@@ -323,27 +329,27 @@ export function activate(api) {
   const products = api.cms.storage.collection('products')
 
   api.cms.loops.registerSource({
-    id:    'acme.products',
+    id: 'acme.products',
     label: 'Acme products',
     fields: [
-      { id: 'name',  label: 'Name',  format: 'plain' },
+      { id: 'name', label: 'Name', format: 'plain' },
       { id: 'price', label: 'Price', format: 'plain' },
       { id: 'image', label: 'Image', format: 'media' },
     ],
     filterSchema: {
       category: {
-        type:    'select',
-        label:   'Category',
+        type: 'select',
+        label: 'Category',
         options: [
-          { value: '',           label: 'All' },
-          { value: 'new',        label: 'New arrivals' },
-          { value: 'clearance',  label: 'Clearance' },
+          { value: '', label: 'All' },
+          { value: 'new', label: 'New arrivals' },
+          { value: 'clearance', label: 'Clearance' },
         ],
       },
     },
     orderByOptions: [
       { id: 'createdAt:desc', label: 'Newest' },
-      { id: 'price:asc',      label: 'Price low → high' },
+      { id: 'price:asc', label: 'Price low → high' },
     ],
     async fetch(ctx) {
       const { records } = await products.list({ limit: ctx.limit ?? 100 })
@@ -356,9 +362,7 @@ export function activate(api) {
       return { items, totalItems: items.length }
     },
     preview(ctx) {
-      return [
-        { id: 'preview-1', fields: { name: 'Example product', price: 99 } },
-      ]
+      return [{ id: 'preview-1', fields: { name: 'Example product', price: 99 } }]
     },
   })
 }
@@ -406,26 +410,28 @@ Two modes are available via the loop node's `pagination` prop:
 **`pagination: 'infinite'`** — renders the first `pageSize` items and appends a **"Load more"** button. Each click fetches the next page from `/_instatic/loop/<loopId>?page=N&pagePath=<path>` and appends the returned HTML before the button. When `hasMore` is false the button is removed automatically.
 
 To enable infinite loading:
+
 1. Set `props.pagination = 'infinite'` on the loop node.
 2. Set `props.pageSize` (items per click; defaults to 10).
 3. The publisher auto-injects `<script type="module" src="/_instatic/assets/loop-runtime.js">` when at least one infinite loop exists on the page (see `server/publish/loopRuntime.ts`). The runtime is < 2 KB and ships only when needed.
 
 For static multi-page navigation (no JS required):
+
 - Use separate `base.loop` nodes with an `offset` filter — one per "page" — and static links between pages.
 
 ---
 
 ## Forbidden patterns
 
-| Pattern                                                              | Use instead                                              |
-|----------------------------------------------------------------------|----------------------------------------------------------|
-| `await fetch(...)` inside the loop walker                            | Pre-fetch via `loopPrefetch.ts`                          |
-| Plugin sources that hit the host DB directly                         | Use `api.cms.storage.*`                                  |
-| Reaching across loop iterations (e.g. "the previous item")           | Items are independent. Use a server-side fetch + materialize the relation. |
-| Per-iteration state (e.g. counter)                                   | Loop iterations are independent. The walker doesn't preserve state. |
-| Rendering a loop without prefetched data                             | `RenderConfig.loopData` must be populated — otherwise the loop renders a marker comment. |
-| Cycling variants by index `% items.length` instead of `% variants.length` | Round-robin is by variants. Read `node.children.length`. |
-| Source ids without a namespace (just `products`)                     | Namespace by plugin (`acme.products`) — collisions otherwise |
+| Pattern                                                                   | Use instead                                                                              |
+| ------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------- |
+| `await fetch(...)` inside the loop walker                                 | Pre-fetch via `loopPrefetch.ts`                                                          |
+| Plugin sources that hit the host DB directly                              | Use `api.cms.storage.*`                                                                  |
+| Reaching across loop iterations (e.g. "the previous item")                | Items are independent. Use a server-side fetch + materialize the relation.               |
+| Per-iteration state (e.g. counter)                                        | Loop iterations are independent. The walker doesn't preserve state.                      |
+| Rendering a loop without prefetched data                                  | `RenderConfig.loopData` must be populated — otherwise the loop renders a marker comment. |
+| Cycling variants by index `% items.length` instead of `% variants.length` | Round-robin is by variants. Read `node.children.length`.                                 |
+| Source ids without a namespace (just `products`)                          | Namespace by plugin (`acme.products`) — collisions otherwise                             |
 
 ---
 

@@ -26,10 +26,7 @@ import { dirname, join } from 'node:path'
 import type { DbClient } from '../../../db/client'
 import type { AuthUser } from '../../../repositories/users'
 import { createAuditEvent } from '../../../repositories/audit'
-import {
-  findPluginResource,
-  missingPluginPermissionGrants,
-} from '@core/plugins/manifest'
+import { findPluginResource, missingPluginPermissionGrants } from '@core/plugins/manifest'
 import { isPluginPermission } from '@core/plugin-sdk'
 import type {
   InstalledPlugin,
@@ -46,10 +43,7 @@ import {
   listPluginCrashes,
   type InstalledPluginResult,
 } from '../../../repositories/plugins'
-import {
-  listPluginSecretStates,
-  type PluginSecretState,
-} from '../../../repositories/pluginSecrets'
+import { listPluginSecretStates, type PluginSecretState } from '../../../repositories/pluginSecrets'
 import { collectEnabledAdminPages } from '@core/plugins/manifest'
 import { assertPathWithin } from '../../../util/pathWithin'
 import { badRequest, jsonResponse } from '../../../http'
@@ -61,11 +55,7 @@ import { requestAuditContext } from '../shared'
 // ---------------------------------------------------------------------------
 
 type PluginAuditAction =
-  | 'plugin.install'
-  | 'plugin.update'
-  | 'plugin.enable'
-  | 'plugin.disable'
-  | 'plugin.delete'
+  'plugin.install' | 'plugin.update' | 'plugin.enable' | 'plugin.disable' | 'plugin.delete'
 
 /**
  * Record a plugin lifecycle action in the audit log. The mutation endpoints
@@ -188,9 +178,7 @@ export async function pluginsPayload(db: DbClient) {
         : r,
     ),
   )
-  const asPlugins = presented.map((r) =>
-    r.kind === 'ok' ? r.plugin : brokenPluginStub(r),
-  )
+  const asPlugins = presented.map((r) => (r.kind === 'ok' ? r.plugin : brokenPluginStub(r)))
   // Attach recent crash events per plugin so the admin UI can render the
   // "Recent issues" panel without an extra round trip per card. Cap at 10
   // most recent — older events stay in the DB but the UI only shows the

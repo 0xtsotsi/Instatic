@@ -62,10 +62,7 @@ import type { DbClient } from '../db/client'
 import type { PublishedPageSnapshot } from '../repositories/publish'
 import type { PublishedDataRow } from '@core/data/schemas'
 import { isTemplatePage, resolveNotFoundTemplate } from '@core/templates'
-import {
-  getDataRowRedirectByRoute,
-  getPublishedDataRowByRoute,
-} from '../repositories/data/publish'
+import { getDataRowRedirectByRoute, getPublishedDataRowByRoute } from '../repositories/data/publish'
 import { getPublishedPageBySlug } from '../repositories/publish'
 import { applyPublishedHtmlPipeline } from './publishedHtmlPipeline'
 import {
@@ -100,11 +97,19 @@ function publicSlugFromPath(pathname: string): string {
  * have at least two segments — the caller should treat those as
  * "not a content-row URL" and move on.
  */
-function contentRouteFromPath(pathname: string): { tableRouteBase: string; rowSlug: string } | null {
-  const parts = pathname.replace(/^\/+|\/+$/g, '').split('/').filter(Boolean)
+function contentRouteFromPath(
+  pathname: string,
+): { tableRouteBase: string; rowSlug: string } | null {
+  const parts = pathname
+    .replace(/^\/+|\/+$/g, '')
+    .split('/')
+    .filter(Boolean)
   if (parts.length < 2) return null
   return {
-    tableRouteBase: `/${parts.slice(0, -1).map((part) => decodeURIComponent(part)).join('/')}`,
+    tableRouteBase: `/${parts
+      .slice(0, -1)
+      .map((part) => decodeURIComponent(part))
+      .join('/')}`,
     rowSlug: decodeURIComponent(parts[parts.length - 1]),
   }
 }
@@ -144,10 +149,7 @@ type PublicRouteResolution =
  * templates; when there isn't one, we return `not-found` rather than inventing
  * a fallback document.
  */
-async function resolvePublicRoute(
-  db: DbClient,
-  url: URL,
-): Promise<PublicRouteResolution> {
+async function resolvePublicRoute(db: DbClient, url: URL): Promise<PublicRouteResolution> {
   // Page at the full slug.
   const pageSlug = publicSlugFromPath(url.pathname)
   const pageSnapshot = await getPublishedPageBySlug(db, pageSlug)
@@ -258,17 +260,15 @@ export async function renderPublicResolution(
   }
 
   // ── Layer B: in-memory LRU cache for the expensive render path ───────────
-  const cached = await getOrRender(
-    cacheKey,
-    async () => {
-      const rendered = resolution.kind === 'page'
+  const cached = await getOrRender(cacheKey, async () => {
+    const rendered =
+      resolution.kind === 'page'
         ? await renderPublishedSnapshot(resolution.snapshot, { db, url })
         : await renderPublishedDataRowTemplate(resolution.snapshot, resolution.row, { db, url })
-      if (!rendered) return null
-      const html = await applyPublishedHtmlPipeline(rendered, db)
-      return { body: html, headers: { 'content-type': 'text/html; charset=utf-8' }, status: 200 }
-    },
-  )
+    if (!rendered) return null
+    const html = await applyPublishedHtmlPipeline(rendered, db)
+    return { body: html, headers: { 'content-type': 'text/html; charset=utf-8' }, status: 200 }
+  })
   if (!cached) return null
   return new Response(cached.body, { headers: cached.headers, status: cached.status })
 }

@@ -24,13 +24,16 @@ import {
   type AiStreamEvent,
   type AiToolOutput,
 } from '../runtime/types'
-import type {
-  AiProvider,
-  AiProviderModel,
-  AiResolvedCredential,
-  AiStreamRequest,
-} from './types'
-import { runToolLoop, type ProviderAdapter, type TurnResult, type TurnToolCall, type TurnToolResult, type TurnTranslator, type TurnUsage } from './http/toolLoop'
+import type { AiProvider, AiProviderModel, AiResolvedCredential, AiStreamRequest } from './types'
+import {
+  runToolLoop,
+  type ProviderAdapter,
+  type TurnResult,
+  type TurnToolCall,
+  type TurnToolResult,
+  type TurnTranslator,
+  type TurnUsage,
+} from './http/toolLoop'
 import type { SseFrame } from './http/sse'
 import { parseToolArguments } from './http/toolArgs'
 
@@ -166,8 +169,12 @@ async function fetchAnthropicModels(
   })
 }
 
-function deriveTier(modelId: string, opusAlreadySeen: boolean): { tier: string | undefined; isOpus: boolean } {
-  if (modelId.includes('opus')) return { tier: opusAlreadySeen ? 'smart' : 'smartest', isOpus: true }
+function deriveTier(
+  modelId: string,
+  opusAlreadySeen: boolean,
+): { tier: string | undefined; isOpus: boolean } {
+  if (modelId.includes('opus'))
+    return { tier: opusAlreadySeen ? 'smart' : 'smartest', isOpus: true }
   if (modelId.includes('sonnet')) return { tier: 'balanced', isOpus: false }
   if (modelId.includes('haiku')) return { tier: 'fast', isOpus: false }
   return { tier: undefined, isOpus: false }
@@ -202,10 +209,7 @@ interface AnthropicToolResultBlock {
   is_error?: boolean
 }
 type AnthropicContentBlock =
-  | AnthropicTextBlock
-  | AnthropicImageBlock
-  | AnthropicToolUseBlock
-  | AnthropicToolResultBlock
+  AnthropicTextBlock | AnthropicImageBlock | AnthropicToolUseBlock | AnthropicToolResultBlock
 
 export interface AnthropicMessage {
   role: 'user' | 'assistant'
@@ -309,7 +313,9 @@ export function mapHistory(messages: AiMessage[]): AnthropicMessage[] {
     } else if (msg.role === 'assistant') {
       const content: AnthropicContentBlock[] = []
       while (i < messages.length && messages[i]!.role === 'assistant') {
-        content.push(...assistantContent((messages[i] as Extract<AiMessage, { role: 'assistant' }>).content))
+        content.push(
+          ...assistantContent((messages[i] as Extract<AiMessage, { role: 'assistant' }>).content),
+        )
         i += 1
       }
       out.push({ role: 'assistant', content })
@@ -350,7 +356,10 @@ function userContent(blocks: AiContentBlock[]): AnthropicContentBlock[] {
   for (const block of blocks) {
     if (block.kind === 'text') out.push({ type: 'text', text: block.text })
     else if (block.kind === 'image') {
-      out.push({ type: 'image', source: { type: 'base64', media_type: block.mimeType, data: block.data } })
+      out.push({
+        type: 'image',
+        source: { type: 'base64', media_type: block.mimeType, data: block.data },
+      })
     }
     // user-authored toolCall blocks don't exist; ignore defensively.
   }
@@ -363,7 +372,12 @@ function assistantContent(blocks: AiContentBlock[]): AnthropicContentBlock[] {
     if (block.kind === 'text') {
       if (block.text) out.push({ type: 'text', text: block.text })
     } else if (block.kind === 'toolCall') {
-      out.push({ type: 'tool_use', id: block.toolCallId, name: block.toolName, input: block.input ?? {} })
+      out.push({
+        type: 'tool_use',
+        id: block.toolCallId,
+        name: block.toolName,
+        input: block.input ?? {},
+      })
     }
     // assistant image blocks don't occur; ignore.
   }
@@ -402,7 +416,10 @@ function toolOutputToContent(
   // base64 length, so this is the whole point of the multimodal channel.
   const blocks: (AnthropicTextBlock | AnthropicImageBlock)[] = [{ type: 'text', text }]
   for (const img of output.images) {
-    blocks.push({ type: 'image', source: { type: 'base64', media_type: img.mimeType, data: img.data } })
+    blocks.push({
+      type: 'image',
+      source: { type: 'base64', media_type: img.mimeType, data: img.data },
+    })
   }
   return blocks
 }
@@ -448,10 +465,7 @@ const AnthropicSseEventSchema = Type.Object(
       ),
     ),
     message: Type.Optional(
-      Type.Object(
-        { usage: Type.Optional(AnthropicUsageSchema) },
-        { additionalProperties: true },
-      ),
+      Type.Object({ usage: Type.Optional(AnthropicUsageSchema) }, { additionalProperties: true }),
     ),
     usage: Type.Optional(AnthropicUsageSchema),
     error: Type.Optional(
@@ -537,13 +551,15 @@ export class AnthropicTurnTranslator implements TurnTranslator<AnthropicMessage>
         if (!tool) return []
         const input = parseToolArguments(tool.json)
         this.toolCalls.push({ id: tool.id, name: tool.name, input })
-        return [{
-          type: 'toolCall',
-          toolCallId: tool.id,
-          toolName: tool.name,
-          input,
-          status: 'pending',
-        }]
+        return [
+          {
+            type: 'toolCall',
+            toolCallId: tool.id,
+            toolName: tool.name,
+            input,
+            status: 'pending',
+          },
+        ]
       }
 
       case 'message_delta': {
@@ -554,12 +570,14 @@ export class AnthropicTurnTranslator implements TurnTranslator<AnthropicMessage>
 
       case 'error': {
         const detail = event.error?.message
-        return [{
-          type: 'error',
-          message: detail
-            ? `Anthropic error: ${detail}`
-            : 'Anthropic stream failed. Check your credentials in /admin/ai/providers.',
-        }]
+        return [
+          {
+            type: 'error',
+            message: detail
+              ? `Anthropic error: ${detail}`
+              : 'Anthropic stream failed. Check your credentials in /admin/ai/providers.',
+          },
+        ]
       }
 
       // message_stop, ping, and unrecognised events carry nothing we surface.
@@ -578,7 +596,12 @@ export class AnthropicTurnTranslator implements TurnTranslator<AnthropicMessage>
       }
       const tool = this.toolByIndex.get(index)
       if (tool) {
-        content.push({ type: 'tool_use', id: tool.id, name: tool.name, input: parseToolArguments(tool.json) })
+        content.push({
+          type: 'tool_use',
+          id: tool.id,
+          name: tool.name,
+          input: parseToolArguments(tool.json),
+        })
       }
     }
 
@@ -593,7 +616,12 @@ export class AnthropicTurnTranslator implements TurnTranslator<AnthropicMessage>
   private mergeUsage(usage: MutableUsage): void {
     // input/cache fields land on message_start; output_tokens is cumulative on
     // message_delta — last-wins captures the final values correctly.
-    for (const key of ['input_tokens', 'output_tokens', 'cache_read_input_tokens', 'cache_creation_input_tokens'] as const) {
+    for (const key of [
+      'input_tokens',
+      'output_tokens',
+      'cache_read_input_tokens',
+      'cache_creation_input_tokens',
+    ] as const) {
       const value = usage[key]
       if (typeof value === 'number') this.usage[key] = value
     }

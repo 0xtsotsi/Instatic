@@ -20,39 +20,39 @@ A plugin is a zip package containing a `plugin.json` manifest and one or more bu
 
 ## Where the code lives
 
-| Concern                        | Lives in                                  |
-|--------------------------------|-------------------------------------------|
-| SDK (author-facing API surface)| `src/core/plugin-sdk/`                    |
-| `instatic-plugin` CLI                | `src/core/plugin-sdk/cli/`                |
-| Manifest schema + parser       | `src/core/plugins/manifest.ts`            |
-| Admin-page route helpers       | `src/core/plugins/manifestAdminPages.ts`  |
-| Host-side plugin runtime       | `src/core/plugins/`                       |
-| Lifecycle event schema + types | `src/core/plugins/events.ts`              |
-| Worker host (server entrypoint) | `server/plugins/pluginWorker.ts`, `server/plugins/host/workerPool.ts` |
-| QuickJS VM factory (server entrypoint)| `server/plugins/quickjs/vm.ts`       |
-| Sandbox host (module pack VMs) | `server/plugins/modulePackVm.ts`          |
-| VM bootstrap source (typed)    | `server/plugins/quickjs/bootstrap/src/`   |
-| VM bootstrap generated artifacts | `server/plugins/quickjs/bootstrap/generated/` (run `bun run bootstrap:sync`) |
-| Host RPC dispatcher            | `server/plugins/host/apiDispatch.ts`, `server/plugins/host/rpc.ts` |
-| Gated outbound fetch + SSRF guards | `server/plugins/host/network.ts`       |
-| Byte-safe body wire format     | `server/plugins/protocol/bodyEncoding.ts` |
-| Route request/response I/O     | `server/plugins/host/routeIo.ts`          |
-| Media extension handlers       | `server/plugins/host/handlers/media.ts`, `src/core/plugins/mediaStorageRegistry.ts`, `src/core/plugins/mediaVariantDelegateRegistry.ts` |
-| Published-page asset injection | `server/publish/frontendInjections.ts`    |
-| Dashboard widget registry      | `src/core/dashboard/registry.ts`          |
-| Plugin asset path containment      | `server/util/pathWithin.ts`            |
-| Plugin lifecycle (boot, install, activate, uninstall) | `server/plugins/runtime.ts`, `package.ts` |
-| Plugin scheduler               | `server/plugins/scheduler.ts`             |
-| Event broadcaster (server fan-out) | `server/plugins/eventBroadcaster.ts`  |
-| SSE event endpoint             | `server/handlers/cms/plugins/events.ts`   |
-| HTTP route forwarder           | `server/plugins/runtime.ts` (`handleServerPluginRuntimeRequest`) |
-| Plugin pages in admin          | `src/admin/pages/plugins/`                |
-| SSE event stream (client)      | `src/admin/pages/plugins/utils/pluginEventStream.ts` |
-| Admin shell event bridge hook  | `src/admin/pages/plugins/hooks/usePluginEventBridge.ts` |
-| Plugin host UI primitives      | `src/admin/plugin-host-ui/`               |
-| Plugin host React hooks        | `src/admin/plugin-host-hooks/`            |
-| Example template plugin        | `examples/plugins/template/`              |
-| Installed plugins on disk      | `uploads/plugins/<id>/<version>/`         |
+| Concern                                               | Lives in                                                                                                                                |
+| ----------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
+| SDK (author-facing API surface)                       | `src/core/plugin-sdk/`                                                                                                                  |
+| `instatic-plugin` CLI                                 | `src/core/plugin-sdk/cli/`                                                                                                              |
+| Manifest schema + parser                              | `src/core/plugins/manifest.ts`                                                                                                          |
+| Admin-page route helpers                              | `src/core/plugins/manifestAdminPages.ts`                                                                                                |
+| Host-side plugin runtime                              | `src/core/plugins/`                                                                                                                     |
+| Lifecycle event schema + types                        | `src/core/plugins/events.ts`                                                                                                            |
+| Worker host (server entrypoint)                       | `server/plugins/pluginWorker.ts`, `server/plugins/host/workerPool.ts`                                                                   |
+| QuickJS VM factory (server entrypoint)                | `server/plugins/quickjs/vm.ts`                                                                                                          |
+| Sandbox host (module pack VMs)                        | `server/plugins/modulePackVm.ts`                                                                                                        |
+| VM bootstrap source (typed)                           | `server/plugins/quickjs/bootstrap/src/`                                                                                                 |
+| VM bootstrap generated artifacts                      | `server/plugins/quickjs/bootstrap/generated/` (run `bun run bootstrap:sync`)                                                            |
+| Host RPC dispatcher                                   | `server/plugins/host/apiDispatch.ts`, `server/plugins/host/rpc.ts`                                                                      |
+| Gated outbound fetch + SSRF guards                    | `server/plugins/host/network.ts`                                                                                                        |
+| Byte-safe body wire format                            | `server/plugins/protocol/bodyEncoding.ts`                                                                                               |
+| Route request/response I/O                            | `server/plugins/host/routeIo.ts`                                                                                                        |
+| Media extension handlers                              | `server/plugins/host/handlers/media.ts`, `src/core/plugins/mediaStorageRegistry.ts`, `src/core/plugins/mediaVariantDelegateRegistry.ts` |
+| Published-page asset injection                        | `server/publish/frontendInjections.ts`                                                                                                  |
+| Dashboard widget registry                             | `src/core/dashboard/registry.ts`                                                                                                        |
+| Plugin asset path containment                         | `server/util/pathWithin.ts`                                                                                                             |
+| Plugin lifecycle (boot, install, activate, uninstall) | `server/plugins/runtime.ts`, `package.ts`                                                                                               |
+| Plugin scheduler                                      | `server/plugins/scheduler.ts`                                                                                                           |
+| Event broadcaster (server fan-out)                    | `server/plugins/eventBroadcaster.ts`                                                                                                    |
+| SSE event endpoint                                    | `server/handlers/cms/plugins/events.ts`                                                                                                 |
+| HTTP route forwarder                                  | `server/plugins/runtime.ts` (`handleServerPluginRuntimeRequest`)                                                                        |
+| Plugin pages in admin                                 | `src/admin/pages/plugins/`                                                                                                              |
+| SSE event stream (client)                             | `src/admin/pages/plugins/utils/pluginEventStream.ts`                                                                                    |
+| Admin shell event bridge hook                         | `src/admin/pages/plugins/hooks/usePluginEventBridge.ts`                                                                                 |
+| Plugin host UI primitives                             | `src/admin/plugin-host-ui/`                                                                                                             |
+| Plugin host React hooks                               | `src/admin/plugin-host-hooks/`                                                                                                          |
+| Example template plugin                               | `examples/plugins/template/`                                                                                                            |
+| Installed plugins on disk                             | `uploads/plugins/<id>/<version>/`                                                                                                       |
 
 ---
 
@@ -78,13 +78,13 @@ assets/                  <- static assets shipped in the zip (optional)
 
 `bun instatic-plugin build` produces this runtime layout from `instatic-plugin.config.ts`. Bundle formats are intentionally different per surface:
 
-| Bundle | Format | Loaded by |
-|---|---|---|
-| `server/index.js` | IIFE facade assigning `globalThis.__plugin_exports` | Bun worker → QuickJS VM |
-| `modules/index.js` | ESM default export | Browser editor via dynamic import; server QuickJS after `server/plugins/modulePackVm.ts` rewrites the default export to `globalThis.__module_pack` |
-| `editor/index.js` | ESM | Unsandboxed admin window via dynamic import |
-| Admin app bundles | ESM | Unsandboxed admin window via `adminPages[].content.kind === "app"` |
-| `frontend/*.js` | ESM | Published pages via manifest-declared `frontend.assets[]` |
+| Bundle             | Format                                              | Loaded by                                                                                                                                          |
+| ------------------ | --------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `server/index.js`  | IIFE facade assigning `globalThis.__plugin_exports` | Bun worker → QuickJS VM                                                                                                                            |
+| `modules/index.js` | ESM default export                                  | Browser editor via dynamic import; server QuickJS after `server/plugins/modulePackVm.ts` rewrites the default export to `globalThis.__module_pack` |
+| `editor/index.js`  | ESM                                                 | Unsandboxed admin window via dynamic import                                                                                                        |
+| Admin app bundles  | ESM                                                 | Unsandboxed admin window via `adminPages[].content.kind === "app"`                                                                                 |
+| `frontend/*.js`    | ESM                                                 | Published pages via manifest-declared `frontend.assets[]`                                                                                          |
 
 Sandboxed bundles are scanned for forbidden literals during `build`, during `lint`, and again when the zip is uploaded.
 
@@ -96,10 +96,10 @@ Authors normally write `instatic-plugin.config.ts` with `definePlugin(...)`; the
 
 ```jsonc
 {
-  "id": "acme.workflow",                        // namespaced, lowercase
-  "name": "Workflow",                           // display name
-  "version": "1.0.0",                           // semver-like
-  "apiVersion": 1,                              // only `1` currently
+  "id": "acme.workflow", // namespaced, lowercase
+  "name": "Workflow", // display name
+  "version": "1.0.0", // semver-like
+  "apiVersion": 1, // only `1` currently
   "description": "Approval workflow for posts.",
 
   "permissions": [
@@ -107,17 +107,17 @@ Authors normally write `instatic-plugin.config.ts` with `definePlugin(...)`; the
     "cms.routes.public",
     "cms.storage",
     "cms.hooks",
-    "admin.navigation",   // required by adminPages[]
-    "editor.code",        // required by entrypoints.editor (unsandboxed admin-window code)
-    "modules.register",   // required by entrypoints.modules
-    "frontend.assets",    // required by frontend.assets[]
-    "network.outbound"    // required by fetch() in the server sandbox
+    "admin.navigation", // required by adminPages[]
+    "editor.code", // required by entrypoints.editor (unsandboxed admin-window code)
+    "modules.register", // required by entrypoints.modules
+    "frontend.assets", // required by frontend.assets[]
+    "network.outbound", // required by fetch() in the server sandbox
   ],
 
   "entrypoints": {
-    "server":  "server/index.js",
-    "editor":  "editor/index.js",
-    "modules": "modules/index.js"
+    "server": "server/index.js",
+    "editor": "editor/index.js",
+    "modules": "modules/index.js",
   },
 
   "resources": [
@@ -129,9 +129,9 @@ Authors normally write `instatic-plugin.config.ts` with `definePlugin(...)`; the
       "fields": [
         { "id": "title", "label": "Title", "type": "text", "required": true },
         { "id": "notes", "label": "Notes", "type": "longtext" },
-        { "id": "approved", "label": "Approved", "type": "boolean" }
-      ]
-    }
+        { "id": "approved", "label": "Approved", "type": "boolean" },
+      ],
+    },
   ],
 
   "adminPages": [
@@ -143,8 +143,8 @@ Authors normally write `instatic-plugin.config.ts` with `definePlugin(...)`; the
       "content": {
         "kind": "resource",
         "heading": "Approval Queue",
-        "resource": "approvals"
-      }
+        "resource": "approvals",
+      },
     },
     {
       "id": "app",
@@ -154,47 +154,51 @@ Authors normally write `instatic-plugin.config.ts` with `definePlugin(...)`; the
       "content": {
         "kind": "app",
         "heading": "Workflow",
-        "entry": "admin/workflow.js"
-      }
-    }
+        "entry": "admin/workflow.js",
+      },
+    },
   ],
 
   "settings": [
     { "id": "apiKey", "type": "password", "label": "API key", "secret": true },
-    { "id": "mode", "type": "select", "label": "Mode",
+    {
+      "id": "mode",
+      "type": "select",
+      "label": "Mode",
       "options": [
         { "label": "Draft", "value": "draft" },
-        { "label": "Live", "value": "live" }
+        { "label": "Live", "value": "live" },
       ],
-      "default": "draft"
-    }
+      "default": "draft",
+    },
   ],
 
   "frontend": {
     "assets": [
-      { "kind": "script", "src": "frontend/tracker.js",
-        "placement": "body-end", "strategy": "defer" }
-    ]
+      {
+        "kind": "script",
+        "src": "frontend/tracker.js",
+        "placement": "body-end",
+        "strategy": "defer",
+      },
+    ],
   },
 
-  "networkAllowedHosts": [
-    "api.weather.example.com",
-    "*.cdn.weather.example.com"
-  ],
+  "networkAllowedHosts": ["api.weather.example.com", "*.cdn.weather.example.com"],
 
-  "pack": { "path": "pack/site.json" }
+  "pack": { "path": "pack/site.json" },
 }
 ```
 
 ### ID rules
 
-| Where the ID appears        | Rule                                                       | Examples                  |
-|-----------------------------|------------------------------------------------------------|---------------------------|
-| `plugin.json` top-level `id`| Namespaced, lowercase (`vendor.product[.subname]`)         | `acme.workflow`           |
-| `resources[].id`, `adminPages[].id` | URL path segment — lowercase kebab-case             | `seo-entries`, `subscribers` |
-| `resources[].fields[].id`   | JSON key — any common identifier convention                | `email`, `subscribedAt`   |
-| Pack `classes[].id`         | Namespaced under the plugin ID                             | `acme.workflow/hero-root` |
-| Pack `layouts[].id`         | Namespaced under the plugin ID                             | `acme.workflow/hero-section` |
+| Where the ID appears                | Rule                                               | Examples                     |
+| ----------------------------------- | -------------------------------------------------- | ---------------------------- |
+| `plugin.json` top-level `id`        | Namespaced, lowercase (`vendor.product[.subname]`) | `acme.workflow`              |
+| `resources[].id`, `adminPages[].id` | URL path segment — lowercase kebab-case            | `seo-entries`, `subscribers` |
+| `resources[].fields[].id`           | JSON key — any common identifier convention        | `email`, `subscribedAt`      |
+| Pack `classes[].id`                 | Namespaced under the plugin ID                     | `acme.workflow/hero-root`    |
+| Pack `layouts[].id`                 | Namespaced under the plugin ID                     | `acme.workflow/hero-section` |
 
 `parsePluginManifest` validates all of these and produces a clear error message. `bun instatic-plugin lint` runs the same checks before upload. Coherence checks also enforce permission-dependent shape:
 
@@ -223,21 +227,21 @@ Each hook receives the `api` object (see below). All hooks may be sync or async.
 2. Records the error in the plugin row's `lastError`.
 3. Sets `lifecycleStatus = 'error'`.
 
-| Status       | Meaning                                                                          |
-|--------------|----------------------------------------------------------------------------------|
-| `installed`  | Package on disk, `install` succeeded, `activate` not run yet.                    |
-| `active`     | Plugin enabled, `activate` succeeded, routes/hooks/loops live.                   |
-| `disabled`   | Plugin disabled by the owner (`deactivate` succeeded if exported).               |
-| `error`      | A hook threw or the worker crashed past its budget. `lastError` carries details. |
+| Status      | Meaning                                                                          |
+| ----------- | -------------------------------------------------------------------------------- |
+| `installed` | Package on disk, `install` succeeded, `activate` not run yet.                    |
+| `active`    | Plugin enabled, `activate` succeeded, routes/hooks/loops live.                   |
+| `disabled`  | Plugin disabled by the owner (`deactivate` succeeded if exported).               |
+| `error`     | A hook threw or the worker crashed past its budget. `lastError` carries details. |
 
 ### Hook signatures
 
 ```js
-export function install(api)        {}
-export function activate(api)       {}
-export function deactivate(api)     {}
-export function uninstall(api)      {}
-export function migrate(ctx, api)   {} // ctx = { fromVersion: '1.0.0' }
+export function install(api) {}
+export function activate(api) {}
+export function deactivate(api) {}
+export function uninstall(api) {}
+export function migrate(ctx, api) {} // ctx = { fromVersion: '1.0.0' }
 ```
 
 ### Force-uninstall
@@ -272,17 +276,17 @@ Plugin worker host / install handler
 
 **Event kinds**, derived from `PluginEventSchema` in `src/core/plugins/events.ts`:
 
-| Kind         | Trigger                                | Admin effect                         |
-|--------------|----------------------------------------|--------------------------------------|
-| `crash`      | Worker crashed, within budget          | Warning toast                        |
-| `recovered`  | Auto-respawn succeeded                 | Clears in-error badge                |
-| `parked`     | Crash budget exhausted                 | Error toast + in-error badge         |
-| `restarted`  | Owner restarted manually               | Clears in-error badge                |
-| `installed`  | Plugin installed                       | Re-fetches plugin list               |
-| `updated`    | Plugin updated to a new version        | Re-fetches plugin list               |
-| `uninstalled`| Plugin removed                         | Re-fetches plugin list               |
-| `enabled`    | Plugin enabled                         | Re-fetches plugin list               |
-| `disabled`   | Plugin disabled                        | Clears in-error badge                |
+| Kind          | Trigger                         | Admin effect                 |
+| ------------- | ------------------------------- | ---------------------------- |
+| `crash`       | Worker crashed, within budget   | Warning toast                |
+| `recovered`   | Auto-respawn succeeded          | Clears in-error badge        |
+| `parked`      | Crash budget exhausted          | Error toast + in-error badge |
+| `restarted`   | Owner restarted manually        | Clears in-error badge        |
+| `installed`   | Plugin installed                | Re-fetches plugin list       |
+| `updated`     | Plugin updated to a new version | Re-fetches plugin list       |
+| `uninstalled` | Plugin removed                  | Re-fetches plugin list       |
+| `enabled`     | Plugin enabled                  | Re-fetches plugin list       |
+| `disabled`    | Plugin disabled                 | Clears in-error badge        |
 
 `src/core/plugins/events.ts` is the single source of truth. Both the server broadcaster and the client stream derive their `PluginEvent` type from `Static<typeof PluginEventSchema>` — there is no parallel hand-written union.
 
@@ -301,7 +305,7 @@ Editor entrypoints (`entrypoints.editor`) and app-kind admin pages (`adminPages[
 That trust level is gated by one permission: **`editor.code`** (risk: dangerous).
 
 - The manifest parser rejects an editor entrypoint or app-kind admin page that doesn't declare `editor.code` (`parsePluginManifest` coherence checks; `instatic-plugin lint` reports the same error pre-upload).
-- The editor loader (`src/core/plugins/editorPluginLoader.ts`) refuses to import an editor entrypoint without the `editor.code` *grant*, and records a visible "permission not granted" failure on the plugin card instead of skipping silently. Module packs get the same treatment for `modules.register`.
+- The editor loader (`src/core/plugins/editorPluginLoader.ts`) refuses to import an editor entrypoint without the `editor.code` _grant_, and records a visible "permission not granted" failure on the plugin card instead of skipping silently. Module packs get the same treatment for `modules.register`.
 - The admin-app loader (`src/core/plugins/adminRuntime.ts`) refuses to import an app page without the grant; the page body renders the refusal.
 - `adminPages[].content.assetPath` is pinned to the plugin's own `/uploads/plugins/{id}/{version}` subtree so a manifest can't point the dynamic import at foreign code.
 - The install review dialog (always shown — even for zero-permission plugins) calls out `editor.code` with a dedicated unsandboxed-code warning.
@@ -320,16 +324,16 @@ Inside the admin window, plugin React surfaces (panels, app pages, canvas overla
 
 These produce a build-time error and a runtime error if attempted:
 
-| Forbidden                                | Replacement                                          |
-|------------------------------------------|------------------------------------------------------|
-| `import 'node:fs'`, any `node:*`         | `api.cms.storage.*` for plugin data                  |
-| `import 'bun:*'`                         | The SDK                                              |
-| `Bun.spawn`, `Bun.connect`, `Bun.serve`, `Bun.sql`, `Bun.write`, `Bun.$` | `api.cms.hooks.emit` / `api.cms.storage.*` |
-| `process.env`, `process.exit`, `process.binding` | `api.cms.settings.*`                          |
-| `require()`                              | ES module imports (resolved at build time)           |
-| `globalThis.fetch` without permission    | Declare `network.outbound` + `networkAllowedHosts`   |
-| `WebSocket`, `XMLHttpRequest`            | Not in the VM                                        |
-| `eval`, `new Function(...)`              | Blocked                                              |
+| Forbidden                                                                | Replacement                                        |
+| ------------------------------------------------------------------------ | -------------------------------------------------- |
+| `import 'node:fs'`, any `node:*`                                         | `api.cms.storage.*` for plugin data                |
+| `import 'bun:*'`                                                         | The SDK                                            |
+| `Bun.spawn`, `Bun.connect`, `Bun.serve`, `Bun.sql`, `Bun.write`, `Bun.$` | `api.cms.hooks.emit` / `api.cms.storage.*`         |
+| `process.env`, `process.exit`, `process.binding`                         | `api.cms.settings.*`                               |
+| `require()`                                                              | ES module imports (resolved at build time)         |
+| `globalThis.fetch` without permission                                    | Declare `network.outbound` + `networkAllowedHosts` |
+| `WebSocket`, `XMLHttpRequest`                                            | Not in the VM                                      |
+| `eval`, `new Function(...)`                                              | Blocked                                            |
 
 ### Three layers of enforcement
 
@@ -343,20 +347,20 @@ Sandbox invariants are gated by `src/__tests__/architecture/plugin-sandbox-invar
 
 VM budgets live in `server/plugins/quickjs/limits.ts`; the host-side RPC timeout lives in `server/plugins/host/workerPool.ts`.
 
-| Limit | Value | Enforced by |
-|---|---|---|
-| VM heap | 64 MB (`DEFAULT_MEMORY_LIMIT_BYTES`) | QuickJS `setMemoryLimit` — allocations beyond it throw inside the VM |
-| VM stack | 1 MB (`DEFAULT_STACK_SIZE_BYTES`) | QuickJS `setMaxStackSize` — fatal for runaway recursion |
-| Eval deadline | 5 s (`DEFAULT_EVAL_TIMEOUT_MS`) | wall-clock interrupt on the QuickJS runtime |
-| Module-pack eval deadline | 2 s (`MODULE_PACK_EVAL_TIMEOUT_MS`) | same interrupt — canvas `render()`/`preview()` are pure sync transforms |
-| Schedule fire | the schedule's `maxDurationMs` (host-capped at 5 min) | replaces the 5 s eval budget for that one call |
-| Worker RPC | 30 s (`DEFAULT_RPC_TIMEOUT_MS`); schedule runs get `maxDurationMs` + 10 s slack | host-side timeout in `requestFromWorker` |
+| Limit                     | Value                                                                           | Enforced by                                                             |
+| ------------------------- | ------------------------------------------------------------------------------- | ----------------------------------------------------------------------- |
+| VM heap                   | 64 MB (`DEFAULT_MEMORY_LIMIT_BYTES`)                                            | QuickJS `setMemoryLimit` — allocations beyond it throw inside the VM    |
+| VM stack                  | 1 MB (`DEFAULT_STACK_SIZE_BYTES`)                                               | QuickJS `setMaxStackSize` — fatal for runaway recursion                 |
+| Eval deadline             | 5 s (`DEFAULT_EVAL_TIMEOUT_MS`)                                                 | wall-clock interrupt on the QuickJS runtime                             |
+| Module-pack eval deadline | 2 s (`MODULE_PACK_EVAL_TIMEOUT_MS`)                                             | same interrupt — canvas `render()`/`preview()` are pure sync transforms |
+| Schedule fire             | the schedule's `maxDurationMs` (host-capped at 5 min)                           | replaces the 5 s eval budget for that one call                          |
+| Worker RPC                | 30 s (`DEFAULT_RPC_TIMEOUT_MS`); schedule runs get `maxDurationMs` + 10 s slack | host-side timeout in `requestFromWorker`                                |
 
 **The eval deadline covers every way plugin code can execute.** Each entry into VM execution — the bootstrap eval, the plugin bundle's top-level eval, every `__run*` dispatch (lifecycle, route, hook, loop, schedule, media), and the pending-jobs pump that runs timer callbacks (`setTimeout`/`setInterval` continuations) — registers a wall-clock deadline in a per-runtime registry (`server/plugins/quickjs/eval.ts`). One persistent interrupt handler aborts the runtime once the clock passes the latest active deadline, so concurrent evals on one context cannot strip each other's protection and a `while (true) {}` anywhere (top level, route handler, timer callback) is interrupted instead of wedging the worker thread.
 
 **What the plugin author sees on a deadline hit:** the call fails with QuickJS's `interrupted` error — schedule runs record it as `status: 'timeout'`, every other entry point surfaces it as an ordinary error (lifecycle failure, route 500, hook listener log line). Plugins that legitimately need more time should yield back to the host (await host calls, split work across schedule fires) rather than block in a tight loop.
 
-**The worker RPC timeout is the backstop for a truly wedged worker.** A worker that hangs never *crashes*, so without it the awaiting HTTP request or publish render would hang forever and crash recovery would never engage. When `requestFromWorker` times out, the call rejects with `Plugin "<id>" did not respond to <kind> within <ms>ms` and the worker goes through the same teardown as a crash (`handleWorkerCrash`): terminated, sibling pending calls rejected, host-side registrations dropped, a crash event recorded for the admin UI, and the sliding-window counter decides auto-respawn vs parking the plugin in `error` state.
+**The worker RPC timeout is the backstop for a truly wedged worker.** A worker that hangs never _crashes_, so without it the awaiting HTTP request or publish render would hang forever and crash recovery would never engage. When `requestFromWorker` times out, the call rejects with `Plugin "<id>" did not respond to <kind> within <ms>ms` and the worker goes through the same teardown as a crash (`handleWorkerCrash`): terminated, sibling pending calls rejected, host-side registrations dropped, a crash event recorded for the admin UI, and the sliding-window counter decides auto-respawn vs parking the plugin in `error` state.
 
 **Error stacks:** VM errors keep their QuickJS stack frames (plugin bundles are evaluated with the filename `plugin:<id>`, and the ESM shim adds zero line offset, so frames map 1:1 onto the shipped bundle). The frames travel worker→host on the optional `stack` field of the `*-result` protocol messages and appear in `[plugin:<id>]` server logs only — HTTP responses and API replies carry just the error message.
 
@@ -421,11 +425,11 @@ Every lifecycle hook receives one `api` object. Its surface:
 ### Plugin metadata + logging
 
 ```js
-api.plugin.id              // 'acme.workflow'
-api.plugin.version         // '1.0.0'
-api.plugin.permissions     // ['cms.routes', 'cms.storage']
-api.plugin.log(...args)    // routes to host's [plugin:<id>] logger
-api.plugin.assetUrl(p)     // '/uploads/plugins/<id>/<version>/<path>'
+api.plugin.id // 'acme.workflow'
+api.plugin.version // '1.0.0'
+api.plugin.permissions // ['cms.routes', 'cms.storage']
+api.plugin.log(...args) // routes to host's [plugin:<id>] logger
+api.plugin.assetUrl(p) // '/uploads/plugins/<id>/<version>/<path>'
 ```
 
 ### Editor and dashboard APIs — unsandboxed admin-window code
@@ -459,15 +463,15 @@ export function activate(api) {
 
 Editor surfaces are permission-split:
 
-| API | Permission |
-|---|---|
-| `api.editor.commands.register`, `api.editor.palette.registerCommand`, `api.editor.palette.registerProvider` | `editor.commands` |
-| `api.editor.toolbar.addButton` | `editor.toolbar` |
-| `api.editor.panels.register` | `editor.panels` |
-| `api.editor.canvas.registerOverlay` | `editor.canvas` |
-| `api.editor.store.read` | `editor.store.read` |
-| `api.editor.store.transaction` | `editor.store.write` |
-| `api.cms.storage.collection(...)` from browser plugin code | `cms.storage` |
+| API                                                                                                         | Permission           |
+| ----------------------------------------------------------------------------------------------------------- | -------------------- |
+| `api.editor.commands.register`, `api.editor.palette.registerCommand`, `api.editor.palette.registerProvider` | `editor.commands`    |
+| `api.editor.toolbar.addButton`                                                                              | `editor.toolbar`     |
+| `api.editor.panels.register`                                                                                | `editor.panels`      |
+| `api.editor.canvas.registerOverlay`                                                                         | `editor.canvas`      |
+| `api.editor.store.read`                                                                                     | `editor.store.read`  |
+| `api.editor.store.transaction`                                                                              | `editor.store.write` |
+| `api.cms.storage.collection(...)` from browser plugin code                                                  | `cms.storage`        |
 
 Dashboard widgets are registered from the same unsandboxed browser entrypoint through `api.dashboard.widgets.register(...)` and require `dashboard.widgets.register`:
 
@@ -506,12 +510,12 @@ Widget ids must be namespaced under the plugin id (`<pluginId>.<rest>`). The com
 ### CMS routes — requires `cms.routes` (public routes also require `cms.routes.public`)
 
 ```js
-api.cms.routes.get('/status', 'plugins.read', handler)         // capability-gated
+api.cms.routes.get('/status', 'plugins.read', handler) // capability-gated
 api.cms.routes.post('/action', 'plugins.configure', handler)
 api.cms.routes.patch('/item/:id', 'plugins.configure', handler)
 api.cms.routes.delete('/item/:id', 'plugins.configure', handler)
-api.cms.routes.authenticated.get('/me', handler)               // any logged-in user
-api.cms.routes.public.post('/subscribe', handler)              // anonymous — also requires cms.routes.public
+api.cms.routes.authenticated.get('/me', handler) // any logged-in user
+api.cms.routes.public.post('/subscribe', handler) // anonymous — also requires cms.routes.public
 ```
 
 Routes mount under `/admin/api/cms/plugins/<id>/runtime/*`. The host enforces the admin session check + the declared capability before invoking the handler. Handlers receive `{ req, body, user }`. The `user` is `null` for public routes.
@@ -524,8 +528,8 @@ Custom responses (status, headers, non-JSON bodies) use the raw-response escape 
 
 ```js
 const items = api.cms.storage.collection('items')
-const all   = await items.list()
-const made  = await items.create({ title: 'Draft', status: 'pending' })
+const all = await items.list()
+const made = await items.create({ title: 'Draft', status: 'pending' })
 await items.update(made.id, { status: 'approved' })
 await items.delete(made.id)
 ```
@@ -535,15 +539,17 @@ Plugin storage is per-plugin, per-collection. The collection name must match a `
 ### CMS hooks — requires `cms.hooks`
 
 ```js
-api.cms.hooks.on('publish.after', async (event) => { /* … */ })
+api.cms.hooks.on('publish.after', async (event) => {
+  /* … */
+})
 api.cms.hooks.filter('publish.html', async (html) => html + '<!-- plugin -->')
-const name = await api.cms.hooks.emit('sync.done', { /* … */ })
+const name = await api.cms.hooks.emit('sync.done', {/* … */})
 // name === 'plugin.<your-plugin-id>.sync.done'
 ```
 
 **Host-emitted events** (the reserved core list, `CORE_HOOK_EVENTS` in `src/core/plugins/hookBus.ts`): `publish.before`, `publish.after`, `content.entry.created`, `content.entry.updated`, `content.entry.deleted`, `settings.changed`. **Filters**: `publish.html`, `publish.headers`, `content.entry.cells`.
 
-**Plugin emits are namespaced.** The host rewrites every `emit('<name>', …)` to `plugin.<your-plugin-id>.<name>` (a name already in your own namespace passes through unchanged), so event provenance is unforgeable — a plugin cannot fire `content.entry.created` or any other core event at other listeners, and emitting a name in *another* plugin's namespace (`plugin.<other-id>.*`) is rejected with an error. `emit` resolves to the canonical namespaced name. Cross-plugin eventing still works: subscribing is unrestricted, so a plugin listens to another plugin's events by their full namespaced name, e.g. `api.cms.hooks.on('plugin.acme.analytics.page-view', …)`.
+**Plugin emits are namespaced.** The host rewrites every `emit('<name>', …)` to `plugin.<your-plugin-id>.<name>` (a name already in your own namespace passes through unchanged), so event provenance is unforgeable — a plugin cannot fire `content.entry.created` or any other core event at other listeners, and emitting a name in _another_ plugin's namespace (`plugin.<other-id>.*`) is rejected with an error. `emit` resolves to the canonical namespaced name. Cross-plugin eventing still works: subscribing is unrestricted, so a plugin listens to another plugin's events by their full namespaced name, e.g. `api.cms.hooks.on('plugin.acme.analytics.page-view', …)`.
 
 ### Loop sources — requires `loops.register`
 
@@ -552,7 +558,7 @@ api.cms.loops.registerSource({
   id: 'acme.products',
   label: 'Acme products',
   fields: [/* LoopSourceField[] */],
-  filterSchema: { /* PropertySchema */ },
+  filterSchema: {/* PropertySchema */},
   orderByOptions: [/* allowed sort keys */],
   fetch: async (ctx) => ({ items: [/* LoopItem[] */], totalItems: 0 }),
 
@@ -607,12 +613,17 @@ Published-page tags are declarative. A plugin declares `frontend.assets[]` in th
   "permissions": ["frontend.assets"],
   "frontend": {
     "assets": [
-      { "kind": "script", "src": "frontend/tracker.js", "placement": "body-end", "strategy": "defer" },
+      {
+        "kind": "script",
+        "src": "frontend/tracker.js",
+        "placement": "body-end",
+        "strategy": "defer",
+      },
       { "kind": "style", "href": "frontend/widget.css", "placement": "head-end" },
       { "kind": "meta", "attrs": { "name": "acme-widget", "content": "enabled" } },
-      { "kind": "link", "attrs": { "rel": "preconnect", "href": "https://cdn.example.com" } }
-    ]
-  }
+      { "kind": "link", "attrs": { "rel": "preconnect", "href": "https://cdn.example.com" } },
+    ],
+  },
 }
 ```
 
@@ -643,17 +654,25 @@ The settings form round-trips the mask: a PUT where a secret field still carries
 ### Scheduled jobs — requires `cms.schedule`
 
 ```js
-api.cms.schedule.daily('cleanup', '03:00', async () => { /* … */ })
-api.cms.schedule.hourly('refresh', async () => { /* … */ })
-api.cms.schedule.every(5, 'poll', async () => { /* … */ })
+api.cms.schedule.daily('cleanup', '03:00', async () => {
+  /* … */
+})
+api.cms.schedule.hourly('refresh', async () => {
+  /* … */
+})
+api.cms.schedule.every(5, 'poll', async () => {
+  /* … */
+})
 
 // Full form with overlap policy + duration override:
 api.cms.schedule.register({
   id: 'shopify-sync',
   cadence: { interval: 'monthly', at: '02:00', dayOfMonth: 1 },
-  overlap: 'skip',          // 'skip' | 'queue' | 'parallel'
-  maxDurationMs: 60_000,    // default 5s budget
-  handler: async () => { /* … */ },
+  overlap: 'skip', // 'skip' | 'queue' | 'parallel'
+  maxDurationMs: 60_000, // default 5s budget
+  handler: async () => {
+    /* … */
+  },
 })
 ```
 
@@ -674,13 +693,13 @@ A schedule fires only when it is `enabled`, not `paused`, and its plugin is enab
 
 Plugins read and write CMS content (pages, posts, custom tables) through `api.cms.content.*`. Five permissions are split so most plugins (SEO assistants, translators, search indexers, AI helpers) get only what they need:
 
-| Permission                    | Risk      | Plugin can                                                                 |
-|-------------------------------|-----------|-----------------------------------------------------------------------------|
-| `cms.content.read`            | Low       | List / read entries; read tree-shaped fields; read published snapshots; search |
-| `cms.content.write`           | High      | Create / update entries; mutate tree-shaped fields; move entries between tables |
-| `cms.content.publish`         | High      | Publish or schedule-publish entries; `republishAll()`                       |
-| `cms.content.delete`          | High      | Soft-delete entries                                                          |
-| `cms.content.tables.manage`   | Dangerous | Create user-managed tables (never system tables)                            |
+| Permission                  | Risk      | Plugin can                                                                      |
+| --------------------------- | --------- | ------------------------------------------------------------------------------- |
+| `cms.content.read`          | Low       | List / read entries; read tree-shaped fields; read published snapshots; search  |
+| `cms.content.write`         | High      | Create / update entries; mutate tree-shaped fields; move entries between tables |
+| `cms.content.publish`       | High      | Publish or schedule-publish entries; `republishAll()`                           |
+| `cms.content.delete`        | High      | Soft-delete entries                                                             |
+| `cms.content.tables.manage` | Dangerous | Create user-managed tables (never system tables)                                |
 
 The manifest's `contentAccess[]` lists every table whose entries the plugin can touch, with per-table modes. The host fails closed without both the permission and the allowlist entry for entry reads/writes/publishes/deletes. `content.tables.create(...)` is different: it requires `cms.content.tables.manage`, creates a new user-managed table, and does not require a pre-existing `contentAccess[]` row for that table.
 
@@ -689,8 +708,8 @@ The manifest's `contentAccess[]` lists every table whose entries the plugin can 
   "permissions": ["cms.content.read", "cms.content.write"],
   "contentAccess": [
     { "table": "pages", "modes": ["read", "write"] },
-    { "table": "posts", "modes": ["read"] }
-  ]
+    { "table": "posts", "modes": ["read"] },
+  ],
 }
 ```
 
@@ -725,9 +744,7 @@ await pages.createMany([
   { slug: 'one', cells: { title: 'One', body: tree } },
   { slug: 'two', cells: { title: 'Two', body: tree } },
 ])
-await pages.updateMany([
-  { id: entryId, patch: { cells: { seoTitle: 'Updated title' } } },
-])
+await pages.updateMany([{ id: entryId, patch: { cells: { seoTitle: 'Updated title' } } }])
 await pages.deleteMany([entryId])
 
 // Tree mutation — runs through the SAME engine as the visual editor
@@ -757,10 +774,13 @@ The host protocol names the per-table entry calls as `cms.content.entries.list`,
 Three event channels fire alongside every content write. Plugins use `actor` to skip their own writes (avoid feedback loops):
 
 ```js
-api.cms.hooks.on('content.entry.updated', async ({ tableSlug, entryId, changedFieldIds, actor }) => {
-  if (actor.kind === 'plugin' && actor.pluginId === api.plugin.id) return
-  // …
-})
+api.cms.hooks.on(
+  'content.entry.updated',
+  async ({ tableSlug, entryId, changedFieldIds, actor }) => {
+    if (actor.kind === 'plugin' && actor.pluginId === api.plugin.id) return
+    // …
+  },
+)
 ```
 
 Filter that runs before persistence — validate, normalize, auto-fill:
@@ -794,11 +814,13 @@ api.cms.media.registerStorageAdapter({
   async beginWrite(input) {
     return {
       storagePath: `media/${input.contentHash}`,
-      steps: [{
-        method: 'PUT',
-        url: `https://uploads.example.com/${input.contentHash}`,
-        headers: { 'content-type': input.mimeType },
-      }],
+      steps: [
+        {
+          method: 'PUT',
+          url: `https://uploads.example.com/${input.contentHash}`,
+          headers: { 'content-type': input.mimeType },
+        },
+      ],
       expiresAt: Date.now() + 60_000,
     }
   },
@@ -865,12 +887,12 @@ The input URL, browser requests, redirects, and downloaded assets are constraine
 ### Outbound HTTP — requires `network.outbound` + `networkAllowedHosts`
 
 ```js
-const res  = await fetch('https://api.example.com/data')
+const res = await fetch('https://api.example.com/data')
 const data = await res.json()
 
 // Binary is first-class in both directions:
-const img   = await fetch('https://cdn.example.com/pixel.png')
-const bytes = new Uint8Array(await img.arrayBuffer())   // exact upstream bytes
+const img = await fetch('https://cdn.example.com/pixel.png')
+const bytes = new Uint8Array(await img.arrayBuffer()) // exact upstream bytes
 await fetch('https://api.example.com/upload', { method: 'POST', body: bytes })
 ```
 
@@ -900,15 +922,15 @@ Permissions are requested in `plugin.json` and approved by the site owner at ins
 The install endpoints enforce **grants = declared**, in both directions: every declared permission must be granted (install is all-or-nothing — there is no optional-permissions concept), and every granted permission must be declared (`assertPluginPermissionGrants` in `server/handlers/cms/plugins/shared.ts` rejects a tampered client that grants capabilities the manifest never disclosed). The install review dialog is shown for **every** install and upgrade — a zero-permission plugin renders "No permissions requested" rather than installing silently.
 
 **One authority, three checkpoints.** The declared `permissions` array (what the
-plugin *asked for*) is used only by the install/consent UI. Enforcement always
-validates against `grantedPermissions` (what the operator *approved*), at three
+plugin _asked for_) is used only by the install/consent UI. Enforcement always
+validates against `grantedPermissions` (what the operator _approved_), at three
 independent layers that agree on that single authority:
 
-| Layer | Check | Where |
-|-------|-------|-------|
-| VM (sandbox) | `assertTargetPermission` looks up the required permission in `TARGET_PERMISSIONS` from `server/plugins/protocol/targets.ts` and throws synchronously if it is not granted | `server/plugins/quickjs/bootstrap/src/buildApi.ts` |
-| Host (dispatch) | Centralized `assertHostPluginPermission` in `apiDispatch.ts` — looks up `TARGET_PERMISSIONS[target]` and asserts before the handler runs; individual handlers only add the conditional checks a static map cannot express | `server/plugins/host/apiDispatch.ts` |
-| Editor (SDK) | `assertPluginPermission` against `manifest.grantedPermissions` | `src/core/plugins/runtime.ts` |
+| Layer           | Check                                                                                                                                                                                                                     | Where                                              |
+| --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------- |
+| VM (sandbox)    | `assertTargetPermission` looks up the required permission in `TARGET_PERMISSIONS` from `server/plugins/protocol/targets.ts` and throws synchronously if it is not granted                                                 | `server/plugins/quickjs/bootstrap/src/buildApi.ts` |
+| Host (dispatch) | Centralized `assertHostPluginPermission` in `apiDispatch.ts` — looks up `TARGET_PERMISSIONS[target]` and asserts before the handler runs; individual handlers only add the conditional checks a static map cannot express | `server/plugins/host/apiDispatch.ts`               |
+| Editor (SDK)    | `assertPluginPermission` against `manifest.grantedPermissions`                                                                                                                                                            | `src/core/plugins/runtime.ts`                      |
 
 Both the VM layer and the host layer drive from the same `TARGET_PERMISSIONS` map in `server/plugins/protocol/targets.ts`. This single table is the source of truth for which permission each RPC target requires — the VM and host can never silently assert different permissions for the same target.
 
@@ -929,37 +951,37 @@ Risk levels:
 
 ### Capability matrix (summary)
 
-| Permission                  | Surface              | Risk      | Meaning                                                                 |
-|-----------------------------|----------------------|-----------|-------------------------------------------------------------------------|
-| `admin.navigation`          | Admin                | Medium    | Add admin navigation entries (declarative pages; app pages also need `editor.code`) |
-| `editor.code`               | Admin / editor       | Dangerous | Run plugin JavaScript **unsandboxed** in the admin window (editor entrypoint, app-kind admin pages) |
-| `cms.storage`               | Admin / editor / server| Medium  | Read/write plugin-owned records                                         |
-| `cms.routes`                | Server               | High      | Register authenticated backend routes                                   |
-| `cms.routes.public`         | Server               | Dangerous | Register anonymously-callable routes; requires `cms.routes` too          |
-| `cms.hooks`                 | Server               | High      | Listen to CMS events / filter values                                    |
-| `cms.schedule`              | Server               | High      | Register cadence-driven handlers                                        |
-| `cms.capture`               | Server               | High      | Invoke `api.cms.capture.fromUrl` within `networkAllowedHosts`            |
-| `cms.content.read`          | Server               | Low       | List / read entries; read trees; search; published snapshots             |
-| `cms.content.write`         | Server               | High      | Create / update entries; mutate trees; move between tables               |
-| `cms.content.publish`       | Server               | High      | Publish / schedule-publish entries; `republishAll()`                     |
-| `cms.content.delete`        | Server               | High      | Soft-delete entries                                                      |
-| `cms.content.tables.manage` | Server               | Dangerous | Create user-managed tables                                               |
-| `editor.toolbar`            | Editor               | Medium    | Add toolbar buttons                                                     |
-| `editor.commands`           | Editor               | Medium    | Register editor commands + Spotlight palette commands / providers       |
-| `editor.store.read`         | Editor               | Medium    | Read editor store state                                                 |
-| `editor.store.write`        | Editor               | High      | Mutate editor store state through a host transaction                    |
-| `editor.canvas`             | Editor               | High      | Register canvas overlay React components                                |
-| `editor.panels`             | Editor               | Medium    | Register left-sidebar panels. Use `definePluginPanel({ id, label, iconName, accent? })` from the SDK — `accent` pins a specific rail tint; omit it to let the host derive one automatically from the panel identity. |
-| `modules.register`          | Editor / manifest    | High      | Ship new modules to the canvas module library                           |
-| `loops.register`            | Editor / server / manifest | Medium | Register custom `base.loop` sources                                  |
-| `visualComponents.register` | Admin / manifest     | Medium    | Ship VCs / page templates / class / layout packs (via `pack/site.json`) |
-| `dashboard.widgets.register`| Admin                | Medium    | Register cards in the admin dashboard widget grid                       |
-| `frontend.assets`           | Frontend / manifest  | High      | Inject declarative tags into every published page; also gates module render() `js` |
-| `network.outbound`          | Server               | High      | Make outbound HTTP requests (with `networkAllowedHosts` allowlist)      |
-| `media.storage.adapter`     | Server / CMS media   | Dangerous | Register an electable media storage backend                             |
-| `media.url.transform`       | Server / CMS media   | Medium    | Rewrite media URLs at render/preview/admin read time                    |
-| `media.variant.delegate`    | Server / CMS media   | High      | Replace local responsive variant generation with URL templates          |
-| `unstable.internals`        | Admin / editor / server | Dangerous | Reserved for trusted first-party plugins                            |
+| Permission                   | Surface                    | Risk      | Meaning                                                                                                                                                                                                              |
+| ---------------------------- | -------------------------- | --------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `admin.navigation`           | Admin                      | Medium    | Add admin navigation entries (declarative pages; app pages also need `editor.code`)                                                                                                                                  |
+| `editor.code`                | Admin / editor             | Dangerous | Run plugin JavaScript **unsandboxed** in the admin window (editor entrypoint, app-kind admin pages)                                                                                                                  |
+| `cms.storage`                | Admin / editor / server    | Medium    | Read/write plugin-owned records                                                                                                                                                                                      |
+| `cms.routes`                 | Server                     | High      | Register authenticated backend routes                                                                                                                                                                                |
+| `cms.routes.public`          | Server                     | Dangerous | Register anonymously-callable routes; requires `cms.routes` too                                                                                                                                                      |
+| `cms.hooks`                  | Server                     | High      | Listen to CMS events / filter values                                                                                                                                                                                 |
+| `cms.schedule`               | Server                     | High      | Register cadence-driven handlers                                                                                                                                                                                     |
+| `cms.capture`                | Server                     | High      | Invoke `api.cms.capture.fromUrl` within `networkAllowedHosts`                                                                                                                                                        |
+| `cms.content.read`           | Server                     | Low       | List / read entries; read trees; search; published snapshots                                                                                                                                                         |
+| `cms.content.write`          | Server                     | High      | Create / update entries; mutate trees; move between tables                                                                                                                                                           |
+| `cms.content.publish`        | Server                     | High      | Publish / schedule-publish entries; `republishAll()`                                                                                                                                                                 |
+| `cms.content.delete`         | Server                     | High      | Soft-delete entries                                                                                                                                                                                                  |
+| `cms.content.tables.manage`  | Server                     | Dangerous | Create user-managed tables                                                                                                                                                                                           |
+| `editor.toolbar`             | Editor                     | Medium    | Add toolbar buttons                                                                                                                                                                                                  |
+| `editor.commands`            | Editor                     | Medium    | Register editor commands + Spotlight palette commands / providers                                                                                                                                                    |
+| `editor.store.read`          | Editor                     | Medium    | Read editor store state                                                                                                                                                                                              |
+| `editor.store.write`         | Editor                     | High      | Mutate editor store state through a host transaction                                                                                                                                                                 |
+| `editor.canvas`              | Editor                     | High      | Register canvas overlay React components                                                                                                                                                                             |
+| `editor.panels`              | Editor                     | Medium    | Register left-sidebar panels. Use `definePluginPanel({ id, label, iconName, accent? })` from the SDK — `accent` pins a specific rail tint; omit it to let the host derive one automatically from the panel identity. |
+| `modules.register`           | Editor / manifest          | High      | Ship new modules to the canvas module library                                                                                                                                                                        |
+| `loops.register`             | Editor / server / manifest | Medium    | Register custom `base.loop` sources                                                                                                                                                                                  |
+| `visualComponents.register`  | Admin / manifest           | Medium    | Ship VCs / page templates / class / layout packs (via `pack/site.json`)                                                                                                                                              |
+| `dashboard.widgets.register` | Admin                      | Medium    | Register cards in the admin dashboard widget grid                                                                                                                                                                    |
+| `frontend.assets`            | Frontend / manifest        | High      | Inject declarative tags into every published page; also gates module render() `js`                                                                                                                                   |
+| `network.outbound`           | Server                     | High      | Make outbound HTTP requests (with `networkAllowedHosts` allowlist)                                                                                                                                                   |
+| `media.storage.adapter`      | Server / CMS media         | Dangerous | Register an electable media storage backend                                                                                                                                                                          |
+| `media.url.transform`        | Server / CMS media         | Medium    | Rewrite media URLs at render/preview/admin read time                                                                                                                                                                 |
+| `media.variant.delegate`     | Server / CMS media         | High      | Replace local responsive variant generation with URL templates                                                                                                                                                       |
+| `unstable.internals`         | Admin / editor / server    | Dangerous | Reserved for trusted first-party plugins                                                                                                                                                                             |
 
 Full descriptions and labels live in `src/core/plugin-sdk/capabilities.ts` — the source of truth.
 
@@ -989,11 +1011,7 @@ export default definePlugin({
   name: 'Workflow',
   version: '1.0.0',
   description: 'Approval workflow for pages.',
-  permissions: [
-    permissions.cmsRoutes,
-    permissions.cmsStorage,
-    permissions.adminNavigation,
-  ],
+  permissions: [permissions.cmsRoutes, permissions.cmsStorage, permissions.adminNavigation],
   resources: [
     {
       id: 'approvals',
@@ -1100,22 +1118,22 @@ export default definePlugin({
 
 ## Forbidden patterns
 
-| Pattern                                                                  | Use instead                                                  |
-|--------------------------------------------------------------------------|--------------------------------------------------------------|
-| `import fs from 'node:fs'` or any Node API                               | `api.cms.storage.*` for data, `api.plugin.assetUrl(p)` for files |
-| `import { Database } from 'bun:sqlite'` or any `bun:*` module            | The SDK                                                      |
-| `Bun.spawn` / `Bun.serve` / `Bun.write` / `Bun.sql` / `Bun.$`            | Hooks (`api.cms.hooks.emit`) for cross-plugin signals        |
-| `process.env.SECRET_KEY`                                                 | `api.cms.settings.get('secretKey')`                          |
-| `require('module')`                                                      | ES module `import` (resolved at build time)                  |
-| `globalThis.fetch(...)` without permission                               | Declare `network.outbound` + `networkAllowedHosts`           |
-| `eval(...)` / `new Function(...)`                                        | Blocked — no replacement                                     |
-| Calling a host capability without the matching permission                | Declare it in `instatic-plugin.config.ts` / `plugin.json` permissions |
-| Reaching the DB directly from a plugin                                   | Use `api.cms.storage.*`                                      |
-| IP literals or `localhost` in `networkAllowedHosts`                      | Use a hostname — rejected at manifest parse time             |
-| `FormData`, `Blob`, `URLSearchParams`, or streams as sandbox `fetch` bodies | Serialize to `string`, `ArrayBuffer`, or a typed-array view |
-| `entrypoints.admin` for custom admin pages                               | Use `adminPages[].content.kind === "app"` with `content.entry` |
-| Skipping `instatic-plugin lint` before upload                                  | Always lint — the host scans anyway and refuses the upload   |
-| Calling host APIs from inside a constructor / module top-level           | Use lifecycle hooks (`activate(api)`) — host APIs are only bound there |
+| Pattern                                                                     | Use instead                                                            |
+| --------------------------------------------------------------------------- | ---------------------------------------------------------------------- |
+| `import fs from 'node:fs'` or any Node API                                  | `api.cms.storage.*` for data, `api.plugin.assetUrl(p)` for files       |
+| `import { Database } from 'bun:sqlite'` or any `bun:*` module               | The SDK                                                                |
+| `Bun.spawn` / `Bun.serve` / `Bun.write` / `Bun.sql` / `Bun.$`               | Hooks (`api.cms.hooks.emit`) for cross-plugin signals                  |
+| `process.env.SECRET_KEY`                                                    | `api.cms.settings.get('secretKey')`                                    |
+| `require('module')`                                                         | ES module `import` (resolved at build time)                            |
+| `globalThis.fetch(...)` without permission                                  | Declare `network.outbound` + `networkAllowedHosts`                     |
+| `eval(...)` / `new Function(...)`                                           | Blocked — no replacement                                               |
+| Calling a host capability without the matching permission                   | Declare it in `instatic-plugin.config.ts` / `plugin.json` permissions  |
+| Reaching the DB directly from a plugin                                      | Use `api.cms.storage.*`                                                |
+| IP literals or `localhost` in `networkAllowedHosts`                         | Use a hostname — rejected at manifest parse time                       |
+| `FormData`, `Blob`, `URLSearchParams`, or streams as sandbox `fetch` bodies | Serialize to `string`, `ArrayBuffer`, or a typed-array view            |
+| `entrypoints.admin` for custom admin pages                                  | Use `adminPages[].content.kind === "app"` with `content.entry`         |
+| Skipping `instatic-plugin lint` before upload                               | Always lint — the host scans anyway and refuses the upload             |
+| Calling host APIs from inside a constructor / module top-level              | Use lifecycle hooks (`activate(api)`) — host APIs are only bound there |
 
 ---
 

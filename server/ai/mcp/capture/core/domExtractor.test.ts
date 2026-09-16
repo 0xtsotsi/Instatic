@@ -14,12 +14,7 @@
  */
 import { describe, expect, it } from 'bun:test'
 import { Window } from 'happy-dom'
-import {
-  COMPUTED_PROPS,
-  extractDom,
-  PAGE_WALKER_SOURCE,
-  type ExtractContext,
-} from './domExtractor'
+import { COMPUTED_PROPS, extractDom, PAGE_WALKER_SOURCE, type ExtractContext } from './domExtractor'
 
 /** Build an ExtractContext backed by a fresh happy-dom Window. */
 function makeCtx(html: string): ExtractContext {
@@ -119,9 +114,7 @@ describe('extractDom (pure TypeScript walker)', () => {
   })
 
   it('selector: null captures the document body', () => {
-    const ctx = makeCtx(
-      '<html><body><main><p>x</p></main></body></html>',
-    )
+    const ctx = makeCtx('<html><body><main><p>x</p></main></body></html>')
     const nodes = extractDom({ selector: null, maxDepth: 2 }, ctx)
     expect(nodes.length).toBeGreaterThanOrEqual(1)
     expect(nodes[0]!.outerHTML.toLowerCase()).toContain('<body>')
@@ -221,7 +214,7 @@ describe('PAGE_WALKER_SOURCE (page-side bridge)', () => {
     expect(PAGE_WALKER_SOURCE.trimEnd().endsWith('return out;\n}')).toBe(true)
   })
 
-  it('runs end-to-end inside a happy-dom realm via the fetcher\'s wrapper shape', () => {
+  it("runs end-to-end inside a happy-dom realm via the fetcher's wrapper shape", () => {
     // Re-create the page-side shape the fetcher uses: an IIFE whose body
     // inlines PAGE_WALKER_SOURCE and then calls runExtract on the JSON-
     // baked args. PAGE_WALKER_SOURCE references `document` and `window`
@@ -245,11 +238,11 @@ describe('PAGE_WALKER_SOURCE (page-side bridge)', () => {
       PAGE_WALKER_SOURCE,
       'return runExtract(target, COMPUTED_PROPS_);',
     ].join('\n')
-    const fn = new Function(
-      'target',
-      'COMPUTED_PROPS_',
-      body,
-    ) as unknown as (this: { document: unknown; window: unknown }, target: { selector: string | null; maxDepth: number }, props: readonly string[]) => ExtractedNodeFromWalker[]
+    const fn = new Function('target', 'COMPUTED_PROPS_', body) as unknown as (
+      this: { document: unknown; window: unknown },
+      target: { selector: string | null; maxDepth: number },
+      props: readonly string[],
+    ) => ExtractedNodeFromWalker[]
     const result = fn.call(realmWindow, { selector: '.root', maxDepth: Infinity }, COMPUTED_PROPS)
     expect(Array.isArray(result)).toBe(true)
     const tags = result.map((n) => (n.outerHTML.match(/^<(\w+)/) ?? [])[1])

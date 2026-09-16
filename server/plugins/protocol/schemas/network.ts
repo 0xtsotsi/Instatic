@@ -9,7 +9,8 @@ import { Type } from '@sinclair/typebox'
  * (instead of imported) so this file stays a single source of truth for the
  * worker IPC schemas and doesn't pull in manifest validation.
  */
-export const NETWORK_HOST_PATTERN = /^(?:\*\.)?[a-z0-9]([a-z0-9-]*[a-z0-9])?(?:\.[a-z0-9]([a-z0-9-]*[a-z0-9])?)*$/
+export const NETWORK_HOST_PATTERN =
+  /^(?:\*\.)?[a-z0-9]([a-z0-9-]*[a-z0-9])?(?:\.[a-z0-9]([a-z0-9-]*[a-z0-9])?)*$/
 
 export const NetworkFetchInitSchema = Type.Object(
   {
@@ -26,7 +27,9 @@ export const NetworkFetchInitSchema = Type.Object(
     // if the signal fires, the polyfill posts `network.abort` with the
     // same id so the host can drop the in-flight request. Plain JS
     // identifier shape — the bootstrap generates `'a' + counter + '_' + ts36`.
-    abortId: Type.Optional(Type.String({ minLength: 1, maxLength: 128, pattern: '^[a-zA-Z0-9_]+$' })),
+    abortId: Type.Optional(
+      Type.String({ minLength: 1, maxLength: 128, pattern: '^[a-zA-Z0-9_]+$' }),
+    ),
   },
   { additionalProperties: false },
 )

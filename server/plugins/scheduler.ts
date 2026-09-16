@@ -173,7 +173,14 @@ async function fireSchedule(
   // Atomic claim — if another tick (or another HA instance) is ahead of
   // us, this returns false and we move on. Two ticks cannot fire the
   // same schedule simultaneously.
-  const claimed = await tryClaimSchedule(db, sched.pluginId, sched.scheduleId, token, lockUntilIso, nowIso)
+  const claimed = await tryClaimSchedule(
+    db,
+    sched.pluginId,
+    sched.scheduleId,
+    token,
+    lockUntilIso,
+    nowIso,
+  )
   if (!claimed) return { ok: false, status: 'error', error: 'already-claimed', durationMs: 0 }
 
   const runId = nanoid()
@@ -186,14 +193,24 @@ async function fireSchedule(
   })
   await markScheduleRunStarted(db, sched.pluginId, sched.scheduleId, nowIso)
 
-  let outcome: { ok: boolean; status: 'ok' | 'error' | 'timeout'; error?: string; durationMs: number }
+  let outcome: {
+    ok: boolean
+    status: 'ok' | 'error' | 'timeout'
+    error?: string
+    durationMs: number
+  }
   try {
     const result = await runScheduleInWorker({
       pluginId: sched.pluginId,
       scheduleId: sched.scheduleId,
       maxDurationMs: sched.maxDurationMs,
     })
-    outcome = { ok: result.status === 'ok', status: result.status, error: result.error, durationMs: result.durationMs }
+    outcome = {
+      ok: result.status === 'ok',
+      status: result.status,
+      error: result.error,
+      durationMs: result.durationMs,
+    }
   } catch (err) {
     // Worker postMessage failed (e.g. worker died mid-call) — treat as a
     // logical error and keep the schedule alive so the next tick retries.

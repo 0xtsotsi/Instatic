@@ -17,31 +17,31 @@ Catalog of every `localStorage` / `sessionStorage` key the admin app writes, and
 
 ### localStorage
 
-| Key                                       | Owner                                                                 | Source-of-truth file                                            |
-|-------------------------------------------|-----------------------------------------------------------------------|-----------------------------------------------------------------|
-| `instatic-editor-prefs`                         | All editor preferences (auto-save, hover-preview, admin theme, UI text size, density, layers options) — see [docs/features/editor-preferences.md](../features/editor-preferences.md) | `src/admin/pages/site/preferences/editorPreferences.ts` → `EDITOR_PREFS_KEY` |
-| `instatic-editor-layout-v2`                     | Per-workspace sidebar widths + open states (site / content / data / media) and floating panel positions | `src/admin/state/workspaceLayoutStorage.ts` → `EDITOR_LAYOUT_STORAGE_KEY` |
-| `instatic-clipboard-v1`                         | The editor clipboard (copy / cut / paste of layer subtrees)            | `src/admin/pages/site/store/clipboard/clipboardStorage.ts` → `CLIPBOARD_STORAGE_KEY` |
-| `instatic-class-usage`                          | Recently-used classes in the ClassPicker autocomplete                 | `src/admin/pages/site/preferences/classUsage.ts` → `CLASS_USAGE_STORAGE_KEY` |
-| `instatic-data-grid-primary-widths-v1`          | Per-table primary-column widths in the Data workspace grid            | `src/admin/pages/data/components/DataGrid/usePrimaryColumnWidth.ts` |
-| `instatic-media-page-view-mode`                 | Media workspace view mode (grid / list / large thumbs)                | `src/admin/pages/media/components/MediaCanvas/MediaCanvas.tsx`   |
-| `instatic-media-explorer-view-mode`             | Media Explorer panel view mode (site workspace)                       | `src/admin/pages/site/panels/MediaExplorerPanel/mediaExplorerUtils.ts` → `VIEW_MODE_STORAGE_KEY` |
-| `instatic-module-inserter-v1`                   | Module inserter view mode and recent inserts | `src/admin/pages/site/module-picker/moduleInserterPrefs.ts`      |
-| `instatic-onboarding-dismissed`                 | Dashboard onboarding panel: dismissed / open per-device              | `src/admin/pages/dashboard/hooks/useOnboardingState.ts`         |
-| `spotlight:recent-commands`               | Spotlight recents — last N executed command ids                       | `src/admin/spotlight/recentStore.ts`                            |
-| `spotlight:telemetry:v1`                  | Local Spotlight telemetry (command frequency)                         | `src/admin/spotlight/telemetry.ts`                              |
+| Key                                    | Owner                                                                                                                                                                                | Source-of-truth file                                                                             |
+| -------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------ |
+| `instatic-editor-prefs`                | All editor preferences (auto-save, hover-preview, admin theme, UI text size, density, layers options) — see [docs/features/editor-preferences.md](../features/editor-preferences.md) | `src/admin/pages/site/preferences/editorPreferences.ts` → `EDITOR_PREFS_KEY`                     |
+| `instatic-editor-layout-v2`            | Per-workspace sidebar widths + open states (site / content / data / media) and floating panel positions                                                                              | `src/admin/state/workspaceLayoutStorage.ts` → `EDITOR_LAYOUT_STORAGE_KEY`                        |
+| `instatic-clipboard-v1`                | The editor clipboard (copy / cut / paste of layer subtrees)                                                                                                                          | `src/admin/pages/site/store/clipboard/clipboardStorage.ts` → `CLIPBOARD_STORAGE_KEY`             |
+| `instatic-class-usage`                 | Recently-used classes in the ClassPicker autocomplete                                                                                                                                | `src/admin/pages/site/preferences/classUsage.ts` → `CLASS_USAGE_STORAGE_KEY`                     |
+| `instatic-data-grid-primary-widths-v1` | Per-table primary-column widths in the Data workspace grid                                                                                                                           | `src/admin/pages/data/components/DataGrid/usePrimaryColumnWidth.ts`                              |
+| `instatic-media-page-view-mode`        | Media workspace view mode (grid / list / large thumbs)                                                                                                                               | `src/admin/pages/media/components/MediaCanvas/MediaCanvas.tsx`                                   |
+| `instatic-media-explorer-view-mode`    | Media Explorer panel view mode (site workspace)                                                                                                                                      | `src/admin/pages/site/panels/MediaExplorerPanel/mediaExplorerUtils.ts` → `VIEW_MODE_STORAGE_KEY` |
+| `instatic-module-inserter-v1`          | Module inserter view mode and recent inserts                                                                                                                                         | `src/admin/pages/site/module-picker/moduleInserterPrefs.ts`                                      |
+| `instatic-onboarding-dismissed`        | Dashboard onboarding panel: dismissed / open per-device                                                                                                                              | `src/admin/pages/dashboard/hooks/useOnboardingState.ts`                                          |
+| `spotlight:recent-commands`            | Spotlight recents — last N executed command ids                                                                                                                                      | `src/admin/spotlight/recentStore.ts`                                                             |
+| `spotlight:telemetry:v1`               | Local Spotlight telemetry (command frequency)                                                                                                                                        | `src/admin/spotlight/telemetry.ts`                                                               |
 
 ### sessionStorage
 
-| Key                                       | Owner                                                                 | Source-of-truth file                                            |
-|-------------------------------------------|-----------------------------------------------------------------------|-----------------------------------------------------------------|
-| `instatic-spotlight-pending-action`             | The cross-page-reload action a Spotlight command is waiting for (e.g. step-up then resume) | `src/admin/spotlight/pendingAction.ts`             |
+| Key                                 | Owner                                                                                      | Source-of-truth file                   |
+| ----------------------------------- | ------------------------------------------------------------------------------------------ | -------------------------------------- |
+| `instatic-spotlight-pending-action` | The cross-page-reload action a Spotlight command is waiting for (e.g. step-up then resume) | `src/admin/spotlight/pendingAction.ts` |
 
 ### Cookies (HttpOnly — not directly readable)
 
-| Cookie                                    | Owner                                                                 | Source-of-truth file                                            |
-|-------------------------------------------|-----------------------------------------------------------------------|-----------------------------------------------------------------|
-| `instatic_admin_session`                        | Admin session token (raw; hashed before lookup)                       | `server/auth/tokens.ts` → `SESSION_COOKIE_NAME`                 |
+| Cookie                   | Owner                                           | Source-of-truth file                            |
+| ------------------------ | ----------------------------------------------- | ----------------------------------------------- |
+| `instatic_admin_session` | Admin session token (raw; hashed before lookup) | `server/auth/tokens.ts` → `SESSION_COOKIE_NAME` |
 
 The session cookie is `HttpOnly`, `Secure` (in production behind TLS), `SameSite=Lax`, `Path=/admin`. The client never reads it directly.
 
@@ -51,10 +51,10 @@ The session cookie is `HttpOnly`, `Secure` (in production behind TLS), `SameSite
 
 Stored in the `user_preferences` table — one row per `(user_id, key)`. Keys are namespaced under `instatic-`. Persisted server-side so they sync across devices.
 
-| Key                                       | Owner                                                                 | Source-of-truth file                                            |
-|-------------------------------------------|-----------------------------------------------------------------------|-----------------------------------------------------------------|
-| `dashboard-layout`                        | Dashboard widget positions / sizes                                     | `src/admin/pages/dashboard/hooks/useDashboardLayout.ts`         |
-| `module-inserter`                         | Module inserter notch favorites: ordered `{ kind, id }` refs for modules, layouts, and Visual Components | `src/admin/pages/site/module-picker/useModuleInserterPreference.ts` |
+| Key                | Owner                                                                                                    | Source-of-truth file                                                |
+| ------------------ | -------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------- |
+| `dashboard-layout` | Dashboard widget positions / sizes                                                                       | `src/admin/pages/dashboard/hooks/useDashboardLayout.ts`             |
+| `module-inserter`  | Module inserter notch favorites: ordered `{ kind, id }` refs for modules, layouts, and Visual Components | `src/admin/pages/site/module-picker/useModuleInserterPreference.ts` |
 
 ### Endpoint
 
@@ -86,11 +86,7 @@ const result = safeParseJson(localStorage.getItem('instatic-...') ?? '', Schema)
 if (!result.ok) throw result.error
 
 // Soft (typical): corruption falls back to defaults
-const value = parseJsonWithFallback(
-  localStorage.getItem('instatic-...') ?? '',
-  Schema,
-  DEFAULTS,
-)
+const value = parseJsonWithFallback(localStorage.getItem('instatic-...') ?? '', Schema, DEFAULTS)
 ```
 
 `parseJsonWithFallback` is the default. The user shouldn't see a broken editor because their localStorage got truncated. See [docs/reference/typebox-patterns.md](typebox-patterns.md).
@@ -102,9 +98,12 @@ const value = parseJsonWithFallback(
 ```ts
 import { Type } from '@core/utils/typeboxHelpers'
 
-const Schema = Type.Object({
-  view: Type.Union([Type.Literal('grid'), Type.Literal('list')]),
-}, { additionalProperties: true })
+const Schema = Type.Object(
+  {
+    view: Type.Union([Type.Literal('grid'), Type.Literal('list')]),
+  },
+  { additionalProperties: true },
+)
 
 const next = { view: 'grid' as const }
 localStorage.setItem('instatic-...', JSON.stringify(next))
@@ -139,10 +138,13 @@ import { parseJsonWithFallback } from '@core/utils/jsonValidate'
 
 const KEY = 'instatic-my-feature-v1'
 
-const Schema = Type.Object({
-  enabled:  Type.Boolean(),
-  threshold: Type.Number(),
-}, { additionalProperties: true })
+const Schema = Type.Object(
+  {
+    enabled: Type.Boolean(),
+    threshold: Type.Number(),
+  },
+  { additionalProperties: true },
+)
 
 type Prefs = Static<typeof Schema>
 const DEFAULTS: Prefs = { enabled: true, threshold: 5 }
@@ -190,16 +192,16 @@ for (const key of Object.keys(localStorage)) {
 
 ## Forbidden patterns
 
-| Pattern                                                              | Use instead                                              |
-|----------------------------------------------------------------------|----------------------------------------------------------|
-| Storing keys without a `instatic-` prefix                                  | Always prefix `instatic-` (or `spotlight:` for spotlight-owned) |
-| `JSON.parse(localStorage.getItem('instatic-...') ?? '{}')`                 | `parseJsonWithFallback(raw, Schema, DEFAULTS)`           |
-| Catching `JSON.parse` errors silently                                | The helpers do it for you                                |
-| Storing secrets (tokens, passwords) in localStorage                  | Cookies (`HttpOnly`) are the only place secrets live    |
-| Cross-tab broadcasting via setTimeout polling                        | Use the native `storage` event (cross-tab) or a CustomEvent (same tab) — see `editorPreferences.ts` for the pattern |
-| Storing large blobs in localStorage (>1MB)                           | Use IndexedDB (rare — most CMS state is server-side)     |
-| Using session storage for things that should survive page reload     | localStorage. session is for in-flight cross-redirect state. |
-| Versioning by editing the schema in place without bumping the key    | Bump `-vN` when shape changes incompatibly               |
+| Pattern                                                           | Use instead                                                                                                         |
+| ----------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------- |
+| Storing keys without a `instatic-` prefix                         | Always prefix `instatic-` (or `spotlight:` for spotlight-owned)                                                     |
+| `JSON.parse(localStorage.getItem('instatic-...') ?? '{}')`        | `parseJsonWithFallback(raw, Schema, DEFAULTS)`                                                                      |
+| Catching `JSON.parse` errors silently                             | The helpers do it for you                                                                                           |
+| Storing secrets (tokens, passwords) in localStorage               | Cookies (`HttpOnly`) are the only place secrets live                                                                |
+| Cross-tab broadcasting via setTimeout polling                     | Use the native `storage` event (cross-tab) or a CustomEvent (same tab) — see `editorPreferences.ts` for the pattern |
+| Storing large blobs in localStorage (>1MB)                        | Use IndexedDB (rare — most CMS state is server-side)                                                                |
+| Using session storage for things that should survive page reload  | localStorage. session is for in-flight cross-redirect state.                                                        |
+| Versioning by editing the schema in place without bumping the key | Bump `-vN` when shape changes incompatibly                                                                          |
 
 ---
 

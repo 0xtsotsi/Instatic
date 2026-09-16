@@ -150,27 +150,27 @@ User drops files / folder / static .zip / CMS bundle .zip
 
 ```ts
 interface ImportPlan {
-  pages:           PagePlan[]
-  styleRules:      NewStyleRule[]
-  styleRuleSources: string[]   // index-aligned with styleRules: source CSS path per rule
-  fonts:           ImportFontFamily[]
-  googleFonts:     ImportGoogleFont[]
-  fontTokens:      ImportFontToken[]
-  conditions:      ConditionDef[]
-  assets:          { sourcePath: string; mimeType: string; bytes: Uint8Array }[]
-  colors:          ImportColorToken[]
-  scripts:         ImportScript[]
-  linkedStylesheets: LinkedStylesheet[]   // every top-level linked sheet + its import mode
-  stylesheets:     ImportStylesheet[]     // sheets kept as files (mode 'file')
-  conflicts:       {
+  pages: PagePlan[]
+  styleRules: NewStyleRule[]
+  styleRuleSources: string[] // index-aligned with styleRules: source CSS path per rule
+  fonts: ImportFontFamily[]
+  googleFonts: ImportGoogleFont[]
+  fontTokens: ImportFontToken[]
+  conditions: ConditionDef[]
+  assets: { sourcePath: string; mimeType: string; bytes: Uint8Array }[]
+  colors: ImportColorToken[]
+  scripts: ImportScript[]
+  linkedStylesheets: LinkedStylesheet[] // every top-level linked sheet + its import mode
+  stylesheets: ImportStylesheet[] // sheets kept as files (mode 'file')
+  conflicts: {
     pages: PageConflict[]
     rules: RuleConflict[]
     tokens: TokenConflict[]
     crossSheetClasses: CrossSheetClassConflict[]
   }
-  warnings:        ImportWarning[]
-  droppedAtRules:  string[]     // source text of un-modelable @-rules
-  unusedCss:       string[]     // CSS files present but not linked by any page
+  warnings: ImportWarning[]
+  droppedAtRules: string[] // source text of un-modelable @-rules
+  unusedCss: string[] // CSS files present but not linked by any page
 }
 ```
 
@@ -193,17 +193,17 @@ interface ImportScript {
 
 ## What each category imports
 
-| Category | What | How |
-|---|---|---|
-| **Pages** | One `PagePlan` per `.html` file | `makeHtmlPagePlan` parses the body via `@core/htmlImport`; slug derived from the relative file path (`documentation/index.html` → `documentation`, `guides/install.html` → `guides/install`) |
-| **HTML attributes** | Safe extra attributes on ordinary elements (`id`, ARIA, `role`, custom attrs, `data-*`, etc.) | Stored as `props.htmlAttributes` on base container/text/link/button/image modules so CSS selectors, anchors, classic scripts, accessibility attributes, and template runtime hooks such as `data-bg-src`, `data-aos`, and `data-bs-*` survive import. Users edit the same bag in the Properties panel's Attributes view. `class` is handled by the selector registry, inline `style` becomes `node.inlineStyles`, event handlers are stripped, and reserved Instatic/editor `data-*` names are not imported. Local asset URLs inside these attributes are uploaded and rewritten. |
-| **Style rules** | All rules from linked CSS files and their unconditional local `@import` graph | `expandLinkedCssImports` follows bundled local CSS imports first, then `cssToStyleRules` maps selector declaration blocks to `NewStyleRule` entries (class or ambient kind) and stores supported stylesheet-level rules such as `@keyframes` as ambient raw CSS rules |
-| **Media** | Uploadable images, videos, and fonts — including unreferenced files in the bundle | `buildAssetPlan` collects referenced assets and sweeps uploadable unreferenced files. Source companions such as `.scss`, sourcemaps, PHP mailers, `desktop.ini`, and README files are excluded before upload. |
-| **Color tokens** | CSS custom properties on `:root` / `html` / `body` that look like colours | `extractRootColorTokens` pulls them into `ImportColorToken[]`; they become framework palette tokens. The framework parses hex, rgb/rgba, and hsl/hsla into channels (deriving shades/tints/transparent steps); any other authored value (oklch(), color-mix(), …) still emits its base `--<slug>` verbatim so `var(--x)` references never break. A `--<slug>` that collides with an existing colour token surfaces as a `TokenConflict` (rename / skip / overwrite) |
-| **Fonts** | Self-hosted `@font-face` families with at least one bundled file, plus trusted Google CSS2 imports | `buildFontFamilies` in `assetPlan.ts` picks the best bundled format (woff2 → woff → ttf → otf); `extractGoogleFontImports` turns Google CSS2 `@import` rules into install requests. Commit uploads custom files via `tx.addFonts`, installs Google families through the CMS Google-font installer, then merges those returned `FontEntry` records via `tx.addInstalledFonts` |
-| **Font tokens** | Root `--font-*` variables with font-family stacks | `extractRootFontTokens` pulls them into `ImportFontToken[]`; committed via `tx.addFontTokens` after fonts so matching imported families can be assigned. A `--font-*` that collides with an existing font token surfaces as a `TokenConflict` (rename / skip / overwrite) |
-| **Scripts** | Executable inline scripts and JS files linked by imported HTML | Preserved in source order and committed via `tx.addScripts` with page scope from the source HTML. Classic scripts remain plain `<script>` assets and bypass bundling; `type="module"` scripts keep module semantics. Module imports from known npm CDNs (`esm.sh`, `esm.run`, `unpkg`, jsDelivr npm URLs) are rewritten to bare package specifiers and recorded as runtime dependencies, so `https://esm.sh/@motion.page/sdk@1.2.4` becomes `@motion.page/sdk` plus `@motion.page/sdk: 1.2.4` in `packageJson.dependencies`. Non-executable script data such as `application/json`, import maps, and templates is skipped. |
-| **Stylesheets (kept)** | Top-level linked sheets the user opted into `mode: 'file'` | Flattened `@import` graph, Google imports stripped, `url()` normalised; committed via `tx.addStylesheets` as a `SiteFile` (`type: 'style'`) + `site.runtime.styles` entry scoped to the linking pages. Editable afterwards in the Site panel's Styles section and the code editor. |
+| Category               | What                                                                                               | How                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
+| ---------------------- | -------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Pages**              | One `PagePlan` per `.html` file                                                                    | `makeHtmlPagePlan` parses the body via `@core/htmlImport`; slug derived from the relative file path (`documentation/index.html` → `documentation`, `guides/install.html` → `guides/install`)                                                                                                                                                                                                                                                                                                                                                                                                                               |
+| **HTML attributes**    | Safe extra attributes on ordinary elements (`id`, ARIA, `role`, custom attrs, `data-*`, etc.)      | Stored as `props.htmlAttributes` on base container/text/link/button/image modules so CSS selectors, anchors, classic scripts, accessibility attributes, and template runtime hooks such as `data-bg-src`, `data-aos`, and `data-bs-*` survive import. Users edit the same bag in the Properties panel's Attributes view. `class` is handled by the selector registry, inline `style` becomes `node.inlineStyles`, event handlers are stripped, and reserved Instatic/editor `data-*` names are not imported. Local asset URLs inside these attributes are uploaded and rewritten.                                          |
+| **Style rules**        | All rules from linked CSS files and their unconditional local `@import` graph                      | `expandLinkedCssImports` follows bundled local CSS imports first, then `cssToStyleRules` maps selector declaration blocks to `NewStyleRule` entries (class or ambient kind) and stores supported stylesheet-level rules such as `@keyframes` as ambient raw CSS rules                                                                                                                                                                                                                                                                                                                                                      |
+| **Media**              | Uploadable images, videos, and fonts — including unreferenced files in the bundle                  | `buildAssetPlan` collects referenced assets and sweeps uploadable unreferenced files. Source companions such as `.scss`, sourcemaps, PHP mailers, `desktop.ini`, and README files are excluded before upload.                                                                                                                                                                                                                                                                                                                                                                                                              |
+| **Color tokens**       | CSS custom properties on `:root` / `html` / `body` that look like colours                          | `extractRootColorTokens` pulls them into `ImportColorToken[]`; they become framework palette tokens. The framework parses hex, rgb/rgba, and hsl/hsla into channels (deriving shades/tints/transparent steps); any other authored value (oklch(), color-mix(), …) still emits its base `--<slug>` verbatim so `var(--x)` references never break. A `--<slug>` that collides with an existing colour token surfaces as a `TokenConflict` (rename / skip / overwrite)                                                                                                                                                        |
+| **Fonts**              | Self-hosted `@font-face` families with at least one bundled file, plus trusted Google CSS2 imports | `buildFontFamilies` in `assetPlan.ts` picks the best bundled format (woff2 → woff → ttf → otf); `extractGoogleFontImports` turns Google CSS2 `@import` rules into install requests. Commit uploads custom files via `tx.addFonts`, installs Google families through the CMS Google-font installer, then merges those returned `FontEntry` records via `tx.addInstalledFonts`                                                                                                                                                                                                                                               |
+| **Font tokens**        | Root `--font-*` variables with font-family stacks                                                  | `extractRootFontTokens` pulls them into `ImportFontToken[]`; committed via `tx.addFontTokens` after fonts so matching imported families can be assigned. A `--font-*` that collides with an existing font token surfaces as a `TokenConflict` (rename / skip / overwrite)                                                                                                                                                                                                                                                                                                                                                  |
+| **Scripts**            | Executable inline scripts and JS files linked by imported HTML                                     | Preserved in source order and committed via `tx.addScripts` with page scope from the source HTML. Classic scripts remain plain `<script>` assets and bypass bundling; `type="module"` scripts keep module semantics. Module imports from known npm CDNs (`esm.sh`, `esm.run`, `unpkg`, jsDelivr npm URLs) are rewritten to bare package specifiers and recorded as runtime dependencies, so `https://esm.sh/@motion.page/sdk@1.2.4` becomes `@motion.page/sdk` plus `@motion.page/sdk: 1.2.4` in `packageJson.dependencies`. Non-executable script data such as `application/json`, import maps, and templates is skipped. |
+| **Stylesheets (kept)** | Top-level linked sheets the user opted into `mode: 'file'`                                         | Flattened `@import` graph, Google imports stripped, `url()` normalised; committed via `tx.addStylesheets` as a `SiteFile` (`type: 'style'`) + `site.runtime.styles` entry scoped to the linking pages. Editable afterwards in the Site panel's Styles section and the code editor.                                                                                                                                                                                                                                                                                                                                         |
 
 ---
 
@@ -211,16 +211,16 @@ interface ImportScript {
 
 `cssToStyleRules` parses a CSS file using the browser's native `CSSStyleSheet.replaceSync()`.
 
-| Source rule | Stored as |
-|---|---|
-| `.foo { … }` (single class) | `StyleRule{ kind:'class', name:'foo', selector:'.foo' }` |
-| `h1`, `body`, `a:hover`, `.hero .title` | `StyleRule{ kind:'ambient', selector: verbatim }` |
-| `@media ... { … }` | Merged into a matching viewport context's `contextStyles` when it matches a configured media query (or an older/default max-width threshold); otherwise preserved as a reusable media condition |
-| Unconditional local `@import "file.css"` | Followed recursively from the linked stylesheet; the imported file keeps its own source path so relative `url(...)` assets resolve correctly |
-| Trusted Google CSS2 `@import` | Parsed into `ImportGoogleFont` install requests and committed as self-hosted installed font entries |
-| `@keyframes` | Stored as a supported ambient raw CSS rule and emitted globally by the publisher after its raw-keyframes safety gate |
-| Conditional local `@import`, arbitrary external `@import`, `@layer` | Dropped; source text added to `droppedAtRules`; a `dropped-at-rule` warning emitted when surfaced by the CSS engine |
-| `@font-face` | Captured as `ParsedFontFace`; resolved into `ImportFontFamily` by `buildAssetPlan` |
+| Source rule                                                         | Stored as                                                                                                                                                                                       |
+| ------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `.foo { … }` (single class)                                         | `StyleRule{ kind:'class', name:'foo', selector:'.foo' }`                                                                                                                                        |
+| `h1`, `body`, `a:hover`, `.hero .title`                             | `StyleRule{ kind:'ambient', selector: verbatim }`                                                                                                                                               |
+| `@media ... { … }`                                                  | Merged into a matching viewport context's `contextStyles` when it matches a configured media query (or an older/default max-width threshold); otherwise preserved as a reusable media condition |
+| Unconditional local `@import "file.css"`                            | Followed recursively from the linked stylesheet; the imported file keeps its own source path so relative `url(...)` assets resolve correctly                                                    |
+| Trusted Google CSS2 `@import`                                       | Parsed into `ImportGoogleFont` install requests and committed as self-hosted installed font entries                                                                                             |
+| `@keyframes`                                                        | Stored as a supported ambient raw CSS rule and emitted globally by the publisher after its raw-keyframes safety gate                                                                            |
+| Conditional local `@import`, arbitrary external `@import`, `@layer` | Dropped; source text added to `droppedAtRules`; a `dropped-at-rule` warning emitted when surfaced by the CSS engine                                                                             |
+| `@font-face`                                                        | Captured as `ParsedFontFace`; resolved into `ImportFontFamily` by `buildAssetPlan`                                                                                                              |
 
 ---
 
@@ -243,7 +243,7 @@ A multi-page site typically links one stylesheet per page, and those stylesheets
 
 Resolutions apply in `applyCrossSheetClassResolutions` (via `applyConflictResolutions`, before site-vs-import rule conflicts):
 
-- **rename** — the divergent definition is materialised as ONE class rule under the new name carrying the cascade-merged declarations; the affected cascades' exclusive class fragments for the old name are dropped, class tokens in their exclusive ambient selectors follow the rename, and the affected pages' node class tokens move to the new name. Fragments in stylesheets *shared* with a kept cascade stay put (they also feed the kept definition; their declarations are still present in the materialised rule).
+- **rename** — the divergent definition is materialised as ONE class rule under the new name carrying the cascade-merged declarations; the affected cascades' exclusive class fragments for the old name are dropped, class tokens in their exclusive ambient selectors follow the rename, and the affected pages' node class tokens move to the new name. Fragments in stylesheets _shared_ with a kept cascade stay put (they also feed the kept definition; their declarations are still present in the materialised rule).
 - **skip** — keep the first definition: the divergent cascades' exclusive fragments are dropped and their pages bind to the kept definition by name.
 - **overwrite** — this definition wins the bare name: every OTHER cascade's exclusive fragments for it are dropped.
 
@@ -267,12 +267,14 @@ The escape hatch for "this sheet's resets/styles must not leak into other pages 
 Page slugs can be slash-delimited public paths. Root `index.html` stays the homepage slug `index`; nested `index.html` files use their directory route, so `documentation/index.html` imports as `/documentation` and does not collide with `download-version/index.html`.
 
 Each conflict has a `defaultResolution`:
+
 - `auto-rename` — append `-2` (or `-3`, `-4`, …) until unique. This is the default.
 - `overwrite` — replace the existing page / rule / token value.
 - `skip` — do not import this item.
 - `custom-rename` — the user typed a new slug / class / token variable.
 
 `applyConflictResolutions(plan, pageResolutions, ruleResolutions, tokenResolutions)` applies the resolutions to the plan:
+
 - Page renames update the slug; rule renames update the `name` + `selector` and remap `classIds` on nodes.
 - **Token renames** rename the imported token in `plan.colors` / `plan.fontTokens` AND rewrite every `var(--old)` → `var(--new)` reference across the imported style rules (`styles` + `contextStyles`) and node `inlineStyles`, so the imported design keeps resolving to its own token instead of silently binding to the pre-existing same-named one (fallbacks like `var(--x, serif)` are preserved).
 - **Token skip** drops the imported token (references keep the old name and bind to the existing token).
@@ -286,9 +288,9 @@ The conflict wizard renders bulk controls in each of the three conflict categori
 
 ## Atomicity
 
-| Phase | Guarantee |
-|---|---|
-| Asset uploads (Step A) | Network, not reversible. Per-asset failures are caught, recorded as `asset-upload-failed` warnings, and the import continues. Orphaned uploads are harmless — left in the media library for manual cleanup. |
+| Phase                   | Guarantee                                                                                                                                                                                                                             |
+| ----------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Asset uploads (Step A)  | Network, not reversible. Per-asset failures are caught, recorded as `asset-upload-failed` warnings, and the import continues. Orphaned uploads are harmless — left in the media library for manual cleanup.                           |
 | Store mutation (Step C) | Single `adapter.commit` call. The admin adapter wraps it in one `mutateAllPagesAndSite` call — one patch-based undo entry. Cmd+Z reverts pages, style rules, stylesheet files, fonts, color tokens, and scripts together in one step. |
 
 ---
@@ -304,6 +306,7 @@ The modal is mounted once at the authenticated admin shell (`AuthenticatedAdmin.
 **CMS bundle review** — shown when the dropped archive validates as an Instatic transfer archive. The wizard reads only the manifest for preview, calls `previewSiteBundle` to render a diff against the local site, then lets the user pick `replace`, `merge-add`, or `merge-overwrite` and include/exclude the shell, rows, media, folders, and redirects. Continue routes through the same Conflicts and Import steps as static import. Commit calls `importSiteBundleArchive` with the original ZIP `File`, so media assets stream through `/admin/api/cms/import/archive` instead of expanding into browser memory.
 
 **Analyze (Review)** — category navigator. Left column: one nav entry per import category with its count and include-toggle, plus "Add more files" (files can be added at any point — re-ingests and rebuilds the plan) and a "Can't import" entry for skipped items. Right pane: detail view per category:
+
 - **Pages** — checkbox + inline slug editor per page.
 - **Style rules** — a per-stylesheet mode picker first (each top-level linked sheet: "Editable style rules" vs "Keep as stylesheet"; flipping a mode synchronously rebuilds the plan), then converted rules grouped by source stylesheet with a search bar and per-rule checkboxes. Groups up to 60 rules expanded; remaining are collapsed into "+N more". Kept sheets show as a single row with an include checkbox and their page scope.
 - **Media** — tiles grouped by MIME class (Images / SVG / GIF / Video / Other) with a per-group Switch.
@@ -322,28 +325,28 @@ On success the same step switches to its **complete** state — a success mark, 
 
 ## Warning kinds
 
-| Kind | When emitted |
-|---|---|
-| `dropped-at-rule` | An unsupported at-rule such as `@layer`, conditional local `@import`, or arbitrary external `@import` was present but cannot be modelled |
-| `unmatched-media-query` | Legacy warning kind retained for old import reports; current imports preserve unmatched `@media` blocks as reusable conditions |
-| `invalid-rule` | A CSS rule caused `replaceSync` to throw (sheet-level parse error) |
-| `blocked-property` | A CSS property name is on the security denylist (`behavior`, `-moz-binding`, …) — declaration dropped |
-| `duplicate-class` | Two `.foo {}` rules in the same file; later declarations win |
-| `missing-stylesheet` | A `<link rel="stylesheet">` href was not found in the FileMap |
-| `asset-upload-failed` | An individual asset upload was rejected by the server; the original FileMap path remains in the import |
-| `external-font` | An `@font-face` with no bundled file (all `src` entries are external URLs) — skipped |
+| Kind                    | When emitted                                                                                                                             |
+| ----------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| `dropped-at-rule`       | An unsupported at-rule such as `@layer`, conditional local `@import`, or arbitrary external `@import` was present but cannot be modelled |
+| `unmatched-media-query` | Legacy warning kind retained for old import reports; current imports preserve unmatched `@media` blocks as reusable conditions           |
+| `invalid-rule`          | A CSS rule caused `replaceSync` to throw (sheet-level parse error)                                                                       |
+| `blocked-property`      | A CSS property name is on the security denylist (`behavior`, `-moz-binding`, …) — declaration dropped                                    |
+| `duplicate-class`       | Two `.foo {}` rules in the same file; later declarations win                                                                             |
+| `missing-stylesheet`    | A `<link rel="stylesheet">` href was not found in the FileMap                                                                            |
+| `asset-upload-failed`   | An individual asset upload was rejected by the server; the original FileMap path remains in the import                                   |
+| `external-font`         | An `@font-face` with no bundled file (all `src` entries are external URLs) — skipped                                                     |
 
 ---
 
 ## Forbidden patterns
 
-| Pattern | Use instead |
-|---|---|
-| Importing from `src/core/siteImport/` deep paths outside the module | Use the barrel: `import { buildImportPlan } from '@core/siteImport'` |
-| Adding React, admin, or server imports to any file in `src/core/siteImport/` | Keep the pipeline headless; gated by `siteImport-headless.test.ts` |
-| Using `as Foo` at a boundary instead of the TypeBox schema | All boundaries use `readValidatedBody` / TypeBox schemas |
-| Silent empty `catch (_err)` in the commit loop | Per-asset failures emit an `asset-upload-failed` warning and continue |
-| Calling `commitImportPlan` without running `buildImportPlan` first | The plan's `styleRuleSources`, `conflicts`, and `droppedAtRules` fields are required by the wizard |
+| Pattern                                                                      | Use instead                                                                                        |
+| ---------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------- |
+| Importing from `src/core/siteImport/` deep paths outside the module          | Use the barrel: `import { buildImportPlan } from '@core/siteImport'`                               |
+| Adding React, admin, or server imports to any file in `src/core/siteImport/` | Keep the pipeline headless; gated by `siteImport-headless.test.ts`                                 |
+| Using `as Foo` at a boundary instead of the TypeBox schema                   | All boundaries use `readValidatedBody` / TypeBox schemas                                           |
+| Silent empty `catch (_err)` in the commit loop                               | Per-asset failures emit an `asset-upload-failed` warning and continue                              |
+| Calling `commitImportPlan` without running `buildImportPlan` first           | The plan's `styleRuleSources`, `conflicts`, and `droppedAtRules` fields are required by the wizard |
 
 ---
 

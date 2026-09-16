@@ -79,20 +79,20 @@ Use the in-house router for every internal admin navigation, including links ren
 
 The route table (`src/admin/router.tsx`):
 
-| Path                                    | Component shorthand               |
-|-----------------------------------------|-----------------------------------|
-| `/` → redirect to `/admin/dashboard`    | `<Navigate />`                    |
-| `/admin` → redirect to `/admin/dashboard` | `<Navigate />`                  |
-| `/admin/dashboard`                      | `<AdminEntry section="dashboard" />` |
-| `/admin/site`                           | `<AdminEntry section="site" />` (the editor) |
-| `/admin/content`                        | `<AdminEntry section="content" />` |
-| `/admin/data`                           | `<AdminEntry section="data" />`  |
-| `/admin/media`                          | `<AdminEntry section="media" />` |
-| `/admin/plugins`                        | `<AdminEntry section="plugins" />` |
-| `/admin/users`                          | `<AdminEntry section="users" />` |
-| `/admin/ai`                             | `<AdminEntry section="ai" />` (AI credentials, models, defaults) |
-| `/admin/account`                        | `<AdminEntry section="account" />` |
-| `/admin/plugins/:pluginId/:pageId`      | `<AdminEntry section="pluginPage" />` |
+| Path                                      | Component shorthand                                              |
+| ----------------------------------------- | ---------------------------------------------------------------- |
+| `/` → redirect to `/admin/dashboard`      | `<Navigate />`                                                   |
+| `/admin` → redirect to `/admin/dashboard` | `<Navigate />`                                                   |
+| `/admin/dashboard`                        | `<AdminEntry section="dashboard" />`                             |
+| `/admin/site`                             | `<AdminEntry section="site" />` (the editor)                     |
+| `/admin/content`                          | `<AdminEntry section="content" />`                               |
+| `/admin/data`                             | `<AdminEntry section="data" />`                                  |
+| `/admin/media`                            | `<AdminEntry section="media" />`                                 |
+| `/admin/plugins`                          | `<AdminEntry section="plugins" />`                               |
+| `/admin/users`                            | `<AdminEntry section="users" />`                                 |
+| `/admin/ai`                               | `<AdminEntry section="ai" />` (AI credentials, models, defaults) |
+| `/admin/account`                          | `<AdminEntry section="account" />`                               |
+| `/admin/plugins/:pluginId/:pageId`        | `<AdminEntry section="pluginPage" />`                            |
 
 Every route is wrapped with `withRouteBoundary(...)` → `<ErrorBoundary location="admin-route" resetKeys={[pathname]}>` and `<Suspense fallback={<AppLoadingScreen />}>`. The error boundary resets when the pathname changes so a broken route never strands the user.
 
@@ -116,7 +116,7 @@ Captures the `URLSearchParams` present at first mount using a `useState` lazy in
 
 ```ts
 const initialParams = useInitialQueryParams()
-const pageSlug = initialParams.get('page')  // read once on load
+const pageSlug = initialParams.get('page') // read once on load
 ```
 
 ### `useUrlQuerySync(params, options?)`
@@ -138,14 +138,14 @@ useUrlQuerySync(
 
 ### URL contract per workspace
 
-| Workspace | URL form | Notes |
-|-----------|----------|-------|
-| **Site editor** | `/admin/site` | Home page (slug `index`); bare URL is canonical — no `?page=` written |
-| **Site editor** | `/admin/site?page=<slug>` | Opens the page with that slug |
-| **Site editor** | `/admin/site?table=pages&row=<rowId>` | Cross-workspace deep link from Data workspace; normalized to `?page=<slug>` after consume |
-| **Site editor** | `/admin/site?table=components&row=<rowId>` | Opens the Visual Component with that id; normalized after consume |
-| **Content** | `/admin/content?table=<collectionSlug>&row=<rowId>` | Opens the collection and entry |
-| **Data** | `/admin/data?table=<tableSlug>&row=<rowId>` | Opens the table and row |
+| Workspace       | URL form                                            | Notes                                                                                     |
+| --------------- | --------------------------------------------------- | ----------------------------------------------------------------------------------------- |
+| **Site editor** | `/admin/site`                                       | Home page (slug `index`); bare URL is canonical — no `?page=` written                     |
+| **Site editor** | `/admin/site?page=<slug>`                           | Opens the page with that slug                                                             |
+| **Site editor** | `/admin/site?table=pages&row=<rowId>`               | Cross-workspace deep link from Data workspace; normalized to `?page=<slug>` after consume |
+| **Site editor** | `/admin/site?table=components&row=<rowId>`          | Opens the Visual Component with that id; normalized after consume                         |
+| **Content**     | `/admin/content?table=<collectionSlug>&row=<rowId>` | Opens the collection and entry                                                            |
+| **Data**        | `/admin/data?table=<tableSlug>&row=<rowId>`         | Opens the table and row                                                                   |
 
 ### Site editor URL sync — `useSiteEditorUrlSync`
 
@@ -174,11 +174,11 @@ Sensitive actions (delete user, revoke another device, sign out all devices) req
 
 Every admin page picks one of three root layouts from `src/admin/layouts/`. Import directly from the per-layout path so rolldown can split them into separate chunks (there is deliberately no barrel).
 
-| Layout | Used by | Bundle contract |
-|---|---|---|
-| `AdminCanvasLayout` | Site editor (`SitePage`) | Site shell — toolbar/chrome, persistence, editor store, and a post-paint lazy boundary for the heavy body. |
-| `AdminWorkspaceCanvasLayout` | Content, Data, Media | Canvas chrome (toolbar, sidebar, full-height canvas) WITHOUT site-only modules (no editor store, PropertiesPanel, DnD, or CodeMirror). |
-| `AdminPageLayout` | Plugins, Users, Account, plugin admin pages | Lightweight — toolbar + centered scrollable page body. **Must not import the editor store.** Site name and favicon come from `useSiteSummary` + the `adminUi` Zustand store. |
+| Layout                       | Used by                                     | Bundle contract                                                                                                                                                              |
+| ---------------------------- | ------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `AdminCanvasLayout`          | Site editor (`SitePage`)                    | Site shell — toolbar/chrome, persistence, editor store, and a post-paint lazy boundary for the heavy body.                                                                   |
+| `AdminWorkspaceCanvasLayout` | Content, Data, Media                        | Canvas chrome (toolbar, sidebar, full-height canvas) WITHOUT site-only modules (no editor store, PropertiesPanel, DnD, or CodeMirror).                                       |
+| `AdminPageLayout`            | Plugins, Users, Account, plugin admin pages | Lightweight — toolbar + centered scrollable page body. **Must not import the editor store.** Site name and favicon come from `useSiteSummary` + the `adminUi` Zustand store. |
 
 `AdminCanvasLayout` keeps the real editor shell mounted while `usePersistence()` loads the draft site document. In production it renders the toolbar/chrome first and lazy-loads `AdminCanvasEditorBody` after paint. The body owns the permanent rail, sidebars, canvas, DnD context, `ConfirmDeleteProvider`, `CodeEditorPanel`, first-party module registration, and loop-source registration. Rare modal surfaces such as `ImportHtmlModal` stay behind their own open-state lazy boundary inside the body. Loading states use the same local skeleton vocabulary: the editor-body lazy fallback and the canvas no-site fallback both render `CanvasFrameSkeletonFrame`, and sidebars use compact skeleton rows or blocks. Once the document is in the store, every breakpoint frame mounts immediately — the tree is already in memory, so there is nothing to stagger.
 
@@ -304,16 +304,16 @@ Organization is persisted in `site.explorer` on the site shell. Folders are deco
 
 **Store actions** on `siteSlice` for explorer management:
 
-| Action | Effect |
-|---|---|
-| `createExplorerFolder(sectionId, name)` | Creates a folder in the given section, returns the new folder id |
-| `renameExplorerFolder(sectionId, folderId, name)` | Renames a folder |
-| `deleteExplorerFolder(sectionId, folderId)` | Deletes a folder; items that were inside it move to the section root |
-| `moveExplorerFolder(sectionId, folderId, nextIndex)` | Reorders a folder within the root level |
-| `moveExplorerItem(sectionId, itemId, parentFolderId, nextIndex)` | Moves an item to a folder or the root; the homepage cannot be moved |
-| `setPageAsHomepage(pageId)` | Promotes a page to `slug='index'`, demotes the previous homepage to a generated slug, pins the new homepage at the section root |
-| `convertPageToTemplate(pageId, payload)` | Sets `page.template` config; moves the row from Pages to Templates section in the explorer |
-| `convertTemplateToPage(pageId)` | Clears `page.template` and strips `dynamicBindings` from all nodes; moves the row back to Pages |
+| Action                                                           | Effect                                                                                                                          |
+| ---------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------- |
+| `createExplorerFolder(sectionId, name)`                          | Creates a folder in the given section, returns the new folder id                                                                |
+| `renameExplorerFolder(sectionId, folderId, name)`                | Renames a folder                                                                                                                |
+| `deleteExplorerFolder(sectionId, folderId)`                      | Deletes a folder; items that were inside it move to the section root                                                            |
+| `moveExplorerFolder(sectionId, folderId, nextIndex)`             | Reorders a folder within the root level                                                                                         |
+| `moveExplorerItem(sectionId, itemId, parentFolderId, nextIndex)` | Moves an item to a folder or the root; the homepage cannot be moved                                                             |
+| `setPageAsHomepage(pageId)`                                      | Promotes a page to `slug='index'`, demotes the previous homepage to a generated slug, pins the new homepage at the section root |
+| `convertPageToTemplate(pageId, payload)`                         | Sets `page.template` config; moves the row from Pages to Templates section in the explorer                                      |
+| `convertTemplateToPage(pageId)`                                  | Clears `page.template` and strips `dynamicBindings` from all nodes; moves the row back to Pages                                 |
 
 **DnD architecture:** Organization drag-and-drop (`useSiteExplorerDnd`) uses `useDndMonitor` to hook into the outer `DndContext` that lives in `AdminCanvasEditorBody`. The explorer DnD hook only reacts to `siteExplorerItem` / `siteExplorerFolder` drags, which keeps Site Explorer focused on opening and organizing site artifacts rather than inserting components onto the canvas.
 
@@ -329,20 +329,20 @@ Organization is persisted in `site.explorer` on the site shell. Folders are deco
 
 The store is composed of **12 slices**, each created by a factory in `store/slices/`:
 
-| Slice                  | Owns                                                                       |
-|------------------------|----------------------------------------------------------------------------|
-| `siteSlice`            | `SiteDocument` (pages, nodes, breakpoints, settings, classes, files). The page tree itself. |
-| `selectionSlice`       | `selectedNodeId`, `hoveredNodeId`                                          |
-| `canvasSlice`          | Zoom, pan, `activeBreakpointId`, `activeConditionId`, `canvasMode` ('select'|'pan'|'insert'), `canvasView` ('design'|'live'), `runScripts` |
-| `uiSlice`              | Site editor panel visibility, unsaved-changes flag, insert picker, `componentizeEditorRequest` |
-| `classSlice`           | Style-rule CRUD, node ↔ class assignment, ambient selector creation         |
-| `filesSlice`           | `SiteFile` CRUD                                                            |
-| `visualComponentsSlice`| Visual Component CRUD                                                      |
-| `settingsSlice`        | Settings modal open/close + active section                                 |
-| `agentSlice`           | AI Agent Panel state + streaming                                           |
-| `sitePanelSlice`       | Dependency manifest + site runtime settings                                |
-| `clipboardSlice`       | Copy / cut / paste of layer subtrees, persisted editor-wide                |
-| `inlineEditSlice`      | `activeInlineEdit` — the canvas inline text-edit session (double-click to edit) |
+| Slice                   | Owns                                                                                           |
+| ----------------------- | ---------------------------------------------------------------------------------------------- |
+| `siteSlice`             | `SiteDocument` (pages, nodes, breakpoints, settings, classes, files). The page tree itself.    |
+| `selectionSlice`        | `selectedNodeId`, `hoveredNodeId`                                                              |
+| `canvasSlice`           | Zoom, pan, `activeBreakpointId`, `activeConditionId`, `canvasMode` ('select'                   | 'pan' | 'insert'), `canvasView` ('design' | 'live'), `runScripts` |
+| `uiSlice`               | Site editor panel visibility, unsaved-changes flag, insert picker, `componentizeEditorRequest` |
+| `classSlice`            | Style-rule CRUD, node ↔ class assignment, ambient selector creation                            |
+| `filesSlice`            | `SiteFile` CRUD                                                                                |
+| `visualComponentsSlice` | Visual Component CRUD                                                                          |
+| `settingsSlice`         | Settings modal open/close + active section                                                     |
+| `agentSlice`            | AI Agent Panel state + streaming                                                               |
+| `sitePanelSlice`        | Dependency manifest + site runtime settings                                                    |
+| `clipboardSlice`        | Copy / cut / paste of layer subtrees, persisted editor-wide                                    |
+| `inlineEditSlice`       | `activeInlineEdit` — the canvas inline text-edit session (double-click to edit)                |
 
 The combined `EditorStore` type lives at `store/types.ts` so each slice can import it without going through `store.ts` (this eliminates the historical store ↔ slice cycles).
 
@@ -354,8 +354,9 @@ The store routes mutations to the **active tree** (page in page-mode, VC in VC-m
 
 ```ts
 function mutateActiveTree(fn: (tree: NodeTree<PageNode>) => void): void {
-  if (mode === 'page')   fn(activePage)            // Page IS NodeTree<PageNode>
-  else                   fn(vc.tree as NodeTree<PageNode>)  // structurally identical cast
+  if (mode === 'page')
+    fn(activePage) // Page IS NodeTree<PageNode>
+  else fn(vc.tree as NodeTree<PageNode>) // structurally identical cast
 }
 ```
 
@@ -421,13 +422,13 @@ Double-clicking a node whose module declares `inlineTextEdit` (`base.text`, `bas
 
 Each iframe `<head>` receives five `<style>` elements (three from `ClassStyleInjector`, one each from the others), in this order:
 
-| Element | Injector | Cascade layer | Contents |
-|---|---|---|---|
-| `<style id="instatic-editor-chrome">` | `EditorChromeInjector` | **unlayered** | Editor-only chrome: placeholder, slot-instance, list placeholder, unknown-module fallback |
-| `<style id="mc-classes">` | `ClassStyleInjector` | `@layer user-authored` | Publisher reset + framework CSS + class registry CSS |
-| `<style id="mc-classes-preview">` | `ClassStyleInjector` | `@layer user-authored` | Higher-specificity preview rule while a property control is hovered; empty for state-pseudo rules |
-| `<style id="mc-classes-force-state">` | `ClassStyleInjector` | `@layer user-authored` | Forced state preview: paints the active state-pseudo rule onto the selected node via a doubled `[data-node-id]` selector |
-| `<style id="mc-user-styles">` | `UserStylesheetInjector` | `@layer user-authored` | User-uploaded stylesheets (verbatim, unscoped) |
+| Element                               | Injector                 | Cascade layer          | Contents                                                                                                                 |
+| ------------------------------------- | ------------------------ | ---------------------- | ------------------------------------------------------------------------------------------------------------------------ |
+| `<style id="instatic-editor-chrome">` | `EditorChromeInjector`   | **unlayered**          | Editor-only chrome: placeholder, slot-instance, list placeholder, unknown-module fallback                                |
+| `<style id="mc-classes">`             | `ClassStyleInjector`     | `@layer user-authored` | Publisher reset + framework CSS + class registry CSS                                                                     |
+| `<style id="mc-classes-preview">`     | `ClassStyleInjector`     | `@layer user-authored` | Higher-specificity preview rule while a property control is hovered; empty for state-pseudo rules                        |
+| `<style id="mc-classes-force-state">` | `ClassStyleInjector`     | `@layer user-authored` | Forced state preview: paints the active state-pseudo rule onto the selected node via a doubled `[data-node-id]` selector |
+| `<style id="mc-user-styles">`         | `UserStylesheetInjector` | `@layer user-authored` | User-uploaded stylesheets (verbatim, unscoped)                                                                           |
 
 The **unlayered-vs-layered** split is the cascade isolation mechanism: CSS rules outside any `@layer` always beat rules inside `@layer`-d blocks, regardless of specificity. Author CSS (both the class registry and user stylesheets) goes into `@layer user-authored`, so it can never override the editor chrome even with a high-specificity selector.
 
@@ -443,69 +444,69 @@ Why this matters: selection rings and the floating selection toolbar are portale
 
 **Editor layout z-index table** (shared context, outside the canvas):
 
-| Element                               | z-index | File |
-|---------------------------------------|---------|------|
-| Canvas (CanvasRoot, isolation root)   | 0       | `canvas/CanvasRoot.module.css` |
-| Toolbar (main bar)                    | 30      | `toolbar/Toolbar.module.css` |
-| PropertiesPanel (floating)            | 50      | `panels/PropertiesPanel/PropertiesPanel.module.css` |
-| AgentPanel (floating)                 | 50      | `panels/AgentPanel/AgentPanel.module.css` |
-| PanelRail                             | 55      | `sidebars/PanelRail/PanelRail.module.css` |
-| LeftSidebar, RightSidebar             | 85      | `sidebars/{Left,Right}Sidebar/` |
-| CodeEditorPanel (floats over sidebars)| 95      | `code-editor/CodeEditorPanel.module.css` |
-| Toolbar popovers / dropdowns          | 201     | `toolbar/Toolbar.module.css` |
-| PreviewOverlay                        | 400–401 | `preview/PreviewOverlay.module.css` |
+| Element                                | z-index | File                                                |
+| -------------------------------------- | ------- | --------------------------------------------------- |
+| Canvas (CanvasRoot, isolation root)    | 0       | `canvas/CanvasRoot.module.css`                      |
+| Toolbar (main bar)                     | 30      | `toolbar/Toolbar.module.css`                        |
+| PropertiesPanel (floating)             | 50      | `panels/PropertiesPanel/PropertiesPanel.module.css` |
+| AgentPanel (floating)                  | 50      | `panels/AgentPanel/AgentPanel.module.css`           |
+| PanelRail                              | 55      | `sidebars/PanelRail/PanelRail.module.css`           |
+| LeftSidebar, RightSidebar              | 85      | `sidebars/{Left,Right}Sidebar/`                     |
+| CodeEditorPanel (floats over sidebars) | 95      | `code-editor/CodeEditorPanel.module.css`            |
+| Toolbar popovers / dropdowns           | 201     | `toolbar/Toolbar.module.css`                        |
+| PreviewOverlay                         | 400–401 | `preview/PreviewOverlay.module.css`                 |
 
 **Canvas-internal z-index table** (all confined inside the `z-index: 0` canvas context):
 
-| Element                               | z-index           |
-|---------------------------------------|-------------------|
-| PluginCanvasOverlayLayer              | 50                |
-| Selection ring, hover ring, selection toolbar | 51        |
-| Alt/Option inspect ladder             | 52                |
-| CanvasNotch                           | 53                |
-| CanvasModeToggle                      | 53                |
-| CanvasContextSelector                 | 60                |
-| TemplateModeControl / VisualComponentModeControl | 200      |
-| Drop-indicator inside iframe          | 2147483647 (max)  |
+| Element                                          | z-index          |
+| ------------------------------------------------ | ---------------- |
+| PluginCanvasOverlayLayer                         | 50               |
+| Selection ring, hover ring, selection toolbar    | 51               |
+| Alt/Option inspect ladder                        | 52               |
+| CanvasNotch                                      | 53               |
+| CanvasModeToggle                                 | 53               |
+| CanvasContextSelector                            | 60               |
+| TemplateModeControl / VisualComponentModeControl | 200              |
+| Drop-indicator inside iframe                     | 2147483647 (max) |
 
 Canvas-internal values are not CSS tokens — they are raw integers intentionally scoped to the canvas stacking context and isolated from the layout stacking context by the `z-index: 0` on `CanvasRoot`.
 
 ### Key canvas files
 
-| File                            | Owns                                                            |
-|---------------------------------|-----------------------------------------------------------------|
-| `CanvasRoot.tsx`                | Top-level canvas mount                                          |
-| `BreakpointFrame.tsx`           | One iframe per active breakpoint                                |
-| `IframeFrameSurface.tsx`        | The iframe element + portal + style injectors                   |
-| `EditorChromeInjector.tsx`      | Unlayered editor-chrome CSS into each iframe head               |
-| `ClassStyleInjector.tsx`        | Class registry + publisher reset CSS into each iframe head      |
-| `UserStylesheetInjector.tsx`    | User-uploaded CSS into each iframe head                         |
-| `NodeRenderer.tsx`              | Renders a single node and its children inside the iframe        |
-| `CanvasTransformLayer.tsx`      | Zoom + pan transform (design view)                              |
-| `CanvasLiveSurface.tsx`         | "Live" view — single real-size editable frame, normal scroll    |
-| `RuntimeScriptInjector.tsx`     | Injects bundled runtime scripts into an editable iframe         |
-| `CanvasNotch.tsx`               | Top-center chrome: history controls + favorite insert shortcuts; peek mode in live view |
-| `CanvasModeToggle.tsx`          | Design/Live view toggle + Run-scripts toggle + breakpoint switch; peek mode in live view |
-| `CanvasContextSelector.tsx`     | Editing-context switcher: viewports + custom conditions (@media/@container/@supports) |
-| `CanvasLayerContextMenu.tsx`    | Right-click on a layer                                          |
-| `canvasDnd.ts`                  | Drag-and-drop (insert / move / wrap)                            |
-| `canvasDomGeometry.ts`          | Cross-iframe DOM measurement; `panToCenterBreakpointFrame` viewport centering geometry |
-| `canvasOverlayGeometry.ts`      | Cross-iframe element rect → canvas-root coords; overlay rect union |
-| `canvasSelectionUtils.ts`       | Selection helpers                                               |
-| `BreakpointSelectionOverlay.tsx`| Selection / hover rings, selection toolbar, inspect ladder integration |
-| `CanvasInsertModuleButton.tsx`  | "Insert module" button in the canvas selection toolbar — opens `ModuleInserterDialog` |
-| `canvasTreeLadder.ts`           | Alt/Option inspect ladder tree model                            |
-| `CanvasTreeLadderOverlay.tsx`   | `useCanvasTreeLadderOverlay` — wires the ladder model to canvas events and portal |
-| `CanvasTreeLadderRowButton.tsx` | Single row button in the Alt/Option inspect ladder              |
-| `useCanvas.ts`                  | Pan/zoom gesture hook; `centerOnBreakpointFrame` for initial viewport focus |
-| `useCanvasKeyboardShortcuts.ts` | Editor keyboard shortcuts (delete, duplicate, wrap, …)          |
-| `useRuntimeScriptBuild.ts`      | Builds the bundled runtime scripts for the Run-scripts toggle    |
-| `useIframeCursorBridge.ts`      | Bridges iframe-native cursor movement to parent-doc callbacks (used by breakpoint activation tooltip) |
-| `CanvasComposedTree.tsx`        | Renders the active document inside its matching template chain (wrappers read-only, active doc editable) |
-| `canvasComposition.ts`          | `resolveEditorWrapperTemplates` — editor-side mirror of `resolveTemplateChain` for canvas wrapping |
-| `DocumentSwitcher.tsx`          | Compact grouped dropdown (Pages / Templates / Components) for jumping to any other document — shared by `TemplateModeControl` and `VisualComponentModeControl` |
-| `TemplateModeControl.tsx`       | Floating control shown while editing a template: document switcher + preview-source selector |
-| `VisualComponentModeControl.tsx`| Floating control shown while editing a Visual Component: "Back to page" exit + document switcher |
+| File                             | Owns                                                                                                                                                           |
+| -------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `CanvasRoot.tsx`                 | Top-level canvas mount                                                                                                                                         |
+| `BreakpointFrame.tsx`            | One iframe per active breakpoint                                                                                                                               |
+| `IframeFrameSurface.tsx`         | The iframe element + portal + style injectors                                                                                                                  |
+| `EditorChromeInjector.tsx`       | Unlayered editor-chrome CSS into each iframe head                                                                                                              |
+| `ClassStyleInjector.tsx`         | Class registry + publisher reset CSS into each iframe head                                                                                                     |
+| `UserStylesheetInjector.tsx`     | User-uploaded CSS into each iframe head                                                                                                                        |
+| `NodeRenderer.tsx`               | Renders a single node and its children inside the iframe                                                                                                       |
+| `CanvasTransformLayer.tsx`       | Zoom + pan transform (design view)                                                                                                                             |
+| `CanvasLiveSurface.tsx`          | "Live" view — single real-size editable frame, normal scroll                                                                                                   |
+| `RuntimeScriptInjector.tsx`      | Injects bundled runtime scripts into an editable iframe                                                                                                        |
+| `CanvasNotch.tsx`                | Top-center chrome: history controls + favorite insert shortcuts; peek mode in live view                                                                        |
+| `CanvasModeToggle.tsx`           | Design/Live view toggle + Run-scripts toggle + breakpoint switch; peek mode in live view                                                                       |
+| `CanvasContextSelector.tsx`      | Editing-context switcher: viewports + custom conditions (@media/@container/@supports)                                                                          |
+| `CanvasLayerContextMenu.tsx`     | Right-click on a layer                                                                                                                                         |
+| `canvasDnd.ts`                   | Drag-and-drop (insert / move / wrap)                                                                                                                           |
+| `canvasDomGeometry.ts`           | Cross-iframe DOM measurement; `panToCenterBreakpointFrame` viewport centering geometry                                                                         |
+| `canvasOverlayGeometry.ts`       | Cross-iframe element rect → canvas-root coords; overlay rect union                                                                                             |
+| `canvasSelectionUtils.ts`        | Selection helpers                                                                                                                                              |
+| `BreakpointSelectionOverlay.tsx` | Selection / hover rings, selection toolbar, inspect ladder integration                                                                                         |
+| `CanvasInsertModuleButton.tsx`   | "Insert module" button in the canvas selection toolbar — opens `ModuleInserterDialog`                                                                          |
+| `canvasTreeLadder.ts`            | Alt/Option inspect ladder tree model                                                                                                                           |
+| `CanvasTreeLadderOverlay.tsx`    | `useCanvasTreeLadderOverlay` — wires the ladder model to canvas events and portal                                                                              |
+| `CanvasTreeLadderRowButton.tsx`  | Single row button in the Alt/Option inspect ladder                                                                                                             |
+| `useCanvas.ts`                   | Pan/zoom gesture hook; `centerOnBreakpointFrame` for initial viewport focus                                                                                    |
+| `useCanvasKeyboardShortcuts.ts`  | Editor keyboard shortcuts (delete, duplicate, wrap, …)                                                                                                         |
+| `useRuntimeScriptBuild.ts`       | Builds the bundled runtime scripts for the Run-scripts toggle                                                                                                  |
+| `useIframeCursorBridge.ts`       | Bridges iframe-native cursor movement to parent-doc callbacks (used by breakpoint activation tooltip)                                                          |
+| `CanvasComposedTree.tsx`         | Renders the active document inside its matching template chain (wrappers read-only, active doc editable)                                                       |
+| `canvasComposition.ts`           | `resolveEditorWrapperTemplates` — editor-side mirror of `resolveTemplateChain` for canvas wrapping                                                             |
+| `DocumentSwitcher.tsx`           | Compact grouped dropdown (Pages / Templates / Components) for jumping to any other document — shared by `TemplateModeControl` and `VisualComponentModeControl` |
+| `TemplateModeControl.tsx`        | Floating control shown while editing a template: document switcher + preview-source selector                                                                   |
+| `VisualComponentModeControl.tsx` | Floating control shown while editing a Visual Component: "Back to page" exit + document switcher                                                               |
 
 ---
 
@@ -556,12 +557,12 @@ When an eligible node is selected on a page canvas (not root, not already a ref,
 
 Both sidebars animate open/close with `transition: flex-basis 180ms ease, width 180ms ease` (disabled under `prefers-reduced-motion: reduce`). The implementation uses a **two-variable pattern** to prevent content reflow during animation:
 
-| CSS variable | Value when closed | Value when open | Used for |
-|---|---|---|---|
-| `--left-sidebar-panel-width` | `0px` | saved panel width | Sidebar `flex-basis` / `width` (drives the animation) |
-| `--left-sidebar-panel-layout-width` | saved panel width | saved panel width | Panel slot `width` (stays constant; prevents reflow) |
-| `--right-sidebar-panel-width` | `0px` | saved panel width | Sidebar `flex-basis` / `width` |
-| `--right-sidebar-panel-layout-width` | saved panel width | saved panel width | Panel slot `width` |
+| CSS variable                         | Value when closed | Value when open   | Used for                                              |
+| ------------------------------------ | ----------------- | ----------------- | ----------------------------------------------------- |
+| `--left-sidebar-panel-width`         | `0px`             | saved panel width | Sidebar `flex-basis` / `width` (drives the animation) |
+| `--left-sidebar-panel-layout-width`  | saved panel width | saved panel width | Panel slot `width` (stays constant; prevents reflow)  |
+| `--right-sidebar-panel-width`        | `0px`             | saved panel width | Sidebar `flex-basis` / `width`                        |
+| `--right-sidebar-panel-layout-width` | saved panel width | saved panel width | Panel slot `width`                                    |
 
 The sidebar shell expands/collapses by animating `--*-panel-width`. The panel slot always stays at `--*-panel-layout-width` so text and controls inside it do not reflow during the animation.
 
@@ -581,7 +582,7 @@ The sidebar shell expands/collapses by animating `--*-panel-width`. The panel sl
 - `ModulePickerDropdown` — opens the module inserter modal
 - `OpenLivePageButton` (`src/admin/shared/OpenLivePageButton/`) — toolbar icon (always visible, not Site-editor-only) that opens the live site in a new tab. Target URL is read from `adminUi.activeLivePath`: active document's public path when an editor is open, site root (`/`) otherwise. Tooltip changes between "Open live page" (active path) and "Open live site" (null). Component stays outside `src/admin/pages/site/` so it mounts on every admin route without touching the editor graph.
 
-**Global trailer.** `Toolbar.tsx` renders a fixed trailer at the right end of every admin route, regardless of which layout mounted it or what the caller passes in `rightSlot`: `SettingsButton` → `OpenLivePageButton` → `AccountMenuButton`. These are not layout- or page-owned — the settings cog, live-page link, and account menu are identical everywhere, the same way the left nav is. `SettingsButton` reads only the tiny `adminUi` store, so hosting it in the shell keeps the editor toolchain out of the lightweight admin bundles. Layouts use `rightSlot` only for surface-specific controls *before* the trailer (e.g. `ZoomControls` + `PublishButton` on the Site editor, the Uploads toggle on Media); pages must never inject their own `SettingsButton`.
+**Global trailer.** `Toolbar.tsx` renders a fixed trailer at the right end of every admin route, regardless of which layout mounted it or what the caller passes in `rightSlot`: `SettingsButton` → `OpenLivePageButton` → `AccountMenuButton`. These are not layout- or page-owned — the settings cog, live-page link, and account menu are identical everywhere, the same way the left nav is. `SettingsButton` reads only the tiny `adminUi` store, so hosting it in the shell keeps the editor toolchain out of the lightweight admin bundles. Layouts use `rightSlot` only for surface-specific controls _before_ the trailer (e.g. `ZoomControls` + `PublishButton` on the Site editor, the Uploads toggle on Media); pages must never inject their own `SettingsButton`.
 
 ### Settings modal
 
@@ -589,12 +590,12 @@ The sidebar shell expands/collapses by animating `--*-panel-width`. The panel sl
 
 **Sections** (rail nav, four entries):
 
-| Section       | What it contains                                                             |
-|---------------|------------------------------------------------------------------------------|
-| General       | Site name, meta title, meta description, language, favicon                   |
-| Shortcuts     | Auto-rendered keyboard shortcut reference from the keybindings registry       |
-| Publishing    | Self-hosted runtime info + framework CSS tree-shaking toggle                 |
-| Preferences   | Catalog-driven editor preferences (auto-rendered from `PREFERENCE_CATALOG`)  |
+| Section     | What it contains                                                            |
+| ----------- | --------------------------------------------------------------------------- |
+| General     | Site name, meta title, meta description, language, favicon                  |
+| Shortcuts   | Auto-rendered keyboard shortcut reference from the keybindings registry     |
+| Publishing  | Self-hosted runtime info + framework CSS tree-shaking toggle                |
+| Preferences | Catalog-driven editor preferences (auto-rendered from `PREFERENCE_CATALOG`) |
 
 Site-specific controls that were previously sections of this modal (Pages roster, Breakpoints/Viewports, Conditions) now live in their dedicated surfaces: the Site Explorer panel and `CanvasContextSelector` (unified condition axis).
 
@@ -605,7 +606,7 @@ Site-specific controls that were previously sections of this modal (Pages roster
 - **Site editor** (editor store holds a live draft): delegate to the editor-store mutations. Settings edits join the unsaved draft and persist through the editor's autosave / Save pipeline alongside page-tree edits — never clobbered.
 - **Every other admin page** (no in-memory draft): a standalone Zustand store loads the document once via `cmsAdapter`, edits a local copy, and persists immediately with a shell-only `saveSite` (empty dirty sets, so pages / components / layouts are left untouched). After each save it refreshes the `adminUi` site summary and fires `CMS_SITE_RELOAD_EVENT` so the toolbar brand and `useSiteSummary` re-sync. There is no Save button on those pages, so writes commit on blur / toggle.
 
-Because the controller is imported only by the lazy section components, the editor-store import it carries stays inside the `SettingsModal` chunk and never enters the eager graph of the lightweight layouts. This is what makes the modal *actually* global — before it, General and Publishing rendered a permanent skeleton anywhere outside the Site editor.
+Because the controller is imported only by the lazy section components, the editor-store import it carries stays inside the `SettingsModal` chunk and never enters the eager graph of the lightweight layouts. This is what makes the modal _actually_ global — before it, General and Publishing rendered a permanent skeleton anywhere outside the Site editor.
 
 `CanvasNotch` (`src/admin/pages/site/canvas/CanvasNotch.tsx`) owns the canvas-local insertion chrome. Its quick insert buttons are resolved from each admin's server-side `module-inserter` user preference; the default favorites are Container, Text, and Image. The full module inserter is the management surface for those favorites, so any insertable module, layout preset, or Visual Component can be pinned into the notch without adding a separate settings panel. In Visual Component mode, `CanvasRoot` mounts `VisualComponentModeControl` below the notch so the current component name, rename action, and page-return action stay attached to the canvas rather than the global toolbar. In live mode the notch accepts a `peek` prop — it parks above the top edge (clipped by `overflow:hidden`) and rolls down on hover/`:focus-within` so it does not overlay the page header; a slim `peekHandle` strip remains as the hover target.
 

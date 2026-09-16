@@ -46,7 +46,11 @@ export function handlePluginEventsStream(req: Request): Response {
         if (lease) clearTimeout(lease)
         req.signal.removeEventListener('abort', cleanup)
         unsubscribe()
-        try { controller.close() } catch { /* already closed or cancelled */ }
+        try {
+          controller.close()
+        } catch {
+          /* already closed or cancelled */
+        }
       }
       closeStream = cleanup
 

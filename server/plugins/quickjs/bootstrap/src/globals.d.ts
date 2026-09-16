@@ -81,11 +81,19 @@ declare global {
   var __runMigrate: (fromVersion: string) => Promise<void>
   var __runRoute: (routeKey: string, ctxJson: string) => Promise<string>
   var __runHookListener: (listenerId: string, payloadJson: string) => Promise<void>
-  var __runHookFilter: (filterId: string, valueJson: string, contextJson?: string) => Promise<string>
+  var __runHookFilter: (
+    filterId: string,
+    valueJson: string,
+    contextJson?: string,
+  ) => Promise<string>
   var __runLoopFetch: (sourceId: string, ctxJson: string) => Promise<string>
   var __runLoopPreview: (sourceId: string, ctxJson: string) => string
   var __runSchedule: (scheduleId: string) => Promise<void>
-  var __runMediaAdapterCall: (adapterId: string, method: string, argsJson: string) => Promise<string>
+  var __runMediaAdapterCall: (
+    adapterId: string,
+    method: string,
+    argsJson: string,
+  ) => Promise<string>
   var __runMediaUrlTransformer: (transformerId: string, payloadJson: string) => Promise<string>
   var __updateSettings: (nextJson: string) => void
   var __detectExportedHooks: () => string[]

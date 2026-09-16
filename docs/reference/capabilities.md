@@ -20,38 +20,38 @@ For the broader auth flow (sessions, MFA, step-up), see [docs/features/auth-and-
 
 ### Read
 
-| Capability         | Grants                                                              | Roles            |
-|--------------------|---------------------------------------------------------------------|------------------|
-| `dashboard.read`   | Open the Dashboard workspace                                        | Owner, Admin, Client |
-| `site.read`        | Open the Site workspace; view pages, VCs, classes. Also gates `/runtime/preview` (preview HTML rendering of the posted draft). | Owner, Admin, Client |
+| Capability       | Grants                                                                                                                         | Roles                |
+| ---------------- | ------------------------------------------------------------------------------------------------------------------------------ | -------------------- |
+| `dashboard.read` | Open the Dashboard workspace                                                                                                   | Owner, Admin, Client |
+| `site.read`      | Open the Site workspace; view pages, VCs, classes. Also gates `/runtime/preview` (preview HTML rendering of the posted draft). | Owner, Admin, Client |
 
 ### Site editing (three-way split)
 
-| Capability               | Grants                                                              | Roles         |
-|--------------------------|---------------------------------------------------------------------|---------------|
-| `site.structure.edit`    | Add / remove / move / rename nodes; manage pages, VCs, classes      | Owner, Admin  |
-| `site.content.edit`      | Modify content props (text, image src/alt, link href) on existing nodes — no structure or style edits | Owner, Admin, Client |
-| `site.style.edit`        | Modify CSS classes, style overrides, breakpoints, framework tokens  | Owner, Admin  |
+| Capability            | Grants                                                                                                | Roles                |
+| --------------------- | ----------------------------------------------------------------------------------------------------- | -------------------- |
+| `site.structure.edit` | Add / remove / move / rename nodes; manage pages, VCs, classes                                        | Owner, Admin         |
+| `site.content.edit`   | Modify content props (text, image src/alt, link href) on existing nodes — no structure or style edits | Owner, Admin, Client |
+| `site.style.edit`     | Modify CSS classes, style overrides, breakpoints, framework tokens                                    | Owner, Admin         |
 
 `SITE_WRITE_CAPABILITIES` is the convenience set `['site.structure.edit', 'site.content.edit', 'site.style.edit']` — defined locally in `server/handlers/cms/siteDocument.ts` and `src/admin/access.ts` at each point of use, not in a shared capabilities module. The transactional site-document save (`PUT /admin/api/cms/site-document`) accepts any site writer, then diff-validates the batch by category: page deletions, page metadata, topology, module identity, non-content props, and dynamic bindings require `site.structure.edit`; content-category props (and site-wide SEO copy on the shell) require `site.content.edit`; inline styles/classes/breakpoint overrides and style rules require `site.style.edit`. Empty change sets are no-op saves any site writer may perform, but changed/deleted components and layouts remain structural work (`site.structure.edit`).
 
 ### Page publishing
 
-| Capability       | Grants                                  | Roles         |
-|------------------|-----------------------------------------|---------------|
-| `pages.edit`     | Edit page metadata (title, slug, ...)   | Owner, Admin  |
-| `pages.publish`  | Publish / unpublish pages               | Owner, Admin  |
+| Capability      | Grants                                | Roles        |
+| --------------- | ------------------------------------- | ------------ |
+| `pages.edit`    | Edit page metadata (title, slug, ...) | Owner, Admin |
+| `pages.publish` | Publish / unpublish pages             | Owner, Admin |
 
 ### Content (postType rows)
 
-| Capability                | Grants                                                              | Roles         |
-|---------------------------|---------------------------------------------------------------------|---------------|
-| `content.create`          | Create new draft postType rows                                      | Owner, Admin  |
-| `content.edit.own`        | Edit rows where `author_user_id = me`                               | Owner, Admin  |
-| `content.edit.any`        | Edit any row                                                        | Owner, Admin  |
-| `content.publish.own`     | Publish own rows                                                    | Owner, Admin  |
-| `content.publish.any`     | Publish any row                                                     | Owner, Admin  |
-| `content.manage`          | Full content admin: edit / publish / status any row regardless of author | Owner, Admin |
+| Capability            | Grants                                                                   | Roles        |
+| --------------------- | ------------------------------------------------------------------------ | ------------ |
+| `content.create`      | Create new draft postType rows                                           | Owner, Admin |
+| `content.edit.own`    | Edit rows where `author_user_id = me`                                    | Owner, Admin |
+| `content.edit.any`    | Edit any row                                                             | Owner, Admin |
+| `content.publish.own` | Publish own rows                                                         | Owner, Admin |
+| `content.publish.any` | Publish any row                                                          | Owner, Admin |
+| `content.manage`      | Full content admin: edit / publish / status any row regardless of author | Owner, Admin |
 
 The `own / any` split is the standard CMS workflow: a contributor can edit/publish their own posts; an editor (`content.edit.any`, `content.publish.any`) can manage everyone's.
 
@@ -59,71 +59,71 @@ The `own / any` split is the standard CMS workflow: a contributor can edit/publi
 
 The Data workspace is split from the Content workspace: Content owns row-level editorial via `content.*`; Data owns schema design, cross-collection row moves, and bundle export/import. Table read/manage is further split **system vs custom**, so a persona (e.g. Client) can browse and manage custom tables without ever seeing the four internal system tables (`posts`, `pages`, `components`, `layouts`).
 
-| Capability                    | Grants                                                              | Roles         |
-|-------------------------------|---------------------------------------------------------------------|---------------|
-| `data.custom.tables.read`     | Open the Data workspace; see + browse **custom** tables and their field schemas | Owner, Admin, Client |
-| `data.custom.tables.manage`   | Create, rename, delete **custom** tables; add/rename/delete fields; change primary field, route base. **Step-up gated** — changes public URL surface. | Owner, Admin |
-| `data.system.tables.read`     | See + open the four **system** tables (`posts`/`pages`/`components`/`layouts`). | Owner, Admin |
-| `data.system.tables.manage`   | On a system table: add/edit/remove **custom** fields and set the primary field. The table's identity (name, slug, route base, labels, kind) and its **built-in fields** are frozen for everyone — `assertSystemTableUpdateAllowed` rejects those edits server-side. Built-in field *values* on the structural system tables (pages/components/layouts) are read-only in the grid; `posts` built-ins stay editable. | Owner, Admin |
-| `data.rows.move`       | `PATCH /data/rows/:id/table` — move a row to a different table (changes its public URL because route base differs per table). | Owner, Admin |
-| `data.export`          | `GET /export` and `POST /import/preview` (read-only bundle ops). Row visibility is filtered against `canSeeAllDataRows`. | Owner, Admin |
-| `data.import`          | `POST /import` (write). **`replace` strategy ALSO requires `content.manage` AND step-up.** Bundles carrying a site shell ALSO require `site.structure.edit`. | Owner, Admin |
+| Capability                  | Grants                                                                                                                                                                                                                                                                                                                                                                                                             | Roles                |
+| --------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | -------------------- |
+| `data.custom.tables.read`   | Open the Data workspace; see + browse **custom** tables and their field schemas                                                                                                                                                                                                                                                                                                                                    | Owner, Admin, Client |
+| `data.custom.tables.manage` | Create, rename, delete **custom** tables; add/rename/delete fields; change primary field, route base. **Step-up gated** — changes public URL surface.                                                                                                                                                                                                                                                              | Owner, Admin         |
+| `data.system.tables.read`   | See + open the four **system** tables (`posts`/`pages`/`components`/`layouts`).                                                                                                                                                                                                                                                                                                                                    | Owner, Admin         |
+| `data.system.tables.manage` | On a system table: add/edit/remove **custom** fields and set the primary field. The table's identity (name, slug, route base, labels, kind) and its **built-in fields** are frozen for everyone — `assertSystemTableUpdateAllowed` rejects those edits server-side. Built-in field _values_ on the structural system tables (pages/components/layouts) are read-only in the grid; `posts` built-ins stay editable. | Owner, Admin         |
+| `data.rows.move`            | `PATCH /data/rows/:id/table` — move a row to a different table (changes its public URL because route base differs per table).                                                                                                                                                                                                                                                                                      | Owner, Admin         |
+| `data.export`               | `GET /export` and `POST /import/preview` (read-only bundle ops). Row visibility is filtered against `canSeeAllDataRows`.                                                                                                                                                                                                                                                                                           | Owner, Admin         |
+| `data.import`               | `POST /import` (write). **`replace` strategy ALSO requires `content.manage` AND step-up.** Bundles carrying a site shell ALSO require `site.structure.edit`.                                                                                                                                                                                                                                                       | Owner, Admin         |
 
 ### Media (granular split)
 
-| Capability       | Grants                                                              | Roles         |
-|------------------|---------------------------------------------------------------------|---------------|
-| `media.read`     | Open the Media workspace; browse assets and folders; see thumbnails in pickers. Also gated by `/dashboard/media`. | Owner, Admin, Client |
-| `media.write`    | Upload assets; edit metadata (alt text, caption, tags); manage folders; restore from trash. | Owner, Admin |
-| `media.replace`  | Overwrite the bytes for an existing asset (variants regenerate). Split out from `media.write` because this silently swaps the bytes every page reference points at. | Owner, Admin |
-| `media.delete`   | Soft-delete to trash; hard-purge (`?purge=1`) additionally requires step-up. Also gates `DELETE /media/folders/:id` (cascade). | Owner, Admin |
+| Capability      | Grants                                                                                                                                                              | Roles                |
+| --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------- |
+| `media.read`    | Open the Media workspace; browse assets and folders; see thumbnails in pickers. Also gated by `/dashboard/media`.                                                   | Owner, Admin, Client |
+| `media.write`   | Upload assets; edit metadata (alt text, caption, tags); manage folders; restore from trash.                                                                         | Owner, Admin         |
+| `media.replace` | Overwrite the bytes for an existing asset (variants regenerate). Split out from `media.write` because this silently swaps the bytes every page reference points at. | Owner, Admin         |
+| `media.delete`  | Soft-delete to trash; hard-purge (`?purge=1`) additionally requires step-up. Also gates `DELETE /media/folders/:id` (cascade).                                      | Owner, Admin         |
 
 ### Runtime + storage (granular split)
 
 Was a single `runtime.manage`. Split because adapter election (bytes go to a plugin-provided backend) is a separate trust decision from `package.json` dependency editing.
 
-| Capability             | Grants                                                              | Roles         |
-|------------------------|---------------------------------------------------------------------|---------------|
-| `runtime.dependencies` | Edit site `package.json` dependencies; trigger `POST /runtime/dependencies/resolve`. | Owner, Admin |
+| Capability             | Grants                                                                                                                                               | Roles        |
+| ---------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- | ------------ |
+| `runtime.dependencies` | Edit site `package.json` dependencies; trigger `POST /runtime/dependencies/resolve`.                                                                 | Owner, Admin |
 | `storage.elect`        | Elect a media storage adapter per asset role (originals / variants / avatars / fonts); elect/clear the variant delegate; verify adapter credentials. | Owner, Admin |
-| `storage.migrate`      | Run the migration SSE that moves bytes between adapters after an election change. | Owner, Admin |
+| `storage.migrate`      | Run the migration SSE that moves bytes between adapters after an election change.                                                                    | Owner, Admin |
 
 ### Plugins (granular split)
 
 Was a single `plugins.manage`. Split per the four very different blast radii: read / configure / install (RCE-class) / lifecycle.
 
-| Capability             | Grants                                                              | Step-up | Roles         |
-|------------------------|---------------------------------------------------------------------|---------|---------------|
-| `plugins.read`         | List installed plugins; read masked settings; view event SSE stream; read schedule list. Also gates `/dashboard/plugins`. | no | Owner, Admin |
-| `plugins.configure`    | Edit per-plugin settings via `PUT /plugins/:id/settings`; manage plugin records via `/plugins/:id/resources/*`. | yes (settings only) | Owner, Admin |
-| `plugins.install`      | Install / upgrade / uninstall plugins; pack install; inspect-package. **RCE-class — runs third-party code on the host.** | yes (mutations) | Owner, Admin |
-| `plugins.lifecycle`    | Enable / disable / restart plugins; schedule run-now / pause / resume. | yes (mutations) | Owner, Admin |
+| Capability          | Grants                                                                                                                    | Step-up             | Roles        |
+| ------------------- | ------------------------------------------------------------------------------------------------------------------------- | ------------------- | ------------ |
+| `plugins.read`      | List installed plugins; read masked settings; view event SSE stream; read schedule list. Also gates `/dashboard/plugins`. | no                  | Owner, Admin |
+| `plugins.configure` | Edit per-plugin settings via `PUT /plugins/:id/settings`; manage plugin records via `/plugins/:id/resources/*`.           | yes (settings only) | Owner, Admin |
+| `plugins.install`   | Install / upgrade / uninstall plugins; pack install; inspect-package. **RCE-class — runs third-party code on the host.**  | yes (mutations)     | Owner, Admin |
+| `plugins.lifecycle` | Enable / disable / restart plugins; schedule run-now / pause / resume.                                                    | yes (mutations)     | Owner, Admin |
 
 ### Users + roles
 
-| Capability       | Grants                                                              | Roles                                  |
-|------------------|---------------------------------------------------------------------|----------------------------------------|
-| `users.manage`   | Create, edit, delete, suspend users; assign roles                   | Owner, Admin                           |
-| `roles.manage`   | Create, edit, delete custom roles; assign capabilities to roles     | **Owner only.** Admin does not get this. |
+| Capability     | Grants                                                          | Roles                                    |
+| -------------- | --------------------------------------------------------------- | ---------------------------------------- |
+| `users.manage` | Create, edit, delete, suspend users; assign roles               | Owner, Admin                             |
+| `roles.manage` | Create, edit, delete custom roles; assign capabilities to roles | **Owner only.** Admin does not get this. |
 
 `roles.manage` is **owner-only by design** — only the installation owner edits capability grants. Admins manage everything else but can't grant themselves new capabilities.
 
 ### Audit
 
-| Capability       | Grants                                                              | Roles         |
-|------------------|---------------------------------------------------------------------|---------------|
-| `audit.read`     | Read the dedicated `/admin/api/cms/audit` endpoint AND the Dashboard activity widget (previously leaked to every authenticated user — see A2 fix). | Owner, Admin |
+| Capability   | Grants                                                                                                                                             | Roles        |
+| ------------ | -------------------------------------------------------------------------------------------------------------------------------------------------- | ------------ |
+| `audit.read` | Read the dedicated `/admin/api/cms/audit` endpoint AND the Dashboard activity widget (previously leaked to every authenticated user — see A2 fix). | Owner, Admin |
 
 ### AI runtime
 
 Was a single `ai.use`. Split so a Client persona can have chat assistance without the agent being able to mutate the editor store on their behalf.
 
-| Capability             | Grants                                                              | Roles         |
-|------------------------|---------------------------------------------------------------------|---------------|
-| `ai.chat`              | Open AI conversations. The agent inherits the caller's capabilities: every tool declares `requiredCapabilities` (ANY-OF, mirroring its HTTP-route gate — e.g. `list_users` → `users.manage`, document reads → the `requireDataAccess` set, `list_media` → `media.read`) and is only offered when the caller holds one. `ai.chat` is the floor, not a blanket read grant. | Owner, Admin |
-| `ai.tools.write`       | Enable canvas write tools (`setNodeProps`, `insertNode`, `deleteNode`, etc.) in registered AI conversations. Without this, the model has no write tools at all. | Owner, Admin |
-| `ai.providers.manage`  | Create / update / delete AI provider credentials + per-scope defaults | Owner, Admin |
-| `ai.audit.read`        | Read site-wide AI usage, cost, and error events across all users    | Owner, Admin |
+| Capability            | Grants                                                                                                                                                                                                                                                                                                                                                                   | Roles        |
+| --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------ |
+| `ai.chat`             | Open AI conversations. The agent inherits the caller's capabilities: every tool declares `requiredCapabilities` (ANY-OF, mirroring its HTTP-route gate — e.g. `list_users` → `users.manage`, document reads → the `requireDataAccess` set, `list_media` → `media.read`) and is only offered when the caller holds one. `ai.chat` is the floor, not a blanket read grant. | Owner, Admin |
+| `ai.tools.write`      | Enable canvas write tools (`setNodeProps`, `insertNode`, `deleteNode`, etc.) in registered AI conversations. Without this, the model has no write tools at all.                                                                                                                                                                                                          | Owner, Admin |
+| `ai.providers.manage` | Create / update / delete AI provider credentials + per-scope defaults                                                                                                                                                                                                                                                                                                    | Owner, Admin |
+| `ai.audit.read`       | Read site-wide AI usage, cost, and error events across all users                                                                                                                                                                                                                                                                                                         | Owner, Admin |
 
 ---
 
@@ -131,12 +131,12 @@ Was a single `ai.use`. Split so a Client persona can have chat assistance withou
 
 Four built-in `SYSTEM_ROLES`:
 
-| Role     | id        | Capabilities                                                                 | Boot behaviour |
-|----------|-----------|------------------------------------------------------------------------------|----------------|
-| Owner    | `owner`   | All 36 (`CORE_CAPABILITIES`)                                                 | Force-resynced on every boot. Owner-only `roles.manage`. |
-| Admin    | `admin`   | All 36 except `roles.manage`                                                 | **Force-resynced on every boot** (changed from previous "seeded once"). Hand-edits restored at boot. |
-| Client   | `client`  | `dashboard.read`, `site.read`, `site.content.edit`, `media.read`, `data.custom.tables.read` | Seeded once; freely editable. Sees custom tables only — never the system tables. |
-| Member   | `member`  | (none)                                                                       | Seeded once; freely editable. |
+| Role   | id       | Capabilities                                                                                | Boot behaviour                                                                                       |
+| ------ | -------- | ------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------- |
+| Owner  | `owner`  | All 36 (`CORE_CAPABILITIES`)                                                                | Force-resynced on every boot. Owner-only `roles.manage`.                                             |
+| Admin  | `admin`  | All 36 except `roles.manage`                                                                | **Force-resynced on every boot** (changed from previous "seeded once"). Hand-edits restored at boot. |
+| Client | `client` | `dashboard.read`, `site.read`, `site.content.edit`, `media.read`, `data.custom.tables.read` | Seeded once; freely editable. Sees custom tables only — never the system tables.                     |
+| Member | `member` | (none)                                                                                      | Seeded once; freely editable.                                                                        |
 
 A new capability added to the codebase appears on Owner AND Admin on the next boot (force-sync). Client and Member don't auto-update — users grant the new capability via the Roles admin page if they want it. Existing **custom** roles also don't auto-update — same reason.
 
@@ -174,9 +174,9 @@ The three forms map to `HostRouteAccess = { kind: 'capability'; capability } | {
 The canonical pattern is in `server/auth/authz.ts`. Three helpers:
 
 ```ts
-requireAuthenticatedUser(req, db)                        // any logged-in user
-requireCapability(req, db, 'site.read')                  // one capability
-requireAnyCapability(req, db, SITE_WRITE_CAPABILITIES)   // any of a set
+requireAuthenticatedUser(req, db) // any logged-in user
+requireCapability(req, db, 'site.read') // one capability
+requireAnyCapability(req, db, SITE_WRITE_CAPABILITIES) // any of a set
 ```
 
 Each returns `AuthUser | Response`. The handler checks `instanceof Response` and returns early on auth failure.
@@ -184,7 +184,7 @@ Each returns `AuthUser | Response`. The handler checks `instanceof Response` and
 Step-up-gated actions:
 
 ```ts
-requireStepUp(req, db)        // per-user sensitive-action step-up policy
+requireStepUp(req, db) // per-user sensitive-action step-up policy
 ```
 
 See [docs/features/auth-and-access.md](../features/auth-and-access.md) for the full step-up flow.
@@ -201,11 +201,11 @@ When an endpoint or UI affordance is reachable by **any of several capabilities*
 
 Examples already in the tree:
 
-| Constant                       | Defined in | Gate |
-|--------------------------------|------------|------|
-| `SITE_WRITE_CAPABILITIES`      | `server/handlers/cms/site.ts`, `src/admin/access.ts` | Save the draft site |
-| `DATA_ACCESS_CAPABILITIES`, `DATA_EDIT_CAPABILITIES`, `DATA_PUBLISH_CAPABILITIES`, … | `server/handlers/cms/data/access.ts` | Data/content row operations |
-| `CONTENT_ACCESS_CAPABILITIES`, `PLUGIN_READ_CAPABILITIES`, `DATA_WORKSPACE_READ_CAPABILITIES` | `src/admin/access.ts` | Admin workspace visibility |
+| Constant                                                                                      | Defined in                                           | Gate                        |
+| --------------------------------------------------------------------------------------------- | ---------------------------------------------------- | --------------------------- |
+| `SITE_WRITE_CAPABILITIES`                                                                     | `server/handlers/cms/site.ts`, `src/admin/access.ts` | Save the draft site         |
+| `DATA_ACCESS_CAPABILITIES`, `DATA_EDIT_CAPABILITIES`, `DATA_PUBLISH_CAPABILITIES`, …          | `server/handlers/cms/data/access.ts`                 | Data/content row operations |
+| `CONTENT_ACCESS_CAPABILITIES`, `PLUGIN_READ_CAPABILITIES`, `DATA_WORKSPACE_READ_CAPABILITIES` | `src/admin/access.ts`                                | Admin workspace visibility  |
 
 There are deliberately **no** whole-family "super-set" constants (e.g. one `MEDIA_CAPABILITIES` listing every `media.*` cap). The system roles don't consume one — Owner uses the full `CORE_CAPABILITIES`, and Admin's grant list is written out leaf-by-leaf on purpose so every new capability forces a conscious per-PR decision about whether Admin gets it (see the `SYSTEM_ROLES` comment). A "future leaf auto-flows in" super-set is exactly the silent drift that design rejects. Group caps by what a gate needs, locally — never by family, globally.
 
@@ -251,14 +251,14 @@ For workspace-level gating, `canAccessWorkspace(user, section)` is the single so
    ] as const
    ```
 2. If it belongs to the Owner / Admin / Client default sets, add it to the matching `SYSTEM_ROLES` entry in `server/auth/capabilities.ts`. Owner + Admin force-sync on next boot.
-4. Use it at the gate point:
+3. Use it at the gate point:
    ```ts
    const user = await requireCapability(req, db, 'analytics.read')
    if (user instanceof Response) return user
    ```
-5. Add a `CAPABILITY_META` entry + a `CAPABILITY_GROUPS` section in `src/admin/pages/users/utils/capabilities.ts` so the role-edit dialog renders a checkbox for it. The picker-coverage test fails until you do.
-6. Existing **custom roles** will NOT have the new capability until users grant it through the Roles admin page.
-7. Update this doc (table + adjacent docs) so agents and humans can find the new capability.
+4. Add a `CAPABILITY_META` entry + a `CAPABILITY_GROUPS` section in `src/admin/pages/users/utils/capabilities.ts` so the role-edit dialog renders a checkbox for it. The picker-coverage test fails until you do.
+5. Existing **custom roles** will NOT have the new capability until users grant it through the Roles admin page.
+6. Update this doc (table + adjacent docs) so agents and humans can find the new capability.
 
 ### Add a custom role
 
@@ -280,23 +280,27 @@ Saved to the `roles` table with `capabilities_json: CoreCapability[]`. Assigned 
 ```ts
 import { userHasCapability, userHasAnyCapability } from '@auth/authz'
 
-if (userHasCapability(user, 'audit.read')) { /* show menu */ }
-if (userHasAnyCapability(user, SITE_WRITE_CAPABILITIES)) { /* allow save */ }
+if (userHasCapability(user, 'audit.read')) {
+  /* show menu */
+}
+if (userHasAnyCapability(user, SITE_WRITE_CAPABILITIES)) {
+  /* allow save */
+}
 ```
 
 ---
 
 ## Forbidden patterns
 
-| Pattern                                                              | Use instead                                              |
-|----------------------------------------------------------------------|----------------------------------------------------------|
-| `user.role === 'admin'` to gate                                      | `userHasCapability(user, 'media.read')`                  |
-| Hand-rolling a capability check (`user.capabilities.includes(...)`) | `userHasCapability` / `requireCapability`                |
-| Granting `roles.manage` to non-Owner roles                           | Owner-only by design. Don't expand.                      |
-| Skipping the boot-time `syncSystemRoles(db)` call in tests           | Tests should call it to set up a realistic state         |
-| Adding a "permission" string outside the known set                   | Append to `CORE_CAPABILITIES` in `@core/capabilities` first; the derived type catches typos |
-| Per-route ad-hoc auth that doesn't go through `requireCapability`    | Always use the helpers — gates aren't optional. The arch test catches missing gates. |
-| Plugin route registered with `capability: null` (legacy shape)       | Use `api.cms.routes.authenticated.*` (logged-in user) or `api.cms.routes.public.*` (anonymous, requires `cms.routes.public` permission). |
+| Pattern                                                             | Use instead                                                                                                                              |
+| ------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| `user.role === 'admin'` to gate                                     | `userHasCapability(user, 'media.read')`                                                                                                  |
+| Hand-rolling a capability check (`user.capabilities.includes(...)`) | `userHasCapability` / `requireCapability`                                                                                                |
+| Granting `roles.manage` to non-Owner roles                          | Owner-only by design. Don't expand.                                                                                                      |
+| Skipping the boot-time `syncSystemRoles(db)` call in tests          | Tests should call it to set up a realistic state                                                                                         |
+| Adding a "permission" string outside the known set                  | Append to `CORE_CAPABILITIES` in `@core/capabilities` first; the derived type catches typos                                              |
+| Per-route ad-hoc auth that doesn't go through `requireCapability`   | Always use the helpers — gates aren't optional. The arch test catches missing gates.                                                     |
+| Plugin route registered with `capability: null` (legacy shape)      | Use `api.cms.routes.authenticated.*` (logged-in user) or `api.cms.routes.public.*` (anonymous, requires `cms.routes.public` permission). |
 
 ---
 

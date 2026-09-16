@@ -28,7 +28,10 @@
  */
 import type { DbClient } from '../../db/client'
 import { dispatchDelete, dispatchUpload } from './mediaUploadDispatch'
-import { getElectedVariantDelegate, type ElectedVariantDelegate } from '../../repositories/mediaStorageAdapters'
+import {
+  getElectedVariantDelegate,
+  type ElectedVariantDelegate,
+} from '../../repositories/mediaStorageAdapters'
 import { runImageVariantJob, isImageVariantOk } from './imageVariantWorkerHost'
 import { toArrayBuffer } from '../../binary'
 
@@ -151,7 +154,12 @@ export async function processImageVariants(
     // not host-stored bytes. The worker returned no variant bytes for
     // this case (we passed `generateLadder: false`).
     if (delegate) {
-      const variants = buildDelegateVariants(delegate, parentStoragePath, response.width, response.height)
+      const variants = buildDelegateVariants(
+        delegate,
+        parentStoragePath,
+        response.width,
+        response.height,
+      )
       return {
         width: response.width,
         height: response.height,
@@ -208,9 +216,7 @@ export async function processImageVariants(
  * conservative choice that matches what the host's static handler serves.
  */
 function originPathForDelegate(parentStoragePath: string): string {
-  return parentStoragePath.startsWith('/')
-    ? parentStoragePath
-    : `/uploads/${parentStoragePath}`
+  return parentStoragePath.startsWith('/') ? parentStoragePath : `/uploads/${parentStoragePath}`
 }
 
 /**

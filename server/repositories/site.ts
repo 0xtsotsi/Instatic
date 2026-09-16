@@ -45,25 +45,29 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 
 function readStoredShell(row: SiteRow): SiteShell {
   const stored = row.settings_json
-  const site: Record<string, unknown> = isRecord(stored?.site) ? stored.site as Record<string, unknown> : {}
+  const site: Record<string, unknown> = isRecord(stored?.site)
+    ? (stored.site as Record<string, unknown>)
+    : {}
   const conditions = parseConditions(site.conditions)
   return {
     id: typeof site.id === 'string' ? site.id : 'default',
     name: typeof row.name === 'string' ? row.name : '',
-    files: Array.isArray(site.files) ? site.files as SiteShell['files'] : [],
+    files: Array.isArray(site.files) ? (site.files as SiteShell['files']) : [],
     packageJson: normalizeSitePackageJson(site.packageJson),
     runtime: normalizeSiteRuntimeConfig(site.runtime),
     breakpoints: Array.isArray(site.breakpoints)
-      ? site.breakpoints as SiteShell['breakpoints']
+      ? (site.breakpoints as SiteShell['breakpoints'])
       : DEFAULT_BREAKPOINTS,
     ...(conditions.length > 0 ? { conditions } : {}),
     settings: isRecord(site.settings)
-      ? site.settings as unknown as SiteShell['settings']
+      ? (site.settings as unknown as SiteShell['settings'])
       : DEFAULT_SITE_SETTINGS,
-    styleRules: isRecord(site.styleRules) ? site.styleRules as SiteShell['styleRules'] : {},
+    styleRules: isRecord(site.styleRules) ? (site.styleRules as SiteShell['styleRules']) : {},
     explorer: parseSiteExplorerOrganization(site.explorer),
-    createdAt: typeof site.createdAt === 'number' ? site.createdAt : Date.parse(String(row.created_at)),
-    updatedAt: typeof site.updatedAt === 'number' ? site.updatedAt : Date.parse(String(row.updated_at)),
+    createdAt:
+      typeof site.createdAt === 'number' ? site.createdAt : Date.parse(String(row.created_at)),
+    updatedAt:
+      typeof site.updatedAt === 'number' ? site.updatedAt : Date.parse(String(row.updated_at)),
   }
 }
 

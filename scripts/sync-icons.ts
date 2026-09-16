@@ -37,7 +37,16 @@
  * with "run `bun run icons:sync`" if the vendored set drifts.
  */
 
-import { existsSync, mkdirSync, readdirSync, readFileSync, rmSync, statSync, writeFileSync, copyFileSync } from 'node:fs'
+import {
+  existsSync,
+  mkdirSync,
+  readdirSync,
+  readFileSync,
+  rmSync,
+  statSync,
+  writeFileSync,
+  copyFileSync,
+} from 'node:fs'
 import { dirname, extname, join, relative, resolve } from 'node:path'
 import { spawnSync } from 'node:child_process'
 
@@ -50,9 +59,7 @@ const VENDOR_TYPES_FILE = join(VENDOR_DIR, 'types.ts')
 const VENDOR_TSCONFIG = join(VENDOR_DIR, 'tsconfig.json')
 const VENDOR_PACKAGE_JSON = join(VENDOR_DIR, 'package.json')
 
-const UPSTREAM = resolve(
-  process.env.PIXEL_ART_ICONS_SRC ?? join(ROOT, '..', 'pixel-art-icons'),
-)
+const UPSTREAM = resolve(process.env.PIXEL_ART_ICONS_SRC ?? join(ROOT, '..', 'pixel-art-icons'))
 const UPSTREAM_ICONS_DIR = join(UPSTREAM, 'icons')
 const UPSTREAM_TYPES_FILE = join(UPSTREAM, 'types.ts')
 
@@ -108,9 +115,7 @@ function collectImportedIcons(): Set<string> {
     while ((m = IMPORT_RE.exec(source)) !== null) {
       const name = m[1]
       if (!ICON_NAME_RE.test(name)) {
-        throw new Error(
-          `[sync-icons] Invalid icon name "${name}" in ${relative(ROOT, file)}`,
-        )
+        throw new Error(`[sync-icons] Invalid icon name "${name}" in ${relative(ROOT, file)}`)
       }
       names.add(name)
     }
@@ -133,9 +138,7 @@ function copyFromUpstream(names: Set<string>, options: SyncOptions): void {
     )
   }
   if (!existsSync(UPSTREAM_TYPES_FILE)) {
-    throw new Error(
-      `[sync-icons] Upstream is missing types.ts at ${UPSTREAM_TYPES_FILE}`,
-    )
+    throw new Error(`[sync-icons] Upstream is missing types.ts at ${UPSTREAM_TYPES_FILE}`)
   }
 
   if (!options.check) {
@@ -245,18 +248,12 @@ const VENDOR_TSCONFIG_CONTENT = {
 
 function writePackageJson(options: SyncOptions): void {
   if (options.check) return
-  writeFileSync(
-    VENDOR_PACKAGE_JSON,
-    JSON.stringify(VENDOR_PACKAGE_JSON_CONTENT, null, 2) + '\n',
-  )
+  writeFileSync(VENDOR_PACKAGE_JSON, JSON.stringify(VENDOR_PACKAGE_JSON_CONTENT, null, 2) + '\n')
 }
 
 function writeTsconfig(options: SyncOptions): void {
   if (options.check) return
-  writeFileSync(
-    VENDOR_TSCONFIG,
-    JSON.stringify(VENDOR_TSCONFIG_CONTENT, null, 2) + '\n',
-  )
+  writeFileSync(VENDOR_TSCONFIG, JSON.stringify(VENDOR_TSCONFIG_CONTENT, null, 2) + '\n')
 }
 
 // ---------------------------------------------------------------------------
@@ -275,9 +272,7 @@ function buildDist(options: SyncOptions): void {
   // node_modules tree just fine.
   const tsc = join(ROOT, 'node_modules', '.bin', 'tsc')
   if (!existsSync(tsc)) {
-    throw new Error(
-      `[sync-icons] tsc not found at ${tsc}. Run \`bun install\` first.`,
-    )
+    throw new Error(`[sync-icons] tsc not found at ${tsc}. Run \`bun install\` first.`)
   }
 
   const result = spawnSync(tsc, ['-p', VENDOR_TSCONFIG], {
@@ -322,13 +317,10 @@ function runCheck(): number {
   const missingDist = [...imported].filter((n) => !dist.has(n)).sort()
   const orphanDist = [...dist].filter((n) => !imported.has(n)).sort()
 
-  const drift =
-    missingSrc.length + orphanSrc.length + missingDist.length + orphanDist.length
+  const drift = missingSrc.length + orphanSrc.length + missingDist.length + orphanDist.length
 
   if (drift === 0) {
-    console.error(
-      `[icons:check] vendor/pixel-art-icons is fresh (${imported.size} icons).`,
-    )
+    console.error(`[icons:check] vendor/pixel-art-icons is fresh (${imported.size} icons).`)
     return 0
   }
 
@@ -357,9 +349,7 @@ function runCheck(): number {
         orphanDist.map((n) => `    - dist/icons/${n}.js`).join('\n'),
     )
   }
-  console.error(
-    `\n  Run \`bun run icons:sync\` to refresh vendor/pixel-art-icons/.\n`,
-  )
+  console.error(`\n  Run \`bun run icons:sync\` to refresh vendor/pixel-art-icons/.\n`)
   return 1
 }
 
@@ -380,9 +370,7 @@ function main(): number {
     )
   }
 
-  console.error(
-    `[sync-icons] ${imported.size} unique icon(s) imported by src/.`,
-  )
+  console.error(`[sync-icons] ${imported.size} unique icon(s) imported by src/.`)
 
   // Make sure vendor dir + skeleton exist
   mkdirSync(VENDOR_DIR, { recursive: true })
@@ -390,17 +378,13 @@ function main(): number {
   copyFromUpstream(imported, { check: false })
   const orphans = removeOrphans(imported, { check: false })
   if (orphans.length > 0) {
-    console.error(
-      `[sync-icons] removed ${orphans.length} orphan icon(s): ${orphans.join(', ')}`,
-    )
+    console.error(`[sync-icons] removed ${orphans.length} orphan icon(s): ${orphans.join(', ')}`)
   }
   writePackageJson({ check: false })
   writeTsconfig({ check: false })
   buildDist({ check: false })
 
-  console.error(
-    `[sync-icons] vendor/pixel-art-icons/ is fresh — ${imported.size} icons + types.`,
-  )
+  console.error(`[sync-icons] vendor/pixel-art-icons/ is fresh — ${imported.size} icons + types.`)
 
   // Bun's `file:` deps are copied into node_modules at install time, so
   // re-running install after a sync is required for the new icons to be

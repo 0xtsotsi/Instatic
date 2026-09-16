@@ -19,14 +19,21 @@
 
 import sharp from 'sharp'
 import { encode as encodeBlurHash } from 'blurhash'
-import type { ImageVariantJobRequest, ImageVariantJobResponse, ImageVariantPayload } from './imageVariantProtocol'
+import type {
+  ImageVariantJobRequest,
+  ImageVariantJobResponse,
+  ImageVariantPayload,
+} from './imageVariantProtocol'
 import { toArrayBuffer } from '../../binary'
 
 /** libwebp's hard cap on either output dimension. */
 const MAX_WEBP_DIMENSION = 16383
 
 function send(msg: ImageVariantJobResponse, transfer: ArrayBuffer[] = []): void {
-  ;(self as unknown as { postMessage: (m: unknown, transfer?: ArrayBuffer[]) => void }).postMessage(msg, transfer)
+  ;(self as unknown as { postMessage: (m: unknown, transfer?: ArrayBuffer[]) => void }).postMessage(
+    msg,
+    transfer,
+  )
 }
 
 async function handleJob(req: ImageVariantJobRequest): Promise<void> {
@@ -135,7 +142,9 @@ async function handleJob(req: ImageVariantJobRequest): Promise<void> {
   }
 }
 
-;(self as unknown as { onmessage: (e: MessageEvent) => void }).onmessage = (event: MessageEvent) => {
+;(self as unknown as { onmessage: (e: MessageEvent) => void }).onmessage = (
+  event: MessageEvent,
+) => {
   const msg = event.data as ImageVariantJobRequest
   if (msg && msg.kind === 'image-variant-job') {
     void handleJob(msg)

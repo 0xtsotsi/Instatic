@@ -100,7 +100,10 @@ async function setPluginEnabledFromRequest(
     enabled ? 'plugin.enable' : 'plugin.disable',
     pluginId,
   )
-  return jsonResponse({ plugin: await presentPluginSecrets(db, lifecycle.plugin), ...(await pluginsPayload(db)) })
+  return jsonResponse({
+    plugin: await presentPluginSecrets(db, lifecycle.plugin),
+    ...(await pluginsPayload(db)),
+  })
 }
 
 export async function handlePluginItem(
@@ -142,11 +145,23 @@ export async function handlePluginItem(
       // deactivate first so the plugin tears down its active-state
       // resources before the uninstall hook does its permanent cleanup.
       if (current.lifecycleStatus === 'active') {
-        const deactivated = await runPluginLifecycleHook(db, current, options, 'deactivate', 'disabled')
+        const deactivated = await runPluginLifecycleHook(
+          db,
+          current,
+          options,
+          'deactivate',
+          'disabled',
+        )
         if (!deactivated.ok) return uninstallHookFailure('deactivate', deactivated.plugin)
         current = deactivated.plugin
       }
-      const uninstalled = await runPluginLifecycleHook(db, current, options, 'uninstall', current.lifecycleStatus)
+      const uninstalled = await runPluginLifecycleHook(
+        db,
+        current,
+        options,
+        'uninstall',
+        current.lifecycleStatus,
+      )
       if (!uninstalled.ok) return uninstallHookFailure('uninstall', uninstalled.plugin)
     }
 
@@ -162,10 +177,7 @@ export async function handlePluginItem(
  * the message tells the operator the force-remove escape hatch exists so a
  * broken hook can never permanently block removal.
  */
-function uninstallHookFailure(
-  hook: 'deactivate' | 'uninstall',
-  plugin: InstalledPlugin,
-): Response {
+function uninstallHookFailure(hook: 'deactivate' | 'uninstall', plugin: InstalledPlugin): Response {
   const detail = plugin.lastError ?? 'Plugin lifecycle hook failed'
   return badRequest(
     `Plugin ${hook} hook failed during uninstall: ${detail} — the plugin is still installed. Fix the plugin, or force-remove it to skip its cleanup hooks.`,
@@ -277,5 +289,8 @@ export async function handlePluginRestart(
   })
   const finalResult = await getInstalledPlugin(db, pluginId)
   const finalRow = (finalResult?.kind === 'ok' ? finalResult.plugin : null) ?? plugin
-  return jsonResponse({ plugin: await presentPluginSecrets(db, finalRow), ...(await pluginsPayload(db)) })
+  return jsonResponse({
+    plugin: await presentPluginSecrets(db, finalRow),
+    ...(await pluginsPayload(db)),
+  })
 }

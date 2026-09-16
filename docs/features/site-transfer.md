@@ -1,6 +1,6 @@
 # Site Transfer
 
-Export and import — move a complete site between self-hosted instances. One ZIP bundle carries the shell, all data tables, all data rows, the media library (metadata + raw files + the folder tree), and published-URL redirects. Everything that defines the *site* travels in one archive, so re-importing into a fresh instance reproduces an **identical** site.
+Export and import — move a complete site between self-hosted instances. One ZIP bundle carries the shell, all data tables, all data rows, the media library (metadata + raw files + the folder tree), and published-URL redirects. Everything that defines the _site_ travels in one archive, so re-importing into a fresh instance reproduces an **identical** site.
 
 The transfer format is **self-contained** — no external service, no signed URLs, no incremental sync. Use it for backup, environment promotion (staging → production), or migrating between hosts.
 
@@ -75,9 +75,9 @@ site-bundle-2026-06-17T15-58-44.zip
 
 ```ts
 interface SiteBundleArchiveManifest {
-  schemaVersion:  1
-  exportedAt:     string                    // ISO datetime
-  sourceSiteName?: string                   // human-readable name of source site
+  schemaVersion: 1
+  exportedAt: string // ISO datetime
+  sourceSiteName?: string // human-readable name of source site
 
   /** Optional site shell — settings, breakpoints, classes, files, runtime, package.json */
   site?: SiteShell
@@ -86,7 +86,7 @@ interface SiteBundleArchiveManifest {
   tables: DataTable[]
 
   /** All (or selected) data rows — `data_rows` rows. Cells included verbatim. */
-  rows:   DataRow[]
+  rows: DataRow[]
 
   /** Optional: media asset metadata. Bytes live at media/<storagePath>. */
   media?: MediaAssetMetadata[]
@@ -109,16 +109,16 @@ The archive manifest parses through TypeBox before import. The admin import path
 
 A portable bundle deliberately carries **no secrets and no instance-runtime state** — it travels between hosts and lands as a downloadable file, so credentials must never be in it.
 
-| Excluded                | Why                                                                   |
-|-------------------------|-----------------------------------------------------------------------|
-| Sessions                | Per-device, security-sensitive                                        |
-| Users / roles + passwords | Bundles are for site content, not account migration; password hashes must not travel |
-| AI provider keys        | Credentials — never in a portable file                                |
-| Audit / login logs      | Local to the host                                                     |
-| Published HTML files    | Re-rendered on first publish after import                             |
-| Media variants          | Omitted; imported assets fall back to originals until a later upload/replace regenerates variants |
+| Excluded                        | Why                                                                                                       |
+| ------------------------------- | --------------------------------------------------------------------------------------------------------- |
+| Sessions                        | Per-device, security-sensitive                                                                            |
+| Users / roles + passwords       | Bundles are for site content, not account migration; password hashes must not travel                      |
+| AI provider keys                | Credentials — never in a portable file                                                                    |
+| Audit / login logs              | Local to the host                                                                                         |
+| Published HTML files            | Re-rendered on first publish after import                                                                 |
+| Media variants                  | Omitted; imported assets fall back to originals until a later upload/replace regenerates variants         |
 | Plugin packages + install state | Plugin-owned `data_rows` are in `rows`; the installed-plugin set + package bytes are a separate subsystem |
-| Per-user preferences    | Per-device — `localStorage` + `user_preferences` rows                 |
+| Per-user preferences            | Per-device — `localStorage` + `user_preferences` rows                                                     |
 
 Folder and row authorship (`created_by_user_id`) is **reset to null** on import — the users it referenced don't exist on a fresh instance, exactly like data-row author references.
 
@@ -172,32 +172,32 @@ Returns a `BundlePreview`:
 ```ts
 {
   meta: {
-    exportedAt:      string        // from the bundle
-    sourceSiteName:  string | null // from the bundle
-    schemaVersion:   1
+    exportedAt: string // from the bundle
+    sourceSiteName: string | null // from the bundle
+    schemaVersion: 1
   }
   tables: Array<{
-    id:           string
-    name:         string
-    kind:         DataTableKind
-    inBundle:     number    // rows in bundle for this table
-    willReplace:  number    // bundle rows whose id exists locally
-    willAdd:      number    // bundle rows whose id does not exist locally
-    currentLocal: number    // current non-deleted rows on local instance
+    id: string
+    name: string
+    kind: DataTableKind
+    inBundle: number // rows in bundle for this table
+    willReplace: number // bundle rows whose id exists locally
+    willAdd: number // bundle rows whose id does not exist locally
+    currentLocal: number // current non-deleted rows on local instance
   }>
   totals: {
-    rows:          number   // total rows in bundle
-    mediaFiles:    number   // total media assets in bundle
-    mediaEmbedded: boolean  // true if media bytes are present in the internal import payload
-    mediaFolders:  number   // total folders in bundle
-    redirects:     number   // total redirects in bundle
+    rows: number // total rows in bundle
+    mediaFiles: number // total media assets in bundle
+    mediaEmbedded: boolean // true if media bytes are present in the internal import payload
+    mediaFolders: number // total folders in bundle
+    redirects: number // total redirects in bundle
   }
   rowConflicts: Array<{
-    tableId:       string
-    tableName:     string
-    rowId:         string
-    rowTitle:      string
-    slug:          string
+    tableId: string
+    tableName: string
+    rowId: string
+    rowTitle: string
+    slug: string
     existingRowId: string
     suggestedSlug: string
   }>
@@ -226,11 +226,11 @@ The archive endpoint also accepts a `selection` query parameter containing `Bund
 type ImportStrategy = 'replace' | 'merge-add' | 'merge-overwrite'
 ```
 
-| Strategy           | Tables                            | Rows                              | Media                              | Folders + redirects          |
-|--------------------|-----------------------------------|-----------------------------------|------------------------------------|------------------------------|
-| `replace`          | Wipe + recreate from bundle       | Wipe + recreate                   | Wipe + write all bytes             | Wipe + recreate from bundle  |
-| `merge-add`        | Skip if exists; add if new        | Skip if id or active slug exists; add if new | Skip if exists; add if new         | Left untouched               |
-| `merge-overwrite`  | Upsert (incoming wins)            | Upsert (incoming wins)            | Upsert (incoming bytes win)        | Left untouched               |
+| Strategy          | Tables                      | Rows                                         | Media                       | Folders + redirects         |
+| ----------------- | --------------------------- | -------------------------------------------- | --------------------------- | --------------------------- |
+| `replace`         | Wipe + recreate from bundle | Wipe + recreate                              | Wipe + write all bytes      | Wipe + recreate from bundle |
+| `merge-add`       | Skip if exists; add if new  | Skip if id or active slug exists; add if new | Skip if exists; add if new  | Left untouched              |
+| `merge-overwrite` | Upsert (incoming wins)      | Upsert (incoming wins)                       | Upsert (incoming bytes win) | Left untouched              |
 
 Folder membership (`media_asset_folders`) is restored **after** the media bytes land, and only into folders the bundle actually carried. Redirect rows are inserted after their target rows exist (in `replace`, the rows' cascade-delete clears the old redirects first). Folders + redirects ride only the `replace` (full-restore) path because merging a folder tree or redirect set into a populated instance risks unique-key collisions — the same reason the site shell is `replace`/`merge-overwrite`-only.
 
@@ -269,13 +269,13 @@ Primary merge identity is **id**: a row in the bundle with the same id as an exi
 
 ### Capability gates
 
-| Operation                             | Required capability                                 |
-|---------------------------------------|-----------------------------------------------------|
-| Export                                | `data.export`                                       |
-| Preview                               | `data.export`                                       |
-| Apply (any strategy)                  | `data.import`                                       |
-| Apply with `replace` strategy         | `data.import` AND `content.manage` AND step-up      |
-| Apply bundle that carries `site` shell| ALSO `site.structure.edit`                          |
+| Operation                              | Required capability                            |
+| -------------------------------------- | ---------------------------------------------- |
+| Export                                 | `data.export`                                  |
+| Preview                                | `data.export`                                  |
+| Apply (any strategy)                   | `data.import`                                  |
+| Apply with `replace` strategy          | `data.import` AND `content.manage` AND step-up |
+| Apply bundle that carries `site` shell | ALSO `site.structure.edit`                     |
 
 ---
 
@@ -350,15 +350,15 @@ A nightly cron can hit `/admin/api/cms/export` with an admin session cookie and 
 
 ## Forbidden patterns
 
-| Pattern                                                              | Use instead                                              |
-|----------------------------------------------------------------------|----------------------------------------------------------|
-| Importing without a preview                                          | Always preview first — `replace` is destructive          |
-| Customising the export to add server secrets (DB URL, API keys)      | Bundles travel between hosts — never include secrets     |
-| Hand-editing a bundle JSON to patch a row                            | The bundle is validated against `SiteBundleSchema`. Hand edits will be rejected if the shape's wrong; use the admin UI for one-off edits. |
-| Renaming a `data_table.id` between export and import                 | Match is by id — different id = different table         |
-| Importing media without the matching `data_rows` references           | Orphan media is fine but won't render anywhere          |
-| Concurrent imports on the same site                                  | Wrap import in a transaction (already done) but don't run two at once — capability gate + step-up reduces accidental concurrency |
-| Storing bundles in version control                                   | Large + binary media bloats the repo. Use object storage / drive. |
+| Pattern                                                                 | Use instead                                                                                                                                         |
+| ----------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Importing without a preview                                             | Always preview first — `replace` is destructive                                                                                                     |
+| Customising the export to add server secrets (DB URL, API keys)         | Bundles travel between hosts — never include secrets                                                                                                |
+| Hand-editing a bundle JSON to patch a row                               | The bundle is validated against `SiteBundleSchema`. Hand edits will be rejected if the shape's wrong; use the admin UI for one-off edits.           |
+| Renaming a `data_table.id` between export and import                    | Match is by id — different id = different table                                                                                                     |
+| Importing media without the matching `data_rows` references             | Orphan media is fine but won't render anywhere                                                                                                      |
+| Concurrent imports on the same site                                     | Wrap import in a transaction (already done) but don't run two at once — capability gate + step-up reduces accidental concurrency                    |
+| Storing bundles in version control                                      | Large + binary media bloats the repo. Use object storage / drive.                                                                                   |
 | Crafting a bundle with a `storagePath` containing `..` or a leading `/` | Rejected by `MediaAssetExportSchema` at parse time and by `assertPathWithin` at the write sink. Do not rely on either check alone — both must hold. |
 
 ---

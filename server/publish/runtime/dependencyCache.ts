@@ -201,13 +201,21 @@ async function performInstall(
   await mkdir(tempDir, { recursive: true })
 
   try {
-    await writeFile(join(tempDir, 'package.json'), JSON.stringify({
-      private: true,
-      name: `instatic-runtime-${hash}`,
-      version: '0.0.0',
-      type: 'module',
-      dependencies: exactDependencies,
-    }, null, 2), 'utf8')
+    await writeFile(
+      join(tempDir, 'package.json'),
+      JSON.stringify(
+        {
+          private: true,
+          name: `instatic-runtime-${hash}`,
+          version: '0.0.0',
+          type: 'module',
+          dependencies: exactDependencies,
+        },
+        null,
+        2,
+      ),
+      'utf8',
+    )
 
     const installTimeoutMs = options.installTimeoutMs ?? DEFAULT_INSTALL_TIMEOUT_MS
     const abort = new AbortController()
@@ -230,11 +238,15 @@ async function performInstall(
     // Sentinel goes inside the temp dir at the location it will live after the
     // rename, so the renamed directory is already a "valid" cache from the
     // first instant it is observable at the final path.
-    await writeFile(join(tempDir, INSTALL_SENTINEL_FILE), JSON.stringify({
-      hash,
-      completedAt: Date.now(),
-      packageCount: Object.keys(exactDependencies).length,
-    }), 'utf8')
+    await writeFile(
+      join(tempDir, INSTALL_SENTINEL_FILE),
+      JSON.stringify({
+        hash,
+        completedAt: Date.now(),
+        packageCount: Object.keys(exactDependencies).length,
+      }),
+      'utf8',
+    )
 
     try {
       await rename(tempDir, workspaceDir)

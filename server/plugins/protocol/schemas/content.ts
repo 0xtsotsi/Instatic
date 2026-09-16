@@ -38,7 +38,10 @@ export const ContentTablesCreateArgsSchema = Type.Tuple([CreateContentTableInput
 export const ContentEntriesListArgsSchema = Type.Tuple([SlugSchema, ContentListOptionsSchema])
 export const ContentEntriesGetArgsSchema = Type.Tuple([SlugSchema, EntryIdSchema])
 export const ContentEntriesGetBySlugArgsSchema = Type.Tuple([SlugSchema, SlugSchema])
-export const ContentEntriesCreateArgsSchema = Type.Tuple([SlugSchema, CreateContentEntryInputSchema])
+export const ContentEntriesCreateArgsSchema = Type.Tuple([
+  SlugSchema,
+  CreateContentEntryInputSchema,
+])
 export const ContentEntriesUpdateArgsSchema = Type.Tuple([
   SlugSchema,
   EntryIdSchema,
@@ -48,9 +51,12 @@ export const ContentEntriesDeleteArgsSchema = Type.Tuple([SlugSchema, EntryIdSch
 export const ContentEntriesPublishArgsSchema = Type.Tuple([
   SlugSchema,
   EntryIdSchema,
-  Type.Object({
-    scheduledFor: Type.Optional(Type.String({ minLength: 1, maxLength: 64 })),
-  }, { additionalProperties: false }),
+  Type.Object(
+    {
+      scheduledFor: Type.Optional(Type.String({ minLength: 1, maxLength: 64 })),
+    },
+    { additionalProperties: false },
+  ),
 ])
 export const ContentEntriesMoveTableArgsSchema = Type.Tuple([SlugSchema, EntryIdSchema, SlugSchema])
 
@@ -61,10 +67,13 @@ export const ContentEntriesCreateManyArgsSchema = Type.Tuple([
 export const ContentEntriesUpdateManyArgsSchema = Type.Tuple([
   SlugSchema,
   Type.Array(
-    Type.Object({
-      id: EntryIdSchema,
-      patch: UpdateContentEntryInputSchema,
-    }, { additionalProperties: false }),
+    Type.Object(
+      {
+        id: EntryIdSchema,
+        patch: UpdateContentEntryInputSchema,
+      },
+      { additionalProperties: false },
+    ),
     { maxItems: 500 },
   ),
 ])

@@ -37,7 +37,8 @@ export async function loadCachedCatalogue(db: DbClient): Promise<ModelCatalogue 
         inputPerMTok: Number(row.input_per_mtok),
         outputPerMTok: Number(row.output_per_mtok),
         cacheReadPerMTok: row.cache_read_per_mtok === null ? null : Number(row.cache_read_per_mtok),
-        cacheWritePerMTok: row.cache_write_per_mtok === null ? null : Number(row.cache_write_per_mtok),
+        cacheWritePerMTok:
+          row.cache_write_per_mtok === null ? null : Number(row.cache_write_per_mtok),
       },
       contextWindow: row.context_window === null ? null : Number(row.context_window),
     })
@@ -55,7 +56,11 @@ export async function saveCachedCatalogue(db: DbClient, catalogue: ModelCatalogu
   })
 }
 
-async function insertPricingRow(db: DbClient, key: string, entry: ModelCatalogueEntry): Promise<void> {
+async function insertPricingRow(
+  db: DbClient,
+  key: string,
+  entry: ModelCatalogueEntry,
+): Promise<void> {
   await db`
     insert into ai_model_pricing (
       pricing_key, input_per_mtok, output_per_mtok,

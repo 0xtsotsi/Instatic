@@ -15,7 +15,6 @@ required runtime env vars per `docs/deployment/railway.md`.
 > **Validate by clicking through a deploy in the Railway UI before treating
 > this as the canonical template.** If any field is rejected, edit
 > `template.json` and commit the correction in a follow-up PR.
->
 
 > **Why build from source instead of pinning a published image?** The fork
 > publishes no GHCR package, and upstream `ghcr.io/corebunch/instatic:*` does
@@ -38,10 +37,10 @@ Use the same pattern as Render's template repositories described in
 
 ## What the template provisions
 
-| Service          | Source                            | Persistent data                |
-|------------------|-----------------------------------|--------------------------------|
-| `instatic`       | Fork GitHub repo, Dockerfile build | `/app/storage` (uploads)       |
-| `instatic-postgres` | Railway Postgres template       | Postgres service volume        |
+| Service             | Source                             | Persistent data          |
+| ------------------- | ---------------------------------- | ------------------------ |
+| `instatic`          | Fork GitHub repo, Dockerfile build | `/app/storage` (uploads) |
+| `instatic-postgres` | Railway Postgres template          | Postgres service volume  |
 
 App env vars set by the template:
 
@@ -81,11 +80,11 @@ Both entries must be valid URLs (scheme + host, no trailing slash, `https://` no
 
 ## Troubleshooting
 
-| Symptom | Check |
-|---|---|
-| Public URL shows service unavailable | `PORT` and the target port must both be `8080`. |
-| Deploy healthcheck fails | Healthcheck path must be `/health`; the app must listen on `PORT`. |
-| `EACCES: permission denied, mkdir '/app/storage/...'` in app logs | `RAILWAY_RUN_UID=0` must be set on the app service. |
-| First-run setup or login returns `Forbidden: invalid origin` | The template does not set `PUBLIC_ORIGIN` on purpose — the server auto-detects it from `RAILWAY_PUBLIC_DOMAIN`. If you set `PUBLIC_ORIGIN` to a literal value, it must match the URL you opened exactly (no trailing slash, `https://` not `http://`). To add a custom domain, see the 'PUBLIC_ORIGIN' section above — do **not** include `${{RAILWAY_PUBLIC_DOMAIN}}` syntax; list the literal Railway domain as the first entry. |
-| Adding AI credentials or enabling TOTP MFA returns 500 | `INSTATIC_SECRET_KEY` must exist and be stable across redeploys. |
-| Deploy pulls upstream `corebunch/instatic` instead of the fork | The service is connected to the wrong source. Change the service source to `https://github.com/0xtsotsi/Instatic` with `Builder: Dockerfile`. |
+| Symptom                                                           | Check                                                                                                                                                                                                                                                                                                                                                                                                                              |
+| ----------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Public URL shows service unavailable                              | `PORT` and the target port must both be `8080`.                                                                                                                                                                                                                                                                                                                                                                                    |
+| Deploy healthcheck fails                                          | Healthcheck path must be `/health`; the app must listen on `PORT`.                                                                                                                                                                                                                                                                                                                                                                 |
+| `EACCES: permission denied, mkdir '/app/storage/...'` in app logs | `RAILWAY_RUN_UID=0` must be set on the app service.                                                                                                                                                                                                                                                                                                                                                                                |
+| First-run setup or login returns `Forbidden: invalid origin`      | The template does not set `PUBLIC_ORIGIN` on purpose — the server auto-detects it from `RAILWAY_PUBLIC_DOMAIN`. If you set `PUBLIC_ORIGIN` to a literal value, it must match the URL you opened exactly (no trailing slash, `https://` not `http://`). To add a custom domain, see the 'PUBLIC_ORIGIN' section above — do **not** include `${{RAILWAY_PUBLIC_DOMAIN}}` syntax; list the literal Railway domain as the first entry. |
+| Adding AI credentials or enabling TOTP MFA returns 500            | `INSTATIC_SECRET_KEY` must exist and be stable across redeploys.                                                                                                                                                                                                                                                                                                                                                                   |
+| Deploy pulls upstream `corebunch/instatic` instead of the fork    | The service is connected to the wrong source. Change the service source to `https://github.com/0xtsotsi/Instatic` with `Builder: Dockerfile`.                                                                                                                                                                                                                                                                                      |

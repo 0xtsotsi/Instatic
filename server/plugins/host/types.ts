@@ -86,8 +86,7 @@ export interface PendingRequest {
  * branch on whether to respawn or park in error state.
  */
 export type CrashRecoveryDecision =
-  | { kind: 'respawn'; recentCrashCount: number }
-  | { kind: 'give-up'; recentCrashCount: number }
+  { kind: 'respawn'; recentCrashCount: number } | { kind: 'give-up'; recentCrashCount: number }
 
 /**
  * Callback the runtime registers so the worker host can ask it to re-load +

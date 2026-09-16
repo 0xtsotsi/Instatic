@@ -8,10 +8,10 @@ Railway is the simplest managed target for Instatic because it can run the publi
 
 ## TL;DR
 
-| Template | Database | App volume | `DATABASE_URL` |
-|---|---|---|---|
-| SQLite | SQLite file in the app volume | `/app/storage` | `sqlite:/app/storage/data/cms.db` |
-| Postgres | Railway Postgres service | `/app/storage` for uploads only | `${{Postgres.DATABASE_URL}}` |
+| Template | Database                      | App volume                      | `DATABASE_URL`                    |
+| -------- | ----------------------------- | ------------------------------- | --------------------------------- |
+| SQLite   | SQLite file in the app volume | `/app/storage`                  | `sqlite:/app/storage/data/cms.db` |
+| Postgres | Railway Postgres service      | `/app/storage` for uploads only | `${{Postgres.DATABASE_URL}}`      |
 
 Both templates use:
 
@@ -45,14 +45,14 @@ Do not add a separate migration command. `server/index.ts` creates the DB client
 
 Recommended service settings:
 
-| Setting | Value |
-|---|---|
-| Source | Docker image |
-| Image | `ghcr.io/corebunch/instatic:0.0.11` |
-| Public networking | HTTP enabled |
-| Target port | `8080` |
-| Healthcheck path | `/health` |
-| Volume mount path | `/app/storage` |
+| Setting           | Value                               |
+| ----------------- | ----------------------------------- |
+| Source            | Docker image                        |
+| Image             | `ghcr.io/corebunch/instatic:0.0.11` |
+| Public networking | HTTP enabled                        |
+| Target port       | `8080`                              |
+| Healthcheck path  | `/health`                           |
+| Volume mount path | `/app/storage`                      |
 
 Railway volumes mount at runtime, not build time. Instatic only writes runtime data there, so the published image stays unchanged across installs.
 
@@ -104,10 +104,10 @@ Use Postgres when the site has several admin users, when you want database backu
 
 Template services:
 
-| Service | Source | Persistent data |
-|---|---|---|
-| App | Instatic Dockerfile/image | `/app/storage/uploads` on the app volume |
-| Postgres | Railway PostgreSQL template | Postgres service volume |
+| Service  | Source                      | Persistent data                          |
+| -------- | --------------------------- | ---------------------------------------- |
+| App      | Instatic Dockerfile/image   | `/app/storage/uploads` on the app volume |
+| Postgres | Railway PostgreSQL template | Postgres service volume                  |
 
 Attach one volume to the app service:
 
@@ -149,17 +149,17 @@ Set a maintenance window before enabling automatic updates on sites with attache
 
 ## Troubleshooting
 
-| Symptom | Check |
-|---|---|
-| Public URL shows service unavailable | `PORT` and the public target port must match. The template uses `8080`. |
-| Deploy health check fails | Healthcheck path must be `/health`; the app must listen on `PORT`. |
-| SQLite data disappears after redeploy | `DATABASE_URL` must point under the mounted volume, e.g. `/app/storage/data/cms.db`. |
-| Uploaded files disappear after redeploy | `UPLOADS_DIR` must point under the mounted volume, e.g. `/app/storage/uploads`. |
-| App logs show `EACCES: permission denied, mkdir '/app/storage/...'` | Set `RAILWAY_RUN_UID=0`; Railway mounts volumes as `root` and the image otherwise runs as non-root `bun`. |
-| First-run setup or login returns `Forbidden: invalid origin` | Confirm `PUBLIC_ORIGIN` matches the public URL you opened. Templates set `PUBLIC_ORIGIN=https://${{RAILWAY_PUBLIC_DOMAIN}}`; if you front the app with a custom domain, append it as a second comma-separated entry. |
-| Postgres app cannot connect | `DATABASE_URL` must reference the Postgres service's internal `DATABASE_URL`, not a copied local URL. |
-| Adding an AI provider credential or enabling TOTP MFA returns 500 | Confirm `INSTATIC_SECRET_KEY` exists and has not been rotated. One-click templates generate it automatically; hand-created services can generate it with `bun run scripts/generate-secret-key.ts`. |
-| Deployments appear in the Instatic GitHub repo | The service is connected to GitHub source. Change the service source to the published Docker image. |
+| Symptom                                                             | Check                                                                                                                                                                                                                |
+| ------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Public URL shows service unavailable                                | `PORT` and the public target port must match. The template uses `8080`.                                                                                                                                              |
+| Deploy health check fails                                           | Healthcheck path must be `/health`; the app must listen on `PORT`.                                                                                                                                                   |
+| SQLite data disappears after redeploy                               | `DATABASE_URL` must point under the mounted volume, e.g. `/app/storage/data/cms.db`.                                                                                                                                 |
+| Uploaded files disappear after redeploy                             | `UPLOADS_DIR` must point under the mounted volume, e.g. `/app/storage/uploads`.                                                                                                                                      |
+| App logs show `EACCES: permission denied, mkdir '/app/storage/...'` | Set `RAILWAY_RUN_UID=0`; Railway mounts volumes as `root` and the image otherwise runs as non-root `bun`.                                                                                                            |
+| First-run setup or login returns `Forbidden: invalid origin`        | Confirm `PUBLIC_ORIGIN` matches the public URL you opened. Templates set `PUBLIC_ORIGIN=https://${{RAILWAY_PUBLIC_DOMAIN}}`; if you front the app with a custom domain, append it as a second comma-separated entry. |
+| Postgres app cannot connect                                         | `DATABASE_URL` must reference the Postgres service's internal `DATABASE_URL`, not a copied local URL.                                                                                                                |
+| Adding an AI provider credential or enabling TOTP MFA returns 500   | Confirm `INSTATIC_SECRET_KEY` exists and has not been rotated. One-click templates generate it automatically; hand-created services can generate it with `bun run scripts/generate-secret-key.ts`.                   |
+| Deployments appear in the Instatic GitHub repo                      | The service is connected to GitHub source. Change the service source to the published Docker image.                                                                                                                  |
 
 ## Related
 

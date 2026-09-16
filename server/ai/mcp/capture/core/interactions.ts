@@ -29,15 +29,7 @@
  * at runtime.
  */
 export type InteractionStep = {
-  action:
-    | 'click'
-    | 'fill'
-    | 'type'
-    | 'hover'
-    | 'wait_for'
-    | 'wait_for_url'
-    | 'wait'
-    | 'press'
+  action: 'click' | 'fill' | 'type' | 'hover' | 'wait_for' | 'wait_for_url' | 'wait' | 'press'
   selector?: string
   value?: string
   text?: string
@@ -78,9 +70,16 @@ export const MAX_TYPE_DELAY_MS = 5_000
 export interface InteractionPage {
   click(selector: string, opts?: { timeout?: number }): Promise<unknown>
   fill(selector: string, value: string, opts?: { timeout?: number }): Promise<unknown>
-  type(selector: string, text: string, opts?: { delay?: number; timeout?: number }): Promise<unknown>
+  type(
+    selector: string,
+    text: string,
+    opts?: { delay?: number; timeout?: number },
+  ): Promise<unknown>
   hover(selector: string, opts?: { timeout?: number }): Promise<unknown>
-  waitForSelector(selector: string, opts?: { state?: 'attached' | 'visible' | 'hidden'; timeout?: number }): Promise<unknown>
+  waitForSelector(
+    selector: string,
+    opts?: { state?: 'attached' | 'visible' | 'hidden'; timeout?: number },
+  ): Promise<unknown>
   waitForURL(url: string | RegExp, opts?: { timeout?: number }): Promise<unknown>
   waitForTimeout(ms: number): Promise<unknown>
   press(selector: string, key: string, opts?: { timeout?: number }): Promise<unknown>
@@ -116,7 +115,10 @@ function parseUrlPattern(
       try {
         return { ok: true, value: new RegExp(body, flags) }
       } catch (err) {
-        return { ok: false, reason: `invalid regex: ${err instanceof Error ? err.message : String(err)}` }
+        return {
+          ok: false,
+          reason: `invalid regex: ${err instanceof Error ? err.message : String(err)}`,
+        }
       }
     }
   }
@@ -219,9 +221,9 @@ async function executeStep(
         // substrings with "URL pattern must be a string or regex". Wrap
         // the substring in an escaped regex so waitForURL accepts it.
         if (
-          err instanceof Error
-          && /URL pattern must be/.test(err.message)
-          && typeof target === 'string'
+          err instanceof Error &&
+          /URL pattern must be/.test(err.message) &&
+          typeof target === 'string'
         ) {
           const escaped = target.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
           const re = new RegExp(escaped)

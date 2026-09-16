@@ -28,8 +28,10 @@ import { HeadingEditor } from './HeadingEditor'
 
 const HeadingPropsSchema = Type.Object({
   level: Type.Number({ default: 2 }),
-  text:  Type.String({ default: 'Heading' }),
-  align: Type.Union([Type.Literal('left'), Type.Literal('center'), Type.Literal('right')], { default: 'left' }),
+  text: Type.String({ default: 'Heading' }),
+  align: Type.Union([Type.Literal('left'), Type.Literal('center'), Type.Literal('right')], {
+    default: 'left',
+  }),
 })
 
 type HeadingProps = Static<typeof HeadingPropsSchema>
@@ -52,15 +54,15 @@ export const HeadingModule: ModuleDefinition<HeadingProps> = {
       label: 'Level',
       options: [1, 2, 3, 4, 5, 6].map((n) => ({ value: String(n), label: `h${n}` })),
     },
-    text:  { type: 'text', label: 'Text' },
+    text: { type: 'text', label: 'Text' },
     align: {
       type: 'select',
       label: 'Align',
       layout: 'inline',
       options: [
-        { value: 'left',   label: 'Left' },
+        { value: 'left', label: 'Left' },
         { value: 'center', label: 'Center' },
-        { value: 'right',  label: 'Right' },
+        { value: 'right', label: 'Right' },
       ],
     },
   },
@@ -69,7 +71,7 @@ export const HeadingModule: ModuleDefinition<HeadingProps> = {
     const tag = `h${Math.max(1, Math.min(6, Number(props.level) || 2))}`
     return {
       html: `<${tag} class="heading" data-align="${props.align}">${props.text}</${tag}>`,
-      css:  `.heading[data-align="center"] { text-align: center; }
+      css: `.heading[data-align="center"] { text-align: center; }
              .heading[data-align="right"]  { text-align: right;  }`,
     }
   },
@@ -118,7 +120,7 @@ Leaf modules (`canHaveChildren: false`) receive an empty array — they can igno
 ```ts
 return {
   html: `<div class="my-mod">${renderedChildren.join('')}</div>`,
-  css:  `.my-mod { padding: 16px; }`,
+  css: `.my-mod { padding: 16px; }`,
 }
 ```
 
@@ -134,21 +136,21 @@ The `schema` field maps prop keys to `PropertyControl` descriptors. Full union i
 
 ### Control types
 
-| `type`      | Renders as                                        | Value shape              |
-|-------------|---------------------------------------------------|--------------------------|
-| `text`      | `<Input>`                                         | `string`                 |
-| `textarea`  | `<Textarea>`                                      | `string`                 |
-| `richtext`  | No visible site-editor control; hidden/internal sanitized HTML prop | HTML string              |
-| `number`    | `<Input type="number">`                           | `number`                 |
-| `toggle`    | `<Switch>`                                        | `boolean`                |
-| `select`    | `<Select>` or `<ContextMenu>` for long lists      | option value string      |
-| `color`     | `<ColorInput>`                                    | hex string               |
-| `url`       | URL text input                                    | `string`                 |
-| `dataTable` | Data table picker                                 | table id string          |
-| `image`     | Media picker (images)                             | media id or URL string   |
-| `media`     | Media picker (image or video)                     | media id string          |
-| `svg`       | Inline SVG editor                                 | SVG markup string        |
-| `group`     | Collapsible section (visual grouping, no data)    | — (children record)      |
+| `type`      | Renders as                                                          | Value shape            |
+| ----------- | ------------------------------------------------------------------- | ---------------------- |
+| `text`      | `<Input>`                                                           | `string`               |
+| `textarea`  | `<Textarea>`                                                        | `string`               |
+| `richtext`  | No visible site-editor control; hidden/internal sanitized HTML prop | HTML string            |
+| `number`    | `<Input type="number">`                                             | `number`               |
+| `toggle`    | `<Switch>`                                                          | `boolean`              |
+| `select`    | `<Select>` or `<ContextMenu>` for long lists                        | option value string    |
+| `color`     | `<ColorInput>`                                                      | hex string             |
+| `url`       | URL text input                                                      | `string`               |
+| `dataTable` | Data table picker                                                   | table id string        |
+| `image`     | Media picker (images)                                               | media id or URL string |
+| `media`     | Media picker (image or video)                                       | media id string        |
+| `svg`       | Inline SVG editor                                                   | SVG markup string      |
+| `group`     | Collapsible section (visual grouping, no data)                      | — (children record)    |
 
 ### Conditional controls
 
@@ -196,12 +198,12 @@ html: { type: 'richtext', label: 'Content', hidden: true }
 
 `escapeProps(props, schema)` chooses each string prop's escaper from its declared control `type` — **never** from the prop's key name:
 
-| control `type`            | escaper at the publisher boundary                          |
-|---------------------------|------------------------------------------------------------|
-| `url` / `image` / `media` | `isSafeUrl` (blocks `javascript:` etc.; passed raw for the module's `safeUrl`) |
-| `richtext`                | `sanitizeRichtext` (DOMPurify)                             |
-| `svg`                     | `sanitizeSvg` (DOMPurify SVG profile)                      |
-| everything else, or a prop absent from `schema` | `escapeHtml` (safe default)          |
+| control `type`                                  | escaper at the publisher boundary                                              |
+| ----------------------------------------------- | ------------------------------------------------------------------------------ |
+| `url` / `image` / `media`                       | `isSafeUrl` (blocks `javascript:` etc.; passed raw for the module's `safeUrl`) |
+| `richtext`                                      | `sanitizeRichtext` (DOMPurify)                                                 |
+| `svg`                                           | `sanitizeSvg` (DOMPurify SVG profile)                                          |
+| everything else, or a prop absent from `schema` | `escapeHtml` (safe default)                                                    |
 
 A prop that needs URL/richtext/SVG handling **must** declare the matching `type`. `richtext` is intentionally an internal/hidden HTML prop type for publisher sanitization; author-facing formatted content is authored in the Content workspace and rendered through content outlets or variable bindings. There is no key-name fallback.
 
@@ -218,7 +220,7 @@ import type { ModuleComponentProps } from '@core/module-engine'
 
 interface HeadingProps extends Record<string, unknown> {
   level: number
-  text:  string
+  text: string
   align: string
 }
 
@@ -228,15 +230,20 @@ export const HeadingEditor: React.FC<ModuleComponentProps<HeadingProps>> = ({
   nodeWrapperProps,
 }) => {
   const tag = `h${Math.max(1, Math.min(6, Number(props.level) || 2))}`
-  return React.createElement(tag, {
-    ...nodeWrapperProps,   // REQUIRED — wires selection, hover, keyboard to this node
-    className: mcClassName, // REQUIRED — applies node.classIds CSS
-    'data-align': props.align,
-  }, props.text)
+  return React.createElement(
+    tag,
+    {
+      ...nodeWrapperProps, // REQUIRED — wires selection, hover, keyboard to this node
+      className: mcClassName, // REQUIRED — applies node.classIds CSS
+      'data-align': props.align,
+    },
+    props.text,
+  )
 }
 ```
 
 **Rules:**
+
 - Spread `nodeWrapperProps` onto the root element. Without it the node is invisible to the editor's interaction layer (no selection, no hover, no keyboard).
 - Apply `mcClassName` as the root element's class. Without it the author's CSS class rules don't apply in the canvas.
 - Produce the same DOM structure as `render()` — canvas selection geometry, drop-target detection, and dimension measurement assume parity.
@@ -256,19 +263,19 @@ src/modules/base/mymod/
 
 Name the leaf after what it owns, not generically:
 
-| Module           | Leaf file       | What it holds                                         |
-|------------------|-----------------|-------------------------------------------------------|
-| `base.button`    | `anchor.ts`     | `resolveButtonAnchor()` — element decision (`<a>` vs `<button>`) |
-| `base.link`      | `content.ts`    | `linkUsesChildren()` — children/text fallback rule    |
-| `base.list`      | `items.ts`      | `parseItems()` — textarea → trimmed non-empty array   |
-| `base.video`     | `youtube.ts`    | `parseYoutubeId()`, `youtubeEmbedUrl()` — embed URL  |
-| `base.text`      | `tags.ts`       | `normalizeTag()`, `TextTag` — semantic tag coercion   |
+| Module        | Leaf file    | What it holds                                                    |
+| ------------- | ------------ | ---------------------------------------------------------------- |
+| `base.button` | `anchor.ts`  | `resolveButtonAnchor()` — element decision (`<a>` vs `<button>`) |
+| `base.link`   | `content.ts` | `linkUsesChildren()` — children/text fallback rule               |
+| `base.list`   | `items.ts`   | `parseItems()` — textarea → trimmed non-empty array              |
+| `base.video`  | `youtube.ts` | `parseYoutubeId()`, `youtubeEmbedUrl()` — embed URL              |
+| `base.text`   | `tags.ts`    | `normalizeTag()`, `TextTag` — semantic tag coercion              |
 
 **Cross-module shared vocabulary** goes in `src/modules/base/shared/` rather than inside a single module folder:
 
-| File                       | Exports                                                      | Used by            |
-|----------------------------|--------------------------------------------------------------|--------------------|
-| `shared/anchorTarget.ts`   | `AnchorTargetSchema`, `AnchorTarget`, `ANCHOR_TARGET_OPTIONS`, `anchorRel()` | button, link |
+| File                     | Exports                                                                      | Used by      |
+| ------------------------ | ---------------------------------------------------------------------------- | ------------ |
+| `shared/anchorTarget.ts` | `AnchorTargetSchema`, `AnchorTarget`, `ANCHOR_TARGET_OPTIONS`, `anchorRel()` | button, link |
 
 ```ts
 // anchor.ts — leaf file for base.button
@@ -318,15 +325,22 @@ render: (props) => {
 ```
 
 `RenderResolvedMedia` shape (source: `src/core/publisher/renderConfig.ts`):
+
 ```ts
 interface RenderResolvedMedia {
-  publicPath: string          // original upload URL
+  publicPath: string // original upload URL
   width: number | null
   height: number | null
   altText: string
   blurHash: string | null
-  posterPath: string | null   // video poster frame URL
-  variants: Array<{ width: number; height: number; format: string; path: string; sizeBytes: number }>
+  posterPath: string | null // video poster frame URL
+  variants: Array<{
+    width: number
+    height: number
+    format: string
+    path: string
+    sizeBytes: number
+  }>
 }
 ```
 
@@ -363,9 +377,9 @@ The DOM/Layers panel resolves the badge through the single helper `resolveHtmlTa
 The publisher's node walker has more than one render path, and which one a module takes used to be invisible on the definition. `publishBehavior` makes the contract explicit:
 
 ```ts
-publishBehavior: 'standard'     // (default, omit) — the normal bottom-up walk
-publishBehavior: 'special'      // a publisher-side specialised renderer replaces the walk
-publishBehavior: 'transparent'  // the node renders nothing on its own
+publishBehavior: 'standard' // (default, omit) — the normal bottom-up walk
+publishBehavior: 'special' // a publisher-side specialised renderer replaces the walk
+publishBehavior: 'transparent' // the node renders nothing on its own
 ```
 
 - **`'standard'`** (the default — just omit the field): `renderStandardNode` runs the usual flow — render children → resolve/escape props → call `render()` → inject classes. Almost every module.
@@ -392,18 +406,18 @@ The publisher emits a `<script type="importmap">` entry. `getMissingModuleDepend
 
 ## Forbidden patterns
 
-| Pattern                                                              | Use instead                                              |
-|----------------------------------------------------------------------|----------------------------------------------------------|
-| `document.querySelector` inside `render`                             | Render is pure. No DOM.                                  |
-| `await fetch(...)` inside `render`                                   | Render is sync. Pre-fetch via prefetch helpers.          |
-| Mutating `props` inside `render`                                     | Treat props as immutable.                                |
-| Emitting `<script>` tags from `render`                              | The publisher sanitizer strips them. Use plugin frontend assets. |
-| Hardcoded id selectors in CSS (`.my-mod-${nodeId}`)                 | CSS is deduped per `moduleId`. Use `[data-*]` attribute selectors. |
-| Importing from `@admin/...` inside a module                          | Modules are publisher-side. Stay inside `@core/...` and `@ui/...` (icons only). |
-| Omitting `nodeWrapperProps` spread in editor component              | Node becomes unselectable and invisible to the editor.  |
+| Pattern                                                                | Use instead                                                                                                                                     |
+| ---------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
+| `document.querySelector` inside `render`                               | Render is pure. No DOM.                                                                                                                         |
+| `await fetch(...)` inside `render`                                     | Render is sync. Pre-fetch via prefetch helpers.                                                                                                 |
+| Mutating `props` inside `render`                                       | Treat props as immutable.                                                                                                                       |
+| Emitting `<script>` tags from `render`                                 | The publisher sanitizer strips them. Use plugin frontend assets.                                                                                |
+| Hardcoded id selectors in CSS (`.my-mod-${nodeId}`)                    | CSS is deduped per `moduleId`. Use `[data-*]` attribute selectors.                                                                              |
+| Importing from `@admin/...` inside a module                            | Modules are publisher-side. Stay inside `@core/...` and `@ui/...` (icons only).                                                                 |
+| Omitting `nodeWrapperProps` spread in editor component                 | Node becomes unselectable and invisible to the editor.                                                                                          |
 | Non-component exports from `*Editor.tsx` (utilities, types, constants) | Put shared logic in a sibling `.ts` leaf (see "Sharing logic" above). Editor files must stay component-only for React Fast Refresh HMR to work. |
-| Duplicating render logic between `render()` and `*Editor.tsx`          | Extract to a sibling `.ts` leaf or `base/shared/`. Canvas/publisher drift is the most visible bug a CMS can ship. |
-| Parallel `interface Foo` next to a `FooPropsSchema`                 | Use `type Foo = Static<typeof FooPropsSchema>`.          |
+| Duplicating render logic between `render()` and `*Editor.tsx`          | Extract to a sibling `.ts` leaf or `base/shared/`. Canvas/publisher drift is the most visible bug a CMS can ship.                               |
+| Parallel `interface Foo` next to a `FooPropsSchema`                    | Use `type Foo = Static<typeof FooPropsSchema>`.                                                                                                 |
 
 ---
 

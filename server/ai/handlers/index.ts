@@ -20,11 +20,7 @@ import { tryHandleAiModels } from './models'
 import { tryHandleAiMcpConnectors } from '../mcp/handlers/connectors'
 import { tryHandleAiEditorBridge } from '../mcp/handlers/editorBridge'
 
-export function tryHandleAi(
-  req: Request,
-  db: DbClient,
-  url: URL,
-): Promise<Response> | null {
+export function tryHandleAi(req: Request, db: DbClient, url: URL): Promise<Response> | null {
   const pathname = url.pathname
   if (!pathname.startsWith('/admin/api/ai/')) return null
 

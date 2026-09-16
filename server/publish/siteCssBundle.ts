@@ -131,7 +131,11 @@ function computePageInvariantBundles(
 // Deliberately NOT keyed on the site object: every consumer loads the snapshot
 // fresh (DB JSON parse per query), so an identity key would never hit — that
 // was exactly the bug that made every Layer B miss re-walk the whole site.
-let pageInvariantCache: { version: number; mediaSignature: string; bundles: PageInvariantBundles } | null = null
+let pageInvariantCache: {
+  version: number
+  mediaSignature: string
+  bundles: PageInvariantBundles
+} | null = null
 registerVersionedCacheReset(() => {
   pageInvariantCache = null
 })
@@ -147,7 +151,11 @@ function memoizedPageInvariantBundles(
   options: ResponsiveCssOptions,
 ): PageInvariantBundles {
   const mediaSignature = styleMediaSignature(site, options)
-  if (pageInvariantCache && pageInvariantCache.version === version && pageInvariantCache.mediaSignature === mediaSignature) {
+  if (
+    pageInvariantCache &&
+    pageInvariantCache.version === version &&
+    pageInvariantCache.mediaSignature === mediaSignature
+  ) {
     return pageInvariantCache.bundles
   }
   const bundles = computePageInvariantBundles(site, registry, options)
@@ -187,10 +195,7 @@ function buildFrameworkCss(site: SiteDocument, registry: IModuleRegistry): strin
  * 12-hex-char SHA-256 prefix = 48 bits of entropy ≈ 2.8e14 distinct values.
  * Collision-free for any realistic CMS site count.
  */
-function makeBundleFile(
-  bundle: SiteCssBundleId,
-  content: string,
-): CssBundleFile {
+function makeBundleFile(bundle: SiteCssBundleId, content: string): CssBundleFile {
   const hash = createHash('sha256').update(content).digest('hex').slice(0, 12)
   return {
     bundle,

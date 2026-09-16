@@ -69,7 +69,9 @@ async function main(): Promise<void> {
       // Google ships a synthetic 'menu' subset that points to a glyph subset
       // used for their picker UI — strip it so users only see real subsets.
       subsets: (entry.subsets ?? []).filter((s) => s && s !== 'menu').sort(),
-      variants: Object.keys(entry.fonts ?? {}).map(normalizeVariant).sort(sortVariants),
+      variants: Object.keys(entry.fonts ?? {})
+        .map(normalizeVariant)
+        .sort(sortVariants),
       popularity: entry.popularity ?? entry.defaultSort ?? 9999,
     }))
     .filter((entry) => entry.variants.length > 0 && entry.subsets.length > 0)

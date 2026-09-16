@@ -20,11 +20,7 @@ import { type CaptureFetcher, type FetchedPage } from './core/playwrightFetcher'
 import { generateUid } from './adapters/uids'
 import { tokensFromSite } from './adapters/tokens'
 import { applyPipeline, type CaptureMode } from './pipeline'
-import {
-  INTERACTION_TIMEOUT_MS,
-  MAX_INTERACTIONS,
-  type InteractionStep,
-} from './core/interactions'
+import { INTERACTION_TIMEOUT_MS, MAX_INTERACTIONS, type InteractionStep } from './core/interactions'
 
 // Re-export so captureTool.ts (and any test that imports from this module)
 // can keep using the validateSelector boundary check without crossing
@@ -154,8 +150,8 @@ export async function runCapture(
     }
 
     // Resolve the draft site's tokens from the DB. Empty list is fine —
-// applyDesignTokens is a no-op when there are no colour tokens. Skip
-// entirely for 'dom-only' — no CSS path means tokens are never read.
+    // applyDesignTokens is a no-op when there are no colour tokens. Skip
+    // entirely for 'dom-only' — no CSS path means tokens are never read.
     const needsCss = mode !== 'dom-only'
     const draftSite = needsCss ? await getDraftSite(deps.db) : null
     const tokens = draftSite ? tokensFromSite(draftSite) : []
@@ -178,7 +174,9 @@ export async function runCapture(
       tokens,
       assetsMax,
       baseUrl: url,
-      safeFetcher: safeFetcher ?? { fetch: async () => ({ ok: false, error: 'no fetcher (restricted mode)' }) },
+      safeFetcher: safeFetcher ?? {
+        fetch: async () => ({ ok: false, error: 'no fetcher (restricted mode)' }),
+      },
       resolveLocalPath: (u) => {
         const m = u.match(/\.[a-z0-9]{1,8}(?:\?|$)/i)
         const ext = m ? m[0].replace(/[?].*$/, '') : '.bin'
@@ -194,7 +192,15 @@ export async function runCapture(
   } finally {
     // Release per-page resources (page + context), then the browser
     // process. Without this, every MCP call leaks one Chromium.
-    try { await fetched?.close() } catch { /* best effort */ }
-    try { await deps.fetcher?.close() } catch { /* best effort */ }
+    try {
+      await fetched?.close()
+    } catch {
+      /* best effort */
+    }
+    try {
+      await deps.fetcher?.close()
+    } catch {
+      /* best effort */
+    }
   }
 }

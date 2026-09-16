@@ -74,9 +74,7 @@ export interface ApplyPipelineResult {
  *   - 'dom-only'    → css is '', html/uids populated, assetFiles empty
  *   - 'dom+styles'  → everything populated when the page had assets
  */
-export async function applyPipeline(
-  input: ApplyPipelineInput,
-): Promise<ApplyPipelineResult> {
+export async function applyPipeline(input: ApplyPipelineInput): Promise<ApplyPipelineResult> {
   const {
     nodes,
     mode,
@@ -188,9 +186,7 @@ function sanitizeSelectorForError(s: string, maxLen = 100): string {
  * Returns `{ ok: true }` for well-formed input, or `{ ok: false, error }`
  * with an error string suitable for the tool's return shape.
  */
-export function validateSelector(
-  selector: string,
-): { ok: true } | { ok: false; error: string } {
+export function validateSelector(selector: string): { ok: true } | { ok: false; error: string } {
   const sample = sanitizeSelectorForError(selector)
   if (selector.length > MAX_SELECTOR_LENGTH) {
     return {

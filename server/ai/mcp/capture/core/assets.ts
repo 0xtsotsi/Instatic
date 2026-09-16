@@ -10,7 +10,9 @@
  */
 
 export interface AssetFetcher {
-  fetch(url: string): Promise<{ ok: boolean; bytes?: Uint8Array; contentType?: string; error?: string }>
+  fetch(
+    url: string,
+  ): Promise<{ ok: boolean; bytes?: Uint8Array; contentType?: string; error?: string }>
 }
 
 export interface CollectedAsset {
@@ -59,7 +61,8 @@ function extractHtmlUrls(html: string): string[] {
       trimmed.startsWith('javascript:') ||
       trimmed.startsWith('mailto:') ||
       trimmed.startsWith('blob:')
-    ) continue
+    )
+      continue
     for (const part of v.split(/,\s*/)) {
       const url = part.trim().split(/\s+/)[0]
       if (url) out.push(url)
@@ -83,7 +86,8 @@ function isAssetWorthy(url: string): boolean {
     url.startsWith('mailto:') ||
     url.startsWith('#') ||
     url.startsWith('blob:')
-  ) return false
+  )
+    return false
   return true
 }
 
@@ -105,7 +109,9 @@ function defaultResolveLocalPath(url: string): string {
     if (dot > -1 && dot > p.lastIndexOf('/')) {
       ext = p.slice(dot).slice(0, 8)
     }
-  } catch { /* ignore */ }
+  } catch {
+    /* ignore */
+  }
   return `assets/${fnv1a32(url)}${ext}`
 }
 
@@ -150,7 +156,11 @@ export async function collectAssets(
     urlToLocal.set(url, localPath)
     files.push({ localPath, originalUrl: url })
     if (options.persist) {
-      await options.persist(localPath, result.bytes, result.contentType ?? 'application/octet-stream')
+      await options.persist(
+        localPath,
+        result.bytes,
+        result.contentType ?? 'application/octet-stream',
+      )
     }
   }
 

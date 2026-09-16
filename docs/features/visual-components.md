@@ -26,11 +26,11 @@ A VC **is** a `NodeTree<VCNode>` (structurally identical to `NodeTree<BaseNode>`
 
 ```ts
 export const VisualComponentSchema = Type.Object({
-  id:          Type.String(),
-  name:        Type.String(),
+  id: Type.String(),
+  name: Type.String(),
   description: Type.Optional(Type.String()),
-  tree:        NodeTreeSchema,      // NodeTree<VCNode>
-  params:      Type.Array(VCParamSchema),
+  tree: NodeTreeSchema, // NodeTree<VCNode>
+  params: Type.Array(VCParamSchema),
   // ... metadata fields
 })
 export type VisualComponent = Static<typeof VisualComponentSchema>
@@ -124,11 +124,11 @@ applySlotSyncResult(nodesMap, result)
 
 Three op kinds:
 
-| Op            | When it fires                                                            |
-|---------------|--------------------------------------------------------------------------|
-| `InsertSlot`  | The VC declares a slot the ref doesn't have a slot-instance for yet      |
-| `RenameSlot`  | The slot's `name` changed in the VC; the existing slot-instance's `slotName` prop updates |
-| `DeleteSlot`  | The VC removed a slot; the matching slot-instance + its subtree are dropped |
+| Op           | When it fires                                                                             |
+| ------------ | ----------------------------------------------------------------------------------------- |
+| `InsertSlot` | The VC declares a slot the ref doesn't have a slot-instance for yet                       |
+| `RenameSlot` | The slot's `name` changed in the VC; the existing slot-instance's `slotName` prop updates |
+| `DeleteSlot` | The VC removed a slot; the matching slot-instance + its subtree are dropped               |
 
 Matching strategy: **name first, then positional fallback**. Phase 1 matches existing slot-instances to slots by `slotName` (exact match). Phase 2 pairs any remaining unmatched instances with unmatched slot names by position — this produces `rename` ops rather than delete+insert, so renaming a slot outlet in the VC carries the user's content with it instead of wiping it.
 
@@ -162,8 +162,8 @@ A VC ref instance carries `instanceProps` — the values for the VC's `params`. 
   "moduleId": "base.heading",
   "props": { "text": "Default", "level": 2 },
   "propBindings": {
-    "text": { "paramId": "<heading-param-id>" }
-  }
+    "text": { "paramId": "<heading-param-id>" },
+  },
 }
 ```
 
@@ -279,14 +279,14 @@ On success, `activeDocument` switches to the new VC and the editor opens its tre
 
 ### Key files
 
-| File | Role |
-|------|------|
-| `src/admin/pages/site/componentization/componentizeEligibility.ts` | `canComponentizeNode` — eligibility predicate |
-| `src/admin/pages/site/componentization/index.ts` | Public barrel for the `@site/componentization` module |
-| `src/admin/pages/site/panels/PropertiesPanel/ConvertToComponentButton.tsx` | Inline name-input strip in the Properties Panel |
-| `src/admin/pages/site/panels/DomPanel/LayerNodeContextMenu.tsx` | "Componentize" context menu item |
-| `src/admin/pages/site/store/slices/uiSlice.ts` | `openComponentizeEditor`, `clearComponentizeEditorRequest`, `componentizeEditorRequest` |
-| `src/admin/pages/site/store/slices/visualComponentsSlice.ts` | `convertNodeToComponent` — the actual page-tree mutation |
+| File                                                                       | Role                                                                                    |
+| -------------------------------------------------------------------------- | --------------------------------------------------------------------------------------- |
+| `src/admin/pages/site/componentization/componentizeEligibility.ts`         | `canComponentizeNode` — eligibility predicate                                           |
+| `src/admin/pages/site/componentization/index.ts`                           | Public barrel for the `@site/componentization` module                                   |
+| `src/admin/pages/site/panels/PropertiesPanel/ConvertToComponentButton.tsx` | Inline name-input strip in the Properties Panel                                         |
+| `src/admin/pages/site/panels/DomPanel/LayerNodeContextMenu.tsx`            | "Componentize" context menu item                                                        |
+| `src/admin/pages/site/store/slices/uiSlice.ts`                             | `openComponentizeEditor`, `clearComponentizeEditorRequest`, `componentizeEditorRequest` |
+| `src/admin/pages/site/store/slices/visualComponentsSlice.ts`               | `convertNodeToComponent` — the actual page-tree mutation                                |
 
 ---
 
@@ -294,10 +294,10 @@ On success, `activeDocument` switches to the new VC and the editor opens its tre
 
 The editor supports two modes — see [docs/editor.md](../editor.md):
 
-| Mode    | What `mutateActiveTree(fn)` calls           | Tree                          |
-|---------|---------------------------------------------|-------------------------------|
-| `page`  | `fn(activePage)`                            | The active page's tree        |
-| `vc`    | `fn(vc.tree as NodeTree<PageNode>)`         | The active VC's tree          |
+| Mode   | What `mutateActiveTree(fn)` calls   | Tree                   |
+| ------ | ----------------------------------- | ---------------------- |
+| `page` | `fn(activePage)`                    | The active page's tree |
+| `vc`   | `fn(vc.tree as NodeTree<PageNode>)` | The active VC's tree   |
 
 The 11 named tree-mutation store actions work in both modes without branching. See [docs/reference/page-tree.md](../reference/page-tree.md).
 
@@ -324,10 +324,10 @@ Returns `null` when the VC has no usages (the caller can commit silently). When 
 
 ```ts
 interface VCDeletionImpact {
-  vc:        { id: string; name: string }
-  usages:    VCRefUsage[]   // every page + VC ref that points at this VC
-  pageCount: number          // distinct pages with at least one ref
-  vcCount:   number          // distinct other VCs with at least one ref
+  vc: { id: string; name: string }
+  usages: VCRefUsage[] // every page + VC ref that points at this VC
+  pageCount: number // distinct pages with at least one ref
+  vcCount: number // distinct other VCs with at least one ref
 }
 ```
 
@@ -397,7 +397,7 @@ Consumers see a control for the param in the VC ref's Properties Panel (type-dri
 ```ts
 import { instantiateVCAtRef } from '@core/visualComponents'
 
-const { refNode, slotInstances } = instantiateVCAtRef(vc, { /* instanceProps */ })
+const { refNode, slotInstances } = instantiateVCAtRef(vc, {/* instanceProps */})
 // refNode has props.componentId = vc.id and one slot-instance child per slot.
 ```
 
@@ -415,17 +415,17 @@ const { refNode, slotInstances } = instantiateVCAtRef(vc, { /* instanceProps */ 
 
 ## Forbidden patterns
 
-| Pattern                                                                | Use instead                                                   |
-|------------------------------------------------------------------------|---------------------------------------------------------------|
-| Storing slot content as a `slotContent` prop on the ref                | `base.slot-instance` children in the consumer page tree       |
-| Looking up slots from `vc.params` instead of walking the VC tree       | `extractSlotNamesFromVCTree` / `syncSlotInstances`            |
-| Mutating `slot-instance` children directly outside the consumer page   | They live in the consumer page tree — edit them there         |
-| Binding a prop on a VC tree node to a literal value                    | The literal goes in `node.props`. Bindings are `propBindings` mapping prop → `{ paramId }`. |
-| Looking up a param by `name`                                           | Use `id` — names can be renamed, ids are stable               |
-| Inserting a ref without running `syncSlotInstances`                    | Always sync, even on first insert. `instantiateVCAtRef` does it for you. |
-| Running slot sync against page trees only when a slot shape changes    | Use `allTreeNodeMaps(site)` from `vcSlotReconcile.ts` (covers pages + all VC trees) so refs nested inside other VCs are also reconciled |
-| Allowing recursive VC refs                                             | Call `wouldCreateCycle(...)` before insert / rebind           |
-| Branching on `kind === 'visualComponent'` inside a tree mutation       | Mutations operate on `NodeTree<TNode>` — `mutateActiveTree` is the only branch (gated). |
+| Pattern                                                              | Use instead                                                                                                                             |
+| -------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
+| Storing slot content as a `slotContent` prop on the ref              | `base.slot-instance` children in the consumer page tree                                                                                 |
+| Looking up slots from `vc.params` instead of walking the VC tree     | `extractSlotNamesFromVCTree` / `syncSlotInstances`                                                                                      |
+| Mutating `slot-instance` children directly outside the consumer page | They live in the consumer page tree — edit them there                                                                                   |
+| Binding a prop on a VC tree node to a literal value                  | The literal goes in `node.props`. Bindings are `propBindings` mapping prop → `{ paramId }`.                                             |
+| Looking up a param by `name`                                         | Use `id` — names can be renamed, ids are stable                                                                                         |
+| Inserting a ref without running `syncSlotInstances`                  | Always sync, even on first insert. `instantiateVCAtRef` does it for you.                                                                |
+| Running slot sync against page trees only when a slot shape changes  | Use `allTreeNodeMaps(site)` from `vcSlotReconcile.ts` (covers pages + all VC trees) so refs nested inside other VCs are also reconciled |
+| Allowing recursive VC refs                                           | Call `wouldCreateCycle(...)` before insert / rebind                                                                                     |
+| Branching on `kind === 'visualComponent'` inside a tree mutation     | Mutations operate on `NodeTree<TNode>` — `mutateActiveTree` is the only branch (gated).                                                 |
 
 ---
 

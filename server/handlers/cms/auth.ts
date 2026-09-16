@@ -46,10 +46,7 @@ import {
   toPublicUser,
   type AuthUser,
 } from '../../repositories/users'
-import {
-  requireAuthenticatedUser,
-  getSessionHash,
-} from '../../auth/authz'
+import { requireAuthenticatedUser, getSessionHash } from '../../auth/authz'
 import { stepUpWindowMs } from '../../auth/stepUpPolicy'
 import { createAuditEvent } from '../../repositories/audit'
 import {
@@ -429,7 +426,10 @@ async function handleMfaVerify(req: Request, db: DbClient): Promise<Response> {
       userId: user.id,
       result: 'rate_limited',
     })
-    return rateLimitedResponse('Account temporarily locked due to repeated failed attempts.', lockState.retryAfterMs)
+    return rateLimitedResponse(
+      'Account temporarily locked due to repeated failed attempts.',
+      lockState.retryAfterMs,
+    )
   }
 
   const rateLimitKey = ip ?? 'unknown'
@@ -538,7 +538,11 @@ async function handleLogout(req: Request, db: DbClient): Promise<Response> {
 async function handleMe(req: Request, db: DbClient): Promise<Response> {
   const user = await requireAuthenticatedUser(req, db)
   if (user instanceof Response) return user
-  return jsonResponse({ user: toPublicUser(user), role: user.role, capabilities: user.capabilities })
+  return jsonResponse({
+    user: toPublicUser(user),
+    role: user.role,
+    capabilities: user.capabilities,
+  })
 }
 
 // Session-management endpoints (GET /auth/sessions, DELETE /auth/sessions/:id,
@@ -704,7 +708,7 @@ async function verifyStepUpMfa(
         user: null,
       }
     }
-    refreshedUser = await findUserById(db, user.id) ?? user
+    refreshedUser = (await findUserById(db, user.id)) ?? user
   }
 
   mfaRateLimit.reset(rateLimitKey)
@@ -751,7 +755,10 @@ async function handleStepUp(req: Request, db: DbClient): Promise<Response> {
     return recordStepUpRateLimit(db, req, user, ip, 'tuple', decision.retryAfterMs)
   }
 
-  const StepUpBodySchema = Type.Object({ password: Type.String(), mfaCode: Type.Optional(Type.String()) })
+  const StepUpBodySchema = Type.Object({
+    password: Type.String(),
+    mfaCode: Type.Optional(Type.String()),
+  })
   const body = await readValidatedBody(req, StepUpBodySchema)
   const password = (body?.password ?? '').trim()
   const mfaCode = (body?.mfaCode ?? '').trim()

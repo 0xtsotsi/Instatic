@@ -11,11 +11,7 @@
  * (de)serialization rules stay independently readable and testable.
  */
 
-import {
-  bytesToBase64,
-  decodeBodyBytes,
-  encodeBodyBytes,
-} from '../protocol/bodyEncoding'
+import { bytesToBase64, decodeBodyBytes, encodeBodyBytes } from '../protocol/bodyEncoding'
 import type {
   SerializedRequest,
   SerializedResponse,
@@ -47,18 +43,20 @@ export async function serializeRouteRequest(
   // can ship realistic typing without forcing tests to mock the full
   // Headers contract.
   const headers: Record<string, string> = {}
-  const reqHeaders = request.headers as unknown as
-    | { forEach?: (cb: (value: string, key: string) => void) => void; entries?: () => Iterable<[string, string]> }
-    | null
+  const reqHeaders = request.headers as unknown as {
+    forEach?: (cb: (value: string, key: string) => void) => void
+    entries?: () => Iterable<[string, string]>
+  } | null
   if (reqHeaders && typeof reqHeaders.forEach === 'function') {
-    reqHeaders.forEach((v: string, k: string) => { headers[k.toLowerCase()] = v })
+    reqHeaders.forEach((v: string, k: string) => {
+      headers[k.toLowerCase()] = v
+    })
   } else if (reqHeaders && typeof reqHeaders.entries === 'function') {
     for (const [k, v] of reqHeaders.entries()) headers[k.toLowerCase()] = v
   }
 
-  const bodyBytes = request.method !== 'GET'
-    ? new Uint8Array(await request.arrayBuffer())
-    : new Uint8Array(0)
+  const bodyBytes =
+    request.method !== 'GET' ? new Uint8Array(await request.arrayBuffer()) : new Uint8Array(0)
 
   const parsedBody: Record<string, unknown> = {}
   if (bodyBytes.length > 0) {
@@ -147,9 +145,8 @@ async function serializeUploadedFile(file: File): Promise<SerializedUploadedFile
 /** Turn the worker's serialized route result back into a real `Response`. */
 export function materializeRouteResponse(response: SerializedResponse): Response {
   if (response.kind === 'response') {
-    const body = response.bodyEncoding === 'base64'
-      ? decodeBodyBytes(response.body, 'base64')
-      : response.body
+    const body =
+      response.bodyEncoding === 'base64' ? decodeBodyBytes(response.body, 'base64') : response.body
     return new Response(body, {
       status: response.status,
       headers: response.headers,

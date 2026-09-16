@@ -69,11 +69,37 @@ describe('listDataRowsWithFilter', () => {
   beforeEach(async () => {
     db = await freshDb()
     // Four live rows + one soft-deleted row. updated_at controls default order.
-    await seedRow(db, { id: 'alpha', title: 'Alpha', status: 'published', updatedAt: '2024-01-01T00:00:00.000Z' })
-    await seedRow(db, { id: 'beta', title: 'Beta', status: 'draft', updatedAt: '2024-02-01T00:00:00.000Z' })
-    await seedRow(db, { id: 'gamma', title: 'Gamma', status: 'published', updatedAt: '2024-03-01T00:00:00.000Z' })
-    await seedRow(db, { id: 'deleted', title: 'Deleted', status: 'published', updatedAt: '2024-05-01T00:00:00.000Z', deleted: true })
-    await seedRow(db, { id: 'delta', title: 'Delta', status: 'published', updatedAt: '2024-04-01T00:00:00.000Z' })
+    await seedRow(db, {
+      id: 'alpha',
+      title: 'Alpha',
+      status: 'published',
+      updatedAt: '2024-01-01T00:00:00.000Z',
+    })
+    await seedRow(db, {
+      id: 'beta',
+      title: 'Beta',
+      status: 'draft',
+      updatedAt: '2024-02-01T00:00:00.000Z',
+    })
+    await seedRow(db, {
+      id: 'gamma',
+      title: 'Gamma',
+      status: 'published',
+      updatedAt: '2024-03-01T00:00:00.000Z',
+    })
+    await seedRow(db, {
+      id: 'deleted',
+      title: 'Deleted',
+      status: 'published',
+      updatedAt: '2024-05-01T00:00:00.000Z',
+      deleted: true,
+    })
+    await seedRow(db, {
+      id: 'delta',
+      title: 'Delta',
+      status: 'published',
+      updatedAt: '2024-04-01T00:00:00.000Z',
+    })
   })
 
   it('returns live rows in default updated_at-desc order, excluding soft-deleted', async () => {
@@ -105,13 +131,17 @@ describe('listDataRowsWithFilter', () => {
   })
 
   it('filters by a cells_json field (where condition)', async () => {
-    const { rows, totalCount } = await listDataRowsWithFilter(db, 'posts', { filter: { title: 'Gamma' } })
+    const { rows, totalCount } = await listDataRowsWithFilter(db, 'posts', {
+      filter: { title: 'Gamma' },
+    })
     expect(rows.map((r) => r.id)).toEqual(['gamma'])
     expect(totalCount).toBe(1)
   })
 
   it('returns an empty result set without error', async () => {
-    const { rows, totalCount } = await listDataRowsWithFilter(db, 'posts', { filter: { title: 'Nonexistent' } })
+    const { rows, totalCount } = await listDataRowsWithFilter(db, 'posts', {
+      filter: { title: 'Nonexistent' },
+    })
     expect(rows).toEqual([])
     expect(totalCount).toBe(0)
   })

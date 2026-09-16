@@ -132,11 +132,7 @@ export async function resurrectDataRow(
  * already written by `updateDataRowDraftCells` in the same transaction; this
  * just moves the row off the placeholder slug onto its final one.
  */
-export async function updateDataRowSlug(
-  db: DbClient,
-  rowId: string,
-  slug: string,
-): Promise<void> {
+export async function updateDataRowSlug(db: DbClient, rowId: string, slug: string): Promise<void> {
   await db`
     update data_rows
     set slug = ${slug}

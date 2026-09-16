@@ -22,10 +22,7 @@ import {
   searchDataRows,
 } from '../../../repositories/data'
 import { listMediaAssets } from '../../../repositories/media'
-import {
-  readSlugCell,
-  readTitleCell,
-} from '@core/data/cells'
+import { readSlugCell, readTitleCell } from '@core/data/cells'
 import { normalizeDataTableFields } from '@core/data/fields'
 import type { DataField, DataRow, DataTableListItem } from '@core/data/schemas'
 
@@ -134,9 +131,7 @@ const listCollectionsTool: AiTool = {
   handler: async (_input, ctx) => {
     const tables = await listDataTablesWithCounts(ctx.db)
     return {
-      collections: tables
-        .filter((t) => CONTENT_KIND_VISIBLE.has(t.kind))
-        .map(projectCollection),
+      collections: tables.filter((t) => CONTENT_KIND_VISIBLE.has(t.kind)).map(projectCollection),
     }
   },
 }
@@ -180,12 +175,14 @@ const getCollectionSchemaTool: AiTool = {
 
 const ListDocumentsInput = Type.Object({
   tableId: Type.String({ minLength: 1 }),
-  status: Type.Optional(Type.Union([
-    Type.Literal('draft'),
-    Type.Literal('unpublished'),
-    Type.Literal('published'),
-    Type.Literal('scheduled'),
-  ])),
+  status: Type.Optional(
+    Type.Union([
+      Type.Literal('draft'),
+      Type.Literal('unpublished'),
+      Type.Literal('published'),
+      Type.Literal('scheduled'),
+    ]),
+  ),
   authorUserId: Type.Optional(Type.String({ minLength: 1 })),
   limit: Type.Optional(Type.Integer({ minimum: 1, maximum: 200 })),
   offset: Type.Optional(Type.Integer({ minimum: 0 })),
@@ -272,7 +269,7 @@ const searchDocumentsTool: AiTool = {
   execution: 'server',
   requiredCapabilities: DOCUMENT_READ_CAPS,
   description:
-    "Full-text search across document slugs (the slug is a URL-safe derivative of the title — reliable text proxy for free-text lookup). Returns light summaries (id, tableId, slug, status, updatedAt). `limit` default 25, max 100.",
+    'Full-text search across document slugs (the slug is a URL-safe derivative of the title — reliable text proxy for free-text lookup). Returns light summaries (id, tableId, slug, status, updatedAt). `limit` default 25, max 100.',
   inputSchema: SearchDocumentsInput,
   handler: async (input, ctx) => {
     const { query, limit } = input as Static<typeof SearchDocumentsInput>

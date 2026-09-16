@@ -152,7 +152,7 @@ export async function serveStaticFile(
         'content-encoding': encoding,
         // Tells caches the response varies based on the request encoding,
         // so a gzip-only client doesn't get served a cached brotli payload.
-        'vary': 'accept-encoding',
+        vary: 'accept-encoding',
       },
     })
   }
@@ -374,9 +374,7 @@ const BOOT_API_KICKOFF = `
 // it starts requests during HTML parse. Workspace prewarming belongs in
 // AuthenticatedAdmin's requestIdleCallback scheduler, where it actually runs
 // after the active page has painted.
-const AUTHENTICATED_SHELL_PREFIXES: readonly string[] = [
-  'AuthenticatedAdmin-',
-]
+const AUTHENTICATED_SHELL_PREFIXES: readonly string[] = ['AuthenticatedAdmin-']
 
 let authenticatedShellPreloadCache: { staticDir: string; html: string } | null = null
 function buildAuthenticatedShellPreloadHints(staticDir: string): string {
@@ -398,9 +396,7 @@ function buildAuthenticatedShellPreloadHints(staticDir: string): string {
   for (const prefix of AUTHENTICATED_SHELL_PREFIXES) {
     const match = entries.find((name) => name.startsWith(prefix) && name.endsWith('.js'))
     if (!match) continue
-    lines.push(
-      `    <link rel="modulepreload" href="/assets/${match}" crossorigin>`,
-    )
+    lines.push(`    <link rel="modulepreload" href="/assets/${match}" crossorigin>`)
   }
   const html = lines.join('\n')
   authenticatedShellPreloadCache = { staticDir, html }
@@ -442,10 +438,7 @@ function injectLoginSkeleton(html: string): string {
   //    boot-API kickoff so `useAdminBoot` can consume already-started fetches.
   const styleTag = `<style data-initial-login>${LOGIN_SKELETON_STYLES}</style>`
   const injected = `</style>\n    ${styleTag}${BOOT_API_KICKOFF}`
-  let next = html.replace(
-    /<\/style>\s*<\/head>/,
-    (m) => m.replace('</style>', injected),
-  )
+  let next = html.replace(/<\/style>\s*<\/head>/, (m) => m.replace('</style>', injected))
   // Fallback if the marker pattern shifts: append at the end of <head>.
   if (!next.includes('data-initial-login')) {
     next = next.replace('</head>', `  ${styleTag}${BOOT_API_KICKOFF}\n  </head>`)
@@ -510,7 +503,7 @@ export async function serveAdminApp(staticDir: string, req?: Request): Promise<R
         'content-type': 'text/html; charset=utf-8',
         'cache-control': 'no-cache',
         'content-encoding': 'br',
-        'vary': 'accept-encoding',
+        vary: 'accept-encoding',
       },
     })
   }
@@ -521,7 +514,7 @@ export async function serveAdminApp(staticDir: string, req?: Request): Promise<R
         'content-type': 'text/html; charset=utf-8',
         'cache-control': 'no-cache',
         'content-encoding': 'gzip',
-        'vary': 'accept-encoding',
+        vary: 'accept-encoding',
       },
     })
   }

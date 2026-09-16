@@ -124,69 +124,69 @@ Three categories, three voices:
 
 ### Top-level
 
-| Doc                         | What it covers                                                          |
-|-----------------------------|-------------------------------------------------------------------------|
-| [architecture.md](architecture.md) | System overview: process, folders, request lifecycle, data model, validation, decision tables |
-| [design.md](design.md)      | Visual design system: principles, tokens, surface systems, UI primitives, forbidden patterns |
-| [server.md](server.md)      | Server deep dive: boot sequence, router, handlers, auth, DB adapter, publishing, plugin runtime |
-| [editor.md](editor.md)      | Admin + editor deep dive: routing, workspaces, editor store, canvas, sidebars, spotlight |
-| [CONVENTIONS.md](CONVENTIONS.md) | How docs in this repo are structured and written (read before authoring) |
+| Doc                                | What it covers                                                                                  |
+| ---------------------------------- | ----------------------------------------------------------------------------------------------- |
+| [architecture.md](architecture.md) | System overview: process, folders, request lifecycle, data model, validation, decision tables   |
+| [design.md](design.md)             | Visual design system: principles, tokens, surface systems, UI primitives, forbidden patterns    |
+| [server.md](server.md)             | Server deep dive: boot sequence, router, handlers, auth, DB adapter, publishing, plugin runtime |
+| [editor.md](editor.md)             | Admin + editor deep dive: routing, workspaces, editor store, canvas, sidebars, spotlight        |
+| [CONVENTIONS.md](CONVENTIONS.md)   | How docs in this repo are structured and written (read before authoring)                        |
 
 ### Features
 
-| Doc                                                              | What it covers                                                       |
-|------------------------------------------------------------------|----------------------------------------------------------------------|
-| [features/plugin-system.md](features/plugin-system.md)           | The plugin system end-to-end: package shape, lifecycle, sandbox, SDK, permissions, CLI |
-| [features/publisher.md](features/publisher.md)                   | The page-tree-to-HTML/CSS renderer + server-side publishing wrappers |
-| [features/visual-components.md](features/visual-components.md)   | VCs, slots, params, instantiation, recursion guard                   |
-| [features/content-storage.md](features/content-storage.md)       | `data_tables` + `data_rows` — the universal content store           |
-| [features/content-workspace.md](features/content-workspace.md)   | Content workspace UI: collections, entries, body editor, settings panel |
-| [features/data-workspace.md](features/data-workspace.md)         | Data workspace UI: DataInspector, field management, DataGrid        |
-| [features/auth-and-access.md](features/auth-and-access.md)       | Sessions, MFA, step-up, lockout, CSRF, capabilities                  |
-| [features/site-shell.md](features/site-shell.md)                 | The persisted site config (breakpoints, classes, files, deps)        |
-| [features/modules.md](features/modules.md)                       | Module engine, defining first-party blocks                          |
-| [features/dashboard.md](features/dashboard.md)                   | Dashboard workspace, widgets, grid, customize mode                  |
-| [features/spotlight.md](features/spotlight.md)                   | Cmd+K command palette                                                |
-| [features/agent.md](features/agent.md)                           | AI agent integration and provider-agnostic runtime                   |
-| [features/mcp-connectors.md](features/mcp-connectors.md)         | Instatic as an MCP server — external AI clients drive the CMS over MCP |
-| [features/templates.md](features/templates.md)                   | Entry templates + dynamic bindings + token interpolation             |
-| [features/loops.md](features/loops.md)                           | `base.loop` + loop entity sources                                    |
-| [features/cms-native-forms.md](features/cms-native-forms.md)     | Visual form primitives and secure public submissions                 |
-| [features/media.md](features/media.md)                           | Media workspace, upload pipeline, storage adapters                  |
-| [features/audit-log.md](features/audit-log.md)                   | Audit event catalog + recording new actions                         |
-| [features/site-transfer.md](features/site-transfer.md)           | Export / import CMS bundle (JSON round-trip between instances)      |
-| [features/site-import.md](features/site-import.md)               | Super Import — static-site files / ZIP → pages, style rules, media |
-| [features/html-import.md](features/html-import.md)               | HTML string → `PageNode` fragment (paste HTML, AI `insertHtml` tool) |
-| [features/editor-preferences.md](features/editor-preferences.md) | Catalog-driven local UI preferences for the editor                   |
-| [features/canvas-iframe-per-frame.md](features/canvas-iframe-per-frame.md) | Per-breakpoint iframe rendering in the visual editor canvas |
+| Doc                                                                        | What it covers                                                                         |
+| -------------------------------------------------------------------------- | -------------------------------------------------------------------------------------- |
+| [features/plugin-system.md](features/plugin-system.md)                     | The plugin system end-to-end: package shape, lifecycle, sandbox, SDK, permissions, CLI |
+| [features/publisher.md](features/publisher.md)                             | The page-tree-to-HTML/CSS renderer + server-side publishing wrappers                   |
+| [features/visual-components.md](features/visual-components.md)             | VCs, slots, params, instantiation, recursion guard                                     |
+| [features/content-storage.md](features/content-storage.md)                 | `data_tables` + `data_rows` — the universal content store                              |
+| [features/content-workspace.md](features/content-workspace.md)             | Content workspace UI: collections, entries, body editor, settings panel                |
+| [features/data-workspace.md](features/data-workspace.md)                   | Data workspace UI: DataInspector, field management, DataGrid                           |
+| [features/auth-and-access.md](features/auth-and-access.md)                 | Sessions, MFA, step-up, lockout, CSRF, capabilities                                    |
+| [features/site-shell.md](features/site-shell.md)                           | The persisted site config (breakpoints, classes, files, deps)                          |
+| [features/modules.md](features/modules.md)                                 | Module engine, defining first-party blocks                                             |
+| [features/dashboard.md](features/dashboard.md)                             | Dashboard workspace, widgets, grid, customize mode                                     |
+| [features/spotlight.md](features/spotlight.md)                             | Cmd+K command palette                                                                  |
+| [features/agent.md](features/agent.md)                                     | AI agent integration and provider-agnostic runtime                                     |
+| [features/mcp-connectors.md](features/mcp-connectors.md)                   | Instatic as an MCP server — external AI clients drive the CMS over MCP                 |
+| [features/templates.md](features/templates.md)                             | Entry templates + dynamic bindings + token interpolation                               |
+| [features/loops.md](features/loops.md)                                     | `base.loop` + loop entity sources                                                      |
+| [features/cms-native-forms.md](features/cms-native-forms.md)               | Visual form primitives and secure public submissions                                   |
+| [features/media.md](features/media.md)                                     | Media workspace, upload pipeline, storage adapters                                     |
+| [features/audit-log.md](features/audit-log.md)                             | Audit event catalog + recording new actions                                            |
+| [features/site-transfer.md](features/site-transfer.md)                     | Export / import CMS bundle (JSON round-trip between instances)                         |
+| [features/site-import.md](features/site-import.md)                         | Super Import — static-site files / ZIP → pages, style rules, media                     |
+| [features/html-import.md](features/html-import.md)                         | HTML string → `PageNode` fragment (paste HTML, AI `insertHtml` tool)                   |
+| [features/editor-preferences.md](features/editor-preferences.md)           | Catalog-driven local UI preferences for the editor                                     |
+| [features/canvas-iframe-per-frame.md](features/canvas-iframe-per-frame.md) | Per-breakpoint iframe rendering in the visual editor canvas                            |
 
 ### Reference
 
-| Doc                                                              | What it answers                                                  |
-|------------------------------------------------------------------|------------------------------------------------------------------|
-| [reference/page-tree.md](reference/page-tree.md)                 | The `NodeTree<TNode>` primitive — mutations, store routing      |
-| [reference/database-dialects.md](reference/database-dialects.md) | Postgres vs. SQLite — three rules + cookbook                    |
-| [reference/typebox-patterns.md](reference/typebox-patterns.md)   | Validating every untyped boundary with TypeBox                  |
-| [reference/ui-primitives.md](reference/ui-primitives.md)         | Full UI primitive catalog with "when to use"                    |
-| [reference/design-tokens.md](reference/design-tokens.md)         | Complete CSS custom property catalog                            |
-| [reference/module-engine.md](reference/module-engine.md)         | "How do I define a new module?"                                 |
-| [reference/canvas-dnd.md](reference/canvas-dnd.md)               | Drag-and-drop / drop zones / insert location                    |
-| [reference/admin-router.md](reference/admin-router.md)           | In-house router primitives                                      |
-| [reference/css-class-registry.md](reference/css-class-registry.md) | User-defined CSS classes + scoped classes                     |
-| [reference/capabilities.md](reference/capabilities.md)           | Full capability matrix + how to add one                         |
-| [reference/persistence-keys.md](reference/persistence-keys.md)   | All localStorage / sessionStorage / server-prefs keys           |
-| [reference/error-boundaries.md](reference/error-boundaries.md)   | `<ErrorBoundary>` placements + reporting                        |
-| [reference/architecture-tests.md](reference/architecture-tests.md) | Catalog of every architecture gate test                       |
-| [reference/editor-history.md](reference/editor-history.md)       | Patch-based undo/redo history: `HistoryEntry`, `mutate*` helpers, coalescing |
-| [reference/react-compiler.md](reference/react-compiler.md)       | React Compiler memoization rule, three exceptions, enforcement gates |
+| Doc                                                                | What it answers                                                                             |
+| ------------------------------------------------------------------ | ------------------------------------------------------------------------------------------- |
+| [reference/page-tree.md](reference/page-tree.md)                   | The `NodeTree<TNode>` primitive — mutations, store routing                                  |
+| [reference/database-dialects.md](reference/database-dialects.md)   | Postgres vs. SQLite — three rules + cookbook                                                |
+| [reference/typebox-patterns.md](reference/typebox-patterns.md)     | Validating every untyped boundary with TypeBox                                              |
+| [reference/ui-primitives.md](reference/ui-primitives.md)           | Full UI primitive catalog with "when to use"                                                |
+| [reference/design-tokens.md](reference/design-tokens.md)           | Complete CSS custom property catalog                                                        |
+| [reference/module-engine.md](reference/module-engine.md)           | "How do I define a new module?"                                                             |
+| [reference/canvas-dnd.md](reference/canvas-dnd.md)                 | Drag-and-drop / drop zones / insert location                                                |
+| [reference/admin-router.md](reference/admin-router.md)             | In-house router primitives                                                                  |
+| [reference/css-class-registry.md](reference/css-class-registry.md) | User-defined CSS classes + scoped classes                                                   |
+| [reference/capabilities.md](reference/capabilities.md)             | Full capability matrix + how to add one                                                     |
+| [reference/persistence-keys.md](reference/persistence-keys.md)     | All localStorage / sessionStorage / server-prefs keys                                       |
+| [reference/error-boundaries.md](reference/error-boundaries.md)     | `<ErrorBoundary>` placements + reporting                                                    |
+| [reference/architecture-tests.md](reference/architecture-tests.md) | Catalog of every architecture gate test                                                     |
+| [reference/editor-history.md](reference/editor-history.md)         | Patch-based undo/redo history: `HistoryEntry`, `mutate*` helpers, coalescing                |
+| [reference/react-compiler.md](reference/react-compiler.md)         | React Compiler memoization rule, three exceptions, enforcement gates                        |
 | [reference/use-async-resource.md](reference/use-async-resource.md) | `useAsyncResource` — canonical single-resource async load hook; when to use and when not to |
 
 ### Operations
 
-| Folder                              | Contents                                                          |
-|-------------------------------------|-------------------------------------------------------------------|
-| [deployment/](deployment/)          | Platform deploys, VPS/Docker installs, TLS, backup, releases      |
-| [e2e/](e2e/)                        | Browser E2E protocols: agent-run audits and Playwright automation docs |
+| Folder                     | Contents                                                               |
+| -------------------------- | ---------------------------------------------------------------------- |
+| [deployment/](deployment/) | Platform deploys, VPS/Docker installs, TLS, backup, releases           |
+| [e2e/](e2e/)               | Browser E2E protocols: agent-run audits and Playwright automation docs |
 
 ---
 
@@ -200,25 +200,25 @@ Every doc has the shape: **one-line scope statement → TL;DR → body sections 
 
 Quick map from "where do I look for X?" to the canonical file:
 
-| Concept                          | Source of truth                                          |
-|----------------------------------|----------------------------------------------------------|
-| Agent rules and constraints      | `CLAUDE.md` (repo root)                                  |
-| Design tokens                    | `src/styles/globals.css`                                 |
-| UI primitives                    | `src/ui/components/`                                     |
-| Page tree shape                  | `src/core/page-tree/treeSchema.ts`                       |
-| Editor store                     | `src/admin/pages/site/store/`                            |
-| Server router                    | `server/router.ts`                                       |
-| CMS API handlers                 | `server/handlers/cms/`                                   |
-| Repositories                     | `server/repositories/`                                   |
-| DB adapter interface             | `server/db/client.ts`                                    |
-| DB adapters                      | `server/db/postgres.ts`, `server/db/sqlite.ts`            |
-| Migrations                       | `server/db/migrations-pg.ts`, `server/db/migrations-sqlite.ts` |
-| Plugin SDK                       | `src/core/plugin-sdk/`                                   |
-| Plugin permission catalog        | `src/core/plugin-sdk/capabilities.ts`                    |
-| Plugin manifest parser           | `src/core/plugins/manifest.ts`                           |
-| Plugin worker + sandbox host     | `server/plugins/pluginWorker.ts`, `server/plugins/host/workerPool.ts`, `server/plugins/quickjs/vm.ts`, `server/plugins/modulePackVm.ts` |
-| Publisher                        | `src/core/publisher/`                                    |
-| CSS value sanitiser              | `src/core/css-sanitize/sanitiseCssValue.ts`              |
-| TypeBox helpers                  | `src/core/utils/typeboxHelpers.ts`                       |
-| Error message extraction         | `src/core/utils/errorMessage.ts`                         |
-| Architecture gate tests          | `src/__tests__/architecture/*.test.ts`                   |
+| Concept                      | Source of truth                                                                                                                         |
+| ---------------------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
+| Agent rules and constraints  | `CLAUDE.md` (repo root)                                                                                                                 |
+| Design tokens                | `src/styles/globals.css`                                                                                                                |
+| UI primitives                | `src/ui/components/`                                                                                                                    |
+| Page tree shape              | `src/core/page-tree/treeSchema.ts`                                                                                                      |
+| Editor store                 | `src/admin/pages/site/store/`                                                                                                           |
+| Server router                | `server/router.ts`                                                                                                                      |
+| CMS API handlers             | `server/handlers/cms/`                                                                                                                  |
+| Repositories                 | `server/repositories/`                                                                                                                  |
+| DB adapter interface         | `server/db/client.ts`                                                                                                                   |
+| DB adapters                  | `server/db/postgres.ts`, `server/db/sqlite.ts`                                                                                          |
+| Migrations                   | `server/db/migrations-pg.ts`, `server/db/migrations-sqlite.ts`                                                                          |
+| Plugin SDK                   | `src/core/plugin-sdk/`                                                                                                                  |
+| Plugin permission catalog    | `src/core/plugin-sdk/capabilities.ts`                                                                                                   |
+| Plugin manifest parser       | `src/core/plugins/manifest.ts`                                                                                                          |
+| Plugin worker + sandbox host | `server/plugins/pluginWorker.ts`, `server/plugins/host/workerPool.ts`, `server/plugins/quickjs/vm.ts`, `server/plugins/modulePackVm.ts` |
+| Publisher                    | `src/core/publisher/`                                                                                                                   |
+| CSS value sanitiser          | `src/core/css-sanitize/sanitiseCssValue.ts`                                                                                             |
+| TypeBox helpers              | `src/core/utils/typeboxHelpers.ts`                                                                                                      |
+| Error message extraction     | `src/core/utils/errorMessage.ts`                                                                                                        |
+| Architecture gate tests      | `src/__tests__/architecture/*.test.ts`                                                                                                  |

@@ -158,7 +158,8 @@ export async function updateRole(
   const slug = input.slug === undefined ? current.slug : slugFromRoleName(input.slug)
   if (!slug) throw new RoleMutationError('Role slug is required')
   await assertRoleSlugAvailable(db, slug, current.id)
-  const description = input.description === undefined ? current.description : input.description.trim()
+  const description =
+    input.description === undefined ? current.description : input.description.trim()
   const capabilities = input.capabilities ?? current.capabilities
 
   const { rows } = await db<RoleRow>`

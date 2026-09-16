@@ -54,7 +54,9 @@ describe('sanitizeSvgBytes', () => {
   })
 
   it('strips on* event handlers and javascript: URLs', () => {
-    const out = clean('<svg onload="alert(1)"><a href="javascript:alert(1)"><rect/></a></svg>').toLowerCase()
+    const out = clean(
+      '<svg onload="alert(1)"><a href="javascript:alert(1)"><rect/></a></svg>',
+    ).toLowerCase()
     expect(out).not.toContain('onload')
     expect(out).not.toContain('javascript:')
   })

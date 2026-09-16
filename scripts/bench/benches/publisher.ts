@@ -60,7 +60,10 @@ type SiteDoc = {
   files: unknown[]
   visualComponents: unknown[]
   packageJson: { dependencies: Record<string, string>; devDependencies: Record<string, string> }
-  runtime: { dependencyLock: { version: number; packages: Record<string, unknown>; updatedAt: number }; scripts: Record<string, unknown> }
+  runtime: {
+    dependencyLock: { version: number; packages: Record<string, unknown>; updatedAt: number }
+    scripts: Record<string, unknown>
+  }
   breakpoints: unknown[]
   settings: { colorTokens: Record<string, unknown>; shortcuts: Record<string, unknown> }
   classes: Record<string, CSSClass>
@@ -97,7 +100,10 @@ function buildNode(id: string, moduleId: string, overrides: Partial<PageNode> = 
   }
 }
 
-function buildTreeOfSize(target: number, options: { classIdsPerNode?: number; availableClassIds?: string[] } = {}): Page {
+function buildTreeOfSize(
+  target: number,
+  options: { classIdsPerNode?: number; availableClassIds?: string[] } = {},
+): Page {
   const { classIdsPerNode = 0, availableClassIds = [] } = options
   const nodes: Record<string, PageNode> = {}
   const rootId = 'n0'
@@ -162,7 +168,8 @@ function buildClasses(n: number): Record<string, CSSClass> {
 export const publisherBench: BenchModule = {
   name: 'publisher',
   title: 'Publisher render pipeline',
-  description: 'Page-tree → static HTML/CSS. Measures core promise of "clean HTML, no framework runtime".',
+  description:
+    'Page-tree → static HTML/CSS. Measures core promise of "clean HTML, no framework runtime".',
 
   async run(ctx: BenchContext): Promise<BenchResult> {
     const engine = await loadEngine()
@@ -267,7 +274,10 @@ export const publisherBench: BenchModule = {
         }
         const s = summarize(samples)
         const bundle = buildSiteCssBundle(siteWithClasses, registry)
-        const totalBytes = (bundle.reset?.content?.length ?? 0) + (bundle.framework?.content?.length ?? 0) + (bundle.style?.content?.length ?? 0)
+        const totalBytes =
+          (bundle.reset?.content?.length ?? 0) +
+          (bundle.framework?.content?.length ?? 0) +
+          (bundle.style?.content?.length ?? 0)
         cssRows.push({
           label: `${fmtNum(classCount)} user classes`,
           inputs: { classes: classCount, iters },
@@ -297,7 +307,8 @@ export const publisherBench: BenchModule = {
       sections: [
         {
           title: 'Tree-size scaling',
-          intro: 'How HTML render cost scales with page node count. Approximately linear in the number of nodes.',
+          intro:
+            'How HTML render cost scales with page node count. Approximately linear in the number of nodes.',
           rows: treeRows,
         },
         {

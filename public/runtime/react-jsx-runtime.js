@@ -12,7 +12,7 @@
 const G = globalThis.__instatic?.ReactJsxRuntime
 if (!G) {
   throw new Error(
-    "[@instatic/runtime] Host React JSX runtime not initialized. Did the host bundle finish loading before the plugin import?",
+    '[@instatic/runtime] Host React JSX runtime not initialized. Did the host bundle finish loading before the plugin import?',
   )
 }
 

@@ -29,10 +29,7 @@
  * a content-only caller cannot bootstrap a site from nothing.
  */
 import type { CoreCapability } from '../../auth/capabilities'
-import type {
-  StyleRule,
-  SiteShell,
-} from '@core/page-tree'
+import type { StyleRule, SiteShell } from '@core/page-tree'
 
 type SiteChangeKind = 'structure' | 'content' | 'style'
 
@@ -101,7 +98,12 @@ export function validateSiteWriteDiff(
   // First save: a content-only caller cannot create the site from nothing.
   // Treat the whole document as a structural change.
   if (!previous) {
-    requireChange(ctx, 'structure', '', 'no previous draft — full site create requires site.structure.edit')
+    requireChange(
+      ctx,
+      'structure',
+      '',
+      'no previous draft — full site create requires site.structure.edit',
+    )
     return
   }
 
@@ -161,10 +163,7 @@ function diffSettings(
   }
 
   // Content fields — site-wide SEO copy that the copy-editor persona owns.
-  const contentKeys: Array<keyof SiteShell['settings']> = [
-    'metaTitle',
-    'metaDescription',
-  ]
+  const contentKeys: Array<keyof SiteShell['settings']> = ['metaTitle', 'metaDescription']
   for (const key of contentKeys) {
     if (!deepEqual(prev[key], next[key])) {
       requireChange(ctx, 'content', `settings.${String(key)}`, `${String(key)} changed`)
@@ -172,11 +171,7 @@ function diffSettings(
   }
 
   // Structural fields — install identity / runtime config / editor prefs.
-  const structuralKeys: Array<keyof SiteShell['settings']> = [
-    'faviconUrl',
-    'language',
-    'shortcuts',
-  ]
+  const structuralKeys: Array<keyof SiteShell['settings']> = ['faviconUrl', 'language', 'shortcuts']
   for (const key of structuralKeys) {
     if (!deepEqual(prev[key], next[key])) {
       requireChange(ctx, 'structure', `settings.${String(key)}`, `${String(key)} changed`)
@@ -212,11 +207,7 @@ function diffClassesMap(
 // files diff
 // ---------------------------------------------------------------------------
 
-function diffFiles(
-  ctx: DiffContext,
-  prev: SiteShell['files'],
-  next: SiteShell['files'],
-): void {
+function diffFiles(ctx: DiffContext, prev: SiteShell['files'], next: SiteShell['files']): void {
   const prevById = new Map(prev.map((f) => [f.id, f]))
   const nextById = new Map(next.map((f) => [f.id, f]))
   for (const id of new Set([...prevById.keys(), ...nextById.keys()])) {
@@ -260,10 +251,8 @@ function deepEqual(a: unknown, b: unknown): boolean {
   if (aKeys.length !== bKeys.length) return false
   for (const k of aKeys) {
     if (!Object.prototype.hasOwnProperty.call(b, k)) return false
-    if (!deepEqual(
-      (a as Record<string, unknown>)[k],
-      (b as Record<string, unknown>)[k],
-    )) return false
+    if (!deepEqual((a as Record<string, unknown>)[k], (b as Record<string, unknown>)[k]))
+      return false
   }
   return true
 }

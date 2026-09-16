@@ -67,11 +67,7 @@ export async function handleMediaRegisterUrlTransformer(
   // render boundary (Phase C wires the boundary).
   hookBus.filter(msg.pluginId, 'media.url.transform', async (value) => {
     const payload = value as { path: string; ctx: unknown }
-    const rewritten = await runMediaUrlTransformerInWorker(
-      msg.pluginId,
-      transformerId,
-      payload,
-    )
+    const rewritten = await runMediaUrlTransformerInWorker(msg.pluginId, transformerId, payload)
     // null = "no rewrite" — chain through. String = the new path.
     if (typeof rewritten === 'string') {
       return { ...payload, path: rewritten }

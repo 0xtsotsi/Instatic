@@ -53,10 +53,13 @@ function runInstaticLoopRuntime(): void {
           page: String(pageNumber + 1),
           pagePath: pagePath,
         })
-        const res = await fetch(endpointBase + encodeURIComponent(loopId) + '?' + params.toString(), {
-          headers: { accept: 'application/json' },
-          credentials: 'same-origin',
-        })
+        const res = await fetch(
+          endpointBase + encodeURIComponent(loopId) + '?' + params.toString(),
+          {
+            headers: { accept: 'application/json' },
+            credentials: 'same-origin',
+          },
+        )
         if (!res.ok) throw new Error('Loop fetch failed: ' + res.status)
         const body = await res.json()
         if (typeof body.html === 'string' && body.html.length > 0) {
@@ -84,7 +87,9 @@ function runInstaticLoopRuntime(): void {
   }
 
   function init(): void {
-    document.querySelectorAll('[data-instatic-loop][data-instatic-loop-mode="infinite"]').forEach(attach)
+    document
+      .querySelectorAll('[data-instatic-loop][data-instatic-loop-mode="infinite"]')
+      .forEach(attach)
   }
 
   if (document.readyState === 'loading') {

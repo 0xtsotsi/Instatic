@@ -19,13 +19,14 @@ describe('rewriteCss', () => {
 
   it('emits multiple rules sharing the scope class', () => {
     const out = rewriteCss({
-      'div': { color: 'red' },
-      'p': { color: 'blue' },
+      div: { color: 'red' },
+      p: { color: 'blue' },
     })
     // Two rules, both scoped under the same class.
     const ruleCount = (out.match(/\{/g) ?? []).length
     expect(ruleCount).toBe(2)
-    const occurrences = (out.match(new RegExp(`\\.${DEFAULT_SCOPE_CLASS} \\.cap_`, 'g')) ?? []).length
+    const occurrences = (out.match(new RegExp(`\\.${DEFAULT_SCOPE_CLASS} \\.cap_`, 'g')) ?? [])
+      .length
     expect(occurrences).toBe(2)
     expect(out).toContain('color: red;')
     expect(out).toContain('color: blue;')

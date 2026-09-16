@@ -79,8 +79,9 @@ function resolveGoogleRequest(input: InstallGoogleFontInput): {
   const variants = (input.variants ?? [])
     .filter((v): v is string => typeof v === 'string' && allowedVariants.has(v))
     .filter((v) => parseVariant(v) !== null)
-  const subsets = (input.subsets ?? [])
-    .filter((s): s is string => typeof s === 'string' && allowedSubsets.has(s))
+  const subsets = (input.subsets ?? []).filter(
+    (s): s is string => typeof s === 'string' && allowedSubsets.has(s),
+  )
 
   if (variants.length === 0) {
     throw new FontInstallError(`No supported variants requested for ${family}`)
@@ -130,7 +131,9 @@ async function fetchFamilyCss(family: string, axisSpec: string): Promise<string>
       // Drop the failed promise from the cache so the next attempt can retry —
       // we don't want a transient Google 5xx to brick the dialog forever.
       cssResponseCache.delete(cacheKey)
-      throw new FontInstallError(`Google Fonts CSS request failed for ${family} (HTTP ${res.status})`)
+      throw new FontInstallError(
+        `Google Fonts CSS request failed for ${family} (HTTP ${res.status})`,
+      )
     }
     return res.text()
   })
@@ -217,8 +220,7 @@ export function parseCss2Faces(css: string, primarySubset: string): ParsedFace[]
 
     const weight = Number(weightMatch[1])
     const italic = styleMatch[1] === 'italic'
-    const variantChanged =
-      prevWeight !== null && (weight !== prevWeight || italic !== prevItalic)
+    const variantChanged = prevWeight !== null && (weight !== prevWeight || italic !== prevItalic)
 
     if (pendingSubset !== null) {
       activeSubset = pendingSubset
@@ -477,10 +479,7 @@ export async function installGoogleFont(
  * endpoint after the client has dropped the entry from `site.settings.fonts`.
  * Idempotent — missing directory is not an error.
  */
-export async function uninstallFontFamily(
-  family: string,
-  uploadsDir: string,
-): Promise<void> {
+export async function uninstallFontFamily(family: string, uploadsDir: string): Promise<void> {
   const slug = familySlug(family)
   if (!slug) return
   await rm(join(uploadsDir, 'fonts', slug), { recursive: true, force: true })

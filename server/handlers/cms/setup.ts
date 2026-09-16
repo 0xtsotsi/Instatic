@@ -159,7 +159,7 @@ async function loadPublicSiteIdentity(db: DbClient): Promise<PublicSiteIdentity>
   // settings payload fails parsing and resolves to a null favicon — never a
   // thrown error or a silently-wrong value.
   const parsed = safeParseValue(StoredSiteIdentitySchema, row.settings_json)
-  const faviconUrl = parsed.ok ? parsed.value.site?.settings?.faviconUrl ?? null : null
+  const faviconUrl = parsed.ok ? (parsed.value.site?.settings?.faviconUrl ?? null) : null
 
   return {
     name: typeof row.name === 'string' && row.name.length > 0 ? row.name : null,

@@ -15,7 +15,8 @@
  */
 import { issuePublicFormPageToken } from './challenge'
 
-const CMS_FORM_TAG_PATTERN = /<form\b(?=[^>]*\bdata-instatic-form-mode=(["'])cms\1)(?=[^>]*\bdata-instatic-form-id=(["'])[^"']+\2)[^>]*>/gi
+const CMS_FORM_TAG_PATTERN =
+  /<form\b(?=[^>]*\bdata-instatic-form-mode=(["'])cms\1)(?=[^>]*\bdata-instatic-form-id=(["'])[^"']+\2)[^>]*>/gi
 
 export function stampFormPageTokens(html: string, pageId: string): string {
   return html.replace(CMS_FORM_TAG_PATTERN, (tag) => {

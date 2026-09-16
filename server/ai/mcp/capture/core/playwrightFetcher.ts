@@ -171,7 +171,9 @@ export async function shutdownSharedBrowser(): Promise<void> {
   // relaunch sequence stays stuck on the original launch handle.
   launchPromise = null
   if (browser) {
-    await browser.close().catch(() => { /* best effort */ })
+    await browser.close().catch(() => {
+      /* best effort */
+    })
   }
 }
 
@@ -222,7 +224,11 @@ export async function createPlaywrightFetcher(
   let lastRelease: (() => void) | null = null
 
   return {
-    async fetch(url: string, target?: CaptureTarget, fetchOpts?: FetchOptions): Promise<FetchedPage> {
+    async fetch(
+      url: string,
+      target?: CaptureTarget,
+      fetchOpts?: FetchOptions,
+    ): Promise<FetchedPage> {
       const release = await acquireContextSlot()
       const context = await browser.newContext()
       lastContext = context
@@ -233,8 +239,8 @@ export async function createPlaywrightFetcher(
           await page.route('**/*', async (route) => {
             const requestUrl = new URL(route.request().url())
             if (
-              (requestUrl.protocol === 'http:' || requestUrl.protocol === 'https:')
-              && !hostMatchesAllowlist(requestUrl.hostname, opts.allowedHosts!)
+              (requestUrl.protocol === 'http:' || requestUrl.protocol === 'https:') &&
+              !hostMatchesAllowlist(requestUrl.hostname, opts.allowedHosts!)
             ) {
               await route.abort('blockedbyclient')
               return
@@ -270,21 +276,29 @@ export async function createPlaywrightFetcher(
         // as JSON and bake them into a self-invoking function expression.
         // This mirrors the cypress / kaihv pattern of shipping a complete
         // IIFE as a string to page.evaluate.
-        const nodes = await page.evaluate(
+        const nodes = (await page.evaluate(
           `(function (target, COMPUTED_PROPS_) { ${PAGE_WALKER_SOURCE}\nreturn runExtract(target, COMPUTED_PROPS_); })(${JSON.stringify(resolvedTarget)}, ${JSON.stringify(COMPUTED_PROPS)})`,
-        ) as ExtractedNode[]
+        )) as ExtractedNode[]
         return {
           html,
           nodes,
           close: async () => {
-            await page.close().catch(() => { /* best effort */ })
-            await context.close().catch(() => { /* best effort */ })
+            await page.close().catch(() => {
+              /* best effort */
+            })
+            await context.close().catch(() => {
+              /* best effort */
+            })
             release()
           },
         }
       } catch (err) {
-        await page.close().catch(() => { /* best effort */ })
-        await context.close().catch(() => { /* best effort */ })
+        await page.close().catch(() => {
+          /* best effort */
+        })
+        await context.close().catch(() => {
+          /* best effort */
+        })
         release()
         throw err
       }
@@ -292,7 +306,9 @@ export async function createPlaywrightFetcher(
     async close(): Promise<void> {
       // Close only the most recent context, not the shared browser.
       if (lastContext) {
-        await lastContext.close().catch(() => { /* best effort */ })
+        await lastContext.close().catch(() => {
+          /* best effort */
+        })
         lastContext = null
       }
       if (lastRelease) {

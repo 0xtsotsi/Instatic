@@ -24,7 +24,6 @@ import type { Dialect } from './client'
 
 // Re-export Dialect so callers can import it from this module alongside JsonFieldExpr.
 
-
 /**
  * Branded SQL fragment produced by `jsonField`.
  * The `.sql` string is safe for insertion into `db.unsafe()` SQL because it
@@ -61,9 +60,7 @@ export function jsonField(column: string, field: string, dialect: Dialect): Json
     throw new Error(`[db/jsonExtract] invalid field identifier: ${field}`)
   }
   const sql =
-    dialect === 'postgres'
-      ? `${column}->>'${field}'`
-      : `json_extract(${column}, '$.${field}')`
+    dialect === 'postgres' ? `${column}->>'${field}'` : `json_extract(${column}, '$.${field}')`
   return Object.freeze({ __brand: 'JsonFieldExpr', sql } as const)
 }
 
@@ -71,4 +68,3 @@ export function jsonField(column: string, field: string, dialect: Dialect): Json
 // convenience wrappers that accept a DbClient and read its .dialect.
 // The import is type-only and erased at runtime; it does not create a
 // circular dependency.
-

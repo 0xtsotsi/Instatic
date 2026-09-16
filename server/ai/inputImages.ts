@@ -126,9 +126,9 @@ async function canonicaliseAiUserImage(
     throw new AiImageInputError('Image data is not a valid JPEG.')
   }
   if (
-    metadata.width > AI_USER_IMAGE_MAX_EDGE
-    || metadata.height > AI_USER_IMAGE_MAX_EDGE
-    || metadata.width * metadata.height > AI_USER_IMAGE_MAX_PIXELS
+    metadata.width > AI_USER_IMAGE_MAX_EDGE ||
+    metadata.height > AI_USER_IMAGE_MAX_EDGE ||
+    metadata.width * metadata.height > AI_USER_IMAGE_MAX_PIXELS
   ) {
     throw new AiImageInputError(
       `Image dimensions exceed the ${AI_USER_IMAGE_MAX_EDGE}px / ${AI_USER_IMAGE_MAX_PIXELS.toLocaleString()}px limit.`,
@@ -136,12 +136,7 @@ async function canonicaliseAiUserImage(
     )
   }
 
-  const canonicalBytes = await canonicaliseJpeg(
-    bytes,
-    metadata.width,
-    metadata.height,
-    signal,
-  )
+  const canonicalBytes = await canonicaliseJpeg(bytes, metadata.width, metadata.height, signal)
   return {
     kind: 'image',
     mimeType: 'image/jpeg',
@@ -192,10 +187,7 @@ async function canonicaliseJpeg(
         if (output.byteLength <= AI_USER_IMAGE_MAX_BYTES) return output
       }
 
-      const scale = Math.max(
-        0.5,
-        Math.sqrt(AI_USER_IMAGE_MAX_BYTES / lastSize) * 0.9,
-      )
+      const scale = Math.max(0.5, Math.sqrt(AI_USER_IMAGE_MAX_BYTES / lastSize) * 0.9)
       width = Math.max(1, Math.floor(width * scale))
       height = Math.max(1, Math.floor(height * scale))
     }

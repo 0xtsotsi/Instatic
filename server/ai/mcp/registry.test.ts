@@ -71,9 +71,11 @@ describe('mcp registry', () => {
 
   it('only exposes full-site publish when both write and publish capabilities are granted', () => {
     expect(mcpToolsForCapabilities(FULL).map((t) => t.name)).toContain('site_publish')
-    expect(mcpToolsForCapabilities(FULL.filter((c) => c !== 'pages.publish')).map((t) => t.name))
-      .not.toContain('site_publish')
-    expect(mcpToolsForCapabilities(FULL.filter((c) => c !== 'ai.tools.write')).map((t) => t.name))
-      .not.toContain('site_publish')
+    expect(
+      mcpToolsForCapabilities(FULL.filter((c) => c !== 'pages.publish')).map((t) => t.name),
+    ).not.toContain('site_publish')
+    expect(
+      mcpToolsForCapabilities(FULL.filter((c) => c !== 'ai.tools.write')).map((t) => t.name),
+    ).not.toContain('site_publish')
   })
 })

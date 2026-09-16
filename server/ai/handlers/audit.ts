@@ -33,11 +33,7 @@ export function tryHandleAiAudit(
   return handleAuditList(req, db, url)
 }
 
-async function handleAuditList(
-  req: Request,
-  db: DbClient,
-  url: URL,
-): Promise<Response> {
+async function handleAuditList(req: Request, db: DbClient, url: URL): Promise<Response> {
   if (req.method !== 'GET') {
     return jsonResponse({ error: 'Method not allowed' }, { status: 405 })
   }

@@ -115,12 +115,20 @@ function acquireDeadline(ctx: QuickJSContext, timeoutMs: number): () => void {
     activeTokens.delete(token)
     if (activeTokens.size === 0) {
       deadlinesByRuntime.delete(runtime)
-      try { runtime.removeInterruptHandler() } catch { /* runtime may already be disposed */ }
+      try {
+        runtime.removeInterruptHandler()
+      } catch {
+        /* runtime may already be disposed */
+      }
     }
   }
 }
 
-function withDeadline<T>(ctx: QuickJSContext, timeoutMs: number, body: () => Promise<T>): Promise<T> {
+function withDeadline<T>(
+  ctx: QuickJSContext,
+  timeoutMs: number,
+  body: () => Promise<T>,
+): Promise<T> {
   const releaseDeadline = acquireDeadline(ctx, timeoutMs)
   return body().finally(releaseDeadline)
 }
@@ -284,9 +292,7 @@ async function settleResolved<T>(
       // it alive trips QuickJS's `list_empty(&rt->gc_obj_list)` assertion
       // when the runtime is freed. `consume` dumps + disposes in one step.
       const errorValue = state.error.consume((handle) => ctx.dump(handle)) as
-        | { message?: string; stack?: string }
-        | string
-        | undefined
+        { message?: string; stack?: string } | string | undefined
       evalHandle.dispose()
       // Surface the plugin's own error message verbatim — the host's
       // logging (`[plugin:<id>]`) provides the context, so a "Plugin VM
@@ -324,7 +330,11 @@ async function settleResolved<T>(
 function drainJobs(ctx: QuickJSContext): number {
   const result = ctx.runtime.executePendingJobs()
   if ('error' in result && result.error) {
-    try { result.error.dispose() } catch { /* ignore */ }
+    try {
+      result.error.dispose()
+    } catch {
+      /* ignore */
+    }
     return 0
   }
   if ('value' in result && typeof result.value === 'number') {
@@ -351,7 +361,16 @@ export function callString(
   return callResolved(ctx, fnHandle, args, (h) => ctx.getString(h), timeoutMs)
 }
 
-export async function evalJson<T>(ctx: QuickJSContext, code: string, timeoutMs: number): Promise<T> {
-  const raw = await evalResolved(ctx, `JSON.stringify((${code}))`, (h) => ctx.getString(h), timeoutMs)
+export async function evalJson<T>(
+  ctx: QuickJSContext,
+  code: string,
+  timeoutMs: number,
+): Promise<T> {
+  const raw = await evalResolved(
+    ctx,
+    `JSON.stringify((${code}))`,
+    (h) => ctx.getString(h),
+    timeoutMs,
+  )
   return JSON.parse(raw) as T
 }

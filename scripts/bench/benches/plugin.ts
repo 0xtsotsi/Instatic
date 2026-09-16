@@ -198,10 +198,7 @@ export const pluginBench: BenchModule = {
         // Set the iteration count via a sneaky globalThis read inside the VM:
         // we use a per-VM wrapper that injects __bench_n before evaluating the
         // user source. Easiest is to inline the count into the source.
-        const source = ROUNDTRIP_SOURCE.replace(
-          "globalThis.__bench_n || '100'",
-          `'${n}'`,
-        )
+        const source = ROUNDTRIP_SOURCE.replace("globalThis.__bench_n || '100'", `'${n}'`)
         const vm = await createPluginVm({ env, pluginSource: source })
         try {
           // Warmup
@@ -277,9 +274,8 @@ export const pluginBench: BenchModule = {
     log.step('bodyEncoding base64 encode/decode')
     const base64Rows: BenchRow[] = []
     {
-      const { bytesToBase64, base64ToBytes } = await import(
-        '../../../server/plugins/protocol/bodyEncoding'
-      )
+      const { bytesToBase64, base64ToBytes } =
+        await import('../../../server/plugins/protocol/bodyEncoding')
       const sweep: Array<{ size: number; iters: number }> = [
         { size: 1_024 * 1_024, iters: ctx.quick ? 5 : 20 },
         { size: 10 * 1_024 * 1_024, iters: ctx.quick ? 3 : 10 },
@@ -289,7 +285,11 @@ export const pluginBench: BenchModule = {
         // Warmup + correctness check.
         const warmEncoded = bytesToBase64(bytes)
         const warmDecoded = base64ToBytes(warmEncoded)
-        if (warmDecoded.length !== bytes.length || warmDecoded[0] !== bytes[0] || warmDecoded[size - 1] !== bytes[size - 1]) {
+        if (
+          warmDecoded.length !== bytes.length ||
+          warmDecoded[0] !== bytes[0] ||
+          warmDecoded[size - 1] !== bytes[size - 1]
+        ) {
           throw new Error(`base64 round-trip mismatch at ${size} bytes`)
         }
         const encodeSamples: number[] = []
@@ -359,7 +359,8 @@ export const pluginBench: BenchModule = {
       sections: [
         {
           title: 'Cold VM boot (createPluginVm)',
-          intro: 'Paid on every plugin activation. Includes WASM module init + context creation + plugin source eval.',
+          intro:
+            'Paid on every plugin activation. Includes WASM module init + context creation + plugin source eval.',
           rows: bootRows,
         },
         {

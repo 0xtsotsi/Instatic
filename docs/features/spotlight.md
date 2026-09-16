@@ -69,28 +69,28 @@ src/admin/spotlight/
 
 ```ts
 interface Command {
-  id:             CommandId          // 'editor.publish', 'site.add-page'
-  title:          string             // "Publish site" — primary row label
-  subtitle?:      string             // shown under the label
-  group:          CommandGroup       // 'editor' | 'site' | 'content' | 'media' | 'pages' | …
+  id: CommandId // 'editor.publish', 'site.add-page'
+  title: string // "Publish site" — primary row label
+  subtitle?: string // shown under the label
+  group: CommandGroup // 'editor' | 'site' | 'content' | 'media' | 'pages' | …
 
-  iconName?:      string             // pixel-art-icons name, e.g. 'save-solid'
-  keywords?:      string[]           // extra search terms (low weight)
+  iconName?: string // pixel-art-icons name, e.g. 'save-solid'
+  keywords?: string[] // extra search terms (low weight)
 
   /** Capability gate — palette filters before display. */
-  capability?:    string | readonly string[]
+  capability?: string | readonly string[]
   /** Workspace gate — only show on these workspaces. 'any' = always. */
-  workspaces?:    ReadonlyArray<AdminWorkspace | 'any'>
+  workspaces?: ReadonlyArray<AdminWorkspace | 'any'>
   /** Predicate run at query time — finer-grained gating. */
-  when?:          (ctx: CommandContext) => boolean
+  when?: (ctx: CommandContext) => boolean
   /** Boosts ranking when `when` returns true. Default 1.0. */
   priorityBoost?: number
 
   /** Argument prompts — multi-step input flow. */
-  args?:          CommandArg[]
+  args?: CommandArg[]
 
   /** Dangerous commands show danger styling + inline confirm. */
-  destructive?:   boolean
+  destructive?: boolean
   /** If true, palette stays open after run. */
   keepOpenAfterRun?: boolean
 
@@ -114,29 +114,29 @@ Two related types flow through Spotlight:
 /** Snapshot built once per palette open. Passed to search / when predicates. */
 interface CommandContext {
   workspace: AdminWorkspace
-  pathname:  string
-  user:      CmsCurrentUser
+  pathname: string
+  user: CmsCurrentUser
   /** Populated by SpotlightRoot when the site editor is the active workspace. */
   editor?: {
-    selectedNodeIds:       ReadonlyArray<string>
-    activePageId:          string | null
-    activeDocument:        ActiveDocument | null
-    canUndo:               boolean
-    canRedo:               boolean
-    activeBreakpointId:    string
-    activeInlineEdit:      boolean
+    selectedNodeIds: ReadonlyArray<string>
+    activePageId: string | null
+    activeDocument: ActiveDocument | null
+    canUndo: boolean
+    canRedo: boolean
+    activeBreakpointId: string
+    activeInlineEdit: boolean
   }
 }
 
 /** Extended context injected into command.run(). Adds action callbacks. */
 interface CommandRunContext extends CommandContext {
-  args:          Record<string, string>  // collected sub-command arguments
-  navigate:      (path: string) => void
-  closeSpotlight:() => void
-  pushScope:     (scopeId: string, args?: Record<string, string>) => void
-  popScope:      () => void
+  args: Record<string, string> // collected sub-command arguments
+  navigate: (path: string) => void
+  closeSpotlight: () => void
+  pushScope: (scopeId: string, args?: Record<string, string>) => void
+  popScope: () => void
   /** Wraps an action in the step-up re-auth flow. */
-  runStepUp:     <T>(action: () => Promise<T>) => Promise<T>
+  runStepUp: <T>(action: () => Promise<T>) => Promise<T>
 }
 ```
 
@@ -150,15 +150,15 @@ The subscription is **dropped on close** to avoid spurious re-renders.
 
 `src/admin/spotlight/builtinCommands.ts` exports the static command set. Common groups:
 
-| Group              | Examples                                                             |
-|--------------------|----------------------------------------------------------------------|
-| `editor`           | Publish, Save, Undo, Redo, Wrap in container, Toggle preview         |
-| `pages`            | Add page, Open page settings                                         |
-| `content`          | New post, Edit post                                                  |
-| `navigation`       | Go to dashboard, Go to site, Go to media, Go to plugins, …           |
-| `settings`         | Open framework scale, Open site settings                             |
-| `ai`               | Open / focus AI assistant                                            |
-| `account` / `users`| Account security, session revocation, user management                |
+| Group               | Examples                                                     |
+| ------------------- | ------------------------------------------------------------ |
+| `editor`            | Publish, Save, Undo, Redo, Wrap in container, Toggle preview |
+| `pages`             | Add page, Open page settings                                 |
+| `content`           | New post, Edit post                                          |
+| `navigation`        | Go to dashboard, Go to site, Go to media, Go to plugins, …   |
+| `settings`          | Open framework scale, Open site settings                     |
+| `ai`                | Open / focus AI assistant                                    |
+| `account` / `users` | Account security, session revocation, user management        |
 
 Each command's `when(ctx)` / `workspaces` / `capability` fields filter by user capability + workspace context. `filterCommands(commands, ctx)` runs once per palette open.
 
@@ -170,14 +170,18 @@ Providers run **as the user types**. Each provider produces results for one doma
 
 ```ts
 interface SpotlightProvider {
-  id:          string
+  id: string
   /** Becomes the group header in results. */
-  label:       string
+  label: string
   /**
    * Called with the current query + context. Returns Commands to merge into
    * the palette. Should be quick — debounced + cached by the runner.
    */
-  search:      (query: string, ctx: CommandContext, signal: AbortSignal) => Promise<Command[]> | Command[]
+  search: (
+    query: string,
+    ctx: CommandContext,
+    signal: AbortSignal,
+  ) => Promise<Command[]> | Command[]
   /** Debounce in ms — applied per provider. 0 = synchronous each keystroke. */
   debounceMs?: number
 }
@@ -217,7 +221,10 @@ export const dataProvider = makeServerProvider({
     title: table.name,
     group: 'data',
     iconName: 'table-solid',
-    run: (ctx) => { ctx.closeSpotlight(); ctx.navigate(`/admin/data?table=${table.id}`) },
+    run: (ctx) => {
+      ctx.closeSpotlight()
+      ctx.navigate(`/admin/data?table=${table.id}`)
+    },
   }),
 })
 ```
@@ -240,13 +247,13 @@ A scope narrows the palette to a single domain. Scopes are stacked (`ScopeFrame[
 
 ```ts
 interface Scope {
-  id:           string          // 'root' | 'pages' | 'content' | …
-  title?:       string          // header text in argument mode
+  id: string // 'root' | 'pages' | 'content' | …
+  title?: string // header text in argument mode
   placeholder?: string
   /** Synchronous static commands offered by this scope. */
-  commands:     () => Command[]
+  commands: () => Command[]
   /** Async providers — called with debounced query + AbortSignal. */
-  providers?:   SpotlightProvider[]
+  providers?: SpotlightProvider[]
 }
 ```
 
@@ -289,18 +296,18 @@ Used by destructive commands: delete user, sign out all devices, revoke session,
 
 ## Keyboard
 
-| Key                  | Action                                                |
-|----------------------|-------------------------------------------------------|
-| ⌘K / Ctrl+K          | Open / close                                          |
-| ⌘I / Ctrl+I          | Open the AI assistant panel                           |
-| ⌘, / Ctrl+,          | Open Settings                                         |
-| Esc                  | Clear query (or close if empty)                       |
-| Arrow up / down      | Move selection                                        |
-| Enter                | Run selected (twice for `destructive` commands)       |
-| Tab / Arrow right    | Enter arg mode or run the selected scope-pushing command |
-| Backspace (empty)    | Pop scope                                             |
-| ?                    | Show all keybindings                                  |
-| Custom command shortcuts | Per-command entry in `keybindings.ts`             |
+| Key                      | Action                                                   |
+| ------------------------ | -------------------------------------------------------- |
+| ⌘K / Ctrl+K              | Open / close                                             |
+| ⌘I / Ctrl+I              | Open the AI assistant panel                              |
+| ⌘, / Ctrl+,              | Open Settings                                            |
+| Esc                      | Clear query (or close if empty)                          |
+| Arrow up / down          | Move selection                                           |
+| Enter                    | Run selected (twice for `destructive` commands)          |
+| Tab / Arrow right        | Enter arg mode or run the selected scope-pushing command |
+| Backspace (empty)        | Pop scope                                                |
+| ?                        | Show all keybindings                                     |
+| Custom command shortcuts | Per-command entry in `keybindings.ts`                    |
 
 Selected-layer shortcuts are command shortcuts too. `⌘C` / `Ctrl+C`, `⌘X` / `Ctrl+X`, `⌘V` / `Ctrl+V`, and `⌘D` / `Ctrl+D` run when focus is on the canvas or the Layers tree. `⌘⌫` / `Ctrl+Backspace` deletes the selected layer from either surface through the normal delete confirmation flow; plain Delete / Backspace remains accepted by the canvas handler for selected canvas nodes.
 
@@ -411,7 +418,9 @@ export function activate(api) {
     label: 'Do the thing',
     subtitle: 'Runs a plugin command',
     workspaces: ['any'],
-    run: async () => { /* … */ },
+    run: async () => {
+      /* … */
+    },
   })
 }
 ```
@@ -448,16 +457,16 @@ run: async (ctx) => {
 
 ## Forbidden patterns
 
-| Pattern                                                              | Use instead                                              |
-|----------------------------------------------------------------------|----------------------------------------------------------|
-| Adding a raw `keydown` listener for a global shortcut                | Register in `keybindings.ts`. Gated.                    |
-| Direct store mutation inside a provider's `search`                   | Providers are read-only — mutate in commands' `run`. Gated by `spotlight-no-direct-store-mutation.test.ts`. |
-| Persisting recents server-side                                       | They're per-device in localStorage. Cross-device recents need a real feature, not a Spotlight detail. |
-| Lazy-importing the editor store at module-eval time                  | The store mounts only when SitePage mounts — eager import would force the chunk. Use `require(...)` inside `search` (see `pagesProvider.ts`). |
-| Long-running providers without `signal` handling                     | The runner aborts on close — return `[]` when `signal.aborted`. |
-| Multi-screen flow inside a single command                            | Use scopes — each step pushes a new scope frame.         |
-| Hand-rolling `fetch` + `isAbortError` in a server provider           | Use `makeServerProvider` or `fetchOnAbortEmpty` from `serverProvider.ts`. |
-| Using `as Foo` past a JSON boundary in a provider                    | Pass a TypeBox schema to `makeServerProvider` or `fetchOnAbortEmpty`. Gated by `boundary-validation.test.ts`. |
+| Pattern                                                    | Use instead                                                                                                                                   |
+| ---------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
+| Adding a raw `keydown` listener for a global shortcut      | Register in `keybindings.ts`. Gated.                                                                                                          |
+| Direct store mutation inside a provider's `search`         | Providers are read-only — mutate in commands' `run`. Gated by `spotlight-no-direct-store-mutation.test.ts`.                                   |
+| Persisting recents server-side                             | They're per-device in localStorage. Cross-device recents need a real feature, not a Spotlight detail.                                         |
+| Lazy-importing the editor store at module-eval time        | The store mounts only when SitePage mounts — eager import would force the chunk. Use `require(...)` inside `search` (see `pagesProvider.ts`). |
+| Long-running providers without `signal` handling           | The runner aborts on close — return `[]` when `signal.aborted`.                                                                               |
+| Multi-screen flow inside a single command                  | Use scopes — each step pushes a new scope frame.                                                                                              |
+| Hand-rolling `fetch` + `isAbortError` in a server provider | Use `makeServerProvider` or `fetchOnAbortEmpty` from `serverProvider.ts`.                                                                     |
+| Using `as Foo` past a JSON boundary in a provider          | Pass a TypeBox schema to `makeServerProvider` or `fetchOnAbortEmpty`. Gated by `boundary-validation.test.ts`.                                 |
 
 ---
 

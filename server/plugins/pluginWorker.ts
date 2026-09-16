@@ -77,7 +77,11 @@ const pendingApiCalls = new Map<
   { resolve: (value: unknown) => void; reject: (err: unknown) => void }
 >()
 
-function callHostApi(pluginId: string, target: ApiCall['target'], args: unknown[]): Promise<unknown> {
+function callHostApi(
+  pluginId: string,
+  target: ApiCall['target'],
+  args: unknown[],
+): Promise<unknown> {
   const correlationId = nanoid()
   return new Promise<unknown>((resolve, reject) => {
     pendingApiCalls.set(correlationId, { resolve, reject })
@@ -135,10 +139,10 @@ async function handleLoadPlugin(msg: LoadPluginRequest): Promise<void> {
         // Default to a sensible derived path when the manifest hasn't yet been
         // written through `writePluginPackageFiles` (e.g. test fixtures that
         // assemble manifests by hand). The real install flow sets this.
-        assetBasePath: msg.manifest.assetBasePath ?? `/uploads/plugins/${msg.pluginId}/${msg.manifest.version}`,
+        assetBasePath:
+          msg.manifest.assetBasePath ?? `/uploads/plugins/${msg.pluginId}/${msg.manifest.version}`,
         settings: { ...msg.settings },
-        hostCall: (target, args) =>
-          callHostApi(msg.pluginId, target as ApiCall['target'], args),
+        hostCall: (target, args) => callHostApi(msg.pluginId, target as ApiCall['target'], args),
         log: (args) => {
           send({ kind: 'log', pluginId: msg.pluginId, args })
         },
@@ -264,7 +268,12 @@ async function handleRunMigrate(msg: RunMigrateRequest): Promise<void> {
 async function handleRunRoute(msg: RunRouteRequest): Promise<void> {
   const vm = vmsByPluginId.get(msg.pluginId)
   if (!vm) {
-    send({ kind: 'route-result', correlationId: msg.correlationId, ok: false, error: 'Plugin not loaded' })
+    send({
+      kind: 'route-result',
+      correlationId: msg.correlationId,
+      ok: false,
+      error: 'Plugin not loaded',
+    })
     return
   }
   try {
@@ -341,7 +350,12 @@ async function handleRunHookListener(msg: RunHookListenerRequest): Promise<void>
 async function handleRunHookFilter(msg: RunHookFilterRequest): Promise<void> {
   const vm = vmsByPluginId.get(msg.pluginId)
   if (!vm) {
-    send({ kind: 'hook-filter-result', correlationId: msg.correlationId, ok: true, value: msg.value })
+    send({
+      kind: 'hook-filter-result',
+      correlationId: msg.correlationId,
+      ok: true,
+      value: msg.value,
+    })
     return
   }
   try {
@@ -435,8 +449,9 @@ async function handleRunSchedule(msg: RunScheduleRequest): Promise<void> {
     // quickjs/eval.ts). Surface this as a distinct status so the admin UI
     // and consecutive-failures logic can treat timeouts separately from
     // logical errors.
-    const status: 'timeout' | 'error' =
-      fields.error.toLowerCase().includes('interrupted') ? 'timeout' : 'error'
+    const status: 'timeout' | 'error' = fields.error.toLowerCase().includes('interrupted')
+      ? 'timeout'
+      : 'error'
     send({
       kind: 'schedule-result',
       correlationId: msg.correlationId,
@@ -481,15 +496,25 @@ async function handleRunMediaUrlTransformer(msg: RunMediaUrlTransformerRequest):
   if (!vm) {
     // Transformer pipeline is purely additive — when the worker is gone,
     // pass the value through unchanged (null = "no rewrite").
-    send({ kind: 'media-url-transformer-result', correlationId: msg.correlationId, ok: true, value: null })
+    send({
+      kind: 'media-url-transformer-result',
+      correlationId: msg.correlationId,
+      ok: true,
+      value: null,
+    })
     return
   }
   try {
-    const payload = (msg.payload && typeof msg.payload === 'object'
-      ? msg.payload
-      : { path: '', ctx: null }) as { path: string; ctx: unknown }
+    const payload = (
+      msg.payload && typeof msg.payload === 'object' ? msg.payload : { path: '', ctx: null }
+    ) as { path: string; ctx: unknown }
     const value = await vm.runMediaUrlTransformer(msg.transformerId, payload)
-    send({ kind: 'media-url-transformer-result', correlationId: msg.correlationId, ok: true, value })
+    send({
+      kind: 'media-url-transformer-result',
+      correlationId: msg.correlationId,
+      ok: true,
+      value,
+    })
   } catch (err) {
     send({
       kind: 'media-url-transformer-result',
@@ -504,7 +529,9 @@ async function handleRunMediaUrlTransformer(msg: RunMediaUrlTransformerRequest):
 // Worker bootstrap
 // ---------------------------------------------------------------------------
 
-;(self as unknown as { onmessage: (e: MessageEvent) => void }).onmessage = (event: MessageEvent) => {
+;(self as unknown as { onmessage: (e: MessageEvent) => void }).onmessage = (
+  event: MessageEvent,
+) => {
   const msg = event.data as MainToWorkerMessage
   switch (msg.kind) {
     case 'load-plugin':

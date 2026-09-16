@@ -105,10 +105,7 @@ function buildTablePatch(
   return update
 }
 
-type TableAuditAction =
-  | 'data.table.create'
-  | 'data.table.update'
-  | 'data.table.delete'
+type TableAuditAction = 'data.table.create' | 'data.table.update' | 'data.table.delete'
 
 async function recordTableAuditEvent(
   db: DbClient,
@@ -156,9 +153,8 @@ async function handleTablesCollection(req: Request, db: DbClient): Promise<Respo
   // accepted because the loop picker calls this and needs to know what tables
   // exist). POST = create a CUSTOM table (`data.custom.tables.manage` + step-up
   // — creating a table changes the public route surface of the site).
-  const user = req.method === 'GET'
-    ? await requireAnyRead(req, db)
-    : await requireCustomTablesManager(req, db)
+  const user =
+    req.method === 'GET' ? await requireAnyRead(req, db) : await requireCustomTablesManager(req, db)
   if (user instanceof Response) return user
 
   if (req.method === 'POST') {
@@ -183,9 +179,7 @@ async function handleTablesCollection(req: Request, db: DbClient): Promise<Respo
 
     if (query) {
       tables = tables.filter(
-        (t) =>
-          t.name.toLowerCase().includes(query) ||
-          t.slug.toLowerCase().includes(query),
+        (t) => t.name.toLowerCase().includes(query) || t.slug.toLowerCase().includes(query),
       )
     }
 
@@ -227,11 +221,7 @@ async function handleTablesCollection(req: Request, db: DbClient): Promise<Respo
   return methodNotAllowed()
 }
 
-async function handleTableItem(
-  req: Request,
-  db: DbClient,
-  tableId: string,
-): Promise<Response> {
+async function handleTableItem(req: Request, db: DbClient, tableId: string): Promise<Response> {
   // GET = schema read (Data workspace OR loop pickers in site editor).
   if (req.method === 'GET') {
     const user = await requireAnyRead(req, db)
@@ -284,14 +274,9 @@ async function handleTableItem(
   return methodNotAllowed()
 }
 
-async function handleTableRows(
-  req: Request,
-  db: DbClient,
-  tableId: string,
-): Promise<Response> {
-  const user = req.method === 'POST'
-    ? await requireDataCreator(req, db)
-    : await requireDataAccess(req, db)
+async function handleTableRows(req: Request, db: DbClient, tableId: string): Promise<Response> {
+  const user =
+    req.method === 'POST' ? await requireDataCreator(req, db) : await requireDataAccess(req, db)
   if (user instanceof Response) return user
 
   const table = await getDataTable(db, tableId)
@@ -388,10 +373,7 @@ const TABLE_LOOP_PREVIEW_PATTERN = /^\/admin\/api\/cms\/data\/tables\/([^/]+)\/l
 // Dispatcher
 // ---------------------------------------------------------------------------
 
-export async function handleDataTableRoutes(
-  req: Request,
-  db: DbClient,
-): Promise<Response | null> {
+export async function handleDataTableRoutes(req: Request, db: DbClient): Promise<Response | null> {
   const { pathname } = new URL(req.url)
 
   if (pathname === `${CMS_API_PREFIX}/data/tables`) {

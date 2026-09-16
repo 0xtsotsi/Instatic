@@ -149,7 +149,12 @@ function diffNode(
     requireChange(capabilities, 'structure', `${nodePath}.propBindings`, 'prop bindings changed')
   }
   if (!deepEqual(previous.dynamicBindings, next.dynamicBindings)) {
-    requireChange(capabilities, 'structure', `${nodePath}.dynamicBindings`, 'dynamic bindings changed')
+    requireChange(
+      capabilities,
+      'structure',
+      `${nodePath}.dynamicBindings`,
+      'dynamic bindings changed',
+    )
   }
 
   if (!deepEqual(previous.classIds, next.classIds)) {
@@ -159,7 +164,12 @@ function diffNode(
     requireChange(capabilities, 'style', `${nodePath}.inlineStyles`, 'inline styles changed')
   }
   if (!deepEqual(previous.breakpointOverrides, next.breakpointOverrides)) {
-    requireChange(capabilities, 'style', `${nodePath}.breakpointOverrides`, 'breakpoint overrides changed')
+    requireChange(
+      capabilities,
+      'style',
+      `${nodePath}.breakpointOverrides`,
+      'breakpoint overrides changed',
+    )
   }
 
   diffNodeProps(capabilities, nodePath, previous, next)

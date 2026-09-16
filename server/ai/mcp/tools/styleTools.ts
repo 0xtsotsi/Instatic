@@ -14,7 +14,12 @@
  * silently needed the editor's posted snapshot and returned nothing over MCP).
  */
 import { Type } from '@core/utils/typeboxHelpers'
-import { isGeneratedClass, styleRuleSelector, type SiteDocument, type StyleRule } from '@core/page-tree'
+import {
+  isGeneratedClass,
+  styleRuleSelector,
+  type SiteDocument,
+  type StyleRule,
+} from '@core/page-tree'
 import { generateClassCSS, generateFrameworkCss } from '@core/publisher'
 import type { CoreCapability } from '@core/capabilities'
 import type { AiTool, ToolContext } from '../../runtime/types'
@@ -38,12 +43,14 @@ const ReadStylesInput = Type.Object(
     ),
     className: Type.Optional(
       Type.String({
-        description: 'Limit output to one class by name (without the leading dot). Omit for the full stylesheet.',
+        description:
+          'Limit output to one class by name (without the leading dot). Omit for the full stylesheet.',
       }),
     ),
     includeTokens: Type.Optional(
       Type.Boolean({
-        description: 'Include the design-token (CSS custom property) definitions. Defaults to true; ignored when className is set.',
+        description:
+          'Include the design-token (CSS custom property) definitions. Defaults to true; ignored when className is set.',
       }),
     ),
   },
@@ -60,7 +67,11 @@ export const styleMcpTools: AiTool[] = [
     inputSchema: ReadStylesInput,
     requiredCapabilities: SITE_READ_CAPS,
     handler: async (input, ctx: ToolContext) => {
-      const { format = 'full', className, includeTokens = true } = input as {
+      const {
+        format = 'full',
+        className,
+        includeTokens = true,
+      } = input as {
         format?: 'full' | 'summary'
         className?: string
         includeTokens?: boolean

@@ -27,12 +27,7 @@
 
 import type { DbClient } from '../../db/client'
 import { requireCapability } from '../../auth/authz'
-import {
-  badRequest,
-  jsonResponse,
-  methodNotAllowed,
-  readValidatedBody,
-} from '../../http'
+import { badRequest, jsonResponse, methodNotAllowed, readValidatedBody } from '../../http'
 import { Type } from '@core/utils/typeboxHelpers'
 import { getErrorMessage } from '@core/utils/errorMessage'
 import { CMS_API_PREFIX, type CmsHandlerOptions } from './shared'
@@ -60,7 +55,6 @@ const ALL_ROLES: ReadonlyArray<MediaAssetRole> = [
   'plugin-pack',
 ]
 
-
 async function handleListStorage(req: Request, db: DbClient): Promise<Response> {
   const user = await requireCapability(req, db, 'storage.elect')
   if (user instanceof Response) return user
@@ -77,8 +71,9 @@ async function handleListStorage(req: Request, db: DbClient): Promise<Response> 
       adapterId: election.adapterId,
       electedAt: election.electedAt,
       electedByUserId: election.electedByUserId,
-      installed: mediaStorageRegistry.resolveForRead(election.adapterId) !== null
-        || election.adapterId === '',
+      installed:
+        mediaStorageRegistry.resolveForRead(election.adapterId) !== null ||
+        election.adapterId === '',
       assetCount: await countAssetsForAdapter(db, election.adapterId),
     })),
   )
@@ -214,10 +209,7 @@ async function handleVerifyAdapter(
 
   const adapter = mediaStorageRegistry.resolveForRead(adapterId)
   if (!adapter) {
-    return jsonResponse(
-      { error: `No installed adapter with id "${adapterId}".` },
-      { status: 404 },
-    )
+    return jsonResponse({ error: `No installed adapter with id "${adapterId}".` }, { status: 404 })
   }
   // Defensive — `verify()` is plugin code; any throw becomes a structured
   // failure so the admin UI doesn't crash on a misbehaving adapter.

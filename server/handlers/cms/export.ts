@@ -48,14 +48,22 @@ import { listMediaAssetsForExport, countMediaAssetsForExport } from '../../repos
 import { listExportableMediaFolders } from '../../repositories/mediaFolders'
 import { jsonResponse, readValidatedBody } from '../../http'
 import { CMS_API_PREFIX, type CmsHandlerOptions } from './shared'
-import { ExportRequestSchema, type MediaAssetMetadata, type SiteBundle } from '@core/data/bundleSchema'
+import {
+  ExportRequestSchema,
+  type MediaAssetMetadata,
+  type SiteBundle,
+} from '@core/data/bundleSchema'
 import {
   BUNDLE_ARCHIVE_MANIFEST_PATH,
   mediaArchivePath,
   type SiteBundleArchiveManifest,
 } from '@core/data/bundleArchive'
 import { canSeeAllDataRows } from './data/access'
-import { createStoredZipStream, estimateStoredZipSize, type StoredZipEntry } from '../../archive/storedZip'
+import {
+  createStoredZipStream,
+  estimateStoredZipSize,
+  type StoredZipEntry,
+} from '../../archive/storedZip'
 
 const EXPORT_PATH = `${CMS_API_PREFIX}/export`
 const EXPORT_ESTIMATE_PATH = `${CMS_API_PREFIX}/export/estimate`
@@ -75,7 +83,10 @@ interface ExportArchiveAsset {
  * payload. Shared by the real export (which appends the encoded bytes) and the
  * estimate (which appends an empty string and sizes the bytes analytically).
  */
-function mediaEntryMetadata(asset: ExportableAsset, sizeBytes = asset.sizeBytes): MediaAssetMetadata {
+function mediaEntryMetadata(
+  asset: ExportableAsset,
+  sizeBytes = asset.sizeBytes,
+): MediaAssetMetadata {
   return {
     id: asset.id,
     filename: asset.filename,
@@ -161,7 +172,10 @@ export async function handleExportRoute(
     // subsets are a POST-only concern (the export dialog always POSTs).
     const tablesParam = url.searchParams.get('tables')
     selections = tablesParam
-      ? tablesParam.split(',').filter(Boolean).map((tableId) => ({ tableId }))
+      ? tablesParam
+          .split(',')
+          .filter(Boolean)
+          .map((tableId) => ({ tableId }))
       : undefined
     includeMedia = url.searchParams.get('includeMedia') === '1'
     includeSite = url.searchParams.get('includeSite') !== '0'
@@ -172,7 +186,10 @@ export async function handleExportRoute(
   // Always load the site shell — needed for sourceSiteName even when includeSite=false
   const shell = await getDraftSite(db)
   if (!shell) {
-    return jsonResponse({ error: 'Site not initialised — run setup before exporting' }, { status: 404 })
+    return jsonResponse(
+      { error: 'Site not initialised — run setup before exporting' },
+      { status: 404 },
+    )
   }
 
   // Resolve the table set: all tables for a full export, or just the named ones.
@@ -229,9 +246,8 @@ export async function handleExportRoute(
   // both the estimate and the real export gate on this so they stay in sync.
   const wantMedia = includeMedia && Boolean(options.uploadsDir)
   const assets = wantMedia ? await listMediaAssetsForExport(db) : []
-  const archiveAssets = wantMedia && options.uploadsDir
-    ? await resolveArchiveAssets(assets, options.uploadsDir)
-    : []
+  const archiveAssets =
+    wantMedia && options.uploadsDir ? await resolveArchiveAssets(assets, options.uploadsDir) : []
 
   if (isEstimate) {
     return estimateResponse(selection, wantMedia, archiveAssets)

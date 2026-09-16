@@ -164,9 +164,6 @@ export function runImageVariantJob(input: ImageVariantJobInput): Promise<ImageVa
 }
 
 /** Narrow helper for the success branch — saves callers a discriminant check. */
-export function isImageVariantOk(
-  response: ImageVariantJobResponse,
-): response is ImageVariantJobOk {
+export function isImageVariantOk(response: ImageVariantJobResponse): response is ImageVariantJobOk {
   return response.ok === true
 }
-

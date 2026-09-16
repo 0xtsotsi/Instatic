@@ -207,12 +207,7 @@ export interface RunScheduleRequest {
  * property lookup on the handler object.
  */
 type MediaAdapterMethod =
-  | 'beginWrite'
-  | 'finalizeWrite'
-  | 'abortWrite'
-  | 'delete'
-  | 'getReadUrl'
-  | 'verify'
+  'beginWrite' | 'finalizeWrite' | 'abortWrite' | 'delete' | 'getReadUrl' | 'verify'
 
 /**
  * Invoke a method on a plugin-registered media storage adapter. The host

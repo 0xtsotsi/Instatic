@@ -30,10 +30,7 @@
 
 import type { DbClient } from '../db/client'
 import { hookBus } from '@core/plugins/hookBus'
-import {
-  collectFrontendInjections,
-  injectFrontendAssets,
-} from './frontendInjections'
+import { collectFrontendInjections, injectFrontendAssets } from './frontendInjections'
 import { stampFormPageTokens } from '../forms/formRuntime'
 import { injectModuleScripts } from './moduleJsBundle'
 import type { RendererOutput } from './publicRenderer'

@@ -106,7 +106,14 @@ interface StorePage {
 function buildStorePage(prefix: string, slug: string, target: number): StorePage {
   const nodes: Record<string, StoreNode> = {}
   const rootId = `${prefix}-n0`
-  nodes[rootId] = { id: rootId, moduleId: 'base.body', props: {}, breakpointOverrides: {}, children: [], classIds: [] }
+  nodes[rootId] = {
+    id: rootId,
+    moduleId: 'base.body',
+    props: {},
+    breakpointOverrides: {},
+    children: [],
+    classIds: [],
+  }
   let counter = 1
   const queue: string[] = [rootId]
   while (counter < target && queue.length > 0) {
@@ -139,10 +146,16 @@ function buildStorePage(prefix: string, slug: string, target: number): StorePage
  * action — which reindexes parents and resets history exactly like a real
  * site load.
  */
-function loadSyntheticSite(useStore: Awaited<ReturnType<typeof loadStore>>, pages: StorePage[]): void {
+function loadSyntheticSite(
+  useStore: Awaited<ReturnType<typeof loadStore>>,
+  pages: StorePage[],
+): void {
   setupSite(useStore)
   const baseSite = (useStore.getState() as { site: object | null }).site
-  if (!baseSite) throw new Error('createSite produced no site — store layout has changed; update editor-store bench.')
+  if (!baseSite)
+    throw new Error(
+      'createSite produced no site — store layout has changed; update editor-store bench.',
+    )
   const clone = structuredClone(baseSite) as { pages: StorePage[] }
   clone.pages = pages
   const state = useStore.getState() as { loadSite: (site: unknown) => void }
@@ -197,7 +210,9 @@ async function benchClassCreation(
   }
 }
 
-function readActivePage(useStore: Awaited<ReturnType<typeof loadStore>>): { id: string; rootNodeId: string } | null {
+function readActivePage(
+  useStore: Awaited<ReturnType<typeof loadStore>>,
+): { id: string; rootNodeId: string } | null {
   const state = useStore.getState() as {
     site: { pages: Array<{ id: string; rootNodeId: string }> } | null
     activePageId: string | null
@@ -209,14 +224,29 @@ function readActivePage(useStore: Awaited<ReturnType<typeof loadStore>>): { id: 
 async function benchTreeMutations(
   useStore: Awaited<ReturnType<typeof loadStore>>,
   nodeCount: number,
-): Promise<{ insertMs: number; deleteMs: number; insertSamples: number[]; deleteSamples: number[]; finalHeap: number; activePageId: string | null }> {
+): Promise<{
+  insertMs: number
+  deleteMs: number
+  insertSamples: number[]
+  deleteSamples: number[]
+  finalHeap: number
+  activePageId: string | null
+}> {
   setupSite(useStore)
   const state = useStore.getState() as {
-    insertNode: (moduleId: string, defaults: Record<string, unknown>, parentId: string, index?: number) => string
+    insertNode: (
+      moduleId: string,
+      defaults: Record<string, unknown>,
+      parentId: string,
+      index?: number,
+    ) => string
     deleteNode: (nodeId: string) => void
   }
   const page = readActivePage(useStore)
-  if (!page) throw new Error('No active page after createSite — store layout has changed; update editor-store bench.')
+  if (!page)
+    throw new Error(
+      'No active page after createSite — store layout has changed; update editor-store bench.',
+    )
   const rootId = page.rootNodeId
 
   const insertSamples: number[] = []
@@ -246,13 +276,21 @@ async function benchTreeMutations(
   }
   const deleteMs = performance.now() - deleteStart
 
-  return { insertMs, deleteMs, insertSamples, deleteSamples, finalHeap, activePageId: (useStore.getState() as { activePageId: string | null }).activePageId }
+  return {
+    insertMs,
+    deleteMs,
+    insertSamples,
+    deleteSamples,
+    finalHeap,
+    activePageId: (useStore.getState() as { activePageId: string | null }).activePageId,
+  }
 }
 
 export const editorStoreBench: BenchModule = {
   name: 'editor-store',
   title: 'Editor store — mutation + class system scaling',
-  description: 'Drives the live Zustand store with realistic class & tree workloads; answers "is the builder laggy at scale?".',
+  description:
+    'Drives the live Zustand store with realistic class & tree workloads; answers "is the builder laggy at scale?".',
 
   async run(ctx: BenchContext): Promise<BenchResult> {
     const useStore = await loadStore()
@@ -280,7 +318,9 @@ export const editorStoreBench: BenchModule = {
           throughput: `${fmtNum(Math.floor(n / (result.totalMs / 1000)))} ops/sec`,
         },
       })
-      log.detail(`    per-op mean=${fmtMs(result.perCreateMean)} p95=${fmtMs(result.perCreateP95)} total=${fmtMs(result.totalMs)}`)
+      log.detail(
+        `    per-op mean=${fmtMs(result.perCreateMean)} p95=${fmtMs(result.perCreateP95)} total=${fmtMs(result.totalMs)}`,
+      )
     }
 
     // ---- Class lookup scaling -------------------------------------------
@@ -344,7 +384,9 @@ export const editorStoreBench: BenchModule = {
             final_heap: fmtBytes(r.finalHeap),
           },
         })
-        log.detail(`    insert: ${fmtMs(r.insertMs)} (${fmtMs(insertSummary.mean)}/op)  delete½: ${fmtMs(r.deleteMs)} (${fmtMs(deleteSummary.mean)}/op)`)
+        log.detail(
+          `    insert: ${fmtMs(r.insertMs)} (${fmtMs(insertSummary.mean)}/op)  delete½: ${fmtMs(r.deleteMs)} (${fmtMs(deleteSummary.mean)}/op)`,
+        )
       }
     }
 
@@ -358,7 +400,11 @@ export const editorStoreBench: BenchModule = {
         setupSite(useStore)
         const state = useStore.getState() as {
           createClass: (name: string) => { id: string }
-          insertNode: (moduleId: string, defaults: Record<string, unknown>, parentId: string) => string
+          insertNode: (
+            moduleId: string,
+            defaults: Record<string, unknown>,
+            parentId: string,
+          ) => string
           addNodeClass: (nodeId: string, classId: string) => void
         }
         // Seed catalogue
@@ -367,7 +413,11 @@ export const editorStoreBench: BenchModule = {
         const page = readActivePage(useStore)
         if (!page) continue
         // Add one target node and assign many classes to it
-        const targetId = state.insertNode('base.text', { text: 'target', tag: 'p' }, page.rootNodeId)
+        const targetId = state.insertNode(
+          'base.text',
+          { text: 'target', tag: 'p' },
+          page.rootNodeId,
+        )
         const ASSIGNS = ctx.quick ? 200 : 1_000
         const samples: number[] = []
         for (let i = 0; i < ASSIGNS; i++) {
@@ -444,18 +494,29 @@ export const editorStoreBench: BenchModule = {
         const state = useStore.getState() as {
           createVisualComponent: (name: string) => string
           setActiveDocument: (doc: { kind: 'visualComponent'; vcId: string }) => void
-          insertNode: (moduleId: string, defaults: Record<string, unknown>, parentId: string) => string
+          insertNode: (
+            moduleId: string,
+            defaults: Record<string, unknown>,
+            parentId: string,
+          ) => string
           updateNodeProps: (nodeId: string, patch: Record<string, unknown>) => void
         }
         const vcId = state.createVisualComponent('Bench VC')
         state.setActiveDocument({ kind: 'visualComponent', vcId })
-        const vc = (useStore.getState() as {
-          site: { visualComponents: Array<{ id: string; tree: { rootNodeId: string } }> }
-        }).site.visualComponents.find((v) => v.id === vcId)
-        if (!vc) throw new Error('createVisualComponent did not register the VC in site.visualComponents')
+        const vc = (
+          useStore.getState() as {
+            site: { visualComponents: Array<{ id: string; tree: { rootNodeId: string } }> }
+          }
+        ).site.visualComponents.find((v) => v.id === vcId)
+        if (!vc)
+          throw new Error('createVisualComponent did not register the VC in site.visualComponents')
         // insertNode routes through mutateActiveTree → VC mode, so the text
         // node lands in the VC's own tree.
-        const textNodeId = state.insertNode('base.text', { text: 'seed', tag: 'p' }, vc.tree.rootNodeId)
+        const textNodeId = state.insertNode(
+          'base.text',
+          { text: 'seed', tag: 'p' },
+          vc.tree.rootNodeId,
+        )
         if (!textNodeId) throw new Error('insertNode into the VC tree returned no id')
         const samples: number[] = []
         for (let i = 0; i < ITERS; i++) {
@@ -475,7 +536,12 @@ export const editorStoreBench: BenchModule = {
         })
         log.detail(`    per-op mean=${fmtMs(s.mean)} p95=${fmtMs(s.p95)}`)
       } catch (err) {
-        vcSweepRows.push(unavailableRow(`${fmtNum(ITERS)} keystrokes, ${fmtNum(PAGES)} pages × ${fmtNum(NODES)} nodes`, err))
+        vcSweepRows.push(
+          unavailableRow(
+            `${fmtNum(ITERS)} keystrokes, ${fmtNum(PAGES)} pages × ${fmtNum(NODES)} nodes`,
+            err,
+          ),
+        )
       }
     }
 
@@ -497,10 +563,10 @@ export const editorStoreBench: BenchModule = {
       const KEYS = ctx.quick ? 50 : 150
       try {
         const { selectActiveCanvasPage } = await import('../../../src/admin/pages/site/store/store')
-        const { getCanvasNodeClassName } = await import('../../../src/admin/pages/site/canvas/canvasNodeClassName')
-        const { resolveEditorFormPreviewState, resolveEditorFormPreviewSuccessMessage } = await import(
-          '../../../src/admin/pages/site/canvas/canvasFormPreview'
-        )
+        const { getCanvasNodeClassName } =
+          await import('../../../src/admin/pages/site/canvas/canvasNodeClassName')
+        const { resolveEditorFormPreviewState, resolveEditorFormPreviewSuccessMessage } =
+          await import('../../../src/admin/pages/site/canvas/canvasFormPreview')
 
         const pages = Array.from({ length: PAGES }, (_, i) =>
           buildStorePage(`sw${i}`, i === 0 ? 'index' : `sweep-page-${i}`, NODES),
@@ -513,7 +579,8 @@ export const editorStoreBench: BenchModule = {
           updateNodeProps: (nodeId: string, patch: Record<string, unknown>) => void
         }
         const activePage = state.site.pages.find((p) => p.id === state.activePageId)
-        if (!activePage) throw new Error('No active page after loadSite — update editor-store bench.')
+        if (!activePage)
+          throw new Error('No active page after loadSite — update editor-store bench.')
         const nodeIds = Object.keys(activePage.nodes)
 
         type S = Parameters<typeof selectActiveCanvasPage>[0]
@@ -521,20 +588,37 @@ export const editorStoreBench: BenchModule = {
         const unsubs: Array<() => void> = []
         for (let frame = 0; frame < FRAMES; frame++) {
           for (const nodeId of nodeIds) {
-            unsubs.push(useStore.subscribe((s: S) => selectActiveCanvasPage(s)?.nodes[nodeId] ?? null, noop))
+            unsubs.push(
+              useStore.subscribe((s: S) => selectActiveCanvasPage(s)?.nodes[nodeId] ?? null, noop),
+            )
             unsubs.push(useStore.subscribe((s: S) => s.selectedNodeIds.includes(nodeId), noop))
             unsubs.push(useStore.subscribe((s: S) => s.hoveredNodeId === nodeId, noop))
-            unsubs.push(useStore.subscribe(
-              (s: S) => (s.previewClassAssignment?.nodeId === nodeId ? s.previewClassAssignment : null),
-              noop,
-            ))
-            unsubs.push(useStore.subscribe((s: S) => resolveEditorFormPreviewState(s, nodeId), noop))
-            unsubs.push(useStore.subscribe((s: S) => resolveEditorFormPreviewSuccessMessage(s, nodeId), noop))
-            unsubs.push(useStore.subscribe((s: S) => {
-              const canvasNode = selectActiveCanvasPage(s)?.nodes[nodeId]
-              const preview = s.previewClassAssignment?.nodeId === nodeId ? s.previewClassAssignment : null
-              return getCanvasNodeClassName(canvasNode?.classIds, preview, nodeId, s.site?.styleRules)
-            }, noop))
+            unsubs.push(
+              useStore.subscribe(
+                (s: S) =>
+                  s.previewClassAssignment?.nodeId === nodeId ? s.previewClassAssignment : null,
+                noop,
+              ),
+            )
+            unsubs.push(
+              useStore.subscribe((s: S) => resolveEditorFormPreviewState(s, nodeId), noop),
+            )
+            unsubs.push(
+              useStore.subscribe((s: S) => resolveEditorFormPreviewSuccessMessage(s, nodeId), noop),
+            )
+            unsubs.push(
+              useStore.subscribe((s: S) => {
+                const canvasNode = selectActiveCanvasPage(s)?.nodes[nodeId]
+                const preview =
+                  s.previewClassAssignment?.nodeId === nodeId ? s.previewClassAssignment : null
+                return getCanvasNodeClassName(
+                  canvasNode?.classIds,
+                  preview,
+                  nodeId,
+                  s.site?.styleRules,
+                )
+              }, noop),
+            )
           }
         }
 
@@ -547,7 +631,8 @@ export const editorStoreBench: BenchModule = {
             hoverSamples.push(performance.now() - t0)
           }
           const textNodeId = nodeIds.find((id) => activePage.nodes[id].moduleId === 'base.text')
-          if (!textNodeId) throw new Error('Synthetic page has no text node — update editor-store bench.')
+          if (!textNodeId)
+            throw new Error('Synthetic page has no text node — update editor-store bench.')
           const keySamples: number[] = []
           for (let i = 0; i < KEYS; i++) {
             const t0 = performance.now()
@@ -566,12 +651,16 @@ export const editorStoreBench: BenchModule = {
               keystroke_p95: fmtMs(keys.p95),
             },
           })
-          log.detail(`    hover mean=${fmtMs(hover.mean)} p95=${fmtMs(hover.p95)}  keystroke mean=${fmtMs(keys.mean)} p95=${fmtMs(keys.p95)}`)
+          log.detail(
+            `    hover mean=${fmtMs(hover.mean)} p95=${fmtMs(hover.p95)}  keystroke mean=${fmtMs(keys.mean)} p95=${fmtMs(keys.p95)}`,
+          )
         } finally {
           for (const unsub of unsubs) unsub()
         }
       } catch (err) {
-        subscriberSweepRows.push(unavailableRow(`${fmtNum(NODES)} nodes × ${FRAMES} frames canvas subscriber sweep`, err))
+        subscriberSweepRows.push(
+          unavailableRow(`${fmtNum(NODES)} nodes × ${FRAMES} frames canvas subscriber sweep`, err),
+        )
       }
     }
 
@@ -583,9 +672,16 @@ export const editorStoreBench: BenchModule = {
       try {
         setupSite(useStore)
         const page = readActivePage(useStore)
-        if (!page) throw new Error('No active page after createSite — store layout has changed; update editor-store bench.')
+        if (!page)
+          throw new Error(
+            'No active page after createSite — store layout has changed; update editor-store bench.',
+          )
         const state = useStore.getState() as {
-          insertNode: (moduleId: string, defaults: Record<string, unknown>, parentId: string) => string
+          insertNode: (
+            moduleId: string,
+            defaults: Record<string, unknown>,
+            parentId: string,
+          ) => string
           updateNodeProps: (nodeId: string, patch: Record<string, unknown>) => void
         }
         const textNodeId = state.insertNode('base.text', { text: '', tag: 'p' }, page.rootNodeId)
@@ -611,7 +707,9 @@ export const editorStoreBench: BenchModule = {
             history_bytes: fmtBytes(historyBytes),
           },
         })
-        log.detail(`    per-op p95=${fmtMs(s.p95)} history=${fmtNum(past.length)} entries, ${fmtBytes(historyBytes)}`)
+        log.detail(
+          `    per-op p95=${fmtMs(s.p95)} history=${fmtNum(past.length)} entries, ${fmtBytes(historyBytes)}`,
+        )
       } catch (err) {
         coalesceRows.push(unavailableRow(`${fmtNum(KEYS)}-keystroke burst on one text node`, err))
       }
@@ -631,8 +729,10 @@ export const editorStoreBench: BenchModule = {
       title: this.title,
       headline: {
         [`createClass p95 @ ${fmtNum(worstClassN)} classes`]: worstClassP95,
-        [`${largestTreeRow?.label ?? 'tree'} insert mean`]: largestTreeRow?.metrics.insert_mean_per_op ?? '—',
-        [`${largestLookupRow?.label ?? 'lookup'} ns/op`]: largestLookupRow?.metrics.ns_per_lookup ?? '—',
+        [`${largestTreeRow?.label ?? 'tree'} insert mean`]:
+          largestTreeRow?.metrics.insert_mean_per_op ?? '—',
+        [`${largestLookupRow?.label ?? 'lookup'} ns/op`]:
+          largestLookupRow?.metrics.ns_per_lookup ?? '—',
         [`multi-${multiDeleteRow?.label ?? 'delete'}`]: multiDeleteRow?.metrics.mean_total ?? '—',
         [`VC sweep ${vcSweepRow?.label ?? ''} mean`]: vcSweepRow?.metrics.mean_per_op ?? '—',
       },
@@ -645,7 +745,8 @@ export const editorStoreBench: BenchModule = {
         },
         {
           title: 'Class lookup throughput',
-          intro: 'Random `site.styleRules[id]` lookups — the floor below which any class-related rendering must live.',
+          intro:
+            'Random `site.styleRules[id]` lookups — the floor below which any class-related rendering must live.',
           rows: lookupRows,
         },
         {

@@ -79,14 +79,34 @@ Why a catalog (not hand-rolled per-preference code):
 The discriminated union has three branches:
 
 ```ts
-interface BooleanPreferenceDef        { id, type: 'boolean',        category, label, description, default: boolean }
-interface SelectPreferenceDef         { id, type: 'select',         category, label, description, options, default: string }
-interface DynamicSelectPreferenceDef  { id, type: 'select-dynamic', category, label, description, optionsSource, default: string }
+interface BooleanPreferenceDef {
+  id
+  type: 'boolean'
+  category
+  label
+  description
+  default: boolean
+}
+interface SelectPreferenceDef {
+  id
+  type: 'select'
+  category
+  label
+  description
+  options
+  default: string
+}
+interface DynamicSelectPreferenceDef {
+  id
+  type: 'select-dynamic'
+  category
+  label
+  description
+  optionsSource
+  default: string
+}
 
-export type PreferenceDef =
-  | BooleanPreferenceDef
-  | SelectPreferenceDef
-  | DynamicSelectPreferenceDef
+export type PreferenceDef = BooleanPreferenceDef | SelectPreferenceDef | DynamicSelectPreferenceDef
 ```
 
 A new preference type (e.g. `'number'`, `'colour'`) adds a branch to this union, one runtime read/set/hook in `editorPreferences.ts`, and one matching row component in `PreferencesSection.tsx`.
@@ -145,7 +165,9 @@ const groups = preferencesByCategory()
 return groups.map((group) => (
   <section key={group.id}>
     <h4>{group.label}</h4>
-    {group.preferences.map((pref) => <PreferenceRow key={pref.id} pref={pref} />)}
+    {group.preferences.map((pref) => (
+      <PreferenceRow key={pref.id} pref={pref} />
+    ))}
   </section>
 ))
 ```
@@ -158,11 +180,11 @@ Categories are declared in the catalog itself:
 
 ```ts
 export const PREFERENCE_CATEGORIES = [
-  { id: 'editor',     label: 'Editor' },
-  { id: 'canvas',     label: 'Canvas',          description: '…' },
-  { id: 'layers',     label: 'Layers panel',    description: '…' },
+  { id: 'editor', label: 'Editor' },
+  { id: 'canvas', label: 'Canvas', description: '…' },
+  { id: 'layers', label: 'Layers panel', description: '…' },
   { id: 'properties', label: 'Properties panel' },
-  { id: 'spotlight',  label: 'Command palette', description: '…' },
+  { id: 'spotlight', label: 'Command palette', description: '…' },
 ]
 ```
 
@@ -187,11 +209,11 @@ A new source is one branch here plus a new value in the `DynamicOptionsSource` u
 
 When the persisted value is no longer in the dynamic option list (e.g. user previously picked a `wide` breakpoint, then opened a site without it), the dropdown still shows the stored value with a `(not in current site)` suffix so the mismatch is visible. The runtime reader (`readEditorSelectPreference`) returns the stored string regardless — consumers (e.g. `applyDefaultBreakpointPreference` in `usePersistence.ts`) decide whether to apply it or fall back.
 
-**`defaultBreakpoint` has two effects on load.** `applyDefaultBreakpointPreference` sets `activeBreakpointId` (the editing context) when the loaded site has a matching breakpoint. Setting the active breakpoint alone does *not* move the canvas — it always mounts at pan `(0, 0)`, which shows the left-most (narrowest) frame. So `CanvasRoot` runs an effect (keyed on `canvasPage.id`) that pans the canvas to horizontally center the active frame (top aligned just below the viewport top), via `useCanvas().centerOnBreakpointFrame` and the pure `panToCenterBreakpointFrame` geometry in `canvasDomGeometry.ts`. This is the spatial half of "Which viewport context the canvas focuses on when a site is opened."
+**`defaultBreakpoint` has two effects on load.** `applyDefaultBreakpointPreference` sets `activeBreakpointId` (the editing context) when the loaded site has a matching breakpoint. Setting the active breakpoint alone does _not_ move the canvas — it always mounts at pan `(0, 0)`, which shows the left-most (narrowest) frame. So `CanvasRoot` runs an effect (keyed on `canvasPage.id`) that pans the canvas to horizontally center the active frame (top aligned just below the viewport top), via `useCanvas().centerOnBreakpointFrame` and the pure `panToCenterBreakpointFrame` geometry in `canvasDomGeometry.ts`. This is the spatial half of "Which viewport context the canvas focuses on when a site is opened."
 
 Because the effect keys on the document id, it also re-centers when the active document changes — switching pages or entering/leaving a Visual Component — so jumping from a long page you'd scrolled down to a shorter one brings the active frame back into view instead of leaving it panned off-screen. The current zoom is preserved; only the pan moves. Edits to the same document do **not** re-center (Mutative returns a new page object per edit, but the id is stable), and breakpoint switches within a document (toolbar, node clicks) also keep the designer's place. The retry that waits for the per-frame iframes to lay out uses `setTimeout`, not `requestAnimationFrame`: rAF only fires while the tab is painting, so a centering scheduled while the editor is backgrounded would otherwise silently never run.
 
-**The loading skeleton has two phases.** While the editor-body chunk itself lazy-loads, `AdminCanvasLayout` paints a lightweight shell fallback using the shared canvas-frame skeletons. That fallback keeps cold Site loads from showing only the toolbar over an empty workspace, but it does not import the real canvas, sidebars, DnD context, modules, or panel graph. Once `CanvasRoot` mounts, `CanvasTransformLayer` owns loading state: while page data loads, it renders skeleton frames (`canvas-loading-frame-<id>`) instead of real ones. The same centering effect runs during this phase (when `canvasPage` is still null) and centers the skeleton for the `defaultBreakpoint` *preference* — i.e. what `activeBreakpointId` will resolve to once the site loads — so `centerOnBreakpointFrame` matches both the real wrapper and its loading skeleton. The result is an immediate visual placeholder on cold load, followed by the pannable skeleton/real content sharing the same centered position.
+**The loading skeleton has two phases.** While the editor-body chunk itself lazy-loads, `AdminCanvasLayout` paints a lightweight shell fallback using the shared canvas-frame skeletons. That fallback keeps cold Site loads from showing only the toolbar over an empty workspace, but it does not import the real canvas, sidebars, DnD context, modules, or panel graph. Once `CanvasRoot` mounts, `CanvasTransformLayer` owns loading state: while page data loads, it renders skeleton frames (`canvas-loading-frame-<id>`) instead of real ones. The same centering effect runs during this phase (when `canvasPage` is still null) and centers the skeleton for the `defaultBreakpoint` _preference_ — i.e. what `activeBreakpointId` will resolve to once the site loads — so `centerOnBreakpointFrame` matches both the real wrapper and its loading skeleton. The result is an immediate visual placeholder on cold load, followed by the pannable skeleton/real content sharing the same centered position.
 
 ---
 
@@ -240,7 +262,7 @@ Both setters dispatch the change event so all hook consumers re-render and the b
   "density": "comfortable",
   "textScale": "large",
   "layersShowTag": true,
-  "layersShowClasses": true
+  "layersShowClasses": true,
 }
 ```
 
@@ -264,25 +286,25 @@ Adding a non-boolean (select / select-dynamic) preference leaves the switch coun
 
 The Settings → Preferences screen renders this list automatically from the catalog.
 
-| Category         | Id                          | Type                 | Default     | Wired in                                       |
-|------------------|-----------------------------|----------------------|-------------|------------------------------------------------|
-| Editor           | `autoSave`                  | boolean              | `true`      | `usePersistence.ts`                            |
-| Editor           | `autoSaveDelay`             | select (5s/15s/30s/60s/5min) | `'30'` | `usePersistence.ts` (`readAutoSaveDelayMs`) |
-| Editor           | `hoverPreview`              | boolean              | `true`      | `ClassPicker.tsx`, `SpacingBoxControl.tsx`     |
-| Editor           | `confirmBeforeDelete`       | boolean              | `false`     | `ConfirmDeleteProvider`                        |
-| Editor           | `theme`                     | select (dark / light) | `'dark'`   | `data-editor-theme` on the document + layout roots |
-| Editor           | `density`                   | select (compact / comfortable) | `'compact'` | `data-editor-density` on the document + layout roots |
-| Editor           | `textScale`                 | select (small / default / large / extra-large) | `'default'` | `data-editor-text-scale` on the document + layout roots |
-| Canvas           | `defaultBreakpoint`         | select-dynamic (`site.breakpoints`) | `'desktop'` | `applyDefaultBreakpointPreference` |
-| Canvas           | `dimInactiveBreakpoints`    | boolean              | `true`      | `CanvasRoot.tsx`                               |
-| Layers panel     | `layersShowIcon`            | boolean              | `true`      | `TreeNode.tsx`                                 |
-| Layers panel     | `layersShowTag`             | boolean              | `true`      | `TreeNode.tsx`                                 |
-| Layers panel     | `layersShowClasses`         | boolean              | `true`      | `TreeNode.tsx`                                 |
-| Layers panel     | `layersAutoExpandSelected`  | boolean              | `true`      | `DomPanel.tsx` selection effect                |
-| Layers panel     | `layersSmoothScroll`        | boolean              | `true`      | `DomPanel.tsx` scroll handler                  |
-| Properties panel | `propertiesSmoothScroll`    | boolean              | `true`      | `StyleSurface.tsx` + `PropertiesPanel.tsx`     |
-| Properties panel | `propertiesSectionsExpanded`| boolean              | `true`      | `StyleSectionsEditor.tsx`, `StyleSurface.tsx`, `CustomPropertiesSection.tsx` |
-| Command palette  | `spotlightTelemetryEnabled` | boolean              | `false`     | command palette usage tracking                  |
+| Category         | Id                           | Type                                           | Default     | Wired in                                                                     |
+| ---------------- | ---------------------------- | ---------------------------------------------- | ----------- | ---------------------------------------------------------------------------- |
+| Editor           | `autoSave`                   | boolean                                        | `true`      | `usePersistence.ts`                                                          |
+| Editor           | `autoSaveDelay`              | select (5s/15s/30s/60s/5min)                   | `'30'`      | `usePersistence.ts` (`readAutoSaveDelayMs`)                                  |
+| Editor           | `hoverPreview`               | boolean                                        | `true`      | `ClassPicker.tsx`, `SpacingBoxControl.tsx`                                   |
+| Editor           | `confirmBeforeDelete`        | boolean                                        | `false`     | `ConfirmDeleteProvider`                                                      |
+| Editor           | `theme`                      | select (dark / light)                          | `'dark'`    | `data-editor-theme` on the document + layout roots                           |
+| Editor           | `density`                    | select (compact / comfortable)                 | `'compact'` | `data-editor-density` on the document + layout roots                         |
+| Editor           | `textScale`                  | select (small / default / large / extra-large) | `'default'` | `data-editor-text-scale` on the document + layout roots                      |
+| Canvas           | `defaultBreakpoint`          | select-dynamic (`site.breakpoints`)            | `'desktop'` | `applyDefaultBreakpointPreference`                                           |
+| Canvas           | `dimInactiveBreakpoints`     | boolean                                        | `true`      | `CanvasRoot.tsx`                                                             |
+| Layers panel     | `layersShowIcon`             | boolean                                        | `true`      | `TreeNode.tsx`                                                               |
+| Layers panel     | `layersShowTag`              | boolean                                        | `true`      | `TreeNode.tsx`                                                               |
+| Layers panel     | `layersShowClasses`          | boolean                                        | `true`      | `TreeNode.tsx`                                                               |
+| Layers panel     | `layersAutoExpandSelected`   | boolean                                        | `true`      | `DomPanel.tsx` selection effect                                              |
+| Layers panel     | `layersSmoothScroll`         | boolean                                        | `true`      | `DomPanel.tsx` scroll handler                                                |
+| Properties panel | `propertiesSmoothScroll`     | boolean                                        | `true`      | `StyleSurface.tsx` + `PropertiesPanel.tsx`                                   |
+| Properties panel | `propertiesSectionsExpanded` | boolean                                        | `true`      | `StyleSectionsEditor.tsx`, `StyleSurface.tsx`, `CustomPropertiesSection.tsx` |
+| Command palette  | `spotlightTelemetryEnabled`  | boolean                                        | `false`     | command palette usage tracking                                               |
 
 ### Confirm-before-delete flow
 
@@ -345,12 +367,12 @@ Surfaces that respond to density use scoped `:global([data-editor-density='comfo
 ```css
 /* TreeRow.module.css */
 .row {
-    --tree-row-h: 28px;          /* compact default */
-    height: var(--tree-row-h);
+  --tree-row-h: 28px; /* compact default */
+  height: var(--tree-row-h);
 }
 :global([data-editor-density='comfortable']) .row {
-    --tree-row-h: 36px;
-    font-size: 12px;
+  --tree-row-h: 36px;
+  font-size: 12px;
 }
 ```
 

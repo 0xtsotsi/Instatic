@@ -19,7 +19,6 @@
 
 var mod = {
   activate(api) {
-
     // ── 1. Basic PluginCommand ────────────────────────────────────────────────
     //
     // The minimum required shape: id + label + run.
@@ -29,7 +28,7 @@ var mod = {
     api.editor.commands.register({
       id: 'acme.template.ping',
       label: 'Template Ping',
-      run: function() {
+      run: function () {
         return { message: 'Template command fired!' }
       },
     })
@@ -76,13 +75,13 @@ var mod = {
           label: 'Tone',
           type: 'select',
           options: [
-            { value: 'formal',   label: 'Formal'   },
-            { value: 'casual',   label: 'Casual'   },
+            { value: 'formal', label: 'Formal' },
+            { value: 'casual', label: 'Casual' },
             { value: 'friendly', label: 'Friendly' },
           ],
         },
       ],
-      run: function() {
+      run: function () {
         // Args are collected by the palette before run() is called.
         // The palette injects them via the CommandRunContext (ctx.args).
         // At the plugin level, run() receives no args directly —
@@ -102,33 +101,32 @@ var mod = {
     // group rather than crashing.
 
     api.editor.palette.registerProvider({
-      id: 'acme.template.staticItems',  // namespaced under plugin id
-      label: 'Template items',           // group header in results
+      id: 'acme.template.staticItems', // namespaced under plugin id
+      label: 'Template items', // group header in results
 
-      search: async function(query) {
+      search: async function (query) {
         // Static demo items — replace with real data fetched from your
         // server entrypoint or an external API.
         var items = [
-          { id: 'item-alpha',   title: 'Alpha item',   subtitle: 'First demo result'  },
-          { id: 'item-beta',    title: 'Beta item',    subtitle: 'Second demo result' },
-          { id: 'item-gamma',   title: 'Gamma item',   subtitle: 'Third demo result'  },
+          { id: 'item-alpha', title: 'Alpha item', subtitle: 'First demo result' },
+          { id: 'item-beta', title: 'Beta item', subtitle: 'Second demo result' },
+          { id: 'item-gamma', title: 'Gamma item', subtitle: 'Third demo result' },
         ]
 
         var q = query.toLowerCase()
         var filtered = q
-          ? items.filter(function(item) {
-              return item.title.toLowerCase().includes(q) ||
-                     item.subtitle.toLowerCase().includes(q)
+          ? items.filter(function (item) {
+              return item.title.toLowerCase().includes(q) || item.subtitle.toLowerCase().includes(q)
             })
           : items
 
-        return filtered.map(function(item) {
+        return filtered.map(function (item) {
           return {
-            id:       item.id,
-            title:    item.title,
+            id: item.id,
+            title: item.title,
             subtitle: item.subtitle,
             iconName: 'file-text-solid',
-            run: async function() {
+            run: async function () {
               // Navigate, open a dialog, call your server route, etc.
               console.log('[acme.template] Selected:', item.title)
             },

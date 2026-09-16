@@ -34,13 +34,22 @@ export interface PluginVmEnv {
 export interface PluginVm {
   readonly pluginId: string
   /** Names of lifecycle hooks the plugin actually exported. */
-  readonly exportedHooks: ReadonlyArray<'install' | 'activate' | 'deactivate' | 'uninstall' | 'migrate'>
+  readonly exportedHooks: ReadonlyArray<
+    'install' | 'activate' | 'deactivate' | 'uninstall' | 'migrate'
+  >
   runLifecycle: (hook: 'install' | 'activate' | 'deactivate' | 'uninstall') => Promise<void>
   runMigrate: (fromVersion: string) => Promise<void>
   runRoute: (routeKey: string, ctx: VmRouteContext) => Promise<unknown>
   runHookListener: (listenerId: string, payload: unknown) => Promise<void>
-  runHookFilter: (filterId: string, value: unknown, context?: Record<string, unknown>) => Promise<unknown>
-  runLoopFetch: (sourceId: string, ctx: unknown) => Promise<{ items: unknown[]; totalItems: number }>
+  runHookFilter: (
+    filterId: string,
+    value: unknown,
+    context?: Record<string, unknown>,
+  ) => Promise<unknown>
+  runLoopFetch: (
+    sourceId: string,
+    ctx: unknown,
+  ) => Promise<{ items: unknown[]; totalItems: number }>
   runLoopPreview: (sourceId: string, ctx: unknown) => Promise<unknown[]>
   /**
    * Fire a scheduled job's handler. `maxDurationMs` overrides the VM's
@@ -65,7 +74,10 @@ export interface PluginVm {
    * Apply a registered URL transformer. Receives `{ path, ctx }`, returns
    * either the rewritten path (string) or `null` for "no change".
    */
-  runMediaUrlTransformer: (transformerId: string, payload: { path: string; ctx: unknown }) => Promise<string | null>
+  runMediaUrlTransformer: (
+    transformerId: string,
+    payload: { path: string; ctx: unknown },
+  ) => Promise<string | null>
   dispose: () => void
 }
 

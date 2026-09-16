@@ -28,29 +28,29 @@ Three forms of rules:
 
 ```ts
 interface StyleRule {
-  id:           string                              // nanoid, stable across renames
-  name:         string                              // class token for class rules; selector mirror for ambient rules
-  kind:         'class' | 'ambient'                // discriminator
-  selector:     string                              // CSS selector (e.g. '.hero-button' or 'h1 > span')
-  order:        number                              // cascade order; rules sorted ascending by this
+  id: string // nanoid, stable across renames
+  name: string // class token for class rules; selector mirror for ambient rules
+  kind: 'class' | 'ambient' // discriminator
+  selector: string // CSS selector (e.g. '.hero-button' or 'h1 > span')
+  order: number // cascade order; rules sorted ascending by this
   description?: string
   scope?: {
-    type:   'node'
+    type: 'node'
     nodeId: string
-    role:   'module-style'
+    role: 'module-style'
   }
-  styles:                  Record<string, unknown>    // base CSS properties (CSSPropertyBag-shaped at write time)
-  stylePriorities?:        Record<string, 'important'>
-  contextStyles:           Record<string, Record<string, unknown>>
+  styles: Record<string, unknown> // base CSS properties (CSSPropertyBag-shaped at write time)
+  stylePriorities?: Record<string, 'important'>
+  contextStyles: Record<string, Record<string, unknown>>
   contextStylePriorities?: Record<string, Record<string, 'important'>>
-  rawCss?:                 string                     // supported raw at-rule CSS, currently imported @keyframes
-  generated?:              GeneratedClassMetadata    // framework-generated flags
-  createdAt?:              number
-  updatedAt?:              number
+  rawCss?: string // supported raw at-rule CSS, currently imported @keyframes
+  generated?: GeneratedClassMetadata // framework-generated flags
+  createdAt?: number
+  updatedAt?: number
 }
 ```
 
-`contextStyles` is the **unified editing-context map**. Each key is a *context id* that is **either**:
+`contextStyles` is the **unified editing-context map**. Each key is a _context id_ that is **either**:
 
 - a **viewport context id** (from `site.breakpoints`) → the publisher emits the context's configured `@media` query; **or**
 - a **custom condition id** (from `site.conditions`, the reusable `@media`/`@container`/`@supports` registry) → the publisher emits that condition's `@`-prelude.
@@ -86,7 +86,7 @@ Plugin-shipped rules are namespaced under the plugin id: `acme.template/hero-roo
 ```ts
 interface PageNode {
   // ...
-  classIds: string[]    // ordered; later ids win in CSS cascade
+  classIds: string[] // ordered; later ids win in CSS cascade
 }
 ```
 
@@ -106,7 +106,7 @@ The right Properties Panel exposes this through a unified selector picker:
 
 The picker decides ambient matches via `element.matches(selector)` on the selected live canvas element. A selector such as `.hero .title` appears when the selected element is `.title`, not when the selected element is the `.hero` ancestor.
 
-The live element is resolved by `findRenderedCanvasNodeElement` (`src/admin/pages/site/canvas/canvasNodeLookup.ts`), which searches ONLY the per-breakpoint canvas iframe documents (identified by `data-breakpoint-id` on their `<body>`). It must never query the admin document: the DOM panel's tree rows, the Import-HTML preview rows, and the selection/hover overlay rings all carry `data-node-id` there, and whether they exist depends on transient UI state (the layers tree auto-expands the selected node's ancestors *after* selection) — matching against them made ambient pills appear and disappear between clicks of the same node.
+The live element is resolved by `findRenderedCanvasNodeElement` (`src/admin/pages/site/canvas/canvasNodeLookup.ts`), which searches ONLY the per-breakpoint canvas iframe documents (identified by `data-breakpoint-id` on their `<body>`). It must never query the admin document: the DOM panel's tree rows, the Import-HTML preview rows, and the selection/hover overlay rings all carry `data-node-id` there, and whether they exist depends on transient UI state (the layers tree auto-expands the selected node's ancestors _after_ selection) — matching against them made ambient pills appear and disappear between clicks of the same node.
 
 **Pseudo-state rules.** Ambient selectors that carry a supported state pseudo-class are recognized as state rules. The supported set (`SUPPORTED_PSEUDO_STATES`) covers transient interaction, navigation, and form-state pseudo-classes: `:hover`, `:active`, `:focus`, `:focus-visible`, `:focus-within`, `:target`, `:visited`, `:checked`, `:indeterminate`, `:placeholder-shown`, `:autofill`, `:disabled`, `:valid`, `:invalid`, `:in-range`, `:out-of-range`, `:user-valid`, `:user-invalid`. Structural and attribute-condition pseudos (`:first-child`, `:required`, `:not(...)`, etc.) are intentionally absent — `element.matches()` evaluates those correctly against the static DOM, so they produce direct matches, not inactive-pseudo matches. All shared helpers live in `src/admin/pages/site/cssStatePseudo.ts` (`SUPPORTED_PSEUDO_STATES`, `selectorStatePseudo`, `stripStatePseudos`, `splitSelectorList`).
 
@@ -128,14 +128,15 @@ The Selectors Panel (`src/admin/pages/site/panels/SelectorsPanel/SelectorsPanel.
 
 **Filter bar — four tabs:**
 
-| Tab     | Shows                                                          |
-|---------|----------------------------------------------------------------|
-| All     | All reusable rules                                             |
-| User    | Rules where `!isGeneratedClass(cls)`                           |
-| Utility | Rules where `isGeneratedClass(cls)`                            |
-| Unused  | Rules where `resolveSelectorUsage(...).unused === true`         |
+| Tab     | Shows                                                   |
+| ------- | ------------------------------------------------------- |
+| All     | All reusable rules                                      |
+| User    | Rules where `!isGeneratedClass(cls)`                    |
+| Utility | Rules where `isGeneratedClass(cls)`                     |
+| Unused  | Rules where `resolveSelectorUsage(...).unused === true` |
 
 **Search** (`normalizeSelectorQuery` + `selectorMatchesQuery`) matches against:
+
 1. The rule's selector token (name or ambient selector text).
 2. All declared CSS property names (`font-size`, `background-color`).
 3. `name:value` pairs (`font-size:16px`) across base styles and every context override.
@@ -227,7 +228,7 @@ A scoped rule is **owned by one node**. Its scope object pins it to that node's 
 When the publisher emits the selector, it generates a uniquely-prefixed name so it can't be applied accidentally elsewhere:
 
 ```css
-[data-node-id="node-xyz"].__instatic_scope_node-xyz {
+[data-node-id='node-xyz'].__instatic_scope_node-xyz {
   border-radius: 12px;
 }
 ```
@@ -249,10 +250,10 @@ A "generated" rule is one the codebase emits programmatically — typically the 
 `classUtils.ts`:
 
 ```ts
-isUserVisibleClass(cls)        // false for generated rules — hides them from the selector picker by default
-isGeneratedClass(cls)          // true if `generated.origin === 'framework'`
-isGeneratedClassLocked(cls)    // true if the rule is locked from manual edit (the framework owns its styles)
-generatedClassKindLabel(cls)   // e.g. 'Spacing', 'Typography' — for grouping in selector-picker rows
+isUserVisibleClass(cls) // false for generated rules — hides them from the selector picker by default
+isGeneratedClass(cls) // true if `generated.origin === 'framework'`
+isGeneratedClassLocked(cls) // true if the rule is locked from manual edit (the framework owns its styles)
+generatedClassKindLabel(cls) // e.g. 'Spacing', 'Typography' — for grouping in selector-picker rows
 ```
 
 The framework regenerates these rules whenever the user changes the framework scale (Site → Framework → Scale panel). Users can opt to show them in the selector picker via Settings → Editor → Show framework-generated classes.
@@ -283,21 +284,21 @@ import { useEditorStore } from '@site/store/store'
 const name = 'hero-button'
 const rule = useEditorStore.getState().createClass(name, {
   'background-color': 'var(--site-primary)',
-  'padding':          { top: 12, right: 24, bottom: 12, left: 24 },
-  'border-radius':    '8px',
+  padding: { top: 12, right: 24, bottom: 12, left: 24 },
+  'border-radius': '8px',
 })
 
 // Equivalent persisted shape:
 const persistedRule: StyleRule = {
-  id:       rule.id,
+  id: rule.id,
   name,
-  kind:     'class',
+  kind: 'class',
   selector: classKindSelector(name),
-  order:    rule.order,
+  order: rule.order,
   styles: {
     'background-color': 'var(--site-primary)',
-    'padding':          { top: 12, right: 24, bottom: 12, left: 24 },
-    'border-radius':    '8px',
+    padding: { top: 12, right: 24, bottom: 12, left: 24 },
+    'border-radius': '8px',
   },
   contextStyles: {},
 }
@@ -341,11 +342,11 @@ The Properties Panel's "Custom" tab generates a scoped rule automatically when t
 ```ts
 const name = `__instatic_scope_${nodeId}`
 const scoped: StyleRule = {
-  id:       nanoid(),
+  id: nanoid(),
   name,
-  kind:     'class',
+  kind: 'class',
   selector: classKindSelector(name),
-  order:    0,
+  order: 0,
   scope: { type: 'node', nodeId, role: 'module-style' },
   styles: { 'border-radius': '12px' },
 }
@@ -376,17 +377,17 @@ Nodes that reference the rule by id keep working — only the rendered CSS outpu
 
 ## Forbidden patterns
 
-| Pattern                                                              | Use instead                                              |
-|----------------------------------------------------------------------|----------------------------------------------------------|
-| Storing CSS strings directly on nodes                                | Add a `StyleRule` to the registry; reference via `classIds` |
-| Looking up a rule by name                                           | Look up by id — names can be renamed                     |
-| Hand-emitting CSS in module `render`                                 | Add a rule to the registry — modules emit shared CSS, not per-instance overrides |
-| Forgetting to clone scoped rules on duplicate / paste              | `cloneScopedClassesForNodeMap` — called by mutations     |
-| Naming a user class `__instatic_scope_*`                                   | Internal scoped rules use this prefix; keep user-created names free of it (the class-kind validator does not reject the prefix — it's a convention, not a gate) |
-| Mixing user rules and framework rules in the same `classIds` array without intent | The order matters — later wins. Framework rules are usually last (override semantics). |
-| Reading `rule.styles` as `CSSPropertyBag` without narrowing         | The persistence boundary stores `Record<string, unknown>` — narrow via `bagToCSS` or `parseStylesBag` |
-| Hard-failing the editor on a corrupt rule entry                     | `parseStyleRuleRegistry` is tolerant — invalid entries drop silently |
-| Assigning an ambient rule to `node.classIds`                        | Ambient rules attach by selector matching — only `kind: 'class'` rules go in `classIds` |
+| Pattern                                                                           | Use instead                                                                                                                                                     |
+| --------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Storing CSS strings directly on nodes                                             | Add a `StyleRule` to the registry; reference via `classIds`                                                                                                     |
+| Looking up a rule by name                                                         | Look up by id — names can be renamed                                                                                                                            |
+| Hand-emitting CSS in module `render`                                              | Add a rule to the registry — modules emit shared CSS, not per-instance overrides                                                                                |
+| Forgetting to clone scoped rules on duplicate / paste                             | `cloneScopedClassesForNodeMap` — called by mutations                                                                                                            |
+| Naming a user class `__instatic_scope_*`                                          | Internal scoped rules use this prefix; keep user-created names free of it (the class-kind validator does not reject the prefix — it's a convention, not a gate) |
+| Mixing user rules and framework rules in the same `classIds` array without intent | The order matters — later wins. Framework rules are usually last (override semantics).                                                                          |
+| Reading `rule.styles` as `CSSPropertyBag` without narrowing                       | The persistence boundary stores `Record<string, unknown>` — narrow via `bagToCSS` or `parseStylesBag`                                                           |
+| Hard-failing the editor on a corrupt rule entry                                   | `parseStyleRuleRegistry` is tolerant — invalid entries drop silently                                                                                            |
+| Assigning an ambient rule to `node.classIds`                                      | Ambient rules attach by selector matching — only `kind: 'class'` rules go in `classIds`                                                                         |
 
 ---
 

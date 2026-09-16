@@ -67,9 +67,7 @@ async function applyTransform(payload: TransformFilterPayload): Promise<string> 
  * any transformer touched the values; returns the original reference
  * untouched when nothing changed (cheap identity check downstream).
  */
-async function materializeAssetForClient<A extends TransformableAsset>(
-  asset: A,
-): Promise<A> {
+async function materializeAssetForClient<A extends TransformableAsset>(asset: A): Promise<A> {
   // Short-circuit: if no plugin has registered a media URL transformer,
   // we don't bother touching the asset. This keeps the hot path free
   // when the feature isn't in use.
@@ -79,13 +77,15 @@ async function materializeAssetForClient<A extends TransformableAsset>(
   // Run the original-path transform and all variant transforms concurrently.
   const [publicPath, ...variantPaths] = await Promise.all([
     applyTransform({ path: asset.publicPath, ctx: { kind: 'original', originalMimeType } }),
-    ...asset.variants.map(v => applyTransform({
-      path: v.path,
-      ctx: { kind: 'variant', width: v.width, format: v.format, originalMimeType },
-    })),
+    ...asset.variants.map((v) =>
+      applyTransform({
+        path: v.path,
+        ctx: { kind: 'variant', width: v.width, format: v.format, originalMimeType },
+      }),
+    ),
   ])
   const variants = asset.variants.map((v, i) =>
-    variantPaths[i] === v.path ? v : { ...v, path: variantPaths[i] }
+    variantPaths[i] === v.path ? v : { ...v, path: variantPaths[i] },
   )
   if (publicPath === asset.publicPath && variants.every((v, i) => v === asset.variants[i])) {
     return asset
@@ -109,7 +109,9 @@ export async function materializeAssetMapForClient<K, A extends TransformableAss
 ): Promise<Map<K, A>> {
   if (!hookBus.hasFiltersFor('media.url.transform')) return assets
   const entries = [...assets]
-  const materialized = await Promise.all(entries.map(([, asset]) => materializeAssetForClient(asset)))
+  const materialized = await Promise.all(
+    entries.map(([, asset]) => materializeAssetForClient(asset)),
+  )
   return new Map(entries.map(([key], i) => [key, materialized[i]]))
 }
 
@@ -122,5 +124,5 @@ export async function materializeAssetListForClient<A extends TransformableAsset
   assets: ReadonlyArray<A>,
 ): Promise<A[]> {
   if (!hookBus.hasFiltersFor('media.url.transform')) return [...assets]
-  return Promise.all(assets.map(asset => materializeAssetForClient(asset)))
+  return Promise.all(assets.map((asset) => materializeAssetForClient(asset)))
 }

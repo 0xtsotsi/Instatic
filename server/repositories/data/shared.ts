@@ -65,48 +65,43 @@ function buildUserRef(
  * `Record<UserJoinPrefix, …>` key set makes an unknown prefix a compile error
  * and the explicit column reads are type-checked against `UserJoinColumns`.
  */
-const userRefAccessors: Record<
-  UserJoinPrefix,
-  (row: UserJoinColumns) => DataUserReference | null
-> = {
-  author: (row) =>
-    buildUserRef(
-      row.author_user_id,
-      row.author_email,
-      row.author_display_name,
-      row.author_role_slug,
-      row.author_role_name,
-    ),
-  created_by: (row) =>
-    buildUserRef(
-      row.created_by_user_id,
-      row.created_by_email,
-      row.created_by_display_name,
-      row.created_by_role_slug,
-      row.created_by_role_name,
-    ),
-  updated_by: (row) =>
-    buildUserRef(
-      row.updated_by_user_id,
-      row.updated_by_email,
-      row.updated_by_display_name,
-      row.updated_by_role_slug,
-      row.updated_by_role_name,
-    ),
-  published_by: (row) =>
-    buildUserRef(
-      row.published_by_user_id,
-      row.published_by_email,
-      row.published_by_display_name,
-      row.published_by_role_slug,
-      row.published_by_role_name,
-    ),
-}
+const userRefAccessors: Record<UserJoinPrefix, (row: UserJoinColumns) => DataUserReference | null> =
+  {
+    author: (row) =>
+      buildUserRef(
+        row.author_user_id,
+        row.author_email,
+        row.author_display_name,
+        row.author_role_slug,
+        row.author_role_name,
+      ),
+    created_by: (row) =>
+      buildUserRef(
+        row.created_by_user_id,
+        row.created_by_email,
+        row.created_by_display_name,
+        row.created_by_role_slug,
+        row.created_by_role_name,
+      ),
+    updated_by: (row) =>
+      buildUserRef(
+        row.updated_by_user_id,
+        row.updated_by_email,
+        row.updated_by_display_name,
+        row.updated_by_role_slug,
+        row.updated_by_role_name,
+      ),
+    published_by: (row) =>
+      buildUserRef(
+        row.published_by_user_id,
+        row.published_by_email,
+        row.published_by_display_name,
+        row.published_by_role_slug,
+        row.published_by_role_name,
+      ),
+  }
 
-export function userRefAt(
-  row: UserJoinColumns,
-  prefix: UserJoinPrefix,
-): DataUserReference | null {
+export function userRefAt(row: UserJoinColumns, prefix: UserJoinPrefix): DataUserReference | null {
   return userRefAccessors[prefix](row)
 }
 

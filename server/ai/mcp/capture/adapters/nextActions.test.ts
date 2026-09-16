@@ -24,7 +24,10 @@ describe('buildNextActions', () => {
   })
 
   it('emits site_apply_css when CSS is present, BEFORE site_insert_html', () => {
-    const actions = buildNextActions({ ...baseResult, css: '.x { color: red; }' }, { parentNodeId: 'p1' })
+    const actions = buildNextActions(
+      { ...baseResult, css: '.x { color: red; }' },
+      { parentNodeId: 'p1' },
+    )
     const idxCss = actions.findIndex((a) => a.tool === 'site_apply_css')
     const idxHtml = actions.findIndex((a) => a.tool === 'site_insert_html')
     expect(idxCss).toBeGreaterThanOrEqual(0)
@@ -65,6 +68,10 @@ describe('buildNextActions', () => {
       },
       { parentNodeId: 'p1' },
     )
-    expect(actions.map((a) => a.tool)).toEqual(['site_apply_css', 'site_insert_html', 'log_unavailable_assets'])
+    expect(actions.map((a) => a.tool)).toEqual([
+      'site_apply_css',
+      'site_insert_html',
+      'log_unavailable_assets',
+    ])
   })
 })

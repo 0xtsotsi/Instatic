@@ -33,7 +33,10 @@ export interface CmsHandlerOptions {
   databaseUrl?: string
 }
 
-export function requestAuditContext(req: Request): { ipAddress: string | null; userAgent: string | null } {
+export function requestAuditContext(req: Request): {
+  ipAddress: string | null
+  userAgent: string | null
+} {
   return {
     ipAddress: clientIp(req),
     userAgent: req.headers.get('user-agent'),

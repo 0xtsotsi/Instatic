@@ -41,10 +41,7 @@ function shouldProxyPublicSiteRequest(req: IncomingMessage): boolean {
   return pathname === '/' || !FILE_EXTENSION_RE.test(pathname)
 }
 
-async function proxyPublicSiteRequest(
-  req: IncomingMessage,
-  res: ServerResponse,
-): Promise<void> {
+async function proxyPublicSiteRequest(req: IncomingMessage, res: ServerResponse): Promise<void> {
   const target = new URL(req.url ?? '/', CMS_DEV_SERVER_ORIGIN)
   const headers = new Headers()
   for (const [key, value] of Object.entries(req.headers)) {
@@ -122,7 +119,10 @@ function vendorChunkName(moduleId: string): string | null {
   if (moduleId.includes('node_modules/react-dom') || /node_modules\/react(\/|\\)/.test(moduleId)) {
     return 'react-vendor'
   }
-  if (moduleId.includes('node_modules/@dnd-kit') || moduleId.includes('node_modules/@use-gesture')) {
+  if (
+    moduleId.includes('node_modules/@dnd-kit') ||
+    moduleId.includes('node_modules/@use-gesture')
+  ) {
     return 'dnd-vendor'
   }
   if (moduleId.includes('node_modules/@sinclair/typebox')) return 'validation-vendor'
@@ -165,11 +165,7 @@ function vendorChunkName(moduleId: string): string | null {
 
 // https://vite.dev/config/
 export default defineConfig({
-  plugins: [
-    publicSiteDevProxyPlugin(),
-    react(),
-    babel({ presets: [reactCompilerPreset()] }),
-  ],
+  plugins: [publicSiteDevProxyPlugin(), react(), babel({ presets: [reactCompilerPreset()] })],
   resolve: {
     alias: {
       '@core': path.resolve(__dirname, 'src/core'),

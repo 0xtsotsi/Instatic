@@ -12,7 +12,7 @@
 const G = globalThis.__instatic?.ReactDOM
 if (!G) {
   throw new Error(
-    "[@instatic/runtime] Host ReactDOM not initialized. Did the host bundle finish loading before the plugin import?",
+    '[@instatic/runtime] Host ReactDOM not initialized. Did the host bundle finish loading before the plugin import?',
   )
 }
 

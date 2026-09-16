@@ -24,11 +24,7 @@ export function isAbortError(err: unknown): boolean {
  * the (already-read) response body; the provider's `{ error: { message } }`
  * envelope is preferred when present, otherwise a status-based fallback.
  */
-export function classifyHttpError(
-  providerLabel: string,
-  status: number,
-  bodyText: string,
-): string {
+export function classifyHttpError(providerLabel: string, status: number, bodyText: string): string {
   return classifyHttpFailure(providerLabel, status, bodyText).message
 }
 
@@ -83,7 +79,9 @@ function requestExceedsProviderContext(
   if (status === 413) return true
   if (status !== 400) return false
   const providerSignal = `${detail ?? ''} ${bodyText}`
-  return /(?:context.{0,24}(?:length|limit|window|exceed)|maximum.{0,16}tokens|too[_ ]many[_ ]tokens|request[_ ].{0,16}(?:too[_ ]large|exceed)|input[_ ]too[_ ]long|too[_ ]many[_ ]images|image.{0,16}(?:count|limit|maximum))/i.test(providerSignal)
+  return /(?:context.{0,24}(?:length|limit|window|exceed)|maximum.{0,16}tokens|too[_ ]many[_ ]tokens|request[_ ].{0,16}(?:too[_ ]large|exceed)|input[_ ]too[_ ]long|too[_ ]many[_ ]images|image.{0,16}(?:count|limit|maximum))/i.test(
+    providerSignal,
+  )
 }
 
 /**

@@ -29,31 +29,31 @@ interface UaMatch {
 const BROWSERS: UaMatch[] = [
   // Order matters: more specific rules first. Edge / Brave / Vivaldi all
   // contain "Chrome" in their UA string.
-  { pattern: /\bEdg(e|A|iOS)?\//i,           label: 'Edge' },
-  { pattern: /\bOPR\/|\bOpera\b/i,           label: 'Opera' },
-  { pattern: /\bVivaldi\//i,                 label: 'Vivaldi' },
-  { pattern: /\bBrave\//i,                   label: 'Brave' },
-  { pattern: /\bFirefox\//i,                 label: 'Firefox' },
+  { pattern: /\bEdg(e|A|iOS)?\//i, label: 'Edge' },
+  { pattern: /\bOPR\/|\bOpera\b/i, label: 'Opera' },
+  { pattern: /\bVivaldi\//i, label: 'Vivaldi' },
+  { pattern: /\bBrave\//i, label: 'Brave' },
+  { pattern: /\bFirefox\//i, label: 'Firefox' },
   // Chrome on iOS reports as "CriOS" — keep it labelled as Chrome to match
   // user expectations (the user installed Chrome).
-  { pattern: /\bCriOS\//i,                   label: 'Chrome' },
-  { pattern: /\bChrome\//i,                  label: 'Chrome' },
+  { pattern: /\bCriOS\//i, label: 'Chrome' },
+  { pattern: /\bChrome\//i, label: 'Chrome' },
   // Safari must come after Chrome — Chrome's UA contains "Safari".
-  { pattern: /\bVersion\/.+ Safari\//i,      label: 'Safari' },
-  { pattern: /\bSafari\//i,                  label: 'Safari' },
+  { pattern: /\bVersion\/.+ Safari\//i, label: 'Safari' },
+  { pattern: /\bSafari\//i, label: 'Safari' },
 ]
 
 const PLATFORMS: UaMatch[] = [
   // iPad reports "iPad" on older iOS, "Macintosh" on recent iPadOS desktop
   // class — handle both. iPhone is unambiguous.
-  { pattern: /\biPhone\b/i,                  label: 'iOS' },
-  { pattern: /\biPad\b|iPadOS/i,             label: 'iPadOS' },
-  { pattern: /\bAndroid\b/i,                 label: 'Android' },
-  { pattern: /\bMacintosh\b|\bMac OS X\b/i,  label: 'macOS' },
+  { pattern: /\biPhone\b/i, label: 'iOS' },
+  { pattern: /\biPad\b|iPadOS/i, label: 'iPadOS' },
+  { pattern: /\bAndroid\b/i, label: 'Android' },
+  { pattern: /\bMacintosh\b|\bMac OS X\b/i, label: 'macOS' },
   // Windows phones are extinct enough to merge into the desktop label.
-  { pattern: /\bWindows\b/i,                 label: 'Windows' },
-  { pattern: /\bCrOS\b/i,                    label: 'ChromeOS' },
-  { pattern: /\bX11\b|\bLinux\b/i,           label: 'Linux' },
+  { pattern: /\bWindows\b/i, label: 'Windows' },
+  { pattern: /\bCrOS\b/i, label: 'ChromeOS' },
+  { pattern: /\bX11\b|\bLinux\b/i, label: 'Linux' },
 ]
 
 function firstMatch(ua: string, table: UaMatch[]): string | null {

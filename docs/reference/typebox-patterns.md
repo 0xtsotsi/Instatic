@@ -31,7 +31,7 @@ Use for inputs where invalid data is genuinely an error: HTTP request bodies, HT
 import { Type, parseValue } from '@core/utils/typeboxHelpers'
 
 const RequestBodySchema = Type.Object({
-  email:    Type.String({ format: 'email' }),
+  email: Type.String({ format: 'email' }),
   password: Type.String({ minLength: 1 }),
 })
 
@@ -60,46 +60,46 @@ const prefs = parseJsonWithFallback(
 
 ### `src/core/utils/typeboxHelpers.ts`
 
-| Helper                            | Purpose                                                              |
-|-----------------------------------|----------------------------------------------------------------------|
-| `Type`                            | Re-export from `@sinclair/typebox` — build schemas                   |
-| `Value`                           | Re-export — reserved mainly for `Value.Parse` and `Value.Create`; prefer compiled helpers for repeated `Check` / `Decode` / `Errors` |
-| `Static<typeof Schema>`           | Type inference — equivalent to `z.infer<typeof S>`                   |
-| `parseValue(schema, value)`       | Strict parse with TypeBox's full `Value.Parse` pipeline; use when defaults/conversion/cleaning matter |
-| `safeParseValue(schema, value)`   | Discriminated union `{ ok: true, value } \| { ok: false, errors }`; uses the compiled validator cache |
-| `withFallback(schema, fallback)`  | Annotate a schema with a default; consulted by `parseWithFallbackAnnotation` and similar |
-| `filterArray(itemSchema, values)` | Filter an `unknown[]` keeping only items matching the schema; uses the compiled validator cache |
-| `formatValueErrors(schema, value)`| Human-readable error message string for failed validation; uses the compiled validator cache |
+| Helper                             | Purpose                                                                                                                              |
+| ---------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
+| `Type`                             | Re-export from `@sinclair/typebox` — build schemas                                                                                   |
+| `Value`                            | Re-export — reserved mainly for `Value.Parse` and `Value.Create`; prefer compiled helpers for repeated `Check` / `Decode` / `Errors` |
+| `Static<typeof Schema>`            | Type inference — equivalent to `z.infer<typeof S>`                                                                                   |
+| `parseValue(schema, value)`        | Strict parse with TypeBox's full `Value.Parse` pipeline; use when defaults/conversion/cleaning matter                                |
+| `safeParseValue(schema, value)`    | Discriminated union `{ ok: true, value } \| { ok: false, errors }`; uses the compiled validator cache                                |
+| `withFallback(schema, fallback)`   | Annotate a schema with a default; consulted by `parseWithFallbackAnnotation` and similar                                             |
+| `filterArray(itemSchema, values)`  | Filter an `unknown[]` keeping only items matching the schema; uses the compiled validator cache                                      |
+| `formatValueErrors(schema, value)` | Human-readable error message string for failed validation; uses the compiled validator cache                                         |
 
 ### `src/core/utils/typeboxCompiler.ts`
 
-| Helper                                      | Purpose                                                          |
-|---------------------------------------------|------------------------------------------------------------------|
-| `compiled(schema)`                          | Return the cached `TypeCheck` for a schema, compiling it once per schema object |
-| `compiledCheck(schema, value)`              | Boolean validation via the cached compiled validator              |
-| `compiledDecode(schema, value)`             | Decode via the cached compiled validator                          |
-| `compiledSafeParseValue(schema, value)`     | Compiled equivalent of `safeParseValue`                           |
-| `compiledFormatValueErrors(schema, value)`  | Compact error formatter using the compiled validator's errors     |
+| Helper                                     | Purpose                                                                         |
+| ------------------------------------------ | ------------------------------------------------------------------------------- |
+| `compiled(schema)`                         | Return the cached `TypeCheck` for a schema, compiling it once per schema object |
+| `compiledCheck(schema, value)`             | Boolean validation via the cached compiled validator                            |
+| `compiledDecode(schema, value)`            | Decode via the cached compiled validator                                        |
+| `compiledSafeParseValue(schema, value)`    | Compiled equivalent of `safeParseValue`                                         |
+| `compiledFormatValueErrors(schema, value)` | Compact error formatter using the compiled validator's errors                   |
 
 ### `src/core/utils/jsonValidate.ts`
 
-| Helper                                          | Purpose                                                          |
-|-------------------------------------------------|------------------------------------------------------------------|
-| `safeParseJson(raw, schema)`                    | Parse a string as JSON + validate; returns `{ ok, value } \| { ok, error }` |
-| `parseJsonWithFallback(raw, schema, default)`   | Best-effort read; returns the default on parse / validate failure|
-| `parseJsonResponse(res, schema)`                | Validate `await res.json()` against a schema using the compiled validator cache; throws on mismatch |
+| Helper                                        | Purpose                                                                                             |
+| --------------------------------------------- | --------------------------------------------------------------------------------------------------- |
+| `safeParseJson(raw, schema)`                  | Parse a string as JSON + validate; returns `{ ok, value } \| { ok, error }`                         |
+| `parseJsonWithFallback(raw, schema, default)` | Best-effort read; returns the default on parse / validate failure                                   |
+| `parseJsonResponse(res, schema)`              | Validate `await res.json()` against a schema using the compiled validator cache; throws on mismatch |
 
 ### `src/core/http/apiClient.ts` (canonical client HTTP layer, `@core/http`)
 
-| Helper                                          | Purpose                                                          |
-|-------------------------------------------------|------------------------------------------------------------------|
+| Helper                                                         | Purpose                                                                                                                                                                                                                     |
+| -------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `apiRequest(path, { method, body, schema, query, signal, … })` | **The default for browser→server calls.** Sets `credentials`, JSON-serializes `body`, validates the success body against `schema` (returns `Static<schema>`; `void` without one), and throws `ApiError` on a non-OK status. |
-| `apiBlobRequest(path, { signal, … })`           | Binary-response counterpart for authenticated image/file reads. Uses the same transport and `ApiError` envelope handling, then returns a `Blob`; the caller validates the MIME type before use. |
-| `readEnvelope(res, schema, fallbackMessage)`    | For code that already holds a `Response` (the persistence layer, which injects its own `fetch`): check `res.ok` (throw `ApiError` with `responseErrorMessage(res, fallback)` if not), then validate body against `schema` |
-| `assertOk(res, fallbackMessage)`                | No-body counterpart to `readEnvelope`: throw `ApiError` if the `Response` is not OK, otherwise return (for void mutations / bodies parsed separately) |
-| `responseErrorMessage(res, fallback)`           | Extract a useful error message from a failed `Response` (reads `{ error: string }` envelope if present, then raw text, otherwise the fallback) |
-| `ApiError`                                      | The single error type thrown by `apiRequest`/`apiBlobRequest`/`readEnvelope`; carries `.status` so UI can branch (403, 404, …) |
-| `isAbortError(err)`                             | True for an aborted fetch (user cancellation / superseded request) — the uniform replacement for `(err as Error).name === 'AbortError'` |
+| `apiBlobRequest(path, { signal, … })`                          | Binary-response counterpart for authenticated image/file reads. Uses the same transport and `ApiError` envelope handling, then returns a `Blob`; the caller validates the MIME type before use.                             |
+| `readEnvelope(res, schema, fallbackMessage)`                   | For code that already holds a `Response` (the persistence layer, which injects its own `fetch`): check `res.ok` (throw `ApiError` with `responseErrorMessage(res, fallback)` if not), then validate body against `schema`   |
+| `assertOk(res, fallbackMessage)`                               | No-body counterpart to `readEnvelope`: throw `ApiError` if the `Response` is not OK, otherwise return (for void mutations / bodies parsed separately)                                                                       |
+| `responseErrorMessage(res, fallback)`                          | Extract a useful error message from a failed `Response` (reads `{ error: string }` envelope if present, then raw text, otherwise the fallback)                                                                              |
+| `ApiError`                                                     | The single error type thrown by `apiRequest`/`apiBlobRequest`/`readEnvelope`; carries `.status` so UI can branch (403, 404, …)                                                                                              |
+| `isAbortError(err)`                                            | True for an aborted fetch (user cancellation / superseded request) — the uniform replacement for `(err as Error).name === 'AbortError'`                                                                                     |
 
 ---
 
@@ -111,10 +111,10 @@ const prefs = parseJsonWithFallback(
 import { Type, type Static } from '@core/utils/typeboxHelpers'
 
 export const FooSchema = Type.Object({
-  id:        Type.String(),
-  count:     Type.Number({ minimum: 0 }),
-  optional:  Type.Optional(Type.String()),
-  tags:      Type.Array(Type.String()),
+  id: Type.String(),
+  count: Type.Number({ minimum: 0 }),
+  optional: Type.Optional(Type.String()),
+  tags: Type.Array(Type.String()),
 })
 
 export type Foo = Static<typeof FooSchema>
@@ -149,7 +149,7 @@ import { badRequest, jsonResponse, readValidatedBody } from '../http'
 
 const CreatePostSchema = Type.Object({
   title: Type.String({ minLength: 1, maxLength: 200 }),
-  body:  Type.String(),
+  body: Type.String(),
 })
 
 const body = await readValidatedBody(req, CreatePostSchema)
@@ -215,7 +215,7 @@ const fonts = filterArray(FontEntrySchema, rawSite.fonts)
 import { Type, withFallback } from '@core/utils/typeboxHelpers'
 
 const SiteSettingsSchema = Type.Object({
-  theme:       withFallback(Type.String(), 'dark'),
+  theme: withFallback(Type.String(), 'dark'),
   breakpoints: withFallback(Type.Array(BreakpointSchema), DEFAULT_BREAKPOINTS),
 })
 ```
@@ -267,15 +267,15 @@ export class SiteValidationError extends Error {
 
 The codebase migrated off Zod. If you encounter a remaining Zod pattern, translate it:
 
-| Zod                                                   | TypeBox                                                            |
-|-------------------------------------------------------|--------------------------------------------------------------------|
-| `z.infer<typeof X>`                                   | `Static<typeof X>`                                                  |
-| `X.parse(v)` (strict)                                 | `parseValue(X, v)` or `Value.Parse(X, v)`                          |
-| `X.safeParse(v)`                                      | `safeParseValue(X, v)` or `compiledCheck(X, v)` for boolean-only hot paths |
-| `X.catch(default)` (soft fallback)                    | `withFallback(X, default)`                                          |
-| `z.array(z.unknown()).transform(filter)`              | `filterArray(itemSchema, values)`                                   |
-| `.transform()` / `.preprocess()` (data migration)     | Sibling parser helper functions (e.g. `parsePageNode`, `parseSitePage`) |
-| `.refine()` (cross-field invariants)                  | Named guard functions called after compiled schema validation       |
+| Zod                                               | TypeBox                                                                    |
+| ------------------------------------------------- | -------------------------------------------------------------------------- |
+| `z.infer<typeof X>`                               | `Static<typeof X>`                                                         |
+| `X.parse(v)` (strict)                             | `parseValue(X, v)` or `Value.Parse(X, v)`                                  |
+| `X.safeParse(v)`                                  | `safeParseValue(X, v)` or `compiledCheck(X, v)` for boolean-only hot paths |
+| `X.catch(default)` (soft fallback)                | `withFallback(X, default)`                                                 |
+| `z.array(z.unknown()).transform(filter)`          | `filterArray(itemSchema, values)`                                          |
+| `.transform()` / `.preprocess()` (data migration) | Sibling parser helper functions (e.g. `parsePageNode`, `parseSitePage`)    |
+| `.refine()` (cross-field invariants)              | Named guard functions called after compiled schema validation              |
 
 There are no Zod exemptions. Provider drivers call REST/SSE APIs directly and pass TypeBox schemas through as JSON Schema for tool inputs. Gated by an import scan.
 
@@ -285,44 +285,44 @@ There are no Zod exemptions. Provider drivers call REST/SSE APIs directly and pa
 
 Common boundaries already wrapped — extend the same pattern when you add a new one:
 
-| Boundary                                   | Helper                                              | Lives in                                |
-|--------------------------------------------|-----------------------------------------------------|-----------------------------------------|
-| HTTP request (client, canonical JSON)      | `apiRequest(path, { schema, … })`                   | `src/core/http/apiClient.ts`            |
-| HTTP request (client, binary body)         | `apiBlobRequest(path, { signal, … })`               | `src/core/http/apiClient.ts`            |
-| HTTP response from a held `Response`        | `readEnvelope(res, Schema, fallback)`               | `src/core/http/apiClient.ts`            |
-| HTTP body-validation primitive (no status semantics; `@core/http` internals, XHR, server-side external APIs) | `parseJsonResponse(res, Schema)` | `src/core/utils/jsonValidate.ts` |
-| Request body (server handler)              | `readValidatedBody(req, Schema)` → typed value or `null` (return `badRequest` on null) | `server/http.ts` + per-handler |
-| `JSON.parse` of localStorage               | `parseJsonWithFallback(raw, Schema, default)`       | `src/core/utils/jsonValidate.ts`        |
-| `JSON.parse` of disk JSON                  | `safeParseJson(raw, Schema)`                        | `src/core/utils/jsonValidate.ts`        |
-| Plugin manifest                            | `parsePluginManifest(raw)`                          | `src/core/plugins/manifest.ts`          |
-| Site shell loaded from storage             | `validateSite(raw)`                                 | `src/core/persistence/validate.ts`      |
-| Page roster on load (fault-tolerant)       | `validatePages(shell, rawPages, vcs, { tolerant: true, storedVcIds })` | `src/core/persistence/validate.ts` |
-| Page roster on write (fail-closed)         | `validatePages(shell, rawPages, vcs)` (default: `tolerant: false`)     | `src/core/persistence/validate.ts` |
-| VC roster loaded from storage (read path)  | `validateVisualComponents(rawVCs)`                  | `src/core/persistence/validate.ts`      |
-| VC roster on write (fail-closed)           | `validateVisualComponentsForWrite(rawVCs)`          | `src/core/persistence/validate.ts`      |
-| Page-tree payload from plugin RPC / disk   | `parsePageNodeTree(raw)`                            | `src/core/page-tree/operationSchema.ts` |
-| DB settings JSON — partial read (handler side) | `safeParseValue(NarrowSchema, row.settings_json)` where `NarrowSchema` covers only the fields the handler needs. TypeBox objects allow extra properties by default, so unrelated settings fields (with their own required sub-schemas) don't block a valid read. Falls back to `null` on failure. | `server/handlers/cms/setup.ts` (`StoredSiteIdentitySchema`) |
-| AI chat snapshot (optional HTTP body field) | `safeParseValue(SiteAgentSnapshotSchema, snapshot)` — falls back to an empty placeholder on failure; never crashes the stream | `server/ai/handlers/chat.ts` |
-| AI tool handler raw output                 | `safeParseValue(AiToolOutputSchema, result)` — wraps non-envelope values as `{ ok: true, data }`; prevents duck-typed truthy-but-non-boolean `ok` fields reaching the driver | `server/ai/drivers/http/execTool.ts` |
-| SSE frame — plugin lifecycle events (client) | `safeParseValue(PluginEventSchema, JSON.parse(frame.data))` — malformed frames are dropped with `console.warn`; well-formed frames are dispatched to subscribers | `src/admin/pages/plugins/utils/pluginEventStream.ts` |
-| DB JSON columns (after auto-parse)         | Per-repository TypeBox schema                       | `server/repositories/*.ts`              |
-| Response schemas (shared)                  | `responseSchemas.ts`                                | `src/core/persistence/responseSchemas.ts`|
+| Boundary                                                                                                     | Helper                                                                                                                                                                                                                                                                                            | Lives in                                                    |
+| ------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------- |
+| HTTP request (client, canonical JSON)                                                                        | `apiRequest(path, { schema, … })`                                                                                                                                                                                                                                                                 | `src/core/http/apiClient.ts`                                |
+| HTTP request (client, binary body)                                                                           | `apiBlobRequest(path, { signal, … })`                                                                                                                                                                                                                                                             | `src/core/http/apiClient.ts`                                |
+| HTTP response from a held `Response`                                                                         | `readEnvelope(res, Schema, fallback)`                                                                                                                                                                                                                                                             | `src/core/http/apiClient.ts`                                |
+| HTTP body-validation primitive (no status semantics; `@core/http` internals, XHR, server-side external APIs) | `parseJsonResponse(res, Schema)`                                                                                                                                                                                                                                                                  | `src/core/utils/jsonValidate.ts`                            |
+| Request body (server handler)                                                                                | `readValidatedBody(req, Schema)` → typed value or `null` (return `badRequest` on null)                                                                                                                                                                                                            | `server/http.ts` + per-handler                              |
+| `JSON.parse` of localStorage                                                                                 | `parseJsonWithFallback(raw, Schema, default)`                                                                                                                                                                                                                                                     | `src/core/utils/jsonValidate.ts`                            |
+| `JSON.parse` of disk JSON                                                                                    | `safeParseJson(raw, Schema)`                                                                                                                                                                                                                                                                      | `src/core/utils/jsonValidate.ts`                            |
+| Plugin manifest                                                                                              | `parsePluginManifest(raw)`                                                                                                                                                                                                                                                                        | `src/core/plugins/manifest.ts`                              |
+| Site shell loaded from storage                                                                               | `validateSite(raw)`                                                                                                                                                                                                                                                                               | `src/core/persistence/validate.ts`                          |
+| Page roster on load (fault-tolerant)                                                                         | `validatePages(shell, rawPages, vcs, { tolerant: true, storedVcIds })`                                                                                                                                                                                                                            | `src/core/persistence/validate.ts`                          |
+| Page roster on write (fail-closed)                                                                           | `validatePages(shell, rawPages, vcs)` (default: `tolerant: false`)                                                                                                                                                                                                                                | `src/core/persistence/validate.ts`                          |
+| VC roster loaded from storage (read path)                                                                    | `validateVisualComponents(rawVCs)`                                                                                                                                                                                                                                                                | `src/core/persistence/validate.ts`                          |
+| VC roster on write (fail-closed)                                                                             | `validateVisualComponentsForWrite(rawVCs)`                                                                                                                                                                                                                                                        | `src/core/persistence/validate.ts`                          |
+| Page-tree payload from plugin RPC / disk                                                                     | `parsePageNodeTree(raw)`                                                                                                                                                                                                                                                                          | `src/core/page-tree/operationSchema.ts`                     |
+| DB settings JSON — partial read (handler side)                                                               | `safeParseValue(NarrowSchema, row.settings_json)` where `NarrowSchema` covers only the fields the handler needs. TypeBox objects allow extra properties by default, so unrelated settings fields (with their own required sub-schemas) don't block a valid read. Falls back to `null` on failure. | `server/handlers/cms/setup.ts` (`StoredSiteIdentitySchema`) |
+| AI chat snapshot (optional HTTP body field)                                                                  | `safeParseValue(SiteAgentSnapshotSchema, snapshot)` — falls back to an empty placeholder on failure; never crashes the stream                                                                                                                                                                     | `server/ai/handlers/chat.ts`                                |
+| AI tool handler raw output                                                                                   | `safeParseValue(AiToolOutputSchema, result)` — wraps non-envelope values as `{ ok: true, data }`; prevents duck-typed truthy-but-non-boolean `ok` fields reaching the driver                                                                                                                      | `server/ai/drivers/http/execTool.ts`                        |
+| SSE frame — plugin lifecycle events (client)                                                                 | `safeParseValue(PluginEventSchema, JSON.parse(frame.data))` — malformed frames are dropped with `console.warn`; well-formed frames are dispatched to subscribers                                                                                                                                  | `src/admin/pages/plugins/utils/pluginEventStream.ts`        |
+| DB JSON columns (after auto-parse)                                                                           | Per-repository TypeBox schema                                                                                                                                                                                                                                                                     | `server/repositories/*.ts`                                  |
+| Response schemas (shared)                                                                                    | `responseSchemas.ts`                                                                                                                                                                                                                                                                              | `src/core/persistence/responseSchemas.ts`                   |
 
 ---
 
 ## Forbidden patterns
 
-| Pattern                                                       | Use instead                                                     |
-|---------------------------------------------------------------|-----------------------------------------------------------------|
-| `await res.json() as Foo`                                     | `apiRequest(path, { schema })` (client) or `readEnvelope(res, FooSchema, msg)` (held `Response`) — `parseJsonResponse` only for `@core/http` internals / XHR / server-side |
-| `body.field as DeepType` after `readEnvelope` / `parseJsonResponse` | Reference `DeepType`'s TypeBox schema in the envelope (e.g. `{ font: FontEntrySchema }`); the parsed value is already correctly typed — no cast needed. For interface-only deep types without a schema, add a `§5.x` allowlist entry in `boundary-validation.test.ts`. |
-| `JSON.parse(raw) as Foo`                                      | `safeParseJson(raw, FooSchema)` / `parseJsonWithFallback`       |
-| Hand-rolled `interface Foo` next to a `FooSchema`             | `type Foo = Static<typeof FooSchema>`                            |
-| Importing `zod` anywhere                                      | TypeBox everywhere — `zod` is banned repo-wide and has been removed from `package.json`. Gated by `ai-driver-isolation.test.ts`. |
-| `try { JSON.parse(raw) } catch (err) { /* swallow */ }`       | `parseJsonWithFallback` for soft, `safeParseJson` for hard       |
-| `if (typeof body.email !== 'string') return badRequest(...)` (ad-hoc shape check) | TypeBox schema + `parseValue`                       |
-| Re-wrapping `Error` in a way that loses the original cause    | `new Error(message, { cause: err })`                             |
-| Silently catching errors (`catch (err) {}`)                   | Name the binding `catch (_err)` and add a one-line comment, or handle the error |
+| Pattern                                                                           | Use instead                                                                                                                                                                                                                                                            |
+| --------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `await res.json() as Foo`                                                         | `apiRequest(path, { schema })` (client) or `readEnvelope(res, FooSchema, msg)` (held `Response`) — `parseJsonResponse` only for `@core/http` internals / XHR / server-side                                                                                             |
+| `body.field as DeepType` after `readEnvelope` / `parseJsonResponse`               | Reference `DeepType`'s TypeBox schema in the envelope (e.g. `{ font: FontEntrySchema }`); the parsed value is already correctly typed — no cast needed. For interface-only deep types without a schema, add a `§5.x` allowlist entry in `boundary-validation.test.ts`. |
+| `JSON.parse(raw) as Foo`                                                          | `safeParseJson(raw, FooSchema)` / `parseJsonWithFallback`                                                                                                                                                                                                              |
+| Hand-rolled `interface Foo` next to a `FooSchema`                                 | `type Foo = Static<typeof FooSchema>`                                                                                                                                                                                                                                  |
+| Importing `zod` anywhere                                                          | TypeBox everywhere — `zod` is banned repo-wide and has been removed from `package.json`. Gated by `ai-driver-isolation.test.ts`.                                                                                                                                       |
+| `try { JSON.parse(raw) } catch (err) { /* swallow */ }`                           | `parseJsonWithFallback` for soft, `safeParseJson` for hard                                                                                                                                                                                                             |
+| `if (typeof body.email !== 'string') return badRequest(...)` (ad-hoc shape check) | TypeBox schema + `parseValue`                                                                                                                                                                                                                                          |
+| Re-wrapping `Error` in a way that loses the original cause                        | `new Error(message, { cause: err })`                                                                                                                                                                                                                                   |
+| Silently catching errors (`catch (err) {}`)                                       | Name the binding `catch (_err)` and add a one-line comment, or handle the error                                                                                                                                                                                        |
 
 ---
 

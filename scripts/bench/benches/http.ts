@@ -46,7 +46,11 @@ function readEagerEndpoints(): Endpoint[] {
   return eager
 }
 
-async function sequential(baseUrl: string, ep: Endpoint, n: number): Promise<{ samples: number[]; lastStatus: number; bytes: number }> {
+async function sequential(
+  baseUrl: string,
+  ep: Endpoint,
+  n: number,
+): Promise<{ samples: number[]; lastStatus: number; bytes: number }> {
   // warmup
   for (let i = 0; i < Math.min(5, n); i++) {
     const r = await fetch(`${baseUrl}${ep.path}`)
@@ -66,7 +70,12 @@ async function sequential(baseUrl: string, ep: Endpoint, n: number): Promise<{ s
   return { samples, lastStatus, bytes }
 }
 
-async function concurrent(baseUrl: string, ep: Endpoint, total: number, concurrency: number): Promise<{ samples: number[]; wallMs: number }> {
+async function concurrent(
+  baseUrl: string,
+  ep: Endpoint,
+  total: number,
+  concurrency: number,
+): Promise<{ samples: number[]; wallMs: number }> {
   // warmup
   for (let i = 0; i < 5; i++) await fetch(`${baseUrl}${ep.path}`).then((r) => r.arrayBuffer())
   const samples: number[] = []
@@ -91,7 +100,8 @@ async function concurrent(baseUrl: string, ep: Endpoint, total: number, concurre
 export const httpBench: BenchModule = {
   name: 'http',
   title: 'HTTP latency + throughput',
-  description: 'Sequential latency and concurrent throughput on /health, /admin, static assets. Auto-manages the prod server lifecycle.',
+  description:
+    'Sequential latency and concurrent throughput on /health, /admin, static assets. Auto-manages the prod server lifecycle.',
 
   async run(ctx: BenchContext): Promise<BenchResult> {
     let server: ServerHandle | null = null
@@ -106,8 +116,15 @@ export const httpBench: BenchModule = {
       const probe = await fetch(`${baseUrl}/health`).catch(() => null)
       if (!probe || !probe.ok) throw new Error(`Server at ${baseUrl}/health did not respond OK`)
     } else {
-      const staticDir = existsSync(resolve(REPO_ROOT, 'dist')) ? resolve(REPO_ROOT, 'dist') : undefined
-      log.step('Spawning production server on a free port' + (staticDir ? ' (with STATIC_DIR=./dist)' : ' (no STATIC_DIR — static asset bench skipped)'))
+      const staticDir = existsSync(resolve(REPO_ROOT, 'dist'))
+        ? resolve(REPO_ROOT, 'dist')
+        : undefined
+      log.step(
+        'Spawning production server on a free port' +
+          (staticDir
+            ? ' (with STATIC_DIR=./dist)'
+            : ' (no STATIC_DIR — static asset bench skipped)'),
+      )
       server = await startServer({ staticDir })
       baseUrl = server.baseUrl
       bootMs = server.bootMs

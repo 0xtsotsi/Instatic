@@ -54,6 +54,7 @@ markdown text (stored) ←→ ProseMirror JSON (in-editor)
 ```
 
 Round-trip functions live in `src/core/markdown/markdownDocument.ts`:
+
 - `markdownToProseMirrorDoc(md)` — parse markdown → ProseMirror node tree
 - `proseMirrorDocToMarkdown(doc)` — serialize ProseMirror node tree → markdown
 
@@ -61,26 +62,26 @@ The serializer produces stable, idempotent output. Existing entries load with no
 
 ### Supported grammar
 
-| Category | Examples |
-|----------|---------|
-| Inline marks | `**bold**`, `*italic*`, `` `code` ``, `~~strike~~`, `[link](url)` |
-| Headings | `## H2`, `### H3`, `#### H4` (`# H1` normalised to `## H2` — H1 is reserved for the title) |
-| Lists | `- ` / `* ` bullets, `1. ` ordered, nested via 2-space indents |
-| Block quote | `> ` |
-| Code block | triple-backtick fence with optional language |
-| Horizontal rule | `---` |
-| Tables | GFM pipe-table syntax |
-| Media | `![alt](src)` for images, `@[video](src)` for videos |
-| Data tokens | `{source.field}` — plain inline text in the editor; resolved by the publisher at render time |
+| Category        | Examples                                                                                     |
+| --------------- | -------------------------------------------------------------------------------------------- |
+| Inline marks    | `**bold**`, `*italic*`, `` `code` ``, `~~strike~~`, `[link](url)`                            |
+| Headings        | `## H2`, `### H3`, `#### H4` (`# H1` normalised to `## H2` — H1 is reserved for the title)   |
+| Lists           | `- ` / `* ` bullets, `1. ` ordered, nested via 2-space indents                               |
+| Block quote     | `> `                                                                                         |
+| Code block      | triple-backtick fence with optional language                                                 |
+| Horizontal rule | `---`                                                                                        |
+| Tables          | GFM pipe-table syntax                                                                        |
+| Media           | `![alt](src)` for images, `@[video](src)` for videos                                         |
+| Data tokens     | `{source.field}` — plain inline text in the editor; resolved by the publisher at render time |
 
 ### Insertion surfaces
 
-| Surface | How |
-|---------|-----|
-| Bubble menu | Appears on text selection — bold / italic / code / strike / link |
-| Slash menu (`/`) | Contextual command menu at the caret — headings, lists, quote, code block, divider, table, media, data token |
-| Canvas notch | Top-center quick-action buttons — Heading, Text, Media, Insert data token. It does not show the Site editor's module picker. |
-| Input rules | `# ` → H1 (normalised), `## ` → H2, `**x**` → bold, `- ` → bullet, `` ``` `` → code block, etc. |
+| Surface          | How                                                                                                                          |
+| ---------------- | ---------------------------------------------------------------------------------------------------------------------------- |
+| Bubble menu      | Appears on text selection — bold / italic / code / strike / link                                                             |
+| Slash menu (`/`) | Contextual command menu at the caret — headings, lists, quote, code block, divider, table, media, data token                 |
+| Canvas notch     | Top-center quick-action buttons — Heading, Text, Media, Insert data token. It does not show the Site editor's module picker. |
+| Input rules      | `# ` → H1 (normalised), `## ` → H2, `**x**` → bold, `- ` → bullet, ` ``` ` → code block, etc.                                |
 
 ### Imperative handle
 
@@ -128,6 +129,7 @@ When the panel is collapsed and an entry is selected, `AdminWorkspaceCanvasLayou
 ## Canvas modes
 
 `ContentModeToggle` switches between:
+
 - **Write** (`contentMode === 'write'`): bare editor surface (`ContentDocumentCanvas` with `TiptapBodyEditor`).
 - **Live** (`contentMode === 'live'`): entry rendered inside its template via `LiveCanvas`, with real site styles and inline editing.
 
@@ -137,11 +139,11 @@ The mode switch is client-only. The markdown body is the source of truth in both
 
 ## Hooks
 
-| Hook | Source | Owns |
-|------|--------|------|
-| `useContentWorkspace` | `hooks/useContentWorkspace.ts` | Collection list, entry list, selection, CRUD operations, error state |
-| `useContentEntryDraft` | `hooks/useContentEntryDraft.ts` | In-memory field state (`title`, `body`, `slug`, `featuredMediaId`, `seoTitle`, `seoDescription`, plus `customCells` for the collection's non-built-in fields), save / publish / status-change handlers |
-| `useContentMediaPicker` | `hooks/useContentMediaPicker.ts` | Media picker modal open/close, featured media asset hydration, body media insert |
+| Hook                    | Source                           | Owns                                                                                                                                                                                                   |
+| ----------------------- | -------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `useContentWorkspace`   | `hooks/useContentWorkspace.ts`   | Collection list, entry list, selection, CRUD operations, error state                                                                                                                                   |
+| `useContentEntryDraft`  | `hooks/useContentEntryDraft.ts`  | In-memory field state (`title`, `body`, `slug`, `featuredMediaId`, `seoTitle`, `seoDescription`, plus `customCells` for the collection's non-built-in fields), save / publish / status-change handlers |
+| `useContentMediaPicker` | `hooks/useContentMediaPicker.ts` | Media picker modal open/close, featured media asset hydration, body media insert                                                                                                                       |
 
 ---
 
@@ -153,9 +155,9 @@ The Content workspace has its own `content` chat scope, mounted as the `agent` p
 
 The server registers 15 content-scope tools:
 
-| Group | Tools |
-|---|---|
-| Server reads | `content_list_collections`, `content_get_collection_schema`, `content_list_documents`, `content_get_document`, `content_search_documents`, `content_list_users`, `content_list_media` |
+| Group                     | Tools                                                                                                                                                                                                                                           |
+| ------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Server reads              | `content_list_collections`, `content_get_collection_schema`, `content_list_documents`, `content_get_document`, `content_search_documents`, `content_list_users`, `content_list_media`                                                           |
 | Browser writes/navigation | `content_create_document`, `content_delete_document`, `content_set_document_status`, `content_set_document_field`, `content_set_document_fields`, `content_set_document_author`, `content_set_active_document`, `content_set_active_collection` |
 
 Body content is exchanged with the model as markdown. The browser bridge converts it to/from the Tiptap document when applying field writes, so the persisted `body` cell remains the same markdown source of truth used by the manual editor.
@@ -166,14 +168,14 @@ Body content is exchanged with the model as markdown. The browser bridge convert
 
 ## Forbidden patterns
 
-| Pattern | Why |
-|---------|-----|
-| Mutating block state via a block ID list | There are no blocks — one ProseMirror document, not a `ContentBlock[]` list |
-| Calling `insertText` / `insertMedia` without checking `bodyEditorRef.current` | The ref is null before the editor mounts |
-| Storing ProseMirror JSON in the `body` cell | Body is always markdown text; the editor does the conversion |
-| Adding `useMemo` / `useCallback` in ContentPage or its hooks | React Compiler handles memoization; the only exception is async handlers extracted to module scope to avoid compiler bail-out (see `useContentEntryDraft`) |
-| Opening the settings panel via a forced `setPropertiesPanel({ collapsed: false })` on mount | The persisted layout is the source of truth; only user actions (selecting an entry, clicking the notch) open the panel |
-| Mutating content-agent writes directly against repositories | The browser bridge owns writes so unsaved draft state and the open Tiptap editor do not desync |
+| Pattern                                                                                     | Why                                                                                                                                                        |
+| ------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Mutating block state via a block ID list                                                    | There are no blocks — one ProseMirror document, not a `ContentBlock[]` list                                                                                |
+| Calling `insertText` / `insertMedia` without checking `bodyEditorRef.current`               | The ref is null before the editor mounts                                                                                                                   |
+| Storing ProseMirror JSON in the `body` cell                                                 | Body is always markdown text; the editor does the conversion                                                                                               |
+| Adding `useMemo` / `useCallback` in ContentPage or its hooks                                | React Compiler handles memoization; the only exception is async handlers extracted to module scope to avoid compiler bail-out (see `useContentEntryDraft`) |
+| Opening the settings panel via a forced `setPropertiesPanel({ collapsed: false })` on mount | The persisted layout is the source of truth; only user actions (selecting an entry, clicking the notch) open the panel                                     |
+| Mutating content-agent writes directly against repositories                                 | The browser bridge owns writes so unsaved draft state and the open Tiptap editor do not desync                                                             |
 
 ---
 

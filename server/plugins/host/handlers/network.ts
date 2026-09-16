@@ -44,7 +44,9 @@ export async function handleNetworkAbort(
       const err = new Error('AbortError')
       err.name = 'AbortError'
       controller.abort(err)
-    } catch { /* ignore */ }
+    } catch {
+      /* ignore */
+    }
     entry.inflightFetches.delete(abortId)
   }
   replyApiOk(msg.pluginId, msg.correlationId)

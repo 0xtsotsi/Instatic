@@ -16,11 +16,7 @@
  */
 
 import { nanoid } from 'nanoid'
-import type {
-  AiBrowserBridge,
-  AiStreamEvent,
-  AiToolOutput,
-} from './types'
+import type { AiBrowserBridge, AiStreamEvent, AiToolOutput } from './types'
 
 // ---------------------------------------------------------------------------
 // NDJSON encoder
@@ -110,7 +106,8 @@ export function createBridge(
           () => settle(new Error(`Browser tool "${toolName}" result timed out.`)),
           timeoutMs,
         )
-        const onAbort = () => settle(new Error('AI chat stream aborted before tool result arrived.'))
+        const onAbort = () =>
+          settle(new Error('AI chat stream aborted before tool result arrived.'))
         const cleanup = () => {
           clearTimeout(timer)
           signal?.removeEventListener('abort', onAbort)

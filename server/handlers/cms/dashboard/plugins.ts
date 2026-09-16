@@ -76,10 +76,7 @@ export async function readPluginsStats(db: DbClient): Promise<PluginsStats> {
  * the widget renders as a dot color. SQLite returns booleans as 0/1
  * integers; Postgres returns proper booleans — handle both.
  */
-function computeRowState(
-  enabled: boolean | number,
-  lifecycle: string,
-): PluginsStatsRow['state'] {
+function computeRowState(enabled: boolean | number, lifecycle: string): PluginsStatsRow['state'] {
   if (lifecycle === 'error') return 'error'
   const isEnabled = enabled === true || enabled === 1
   if (isEnabled && lifecycle === 'active') return 'active'

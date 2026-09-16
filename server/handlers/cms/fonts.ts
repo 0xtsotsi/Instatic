@@ -57,9 +57,7 @@ interface GoogleFontSelection {
  * and reject the same way. Returns the validated selection or a Response with
  * the appropriate 400.
  */
-async function readGoogleFontSelectionBody(
-  req: Request,
-): Promise<GoogleFontSelection | Response> {
+async function readGoogleFontSelectionBody(req: Request): Promise<GoogleFontSelection | Response> {
   const body = await readValidatedBody(req, GoogleFontSelectionBodySchema)
   if (!body) return badRequest('Invalid font selection body')
   const family = body.family.trim()
@@ -102,10 +100,12 @@ async function handleCustomFont(req: Request, db: DbClient): Promise<Response> {
 
   const CustomFontBodySchema = Type.Object({
     family: Type.String(),
-    files: Type.Array(Type.Object({
-      mediaAssetId: Type.String(),
-      variant: Type.String(),
-    })),
+    files: Type.Array(
+      Type.Object({
+        mediaAssetId: Type.String(),
+        variant: Type.String(),
+      }),
+    ),
   })
   const body = await readValidatedBody(req, CustomFontBodySchema)
   if (!body) return badRequest('Invalid request body')

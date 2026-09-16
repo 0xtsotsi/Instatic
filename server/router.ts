@@ -9,8 +9,16 @@ import { getPublishVersion, registerVersionedCacheReset } from './publish/publis
 import { prefetchMediaAssets } from './publish/mediaPrefetch'
 import { getSetupStatusCached } from './repositories/setup'
 import { getPublishedRuntimeAsset } from './repositories/runtimeAsset'
-import { handleLoopRequest, isLoopRuntimeAssetPath, serveLoopRuntimeAsset } from './handlers/cms/loop'
-import { handleHoleRequest, isHoleRuntimeAssetPath, serveHoleRuntimeAsset } from './handlers/cms/hole'
+import {
+  handleLoopRequest,
+  isLoopRuntimeAssetPath,
+  serveLoopRuntimeAsset,
+} from './handlers/cms/loop'
+import {
+  handleHoleRequest,
+  isHoleRuntimeAssetPath,
+  serveHoleRuntimeAsset,
+} from './handlers/cms/hole'
 import { handleModuleJsAssetRequest, isModuleJsAssetPath } from './handlers/cms/moduleJs'
 import { handlePublicFormRequest } from './forms/handler'
 import { isRuntimePackagePath, tryServeRuntimePackage } from './publish/runtime/packageServer'
@@ -91,10 +99,7 @@ const routes: readonly RouteHandler[] = [
   tryServeNotFoundPage,
 ]
 
-export async function handleServerRequest(
-  req: Request,
-  runtime: ServerRuntime,
-): Promise<Response> {
+export async function handleServerRequest(req: Request, runtime: ServerRuntime): Promise<Response> {
   const url = new URL(req.url)
   const { pathname } = url
 
@@ -113,7 +118,12 @@ export async function handleServerRequest(
 // Order matters — see `routes` above.
 // ---------------------------------------------------------------------------
 
-function tryServeHealth(_req: Request, _runtime: ServerRuntime, _url: URL, pathname: string): Response | null {
+function tryServeHealth(
+  _req: Request,
+  _runtime: ServerRuntime,
+  _url: URL,
+  pathname: string,
+): Response | null {
   if (pathname !== '/health') return null
   return jsonResponse({ status: 'ok', ts: Date.now() })
 }
@@ -132,7 +142,12 @@ function tryServeHealth(_req: Request, _runtime: ServerRuntime, _url: URL, pathn
  * the broader `/admin/api/cms/` route so the AI paths don't get swallowed
  * by the CMS dispatcher.
  */
-function tryServeAi(req: Request, runtime: ServerRuntime, url: URL, _pathname: string): Promise<Response> | null {
+function tryServeAi(
+  req: Request,
+  runtime: ServerRuntime,
+  url: URL,
+  _pathname: string,
+): Promise<Response> | null {
   return tryHandleAi(req, runtime.db, url)
 }
 
@@ -142,12 +157,22 @@ function tryServeAi(req: Request, runtime: ServerRuntime, url: URL, _pathname: s
  * CMS tool surface over the Model Context Protocol. Returns `null` for any
  * other path so the dispatcher keeps walking.
  */
-function tryServeMcp(req: Request, runtime: ServerRuntime, _url: URL, pathname: string): Promise<Response | null> | null {
+function tryServeMcp(
+  req: Request,
+  runtime: ServerRuntime,
+  _url: URL,
+  pathname: string,
+): Promise<Response | null> | null {
   if (pathname !== MCP_ENDPOINT_PATH) return null
   return handleMcpHttp(req, runtime.db, { uploadsDir: runtime.uploadsDir })
 }
 
-function tryServeCmsApi(req: Request, runtime: ServerRuntime, _url: URL, pathname: string): Promise<Response> | null {
+function tryServeCmsApi(
+  req: Request,
+  runtime: ServerRuntime,
+  _url: URL,
+  pathname: string,
+): Promise<Response> | null {
   if (!pathname.startsWith('/admin/api/cms/')) return null
   return handleCmsRequest(req, runtime.db, {
     uploadsDir: runtime.uploadsDir,
@@ -159,12 +184,22 @@ function tryServeCmsApi(req: Request, runtime: ServerRuntime, _url: URL, pathnam
  * The loop runtime is a fixed CMS asset, served before the per-site
  * runtime asset lookup so the request never falls through.
  */
-function tryServeLoopRuntimeAsset(req: Request, _runtime: ServerRuntime, _url: URL, pathname: string): Response | null {
+function tryServeLoopRuntimeAsset(
+  req: Request,
+  _runtime: ServerRuntime,
+  _url: URL,
+  pathname: string,
+): Response | null {
   if (req.method !== 'GET' || !isLoopRuntimeAssetPath(pathname)) return null
   return serveLoopRuntimeAsset()
 }
 
-function tryServeLoop(req: Request, runtime: ServerRuntime, url: URL, pathname: string): Promise<Response> | null {
+function tryServeLoop(
+  req: Request,
+  runtime: ServerRuntime,
+  url: URL,
+  pathname: string,
+): Promise<Response> | null {
   if (!pathname.startsWith('/_instatic/loop/')) return null
   return handleLoopRequest(req, url, { db: runtime.db })
 }
@@ -174,7 +209,12 @@ function tryServeLoop(req: Request, runtime: ServerRuntime, url: URL, pathname: 
  * Registered before `tryServeHole` so the exact path is consumed here and
  * never falls through to the hole fragment handler.
  */
-function tryServeHoleRuntimeAsset(req: Request, _runtime: ServerRuntime, _url: URL, pathname: string): Response | null {
+function tryServeHoleRuntimeAsset(
+  req: Request,
+  _runtime: ServerRuntime,
+  _url: URL,
+  pathname: string,
+): Response | null {
   if (req.method !== 'GET' || !isHoleRuntimeAssetPath(pathname)) return null
   return serveHoleRuntimeAsset()
 }
@@ -183,7 +223,12 @@ function tryServeHoleRuntimeAsset(req: Request, _runtime: ServerRuntime, _url: U
  * Layer C hole fragment endpoint — `/_instatic/hole/<nodeId>`.
  * Renders a dynamic node subtree on-demand and caches the result via Layer B.
  */
-function tryServeHole(req: Request, runtime: ServerRuntime, url: URL, pathname: string): Promise<Response> | null {
+function tryServeHole(
+  req: Request,
+  runtime: ServerRuntime,
+  url: URL,
+  pathname: string,
+): Promise<Response> | null {
   if (!pathname.startsWith('/_instatic/hole/')) return null
   return handleHoleRequest(req, url, { db: runtime.db })
 }
@@ -193,17 +238,32 @@ function tryServeHole(req: Request, runtime: ServerRuntime, url: URL, pathname: 
  * namespaced: unknown paths under the prefix 404 inside the handler rather
  * than falling through to the public-slug resolver.
  */
-function tryServeModuleJsAsset(req: Request, runtime: ServerRuntime, url: URL, pathname: string): Promise<Response> | null {
+function tryServeModuleJsAsset(
+  req: Request,
+  runtime: ServerRuntime,
+  url: URL,
+  pathname: string,
+): Promise<Response> | null {
   if (!isModuleJsAssetPath(pathname)) return null
   return handleModuleJsAssetRequest(req, url, { db: runtime.db })
 }
 
-function tryServePublicForm(req: Request, runtime: ServerRuntime, url: URL, pathname: string): Promise<Response | null> | null {
+function tryServePublicForm(
+  req: Request,
+  runtime: ServerRuntime,
+  url: URL,
+  pathname: string,
+): Promise<Response | null> | null {
   if (!pathname.startsWith('/_instatic/form/')) return null
   return handlePublicFormRequest(req, runtime.db, url)
 }
 
-async function tryServeRuntimeAsset(req: Request, runtime: ServerRuntime, _url: URL, pathname: string): Promise<Response | null> {
+async function tryServeRuntimeAsset(
+  req: Request,
+  runtime: ServerRuntime,
+  _url: URL,
+  pathname: string,
+): Promise<Response | null> {
   if (req.method !== 'GET' || !pathname.startsWith('/_instatic/assets/')) return null
 
   // Disk-first: a full publish bakes the runtime JS into the active slot, so
@@ -237,7 +297,8 @@ async function tryServeRuntimeAsset(req: Request, runtime: ServerRuntime, _url: 
 function contentTypeForAssetPath(pathname: string): string {
   if (pathname.endsWith('.js') || pathname.endsWith('.mjs')) return 'text/javascript; charset=utf-8'
   if (pathname.endsWith('.css')) return 'text/css; charset=utf-8'
-  if (pathname.endsWith('.map') || pathname.endsWith('.json')) return 'application/json; charset=utf-8'
+  if (pathname.endsWith('.map') || pathname.endsWith('.json'))
+    return 'application/json; charset=utf-8'
   if (pathname.endsWith('.svg')) return 'image/svg+xml'
   if (pathname.endsWith('.png')) return 'image/png'
   if (pathname.endsWith('.jpg') || pathname.endsWith('.jpeg')) return 'image/jpeg'
@@ -261,7 +322,12 @@ function contentTypeForAssetPath(pathname: string): string {
  * The /_instatic/runtime/cache/ namespace is exclusive: unknown paths under it
  * 404 here rather than falling through to a later matcher.
  */
-async function tryServeRuntimePackageNamespace(req: Request, _runtime: ServerRuntime, _url: URL, pathname: string): Promise<Response | null> {
+async function tryServeRuntimePackageNamespace(
+  req: Request,
+  _runtime: ServerRuntime,
+  _url: URL,
+  pathname: string,
+): Promise<Response | null> {
   if (!isRuntimePackagePath(pathname)) return null
   return (await tryServeRuntimePackage(req, pathname)) ?? new Response('not found', { status: 404 })
 }
@@ -278,9 +344,17 @@ async function tryServeRuntimePackageNamespace(req: Request, _runtime: ServerRun
  * unrelated path like `/_instatic/css/anything.css` from accidentally
  * rendering the homepage.
  */
-async function tryServeSiteCssNamespace(req: Request, runtime: ServerRuntime, _url: URL, pathname: string): Promise<Response | null> {
+async function tryServeSiteCssNamespace(
+  req: Request,
+  runtime: ServerRuntime,
+  _url: URL,
+  pathname: string,
+): Promise<Response | null> {
   if (req.method !== 'GET' || !pathname.startsWith('/_instatic/css/')) return null
-  return (await serveSiteCss(runtime.db, pathname, runtime.uploadsDir)) ?? new Response('Not found', { status: 404 })
+  return (
+    (await serveSiteCss(runtime.db, pathname, runtime.uploadsDir)) ??
+    new Response('Not found', { status: 404 })
+  )
 }
 
 /**
@@ -340,7 +414,7 @@ async function tryServeMediaRedirect(
   return new Response(null, {
     status: 302,
     headers: {
-      'location': signed.url,
+      location: signed.url,
       'cache-control': 'no-store',
       'referrer-policy': 'no-referrer',
     },
@@ -440,7 +514,12 @@ async function tryServeAdminApp(
  * fast-path (pre-rendered static artefacts via `readArtefact`), then
  * `resolvePublicRoute`, then the live renderer + `applyPublishedHtmlPipeline`.
  */
-async function tryServePublicRoute(req: Request, runtime: ServerRuntime, url: URL, _pathname: string): Promise<Response | null> {
+async function tryServePublicRoute(
+  req: Request,
+  runtime: ServerRuntime,
+  url: URL,
+  _pathname: string,
+): Promise<Response | null> {
   if (req.method !== 'GET') return null
   return await renderPublicResolution(runtime.db, url, runtime.uploadsDir)
 }
@@ -450,7 +529,12 @@ async function tryServePublicRoute(req: Request, runtime: ServerRuntime, url: UR
  * they land in the setup wizard instead of seeing a confusing 404. Returns
  * null when the install is already past setup.
  */
-async function trySetupRedirect(req: Request, runtime: ServerRuntime, _url: URL, _pathname: string): Promise<Response | null> {
+async function trySetupRedirect(
+  req: Request,
+  runtime: ServerRuntime,
+  _url: URL,
+  _pathname: string,
+): Promise<Response | null> {
   if (req.method !== 'GET') return null
   // Sticky memo: once setup completes, this stops querying. Without it every
   // unmatched GET (bot probes, 404s) paid two COUNT queries forever.
@@ -467,7 +551,12 @@ async function trySetupRedirect(req: Request, runtime: ServerRuntime, _url: URL,
  * reach here — they absorb their namespace and emit their own 404s. Returns
  * null (→ JSON 404) when the published site has no notFound template.
  */
-async function tryServeNotFoundPage(req: Request, runtime: ServerRuntime, url: URL, _pathname: string): Promise<Response | null> {
+async function tryServeNotFoundPage(
+  req: Request,
+  runtime: ServerRuntime,
+  url: URL,
+  _pathname: string,
+): Promise<Response | null> {
   if (req.method !== 'GET') return null
   return await renderNotFoundResponse(runtime.db, url, runtime.uploadsDir)
 }
@@ -544,7 +633,11 @@ registerVersionedCacheReset(() => {
   cssFallbackVersion = -1
 })
 
-async function serveSiteCss(db: DbClient, pathname: string, uploadsDir?: string): Promise<Response | null> {
+async function serveSiteCss(
+  db: DbClient,
+  pathname: string,
+  uploadsDir?: string,
+): Promise<Response | null> {
   const filename = pathname.slice('/_instatic/css/'.length)
   const match = filename.match(/^(reset|framework|style|userStyles)-([a-f0-9]{12})\.css$/)
   if (!match) return null
@@ -569,24 +662,30 @@ async function serveSiteCss(db: DbClient, pathname: string, uploadsDir?: string)
   const cacheKey = `${bundleId}:${requestedHash}`
   const cached = cssFallbackCache.get(cacheKey)
   if (cached !== undefined) {
-    return cached === null ? new Response('Not found', { status: 404 }) : cssResponse(cached, requestedHash)
+    return cached === null
+      ? new Response('Not found', { status: 404 })
+      : cssResponse(cached, requestedHash)
   }
 
   const inflight = cssFallbackInFlight.get(cacheKey)
-  const promise = inflight ?? (async (): Promise<string | null> => {
-    try {
-      const content = await rebuildSiteCssFromSnapshot(db, bundleId, requestedHash, version)
-      if (cssFallbackCache.size >= CSS_FALLBACK_CACHE_MAX) cssFallbackCache.clear()
-      cssFallbackCache.set(cacheKey, content)
-      return content
-    } finally {
-      cssFallbackInFlight.delete(cacheKey)
-    }
-  })()
+  const promise =
+    inflight ??
+    (async (): Promise<string | null> => {
+      try {
+        const content = await rebuildSiteCssFromSnapshot(db, bundleId, requestedHash, version)
+        if (cssFallbackCache.size >= CSS_FALLBACK_CACHE_MAX) cssFallbackCache.clear()
+        cssFallbackCache.set(cacheKey, content)
+        return content
+      } finally {
+        cssFallbackInFlight.delete(cacheKey)
+      }
+    })()
   if (!inflight) cssFallbackInFlight.set(cacheKey, promise)
 
   const content = await promise
-  return content === null ? new Response('Not found', { status: 404 }) : cssResponse(content, requestedHash)
+  return content === null
+    ? new Response('Not found', { status: 404 })
+    : cssResponse(content, requestedHash)
 }
 
 /**
@@ -607,7 +706,13 @@ async function rebuildSiteCssFromSnapshot(
   const pages = bundleId === 'userStyles' ? snapshot.site.pages : snapshot.site.pages.slice(0, 1)
   for (const page of pages) {
     const mediaAssets = await prefetchMediaAssets(page, snapshot.site, registry, db)
-    const file: CssBundleFile = buildPublishedSiteCssBundle(snapshot.site, registry, page, version, { mediaAssets })[bundleId]
+    const file: CssBundleFile = buildPublishedSiteCssBundle(
+      snapshot.site,
+      registry,
+      page,
+      version,
+      { mediaAssets },
+    )[bundleId]
     if (file.hash === requestedHash) return file.content
   }
   // Page-agnostic view (every enabled stylesheet) — covers a hash that

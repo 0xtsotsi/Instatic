@@ -8,12 +8,12 @@ The VPS stack uses the same production image as managed platforms. Compose only 
 
 ## TL;DR
 
-| Mode | Source-build command | Containers | Persistent volumes |
-|---|---|---|---|
-| SQLite | `docker compose -f compose.prod.yml -f compose.sqlite.yml -f compose.build.yml up -d --build` | `app` | `data`, `uploads` |
-| Postgres | `docker compose -f compose.prod.yml -f compose.build.yml up -d --build` | `app`, `postgres` | `postgres_data`, `uploads` |
-| SQLite + TLS | `docker compose -f compose.prod.yml -f compose.sqlite.yml -f compose.tls.yml -f compose.build.yml up -d --build` | `app`, `caddy` | `data`, `uploads`, `caddy_data` |
-| Postgres + TLS | `docker compose -f compose.prod.yml -f compose.tls.yml -f compose.build.yml up -d --build` | `app`, `postgres`, `caddy` | `postgres_data`, `uploads`, `caddy_data` |
+| Mode           | Source-build command                                                                                             | Containers                 | Persistent volumes                       |
+| -------------- | ---------------------------------------------------------------------------------------------------------------- | -------------------------- | ---------------------------------------- |
+| SQLite         | `docker compose -f compose.prod.yml -f compose.sqlite.yml -f compose.build.yml up -d --build`                    | `app`                      | `data`, `uploads`                        |
+| Postgres       | `docker compose -f compose.prod.yml -f compose.build.yml up -d --build`                                          | `app`, `postgres`          | `postgres_data`, `uploads`               |
+| SQLite + TLS   | `docker compose -f compose.prod.yml -f compose.sqlite.yml -f compose.tls.yml -f compose.build.yml up -d --build` | `app`, `caddy`             | `data`, `uploads`, `caddy_data`          |
+| Postgres + TLS | `docker compose -f compose.prod.yml -f compose.tls.yml -f compose.build.yml up -d --build`                       | `app`, `postgres`, `caddy` | `postgres_data`, `uploads`, `caddy_data` |
 
 SQLite is the default for most single-site installs. Postgres is for multiple simultaneous admin writers, horizontal app scale, or operators who already want Postgres.
 
@@ -80,9 +80,9 @@ DATABASE_URL=sqlite:/app/data/cms.db
 
 Persistent data:
 
-| Volume | Mount path | Contents |
-|---|---|---|
-| `data` | `/app/data` | SQLite database |
+| Volume    | Mount path     | Contents                                   |
+| --------- | -------------- | ------------------------------------------ |
+| `data`    | `/app/data`    | SQLite database                            |
 | `uploads` | `/app/uploads` | Media, fonts, plugins, published artefacts |
 
 Open:
@@ -128,10 +128,10 @@ postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
 
 Persistent data:
 
-| Volume | Mount path | Contents |
-|---|---|---|
-| `postgres_data` | `/var/lib/postgresql/data` | Postgres data directory |
-| `uploads` | `/app/uploads` | Media, fonts, plugins, published artefacts |
+| Volume          | Mount path                 | Contents                                   |
+| --------------- | -------------------------- | ------------------------------------------ |
+| `postgres_data` | `/var/lib/postgresql/data` | Postgres data directory                    |
+| `uploads`       | `/app/uploads`             | Media, fonts, plugins, published artefacts |
 
 ## HTTPS
 

@@ -106,9 +106,10 @@ function canonicalJson(value: unknown): string {
   }
   if (value && typeof value === 'object') {
     const record = value as Record<string, unknown>
-    return `{${Object.keys(record).sort().map((key) =>
-      `${JSON.stringify(key)}:${canonicalJson(record[key])}`
-    ).join(',')}}`
+    return `{${Object.keys(record)
+      .sort()
+      .map((key) => `${JSON.stringify(key)}:${canonicalJson(record[key])}`)
+      .join(',')}}`
   }
   return JSON.stringify(value)
 }
@@ -156,7 +157,10 @@ export async function getDraftSiteDocument(db: DbClient): Promise<SiteDocument |
     listDataRows(db, 'components'),
   ])
   const visualComponents = validateVisualComponents(
-    vcRows.flatMap((r) => { const vc = visualComponentFromRow(r); return vc ? [vc] : [] })
+    vcRows.flatMap((r) => {
+      const vc = visualComponentFromRow(r)
+      return vc ? [vc] : []
+    }),
   )
   return {
     ...shell,
@@ -198,10 +202,7 @@ export async function getDraftPublishStatus(db: DbClient): Promise<DraftPublishS
   const draftPageIds = new Set(draftSite.pages.map((page) => page.id))
   const draftMatchesPublished =
     publishedRows.length === draftSite.pages.length &&
-    publishedRows.every((row) =>
-      draftPageIds.has(row.row_id) &&
-      row.content_hash === draftSiteHash
-    )
+    publishedRows.every((row) => draftPageIds.has(row.row_id) && row.content_hash === draftSiteHash)
   const lastPublishedAt = publishedRows
     .map((row) => new Date(row.published_at).getTime())
     .filter(Number.isFinite)

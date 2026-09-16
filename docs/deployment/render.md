@@ -8,9 +8,9 @@ Render can run Instatic from the published Docker image, provide a public web se
 
 ## TL;DR
 
-| Template | Blueprint | Database | Persistent storage |
-|---|---|---|---|
-| SQLite | `docs/deployment/render/sqlite/render.yaml` | SQLite file | One Render disk mounted at `/app/storage` |
+| Template | Blueprint                                     | Database        | Persistent storage                                  |
+| -------- | --------------------------------------------- | --------------- | --------------------------------------------------- |
+| SQLite   | `docs/deployment/render/sqlite/render.yaml`   | SQLite file     | One Render disk mounted at `/app/storage`           |
 | Postgres | `docs/deployment/render/postgres/render.yaml` | Render Postgres | One Render disk for uploads and published artefacts |
 
 Both templates use:
@@ -32,9 +32,9 @@ Use SQLite for the default one-click install. Use Postgres when the operator wan
 
 Render's one-click flow reads a Blueprint from a Git repository. For public install buttons, keep tiny template repositories whose root `render.yaml` is copied from this repo:
 
-| Template repo | Source file |
-|---|---|
-| `corebunch/instatic-render-sqlite` | `docs/deployment/render/sqlite/render.yaml` |
+| Template repo                        | Source file                                   |
+| ------------------------------------ | --------------------------------------------- |
+| `corebunch/instatic-render-sqlite`   | `docs/deployment/render/sqlite/render.yaml`   |
 | `corebunch/instatic-render-postgres` | `docs/deployment/render/postgres/render.yaml` |
 
 Each template repo README can expose a button:
@@ -109,16 +109,16 @@ Render disk snapshots cover the app disk. Render Postgres backups cover the mana
 
 ## Troubleshooting
 
-| Symptom | Check |
-|---|---|
-| Deploy health check fails | Health check path must be `/health`; the app must listen on `PORT=10000`. |
-| Public URL returns a service error | Confirm the `PORT` environment variable is `10000`. |
-| SQLite data disappears after redeploy | `DATABASE_URL` must point under the mounted disk, e.g. `sqlite:/app/storage/data/cms.db`. |
-| Uploaded files disappear after redeploy | `UPLOADS_DIR` must point under the mounted disk, e.g. `/app/storage/uploads`. |
-| First-run setup or login returns `Forbidden: invalid origin` | Render auto-injects `RENDER_EXTERNAL_URL`; confirm you are opening that exact URL. If you front the app with a custom domain, append it to `PUBLIC_ORIGIN` (comma-separated alongside the Render URL). |
-| Postgres app cannot connect | `DATABASE_URL` must use `fromDatabase` with `property: connectionString`. |
-| Adding an AI provider credential or enabling TOTP MFA returns 500 | Confirm `INSTATIC_SECRET_KEY` exists and has not been rotated. |
-| The service deploys from source instead of the release image | The Blueprint should use `runtime: image`, not `runtime: docker`. |
+| Symptom                                                           | Check                                                                                                                                                                                                  |
+| ----------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Deploy health check fails                                         | Health check path must be `/health`; the app must listen on `PORT=10000`.                                                                                                                              |
+| Public URL returns a service error                                | Confirm the `PORT` environment variable is `10000`.                                                                                                                                                    |
+| SQLite data disappears after redeploy                             | `DATABASE_URL` must point under the mounted disk, e.g. `sqlite:/app/storage/data/cms.db`.                                                                                                              |
+| Uploaded files disappear after redeploy                           | `UPLOADS_DIR` must point under the mounted disk, e.g. `/app/storage/uploads`.                                                                                                                          |
+| First-run setup or login returns `Forbidden: invalid origin`      | Render auto-injects `RENDER_EXTERNAL_URL`; confirm you are opening that exact URL. If you front the app with a custom domain, append it to `PUBLIC_ORIGIN` (comma-separated alongside the Render URL). |
+| Postgres app cannot connect                                       | `DATABASE_URL` must use `fromDatabase` with `property: connectionString`.                                                                                                                              |
+| Adding an AI provider credential or enabling TOTP MFA returns 500 | Confirm `INSTATIC_SECRET_KEY` exists and has not been rotated.                                                                                                                                         |
+| The service deploys from source instead of the release image      | The Blueprint should use `runtime: image`, not `runtime: docker`.                                                                                                                                      |
 
 ## Related
 

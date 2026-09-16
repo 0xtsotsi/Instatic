@@ -196,7 +196,10 @@ function resolveActivityTarget(
     const tableId = readMetadataString(metadata, 'tableId')
     const slug = readMetadataString(metadata, 'slug')
     if (tableId && slug !== null) {
-      return { code: buildRowPath(routeBaseById.get(tableId) ?? null, tableId, slug ?? ''), text: null }
+      return {
+        code: buildRowPath(routeBaseById.get(tableId) ?? null, tableId, slug ?? ''),
+        text: null,
+      }
     }
     return { code: null, text: null }
   }

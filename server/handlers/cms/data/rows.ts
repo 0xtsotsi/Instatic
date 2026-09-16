@@ -341,11 +341,7 @@ async function handleRowStatus(
   return jsonResponse({ row })
 }
 
-async function handleRowAuthor(
-  req: Request,
-  db: DbClient,
-  params: RouteParams,
-): Promise<Response> {
+async function handleRowAuthor(req: Request, db: DbClient, params: RouteParams): Promise<Response> {
   const rowId = params.id
   const user = await requireDataAuthorManager(req, db)
   if (user instanceof Response) return user
@@ -376,11 +372,7 @@ async function handleRowAuthor(
   return jsonResponse({ row })
 }
 
-async function handleRowTable(
-  req: Request,
-  db: DbClient,
-  params: RouteParams,
-): Promise<Response> {
+async function handleRowTable(req: Request, db: DbClient, params: RouteParams): Promise<Response> {
   const rowId = params.id
   // Cross-collection move = structurally distinct from cell-level editing.
   // A junior editor with `content.edit.any` should not be able to take a
@@ -428,7 +420,11 @@ const DATA_ROW_ROUTES: readonly Route<[CmsHandlerOptions]>[] = [
   { method: 'GET', pattern: `${CMS_API_PREFIX}/data/authors`, handler: handleListAuthors },
   { method: 'POST', pattern: new RegExp(`^${ROW_ITEM}/publish$`), handler: handleRowPublish },
   { method: 'POST', pattern: new RegExp(`^${ROW_ITEM}/schedule$`), handler: handleRowSchedulePost },
-  { method: 'DELETE', pattern: new RegExp(`^${ROW_ITEM}/schedule$`), handler: handleRowScheduleDelete },
+  {
+    method: 'DELETE',
+    pattern: new RegExp(`^${ROW_ITEM}/schedule$`),
+    handler: handleRowScheduleDelete,
+  },
   { method: 'PATCH', pattern: new RegExp(`^${ROW_ITEM}/status$`), handler: handleRowStatus },
   { method: 'PATCH', pattern: new RegExp(`^${ROW_ITEM}/author$`), handler: handleRowAuthor },
   { method: 'PATCH', pattern: new RegExp(`^${ROW_ITEM}/table$`), handler: handleRowTable },

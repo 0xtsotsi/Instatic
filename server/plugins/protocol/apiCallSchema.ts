@@ -78,38 +78,52 @@ function apiCallSchema<TTarget extends string, TArgs extends TSchema>(
 // ---------------------------------------------------------------------------
 
 export const ApiCallSchemas = {
-  'cms.routes.register': apiCallSchema('cms.routes.register', Type.Tuple([RouteRegistrationArgSchema])),
+  'cms.routes.register': apiCallSchema(
+    'cms.routes.register',
+    Type.Tuple([RouteRegistrationArgSchema]),
+  ),
   'cms.hooks.on': apiCallSchema('cms.hooks.on', Type.Tuple([HookListenerArgSchema])),
   'cms.hooks.filter': apiCallSchema('cms.hooks.filter', Type.Tuple([HookFilterArgSchema])),
   'cms.hooks.emit': apiCallSchema('cms.hooks.emit', Type.Tuple([HookEmitArgSchema])),
-  'cms.loops.registerSource': apiCallSchema('cms.loops.registerSource', Type.Tuple([LoopSourceDescriptorSchema])),
-  'cms.storage.list': apiCallSchema('cms.storage.list', Type.Tuple([
-    Type.String({ minLength: 1 }),
-    StorageListOptionsSchema,
-  ])),
-  'cms.storage.create': apiCallSchema('cms.storage.create', Type.Tuple([Type.String({ minLength: 1 }), JsonRecordSchema])),
-  'cms.storage.update': apiCallSchema('cms.storage.update', Type.Tuple([
-    Type.String({ minLength: 1 }),
-    Type.String({ minLength: 1 }),
-    JsonRecordSchema,
-  ])),
-  'cms.storage.delete': apiCallSchema('cms.storage.delete', Type.Tuple([
-    Type.String({ minLength: 1 }),
-    Type.String({ minLength: 1 }),
-  ])),
+  'cms.loops.registerSource': apiCallSchema(
+    'cms.loops.registerSource',
+    Type.Tuple([LoopSourceDescriptorSchema]),
+  ),
+  'cms.storage.list': apiCallSchema(
+    'cms.storage.list',
+    Type.Tuple([Type.String({ minLength: 1 }), StorageListOptionsSchema]),
+  ),
+  'cms.storage.create': apiCallSchema(
+    'cms.storage.create',
+    Type.Tuple([Type.String({ minLength: 1 }), JsonRecordSchema]),
+  ),
+  'cms.storage.update': apiCallSchema(
+    'cms.storage.update',
+    Type.Tuple([Type.String({ minLength: 1 }), Type.String({ minLength: 1 }), JsonRecordSchema]),
+  ),
+  'cms.storage.delete': apiCallSchema(
+    'cms.storage.delete',
+    Type.Tuple([Type.String({ minLength: 1 }), Type.String({ minLength: 1 })]),
+  ),
   'cms.settings.replace': apiCallSchema('cms.settings.replace', Type.Tuple([JsonRecordSchema])),
   'cms.capture.fromUrl': apiCallSchema('cms.capture.fromUrl', Type.Tuple([CaptureInputSchema])),
-  'network.fetch': apiCallSchema('network.fetch', Type.Tuple([
-    Type.String({ minLength: 1, maxLength: 2048 }),
-    NetworkFetchInitSchema,
-  ])),
+  'network.fetch': apiCallSchema(
+    'network.fetch',
+    Type.Tuple([Type.String({ minLength: 1, maxLength: 2048 }), NetworkFetchInitSchema]),
+  ),
   // The host is intentionally permissive about `network.abort` — it does
   // NOT require `network.outbound` to be granted. A plugin without the
   // permission can never have minted a live `abortId` in the first place,
   // so the worst case is a missed lookup that no-ops (see dispatchApiCall).
   'network.abort': apiCallSchema('network.abort', Type.Tuple([NetworkAbortArgSchema])),
-  'cms.schedule.register': apiCallSchema('cms.schedule.register', Type.Tuple([ScheduleRegisterArgSchema])),
-  'cms.schedule.cancel': apiCallSchema('cms.schedule.cancel', Type.Tuple([ScheduleCancelArgSchema])),
+  'cms.schedule.register': apiCallSchema(
+    'cms.schedule.register',
+    Type.Tuple([ScheduleRegisterArgSchema]),
+  ),
+  'cms.schedule.cancel': apiCallSchema(
+    'cms.schedule.cancel',
+    Type.Tuple([ScheduleCancelArgSchema]),
+  ),
   'cms.media.registerStorageAdapter': apiCallSchema(
     'cms.media.registerStorageAdapter',
     Type.Tuple([RegisterStorageAdapterArgSchema]),
@@ -124,24 +138,63 @@ export const ApiCallSchemas = {
   ),
   'cms.content.tables.list': apiCallSchema('cms.content.tables.list', ContentTablesListArgsSchema),
   'cms.content.tables.get': apiCallSchema('cms.content.tables.get', ContentTablesGetArgsSchema),
-  'cms.content.tables.create': apiCallSchema('cms.content.tables.create', ContentTablesCreateArgsSchema),
-  'cms.content.entries.list': apiCallSchema('cms.content.entries.list', ContentEntriesListArgsSchema),
+  'cms.content.tables.create': apiCallSchema(
+    'cms.content.tables.create',
+    ContentTablesCreateArgsSchema,
+  ),
+  'cms.content.entries.list': apiCallSchema(
+    'cms.content.entries.list',
+    ContentEntriesListArgsSchema,
+  ),
   'cms.content.entries.get': apiCallSchema('cms.content.entries.get', ContentEntriesGetArgsSchema),
-  'cms.content.entries.getBySlug': apiCallSchema('cms.content.entries.getBySlug', ContentEntriesGetBySlugArgsSchema),
-  'cms.content.entries.create': apiCallSchema('cms.content.entries.create', ContentEntriesCreateArgsSchema),
-  'cms.content.entries.update': apiCallSchema('cms.content.entries.update', ContentEntriesUpdateArgsSchema),
-  'cms.content.entries.delete': apiCallSchema('cms.content.entries.delete', ContentEntriesDeleteArgsSchema),
-  'cms.content.entries.publish': apiCallSchema('cms.content.entries.publish', ContentEntriesPublishArgsSchema),
-  'cms.content.entries.moveTable': apiCallSchema('cms.content.entries.moveTable', ContentEntriesMoveTableArgsSchema),
-  'cms.content.entries.createMany': apiCallSchema('cms.content.entries.createMany', ContentEntriesCreateManyArgsSchema),
-  'cms.content.entries.updateMany': apiCallSchema('cms.content.entries.updateMany', ContentEntriesUpdateManyArgsSchema),
-  'cms.content.entries.deleteMany': apiCallSchema('cms.content.entries.deleteMany', ContentEntriesDeleteManyArgsSchema),
+  'cms.content.entries.getBySlug': apiCallSchema(
+    'cms.content.entries.getBySlug',
+    ContentEntriesGetBySlugArgsSchema,
+  ),
+  'cms.content.entries.create': apiCallSchema(
+    'cms.content.entries.create',
+    ContentEntriesCreateArgsSchema,
+  ),
+  'cms.content.entries.update': apiCallSchema(
+    'cms.content.entries.update',
+    ContentEntriesUpdateArgsSchema,
+  ),
+  'cms.content.entries.delete': apiCallSchema(
+    'cms.content.entries.delete',
+    ContentEntriesDeleteArgsSchema,
+  ),
+  'cms.content.entries.publish': apiCallSchema(
+    'cms.content.entries.publish',
+    ContentEntriesPublishArgsSchema,
+  ),
+  'cms.content.entries.moveTable': apiCallSchema(
+    'cms.content.entries.moveTable',
+    ContentEntriesMoveTableArgsSchema,
+  ),
+  'cms.content.entries.createMany': apiCallSchema(
+    'cms.content.entries.createMany',
+    ContentEntriesCreateManyArgsSchema,
+  ),
+  'cms.content.entries.updateMany': apiCallSchema(
+    'cms.content.entries.updateMany',
+    ContentEntriesUpdateManyArgsSchema,
+  ),
+  'cms.content.entries.deleteMany': apiCallSchema(
+    'cms.content.entries.deleteMany',
+    ContentEntriesDeleteManyArgsSchema,
+  ),
   'cms.content.tree.read': apiCallSchema('cms.content.tree.read', ContentTreeReadArgsSchema),
   'cms.content.tree.mutate': apiCallSchema('cms.content.tree.mutate', ContentTreeMutateArgsSchema),
-  'cms.content.tree.replace': apiCallSchema('cms.content.tree.replace', ContentTreeReplaceArgsSchema),
+  'cms.content.tree.replace': apiCallSchema(
+    'cms.content.tree.replace',
+    ContentTreeReplaceArgsSchema,
+  ),
   'cms.content.search': apiCallSchema('cms.content.search', ContentSearchArgsSchema),
   'cms.content.snapshot': apiCallSchema('cms.content.snapshot', ContentSnapshotArgsSchema),
-  'cms.content.republishAll': apiCallSchema('cms.content.republishAll', ContentRepublishAllArgsSchema),
+  'cms.content.republishAll': apiCallSchema(
+    'cms.content.republishAll',
+    ContentRepublishAllArgsSchema,
+  ),
   'crypto.digest': apiCallSchema('crypto.digest', Type.Tuple([CryptoDigestArgSchema])),
   'crypto.signHmac': apiCallSchema('crypto.signHmac', Type.Tuple([CryptoSignHmacArgSchema])),
 } satisfies Record<string, TSchema>

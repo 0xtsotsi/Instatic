@@ -17,12 +17,7 @@ import type { DbClient } from '../../db/client'
 import { countDataRows } from './rows/read'
 import { normalizeRouteBase } from '@core/templates/templateMatching'
 import { normalizeDataTableFields } from '@core/data/fields'
-import type {
-  DataField,
-  DataTable,
-  DataTableKind,
-  DataTableListItem,
-} from '@core/data/schemas'
+import type { DataField, DataTable, DataTableKind, DataTableListItem } from '@core/data/schemas'
 import { isoDate } from '@core/utils/isoDate'
 
 interface CreateDataTableInput {
@@ -312,7 +307,7 @@ export async function softDeleteDataTable(
   if (!table) return null
   if (table.system === true) return null
 
-  if (await countDataRows(db, tableId) > 0) return null
+  if ((await countDataRows(db, tableId)) > 0) return null
 
   const { rows } = await db<DataTableRow>`
     update data_tables

@@ -116,8 +116,6 @@ describe('tokensFromSite', () => {
         },
       },
     }
-    expect(tokensFromSite(site)).toEqual([
-      { name: '--kept', value: '#00ff00', kind: 'color' },
-    ])
+    expect(tokensFromSite(site)).toEqual([{ name: '--kept', value: '#00ff00', kind: 'color' }])
   })
 })

@@ -181,7 +181,9 @@ export async function runChat(args: RunChatArgs): Promise<void> {
     // can see the actual cause — this surface is capability-gated to
     // admins, not end users.
     console.error('[ai/runner] driver.stream() threw:', err)
-    await flushPendingAssistantText().catch(() => { /* noop */ })
+    await flushPendingAssistantText().catch(() => {
+      /* noop */
+    })
     await finalizePendingToolCalls().catch((finalizeErr) => {
       console.error('[ai/runner] pending tool finalization failed:', finalizeErr)
     })

@@ -16,11 +16,7 @@
  */
 
 import { Type, parseValue } from '@core/utils/typeboxHelpers'
-import type {
-  AiAuthMode,
-  AiProviderId,
-  AiStreamEvent,
-} from '../runtime/types'
+import type { AiAuthMode, AiProviderId, AiStreamEvent } from '../runtime/types'
 import type {
   AiProvider,
   AiProviderCapabilities,
@@ -70,8 +66,7 @@ export const openrouterDriver: AiProvider = {
 
   async resolveCapabilities(creds: AiResolvedCredential, modelId: string, signal: AbortSignal) {
     const models = await fetchOpenRouterModels(creds, signal)
-    return models.find((model) => model.id === modelId)?.capabilities
-      ?? DEFAULT_CAPABILITIES
+    return models.find((model) => model.id === modelId)?.capabilities ?? DEFAULT_CAPABILITIES
   },
 
   async listModels(creds: AiResolvedCredential, signal?: AbortSignal) {

@@ -22,7 +22,10 @@ import { log } from '../lib/log'
 
 const REPO_ROOT = resolve(import.meta.dir, '../../..')
 
-async function runCommand(args: readonly string[], timeoutMs: number): Promise<{ stdout: string; stderr: string; ms: number; exit: number; timedOut: boolean }> {
+async function runCommand(
+  args: readonly string[],
+  timeoutMs: number,
+): Promise<{ stdout: string; stderr: string; ms: number; exit: number; timedOut: boolean }> {
   const t0 = performance.now()
   const controller = new AbortController()
   const timeout = setTimeout(() => controller.abort(), timeoutMs)
@@ -41,7 +44,13 @@ async function runCommand(args: readonly string[], timeoutMs: number): Promise<{
     const exit = await proc.exited
     return { stdout, stderr, ms: performance.now() - t0, exit, timedOut: false }
   } catch (err) {
-    return { stdout: '', stderr: (err as Error).message, ms: performance.now() - t0, exit: -1, timedOut: false }
+    return {
+      stdout: '',
+      stderr: (err as Error).message,
+      ms: performance.now() - t0,
+      exit: -1,
+      timedOut: false,
+    }
   } finally {
     clearTimeout(timeout)
   }
@@ -82,7 +91,9 @@ export const healthBench: BenchModule = {
     const dead = await runCommand(['bunx', '--bun', 'fallow', 'dead-code'], 60_000)
     {
       const deadText = both(dead)
-      const filesMatch = deadText.match(/(\d+)\s+files?\s*·\s*(\d+)\s+exports?\s*·\s*(\d+)\s+types?/i)
+      const filesMatch = deadText.match(
+        /(\d+)\s+files?\s*·\s*(\d+)\s+exports?\s*·\s*(\d+)\s+types?/i,
+      )
       rows.push({
         label: 'fallow dead-code',
         metrics: {
@@ -97,12 +108,26 @@ export const healthBench: BenchModule = {
     // jscpd
     log.step('Running jscpd duplication scan')
     const jscpd = await runCommand(
-      ['bunx', '--bun', 'jscpd', 'src', '--silent', '--reporters', 'consoleFull', '--min-lines', '10', '--min-tokens', '70'],
+      [
+        'bunx',
+        '--bun',
+        'jscpd',
+        'src',
+        '--silent',
+        '--reporters',
+        'consoleFull',
+        '--min-lines',
+        '10',
+        '--min-tokens',
+        '70',
+      ],
       180_000,
     )
     {
       const jscpdText = both(jscpd)
-      const clonesMatch = jscpdText.match(/Found\s+(\d+)\s+exact\s+clones\s+with\s+(\d+)\(([0-9.]+)%\)\s+duplicated\s+lines/i)
+      const clonesMatch = jscpdText.match(
+        /Found\s+(\d+)\s+exact\s+clones\s+with\s+(\d+)\(([0-9.]+)%\)\s+duplicated\s+lines/i,
+      )
       rows.push({
         label: 'jscpd (src)',
         metrics: {
@@ -117,7 +142,17 @@ export const healthBench: BenchModule = {
     // madge circular-deps
     log.step('Running madge --circular')
     const madge = await runCommand(
-      ['bunx', '--bun', 'madge', '--circular', '--ts-config', 'tsconfig.json', '--extensions', 'ts,tsx', 'src'],
+      [
+        'bunx',
+        '--bun',
+        'madge',
+        '--circular',
+        '--ts-config',
+        'tsconfig.json',
+        '--extensions',
+        'ts,tsx',
+        'src',
+      ],
       60_000,
     )
     {
@@ -144,8 +179,8 @@ export const healthBench: BenchModule = {
       name: this.name,
       title: this.title,
       headline: {
-        'maintainability': fallowRow?.metrics.maintainability ?? '—',
-        'duplication': jscpdRow?.metrics.dup_pct ?? '—',
+        maintainability: fallowRow?.metrics.maintainability ?? '—',
+        duplication: jscpdRow?.metrics.dup_pct ?? '—',
         'circular deps': madgeRow?.metrics.cycles ?? '—',
       },
       sections: [

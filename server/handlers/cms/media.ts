@@ -93,7 +93,13 @@ const UpdateMediaMetadataBodySchema = Type.Object({
   tags: Type.Optional(Type.Array(Type.String())),
 })
 
-function buildMetadataPatch(body: { filename?: string; altText?: string; caption?: string; title?: string; tags?: string[] }): UpdateMediaAssetMetadataInput | Response {
+function buildMetadataPatch(body: {
+  filename?: string
+  altText?: string
+  caption?: string
+  title?: string
+  tags?: string[]
+}): UpdateMediaAssetMetadataInput | Response {
   // PATCH accepts any subset of:
   //   filename, altText, caption, title, tags (string[])
   // Filename keeps the historical contract: when present-but-empty, that's
@@ -160,7 +166,8 @@ async function handleUploadMedia(req: Request, db: DbClient): Promise<Response> 
     role: 'original',
     uploadedByUserId: user.id,
     oversizedMessage: 'File exceeds the 50 MB hard limit',
-    unsupportedMessage: 'Only JPEG, PNG, GIF, WebP, SVG, MP4, WebM, and web font (WOFF, WOFF2, TTF, OTF) files can be uploaded',
+    unsupportedMessage:
+      'Only JPEG, PNG, GIF, WebP, SVG, MP4, WebM, and web font (WOFF, WOFF2, TTF, OTF) files can be uploaded',
   })
   if (result instanceof Response) return result
   return jsonResponse({ asset: result }, { status: 201 })
@@ -200,7 +207,8 @@ async function handleReplaceMedia(
     role: 'original',
     uploadedByUserId: user.id,
     oversizedMessage: 'File exceeds the 50 MB hard limit',
-    unsupportedMessage: 'Only JPEG, PNG, GIF, WebP, SVG, MP4, WebM, and web font (WOFF, WOFF2, TTF, OTF) files can be uploaded',
+    unsupportedMessage:
+      'Only JPEG, PNG, GIF, WebP, SVG, MP4, WebM, and web font (WOFF, WOFF2, TTF, OTF) files can be uploaded',
   })
   if (result instanceof Response) return result
   return jsonResponse({ asset: result })

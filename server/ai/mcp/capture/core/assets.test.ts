@@ -53,7 +53,11 @@ describe('collectAssets', () => {
     const html = `<img src="${url}" />`
     const css = `.x { background-image: url(${url}); }`
     const fetcher: AssetFetcher = {
-      fetch: async () => ({ ok: true, bytes: new TextEncoder().encode('x'), contentType: 'image/png' }),
+      fetch: async () => ({
+        ok: true,
+        bytes: new TextEncoder().encode('x'),
+        contentType: 'image/png',
+      }),
     }
     const result = await collectAssets(html, css, fetcher, { baseUrl: 'https://example.com/' })
     expect(result.files).toHaveLength(1)

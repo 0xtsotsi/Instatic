@@ -47,7 +47,10 @@ const SCRIPT_OPEN_RE = /<script\b[^>]*\/?>/gi
 /** A dangling `</script …>` close tag left after its opener was stripped. */
 const SCRIPT_CLOSE_RE = new RegExp(scriptClose, 'gi')
 /** `<foreignObject …>…</foreignObject>` — can carry arbitrary HTML. */
-const FOREIGN_OBJECT_RE = new RegExp(String.raw`<foreignObject\b[\s\S]*?${foreignObjectClose}`, 'gi')
+const FOREIGN_OBJECT_RE = new RegExp(
+  String.raw`<foreignObject\b[\s\S]*?${foreignObjectClose}`,
+  'gi',
+)
 const FOREIGN_OBJECT_OPEN_RE = /<foreignObject\b[^>]*\/?>/gi
 /** `<a …>` / `</a>` is allowed, but href values are scrubbed below. */
 /** `on*="…"` / `on*='…'` / `on*=value` event-handler attributes. */

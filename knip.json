@@ -14,16 +14,8 @@
     "src/core/plugin-sdk/index.ts",
     "src/core/plugin-sdk/cli/*.ts"
   ],
-  "project": [
-    "src/**/*.{ts,tsx}",
-    "server/**/*.ts",
-    "scripts/**/*.ts"
-  ],
-  "ignore": [
-    "src/ui/icons/icons/**",
-    "examples/plugins/**",
-    "src/ui/icons/icon-browser.html"
-  ],
+  "project": ["src/**/*.{ts,tsx}", "server/**/*.ts", "scripts/**/*.ts"],
+  "ignore": ["src/ui/icons/icons/**", "examples/plugins/**", "src/ui/icons/icon-browser.html"],
   "ignoreDependencies": [
     "@fontsource-variable/inter",
     "dependency-cruiser",

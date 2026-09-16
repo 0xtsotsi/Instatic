@@ -13,10 +13,7 @@ import type {
   SiteRuntimeDiagnostic,
   SiteRuntimeTarget,
 } from '@core/site-runtime'
-import {
-  clonePackageJson,
-  DEFAULT_SITE_PACKAGE_JSON,
-} from '@core/site-dependencies/manifest'
+import { clonePackageJson, DEFAULT_SITE_PACKAGE_JSON } from '@core/site-dependencies/manifest'
 import type { RuntimeDependencyCache } from './dependencyCache'
 import { materializeSiteScriptWorkspace } from './virtualSiteWorkspace'
 
@@ -143,22 +140,30 @@ function esbuildDiagnostics(error: unknown): SiteRuntimeDiagnostic[] {
     'errors' in error &&
     Array.isArray((error as { errors: unknown }).errors)
   ) {
-    return (error as { errors: Array<{ text?: string; location?: { file?: string; line?: number; column?: number } }> }).errors
-      .map((item) => ({
-        code: 'runtime-bundle-error',
-        severity: 'error' as const,
-        message: item.text ?? 'Runtime script bundle failed',
-        path: item.location?.file,
-        line: item.location?.line,
-        column: item.location?.column,
-      }))
+    return (
+      error as {
+        errors: Array<{
+          text?: string
+          location?: { file?: string; line?: number; column?: number }
+        }>
+      }
+    ).errors.map((item) => ({
+      code: 'runtime-bundle-error',
+      severity: 'error' as const,
+      message: item.text ?? 'Runtime script bundle failed',
+      path: item.location?.file,
+      line: item.location?.line,
+      column: item.location?.column,
+    }))
   }
 
-  return [{
-    code: 'runtime-bundle-error',
-    severity: 'error',
-    message: error instanceof Error ? error.message : 'Runtime script bundle failed',
-  }]
+  return [
+    {
+      code: 'runtime-bundle-error',
+      severity: 'error',
+      message: error instanceof Error ? error.message : 'Runtime script bundle failed',
+    },
+  ]
 }
 
 function selectedScriptByEntryPoint(
@@ -197,7 +202,9 @@ export async function buildSiteRuntimeScripts(
     moduleScripts.map((entry) => entry.file),
     packageJson,
   )
-  const blockingDiagnostics = importAnalysis.diagnostics.filter((diagnostic) => diagnostic.severity === 'error')
+  const blockingDiagnostics = importAnalysis.diagnostics.filter(
+    (diagnostic) => diagnostic.severity === 'error',
+  )
   if (blockingDiagnostics.length > 0) return emptyRuntimeBuild(importAnalysis.diagnostics)
 
   if (moduleScripts.length === 0) {
@@ -244,11 +251,7 @@ export async function buildSiteRuntimeScripts(
       logLevel: 'silent',
       metafile: true,
       nodePaths: [
-        ...(
-          input.dependencyCache?.nodeModulesDir
-            ? [input.dependencyCache.nodeModulesDir]
-            : []
-        ),
+        ...(input.dependencyCache?.nodeModulesDir ? [input.dependencyCache.nodeModulesDir] : []),
         ...(input.dependencyNodeModulesDir ? [input.dependencyNodeModulesDir] : []),
       ],
       outdir: outputRoot,
@@ -297,7 +300,9 @@ export async function buildSiteRuntimeScripts(
         contentType: contentTypeForPath(path),
       }
     })
-    const publicPathByOutput = new Map(files.map((file) => [`${outputRoot}/${file.path}`, file.publicPath]))
+    const publicPathByOutput = new Map(
+      files.map((file) => [`${outputRoot}/${file.path}`, file.publicPath]),
+    )
     const selectedByEntryPoint = selectedScriptByEntryPoint(
       moduleScripts,
       workspace.entryPointByFileId,
@@ -305,10 +310,7 @@ export async function buildSiteRuntimeScripts(
     )
 
     const moduleAssetScripts = Object.entries(build.metafile.outputs)
-      .map(([
-        outputPath,
-        output,
-      ]): PublishedRuntimeScriptAsset | null => {
+      .map(([outputPath, output]): PublishedRuntimeScriptAsset | null => {
         if (!output.entryPoint) return null
         const script = selectedByEntryPoint.get(output.entryPoint)
         const src = publicPathByOutput.get(outputPath)
@@ -323,8 +325,9 @@ export async function buildSiteRuntimeScripts(
         }
       })
       .filter((script): script is PublishedRuntimeScriptAsset => script !== null)
-    const scripts = [...moduleAssetScripts, ...classicBuild.assets]
-      .sort((a, b) => a.priority - b.priority || a.src.localeCompare(b.src))
+    const scripts = [...moduleAssetScripts, ...classicBuild.assets].sort(
+      (a, b) => a.priority - b.priority || a.src.localeCompare(b.src),
+    )
 
     return {
       files: [...files, ...classicBuild.files],

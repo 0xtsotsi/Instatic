@@ -48,7 +48,8 @@ async function loadServer() {
   const { saveDraftSite } = await import('../../../server/repositories/site')
   const { getDraftPublishStatus } = await import('../../../server/repositories/publish')
   const { publishDraftSite } = await import('../../../server/publish/publishSite')
-  const { createDataRow, listDataRows, listDataRowIdSlugs, updateDataRowDraftCells } = await import('../../../server/repositories/data')
+  const { createDataRow, listDataRows, listDataRowIdSlugs, updateDataRowDraftCells } =
+    await import('../../../server/repositories/data')
   const { getPublishedDataRowByRoute } = await import('../../../server/repositories/data/publish')
   const { getSetupStatus } = await import('../../../server/repositories/setup')
   const { renderPublicResolution } = await import('../../../server/publish/publicRouter')
@@ -207,7 +208,8 @@ async function seedDraftSite(api: ServerApi, db: Db, pageCount: number): Promise
 export const publishBench: BenchModule = {
   name: 'publish',
   title: 'Publish pipeline & public serving',
-  description: 'Full publishDraftSite wall time + DB growth, publish status check, warm dynamic serving, 404 probe, row-route lookup.',
+  description:
+    'Full publishDraftSite wall time + DB growth, publish status check, warm dynamic serving, 404 probe, row-route lookup.',
 
   async run(ctx: BenchContext): Promise<BenchResult> {
     const api = await loadServer()
@@ -272,7 +274,9 @@ export const publishBench: BenchModule = {
             const status = await api.getDraftPublishStatus(published.db)
             samples.push(performance.now() - t0)
             if (status.publishedPages !== published.pageCount) {
-              throw new Error(`status reported ${status.publishedPages} published pages, expected ${published.pageCount}`)
+              throw new Error(
+                `status reported ${status.publishedPages} published pages, expected ${published.pageCount}`,
+              )
             }
           }
           const s = summarize(samples)
@@ -285,7 +289,9 @@ export const publishBench: BenchModule = {
           statusRows.push(unavailableRow('publish status check', err))
         }
       } else {
-        statusRows.push(unavailableRow('publish status check', new Error('publish scenario did not complete')))
+        statusRows.push(
+          unavailableRow('publish status check', new Error('publish scenario did not complete')),
+        )
       }
 
       // ---- Warm dynamic-route serving --------------------------------------
@@ -322,7 +328,12 @@ export const publishBench: BenchModule = {
           warmRows.push(unavailableRow('warm dynamic-route serving', err))
         }
       } else {
-        warmRows.push(unavailableRow('warm dynamic-route serving', new Error('publish scenario did not complete')))
+        warmRows.push(
+          unavailableRow(
+            'warm dynamic-route serving',
+            new Error('publish scenario did not complete'),
+          ),
+        )
       }
 
       // ---- 404 probe cost ---------------------------------------------------
@@ -359,7 +370,9 @@ export const publishBench: BenchModule = {
           notFoundRows.push(unavailableRow('404 probe', err))
         }
       } else {
-        notFoundRows.push(unavailableRow('404 probe', new Error('publish scenario did not complete')))
+        notFoundRows.push(
+          unavailableRow('404 probe', new Error('publish scenario did not complete')),
+        )
       }
 
       // ---- Published row-route lookup --------------------------------------
@@ -481,7 +494,9 @@ export const publishBench: BenchModule = {
             const validated = api.validatePagesForPartialSave([edited], [], existingIdSlugs)
             const db = fresh.db
             await db.transaction(async (tx) => {
-              const existingIds = new Set((await api.listDataRowIdSlugs(tx, 'pages')).map((r) => r.id))
+              const existingIds = new Set(
+                (await api.listDataRowIdSlugs(tx, 'pages')).map((r) => r.id),
+              )
               for (const page of validated) {
                 if (existingIds.has(page.id)) {
                   await api.updateDataRowDraftCells(

@@ -57,9 +57,11 @@ export function findSystemChrome(override?: string): string | null {
     return process.env.PUPPETEER_EXECUTABLE_PATH
   }
   const candidates =
-    process.platform === 'darwin' ? COMMON_CHROME_PATHS_DARWIN :
-    process.platform === 'win32' ? COMMON_CHROME_PATHS_WINDOWS :
-    COMMON_CHROME_PATHS_LINUX
+    process.platform === 'darwin'
+      ? COMMON_CHROME_PATHS_DARWIN
+      : process.platform === 'win32'
+        ? COMMON_CHROME_PATHS_WINDOWS
+        : COMMON_CHROME_PATHS_LINUX
   for (const path of candidates) {
     if (existsSync(path)) return path
   }
@@ -111,7 +113,7 @@ export async function launchBrowser(opts: LaunchOptions = {}): Promise<BrowserSe
     })
   } catch (err) {
     const msg = (err as Error).message
-    if (msg.includes('Executable doesn\'t exist') || msg.includes('looks like Playwright')) {
+    if (msg.includes("Executable doesn't exist") || msg.includes('looks like Playwright')) {
       throw new Error(
         'Playwright Chromium not found. Run `bunx playwright install chromium` once (or pass --chrome-path=PATH for a system browser).',
         { cause: err },
@@ -298,7 +300,8 @@ export async function loadPageWithMetrics(page: Page, url: string): Promise<Page
         longTasks: Array<{ duration: number; startTime: number }>
       }
     }
-    const nav = performance.getEntriesByType('navigation')[0] as PerformanceNavigationTiming | undefined
+    const nav = performance.getEntriesByType('navigation')[0] as
+      PerformanceNavigationTiming | undefined
     const resourceEntries = performance.getEntriesByType('resource') as PerformanceResourceTiming[]
     const transferredBytes = resourceEntries.reduce((sum, r) => sum + (r.transferSize ?? 0), 0)
     const domNodeCount = document.querySelectorAll('*').length
@@ -308,7 +311,9 @@ export async function loadPageWithMetrics(page: Page, url: string): Promise<Page
     // `getEntriesByType('paint')` is the synchronous, authoritative source.
     const paintEntries = performance.getEntriesByType('paint') as PerformanceEntry[]
     const fcpEntry = paintEntries.find((p) => p.name === 'first-contentful-paint')
-    const lcpEntries = performance.getEntriesByType('largest-contentful-paint') as PerformanceEntry[]
+    const lcpEntries = performance.getEntriesByType(
+      'largest-contentful-paint',
+    ) as PerformanceEntry[]
     const lastLcp = lcpEntries.length > 0 ? lcpEntries[lcpEntries.length - 1] : undefined
     return {
       fcp: w.__benchMetrics?.fcp ?? fcpEntry?.startTime ?? null,
@@ -321,7 +326,10 @@ export async function loadPageWithMetrics(page: Page, url: string): Promise<Page
     }
   })
 
-  const totalBlockingMs = metrics.longTasks.reduce((sum, t) => sum + Math.max(0, t.duration - 50), 0)
+  const totalBlockingMs = metrics.longTasks.reduce(
+    (sum, t) => sum + Math.max(0, t.duration - 50),
+    0,
+  )
 
   return {
     totalMs,

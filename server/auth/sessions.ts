@@ -1,5 +1,10 @@
 import { placeholder, type DbClient } from '../db/client'
-import { rowToUser, USER_JOINED_COLUMNS, type AuthUser, type JoinedUserRow } from '../repositories/users'
+import {
+  rowToUser,
+  USER_JOINED_COLUMNS,
+  type AuthUser,
+  type JoinedUserRow,
+} from '../repositories/users'
 import { deriveDeviceLabel } from './deviceLabel'
 
 const SESSION_IDLE_TIMEOUT_MS = 1000 * 60 * 60 * 24 * 30
@@ -226,12 +231,9 @@ export async function rotateSessionToken(
         and revoked_at is null
     `
 
-    const mfaPassedAt = input.mfaPassedAt !== undefined
-      ? input.mfaPassedAt
-      : current.mfa_passed_at
-    const stepUpExpiresAt = input.stepUpExpiresAt !== undefined
-      ? input.stepUpExpiresAt
-      : current.step_up_expires_at
+    const mfaPassedAt = input.mfaPassedAt !== undefined ? input.mfaPassedAt : current.mfa_passed_at
+    const stepUpExpiresAt =
+      input.stepUpExpiresAt !== undefined ? input.stepUpExpiresAt : current.step_up_expires_at
 
     await tx`
       insert into sessions (

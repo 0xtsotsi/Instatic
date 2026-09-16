@@ -206,9 +206,17 @@ export const footprintBench: BenchModule = {
     const srcRows: BenchRow[] = []
     const srcDirs: Array<{ label: string; path: string; exts: readonly string[] }> = [
       { label: 'src/admin', path: resolve(REPO_ROOT, 'src/admin'), exts: ['.ts', '.tsx', '.css'] },
-      { label: 'src/editor', path: resolve(REPO_ROOT, 'src/editor'), exts: ['.ts', '.tsx', '.css'] },
+      {
+        label: 'src/editor',
+        path: resolve(REPO_ROOT, 'src/editor'),
+        exts: ['.ts', '.tsx', '.css'],
+      },
       { label: 'src/core', path: resolve(REPO_ROOT, 'src/core'), exts: ['.ts', '.tsx'] },
-      { label: 'src/modules', path: resolve(REPO_ROOT, 'src/modules'), exts: ['.ts', '.tsx', '.css'] },
+      {
+        label: 'src/modules',
+        path: resolve(REPO_ROOT, 'src/modules'),
+        exts: ['.ts', '.tsx', '.css'],
+      },
       { label: 'src/ui', path: resolve(REPO_ROOT, 'src/ui'), exts: ['.ts', '.tsx', '.css'] },
       { label: 'src/__tests__', path: resolve(REPO_ROOT, 'src/__tests__'), exts: ['.ts', '.tsx'] },
       { label: 'server', path: resolve(REPO_ROOT, 'server'), exts: ['.ts'] },
@@ -244,12 +252,7 @@ export const footprintBench: BenchModule = {
       ['src/__tests__', 'src/styles'],
       10,
     )
-    const largestServer = findLargestFiles(
-      resolve(REPO_ROOT, 'server'),
-      ['.ts'],
-      [],
-      10,
-    )
+    const largestServer = findLargestFiles(resolve(REPO_ROOT, 'server'), ['.ts'], [], 10)
     const bigFileRows: BenchRow[] = [...largest, ...largestServer]
       .sort((a, b) => b.lines - a.lines)
       .slice(0, 10)
@@ -288,7 +291,7 @@ export const footprintBench: BenchModule = {
       name: this.name,
       title: this.title,
       headline: {
-        'node_modules': fmtBytes(nm.totalBytes),
+        node_modules: fmtBytes(nm.totalBytes),
         'src + server LOC': fmtNum(prodLines),
         'test LOC': fmtNum(testLines),
       },

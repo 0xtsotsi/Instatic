@@ -104,31 +104,138 @@ const MEDIA_MAGIC_SIGNATURES: ReadonlyArray<{
   bytes: ReadonlyArray<MagicConstraint>
 }> = [
   // PNG: 89 50 4E 47 0D 0A 1A 0A
-  { mime: 'image/png', bytes: [[0, 0x89], [1, 0x50], [2, 0x4e], [3, 0x47], [4, 0x0d], [5, 0x0a], [6, 0x1a], [7, 0x0a]] },
+  {
+    mime: 'image/png',
+    bytes: [
+      [0, 0x89],
+      [1, 0x50],
+      [2, 0x4e],
+      [3, 0x47],
+      [4, 0x0d],
+      [5, 0x0a],
+      [6, 0x1a],
+      [7, 0x0a],
+    ],
+  },
   // JPEG: FF D8 FF (SOI marker followed by any APPx marker)
-  { mime: 'image/jpeg', bytes: [[0, 0xff], [1, 0xd8], [2, 0xff]] },
+  {
+    mime: 'image/jpeg',
+    bytes: [
+      [0, 0xff],
+      [1, 0xd8],
+      [2, 0xff],
+    ],
+  },
   // GIF87a / GIF89a
-  { mime: 'image/gif', bytes: [[0, 0x47], [1, 0x49], [2, 0x46], [3, 0x38], [4, 0x37], [5, 0x61]] },
-  { mime: 'image/gif', bytes: [[0, 0x47], [1, 0x49], [2, 0x46], [3, 0x38], [4, 0x39], [5, 0x61]] },
+  {
+    mime: 'image/gif',
+    bytes: [
+      [0, 0x47],
+      [1, 0x49],
+      [2, 0x46],
+      [3, 0x38],
+      [4, 0x37],
+      [5, 0x61],
+    ],
+  },
+  {
+    mime: 'image/gif',
+    bytes: [
+      [0, 0x47],
+      [1, 0x49],
+      [2, 0x46],
+      [3, 0x38],
+      [4, 0x39],
+      [5, 0x61],
+    ],
+  },
   // WebP: RIFF<size>WEBP — bytes 0..3 = RIFF, bytes 8..11 = WEBP
-  { mime: 'image/webp', bytes: [[0, 0x52], [1, 0x49], [2, 0x46], [3, 0x46], [8, 0x57], [9, 0x45], [10, 0x42], [11, 0x50]] },
+  {
+    mime: 'image/webp',
+    bytes: [
+      [0, 0x52],
+      [1, 0x49],
+      [2, 0x46],
+      [3, 0x46],
+      [8, 0x57],
+      [9, 0x45],
+      [10, 0x42],
+      [11, 0x50],
+    ],
+  },
   // MP4 / ISO Base Media: `ftyp` box at offset 4..7. The first 4 bytes are
   // the box size which varies; only the type identifier matters here.
-  { mime: 'video/mp4', bytes: [[4, 0x66], [5, 0x74], [6, 0x79], [7, 0x70]] },
+  {
+    mime: 'video/mp4',
+    bytes: [
+      [4, 0x66],
+      [5, 0x74],
+      [6, 0x79],
+      [7, 0x70],
+    ],
+  },
   // WebM: EBML header 1A 45 DF A3 (also Matroska — close enough for us;
   // the content-type we serve is video/webm regardless and browsers will
   // refuse to play non-webm Matroska, which is the desired outcome).
-  { mime: 'video/webm', bytes: [[0, 0x1a], [1, 0x45], [2, 0xdf], [3, 0xa3]] },
+  {
+    mime: 'video/webm',
+    bytes: [
+      [0, 0x1a],
+      [1, 0x45],
+      [2, 0xdf],
+      [3, 0xa3],
+    ],
+  },
 
   // WOFF: 77 4F 46 46 ("wOFF") per W3C WOFF1 §3.
-  { mime: 'font/woff', bytes: [[0, 0x77], [1, 0x4f], [2, 0x46], [3, 0x46]] },
+  {
+    mime: 'font/woff',
+    bytes: [
+      [0, 0x77],
+      [1, 0x4f],
+      [2, 0x46],
+      [3, 0x46],
+    ],
+  },
   // WOFF2: 77 4F 46 32 ("wOF2") per W3C WOFF2 §3.
-  { mime: 'font/woff2', bytes: [[0, 0x77], [1, 0x4f], [2, 0x46], [3, 0x32]] },
+  {
+    mime: 'font/woff2',
+    bytes: [
+      [0, 0x77],
+      [1, 0x4f],
+      [2, 0x46],
+      [3, 0x32],
+    ],
+  },
   // TTF / TrueType: 00 01 00 00 (sfnt scaler type) OR "true" / "ttcf" (rare).
-  { mime: 'font/ttf', bytes: [[0, 0x00], [1, 0x01], [2, 0x00], [3, 0x00]] },
-  { mime: 'font/ttf', bytes: [[0, 0x74], [1, 0x72], [2, 0x75], [3, 0x65]] }, // "true"
+  {
+    mime: 'font/ttf',
+    bytes: [
+      [0, 0x00],
+      [1, 0x01],
+      [2, 0x00],
+      [3, 0x00],
+    ],
+  },
+  {
+    mime: 'font/ttf',
+    bytes: [
+      [0, 0x74],
+      [1, 0x72],
+      [2, 0x75],
+      [3, 0x65],
+    ],
+  }, // "true"
   // OTF / OpenType with CFF outlines: 4F 54 54 4F ("OTTO") per OpenType §6.
-  { mime: 'font/otf', bytes: [[0, 0x4f], [1, 0x54], [2, 0x54], [3, 0x4f]] },
+  {
+    mime: 'font/otf',
+    bytes: [
+      [0, 0x4f],
+      [1, 0x54],
+      [2, 0x54],
+      [3, 0x4f],
+    ],
+  },
 ]
 
 /**
@@ -227,7 +334,9 @@ interface ValidatedUpload {
  * with the appropriate error envelope. Shared by both the create-asset and
  * replace-file flows so the byte-level checks live in exactly one place.
  */
-async function validateUploadedMedia(input: AcceptUploadInput): Promise<Response | ValidatedUpload> {
+async function validateUploadedMedia(
+  input: AcceptUploadInput,
+): Promise<Response | ValidatedUpload> {
   if (input.file.size <= 0) return badRequest('File is empty')
   if (input.file.size > input.maxBytes) return badRequest(input.oversizedMessage)
 
@@ -247,7 +356,9 @@ async function validateUploadedMedia(input: AcceptUploadInput): Promise<Response
   if (detectedMime === 'image/svg+xml') {
     const sanitized = sanitizeSvgBytes(bytes)
     if (sanitized.length === 0) {
-      return badRequest('SVG file is empty after sanitisation (likely contains only disallowed elements).')
+      return badRequest(
+        'SVG file is empty after sanitisation (likely contains only disallowed elements).',
+      )
     }
     // Copy into a fresh ArrayBuffer-backed view so the type matches the
     // `Uint8Array<ArrayBuffer>` the rest of the pipeline expects (the
@@ -281,7 +392,10 @@ export async function acceptUploadedMedia(
   // extension→Content-Type lookup can only ever yield the verified inert
   // MIME we just sniffed. Client-supplied extension is dropped.
   const storageName = `${safeStorageStem(input.file.name)}${EXTENSION_FOR_MIME[validated.detectedMime]}`
-  const suggestedStoragePath = buildSuggestedStoragePath(safeStorageStem(input.file.name), EXTENSION_FOR_MIME[validated.detectedMime])
+  const suggestedStoragePath = buildSuggestedStoragePath(
+    safeStorageStem(input.file.name),
+    EXTENSION_FOR_MIME[validated.detectedMime],
+  )
 
   let dispatched
   try {
@@ -373,7 +487,10 @@ export async function acceptReplacementMedia(
   const previousVariants = await getMediaAssetVariants(db, assetId)
 
   const storageName = `${safeStorageStem(input.file.name)}${EXTENSION_FOR_MIME[validated.detectedMime]}`
-  const suggestedStoragePath = buildSuggestedStoragePath(safeStorageStem(input.file.name), EXTENSION_FOR_MIME[validated.detectedMime])
+  const suggestedStoragePath = buildSuggestedStoragePath(
+    safeStorageStem(input.file.name),
+    EXTENSION_FOR_MIME[validated.detectedMime],
+  )
 
   let dispatched
   try {

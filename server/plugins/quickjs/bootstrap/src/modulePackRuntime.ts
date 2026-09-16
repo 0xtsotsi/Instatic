@@ -19,10 +19,16 @@ import { fromJson } from './boundary'
 // plugins that need diagnostics use api.plugin.log via the server entrypoint,
 // not console inside a render. QuickJS ships no console, so we stub one to
 // keep an accidental console.* call from throwing mid-render.
-const noop = function () { /* silent */ }
+const noop = function () {
+  /* silent */
+}
 globalThis.console = {
-  log: noop, info: noop, warn: noop,
-  error: noop, debug: noop, trace: noop,
+  log: noop,
+  info: noop,
+  warn: noop,
+  error: noop,
+  debug: noop,
+  trace: noop,
 } as Console
 
 /** Normalize a render()/preview() return into the `{ html, css, js }` wire shape. */
@@ -44,7 +50,11 @@ globalThis.__initPack = function initPack(pluginId) {
   const entry = globalThis.__module_pack
   const value = typeof entry === 'function' ? entry({ pluginId: pluginId }) : entry
   if (!Array.isArray(value)) {
-    throw new Error('Plugin "' + pluginId + '" module pack default export must be an array (or a function returning one)')
+    throw new Error(
+      'Plugin "' +
+        pluginId +
+        '" module pack default export must be an array (or a function returning one)',
+    )
   }
   // Keyed by id so the host can call render(id, ...) without re-scanning.
   const byId: Record<string, ModulePackEntry> = {}
@@ -60,12 +70,10 @@ globalThis.__initPack = function initPack(pluginId) {
     // dependencies and editorRuntime are JSON-serializable shapes — copy
     // them through so the host can wire deps into the site package.json
     // and build the iframe sandbox's import map.
-    const deps = def.dependencies && typeof def.dependencies === 'object'
-      ? def.dependencies
-      : undefined
-    const editorRuntime = def.editorRuntime && typeof def.editorRuntime === 'object'
-      ? def.editorRuntime
-      : undefined
+    const deps =
+      def.dependencies && typeof def.dependencies === 'object' ? def.dependencies : undefined
+    const editorRuntime =
+      def.editorRuntime && typeof def.editorRuntime === 'object' ? def.editorRuntime : undefined
     return {
       id: def.id,
       name: def.name,

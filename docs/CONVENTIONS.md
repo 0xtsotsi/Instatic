@@ -121,6 +121,7 @@ The `Related` section is mandatory. It tells the reader what to read next and wh
 ### Section choices by doc type
 
 **Top-level docs** typically have:
+
 - TL;DR
 - Layout / Architecture
 - Layer responsibilities (table)
@@ -130,6 +131,7 @@ The `Related` section is mandatory. It tells the reader what to read next and wh
 - Related
 
 **Feature docs** typically have:
+
 - TL;DR
 - Architecture (what lives where, what depends on what)
 - Data flow / lifecycle
@@ -138,6 +140,7 @@ The `Related` section is mandatory. It tells the reader what to read next and wh
 - Related
 
 **Reference docs** typically have:
+
 - TL;DR
 - The shape (type signatures, file paths, the canonical example)
 - How to use it (one or two cookbook examples)
@@ -183,12 +186,12 @@ The `Related` section is mandatory. It tells the reader what to read next and wh
 
 ## Naming conventions
 
-| Doc type     | Filename                  | Example                          |
-|--------------|---------------------------|----------------------------------|
-| Top-level    | `lowercase-with-dashes.md`| `architecture.md`, `design.md`   |
-| Feature      | `feature-name.md`         | `features/plugin-system.md`      |
-| Reference    | `topic.md`                | `reference/page-tree.md`         |
-| Meta / index | `UPPERCASE.md`            | `CONVENTIONS.md`, `README.md`    |
+| Doc type     | Filename                   | Example                        |
+| ------------ | -------------------------- | ------------------------------ |
+| Top-level    | `lowercase-with-dashes.md` | `architecture.md`, `design.md` |
+| Feature      | `feature-name.md`          | `features/plugin-system.md`    |
+| Reference    | `topic.md`                 | `reference/page-tree.md`       |
+| Meta / index | `UPPERCASE.md`             | `CONVENTIONS.md`, `README.md`  |
 
 Filenames match the dominant concept. If a doc is about the page tree, it's `page-tree.md`. Not `tree-data-structure.md`, not `node-tree-explained.md`, not `nodes.md`.
 
@@ -226,7 +229,7 @@ Pre-release rule applies: **no deprecation notes, no "this is being replaced", n
 
 `CLAUDE.md` is the **agent entry-point and rule book** at the repo root. It is short, dense, prescriptive — it tells agents what to do and what not to do.
 
-`docs/*` are the **explanatory references** `CLAUDE.md` points to. When an agent needs to know *what something is* or *how to extend it*, the trail goes:
+`docs/*` are the **explanatory references** `CLAUDE.md` points to. When an agent needs to know _what something is_ or _how to extend it_, the trail goes:
 
 ```
 CLAUDE.md (rule)
@@ -237,6 +240,7 @@ CLAUDE.md (rule)
 ```
 
 **Rule of thumb:**
+
 - If it's a rule (must / must not), it goes in `CLAUDE.md`.
 - If it's an explanation (what / why / how), it goes in `docs/`.
 - `CLAUDE.md` cites `docs/` for the explanation. `docs/` does not duplicate `CLAUDE.md`'s rules — it links to them.

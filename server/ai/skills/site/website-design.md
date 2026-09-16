@@ -18,7 +18,7 @@ Before you write any HTML, write down three things in your reply (not in code):
 - **Audience.** Who is this for? A solo founder's portfolio reads nothing like a
   B2B SaaS landing page or a neighborhood bakery's storefront. The words, the
   imagery, the density of motion all start here.
-- **One sentence goal.** What must the visitor *do* — book, sign up, read, buy,
+- **One sentence goal.** What must the visitor _do_ — book, sign up, read, buy,
   call? If the page doesn't move them toward that, cut it.
 - **Tone in three adjectives.** "Calm, considered, premium." "Loud, fast,
   chaotic." "Friendly, neighborhood, hand-made." These adjectives are the lens
@@ -47,7 +47,7 @@ so the rhythm scales between breakpoints.
 
 ## 3. Responsive layout
 
-Design responsive *from the start*, not as a fixup. The breakpoint the
+Design responsive _from the start_, not as a fixup. The breakpoint the
 suffix names already include tablet and mobile widths.
 
 - **Three breakpoints is enough.** Most sites use mobile (≤640), tablet

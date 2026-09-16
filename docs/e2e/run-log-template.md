@@ -22,15 +22,15 @@ Copy this structure into `docs/e2e/runs/YYYY-MM-DD-<scope>.md` for each run.
 
 ## Screenshot Trail
 
-| Moment | Screenshot | Notes |
-|---|---|---|
-| Start state |  |  |
-| Post-setup/login |  |  |
-| Editor baseline |  |  |
-| Main edit result |  |  |
-| Reload/persistence |  |  |
-| Publish feedback |  |  |
-| Public page |  |  |
+| Moment             | Screenshot | Notes |
+| ------------------ | ---------- | ----- |
+| Start state        |            |       |
+| Post-setup/login   |            |       |
+| Editor baseline    |            |       |
+| Main edit result   |            |       |
+| Reload/persistence |            |       |
+| Publish feedback   |            |       |
+| Public page        |            |       |
 
 ## Summary
 
@@ -43,9 +43,9 @@ Copy this structure into `docs/e2e/runs/YYYY-MM-DD-<scope>.md` for each run.
 
 ## Scenario Results
 
-| ID | Result | Notes | Issues |
-|---|---|---|---|
-| SETUP-001 |  |  |  |
+| ID        | Result | Notes | Issues |
+| --------- | ------ | ----- | ------ |
+| SETUP-001 |        |       |        |
 
 ## Issues
 
@@ -59,9 +59,7 @@ Copy this structure into `docs/e2e/runs/YYYY-MM-DD-<scope>.md` for each run.
 - Environment:
 - Evidence:
 
-Steps:
-1.
-2.
+Steps: 1. 2.
 
 Expected:
 

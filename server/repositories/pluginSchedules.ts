@@ -37,10 +37,10 @@ type Weekday = 'mon' | 'tue' | 'wed' | 'thu' | 'fri' | 'sat' | 'sun'
  */
 export type Cadence =
   | { interval: 'hourly' }
-  | { interval: 'daily'; at: string }                              // "HH:MM" UTC
-  | { interval: 'weekly'; at: string; day: Weekday }                // "HH:MM" UTC
-  | { interval: 'monthly'; at: string; dayOfMonth: number }         // dayOfMonth 1..28
-  | { interval: 'every'; minutes: number }                          // 1..1440
+  | { interval: 'daily'; at: string } // "HH:MM" UTC
+  | { interval: 'weekly'; at: string; day: Weekday } // "HH:MM" UTC
+  | { interval: 'monthly'; at: string; dayOfMonth: number } // dayOfMonth 1..28
+  | { interval: 'every'; minutes: number } // 1..1440
 
 export type OverlapPolicy = 'skip' | 'queue' | 'parallel'
 
@@ -122,7 +122,11 @@ interface ScheduleRunRow {
 
 function parseCadence(value: unknown): Cadence {
   if (typeof value === 'string') {
-    try { return JSON.parse(value) as Cadence } catch { /* fall through */ }
+    try {
+      return JSON.parse(value) as Cadence
+    } catch {
+      /* fall through */
+    }
   }
   return value as Cadence
 }
@@ -521,10 +525,7 @@ export async function listRecentRuns(
  * schedule_id). Called occasionally by the tick — not every iteration —
  * to bound storage without blocking the hot path.
  */
-export async function trimScheduleRunHistory(
-  db: DbClient,
-  keepPerSchedule = 200,
-): Promise<void> {
+export async function trimScheduleRunHistory(db: DbClient, keepPerSchedule = 200): Promise<void> {
   // Two-step: pick the per-group cutoff timestamp, then delete older rows
   // within each group. ANSI-standard subquery, dialect-naive — works on
   // both Postgres and SQLite.

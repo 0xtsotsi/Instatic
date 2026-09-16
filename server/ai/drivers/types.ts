@@ -190,10 +190,7 @@ export interface AiProvider {
     signal: AbortSignal,
   ): Promise<AiProviderCapabilities>
 
-  listModels(
-    credentials: AiResolvedCredential,
-    signal?: AbortSignal,
-  ): Promise<AiProviderModel[]>
+  listModels(credentials: AiResolvedCredential, signal?: AbortSignal): Promise<AiProviderModel[]>
 
   /**
    * Run one agent turn. Yields canonical AiStreamEvents as the model

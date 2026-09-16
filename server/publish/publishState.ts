@@ -60,7 +60,9 @@ export function getPublishVersion(): number {
  * publish that is itself queued behind the transaction chain (deadlock).
  */
 export function bumpPublishVersionSerialized(): Promise<void> {
-  return withPublishLock(async () => { bumpPublishVersion() })
+  return withPublishLock(async () => {
+    bumpPublishVersion()
+  })
 }
 
 // ---------------------------------------------------------------------------

@@ -43,7 +43,10 @@ export function clearPluginCrashCounter(pluginId: string): void {
  * Record a crash in the per-plugin sliding window. Returns whether the host
  * should auto-respawn or give up.
  */
-export function recordCrashAndDecide(pluginId: string, now: number = Date.now()): CrashRecoveryDecision {
+export function recordCrashAndDecide(
+  pluginId: string,
+  now: number = Date.now(),
+): CrashRecoveryDecision {
   const tracker = crashTrackers.get(pluginId) ?? { timestamps: [] }
   const cutoff = now - CRASH_WINDOW_MS
   // Drop expired entries before counting.
@@ -79,7 +82,11 @@ export function setCrashRecoveryHandler(handler: CrashRecoveryHandler): void {
 export function handleWorkerCrash(pluginId: string, reason: string): void {
   const w = workers.get(pluginId)
   if (w) {
-    try { w.terminate() } catch {/* worker may already be dead */}
+    try {
+      w.terminate()
+    } catch {
+      /* worker may already be dead */
+    }
     workers.delete(pluginId)
   }
   for (const [correlationId, pending] of pendingRequests) {
@@ -99,7 +106,11 @@ export function handleWorkerCrash(pluginId: string, reason: string): void {
     // is dead, so completing the response would just drop bytes on the
     // floor and tie up sockets/memory. Cancelling now releases them.
     for (const ctrl of entry.inflightFetches.values()) {
-      try { ctrl.abort(new Error(`Plugin "${pluginId}" worker crashed`)) } catch { /* ignore */ }
+      try {
+        ctrl.abort(new Error(`Plugin "${pluginId}" worker crashed`))
+      } catch {
+        /* ignore */
+      }
     }
     entry.inflightFetches.clear()
     hookBus.unregisterPlugin(pluginId)

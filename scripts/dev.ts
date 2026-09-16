@@ -76,10 +76,10 @@ interface ComposeServiceState {
  * versions; returns 'absent' when no entry is found.
  */
 function getComposeServiceState(service: string): ComposeServiceState['state'] {
-  const result = Bun.spawnSync(
-    ['docker', 'compose', 'ps', '--all', '--format', 'json', service],
-    { stdout: 'pipe', stderr: 'pipe' },
-  )
+  const result = Bun.spawnSync(['docker', 'compose', 'ps', '--all', '--format', 'json', service], {
+    stdout: 'pipe',
+    stderr: 'pipe',
+  })
   if (result.exitCode !== 0) return 'absent'
 
   const stdout = decoder.decode(result.stdout).trim()
@@ -153,10 +153,7 @@ function ensurePostgresRunning(): void {
     case 'paused':
     case 'restarting':
     case 'dead':
-      runDocker(
-        ['compose', 'start', 'postgres'],
-        `Docker postgres is ${state} — starting it...`,
-      )
+      runDocker(['compose', 'start', 'postgres'], `Docker postgres is ${state} — starting it...`)
       return
     case 'absent':
       runDocker(
@@ -213,10 +210,14 @@ if (isSqliteUrl(DATABASE_URL)) {
   log(`Using SQLite at ${dbPath} — skipping Postgres docker provisioning`)
 } else {
   if (!dockerInstalled()) {
-    fail('Docker is not installed. Install Docker Desktop, or set DATABASE_URL to point at your own postgres.')
+    fail(
+      'Docker is not installed. Install Docker Desktop, or set DATABASE_URL to point at your own postgres.',
+    )
   }
   if (!dockerDaemonRunning()) {
-    fail('Docker daemon is not running. Start Docker Desktop, or set DATABASE_URL to point at your own postgres.')
+    fail(
+      'Docker daemon is not running. Start Docker Desktop, or set DATABASE_URL to point at your own postgres.',
+    )
   }
   ensurePostgresRunning()
   stopAppContainerIfRunning()

@@ -55,7 +55,7 @@ function allMcpTools(runtime?: McpPublishRuntime): AiTool[] {
     createPublishMcpTool(runtime),
     ...contentTools,
     ...siteTools,
-    ...([captureTool]),
+    ...[captureTool],
   ]
   const byName = new Map<string, AiTool>()
   for (const tool of ordered) {

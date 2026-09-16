@@ -68,10 +68,7 @@ const SITE_STRUCTURE_CAPS: readonly CoreCapability[] = ['site.structure.edit']
 
 // Prop/label edits are the copy-editor surface; a structural editor may make
 // them too.
-const SITE_CONTENT_CAPS: readonly CoreCapability[] = [
-  'site.content.edit',
-  'site.structure.edit',
-]
+const SITE_CONTENT_CAPS: readonly CoreCapability[] = ['site.content.edit', 'site.structure.edit']
 
 const SITE_STYLE_CAPS: readonly CoreCapability[] = ['site.style.edit']
 
@@ -124,7 +121,7 @@ const replaceNodeHtmlTool: AiTool = {
   execution: 'browser',
   requiredCapabilities: SITE_STRUCTURE_CAPS,
   description:
-    "Replace a node subtree's children with new HTML. The target node is preserved as the parent; its existing children are rebuilt from the HTML. Style with CSS exactly as in site_insert_html: a <style> block and/or class= attributes; bare `.foo` selectors become reusable classes, other selectors become ambient rules. Custom importer markers work here too: <instatic-loop data-source-id=\"…\" ...> creates a real Loop node and <instatic-outlet> creates a template content outlet. To author or edit CSS on its own (without rebuilding children), use the dedicated site_apply_css tool instead.",
+    'Replace a node subtree\'s children with new HTML. The target node is preserved as the parent; its existing children are rebuilt from the HTML. Style with CSS exactly as in site_insert_html: a <style> block and/or class= attributes; bare `.foo` selectors become reusable classes, other selectors become ambient rules. Custom importer markers work here too: <instatic-loop data-source-id="…" ...> creates a real Loop node and <instatic-outlet> creates a template content outlet. To author or edit CSS on its own (without rebuilding children), use the dedicated site_apply_css tool instead.',
   inputSchema: ReplaceNodeHtmlInputSchema,
 }
 
@@ -148,7 +145,7 @@ const updateNodePropsTool: AiTool = {
   execution: 'browser',
   requiredCapabilities: SITE_CONTENT_CAPS,
   description:
-    'Shallow-merge a patch onto an existing node\'s props. `breakpointId` is only valid for props marked `breakpointOverridable` in the schema (rejected for content props like text/tag/src). For per-breakpoint visual variation use site_apply_css with an `@media` query, not this. Richtext props are auto-sanitised.',
+    "Shallow-merge a patch onto an existing node's props. `breakpointId` is only valid for props marked `breakpointOverridable` in the schema (rejected for content props like text/tag/src). For per-breakpoint visual variation use site_apply_css with an `@media` query, not this. Richtext props are auto-sanitised.",
   inputSchema: UpdateNodePropsInputSchema,
 }
 
@@ -178,7 +175,7 @@ const duplicateNodeTool: AiTool = {
   execution: 'browser',
   requiredCapabilities: SITE_STRUCTURE_CAPS,
   description:
-    "Deep-clone a node + subtree (props, classIds, breakpoint overrides) right after the original. `count` (1-50, default 1) produces N clones in one call. Success data includes the first new node id as `nodeId` and all new ids as `nodeIds`.",
+    'Deep-clone a node + subtree (props, classIds, breakpoint overrides) right after the original. `count` (1-50, default 1) produces N clones in one call. Success data includes the first new node id as `nodeId` and all new ids as `nodeIds`.',
   inputSchema: DuplicateNodeInputSchema,
 }
 
@@ -201,8 +198,7 @@ const assignClassTool: AiTool = {
   scope: 'site',
   execution: 'browser',
   requiredCapabilities: SITE_STYLE_CAPS,
-  description:
-    "Attach an existing CSS class to a node. `classId` accepts id or name.",
+  description: 'Attach an existing CSS class to a node. `classId` accepts id or name.',
   inputSchema: AssignClassInputSchema,
 }
 
@@ -280,7 +276,7 @@ const addPageTool: AiTool = {
   execution: 'browser',
   requiredCapabilities: SITE_STRUCTURE_CAPS,
   description:
-    'Add an EMPTY page and make it the active page. `slug` defaults to a slugified title and is auto-uniqued (a repeat add becomes `-2`, `-3`) — so never call site_add_page twice for the same page. Success data: `pageId` and `rootNodeId`. To build into the new page, pass `rootNodeId` as site_insert_html\'s `parentId` — a pageId is NOT a node id. The page is already active, so just start inserting; no need to site_read_document/site_list_documents first. For copying an existing page use site_duplicate_page.',
+    "Add an EMPTY page and make it the active page. `slug` defaults to a slugified title and is auto-uniqued (a repeat add becomes `-2`, `-3`) — so never call site_add_page twice for the same page. Success data: `pageId` and `rootNodeId`. To build into the new page, pass `rootNodeId` as site_insert_html's `parentId` — a pageId is NOT a node id. The page is already active, so just start inserting; no need to site_read_document/site_list_documents first. For copying an existing page use site_duplicate_page.",
   inputSchema: AddPageInputSchema,
 }
 
@@ -289,8 +285,7 @@ const deletePageTool: AiTool = {
   scope: 'site',
   execution: 'browser',
   requiredCapabilities: SITE_STRUCTURE_CAPS,
-  description:
-    'Permanently delete a page. Fails if it would leave the site with zero pages.',
+  description: 'Permanently delete a page. Fails if it would leave the site with zero pages.',
   inputSchema: DeletePageInputSchema,
 }
 
@@ -300,7 +295,7 @@ const renamePageTool: AiTool = {
   execution: 'browser',
   requiredCapabilities: SITE_STRUCTURE_CAPS,
   description:
-    "Change a page's title and/or slug. `slug=\"index\"` makes this page the homepage. Omit slug to keep it.",
+    'Change a page\'s title and/or slug. `slug="index"` makes this page the homepage. Omit slug to keep it.',
   inputSchema: RenamePageInputSchema,
 }
 
@@ -401,7 +396,7 @@ const renderSnapshotTool: AiTool = {
   scope: 'site',
   execution: 'browser',
   description:
-    "Inspect the rendered canvas. Returns viewport and node geometry, image-load status, overflow/visibility warnings, and key computed styles including color, background image/clip, and WebKit text-mask values. Those computed fields expose cascade failures such as a shorthand resetting `background-clip:text`; compare them with source CSS from site_read_document. When the provider supports image-bearing tool results, a screenshot is also attached. Pass any configured `breakpointId` to render a readiness-aware one-shot frame at that exact width, independent of collapsed/disabled frames or Live mode (defaults to active; unknown ids error). Pass `nodeId` to crop the document to that node while preserving its HTML/body/ancestor paint; omit it for the full page.",
+    'Inspect the rendered canvas. Returns viewport and node geometry, image-load status, overflow/visibility warnings, and key computed styles including color, background image/clip, and WebKit text-mask values. Those computed fields expose cascade failures such as a shorthand resetting `background-clip:text`; compare them with source CSS from site_read_document. When the provider supports image-bearing tool results, a screenshot is also attached. Pass any configured `breakpointId` to render a readiness-aware one-shot frame at that exact width, independent of collapsed/disabled frames or Live mode (defaults to active; unknown ids error). Pass `nodeId` to crop the document to that node while preserving its HTML/body/ancestor paint; omit it for the full page.',
   inputSchema: RenderSnapshotInputSchema,
 }
 

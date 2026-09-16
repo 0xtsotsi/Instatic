@@ -36,7 +36,9 @@ function fail(msg: string): never {
   process.exit(1)
 }
 
-const skipPrompt = process.argv.slice(2).some((arg) => arg === '-y' || arg === '--yes' || arg === '--force')
+const skipPrompt = process.argv
+  .slice(2)
+  .some((arg) => arg === '-y' || arg === '--yes' || arg === '--force')
 
 const config = readServerConfig()
 const { databaseUrl, uploadsDir } = config

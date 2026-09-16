@@ -72,7 +72,11 @@ interface PluginActor {
   pluginId: string
 }
 
-async function emitEntryCreated(tableSlug: string, entryId: string, actor: PluginActor): Promise<void> {
+async function emitEntryCreated(
+  tableSlug: string,
+  entryId: string,
+  actor: PluginActor,
+): Promise<void> {
   await hookBus.emit('content.entry.created', { tableSlug, entryId, actor })
 }
 
@@ -90,15 +94,16 @@ async function emitEntryUpdated(
   })
 }
 
-async function emitEntryDeleted(tableSlug: string, entryId: string, actor: PluginActor): Promise<void> {
+async function emitEntryDeleted(
+  tableSlug: string,
+  entryId: string,
+  actor: PluginActor,
+): Promise<void> {
   await hookBus.emit('content.entry.deleted', { tableSlug, entryId, actor })
 }
 
 /** Diff two cell-bags by key. Falls back to whole-object compare per key. */
-function diffCells(
-  before: Record<string, unknown>,
-  after: Record<string, unknown>,
-): string[] {
+function diffCells(before: Record<string, unknown>, after: Record<string, unknown>): string[] {
   const changed: string[] = []
   const keys = new Set([...Object.keys(before), ...Object.keys(after)])
   for (const key of keys) {
@@ -149,11 +154,7 @@ export async function handleContentTablesGet(
     countDataRows(db, table.id),
     buildTableSlugLookup(db),
   ])
-  replyApiOk(
-    msg.pluginId,
-    msg.correlationId,
-    tableSchema(table, rowCount, slugLookup),
-  )
+  replyApiOk(msg.pluginId, msg.correlationId, tableSchema(table, rowCount, slugLookup))
 }
 
 export async function handleContentTablesCreate(
@@ -164,7 +165,12 @@ export async function handleContentTablesCreate(
   const [input] = msg.args
   // System tables are seeded only; the underlying repository does not accept
   // a `system: true` flag from this entry point — defense-in-depth here too.
-  if (input.slug === 'pages' || input.slug === 'posts' || input.slug === 'components' || input.slug === 'layouts') {
+  if (
+    input.slug === 'pages' ||
+    input.slug === 'posts' ||
+    input.slug === 'components' ||
+    input.slug === 'layouts'
+  ) {
     throw new Error(`Cannot create a table with the reserved system slug "${input.slug}"`)
   }
   const tableIdBySlug = input.fields?.some((field) => field.type === 'relation')
@@ -247,12 +253,7 @@ export async function handleContentEntriesCreate(
     actor,
   })
   const slug = input.slug ?? denormalizeSlug(table, cells)
-  const created = await createDataRow(
-    db,
-    { tableId: table.id, cells, slug },
-    null,
-    msg.pluginId,
-  )
+  const created = await createDataRow(db, { tableId: table.id, cells, slug }, null, msg.pluginId)
   await emitEntryCreated(tableSlug, created.id, actor)
   replyApiOk(msg.pluginId, msg.correlationId, rowToEntry(created, tableSlug))
 }
@@ -378,16 +379,26 @@ export async function handleContentEntriesCreateMany(
   // Apply the cells filter per-input before the transaction. The filter
   // runs INSIDE the same plugin's worker; running it inside the per-row
   // transaction would tie up the DB connection.
-  const prepared = await Promise.all(inputs.map(async (input) => {
-    const cells = await applyContentEntryCellsFilter(input.cells, { tableSlug, entryId: 'new', actor })
-    const slug = input.slug ?? denormalizeSlug(table, cells)
-    return { tableId: table.id, cells, slug }
-  }))
+  const prepared = await Promise.all(
+    inputs.map(async (input) => {
+      const cells = await applyContentEntryCellsFilter(input.cells, {
+        tableSlug,
+        entryId: 'new',
+        actor,
+      })
+      const slug = input.slug ?? denormalizeSlug(table, cells)
+      return { tableId: table.id, cells, slug }
+    }),
+  )
   const created = await createDataRowMany(db, prepared, null, msg.pluginId)
   for (const row of created) {
     await emitEntryCreated(tableSlug, row.id, actor)
   }
-  replyApiOk(msg.pluginId, msg.correlationId, created.map((r) => rowToEntry(r, tableSlug)))
+  replyApiOk(
+    msg.pluginId,
+    msg.correlationId,
+    created.map((r) => rowToEntry(r, tableSlug)),
+  )
 }
 
 export async function handleContentEntriesUpdateMany(
@@ -403,9 +414,16 @@ export async function handleContentEntriesUpdateMany(
   // Read every targeted row in ONE IN-list query, then apply filter + diff
   // per-row before the transaction. Iterating `updates` in input order
   // preserves the first-bad-id error semantics of the old per-row reads.
-  const existingRows = await getDataRowMany(db, updates.map((u) => u.id))
+  const existingRows = await getDataRowMany(
+    db,
+    updates.map((u) => u.id),
+  )
   const existingById = new Map(existingRows.map((row) => [row.id, row]))
-  const prepared: Array<{ id: string; input: { cells: Record<string, unknown>; slug: string }; changedIds: string[] }> = []
+  const prepared: Array<{
+    id: string
+    input: { cells: Record<string, unknown>; slug: string }
+    changedIds: string[]
+  }> = []
   for (const { id, patch } of updates) {
     const existing = existingById.get(id)
     if (!existing || existing.tableId !== table.id) {
@@ -436,7 +454,11 @@ export async function handleContentEntriesUpdateMany(
       await emitEntryUpdated(tableSlug, p.id, p.changedIds, actor)
     }
   }
-  replyApiOk(msg.pluginId, msg.correlationId, updated.map((r) => rowToEntry(r, tableSlug)))
+  replyApiOk(
+    msg.pluginId,
+    msg.correlationId,
+    updated.map((r) => rowToEntry(r, tableSlug)),
+  )
 }
 
 export async function handleContentEntriesDeleteMany(
@@ -627,9 +649,10 @@ export async function handleContentSnapshot(
     versionNumber: rows[0].version_number,
     slug: rows[0].slug,
     cells: rows[0].cells_json,
-    publishedAt: typeof rows[0].published_at === 'string'
-      ? rows[0].published_at
-      : rows[0].published_at.toISOString(),
+    publishedAt:
+      typeof rows[0].published_at === 'string'
+        ? rows[0].published_at
+        : rows[0].published_at.toISOString(),
   }
   replyApiOk(msg.pluginId, msg.correlationId, snap)
 }

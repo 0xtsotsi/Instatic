@@ -87,9 +87,7 @@ function parsePluginUploadPlan(
   if (Value.Check(MediaStorageUploadPlanSchema, value)) {
     return value
   }
-  throw new Error(
-    `Plugin "${pluginId}" adapter "${adapterId}" returned a malformed upload plan`,
-  )
+  throw new Error(`Plugin "${pluginId}" adapter "${adapterId}" returned a malformed upload plan`)
 }
 
 /**
@@ -112,7 +110,8 @@ export function buildAdapterShim(args: {
   const call = (
     method: 'beginWrite' | 'finalizeWrite' | 'abortWrite' | 'delete' | 'getReadUrl' | 'verify',
     methodArgs: unknown[],
-  ): Promise<unknown> => runMediaAdapterCallInWorker(args.pluginId, args.adapterId, method, methodArgs)
+  ): Promise<unknown> =>
+    runMediaAdapterCallInWorker(args.pluginId, args.adapterId, method, methodArgs)
   const shim: MediaStorageAdapter = {
     id: args.adapterId,
     label: args.label,
@@ -122,7 +121,9 @@ export function buildAdapterShim(args: {
       const v = await call('beginWrite', [input])
       return parsePluginUploadPlan(v, args.pluginId, args.adapterId)
     },
-    finalizeWrite: async (input: MediaStorageFinalizeWriteInput): Promise<MediaStorageWriteResult> => {
+    finalizeWrite: async (
+      input: MediaStorageFinalizeWriteInput,
+    ): Promise<MediaStorageWriteResult> => {
       const v = await call('finalizeWrite', [input])
       return v as MediaStorageWriteResult
     },
@@ -151,10 +152,13 @@ export function buildAdapterShim(args: {
         const obj = v as { url: string; expiresAt?: number }
         return {
           url: obj.url,
-          expiresAt: typeof obj.expiresAt === 'number' ? obj.expiresAt : Date.now() + ttlSeconds * 1000,
+          expiresAt:
+            typeof obj.expiresAt === 'number' ? obj.expiresAt : Date.now() + ttlSeconds * 1000,
         }
       }
-      throw new Error(`Plugin "${args.pluginId}" adapter "${args.adapterId}" returned malformed getReadUrl result`)
+      throw new Error(
+        `Plugin "${args.pluginId}" adapter "${args.adapterId}" returned malformed getReadUrl result`,
+      )
     }
   }
   // readStream support for proxy adapters is intentionally not wired in

@@ -6,16 +6,8 @@
  */
 
 import type { TSchema } from '@sinclair/typebox'
-import {
-  compiled,
-  compiledCheck,
-  compiledDecode,
-} from '@core/utils/typeboxCompiler'
-import {
-  ApiCallSchemas,
-  isAllowedApiTarget,
-  type ValidatedApiCall,
-} from './apiCallSchema'
+import { compiled, compiledCheck, compiledDecode } from '@core/utils/typeboxCompiler'
+import { ApiCallSchemas, isAllowedApiTarget, type ValidatedApiCall } from './apiCallSchema'
 
 export class ApiCallValidationError extends Error {
   constructor(message: string) {
@@ -79,4 +71,3 @@ export function parseApiCall(value: unknown): ValidatedApiCall {
 }
 
 // Re-export so callers can import the full allowlist if needed.
-

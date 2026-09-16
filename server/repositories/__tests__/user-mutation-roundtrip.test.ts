@@ -23,7 +23,8 @@ function spyTagged(db: DbClient): { spy: DbClient; taggedSqls: string[] } {
     return db(strings, ...values)
   }
   const spy = Object.assign(base, {
-    unsafe: <Row>(sql: string, params?: unknown[]): Promise<DbResult<Row>> => db.unsafe<Row>(sql, params),
+    unsafe: <Row>(sql: string, params?: unknown[]): Promise<DbResult<Row>> =>
+      db.unsafe<Row>(sql, params),
     transaction: <T>(fn: (tx: DbClient) => Promise<T>) => db.transaction(fn),
     dialect: db.dialect,
   }) as unknown as DbClient

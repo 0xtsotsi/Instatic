@@ -86,8 +86,16 @@ interface SerializedModuleDefinition {
 export interface ModulePackVm {
   readonly pluginId: string
   readonly modules: ReadonlyArray<SerializedModuleDefinition>
-  render(moduleId: string, props: Record<string, unknown>, children: string[]): ModulePackRenderOutput
-  preview(moduleId: string, props: Record<string, unknown>, children: string[]): ModulePackRenderOutput
+  render(
+    moduleId: string,
+    props: Record<string, unknown>,
+    children: string[],
+  ): ModulePackRenderOutput
+  preview(
+    moduleId: string,
+    props: Record<string, unknown>,
+    children: string[],
+  ): ModulePackRenderOutput
   dispose(): void
 }
 
@@ -192,16 +200,36 @@ export async function createModulePackVm(args: {
       },
 
       dispose() {
-        try { if (renderHandle.alive) renderHandle.dispose() } catch {/* already disposed */}
-        try { if (previewHandle.alive) previewHandle.dispose() } catch {/* already disposed */}
-        try { ctx.dispose() } catch {/* already disposed */}
+        try {
+          if (renderHandle.alive) renderHandle.dispose()
+        } catch {
+          /* already disposed */
+        }
+        try {
+          if (previewHandle.alive) previewHandle.dispose()
+        } catch {
+          /* already disposed */
+        }
+        try {
+          ctx.dispose()
+        } catch {
+          /* already disposed */
+        }
       },
     }
   } catch (err) {
     for (const handle of dispatcherHandles) {
-      try { if (handle.alive) handle.dispose() } catch {/* ignore */}
+      try {
+        if (handle.alive) handle.dispose()
+      } catch {
+        /* ignore */
+      }
     }
-    try { ctx.dispose() } catch {/* ignore */}
+    try {
+      ctx.dispose()
+    } catch {
+      /* ignore */
+    }
     throw err
   }
 }

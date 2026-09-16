@@ -133,7 +133,10 @@ describe('runtime cache layout — reader/writer agreement', () => {
     // Negative control: a path the writer never installed must 404, confirming
     // the server resolves inside the writer's node_modules and nowhere else.
     const missingUrl = `/_instatic/runtime/cache/${hash}/three/build/does-not-exist.js`
-    const missing = await tryServeRuntimePackage(new Request(`http://localhost${missingUrl}`), missingUrl)
+    const missing = await tryServeRuntimePackage(
+      new Request(`http://localhost${missingUrl}`),
+      missingUrl,
+    )
     expect(missing?.status).toBe(404)
   })
 
@@ -154,7 +157,9 @@ describe('runtime cache layout — reader/writer agreement', () => {
     const { db, wasQueried } = createThrowingDb()
 
     const res = await handleServerRequest(
-      new Request('http://localhost/_instatic/runtime/cache/not-a-24-hex/three/build/three.module.js'),
+      new Request(
+        'http://localhost/_instatic/runtime/cache/not-a-24-hex/three/build/three.module.js',
+      ),
       { db },
     )
     expect(res.status).toBe(404)

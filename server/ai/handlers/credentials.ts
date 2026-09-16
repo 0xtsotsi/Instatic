@@ -139,7 +139,10 @@ async function handleCreate(req: Request, db: DbClient): Promise<Response> {
     if (err instanceof CredentialError) {
       return jsonResponse({ error: err.message }, { status: err.status })
     }
-    console.error('[ai/credentials] create failed:', safeCredentialErrorMessage(err, bodySecrets(body)))
+    console.error(
+      '[ai/credentials] create failed:',
+      safeCredentialErrorMessage(err, bodySecrets(body)),
+    )
     return jsonResponse({ error: 'Failed to create credential.' }, { status: 500 })
   }
 }
@@ -245,7 +248,10 @@ async function handleUpdate(req: Request, db: DbClient, id: string): Promise<Res
     if (err instanceof CredentialError) {
       return jsonResponse({ error: err.message }, { status: err.status })
     }
-    console.error('[ai/credentials] update failed:', safeCredentialErrorMessage(err, bodySecrets(body)))
+    console.error(
+      '[ai/credentials] update failed:',
+      safeCredentialErrorMessage(err, bodySecrets(body)),
+    )
     return jsonResponse({ error: 'Failed to update credential.' }, { status: 500 })
   }
 }

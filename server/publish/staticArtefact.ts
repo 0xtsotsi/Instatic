@@ -239,11 +239,7 @@ export async function prepareInactiveSlot(
  * @param urlPath  The public route URL path (e.g. `/about` or `/posts/foo`).
  * @param html     The HTML string to write.
  */
-export async function writeArtefact(
-  slotDir: string,
-  urlPath: string,
-  html: string,
-): Promise<void> {
+export async function writeArtefact(slotDir: string, urlPath: string, html: string): Promise<void> {
   const finalPath = resolveArtefactPath(slotDir, urlPath)
   const tmpPath = `${finalPath}.tmp`
 
@@ -440,10 +436,7 @@ export async function updateArtefactInPlace(
  * The inactive slot is not touched — any stale file there will be swept by
  * the next `prepareInactiveSlot` call.
  */
-export async function removeArtefactInPlace(
-  uploadsDir: string,
-  urlPath: string,
-): Promise<void> {
+export async function removeArtefactInPlace(uploadsDir: string, urlPath: string): Promise<void> {
   const slot = await getActiveSlot(uploadsDir)
   const dir = getSlotDir(uploadsDir, slot)
 
@@ -500,7 +493,10 @@ export async function writeStaticAsset(
  * absent, unsafe path). Shares `readArtefact`'s retry loop so it survives the
  * brief slot-swap window on every OS.
  */
-export async function readStaticAsset(uploadsDir: string, publicPath: string): Promise<Uint8Array | null> {
+export async function readStaticAsset(
+  uploadsDir: string,
+  publicPath: string,
+): Promise<Uint8Array | null> {
   let relPath: string
   try {
     relPath = safeRelPath(publicPath)

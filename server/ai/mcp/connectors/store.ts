@@ -107,7 +107,10 @@ export async function createConnector(
   return rowToRecord(rows[0])
 }
 
-export async function listConnectorsForUser(db: DbClient, userId: string): Promise<McpConnectorRecord[]> {
+export async function listConnectorsForUser(
+  db: DbClient,
+  userId: string,
+): Promise<McpConnectorRecord[]> {
   const { rows } = await db<ConnectorRow>`
     select id, user_id, label, type, auth_mode, token_hash,
            capabilities_json, created_at, last_used_at, revoked_at, expires_at

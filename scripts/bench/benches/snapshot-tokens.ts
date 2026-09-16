@@ -112,7 +112,8 @@ function serializableRecord(record: Record<string, unknown>): Record<string, unk
 function serializableValue(value: unknown): unknown {
   if (value === null || ['string', 'number', 'boolean'].includes(typeof value)) return value
   if (Array.isArray(value)) return value.map(serializableValue)
-  if (typeof value === 'object' && value) return serializableRecord(value as Record<string, unknown>)
+  if (typeof value === 'object' && value)
+    return serializableRecord(value as Record<string, unknown>)
   return String(value)
 }
 
@@ -365,7 +366,8 @@ function buildReport(rows: PageTokenRow[], model: string): BenchResult {
   // Highlights: biggest win/loss + aggregate fidelity caveats.
   const byDelta = [...rows].sort(
     (a, b) =>
-      a.readDocumentTokens - (a.jsonTreeTokens + a.jsonClassesTokens + a.jsonTokensTokens) -
+      a.readDocumentTokens -
+      (a.jsonTreeTokens + a.jsonClassesTokens + a.jsonTokensTokens) -
       (b.readDocumentTokens - (b.jsonTreeTokens + b.jsonClassesTokens + b.jsonTokensTokens)),
   )
   const totalOverrides = rows.reduce((a, r) => a + r.nodesWithBreakpointOverrides, 0)
@@ -466,7 +468,9 @@ export const snapshotTokensBench: BenchModule = {
       )
     }
 
-    log.ok(`Loaded ${site.pages.length} page(s) + ${site.visualComponents.length} visual component(s)`)
+    log.ok(
+      `Loaded ${site.pages.length} page(s) + ${site.visualComponents.length} visual component(s)`,
+    )
     const model = counter.model
 
     const rows: PageTokenRow[] = []
@@ -477,7 +481,9 @@ export const snapshotTokensBench: BenchModule = {
       rows.push(row)
       const json = row.jsonTreeTokens + row.jsonClassesTokens + row.jsonTokensTokens
       const readDocument = row.readDocumentTokens
-      log.detail(`json ${fmtNum(json)} tok · read_document ${fmtNum(readDocument)} tok · ${ratio(readDocument, json)}`)
+      log.detail(
+        `json ${fmtNum(json)} tok · read_document ${fmtNum(readDocument)} tok · ${ratio(readDocument, json)}`,
+      )
     }
 
     log.ok(`Counted ${rows.length} page(s) against ${model}`)

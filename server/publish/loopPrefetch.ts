@@ -55,9 +55,8 @@ export function publishedDataRowToLoopItem(row: PublishedDataRow): LoopItem {
   // For post-type rows the `body` cell holds markdown — extract the first
   // inline image to populate the `firstImage` aliases.
   const bodyValue = row.cells['body']
-  const firstImagePath = typeof bodyValue === 'string'
-    ? firstImagePathFromMarkdown(bodyValue)
-    : null
+  const firstImagePath =
+    typeof bodyValue === 'string' ? firstImagePathFromMarkdown(bodyValue) : null
 
   const author = publicDataUserFromParts(row.authorName, row.authorRoleSlug, row.authorRoleName)
   const publishedBy = publicDataUserFromParts(
@@ -289,10 +288,10 @@ export async function prefetchLoopData(
       const props = readLoopProps(node)
       const source = props.sourceId ? loopSourceRegistry.get(props.sourceId) : undefined
       if (!source) {
-        return [
-          node.id,
-          { items: [], totalItems: 0, pageNumber: 1, hasMore: false },
-        ] as [string, ResolvedLoopData]
+        return [node.id, { items: [], totalItems: 0, pageNumber: 1, hasMore: false }] as [
+          string,
+          ResolvedLoopData,
+        ]
       }
       const data = await resolveOneLoop(node, source, {
         db,

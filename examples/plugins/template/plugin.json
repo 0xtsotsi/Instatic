@@ -4,12 +4,7 @@
   "version": "1.0.0",
   "apiVersion": 1,
   "description": "Starter template demonstrating the Instatic plugin SDK — server lifecycle hooks, editor commands, and Command Spotlight (⌘K) integration.",
-  "permissions": [
-    "cms.routes",
-    "editor.code",
-    "editor.commands",
-    "editor.toolbar"
-  ],
+  "permissions": ["cms.routes", "editor.code", "editor.commands", "editor.toolbar"],
   "resources": [],
   "adminPages": [],
   "entrypoints": {

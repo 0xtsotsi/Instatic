@@ -16,10 +16,7 @@ import { jsonResponse } from '../../../http'
 import { CMS_API_PREFIX } from '../shared'
 import { requireDataAccess } from './access'
 
-export async function handleDataMetaRoutes(
-  req: Request,
-  db: DbClient,
-): Promise<Response | null> {
+export async function handleDataMetaRoutes(req: Request, db: DbClient): Promise<Response | null> {
   const { pathname } = new URL(req.url)
 
   if (req.method === 'GET' && pathname === `${CMS_API_PREFIX}/data/_meta`) {

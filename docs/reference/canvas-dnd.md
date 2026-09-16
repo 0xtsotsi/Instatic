@@ -40,12 +40,12 @@ Built on `@dnd-kit/core`. The canvas owns its own DnD context (separate from the
 
 Drag sources:
 
-| Source                    | Origin                          | Drop result                                     |
-|---------------------------|---------------------------------|-------------------------------------------------|
-| `node:<nodeId>`           | A node on the canvas / DOM panel| Move the node to the drop target                |
-| Module inserter item      | Module picker / inserter dialog | Insert a new node of the picked module at the drop target |
-| Media Explorer asset      | Site editor Media panel         | Image asset inserts `base.image`; video asset inserts `base.video` |
-| `tree:<nodeId>`           | The DOM panel tree              | Same as `node:` (DOM panel ⇄ canvas parity)     |
+| Source               | Origin                           | Drop result                                                        |
+| -------------------- | -------------------------------- | ------------------------------------------------------------------ |
+| `node:<nodeId>`      | A node on the canvas / DOM panel | Move the node to the drop target                                   |
+| Module inserter item | Module picker / inserter dialog  | Insert a new node of the picked module at the drop target          |
+| Media Explorer asset | Site editor Media panel          | Image asset inserts `base.image`; video asset inserts `base.video` |
+| `tree:<nodeId>`      | The DOM panel tree               | Same as `node:` (DOM panel ⇄ canvas parity)                        |
 
 Existing-node moves are DnD-context drags. Insert sources that start outside the frame tree use pointer listeners and `resolveCanvasPointerInsertionDrop(...)` because they need the same drop zones but do not carry an existing node id.
 
@@ -72,10 +72,10 @@ A drop zone is a thin rectangle that resolves to **"insert at this position"**. 
 └────────────────────────────┘
 ```
 
-| Zone kind | Position    | Resolves to                            |
-|-----------|-------------|----------------------------------------|
-| Before    | Top edge of a sibling | `{ parentId, index }` (sibling's index)|
-| After     | Bottom edge | `{ parentId, index + 1 }`              |
+| Zone kind | Position                         | Resolves to                                                       |
+| --------- | -------------------------------- | ----------------------------------------------------------------- |
+| Before    | Top edge of a sibling            | `{ parentId, index }` (sibling's index)                           |
+| After     | Bottom edge                      | `{ parentId, index + 1 }`                                         |
 | Into      | Body of a `canHaveChildren` node | `{ parentId: target.id, index: target.children.length }` (append) |
 
 The axis (`'vertical' | 'horizontal'`) depends on the parent's layout — vertical for normal block flow, horizontal for `display: flex; flex-direction: row`.
@@ -133,23 +133,19 @@ onDragEnd: (event) => {
   const { active, over } = event
   if (!over) return
   const sourceKind = parseSourceKind(active.id)
-  const target = resolveCanvasDropTarget({ /* ... */ })
+  const target = resolveCanvasDropTarget({/* ... */})
   if (!target.target) return
 
   if (sourceKind.kind === 'picker') {
     // Insert new module
-    useEditorStore.getState().insertNode(
-      createNode(sourceKind.moduleId),
-      target.target.parentId,
-      target.target.index,
-    )
+    useEditorStore
+      .getState()
+      .insertNode(createNode(sourceKind.moduleId), target.target.parentId, target.target.index)
   } else if (sourceKind.kind === 'node') {
     // Move existing node
-    useEditorStore.getState().moveNode(
-      sourceKind.nodeId,
-      target.target.parentId,
-      target.target.index,
-    )
+    useEditorStore
+      .getState()
+      .moveNode(sourceKind.nodeId, target.target.parentId, target.target.index)
   }
 }
 ```
@@ -220,7 +216,7 @@ Set `locked: true` on the node. The resolver rejects drops on locked nodes (and 
 useEditorStore.getState().insertNode(
   createNode('base.text', { content: 'New text' }),
   parentNodeId,
-  0,                  // index — at the start
+  0, // index — at the start
 )
 ```
 
@@ -234,15 +230,15 @@ Don't add raw `dragstart` / `dragend` listeners — `@dnd-kit` owns those. If yo
 
 ## Forbidden patterns
 
-| Pattern                                                              | Use instead                                              |
-|----------------------------------------------------------------------|----------------------------------------------------------|
-| Native HTML5 drag-and-drop (`draggable={true}`, `onDragOver`, etc.)  | `@dnd-kit/core` everywhere                               |
-| `react-dnd`                                                          | `@dnd-kit/core` — only DnD library in this codebase     |
-| Computing drop targets ad-hoc per surface                            | `resolveCanvasDropTarget(...)` — same logic everywhere   |
-| Skipping the cycle check on a `moveNode`                             | `moveNode` already guards. Use it.                       |
-| Inserting into a locked node                                          | Resolver rejects. Don't bypass.                          |
-| Reading from the iframe's `document` to find drop targets             | Use the canvas-space geometry (`frameGeometry`)          |
-| Dispatching a different mutation per drag source kind, deeply         | Two cases in `onDragEnd`: picker → `insertNode`, node → `moveNode`. Keep it that simple. |
+| Pattern                                                             | Use instead                                                                              |
+| ------------------------------------------------------------------- | ---------------------------------------------------------------------------------------- |
+| Native HTML5 drag-and-drop (`draggable={true}`, `onDragOver`, etc.) | `@dnd-kit/core` everywhere                                                               |
+| `react-dnd`                                                         | `@dnd-kit/core` — only DnD library in this codebase                                      |
+| Computing drop targets ad-hoc per surface                           | `resolveCanvasDropTarget(...)` — same logic everywhere                                   |
+| Skipping the cycle check on a `moveNode`                            | `moveNode` already guards. Use it.                                                       |
+| Inserting into a locked node                                        | Resolver rejects. Don't bypass.                                                          |
+| Reading from the iframe's `document` to find drop targets           | Use the canvas-space geometry (`frameGeometry`)                                          |
+| Dispatching a different mutation per drag source kind, deeply       | Two cases in `onDragEnd`: picker → `insertNode`, node → `moveNode`. Keep it that simple. |
 
 ---
 

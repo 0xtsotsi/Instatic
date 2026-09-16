@@ -35,9 +35,5 @@
     }
   },
   "include": ["vite.config.ts", "server/**/*.ts", "src/core/plugin-sdk/cli/**/*.ts"],
-  "exclude": [
-    "server/**/__tests__",
-    "server/**/*.test.ts",
-    "server/**/*.test.tsx"
-  ]
+  "exclude": ["server/**/__tests__", "server/**/*.test.ts", "server/**/*.test.tsx"]
 }

@@ -1,8 +1,4 @@
-import type {
-  AiProvider,
-  AiProviderCapabilities,
-  AiResolvedCredential,
-} from './types'
+import type { AiProvider, AiProviderCapabilities, AiResolvedCredential } from './types'
 
 const CAPABILITY_CACHE_TTL_MS = 5 * 60 * 1000
 const CAPABILITY_LOOKUP_TIMEOUT_MS = 10_000
@@ -64,10 +60,7 @@ export async function resolveModelCapabilities(
   return lookup
 }
 
-function mapFor<T>(
-  root: WeakMap<AiProvider, Map<string, T>>,
-  driver: AiProvider,
-): Map<string, T> {
+function mapFor<T>(root: WeakMap<AiProvider, Map<string, T>>, driver: AiProvider): Map<string, T> {
   const existing = root.get(driver)
   if (existing) return existing
   const created = new Map<string, T>()
@@ -106,7 +99,9 @@ async function resolveWithTimeout(
   const timeout = new Promise<never>((_resolve, reject) => {
     timeoutId = setTimeout(() => {
       controller.abort()
-      reject(new Error(`Model capability lookup timed out after ${CAPABILITY_LOOKUP_TIMEOUT_MS}ms.`))
+      reject(
+        new Error(`Model capability lookup timed out after ${CAPABILITY_LOOKUP_TIMEOUT_MS}ms.`),
+      )
     }, CAPABILITY_LOOKUP_TIMEOUT_MS)
   })
   try {

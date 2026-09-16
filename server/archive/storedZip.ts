@@ -46,7 +46,9 @@ interface CentralDirectoryEntry {
   usesDataDescriptor: boolean
 }
 
-export function createStoredZipStream(entries: readonly StoredZipEntry[]): ReadableStream<Uint8Array> {
+export function createStoredZipStream(
+  entries: readonly StoredZipEntry[],
+): ReadableStream<Uint8Array> {
   return readableFromAsyncGenerator(streamStoredZip(entries))
 }
 
@@ -125,7 +127,9 @@ async function* streamStoredZip(entries: readonly StoredZipEntry[]): AsyncGenera
       yield chunk
     }
     if (written !== entry.sizeBytes) {
-      throw new Error(`ZIP entry "${entry.path}" wrote ${written} bytes, expected ${entry.sizeBytes}`)
+      throw new Error(
+        `ZIP entry "${entry.path}" wrote ${written} bytes, expected ${entry.sizeBytes}`,
+      )
     }
 
     const crc32 = crc.digest()
@@ -180,7 +184,9 @@ async function* streamStoredZip(entries: readonly StoredZipEntry[]): AsyncGenera
   )
 }
 
-function readableFromAsyncGenerator(generator: AsyncGenerator<Uint8Array>): ReadableStream<Uint8Array> {
+function readableFromAsyncGenerator(
+  generator: AsyncGenerator<Uint8Array>,
+): ReadableStream<Uint8Array> {
   return new ReadableStream<Uint8Array>({
     async pull(controller) {
       const next = await generator.next()
@@ -214,7 +220,9 @@ function makeLocalFileHeader(
   usesDataDescriptor: boolean,
   crc32: number,
 ): Uint8Array {
-  const extra = usesZip64Sizes ? makeZip64Extra([entry.sizeBytes, entry.sizeBytes]) : new Uint8Array(0)
+  const extra = usesZip64Sizes
+    ? makeZip64Extra([entry.sizeBytes, entry.sizeBytes])
+    : new Uint8Array(0)
   const header = new Uint8Array(30 + pathBytes.byteLength + extra.byteLength)
   const view = new DataView(header.buffer, header.byteOffset, header.byteLength)
 
@@ -224,8 +232,8 @@ function makeLocalFileHeader(
   writeUint16(view, 8, ZIP_STORED_METHOD)
   writeDosDateTime(view, 10)
   writeUint32(view, 14, usesDataDescriptor ? 0 : crc32)
-  writeUint32(view, 18, usesZip64Sizes ? UINT32_MAX : (usesDataDescriptor ? 0 : entry.sizeBytes))
-  writeUint32(view, 22, usesZip64Sizes ? UINT32_MAX : (usesDataDescriptor ? 0 : entry.sizeBytes))
+  writeUint32(view, 18, usesZip64Sizes ? UINT32_MAX : usesDataDescriptor ? 0 : entry.sizeBytes)
+  writeUint32(view, 22, usesZip64Sizes ? UINT32_MAX : usesDataDescriptor ? 0 : entry.sizeBytes)
   writeUint16(view, 26, pathBytes.byteLength)
   writeUint16(view, 28, extra.byteLength)
   header.set(pathBytes, 30)
@@ -342,7 +350,7 @@ function centralZip64ExtraLength(entry: CentralDirectoryEntry): number {
   let valueCount = 0
   if (entry.usesZip64Sizes) valueCount += 2
   if (entry.localHeaderOffset > UINT32_MAX) valueCount++
-  return valueCount > 0 ? 4 + (valueCount * 8) : 0
+  return valueCount > 0 ? 4 + valueCount * 8 : 0
 }
 
 function makeCentralZip64Extra(entry: CentralDirectoryEntry): Uint8Array {
@@ -354,12 +362,12 @@ function makeCentralZip64Extra(entry: CentralDirectoryEntry): Uint8Array {
 
 function makeZip64Extra(values: readonly number[]): Uint8Array {
   if (values.length === 0) return new Uint8Array(0)
-  const extra = new Uint8Array(4 + (values.length * 8))
+  const extra = new Uint8Array(4 + values.length * 8)
   const view = new DataView(extra.buffer, extra.byteOffset, extra.byteLength)
   writeUint16(view, 0, ZIP64_EXTRA_FIELD_ID)
   writeUint16(view, 2, values.length * 8)
   values.forEach((value, index) => {
-    writeUint64(view, 4 + (index * 8), value)
+    writeUint64(view, 4 + index * 8, value)
   })
   return extra
 }
@@ -402,7 +410,7 @@ const CRC32_TABLE = new Uint32Array(256)
 for (let i = 0; i < CRC32_TABLE.length; i++) {
   let value = i
   for (let bit = 0; bit < 8; bit++) {
-    value = (value & 1) ? (0xedb88320 ^ (value >>> 1)) : (value >>> 1)
+    value = value & 1 ? 0xedb88320 ^ (value >>> 1) : value >>> 1
   }
   CRC32_TABLE[i] = value >>> 0
 }

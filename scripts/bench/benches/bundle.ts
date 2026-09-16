@@ -41,7 +41,11 @@ function listChunks(): ChunkInfo[] {
     const path = resolve(DIST_ASSETS, name)
     if (!statSync(path).isFile()) continue
     const buf = readFileSync(path)
-    const kind: ChunkInfo['kind'] = name.endsWith('.js') ? 'js' : name.endsWith('.css') ? 'css' : 'other'
+    const kind: ChunkInfo['kind'] = name.endsWith('.js')
+      ? 'js'
+      : name.endsWith('.css')
+        ? 'css'
+        : 'other'
     out.push({
       filename: name,
       path,
@@ -81,7 +85,12 @@ export const bundleBench: BenchModule = {
         sections: [
           {
             title: 'Not run',
-            rows: [{ label: 'dist/', metrics: { reason: 'dist/assets missing — run `bun run build` first.' } }],
+            rows: [
+              {
+                label: 'dist/',
+                metrics: { reason: 'dist/assets missing — run `bun run build` first.' },
+              },
+            ],
           },
         ],
       }
@@ -159,17 +168,29 @@ export const bundleBench: BenchModule = {
       {
         label: 'JS (all chunks)',
         inputs: { files: js.length },
-        metrics: { raw: fmtBytes(jsTotal.raw), gzip: fmtBytes(jsTotal.gz), brotli: fmtBytes(jsTotal.br) },
+        metrics: {
+          raw: fmtBytes(jsTotal.raw),
+          gzip: fmtBytes(jsTotal.gz),
+          brotli: fmtBytes(jsTotal.br),
+        },
       },
       {
         label: 'CSS (all chunks)',
         inputs: { files: css.length },
-        metrics: { raw: fmtBytes(cssTotal.raw), gzip: fmtBytes(cssTotal.gz), brotli: fmtBytes(cssTotal.br) },
+        metrics: {
+          raw: fmtBytes(cssTotal.raw),
+          gzip: fmtBytes(cssTotal.gz),
+          brotli: fmtBytes(cssTotal.br),
+        },
       },
       {
         label: 'Eager first paint',
         inputs: { files: eagerChunks.length },
-        metrics: { raw: fmtBytes(eagerTotal.raw), gzip: fmtBytes(eagerTotal.gz), brotli: fmtBytes(eagerTotal.br) },
+        metrics: {
+          raw: fmtBytes(eagerTotal.raw),
+          gzip: fmtBytes(eagerTotal.gz),
+          brotli: fmtBytes(eagerTotal.br),
+        },
       },
     ]
 
@@ -188,12 +209,14 @@ export const bundleBench: BenchModule = {
         },
         {
           title: 'Eager first-paint chunks',
-          intro: 'These chunks are pulled on every admin first-paint. Anything here is "every visitor pays this" cost.',
+          intro:
+            'These chunks are pulled on every admin first-paint. Anything here is "every visitor pays this" cost.',
           rows: eagerRows,
         },
         {
           title: 'Top 12 JS chunks (lazy + eager)',
-          intro: 'Largest JS chunks by raw bytes. Lazy chunks are fine; eager chunks add to first-paint cost.',
+          intro:
+            'Largest JS chunks by raw bytes. Lazy chunks are fine; eager chunks add to first-paint cost.',
           rows: topJsRows,
         },
         {

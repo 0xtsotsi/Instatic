@@ -3,27 +3,37 @@ import { Type, type Static } from '@core/utils/typeboxHelpers'
 import type { SitePackageJson } from '@core/site-dependencies/manifest'
 import { isSafePackageName } from '@core/site-dependencies/packageNames'
 import { parseJsonResponse } from '@core/utils/jsonValidate'
-import type {
-  LockedSiteDependency,
-  SiteDependencyLock,
-} from '@core/site-runtime'
+import type { LockedSiteDependency, SiteDependencyLock } from '@core/site-runtime'
 
 // Validates the npm registry response. Permissive on extra fields (npm's
 // metadata schema is large and we only consume the fields below). Surfaced
 // by /audit-types — was `await response.json() as NpmPackageMetadata`.
-const NpmPackageMetadataSchema = Type.Object({
-  name: Type.Optional(Type.String()),
-  'dist-tags': Type.Optional(Type.Record(Type.String(), Type.String())),
-  versions: Type.Optional(Type.Record(
-    Type.String(),
-    Type.Object({
-      dist: Type.Optional(Type.Object({
-        integrity: Type.Optional(Type.String()),
-        tarball: Type.Optional(Type.String()),
-      }, { additionalProperties: true })),
-    }, { additionalProperties: true }),
-  )),
-}, { additionalProperties: true })
+const NpmPackageMetadataSchema = Type.Object(
+  {
+    name: Type.Optional(Type.String()),
+    'dist-tags': Type.Optional(Type.Record(Type.String(), Type.String())),
+    versions: Type.Optional(
+      Type.Record(
+        Type.String(),
+        Type.Object(
+          {
+            dist: Type.Optional(
+              Type.Object(
+                {
+                  integrity: Type.Optional(Type.String()),
+                  tarball: Type.Optional(Type.String()),
+                },
+                { additionalProperties: true },
+              ),
+            ),
+          },
+          { additionalProperties: true },
+        ),
+      ),
+    ),
+  },
+  { additionalProperties: true },
+)
 
 type NpmPackageMetadata = Static<typeof NpmPackageMetadataSchema>
 
@@ -61,7 +71,9 @@ function resolveVersion(metadata: NpmPackageMetadata, requested: string): string
 
   const version = maxSatisfying(versions, range)
   if (!version) {
-    throw new Error(`[runtime dependencies] No version satisfies ${metadata.name ?? 'package'}@${requested}`)
+    throw new Error(
+      `[runtime dependencies] No version satisfies ${metadata.name ?? 'package'}@${requested}`,
+    )
   }
   return version
 }
@@ -78,7 +90,9 @@ async function resolveRuntimeDependency(
 
   const fetchImpl = options.fetch ?? fetch
   const now = options.now ?? Date.now
-  const response = await fetchImpl(registryPackageUrl(options.registryUrl ?? 'https://registry.npmjs.org', safeName))
+  const response = await fetchImpl(
+    registryPackageUrl(options.registryUrl ?? 'https://registry.npmjs.org', safeName),
+  )
   if (!response.ok) {
     throw new Error(`[runtime dependencies] Failed to resolve ${safeName}: ${response.status}`)
   }

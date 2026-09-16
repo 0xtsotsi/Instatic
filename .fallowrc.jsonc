@@ -16,7 +16,7 @@
     "scripts/build-google-fonts.ts",
     "scripts/generate-secret-key.ts",
     "marketing/index.html",
-    "marketing/fonts.html"
+    "marketing/fonts.html",
   ],
 
   // Example plugins are zip-distributable user code that gets loaded at runtime
@@ -34,7 +34,7 @@
     // tree-shaking / the React.lazy boundary). Nothing imports them, so
     // fallow flags them as unused files; exclude them from analysis.
     "src/admin/layouts/index.ts",
-    "src/admin/modals/Settings/index.ts"
+    "src/admin/modals/Settings/index.ts",
   ],
 
   // Loaded from src/styles/globals.css via a targeted @font-face URL. Fallow
@@ -54,8 +54,8 @@
   "overrides": [
     {
       "files": ["src/__tests__/**/*.ts", "src/__tests__/**/*.tsx"],
-      "rules": { "unresolved-imports": "off" }
-    }
+      "rules": { "unresolved-imports": "off" },
+    },
   ],
 
   "ignoreExports": [
@@ -67,12 +67,12 @@
     // CSS-module file from duplicate-export grouping.
     {
       "file": "**/*.module.css",
-      "exports": ["*"]
+      "exports": ["*"],
     },
 
     {
       "file": "src/admin/pages/site/code-editor/CodeEditorPanel.module.css",
-      "exports": ["cm-editor"]
+      "exports": ["cm-editor"],
     },
 
     // Plugin SDK public surface — consumed by external plugin authors via
@@ -93,24 +93,24 @@
         "PluginEditorPanelProps",
         "DefinePluginCanvasOverlayConfig",
         "PluginCanvasOverlayComponent",
-        "PluginCanvasOverlayProps"
-      ]
+        "PluginCanvasOverlayProps",
+      ],
     },
     {
       "file": "src/core/plugin-sdk/builders/permissions.ts",
-      "exports": ["PermissionAlias"]
+      "exports": ["PermissionAlias"],
     },
     {
       "file": "src/core/plugin-sdk/types/commands.ts",
-      "exports": ["PluginPaletteCommand"]
+      "exports": ["PluginPaletteCommand"],
     },
     {
       "file": "src/core/plugin-sdk/types/routes.ts",
-      "exports": ["RouteMethod"]
+      "exports": ["RouteMethod"],
     },
     {
       "file": "src/core/plugin-sdk/types/serverApi.ts",
-      "exports": ["ServerPluginModule"]
+      "exports": ["ServerPluginModule"],
     },
 
     // Plugin host-ui / host-hooks barrels — the entire named surface of these
@@ -122,11 +122,11 @@
     // `plugin-host-ui-runtime-parity.test.ts`. Suppress the whole barrel.
     {
       "file": "src/admin/plugin-host-ui/index.ts",
-      "exports": ["*"]
+      "exports": ["*"],
     },
     {
       "file": "src/admin/plugin-host-hooks/index.ts",
-      "exports": ["*"]
-    }
-  ]
+      "exports": ["*"],
+    },
+  ],
 }

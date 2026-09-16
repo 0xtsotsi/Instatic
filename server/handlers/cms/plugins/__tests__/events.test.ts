@@ -9,10 +9,11 @@ async function connectPluginEventStream(): Promise<{
   reader: ReadableStreamDefaultReader<Uint8Array>
 }> {
   const requestController = new AbortController()
-  const response = handlePluginEventsStream(new Request(
-    'http://localhost/admin/api/cms/plugins/events',
-    { signal: requestController.signal },
-  ))
+  const response = handlePluginEventsStream(
+    new Request('http://localhost/admin/api/cms/plugins/events', {
+      signal: requestController.signal,
+    }),
+  )
   const reader = response.body!.getReader()
   const first = await reader.read()
   expect(decoder.decode(first.value)).toContain('event: ping')

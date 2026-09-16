@@ -35,9 +35,13 @@ export async function handleHooksFilter(
 ): Promise<void> {
   const [{ name, filterId }] = msg.args
   entry.hookFilters.push({ pluginId: msg.pluginId, filterId })
-  hookBus.filter(msg.pluginId, name, async (value: unknown, context: { pluginId: string } & Record<string, unknown>) => {
-    return await runHookFilterInWorker(msg.pluginId, filterId, name, value, context)
-  })
+  hookBus.filter(
+    msg.pluginId,
+    name,
+    async (value: unknown, context: { pluginId: string } & Record<string, unknown>) => {
+      return await runHookFilterInWorker(msg.pluginId, filterId, name, value, context)
+    },
+  )
   replyApiOk(msg.pluginId, msg.correlationId)
 }
 

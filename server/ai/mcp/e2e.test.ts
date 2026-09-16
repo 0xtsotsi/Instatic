@@ -30,8 +30,17 @@ beforeEach(async () => {
   `
   token = generateConnectorToken()
   await createConnector(db, {
-    userId: 'u1', label: 'Claude Code', type: 'local',
-    capabilities: ['ai.chat', 'ai.tools.write', 'site.read', 'site.structure.edit', 'content.manage', 'data.system.tables.read'],
+    userId: 'u1',
+    label: 'Claude Code',
+    type: 'local',
+    capabilities: [
+      'ai.chat',
+      'ai.tools.write',
+      'site.read',
+      'site.structure.edit',
+      'content.manage',
+      'data.system.tables.read',
+    ],
     tokenHash: await hashConnectorToken(token),
   })
 })
@@ -47,7 +56,10 @@ interface RpcResponse {
 }
 
 let nextId = 1
-async function rpc(method: string, params: unknown): Promise<{ status: number; json: RpcResponse }> {
+async function rpc(
+  method: string,
+  params: unknown,
+): Promise<{ status: number; json: RpcResponse }> {
   const req = new Request('http://localhost/_instatic/mcp', {
     method: 'POST',
     headers: {
@@ -92,7 +104,9 @@ describe('MCP end-to-end (stateless multi-request, real handler)', () => {
   it('a read-only connector sees reads but no write tools', async () => {
     const readToken = generateConnectorToken()
     await createConnector(db, {
-      userId: 'u1', label: 'RO', type: 'remote',
+      userId: 'u1',
+      label: 'RO',
+      type: 'remote',
       capabilities: ['ai.chat', 'site.read', 'content.manage', 'data.system.tables.read'],
       tokenHash: await hashConnectorToken(readToken),
     })

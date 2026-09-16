@@ -20,11 +20,7 @@
 import { nanoid } from 'nanoid'
 import type { DbClient } from '../../db/client'
 import { isoDateOrNull } from '@core/utils/isoDate'
-import {
-  decryptSecret,
-  encryptSecret,
-  type EncryptedSecret,
-} from '../../secrets/encryption'
+import { decryptSecret, encryptSecret, type EncryptedSecret } from '../../secrets/encryption'
 import {
   getMasterKeyFingerprint,
   loadMasterKey,
@@ -81,12 +77,8 @@ function rowToRecord(row: CredentialRow): CredentialRecord {
  * data. The `ai-credentials-never-leak.test.ts` gate scans handlers to
  * ensure no other shape escapes.
  */
-export async function toCredentialView(
-  record: CredentialRecord,
-): Promise<CredentialView> {
-  const currentFingerprint = record.keyFingerprint
-    ? await getMasterKeyFingerprint()
-    : null
+export async function toCredentialView(record: CredentialRecord): Promise<CredentialView> {
+  const currentFingerprint = record.keyFingerprint ? await getMasterKeyFingerprint() : null
   return {
     id: record.id,
     providerId: record.providerId,
@@ -94,9 +86,7 @@ export async function toCredentialView(
     displayLabel: record.displayLabel,
     baseUrl: record.baseUrl,
     keyFingerprintCurrent:
-      record.keyFingerprint === null
-        ? true
-        : record.keyFingerprint === currentFingerprint,
+      record.keyFingerprint === null ? true : record.keyFingerprint === currentFingerprint,
     createdAt: record.createdAt,
     lastUsedAt: record.lastUsedAt,
   }
@@ -183,7 +173,7 @@ export async function resolveCredentialForDriver(
   if (record.keyFingerprint && record.keyFingerprint !== currentFingerprint) {
     throw new CredentialError(
       `Credential ${record.id} was encrypted with a different master key. ` +
-      `Re-enter the API key in /admin/ai/providers.`,
+        `Re-enter the API key in /admin/ai/providers.`,
       409,
     )
   }
@@ -200,7 +190,7 @@ export async function resolveCredentialForDriver(
   if (record.authMode === 'apiKey' && !apiKey) {
     throw new CredentialError(
       `Credential ${record.id} is marked auth_mode='apiKey' but has no ` +
-      `stored key — data corruption. Re-enter the key in /admin/ai/providers.`,
+        `stored key — data corruption. Re-enter the key in /admin/ai/providers.`,
       500,
     )
   }
@@ -208,7 +198,7 @@ export async function resolveCredentialForDriver(
   if (record.authMode === 'baseUrl' && !record.baseUrl) {
     throw new CredentialError(
       `Credential ${record.id} is marked auth_mode='baseUrl' but has no ` +
-      `stored URL — data corruption. Re-enter the URL in /admin/ai/providers.`,
+        `stored URL — data corruption. Re-enter the URL in /admin/ai/providers.`,
       500,
     )
   }
@@ -253,8 +243,7 @@ export async function createCredentialForUser(
     }
     throw err
   }
-  const baseUrl =
-    input.authMode === 'baseUrl' ? input.baseUrl : null
+  const baseUrl = input.authMode === 'baseUrl' ? input.baseUrl : null
 
   try {
     const { rows } = await db<CredentialRow>`
@@ -285,9 +274,7 @@ export async function createCredentialForUser(
   }
 }
 
-async function maybeEncryptForInput(
-  input: CreateCredentialInput,
-): Promise<EncryptedSecret | null> {
+async function maybeEncryptForInput(input: CreateCredentialInput): Promise<EncryptedSecret | null> {
   if (input.authMode === 'apiKey') {
     return encryptKey(input.apiKey)
   }
@@ -317,18 +304,14 @@ export async function updateCredentialForUser(
   if (!existing) return null
 
   const nextLabel = patch.displayLabel ?? existing.displayLabel
-  const nextBaseUrl =
-    patch.baseUrl !== undefined ? patch.baseUrl : existing.baseUrl
+  const nextBaseUrl = patch.baseUrl !== undefined ? patch.baseUrl : existing.baseUrl
 
   let nextCiphertext = existing.ciphertext
   let nextIv = existing.iv
   let nextFingerprint = existing.keyFingerprint
   if (patch.apiKey !== undefined) {
     if (patch.apiKey.length === 0 && existing.authMode === 'apiKey') {
-      throw new CredentialError(
-        'API key cannot be empty for apiKey-mode credentials.',
-        400,
-      )
+      throw new CredentialError('API key cannot be empty for apiKey-mode credentials.', 400)
     }
     if (patch.apiKey.length === 0) {
       // baseUrl mode clearing optional bearer
@@ -410,10 +393,7 @@ export async function deleteCredentialForUser(
  *
  * Best-effort: no error if the row vanishes mid-stream (cleanup race).
  */
-export async function touchCredentialLastUsed(
-  db: DbClient,
-  credentialId: string,
-): Promise<void> {
+export async function touchCredentialLastUsed(db: DbClient, credentialId: string): Promise<void> {
   await db`
     update ai_provider_credentials
     set last_used_at = current_timestamp
@@ -440,9 +420,7 @@ function isFkViolation(err: unknown): boolean {
   return msg.includes('foreign key') || msg.includes('23503') || msg.includes('fk_')
 }
 
-function credentialEncryptionConfigurationError(
-  err: MasterKeyConfigurationError,
-): CredentialError {
+function credentialEncryptionConfigurationError(err: MasterKeyConfigurationError): CredentialError {
   return new CredentialError(
     `AI credential encryption is not configured: ${err.message.replace('[secrets/masterKey] ', '')}`,
     500,

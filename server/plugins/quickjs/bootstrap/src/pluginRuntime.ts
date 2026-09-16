@@ -95,7 +95,13 @@ globalThis.__runMigrate = async function runMigrate(fromVersion) {
 function __materializeUploadedFiles(value: unknown): unknown {
   if (Array.isArray(value)) return value.map(__materializeUploadedFiles)
   if (!value || typeof value !== 'object') return value
-  const marker = value as { __file?: unknown; name?: unknown; type?: unknown; size?: unknown; dataBase64?: unknown }
+  const marker = value as {
+    __file?: unknown
+    name?: unknown
+    type?: unknown
+    size?: unknown
+    dataBase64?: unknown
+  }
   if (marker.__file !== true || typeof marker.dataBase64 !== 'string') return value
   const dataBase64 = marker.dataBase64
   return {
@@ -106,7 +112,9 @@ function __materializeUploadedFiles(value: unknown): unknown {
       const bytes = __base64ToBytes(dataBase64)
       return bytes.buffer.slice(bytes.byteOffset, bytes.byteOffset + bytes.byteLength)
     },
-    text: async function () { return new TextDecoder().decode(__base64ToBytes(dataBase64)) },
+    text: async function () {
+      return new TextDecoder().decode(__base64ToBytes(dataBase64))
+    },
   }
 }
 
@@ -129,8 +137,9 @@ function __encodeResponseBody(body: unknown): { body: string; bodyEncoding: 'utf
     }
   }
   throw new TypeError(
-    'Route __response body must be a string, ArrayBuffer, or TypedArray/DataView (got '
-    + Object.prototype.toString.call(body).slice(8, -1) + ')',
+    'Route __response body must be a string, ArrayBuffer, or TypedArray/DataView (got ' +
+      Object.prototype.toString.call(body).slice(8, -1) +
+      ')',
   )
 }
 
@@ -155,11 +164,19 @@ globalThis.__runRoute = async function runRoute(routeKey, ctxJson) {
     has: function (name: unknown) {
       return Object.prototype.hasOwnProperty.call(_hdrsLc, String(name).toLowerCase())
     },
-    entries: function () { return Object.entries(_hdrsLc) },
-    keys:    function () { return Object.keys(_hdrsLc) },
-    values:  function () { return Object.values(_hdrsLc) },
+    entries: function () {
+      return Object.entries(_hdrsLc)
+    },
+    keys: function () {
+      return Object.keys(_hdrsLc)
+    },
+    values: function () {
+      return Object.values(_hdrsLc)
+    },
     forEach: function (cb: (value: unknown, key: string) => void) {
-      Object.keys(_hdrsLc).forEach(function (k) { cb(_hdrsLc[k], k) })
+      Object.keys(_hdrsLc).forEach(function (k) {
+        cb(_hdrsLc[k], k)
+      })
     },
   }
   // The raw body crosses the boundary byte-safely: UTF-8 text verbatim,
@@ -174,8 +191,12 @@ globalThis.__runRoute = async function runRoute(routeKey, ctxJson) {
     url: ctx.request.url,
     method: ctx.request.method,
     headers: headersFacade,
-    json: async function () { return fromJson(requestBodyText() || '{}') },
-    text: async function () { return requestBodyText() },
+    json: async function () {
+      return fromJson(requestBodyText() || '{}')
+    },
+    text: async function () {
+      return requestBodyText()
+    },
     arrayBuffer: async function () {
       const bytes = bodyIsBase64 ? __base64ToBytes(rawBody) : new TextEncoder().encode(rawBody)
       return bytes.buffer.slice(bytes.byteOffset, bytes.byteOffset + bytes.byteLength)
@@ -187,7 +208,8 @@ globalThis.__runRoute = async function runRoute(routeKey, ctxJson) {
   }
   const result = await handler({ req: req, body: body, user: ctx.user })
   if (
-    result && typeof result === 'object' &&
+    result &&
+    typeof result === 'object' &&
     (result as { __response?: unknown }).__response === true
   ) {
     const r = result as { status?: unknown; headers?: unknown; body?: unknown }
@@ -243,7 +265,9 @@ globalThis.__runLoopPreview = function runLoopPreview(sourceId, ctxJson) {
   // and the host would silently parse that to an empty preview. Surface the
   // author's bug loudly instead of swallowing it.
   if (result && typeof (result as { then?: unknown }).then === 'function') {
-    throw new TypeError('Loop source "' + sourceId + '" preview() must be synchronous (it returned a Promise)')
+    throw new TypeError(
+      'Loop source "' + sourceId + '" preview() must be synchronous (it returned a Promise)',
+    )
   }
   // Fallback for a preview() that forgets to return: '[]' (the empty array the
   // host parses) instead of the JS `undefined` primitive that would crash the
@@ -293,7 +317,8 @@ globalThis.__runMediaAdapterCall = async function runMediaAdapterCall(adapterId,
   const adapter = globalThis.__plugin_handlers.mediaAdapters[adapterId]
   if (!adapter) throw new Error('Media adapter not registered: ' + adapterId)
   const fn = adapter[method]
-  if (typeof fn !== 'function') throw new Error('Media adapter "' + adapterId + '" does not implement "' + method + '"')
+  if (typeof fn !== 'function')
+    throw new Error('Media adapter "' + adapterId + '" does not implement "' + method + '"')
   const argsArray = fromJson(argsJson)
   // .apply doesn't work cleanly through QuickJS' function wrapping; spread
   // into a regular call. Adapter methods accept 0..2 arguments in v1.
@@ -301,7 +326,10 @@ globalThis.__runMediaAdapterCall = async function runMediaAdapterCall(adapterId,
   return toJson(result, null)
 }
 
-globalThis.__runMediaUrlTransformer = async function runMediaUrlTransformer(transformerId, payloadJson) {
+globalThis.__runMediaUrlTransformer = async function runMediaUrlTransformer(
+  transformerId,
+  payloadJson,
+) {
   const fn = globalThis.__plugin_handlers.mediaUrlTransformers[transformerId]
   if (typeof fn !== 'function') {
     // Pass-through fallback. The host treats a null return as "no rewrite,

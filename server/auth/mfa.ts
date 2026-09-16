@@ -92,12 +92,12 @@ function totpAtCounter(secret: string, counter: number): string {
   counterBytes.writeBigUInt64BE(BigInt(counter))
   const digest = createHmac('sha1', key).update(counterBytes).digest()
   const offset = digest[digest.length - 1]! & 0x0f
-  const value = (
-    ((digest[offset]! & 0x7f) << 24)
-    | ((digest[offset + 1]! & 0xff) << 16)
-    | ((digest[offset + 2]! & 0xff) << 8)
-    | (digest[offset + 3]! & 0xff)
-  ) % 1_000_000
+  const value =
+    (((digest[offset]! & 0x7f) << 24) |
+      ((digest[offset + 1]! & 0xff) << 16) |
+      ((digest[offset + 2]! & 0xff) << 8) |
+      (digest[offset + 3]! & 0xff)) %
+    1_000_000
   return value.toString().padStart(TOTP_DIGITS, '0')
 }
 

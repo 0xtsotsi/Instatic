@@ -23,10 +23,7 @@ const SEARCH_PATH = `${CMS_API_PREFIX}/data/search`
 const DEFAULT_LIMIT = 25
 const MAX_LIMIT = 100
 
-export async function handleDataSearchRoute(
-  req: Request,
-  db: DbClient,
-): Promise<Response | null> {
+export async function handleDataSearchRoute(req: Request, db: DbClient): Promise<Response | null> {
   const url = new URL(req.url)
   if (url.pathname !== SEARCH_PATH) return null
 

@@ -22,11 +22,11 @@ zip -qr ../my-plugin.zip .
 
 ## What's included
 
-| File | Purpose |
-|---|---|
-| `plugin.json` | Plugin manifest — identity, permissions, entrypoints |
+| File              | Purpose                                                          |
+| ----------------- | ---------------------------------------------------------------- |
+| `plugin.json`     | Plugin manifest — identity, permissions, entrypoints             |
 | `editor/index.js` | Editor entrypoint — commands, toolbar buttons, palette providers |
-| `server/index.js` | Server entrypoint — lifecycle hooks, CMS routes |
+| `server/index.js` | Server entrypoint — lifecycle hooks, CMS routes                  |
 
 ## Command Spotlight (⌘K) integration
 
@@ -58,10 +58,15 @@ api.editor.palette.registerCommand({
   workspaces: ['any'],
   args: [
     { id: 'name', label: 'Name', type: 'text', placeholder: 'Your name' },
-    { id: 'tone', label: 'Tone', type: 'select', options: [
-      { value: 'formal', label: 'Formal' },
-      { value: 'casual', label: 'Casual' },
-    ]},
+    {
+      id: 'tone',
+      label: 'Tone',
+      type: 'select',
+      options: [
+        { value: 'formal', label: 'Formal' },
+        { value: 'casual', label: 'Casual' },
+      ],
+    },
   ],
   run: () => {},
 })
@@ -73,16 +78,18 @@ Register a provider to return dynamic search results on each keystroke. Results 
 
 ```js
 api.editor.palette.registerProvider({
-  id: 'acme.template.items',   // must start with "<pluginId>."
+  id: 'acme.template.items', // must start with "<pluginId>."
   label: 'My items',
   search: async (query) => {
     const res = await fetch('/admin/api/cms/plugins/acme.template/runtime/items?q=' + query)
     const data = await res.json()
-    return data.items.map(item => ({
+    return data.items.map((item) => ({
       id: item.id,
       title: item.title,
       subtitle: item.category,
-      run: async () => { /* open item, navigate, etc. */ },
+      run: async () => {
+        /* open item, navigate, etc. */
+      },
     }))
   },
 })
@@ -94,12 +101,12 @@ Both `registerCommand` and `registerProvider` require the `editor.commands` perm
 
 The template requests:
 
-| Permission | Why |
-|---|---|
-| `cms.routes` | Register a `/status` health-check route |
-| `editor.code` | Required for `entrypoints.editor` — editor entrypoints run **unsandboxed** in the admin window |
-| `editor.commands` | Register commands + palette commands and providers |
-| `editor.toolbar` | Add a toolbar button |
+| Permission        | Why                                                                                            |
+| ----------------- | ---------------------------------------------------------------------------------------------- |
+| `cms.routes`      | Register a `/status` health-check route                                                        |
+| `editor.code`     | Required for `entrypoints.editor` — editor entrypoints run **unsandboxed** in the admin window |
+| `editor.commands` | Register commands + palette commands and providers                                             |
+| `editor.toolbar`  | Add a toolbar button                                                                           |
 
 Remove permissions you don't need — users see the full permission list before installing.
 A plugin that drops its editor entrypoint (and any app-kind admin pages) can drop

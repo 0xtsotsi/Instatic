@@ -119,7 +119,12 @@ export async function applyDataRowChangesInTx(
     const storedSlug = existingSlugById.get(write.id)
     if (storedSlug === undefined) continue // created or revived below
     if (storedSlug === write.slug) {
-      await updateDataRowDraftCells(tx, write.id, { cells: write.cells, slug: write.slug }, actorUserId)
+      await updateDataRowDraftCells(
+        tx,
+        write.id,
+        { cells: write.cells, slug: write.slug },
+        actorUserId,
+      )
     } else {
       await updateDataRowDraftCells(tx, write.id, { cells: write.cells, slug: '' }, actorUserId)
       parked.push(write)
@@ -132,7 +137,11 @@ export async function applyDataRowChangesInTx(
       await resurrectDataRow(tx, write.id, { cells: write.cells, slug: '' }, actorUserId)
       parked.push(write)
     } else {
-      await createDataRow(tx, { id: write.id, tableId, cells: write.cells, slug: write.slug }, actorUserId)
+      await createDataRow(
+        tx,
+        { id: write.id, tableId, cells: write.cells, slug: write.slug },
+        actorUserId,
+      )
     }
     await stampDataRowSeq(tx, write.id, seq)
   }

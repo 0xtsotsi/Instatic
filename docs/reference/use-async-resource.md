@@ -22,14 +22,14 @@ Canonical hook for single-resource async loads in admin screens.
 // src/admin/lib/useAsyncResource.ts
 
 export interface AsyncResource<T> {
-  data: T | null       // null before the first successful load
-  loading: boolean     // true while a load is in flight (including initial mount)
+  data: T | null // null before the first successful load
+  loading: boolean // true while a load is in flight (including initial mount)
   error: string | null // human-readable message from the most recent failed load
-  refresh: () => void  // re-run the loader; stable identity across renders
+  refresh: () => void // re-run the loader; stable identity across renders
 }
 
 export interface UseAsyncResourceOptions {
-  fallbackError?: string  // message when a thrown value is not an Error; default: 'Something went wrong'
+  fallbackError?: string // message when a thrown value is not an Error; default: 'Something went wrong'
   swallowErrors?: boolean // when true, a failed load leaves data/error untouched
 }
 
@@ -48,11 +48,16 @@ function useAsyncResource<T>(
 
 ```tsx
 // DataTableControl.tsx
-const { data: tables, loading, error } = useAsyncResource<TableOption[]>(
+const {
+  data: tables,
+  loading,
+  error,
+} = useAsyncResource<TableOption[]>(
   async () => {
     const items = await listCmsDataTables()
-    return items.filter((t) => includeSystem || t.kind === 'data')
-               .map((t) => ({ id: t.id, label: t.name || t.slug || t.id, kind: t.kind }))
+    return items
+      .filter((t) => includeSystem || t.kind === 'data')
+      .map((t) => ({ id: t.id, label: t.name || t.slug || t.id, kind: t.kind }))
   },
   [includeSystem],
   { fallbackError: 'Failed to load data tables.' },
@@ -62,24 +67,23 @@ const { data: tables, loading, error } = useAsyncResource<TableOption[]>(
 **With `refresh()` after a mutation:**
 
 ```tsx
-const { data: plugins, loading, error, refresh } = useAsyncResource(
-  () => listInstalledPlugins(),
-  [],
-)
+const {
+  data: plugins,
+  loading,
+  error,
+  refresh,
+} = useAsyncResource(() => listInstalledPlugins(), [])
 
 async function handleUninstall(id: string) {
   await uninstallPlugin(id)
-  refresh()  // stable, safe in callbacks
+  refresh() // stable, safe in callbacks
 }
 ```
 
 **With `AbortSignal` forwarded to the persistence layer:**
 
 ```tsx
-const { data } = useAsyncResource(
-  (signal) => apiRequest('/api/cms/pages', { signal }),
-  [],
-)
+const { data } = useAsyncResource((signal) => apiRequest('/api/cms/pages', { signal }), [])
 ```
 
 **Seeding an edit form (render-time seed from `data`):**
@@ -90,11 +94,7 @@ When the resource is loaded the first time, you can seed form state from `data` 
 
 ```tsx
 // Widget keeps showing a skeleton rather than an error state.
-const { data: stats } = useAsyncResource(
-  () => loadDashboardStats(),
-  [],
-  { swallowErrors: true },
-)
+const { data: stats } = useAsyncResource(() => loadDashboardStats(), [], { swallowErrors: true })
 ```
 
 ---

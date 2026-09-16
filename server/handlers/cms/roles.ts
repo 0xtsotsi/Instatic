@@ -10,20 +10,11 @@
 import type { DbClient } from '../../db/client'
 import { requireAnyCapability, requireCapability, requireStepUp } from '../../auth/authz'
 import { createAuditEvent } from '../../repositories/audit'
-import {
-  createCustomRole,
-  deleteCustomRole,
-  listRoles,
-  updateRole,
-} from '../../repositories/roles'
+import { createCustomRole, deleteCustomRole, listRoles, updateRole } from '../../repositories/roles'
 import { normalizeCapabilities } from '../../auth/capabilities'
 import { Type } from '@core/utils/typeboxHelpers'
 import { badRequest, jsonResponse, readValidatedBody } from '../../http'
-import {
-  CMS_API_PREFIX,
-  mutationErrorResponse,
-  requestAuditContext,
-} from './shared'
+import { CMS_API_PREFIX, mutationErrorResponse, requestAuditContext } from './shared'
 import { runRouteTable, type Route, type RouteParams } from './routeTable'
 
 const RoleCreateBodySchema = Type.Object({
@@ -33,13 +24,14 @@ const RoleCreateBodySchema = Type.Object({
   capabilities: Type.Array(Type.String()),
 })
 
-const RolePatchBodySchema = Type.Partial(Type.Object({
-  name: Type.String(),
-  slug: Type.String(),
-  description: Type.String(),
-  capabilities: Type.Array(Type.String()),
-}))
-
+const RolePatchBodySchema = Type.Partial(
+  Type.Object({
+    name: Type.String(),
+    slug: Type.String(),
+    description: Type.String(),
+    capabilities: Type.Array(Type.String()),
+  }),
+)
 
 // ---------------------------------------------------------------------------
 // Per-route handlers

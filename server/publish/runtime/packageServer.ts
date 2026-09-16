@@ -82,7 +82,10 @@ function resolveCacheFilePath(pathname: string): { hash: string; absPath: string
   return { hash, absPath }
 }
 
-export async function tryServeRuntimePackage(req: Request, pathname: string): Promise<Response | null> {
+export async function tryServeRuntimePackage(
+  req: Request,
+  pathname: string,
+): Promise<Response | null> {
   if (req.method !== 'GET' && req.method !== 'HEAD') return null
   if (!isRuntimePackagePath(pathname)) return null
 

@@ -45,18 +45,9 @@ export function wrapEsmAsGlobal(
       /^([ \t]*)export\s+(async\s+)?function\s+([A-Za-z_$][\w$]*)/gm,
       '$1__exports.$3 = $2function $3',
     )
-    .replace(
-      /^([ \t]*)export\s+const\s+([A-Za-z_$][\w$]*)\s*=/gm,
-      '$1__exports.$2 =',
-    )
-    .replace(
-      /^([ \t]*)export\s+let\s+([A-Za-z_$][\w$]*)\s*=/gm,
-      '$1__exports.$2 =',
-    )
-    .replace(
-      /^([ \t]*)export\s+default\s+/gm,
-      '$1__exports.default = ',
-    )
+    .replace(/^([ \t]*)export\s+const\s+([A-Za-z_$][\w$]*)\s*=/gm, '$1__exports.$2 =')
+    .replace(/^([ \t]*)export\s+let\s+([A-Za-z_$][\w$]*)\s*=/gm, '$1__exports.$2 =')
+    .replace(/^([ \t]*)export\s+default\s+/gm, '$1__exports.default = ')
 
   // Rewrite `export { foo as default[, bar, …] }` blocks into one assignment
   // per entry: `as default` → `__exports.default`, bare names → same-name

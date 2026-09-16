@@ -56,10 +56,7 @@ const DOCUMENT_PUBLISH_CAPS: readonly CoreCapability[] = [
 ]
 
 // Mirrors `requireDataAuthorManager` (DATA_REASSIGN_CAPABILITIES).
-const DOCUMENT_REASSIGN_CAPS: readonly CoreCapability[] = [
-  'content.edit.any',
-  'content.manage',
-]
+const DOCUMENT_REASSIGN_CAPS: readonly CoreCapability[] = ['content.edit.any', 'content.manage']
 
 const createDocumentTool: AiTool = {
   name: 'content_create_document',
@@ -84,8 +81,7 @@ const deleteDocumentTool: AiTool = {
   scope: 'content',
   execution: 'browser',
   requiredCapabilities: DOCUMENT_EDIT_CAPS,
-  description:
-    'Soft-delete a document. User can restore via the Trash UI.',
+  description: 'Soft-delete a document. User can restore via the Trash UI.',
   inputSchema: DeleteDocumentInput,
 }
 
@@ -125,7 +121,7 @@ const setDocumentFieldTool: AiTool = {
   execution: 'browser',
   requiredCapabilities: DOCUMENT_EDIT_CAPS,
   description:
-    "Write one field on a document. `value` shape depends on the field type (read content_get_collection_schema first if unsure): text/longText/richText/url/email → string; number → number; boolean → boolean; date/dateTime → ISO string; select → option id; multiSelect → option id[]; media → { id } or { id }[]; relation → { rowId } or { rowId }[]; body → markdown string. Bridge converts markdown ↔ Tiptap automatically for body.",
+    'Write one field on a document. `value` shape depends on the field type (read content_get_collection_schema first if unsure): text/longText/richText/url/email → string; number → number; boolean → boolean; date/dateTime → ISO string; select → option id; multiSelect → option id[]; media → { id } or { id }[]; relation → { rowId } or { rowId }[]; body → markdown string. Bridge converts markdown ↔ Tiptap automatically for body.',
   inputSchema: SetDocumentFieldInput,
 }
 

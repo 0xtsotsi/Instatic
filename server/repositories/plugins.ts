@@ -8,10 +8,7 @@ import type {
   PluginSettingsValues,
 } from '@core/plugin-sdk'
 import { pluginSettingsDefaults } from '@core/plugin-sdk'
-import {
-  applyPluginSecretSettings,
-  seedPluginSecretDefaults,
-} from './pluginSecrets'
+import { applyPluginSecretSettings, seedPluginSecretDefaults } from './pluginSecrets'
 import type { StorageListOptions, StorageFilterOperator } from '@core/plugin-sdk/storageSchemas'
 import { parsePluginManifest } from '@core/plugins/manifest'
 import type { DbClient, Dialect } from '../db/client'
@@ -32,7 +29,14 @@ import { jsonField } from '../db/jsonExtract'
  */
 export type InstalledPluginResult =
   | { kind: 'ok'; plugin: InstalledPlugin }
-  | { kind: 'broken'; id: string; name: string; version: string; rawManifest: unknown; reason: string }
+  | {
+      kind: 'broken'
+      id: string
+      name: string
+      version: string
+      rawManifest: unknown
+      reason: string
+    }
 
 interface InstalledPluginRow {
   id: string
@@ -92,8 +96,8 @@ function mapInstalledPlugin(row: InstalledPluginRow): InstalledPluginResult {
         lifecycleStatus,
         lastError: row.last_error ?? null,
         grantedPermissions: Array.isArray(grantedPermissions)
-          ? grantedPermissions as PluginPermission[]
-          : manifest.grantedPermissions ?? [],
+          ? (grantedPermissions as PluginPermission[])
+          : (manifest.grantedPermissions ?? []),
         manifest,
         settings,
         installedAt: isoDate(row.installed_at),
@@ -146,12 +150,7 @@ function mergeSettingsWithDefaults(
 }
 
 function readLifecycleStatus(value: unknown, enabled: boolean): PluginLifecycleStatus {
-  if (
-    value === 'installed' ||
-    value === 'active' ||
-    value === 'disabled' ||
-    value === 'error'
-  ) {
+  if (value === 'installed' || value === 'active' || value === 'disabled' || value === 'error') {
     return value
   }
   return enabled ? 'active' : 'disabled'
@@ -178,7 +177,10 @@ export async function listInstalledPlugins(db: DbClient): Promise<InstalledPlugi
   return rows.map(mapInstalledPlugin)
 }
 
-export async function getInstalledPlugin(db: DbClient, id: string): Promise<InstalledPluginResult | null> {
+export async function getInstalledPlugin(
+  db: DbClient,
+  id: string,
+): Promise<InstalledPluginResult | null> {
   const { rows } = await db<InstalledPluginRow>`
     select id, name, version, enabled, lifecycle_status, last_error,
            granted_permissions_json, manifest_json, settings_json, installed_at, updated_at
@@ -226,7 +228,9 @@ export async function installPlugin(
   // installPlugin is always called with a freshly-validated manifest — a
   // broken result here indicates a serialisation invariant violation.
   if (result.kind !== 'ok') {
-    throw new Error(`[plugins] Failed to re-parse just-installed manifest for "${manifest.id}": ${result.reason}`)
+    throw new Error(
+      `[plugins] Failed to re-parse just-installed manifest for "${manifest.id}": ${result.reason}`,
+    )
   }
   return result.plugin
 }

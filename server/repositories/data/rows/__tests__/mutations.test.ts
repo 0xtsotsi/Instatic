@@ -49,9 +49,7 @@ describe('softDeleteDataRow', () => {
     expect(typeof result.deletedAt).toBe('string')
 
     // The summary shape exposes ONLY these keys — no user-ref fields.
-    expect(Object.keys(result).sort()).toEqual(
-      ['deletedAt', 'id', 'slug', 'status', 'tableId'],
-    )
+    expect(Object.keys(result).sort()).toEqual(['deletedAt', 'id', 'slug', 'status', 'tableId'])
 
     // Compile-time guarantee: the result type does not carry hydrated user refs.
     // @ts-expect-error createdBy is not part of DeletedRowSummary

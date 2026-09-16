@@ -31,7 +31,11 @@ async function loadDb() {
   return { createSqliteClient, runMigrations, sqliteMigrations }
 }
 
-async function freshDb(label: string): Promise<{ db: ReturnType<Awaited<ReturnType<typeof loadDb>>['createSqliteClient']>; path: string; migrateMs: number }> {
+async function freshDb(label: string): Promise<{
+  db: ReturnType<Awaited<ReturnType<typeof loadDb>>['createSqliteClient']>
+  path: string
+  migrateMs: number
+}> {
   const benchDir = resolve(REPO_ROOT, '.tmp/benchmarks')
   mkdirSync(benchDir, { recursive: true })
   const path = resolve(benchDir, `db-bench-${label}-${Date.now()}.db`)
@@ -46,7 +50,8 @@ async function freshDb(label: string): Promise<{ db: ReturnType<Awaited<ReturnTy
 export const dbBench: BenchModule = {
   name: 'db',
   title: 'Database (SQLite) performance',
-  description: 'Migrations, single-row inserts, batched writes, JSON columns, and scan vs index lookup.',
+  description:
+    'Migrations, single-row inserts, batched writes, JSON columns, and scan vs index lookup.',
 
   async run(ctx: BenchContext): Promise<BenchResult> {
     log.step('Spinning up an isolated DB with full migrations')
@@ -118,7 +123,9 @@ export const dbBench: BenchModule = {
             {
               label: 'select * limit 50',
               run: async () => {
-                const { rows } = await fresh.db<{ id: string }>`select id, slug, cells_json from data_rows order by created_at desc limit 50`
+                const { rows } = await fresh.db<{
+                  id: string
+                }>`select id, slug, cells_json from data_rows order by created_at desc limit 50`
                 return { rowCount: rows.length }
               },
             },
@@ -126,14 +133,18 @@ export const dbBench: BenchModule = {
               label: 'select * where slug = ? (indexed lookup)',
               run: async () => {
                 const target = `page-${Math.floor(POPULATE / 2)}`
-                const { rows } = await fresh.db<{ id: string }>`select id from data_rows where slug = ${target}`
+                const { rows } = await fresh.db<{
+                  id: string
+                }>`select id from data_rows where slug = ${target}`
                 return { rowCount: rows.length }
               },
             },
             {
               label: 'select * where cells_json LIKE %k% (sequential scan)',
               run: async () => {
-                const { rows } = await fresh.db<{ id: string }>`select id from data_rows where cells_json like ${'%page-9%'} limit 50`
+                const { rows } = await fresh.db<{
+                  id: string
+                }>`select id from data_rows where cells_json like ${'%page-9%'} limit 50`
                 return { rowCount: rows.length }
               },
             },
@@ -169,12 +180,18 @@ export const dbBench: BenchModule = {
       const jsonRows: BenchRow[] = []
       {
         const SHAPES = [
-          { label: 'small (5 fields)', shape: { a: 1, b: 'two', c: true, d: [1, 2, 3], e: { nested: 'value' } } },
+          {
+            label: 'small (5 fields)',
+            shape: { a: 1, b: 'two', c: true, d: [1, 2, 3], e: { nested: 'value' } },
+          },
           {
             label: 'medium (100 nodes)',
             shape: {
               nodes: Object.fromEntries(
-                Array.from({ length: 100 }, (_, i) => [`n${i}`, { moduleId: 'base.text', props: { text: `n${i}` }, children: [], classIds: [] }]),
+                Array.from({ length: 100 }, (_, i) => [
+                  `n${i}`,
+                  { moduleId: 'base.text', props: { text: `n${i}` }, children: [], classIds: [] },
+                ]),
               ),
               rootNodeId: 'n0',
             },
@@ -183,7 +200,10 @@ export const dbBench: BenchModule = {
             label: 'large (1k nodes)',
             shape: {
               nodes: Object.fromEntries(
-                Array.from({ length: 1000 }, (_, i) => [`n${i}`, { moduleId: 'base.text', props: { text: `n${i}` }, children: [], classIds: [] }]),
+                Array.from({ length: 1000 }, (_, i) => [
+                  `n${i}`,
+                  { moduleId: 'base.text', props: { text: `n${i}` }, children: [], classIds: [] },
+                ]),
               ),
               rootNodeId: 'n0',
             },
@@ -201,7 +221,9 @@ export const dbBench: BenchModule = {
                 insert into data_rows (id, table_id, cells_json, slug, status, created_at, updated_at)
                 values (${id}, ${pagesTableId}, ${shape}, ${id}, 'draft', current_timestamp, current_timestamp)
               `
-              const { rows } = await fresh.db<{ cells_json: unknown }>`select cells_json from data_rows where id = ${id}`
+              const { rows } = await fresh.db<{
+                cells_json: unknown
+              }>`select cells_json from data_rows where id = ${id}`
               if (rows.length === 0) throw new Error('round-trip missed')
               samples.push(performance.now() - t0)
             }
@@ -235,9 +257,24 @@ export const dbBench: BenchModule = {
         },
         sections: [
           { title: 'Migrations', rows: migrationsRow },
-          { title: 'Single-row inserts', intro: 'No transaction wrapper — each insert is its own commit. This is the "naïve write path" floor.', rows: insertRows },
-          { title: 'Query shapes on a populated table', intro: 'Indexed lookups vs. sequential JSON scans on a `data_rows` table with realistic row counts.', rows: listRows },
-          { title: 'JSON column round-trip', intro: 'Insert + readback of a `cells_json` payload. Tests the SQLite adapter\'s auto-stringify / auto-parse layer.', rows: jsonRows },
+          {
+            title: 'Single-row inserts',
+            intro:
+              'No transaction wrapper — each insert is its own commit. This is the "naïve write path" floor.',
+            rows: insertRows,
+          },
+          {
+            title: 'Query shapes on a populated table',
+            intro:
+              'Indexed lookups vs. sequential JSON scans on a `data_rows` table with realistic row counts.',
+            rows: listRows,
+          },
+          {
+            title: 'JSON column round-trip',
+            intro:
+              "Insert + readback of a `cells_json` payload. Tests the SQLite adapter's auto-stringify / auto-parse layer.",
+            rows: jsonRows,
+          },
         ],
       }
     } finally {

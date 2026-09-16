@@ -45,7 +45,10 @@ export async function handleImportPreviewRoute(
 
   const bundle = await readValidatedBody(req, SiteBundleSchema)
   if (!bundle) {
-    return jsonResponse({ error: 'Invalid bundle: body does not conform to SiteBundleSchema' }, { status: 400 })
+    return jsonResponse(
+      { error: 'Invalid bundle: body does not conform to SiteBundleSchema' },
+      { status: 400 },
+    )
   }
 
   // Fetch current local tables to know which ones exist
@@ -58,8 +61,7 @@ export async function handleImportPreviewRoute(
   const tableEntries = await Promise.all(
     bundle.tables.map(async (table) => {
       // Rows in the bundle for this table
-      const bundleRowsForTable = bundle.rows
-        .filter((r) => r.tableId === table.id)
+      const bundleRowsForTable = bundle.rows.filter((r) => r.tableId === table.id)
       const bundleRowIdsForTable = bundleRowsForTable.map((r) => r.id)
 
       // Local rows for this table (0 if the table doesn't exist locally yet)
@@ -115,11 +117,7 @@ function findRowSlugConflicts(
   bundleRows: DataRow[],
   localRows: DataRow[],
 ): BundleRowConflict[] {
-  const localRowsBySlug = new Map(
-    localRows
-      .filter((row) => row.slug)
-      .map((row) => [row.slug, row]),
-  )
+  const localRowsBySlug = new Map(localRows.filter((row) => row.slug).map((row) => [row.slug, row]))
   const reservedSlugs = new Set([
     ...localRowsBySlug.keys(),
     ...bundleRows.map((row) => row.slug).filter((slug) => slug.length > 0),

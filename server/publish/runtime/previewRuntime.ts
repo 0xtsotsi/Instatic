@@ -14,10 +14,7 @@ import {
   type BuildSiteRuntimeScriptsInput,
   type SiteRuntimeBuildResult,
 } from './bundleScripts'
-import {
-  buildRuntimePackageImportmap,
-  serializeImportmapForCsp,
-} from './packageImportmap'
+import { buildRuntimePackageImportmap, serializeImportmapForCsp } from './packageImportmap'
 
 interface RuntimePreviewDocumentInput {
   site: SiteDocument
@@ -64,13 +61,10 @@ export async function buildRuntimePreviewDocument(
   let runtimePackageImportmap: PublishedRuntimePackageImportmap | undefined
   if (input.dependencyCache?.hash && input.dependencyCache.nodeModulesDir) {
     const runtime = normalizeSiteRuntimeConfig(input.site.runtime)
-    const built = await buildRuntimePackageImportmap(
-      runtime.dependencyLock,
-      {
-        hash: input.dependencyCache.hash,
-        nodeModulesDir: input.dependencyCache.nodeModulesDir,
-      },
-    )
+    const built = await buildRuntimePackageImportmap(runtime.dependencyLock, {
+      hash: input.dependencyCache.hash,
+      nodeModulesDir: input.dependencyCache.nodeModulesDir,
+    })
     if (built) {
       const serialized = await serializeImportmapForCsp(built.importmap)
       runtimePackageImportmap = { body: serialized.body, sha256: serialized.sha256 }

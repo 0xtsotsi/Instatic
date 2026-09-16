@@ -68,9 +68,14 @@ async function publishDataRowLocked(
     // synchronous statement right after this await resolves, so a hole-shell
     // baked here carries the version that becomes current with no gap.
     const nextPublishVersion = getPublishVersion() + 1
-    await writeDataRowArtefact(db, uploadsDir, row, previousRoute, nextPublishVersion).catch((err) => {
-      console.error('[publish:row] static artefact write failed (live renderer remains active):', err)
-    })
+    await writeDataRowArtefact(db, uploadsDir, row, previousRoute, nextPublishVersion).catch(
+      (err) => {
+        console.error(
+          '[publish:row] static artefact write failed (live renderer remains active):',
+          err,
+        )
+      },
+    )
   }
 
   // Layer B: invalidate the in-memory render cache so the next visitor request
@@ -118,11 +123,18 @@ async function writeDataRowArtefact(
   const siteSnapshot = await getLatestPublishedSiteSnapshot(db)
   if (!siteSnapshot) return
 
-  const chain = resolveTemplateChain(siteSnapshot.site, { kind: 'entry', tableSlug: tableInfo.tableSlug })
+  const chain = resolveTemplateChain(siteSnapshot.site, {
+    kind: 'entry',
+    tableSlug: tableInfo.tableSlug,
+  })
   if (chain.length === 0) return
 
   // Fetch the full PublishedDataRow (needed for templateContext + media path).
-  const publishedDataRow = await getPublishedDataRowByRoute(db, tableInfo.tableRouteBase, publishedRow.slug)
+  const publishedDataRow = await getPublishedDataRowByRoute(
+    db,
+    tableInfo.tableRouteBase,
+    publishedRow.slug,
+  )
   if (!publishedDataRow) return
 
   const newPath = publicDataPath(tableInfo.tableRouteBase, publishedRow.slug)

@@ -21,7 +21,12 @@ import { resolveSiteDependencyLock } from '../../publish/runtime/dependencyResol
 import { ensureRuntimeDependencyCache } from '../../publish/runtime/dependencyCache'
 import { buildRuntimePackageImportmap } from '../../publish/runtime/packageImportmap'
 import { buildRuntimePreviewDocument } from '../../publish/runtime/previewRuntime'
-import { validateSite, validatePages, validateVisualComponents, SiteValidationError } from '@core/persistence/validate'
+import {
+  validateSite,
+  validatePages,
+  validateVisualComponents,
+  SiteValidationError,
+} from '@core/persistence/validate'
 import { isSafePackageName } from '@core/site-dependencies/packageNames'
 import type { SitePackageJson } from '@core/site-dependencies/manifest'
 import { normalizeSiteRuntimeConfig } from '@core/site-runtime'
@@ -73,9 +78,8 @@ function resolvePreviewPage(site: SiteDocument, pageId: string): Page | null {
 }
 
 function runtimeRequestPackageJson(raw: unknown): SitePackageJson {
-  const manifest = raw && typeof raw === 'object' && !Array.isArray(raw)
-    ? raw as Record<string, unknown>
-    : {}
+  const manifest =
+    raw && typeof raw === 'object' && !Array.isArray(raw) ? (raw as Record<string, unknown>) : {}
   return {
     dependencies: runtimeDependencyMap(manifest.dependencies),
     devDependencies: runtimeDependencyMap(manifest.devDependencies),
@@ -180,9 +184,10 @@ export async function handleRuntimeRoutes(req: Request, db: DbClient): Promise<R
       if (!page) return jsonResponse({ error: 'Page not found' }, { status: 404 })
 
       const runtime = normalizeSiteRuntimeConfig(site.runtime)
-      const dependencyCache = Object.keys(runtime.dependencyLock.packages).length > 0
-        ? await ensureRuntimeDependencyCache(runtime.dependencyLock)
-        : undefined
+      const dependencyCache =
+        Object.keys(runtime.dependencyLock.packages).length > 0
+          ? await ensureRuntimeDependencyCache(runtime.dependencyLock)
+          : undefined
       const preview = await buildRuntimePreviewDocument({
         site,
         page,

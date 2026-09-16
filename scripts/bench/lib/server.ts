@@ -107,9 +107,7 @@ export async function startServer(opts: StartOptions = {}): Promise<ServerHandle
   const bootMs = await waitForHealth(baseUrl).catch(async (err) => {
     proc.kill()
     await logHandle.flush()
-    throw new Error(
-      `${(err as Error).message}\nServer log: ${logFile}`,
-    )
+    throw new Error(`${(err as Error).message}\nServer log: ${logFile}`)
   })
 
   let stopped = false
@@ -142,7 +140,10 @@ export async function startServer(opts: StartOptions = {}): Promise<ServerHandle
   return { baseUrl, port, bootMs, stop, readRssMb }
 }
 
-async function pipeStream(stream: ReadableStream<Uint8Array> | null, sink: ReturnType<typeof Bun.file>['writer'] extends () => infer T ? T : never): Promise<void> {
+async function pipeStream(
+  stream: ReadableStream<Uint8Array> | null,
+  sink: ReturnType<typeof Bun.file>['writer'] extends () => infer T ? T : never,
+): Promise<void> {
   if (!stream) return
   const reader = stream.getReader()
   while (true) {

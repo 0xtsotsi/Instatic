@@ -52,7 +52,10 @@ import {
 import { getDraftSite, saveDraftSite, stampDraftSiteSeq } from '../../repositories/site'
 import { allocateSiteSeq } from '../../repositories/syncSequence'
 import { pageFromRow, pageToCells } from '../../../src/core/data/pageFromRow'
-import { visualComponentFromRow, visualComponentToCells } from '../../../src/core/data/componentFromRow'
+import {
+  visualComponentFromRow,
+  visualComponentToCells,
+} from '../../../src/core/data/componentFromRow'
 import { savedLayoutFromRow, savedLayoutToCells } from '../../../src/core/data/layoutFromRow'
 import {
   SiteValidationError,
@@ -77,18 +80,21 @@ const SITE_WRITE_CAPABILITIES = [
   'site.style.edit',
 ] satisfies CoreCapability[]
 
-const SiteDocumentBodySchema = Type.Object({
-  mode: Type.Union([Type.Literal('incremental'), Type.Literal('replace')]),
-  // The shell — validated structurally by validateSite in phase 1.
-  site: Type.Unknown(),
-  // Pages are parsed/validated by validatePagesForPartialSave.
-  changedPages: Type.Array(Type.Unknown()),
-  deletedPageIds: Type.Array(Type.String()),
-  changedComponents: Type.Array(VisualComponentSchema),
-  deletedComponentIds: Type.Array(Type.String()),
-  changedLayouts: Type.Array(SavedLayoutSchema),
-  deletedLayoutIds: Type.Array(Type.String()),
-}, { additionalProperties: false })
+const SiteDocumentBodySchema = Type.Object(
+  {
+    mode: Type.Union([Type.Literal('incremental'), Type.Literal('replace')]),
+    // The shell — validated structurally by validateSite in phase 1.
+    site: Type.Unknown(),
+    // Pages are parsed/validated by validatePagesForPartialSave.
+    changedPages: Type.Array(Type.Unknown()),
+    deletedPageIds: Type.Array(Type.String()),
+    changedComponents: Type.Array(VisualComponentSchema),
+    deletedComponentIds: Type.Array(Type.String()),
+    changedLayouts: Type.Array(SavedLayoutSchema),
+    deletedLayoutIds: Type.Array(Type.String()),
+  },
+  { additionalProperties: false },
+)
 
 type SiteDocumentBody = Static<typeof SiteDocumentBodySchema>
 
@@ -138,12 +144,17 @@ function forbiddenStructuralChange(
   const err = new ForbiddenSiteChangeError(
     'structure',
     path,
-    deleteIds.size > 0 ? `${label} deleted ${Array.from(deleteIds).join(', ')}` : `${label} changed`,
+    deleteIds.size > 0
+      ? `${label} deleted ${Array.from(deleteIds).join(', ')}`
+      : `${label} changed`,
   )
   return jsonResponse({ error: err.message, kind: err.kind, path: err.path }, { status: 403 })
 }
 
-export async function handleSiteDocumentRoutes(req: Request, db: DbClient): Promise<Response | null> {
+export async function handleSiteDocumentRoutes(
+  req: Request,
+  db: DbClient,
+): Promise<Response | null> {
   const url = new URL(req.url)
   if (url.pathname !== `${CMS_API_PREFIX}/site-document`) return null
   if (req.method !== 'PUT') return methodNotAllowed()
@@ -156,7 +167,9 @@ export async function handleSiteDocumentRoutes(req: Request, db: DbClient): Prom
 
   if (
     body.mode === 'replace' &&
-    (body.deletedPageIds.length > 0 || body.deletedComponentIds.length > 0 || body.deletedLayoutIds.length > 0)
+    (body.deletedPageIds.length > 0 ||
+      body.deletedComponentIds.length > 0 ||
+      body.deletedLayoutIds.length > 0)
   ) {
     return badRequest('replace mode derives deletions server-side — deleted*Ids must be empty')
   }
@@ -195,13 +208,20 @@ export async function handleSiteDocumentRoutes(req: Request, db: DbClient): Prom
       : []
     const changedComponentIds = new Set(body.changedComponents.map((vc) => vc.id))
     const componentDeleteIds = resolveDeleteIds(
-      body.mode, existingVCs.map((vc) => vc.id), changedComponentIds, body.deletedComponentIds,
+      body.mode,
+      existingVCs.map((vc) => vc.id),
+      changedComponentIds,
+      body.deletedComponentIds,
     )
     {
       const overlap = findChangedDeletedOverlap(changedComponentIds, componentDeleteIds)
       if (overlap) return badRequest(`component "${overlap}" is both changed and deleted`)
       const forbidden = forbiddenStructuralChange(
-        user.capabilities, 'components', body.changedComponents.length, componentDeleteIds, 'component',
+        user.capabilities,
+        'components',
+        body.changedComponents.length,
+        componentDeleteIds,
+        'component',
       )
       if (forbidden) return forbidden
     }
@@ -211,7 +231,11 @@ export async function handleSiteDocumentRoutes(req: Request, db: DbClient): Prom
     }
     const components: VisualComponent[] =
       body.changedComponents.length > 0 || componentDeleteIds.size > 0
-        ? validateVisualComponentsForPartialWrite(body.changedComponents, existingVCs, keptComponentIds)
+        ? validateVisualComponentsForPartialWrite(
+            body.changedComponents,
+            existingVCs,
+            keptComponentIds,
+          )
         : []
 
     // Layouts — identity rules (unique id + name) run against the merged roster.
@@ -225,13 +249,20 @@ export async function handleSiteDocumentRoutes(req: Request, db: DbClient): Prom
       : []
     const changedLayoutIds = new Set(body.changedLayouts.map((l) => l.id))
     const layoutDeleteIds = resolveDeleteIds(
-      body.mode, existingLayouts.map((l) => l.id), changedLayoutIds, body.deletedLayoutIds,
+      body.mode,
+      existingLayouts.map((l) => l.id),
+      changedLayoutIds,
+      body.deletedLayoutIds,
     )
     {
       const overlap = findChangedDeletedOverlap(changedLayoutIds, layoutDeleteIds)
       if (overlap) return badRequest(`layout "${overlap}" is both changed and deleted`)
       const forbidden = forbiddenStructuralChange(
-        user.capabilities, 'layouts', body.changedLayouts.length, layoutDeleteIds, 'layout',
+        user.capabilities,
+        'layouts',
+        body.changedLayouts.length,
+        layoutDeleteIds,
+        'layout',
       )
       if (forbidden) return forbidden
     }
@@ -259,7 +290,10 @@ export async function handleSiteDocumentRoutes(req: Request, db: DbClient): Prom
         .filter((id): id is string => typeof id === 'string'),
     )
     const pageDeleteIds = resolveDeleteIds(
-      body.mode, existingPageSlugs.map((r) => r.id), changedPageIdsRaw, body.deletedPageIds,
+      body.mode,
+      existingPageSlugs.map((r) => r.id),
+      changedPageIdsRaw,
+      body.deletedPageIds,
     )
     {
       const overlap = findChangedDeletedOverlap(changedPageIdsRaw, pageDeleteIds)
@@ -276,9 +310,7 @@ export async function handleSiteDocumentRoutes(req: Request, db: DbClient): Prom
         ? validatePagesForPartialSave(body.changedPages, mergedVCs, keptSlugs)
         : []
     const previousPages: Page[] =
-      pages.length > 0 && !hasAllSiteCaps
-        ? (await listDataRows(db, 'pages')).map(pageFromRow)
-        : []
+      pages.length > 0 && !hasAllSiteCaps ? (await listDataRows(db, 'pages')).map(pageFromRow) : []
     validatePageWriteDiff({
       previousPages,
       changedPages: pages,
@@ -314,20 +346,29 @@ export async function handleSiteDocumentRoutes(req: Request, db: DbClient): Prom
       // issues no row queries inside the transaction.
       if (componentWrites.length > 0 || componentDeleteIds.size > 0) {
         await applyDataRowChangesInTx(tx, {
-          tableId: 'components', writes: componentWrites, deleteIds: componentDeleteIds,
-          actorUserId: user.id, seq,
+          tableId: 'components',
+          writes: componentWrites,
+          deleteIds: componentDeleteIds,
+          actorUserId: user.id,
+          seq,
         })
       }
       if (layoutWrites.length > 0 || layoutDeleteIds.size > 0) {
         await applyDataRowChangesInTx(tx, {
-          tableId: 'layouts', writes: layoutWrites, deleteIds: layoutDeleteIds,
-          actorUserId: user.id, seq,
+          tableId: 'layouts',
+          writes: layoutWrites,
+          deleteIds: layoutDeleteIds,
+          actorUserId: user.id,
+          seq,
         })
       }
       if (pageWrites.length > 0 || pageDeleteIds.size > 0) {
         const pagesResult = await applyDataRowChangesInTx(tx, {
-          tableId: 'pages', writes: pageWrites, deleteIds: pageDeleteIds,
-          actorUserId: user.id, seq,
+          tableId: 'pages',
+          writes: pageWrites,
+          deleteIds: pageDeleteIds,
+          actorUserId: user.id,
+          seq,
         })
         deletedPublishedPage = pagesResult.deletedPublished
       }
@@ -345,10 +386,7 @@ export async function handleSiteDocumentRoutes(req: Request, db: DbClient): Prom
   } catch (err) {
     if (err instanceof SiteValidationError) return badRequest(err.message)
     if (err instanceof ForbiddenSiteChangeError) {
-      return jsonResponse(
-        { error: err.message, kind: err.kind, path: err.path },
-        { status: 403 },
-      )
+      return jsonResponse({ error: err.message, kind: err.kind, path: err.path }, { status: 403 })
     }
     throw err
   }

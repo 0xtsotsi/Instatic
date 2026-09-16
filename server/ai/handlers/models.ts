@@ -12,15 +12,18 @@ import { requireCapability } from '../../auth/authz'
 import type { DbClient } from '../../db/client'
 import { resolveDriver } from '../drivers'
 import { listProviderModels } from '../drivers/modelList'
-import {
-  readCredentialForUser,
-  resolveCredentialForDriver,
-} from '../credentials/store'
+import { readCredentialForUser, resolveCredentialForDriver } from '../credentials/store'
 import { getModelCatalogue, pricingKey } from '../pricing'
 import type { AiProviderModel } from '../drivers/types'
 import type { AiProviderId } from '../runtime/types'
 
-const VALID_PROVIDERS: AiProviderId[] = ['anthropic', 'openai', 'ollama', 'openrouter', 'openai-compatible']
+const VALID_PROVIDERS: AiProviderId[] = [
+  'anthropic',
+  'openai',
+  'ollama',
+  'openrouter',
+  'openai-compatible',
+]
 
 export function tryHandleAiModels(
   req: Request,
@@ -47,7 +50,9 @@ async function handleModels(
 
   if (!VALID_PROVIDERS.includes(providerParam as AiProviderId)) {
     return jsonResponse(
-      { error: `Unknown provider "${providerParam}". Must be one of: ${VALID_PROVIDERS.join(', ')}` },
+      {
+        error: `Unknown provider "${providerParam}". Must be one of: ${VALID_PROVIDERS.join(', ')}`,
+      },
       { status: 400 },
     )
   }

@@ -18,16 +18,23 @@ async function freshDb(): Promise<DbClient> {
 }
 
 let db: DbClient
-beforeEach(async () => { db = await freshDb() })
+beforeEach(async () => {
+  db = await freshDb()
+})
 
 describe('mcp auth', () => {
   it('resolves a valid bearer token to a connector + capabilities', async () => {
     const token = generateConnectorToken()
     await createConnector(db, {
-      userId: 'u1', label: 'L', type: 'remote',
-      capabilities: ['ai.chat', 'content.manage'], tokenHash: await hashConnectorToken(token),
+      userId: 'u1',
+      label: 'L',
+      type: 'remote',
+      capabilities: ['ai.chat', 'content.manage'],
+      tokenHash: await hashConnectorToken(token),
     })
-    const req = new Request('http://x/_instatic/mcp', { headers: { Authorization: `Bearer ${token}` } })
+    const req = new Request('http://x/_instatic/mcp', {
+      headers: { Authorization: `Bearer ${token}` },
+    })
     const res = await resolveMcpAuth(req, db)
     expect(res.ok).toBe(true)
     if (res.ok) {
@@ -42,17 +49,25 @@ describe('mcp auth', () => {
   })
 
   it('rejects an unknown token', async () => {
-    const req = new Request('http://x/_instatic/mcp', { headers: { Authorization: 'Bearer imcp_nope' } })
+    const req = new Request('http://x/_instatic/mcp', {
+      headers: { Authorization: 'Bearer imcp_nope' },
+    })
     expect((await resolveMcpAuth(req, db)).ok).toBe(false)
   })
 
   it('rejects a revoked connector token', async () => {
     const token = generateConnectorToken()
     const rec = await createConnector(db, {
-      userId: 'u1', label: 'L', type: 'remote', capabilities: ['ai.chat'], tokenHash: await hashConnectorToken(token),
+      userId: 'u1',
+      label: 'L',
+      type: 'remote',
+      capabilities: ['ai.chat'],
+      tokenHash: await hashConnectorToken(token),
     })
     await db`update ai_mcp_connectors set revoked_at = current_timestamp where id = ${rec.id}`
-    const req = new Request('http://x/_instatic/mcp', { headers: { Authorization: `Bearer ${token}` } })
+    const req = new Request('http://x/_instatic/mcp', {
+      headers: { Authorization: `Bearer ${token}` },
+    })
     expect((await resolveMcpAuth(req, db)).ok).toBe(false)
   })
 
@@ -61,23 +76,35 @@ describe('mcp auth', () => {
     // Create a connector that expired 1 second ago.
     const pastExpiry = new Date(Date.now() - 1000).toISOString()
     const rec = await createConnector(db, {
-      userId: 'u1', label: 'L', type: 'remote', capabilities: ['ai.chat'], tokenHash: await hashConnectorToken(token),
+      userId: 'u1',
+      label: 'L',
+      type: 'remote',
+      capabilities: ['ai.chat'],
+      tokenHash: await hashConnectorToken(token),
       ttlDays: 90,
     })
     // Backdate expires_at to a past timestamp to simulate expiry.
     await db`update ai_mcp_connectors set expires_at = ${pastExpiry} where id = ${rec.id}`
-    const req = new Request('http://x/_instatic/mcp', { headers: { Authorization: `Bearer ${token}` } })
+    const req = new Request('http://x/_instatic/mcp', {
+      headers: { Authorization: `Bearer ${token}` },
+    })
     expect((await resolveMcpAuth(req, db)).ok).toBe(false)
   })
 
   it('accepts a grandfathered connector with NULL expires_at (non-expiring)', async () => {
     const token = generateConnectorToken()
     const rec = await createConnector(db, {
-      userId: 'u1', label: 'Legacy', type: 'remote', capabilities: ['ai.chat'], tokenHash: await hashConnectorToken(token),
+      userId: 'u1',
+      label: 'Legacy',
+      type: 'remote',
+      capabilities: ['ai.chat'],
+      tokenHash: await hashConnectorToken(token),
     })
     // Simulate a pre-migration 019 row with no expiry set.
     await db`update ai_mcp_connectors set expires_at = null where id = ${rec.id}`
-    const req = new Request('http://x/_instatic/mcp', { headers: { Authorization: `Bearer ${token}` } })
+    const req = new Request('http://x/_instatic/mcp', {
+      headers: { Authorization: `Bearer ${token}` },
+    })
     const res = await resolveMcpAuth(req, db)
     expect(res.ok).toBe(true)
   })

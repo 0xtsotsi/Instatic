@@ -15,14 +15,14 @@ import type { DbClient } from '../db/client'
 import { isoDateOrNull } from '@core/utils/isoDate'
 
 interface SessionListItem {
-  id: string                       // sha256 hash of the cookie token (same as session.id_hash)
+  id: string // sha256 hash of the cookie token (same as session.id_hash)
   deviceLabel: string
   ipAddress: string | null
   userAgent: string | null
   createdAt: string
   lastSeenAt: string
   expiresAt: string
-  isCurrent: boolean               // true when id matches the request's session hash
+  isCurrent: boolean // true when id matches the request's session hash
   mfaPassedAt: string | null
   stepUpExpiresAt: string | null
 }

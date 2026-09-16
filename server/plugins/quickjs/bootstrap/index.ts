@@ -17,7 +17,12 @@
  * the bundled IIFE — strict.
  */
 
-import { URL_POLYFILL, TEXT_CODEC_POLYFILL, CONSOLE_POLYFILL, ABORT_CONTROLLER_POLYFILL } from './polyfills'
+import {
+  URL_POLYFILL,
+  TEXT_CODEC_POLYFILL,
+  CONSOLE_POLYFILL,
+  ABORT_CONTROLLER_POLYFILL,
+} from './polyfills'
 import { TIMERS_SOURCE } from './timers'
 import { BASE64_SHIM } from './base64'
 import { CRYPTO_SUBTLE_SHIM } from './crypto'

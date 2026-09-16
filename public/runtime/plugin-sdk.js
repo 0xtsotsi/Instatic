@@ -15,7 +15,7 @@
 const G = globalThis.__instatic?.pluginSdk
 if (!G) {
   throw new Error(
-    "[@instatic/runtime] Plugin SDK not initialized. Did the host bundle finish loading before the plugin import?",
+    '[@instatic/runtime] Plugin SDK not initialized. Did the host bundle finish loading before the plugin import?',
   )
 }
 

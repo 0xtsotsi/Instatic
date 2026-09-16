@@ -17,11 +17,7 @@
 
 import { Type, parseValue } from '@core/utils/typeboxHelpers'
 import { isAbortError } from '@core/http'
-import {
-  type AiAuthMode,
-  type AiProviderId,
-  type AiStreamEvent,
-} from '../runtime/types'
+import { type AiAuthMode, type AiProviderId, type AiStreamEvent } from '../runtime/types'
 import type {
   AiProvider,
   AiProviderCapabilities,
@@ -43,21 +39,39 @@ const FALLBACK_MODELS: AiProviderModel[] = [
     label: 'Llama 4',
     tier: 'smart',
     catalogueSource: 'fallback',
-    capabilities: { toolCalling: true, visionInput: true, toolResultImages: false, promptCache: false, streaming: true },
+    capabilities: {
+      toolCalling: true,
+      visionInput: true,
+      toolResultImages: false,
+      promptCache: false,
+      streaming: true,
+    },
   },
   {
     id: 'llama3.3',
     label: 'Llama 3.3',
     tier: 'balanced',
     catalogueSource: 'fallback',
-    capabilities: { toolCalling: true, visionInput: false, toolResultImages: false, promptCache: false, streaming: true },
+    capabilities: {
+      toolCalling: true,
+      visionInput: false,
+      toolResultImages: false,
+      promptCache: false,
+      streaming: true,
+    },
   },
   {
     id: 'qwen3',
     label: 'Qwen 3',
     tier: 'balanced',
     catalogueSource: 'fallback',
-    capabilities: { toolCalling: true, visionInput: false, toolResultImages: false, promptCache: false, streaming: true },
+    capabilities: {
+      toolCalling: true,
+      visionInput: false,
+      toolResultImages: false,
+      promptCache: false,
+      streaming: true,
+    },
   },
 ]
 
@@ -115,7 +129,10 @@ export const ollamaDriver: AiProvider = {
 const OllamaTagsSchema = Type.Object({
   models: Type.Optional(
     Type.Array(
-      Type.Object({ name: Type.Optional(Type.String()), model: Type.Optional(Type.String()) }, { additionalProperties: true }),
+      Type.Object(
+        { name: Type.Optional(Type.String()), model: Type.Optional(Type.String()) },
+        { additionalProperties: true },
+      ),
     ),
   ),
 })
@@ -127,13 +144,15 @@ const OllamaShowSchema = Type.Object(
 
 function fallbackCapabilities(modelId: string): AiProviderCapabilities {
   const model = FALLBACK_MODELS.find((candidate) => candidate.id === modelId)
-  return model?.capabilities ?? {
-    toolCalling: true,
-    visionInput: false,
-    toolResultImages: false,
-    promptCache: false,
-    streaming: true,
-  }
+  return (
+    model?.capabilities ?? {
+      toolCalling: true,
+      visionInput: false,
+      toolResultImages: false,
+      promptCache: false,
+      streaming: true,
+    }
+  )
 }
 
 async function fetchOllamaModels(
@@ -156,24 +175,26 @@ async function fetchOllamaModels(
     for (let offset = 0; offset < modelIds.length; offset += OLLAMA_CAPABILITY_LOOKUP_CONCURRENCY) {
       signal?.throwIfAborted()
       const batch = modelIds.slice(offset, offset + OLLAMA_CAPABILITY_LOOKUP_CONCURRENCY)
-      const resolvedBatch = await Promise.all(batch.map(async (id) => {
-        const declared = await fetchOllamaDeclaredCapabilities(creds, id, signal).catch((err) => {
-          if (signal?.aborted || isAbortError(err)) throw err
-          return null
-        })
-        return {
-          id,
-          label: id,
-          catalogueSource: 'live' as const,
-          capabilities: {
-            toolCalling: declared ? declared.includes('tools') : true,
-            visionInput: declared?.includes('vision') ?? false,
-            toolResultImages: false,
-            promptCache: false,
-            streaming: true,
-          },
-        } satisfies AiProviderModel
-      }))
+      const resolvedBatch = await Promise.all(
+        batch.map(async (id) => {
+          const declared = await fetchOllamaDeclaredCapabilities(creds, id, signal).catch((err) => {
+            if (signal?.aborted || isAbortError(err)) throw err
+            return null
+          })
+          return {
+            id,
+            label: id,
+            catalogueSource: 'live' as const,
+            capabilities: {
+              toolCalling: declared ? declared.includes('tools') : true,
+              visionInput: declared?.includes('vision') ?? false,
+              toolResultImages: false,
+              promptCache: false,
+              streaming: true,
+            },
+          } satisfies AiProviderModel
+        }),
+      )
       models.push(...resolvedBatch)
     }
     return models.length > 0 ? models : FALLBACK_MODELS

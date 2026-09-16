@@ -130,10 +130,7 @@ function isFsNotFound(err: unknown): boolean {
  * error). The dashboard would still render — the segment just contributes
  * zero to the breakdown bar.
  */
-async function readDatabaseBytes(
-  db: DbClient,
-  databaseUrl: string | undefined,
-): Promise<number> {
+async function readDatabaseBytes(db: DbClient, databaseUrl: string | undefined): Promise<number> {
   if (db.dialect === 'postgres') {
     try {
       const { rows } = await db<{ size: number | string | null }>`

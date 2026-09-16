@@ -75,12 +75,14 @@ globalThis.__buildApi = function buildApi() {
       if (typeof handler !== 'function') throw new TypeError('Route handler must be a function')
       const routeKey = method + ':' + normalizePath(path)
       globalThis.__plugin_handlers.routes[routeKey] = handler as BootstrapFn
-      return call('cms.routes.register', [{
-        method: method,
-        path: normalizePath(path),
-        access: { kind: 'capability', capability: capability },
-        routeKey: routeKey,
-      }])
+      return call('cms.routes.register', [
+        {
+          method: method,
+          path: normalizePath(path),
+          access: { kind: 'capability', capability: capability },
+          routeKey: routeKey,
+        },
+      ])
     }
   }
   function registerAuthenticated(method: string) {
@@ -89,12 +91,14 @@ globalThis.__buildApi = function buildApi() {
       if (typeof handler !== 'function') throw new TypeError('Route handler must be a function')
       const routeKey = method + ':' + normalizePath(path)
       globalThis.__plugin_handlers.routes[routeKey] = handler as BootstrapFn
-      return call('cms.routes.register', [{
-        method: method,
-        path: normalizePath(path),
-        access: { kind: 'authenticated' },
-        routeKey: routeKey,
-      }])
+      return call('cms.routes.register', [
+        {
+          method: method,
+          path: normalizePath(path),
+          access: { kind: 'authenticated' },
+          routeKey: routeKey,
+        },
+      ])
     }
   }
   function registerPublic(method: string) {
@@ -105,12 +109,14 @@ globalThis.__buildApi = function buildApi() {
       if (typeof handler !== 'function') throw new TypeError('Route handler must be a function')
       const routeKey = method + ':' + normalizePath(path)
       globalThis.__plugin_handlers.routes[routeKey] = handler as BootstrapFn
-      return call('cms.routes.register', [{
-        method: method,
-        path: normalizePath(path),
-        access: { kind: 'public' },
-        routeKey: routeKey,
-      }])
+      return call('cms.routes.register', [
+        {
+          method: method,
+          path: normalizePath(path),
+          access: { kind: 'public' },
+          routeKey: routeKey,
+        },
+      ])
     }
   }
 
@@ -133,17 +139,25 @@ globalThis.__buildApi = function buildApi() {
   // rejected, and the call resolves to the canonical (namespaced) name.
   function emit(event: unknown, payload: unknown) {
     assertTargetPermission('cms.hooks.emit')
-    return call('cms.hooks.emit', [{ event: String(event), payload: payload === undefined ? null : payload }])
+    return call('cms.hooks.emit', [
+      { event: String(event), payload: payload === undefined ? null : payload },
+    ])
   }
 
   function registerSource(source: PluginInput) {
     assertTargetPermission('cms.loops.registerSource')
     if (!source || typeof source !== 'object') throw new TypeError('Loop source must be an object')
-    if (typeof source.fetch !== 'function') throw new TypeError('Loop source.fetch must be a function')
+    if (typeof source.fetch !== 'function')
+      throw new TypeError('Loop source.fetch must be a function')
     const sourceId = String(source.id)
     globalThis.__plugin_handlers.loopSources[sourceId] = {
       fetch: source.fetch,
-      preview: typeof source.preview === 'function' ? source.preview : function () { return [] },
+      preview:
+        typeof source.preview === 'function'
+          ? source.preview
+          : function () {
+              return []
+            },
     }
     const descriptor = {
       id: sourceId,
@@ -163,10 +177,18 @@ globalThis.__buildApi = function buildApi() {
     // once up front via the map (same behavior as before, no inline literal).
     assertTargetPermission('cms.storage.list')
     return {
-      list: function (options: unknown) { return call('cms.storage.list', [String(resourceId), options ?? {}]) },
-      create: function (data: unknown) { return call('cms.storage.create', [String(resourceId), data]) },
-      update: function (recordId: unknown, data: unknown) { return call('cms.storage.update', [String(resourceId), String(recordId), data]) },
-      delete: function (recordId: unknown) { return call('cms.storage.delete', [String(resourceId), String(recordId)]) },
+      list: function (options: unknown) {
+        return call('cms.storage.list', [String(resourceId), options ?? {}])
+      },
+      create: function (data: unknown) {
+        return call('cms.storage.create', [String(resourceId), data])
+      },
+      update: function (recordId: unknown, data: unknown) {
+        return call('cms.storage.update', [String(resourceId), String(recordId), data])
+      },
+      delete: function (recordId: unknown) {
+        return call('cms.storage.delete', [String(resourceId), String(recordId)])
+      },
     }
   }
 
@@ -187,10 +209,14 @@ globalThis.__buildApi = function buildApi() {
 
   function scheduleRegister(def: PluginInput) {
     assertTargetPermission('cms.schedule.register')
-    if (!def || typeof def !== 'object') throw new TypeError('schedule.register: argument must be an object')
-    if (typeof def.id !== 'string' || def.id.length === 0) throw new TypeError("schedule.register: 'id' is required")
-    if (typeof def.handler !== 'function') throw new TypeError("schedule.register: 'handler' must be a function")
-    if (!def.cadence || typeof def.cadence !== 'object') throw new TypeError("schedule.register: 'cadence' is required")
+    if (!def || typeof def !== 'object')
+      throw new TypeError('schedule.register: argument must be an object')
+    if (typeof def.id !== 'string' || def.id.length === 0)
+      throw new TypeError("schedule.register: 'id' is required")
+    if (typeof def.handler !== 'function')
+      throw new TypeError("schedule.register: 'handler' must be a function")
+    if (!def.cadence || typeof def.cadence !== 'object')
+      throw new TypeError("schedule.register: 'cadence' is required")
     const scheduleId = String(def.id)
     globalThis.__plugin_handlers.schedules[namespaceScheduleId(scheduleId)] = def.handler
     const overlap = def.overlap === 'queue' || def.overlap === 'parallel' ? def.overlap : 'skip'
@@ -201,12 +227,14 @@ globalThis.__buildApi = function buildApi() {
     let maxDurationMs = typeof def.maxDurationMs === 'number' ? def.maxDurationMs : 5000
     if (maxDurationMs < 100) maxDurationMs = 100
     if (maxDurationMs > 5 * 60 * 1000) maxDurationMs = 5 * 60 * 1000
-    return call('cms.schedule.register', [{
-      scheduleId: scheduleId,
-      cadence: def.cadence,
-      overlap: overlap,
-      maxDurationMs: maxDurationMs,
-    }])
+    return call('cms.schedule.register', [
+      {
+        scheduleId: scheduleId,
+        cadence: def.cadence,
+        overlap: overlap,
+        maxDurationMs: maxDurationMs,
+      },
+    ])
   }
 
   function scheduleCancel(id: unknown) {
@@ -226,13 +254,21 @@ globalThis.__buildApi = function buildApi() {
       return scheduleRegister({ id: id, cadence: { interval: 'hourly' }, handler: handler })
     },
     every: function (minutes: unknown, id: unknown, handler: unknown) {
-      return scheduleRegister({ id: id, cadence: { interval: 'every', minutes: minutes }, handler: handler })
+      return scheduleRegister({
+        id: id,
+        cadence: { interval: 'every', minutes: minutes },
+        handler: handler,
+      })
     },
   }
 
   const settingsApi = {
-    get: function (key: string) { return globalThis.__plugin_settings[key] },
-    getAll: function () { return Object.assign({}, globalThis.__plugin_settings) },
+    get: function (key: string) {
+      return globalThis.__plugin_settings[key]
+    },
+    getAll: function () {
+      return Object.assign({}, globalThis.__plugin_settings)
+    },
     replace: async function (next: unknown) {
       // Validation + persistence happen host-side. The host pushes the
       // merged record back into this VM's __plugin_settings mirror (via
@@ -251,28 +287,49 @@ globalThis.__buildApi = function buildApi() {
 
   function registerStorageAdapter(adapter: PluginInput) {
     assertTargetPermission('cms.media.registerStorageAdapter')
-    if (!adapter || typeof adapter !== 'object') throw new TypeError('registerStorageAdapter: adapter must be an object')
-    if (typeof adapter.id !== 'string' || !adapter.id) throw new TypeError("registerStorageAdapter: 'id' is required")
+    if (!adapter || typeof adapter !== 'object')
+      throw new TypeError('registerStorageAdapter: adapter must be an object')
+    if (typeof adapter.id !== 'string' || !adapter.id)
+      throw new TypeError("registerStorageAdapter: 'id' is required")
     if (adapter.id.indexOf(meta.id + '.') !== 0) {
-      throw new Error('registerStorageAdapter: adapter id "' + adapter.id + '" must start with the plugin id "' + meta.id + '."')
+      throw new Error(
+        'registerStorageAdapter: adapter id "' +
+          adapter.id +
+          '" must start with the plugin id "' +
+          meta.id +
+          '."',
+      )
     }
-    if (typeof adapter.label !== 'string' || !adapter.label) throw new TypeError("registerStorageAdapter: 'label' is required")
+    if (typeof adapter.label !== 'string' || !adapter.label)
+      throw new TypeError("registerStorageAdapter: 'label' is required")
     if (!Array.isArray(adapter.roles) || adapter.roles.length === 0) {
       throw new TypeError("registerStorageAdapter: 'roles' must be a non-empty array")
     }
-    if (typeof adapter.servingMode !== 'string') throw new TypeError("registerStorageAdapter: 'servingMode' is required")
-    if (typeof adapter.beginWrite !== 'function') throw new TypeError("registerStorageAdapter: 'beginWrite' must be a function")
-    if (typeof adapter.finalizeWrite !== 'function') throw new TypeError("registerStorageAdapter: 'finalizeWrite' must be a function")
-    if (typeof adapter.abortWrite !== 'function') throw new TypeError("registerStorageAdapter: 'abortWrite' must be a function")
-    if (typeof adapter['delete'] !== 'function') throw new TypeError("registerStorageAdapter: 'delete' must be a function")
-    if (typeof adapter.verify !== 'function') throw new TypeError("registerStorageAdapter: 'verify' must be a function")
+    if (typeof adapter.servingMode !== 'string')
+      throw new TypeError("registerStorageAdapter: 'servingMode' is required")
+    if (typeof adapter.beginWrite !== 'function')
+      throw new TypeError("registerStorageAdapter: 'beginWrite' must be a function")
+    if (typeof adapter.finalizeWrite !== 'function')
+      throw new TypeError("registerStorageAdapter: 'finalizeWrite' must be a function")
+    if (typeof adapter.abortWrite !== 'function')
+      throw new TypeError("registerStorageAdapter: 'abortWrite' must be a function")
+    if (typeof adapter['delete'] !== 'function')
+      throw new TypeError("registerStorageAdapter: 'delete' must be a function")
+    if (typeof adapter.verify !== 'function')
+      throw new TypeError("registerStorageAdapter: 'verify' must be a function")
     // Mode-specific constraints — the host re-validates but throwing here
     // surfaces the bug at activation time instead of first-use.
     if (adapter.servingMode === 'proxy' && typeof adapter.readStream !== 'function') {
-      throw new TypeError("registerStorageAdapter: servingMode 'proxy' requires a 'readStream' function")
+      throw new TypeError(
+        "registerStorageAdapter: servingMode 'proxy' requires a 'readStream' function",
+      )
     }
     if (adapter.servingMode !== 'proxy' && typeof adapter.getReadUrl !== 'function') {
-      throw new TypeError("registerStorageAdapter: servingMode '" + adapter.servingMode + "' requires a 'getReadUrl' function")
+      throw new TypeError(
+        "registerStorageAdapter: servingMode '" +
+          adapter.servingMode +
+          "' requires a 'getReadUrl' function",
+      )
     }
     // Stash the live callback bag — keyed by id so the host's call-into-VM
     // round-trip can find it without iterating.
@@ -288,23 +345,26 @@ globalThis.__buildApi = function buildApi() {
     // Normalise CSP origins — accept either array of objects or undefined.
     const cspOrigins = Array.isArray(adapter.cspOrigins)
       ? adapter.cspOrigins.map(function (entry: PluginInput) {
-        return { directive: String(entry.directive), origin: String(entry.origin) }
-      })
+          return { directive: String(entry.directive), origin: String(entry.origin) }
+        })
       : undefined
-    return call('cms.media.registerStorageAdapter', [{
-      adapterId: adapter.id,
-      label: String(adapter.label),
-      roles: adapter.roles.slice(),
-      servingMode: String(adapter.servingMode),
-      hasGetReadUrl: typeof adapter.getReadUrl === 'function',
-      hasReadStream: typeof adapter.readStream === 'function',
-      cspOrigins: cspOrigins,
-    }])
+    return call('cms.media.registerStorageAdapter', [
+      {
+        adapterId: adapter.id,
+        label: String(adapter.label),
+        roles: adapter.roles.slice(),
+        servingMode: String(adapter.servingMode),
+        hasGetReadUrl: typeof adapter.getReadUrl === 'function',
+        hasReadStream: typeof adapter.readStream === 'function',
+        cspOrigins: cspOrigins,
+      },
+    ])
   }
 
   function registerUrlTransformer(fn: unknown) {
     assertTargetPermission('cms.media.registerUrlTransformer')
-    if (typeof fn !== 'function') throw new TypeError('registerUrlTransformer: argument must be a function')
+    if (typeof fn !== 'function')
+      throw new TypeError('registerUrlTransformer: argument must be a function')
     const transformerId = __nextId('mediaUrlT')
     globalThis.__plugin_handlers.mediaUrlTransformers[transformerId] = fn as BootstrapFn
     return call('cms.media.registerUrlTransformer', [{ transformerId: transformerId }])
@@ -312,10 +372,18 @@ globalThis.__buildApi = function buildApi() {
 
   function registerVariantDelegate(delegate: PluginInput) {
     assertTargetPermission('cms.media.registerVariantDelegate')
-    if (!delegate || typeof delegate !== 'object') throw new TypeError('registerVariantDelegate: argument must be an object')
-    if (typeof delegate.id !== 'string' || !delegate.id) throw new TypeError("registerVariantDelegate: 'id' is required")
+    if (!delegate || typeof delegate !== 'object')
+      throw new TypeError('registerVariantDelegate: argument must be an object')
+    if (typeof delegate.id !== 'string' || !delegate.id)
+      throw new TypeError("registerVariantDelegate: 'id' is required")
     if (delegate.id.indexOf(meta.id + '.') !== 0) {
-      throw new Error('registerVariantDelegate: id "' + delegate.id + '" must start with the plugin id "' + meta.id + '."')
+      throw new Error(
+        'registerVariantDelegate: id "' +
+          delegate.id +
+          '" must start with the plugin id "' +
+          meta.id +
+          '."',
+      )
     }
     if (typeof delegate.variantUrlTemplate !== 'string') {
       throw new TypeError("registerVariantDelegate: 'variantUrlTemplate' must be a string")
@@ -326,12 +394,14 @@ globalThis.__buildApi = function buildApi() {
     if (!Array.isArray(delegate.formats) || delegate.formats.length === 0) {
       throw new TypeError("registerVariantDelegate: 'formats' must be a non-empty array")
     }
-    return call('cms.media.registerVariantDelegate', [{
-      delegateId: delegate.id,
-      variantUrlTemplate: delegate.variantUrlTemplate,
-      widths: delegate.widths.slice(),
-      formats: delegate.formats.slice(),
-    }])
+    return call('cms.media.registerVariantDelegate', [
+      {
+        delegateId: delegate.id,
+        variantUrlTemplate: delegate.variantUrlTemplate,
+        widths: delegate.widths.slice(),
+        formats: delegate.formats.slice(),
+      },
+    ])
   }
 
   return {
@@ -348,8 +418,11 @@ globalThis.__buildApi = function buildApi() {
           const a = args[i]
           if (typeof a === 'string') parts.push(a)
           else {
-            try { parts.push(JSON.stringify(a)) }
-            catch (_) { parts.push(String(a)) }
+            try {
+              parts.push(JSON.stringify(a))
+            } catch (_) {
+              parts.push(String(a))
+            }
           }
         }
         __log('info', parts.join(' '))
@@ -443,7 +516,7 @@ globalThis.__buildApi = function buildApi() {
               assertTargetPermission('cms.content.entries.update')
               return call('cms.content.entries.update', [s, String(entryId), patch])
             },
-            'delete': function (entryId: unknown) {
+            delete: function (entryId: unknown) {
               assertTargetPermission('cms.content.entries.delete')
               return call('cms.content.entries.delete', [s, String(entryId)])
             },
@@ -512,4 +585,7 @@ globalThis.__buildApi = function buildApi() {
 }
 
 let __idCounter = 0
-function __nextId(prefix: string): string { __idCounter += 1; return prefix + '_' + __idCounter + '_' + Date.now().toString(36) }
+function __nextId(prefix: string): string {
+  __idCounter += 1
+  return prefix + '_' + __idCounter + '_' + Date.now().toString(36)
+}

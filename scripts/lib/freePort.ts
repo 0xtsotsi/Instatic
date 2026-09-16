@@ -23,10 +23,10 @@ interface PortHolder {
  */
 function findPortHolders(port: number): PortHolder[] {
   if (process.platform === 'win32') return []
-  const lsof = Bun.spawnSync(
-    ['lsof', '-nP', `-iTCP:${port}`, '-sTCP:LISTEN', '-t'],
-    { stdout: 'pipe', stderr: 'ignore' },
-  )
+  const lsof = Bun.spawnSync(['lsof', '-nP', `-iTCP:${port}`, '-sTCP:LISTEN', '-t'], {
+    stdout: 'pipe',
+    stderr: 'ignore',
+  })
   if (lsof.exitCode !== 0) return []
 
   const pids = decoder
@@ -43,8 +43,7 @@ function findPortHolders(port: number): PortHolder[] {
       stdout: 'pipe',
       stderr: 'ignore',
     })
-    const command =
-      ps.exitCode === 0 ? decoder.decode(ps.stdout).trim() : '<unknown>'
+    const command = ps.exitCode === 0 ? decoder.decode(ps.stdout).trim() : '<unknown>'
     holders.push({ pid, command })
   }
   return holders

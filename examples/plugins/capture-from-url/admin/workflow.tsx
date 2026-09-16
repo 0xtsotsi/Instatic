@@ -48,8 +48,9 @@ export function CaptureWorkflow() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body),
       })
-      const data = await response.json() as CaptureResult
-      if (!response.ok || !data.ok) throw new Error(data.error || `Capture failed (${response.status})`)
+      const data = (await response.json()) as CaptureResult
+      if (!response.ok || !data.ok)
+        throw new Error(data.error || `Capture failed (${response.status})`)
       setResult(data)
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : 'Capture failed')
@@ -68,13 +69,27 @@ export function CaptureWorkflow() {
       <Card>
         <form onSubmit={capture}>
           <Stack gap={16}>
-            <Input label="URL" type="url" required value={url} placeholder="https://example.com" onChange={setUrl} />
+            <Input
+              label="URL"
+              type="url"
+              required
+              value={url}
+              placeholder="https://example.com"
+              onChange={setUrl}
+            />
 
             <fieldset>
               <legend>Mode</legend>
               {(['dom+styles', 'dom-only', 'styles-only'] as const).map((value) => (
                 <label key={value} style={{ marginRight: 16 }}>
-                  <input type="radio" name="mode" value={value} checked={mode === value} onChange={() => setMode(value)} /> {value}
+                  <input
+                    type="radio"
+                    name="mode"
+                    value={value}
+                    checked={mode === value}
+                    onChange={() => setMode(value)}
+                  />{' '}
+                  {value}
                 </label>
               ))}
             </fieldset>
@@ -83,7 +98,14 @@ export function CaptureWorkflow() {
               <legend>Scope</legend>
               {(['page', 'subtree', 'element'] as const).map((value) => (
                 <label key={value} style={{ marginRight: 16 }}>
-                  <input type="radio" name="scope" value={value} checked={scope === value} onChange={() => setScope(value)} /> {value}
+                  <input
+                    type="radio"
+                    name="scope"
+                    value={value}
+                    checked={scope === value}
+                    onChange={() => setScope(value)}
+                  />{' '}
+                  {value}
                 </label>
               ))}
             </fieldset>
@@ -97,19 +119,32 @@ export function CaptureWorkflow() {
               description="Required for subtree and element captures."
               onChange={setSelector}
             />
-            <Button variant="primary" type="submit" disabled={loading}>{loading ? 'Capturing…' : 'Capture'}</Button>
+            <Button variant="primary" type="submit" disabled={loading}>
+              {loading ? 'Capturing…' : 'Capture'}
+            </Button>
           </Stack>
         </form>
       </Card>
 
-      {error ? <Alert tone="danger" title="Capture failed">{error}</Alert> : null}
+      {error ? (
+        <Alert tone="danger" title="Capture failed">
+          {error}
+        </Alert>
+      ) : null}
       {result ? (
         <Stack gap={16}>
           <Card>
             <Heading level={2}>Preview</Heading>
             {preview ? (
-              <iframe title="Captured page preview" sandbox="" srcDoc={preview} style={{ width: '100%', minHeight: 480, border: '1px solid currentColor' }} />
-            ) : <Text variant="muted">This capture did not return HTML.</Text>}
+              <iframe
+                title="Captured page preview"
+                sandbox=""
+                srcDoc={preview}
+                style={{ width: '100%', minHeight: 480, border: '1px solid currentColor' }}
+              />
+            ) : (
+              <Text variant="muted">This capture did not return HTML.</Text>
+            )}
           </Card>
           <Card>
             <Heading level={2}>HTML</Heading>
@@ -121,7 +156,9 @@ export function CaptureWorkflow() {
           </Card>
           <Card>
             <Heading level={2}>nextActions</Heading>
-            <pre style={{ whiteSpace: 'pre-wrap', overflow: 'auto' }}>{JSON.stringify(result.nextActions ?? [], null, 2)}</pre>
+            <pre style={{ whiteSpace: 'pre-wrap', overflow: 'auto' }}>
+              {JSON.stringify(result.nextActions ?? [], null, 2)}
+            </pre>
           </Card>
         </Stack>
       ) : null}

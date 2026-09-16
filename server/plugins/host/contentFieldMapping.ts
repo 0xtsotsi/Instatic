@@ -61,7 +61,9 @@ export function pluginContentFieldsToDataFields(
       case 'relation': {
         const targetTableId = tableIdBySlug.get(field.targetTableSlug)
         if (!targetTableId) {
-          throw new Error(`Relation field "${field.id}" targets unknown table "${field.targetTableSlug}"`)
+          throw new Error(
+            `Relation field "${field.id}" targets unknown table "${field.targetTableSlug}"`,
+          )
         }
         out.push({
           ...pluginFieldCommon(field),

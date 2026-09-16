@@ -21,12 +21,26 @@ export interface ApplyTokensOptions {
 }
 
 const COLOR_PROPS = new Set([
-  'color', 'background-color', 'border-color', 'border-top-color',
-  'border-right-color', 'border-bottom-color', 'border-left-color',
-  'outline-color', 'text-decoration-color', 'caret-color', 'fill', 'stroke',
+  'color',
+  'background-color',
+  'border-color',
+  'border-top-color',
+  'border-right-color',
+  'border-bottom-color',
+  'border-left-color',
+  'outline-color',
+  'text-decoration-color',
+  'caret-color',
+  'fill',
+  'stroke',
 ])
 
-interface RGB { r: number; g: number; b: number; a: number }
+interface RGB {
+  r: number
+  g: number
+  b: number
+  a: number
+}
 
 function parseHex(hex: string): RGB | null {
   const m = hex.match(/^#([0-9a-fA-F]{3,8})$/)
@@ -68,52 +82,60 @@ function parseColor(s: string): RGB | null {
 
 function ciede2000(c1: RGB, c2: RGB): number {
   const toLab = (c: RGB): { L: number; a: number; b: number } => {
-    let r = c.r / 255, g = c.g / 255, b = c.b / 255
+    let r = c.r / 255,
+      g = c.g / 255,
+      b = c.b / 255
     r = r > 0.04045 ? Math.pow((r + 0.055) / 1.055, 2.4) : r / 12.92
     g = g > 0.04045 ? Math.pow((g + 0.055) / 1.055, 2.4) : g / 12.92
     b = b > 0.04045 ? Math.pow((b + 0.055) / 1.055, 2.4) : b / 12.92
     let x = (r * 0.4124 + g * 0.3576 + b * 0.1805) * 100
     let y = (r * 0.2126 + g * 0.7152 + b * 0.0722) * 100
     let z = (r * 0.0193 + g * 0.1192 + b * 0.9505) * 100
-    x /= 95.047; y /= 100.000; z /= 108.883
-    x = x > 0.008856 ? Math.pow(x, 1/3) : 7.787 * x + 16/116
-    y = y > 0.008856 ? Math.pow(y, 1/3) : 7.787 * y + 16/116
-    z = z > 0.008856 ? Math.pow(z, 1/3) : 7.787 * z + 16/116
+    x /= 95.047
+    y /= 100.0
+    z /= 108.883
+    x = x > 0.008856 ? Math.pow(x, 1 / 3) : 7.787 * x + 16 / 116
+    y = y > 0.008856 ? Math.pow(y, 1 / 3) : 7.787 * y + 16 / 116
+    z = z > 0.008856 ? Math.pow(z, 1 / 3) : 7.787 * z + 16 / 116
     return { L: 116 * y - 16, a: 500 * (x - y), b: 200 * (y - z) }
   }
-  const l1 = toLab(c1), l2 = toLab(c2)
+  const l1 = toLab(c1),
+    l2 = toLab(c2)
   const avgL = (l1.L + l2.L) / 2
   const C1 = Math.sqrt(l1.a * l1.a + l1.b * l1.b)
   const C2 = Math.sqrt(l2.a * l2.a + l2.b * l2.b)
   const avgC = (C1 + C2) / 2
   const G = 0.5 * (1 - Math.sqrt(Math.pow(avgC, 7) / (Math.pow(avgC, 7) + Math.pow(25, 7))))
-  const a1p = l1.a * (1 + G), a2p = l2.a * (1 + G)
+  const a1p = l1.a * (1 + G),
+    a2p = l2.a * (1 + G)
   const C1p = Math.sqrt(a1p * a1p + l1.b * l1.b)
   const C2p = Math.sqrt(a2p * a2p + l2.b * l2.b)
   const avgCp = (C1p + C2p) / 2
-  const h1p = Math.atan2(l1.b, a1p) * 180 / Math.PI + (Math.atan2(l1.b, a1p) < 0 ? 360 : 0)
-  const h2p = Math.atan2(l2.b, a2p) * 180 / Math.PI + (Math.atan2(l2.b, a2p) < 0 ? 360 : 0)
+  const h1p = (Math.atan2(l1.b, a1p) * 180) / Math.PI + (Math.atan2(l1.b, a1p) < 0 ? 360 : 0)
+  const h2p = (Math.atan2(l2.b, a2p) * 180) / Math.PI + (Math.atan2(l2.b, a2p) < 0 ? 360 : 0)
   let dhp = h2p - h1p
   if (Math.abs(dhp) > 180) dhp = dhp > 180 ? dhp - 360 : dhp + 360
   const dLp = l2.L - l1.L
   const dCp = C2p - C1p
-  const dHp = 2 * Math.sqrt(C1p * C2p) * Math.sin(dhp * Math.PI / 360)
+  const dHp = 2 * Math.sqrt(C1p * C2p) * Math.sin((dhp * Math.PI) / 360)
   const avgHp = Math.abs(h1p - h2p) > 180 ? (h1p + h2p + 360) / 2 : (h1p + h2p) / 2
-  const T = 1 - 0.17 * Math.cos((avgHp - 30) * Math.PI / 180) +
-              0.24 * Math.cos(2 * avgHp * Math.PI / 180) +
-              0.32 * Math.cos((3 * avgHp + 6) * Math.PI / 180) -
-              0.20 * Math.cos((4 * avgHp - 63) * Math.PI / 180)
+  const T =
+    1 -
+    0.17 * Math.cos(((avgHp - 30) * Math.PI) / 180) +
+    0.24 * Math.cos((2 * avgHp * Math.PI) / 180) +
+    0.32 * Math.cos(((3 * avgHp + 6) * Math.PI) / 180) -
+    0.2 * Math.cos(((4 * avgHp - 63) * Math.PI) / 180)
   const dTheta = 30 * Math.exp(-Math.pow((avgHp - 275) / 25, 2))
   const Rc = 2 * Math.sqrt(Math.pow(avgCp, 7) / (Math.pow(avgCp, 7) + Math.pow(25, 7)))
   const Sl = 1 + (0.015 * Math.pow(avgL - 50, 2)) / Math.sqrt(20 + Math.pow(avgL - 50, 2))
   const Sc = 1 + 0.045 * avgCp
   const Sh = 1 + 0.015 * avgCp * T
-  const Rt = -Math.sin(2 * dTheta * Math.PI / 180) * Rc
+  const Rt = -Math.sin((2 * dTheta * Math.PI) / 180) * Rc
   return Math.sqrt(
     Math.pow(dLp / Sl, 2) +
-    Math.pow(dCp / Sc, 2) +
-    Math.pow(dHp / Sh, 2) +
-    Rt * (dCp / Sc) * (dHp / Sh)
+      Math.pow(dCp / Sc, 2) +
+      Math.pow(dHp / Sh, 2) +
+      Rt * (dCp / Sc) * (dHp / Sh),
   )
 }
 

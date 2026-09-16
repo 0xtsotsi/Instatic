@@ -1,9 +1,6 @@
 import { describe, expect, it } from 'bun:test'
 import { DEFAULT_SCRIPT_RUNTIME_CONFIG } from '@core/site-runtime'
-import {
-  createDefaultSiteExplorerOrganization,
-  DEFAULT_SITE_SETTINGS,
-} from '@core/page-tree'
+import { createDefaultSiteExplorerOrganization, DEFAULT_SITE_SETTINGS } from '@core/page-tree'
 import type { Page, SiteDocument } from '@core/page-tree'
 import { buildSiteRuntimeScripts } from '../publish/runtime/bundleScripts'
 
@@ -35,9 +32,7 @@ function makeRuntimeSite(page: Page): SiteDocument {
     pages: [page],
     visualComponents: [],
     layouts: [],
-    breakpoints: [
-      { id: 'desktop', label: 'Desktop', width: 1440, icon: 'monitor' },
-    ],
+    breakpoints: [{ id: 'desktop', label: 'Desktop', width: 1440, icon: 'monitor' }],
     settings: structuredClone(DEFAULT_SITE_SETTINGS),
     styleRules: {},
     files: [

@@ -24,10 +24,7 @@ import type { DbClient } from '../db/client'
 import type { SiteCssBundle } from '@core/publisher'
 import { resolveTemplateChain } from '@core/templates'
 import { normalizeRouteBase } from '@core/templates/templateMatching'
-import {
-  getPublishedDataRowByRoute,
-  listPublishedRowRoutes,
-} from '../repositories/data/publish'
+import { getPublishedDataRowByRoute, listPublishedRowRoutes } from '../repositories/data/publish'
 import { renderPublishedDataRowTemplate } from './publicRenderer'
 import { applyPublishedHtmlPipeline } from './publishedHtmlPipeline'
 import { writeArtefact } from './staticArtefact'
@@ -102,7 +99,12 @@ export async function bakePublishedDataRowArtefacts(
       result.cssBundles.push(rendered.cssBundle)
       result.baked++
     } catch (err) {
-      console.error('[publish:site] failed to bake row artefact for', urlPath, '(falls through to live renderer):', err)
+      console.error(
+        '[publish:site] failed to bake row artefact for',
+        urlPath,
+        '(falls through to live renderer):',
+        err,
+      )
     }
   }
 

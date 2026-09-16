@@ -122,33 +122,58 @@ Users can list active sessions and revoke them individually. `revokeOtherSession
 ```ts
 // src/core/capabilities.ts — source of truth
 export const CORE_CAPABILITIES = [
-  'dashboard.read', 'site.read',
-  'site.structure.edit', 'site.content.edit', 'site.style.edit',
-  'pages.edit', 'pages.publish',
-  'content.create', 'content.edit.own', 'content.edit.any',
-  'content.publish.own', 'content.publish.any', 'content.manage',
-  'media.read', 'media.write', 'media.replace', 'media.delete',
-  'runtime.dependencies', 'storage.elect', 'storage.migrate',
-  'plugins.read', 'plugins.configure', 'plugins.install', 'plugins.lifecycle',
-  'users.manage', 'roles.manage', 'audit.read',
-  'data.custom.tables.read', 'data.custom.tables.manage',
-  'data.system.tables.read', 'data.system.tables.manage',
-  'data.rows.move', 'data.export', 'data.import',
-  'ai.chat', 'ai.tools.write', 'ai.providers.manage', 'ai.audit.read',
+  'dashboard.read',
+  'site.read',
+  'site.structure.edit',
+  'site.content.edit',
+  'site.style.edit',
+  'pages.edit',
+  'pages.publish',
+  'content.create',
+  'content.edit.own',
+  'content.edit.any',
+  'content.publish.own',
+  'content.publish.any',
+  'content.manage',
+  'media.read',
+  'media.write',
+  'media.replace',
+  'media.delete',
+  'runtime.dependencies',
+  'storage.elect',
+  'storage.migrate',
+  'plugins.read',
+  'plugins.configure',
+  'plugins.install',
+  'plugins.lifecycle',
+  'users.manage',
+  'roles.manage',
+  'audit.read',
+  'data.custom.tables.read',
+  'data.custom.tables.manage',
+  'data.system.tables.read',
+  'data.system.tables.manage',
+  'data.rows.move',
+  'data.export',
+  'data.import',
+  'ai.chat',
+  'ai.tools.write',
+  'ai.providers.manage',
+  'ai.audit.read',
 ] as const
 
-export type CoreCapability = typeof CORE_CAPABILITIES[number]
+export type CoreCapability = (typeof CORE_CAPABILITIES)[number]
 ```
 
 ### Site-editing split
 
 The site editor's permission surface is split three ways:
 
-| Capability               | What it permits                                                                |
-|--------------------------|--------------------------------------------------------------------------------|
-| `site.structure.edit`    | Add / remove / move / duplicate / rename nodes; pages, VCs, class registry     |
-| `site.content.edit`      | Modify content-typed props on existing nodes (text, image src/alt, link href)  |
-| `site.style.edit`        | Modify CSS classes, style overrides, breakpoints, framework tokens             |
+| Capability            | What it permits                                                               |
+| --------------------- | ----------------------------------------------------------------------------- |
+| `site.structure.edit` | Add / remove / move / duplicate / rename nodes; pages, VCs, class registry    |
+| `site.content.edit`   | Modify content-typed props on existing nodes (text, image src/alt, link href) |
+| `site.style.edit`     | Modify CSS classes, style overrides, breakpoints, framework tokens            |
 
 The "Client" role has only `site.content.edit` (a copy-editor surface — no structure, no styling). The "Admin" role has all three.
 
@@ -156,14 +181,14 @@ The "Client" role has only `site.content.edit` (a copy-editor surface — no str
 
 ### Content publishing split
 
-| Capability                | What it permits                                                  |
-|---------------------------|------------------------------------------------------------------|
-| `content.create`          | Create new draft rows                                            |
-| `content.edit.own`        | Edit rows where `author_user_id = me`                            |
-| `content.edit.any`        | Edit any row                                                     |
-| `content.publish.own`     | Publish own rows                                                 |
-| `content.publish.any`     | Publish any row                                                  |
-| `content.manage`          | Full content admin — manage tables, fields, all rows             |
+| Capability            | What it permits                                      |
+| --------------------- | ---------------------------------------------------- |
+| `content.create`      | Create new draft rows                                |
+| `content.edit.own`    | Edit rows where `author_user_id = me`                |
+| `content.edit.any`    | Edit any row                                         |
+| `content.publish.own` | Publish own rows                                     |
+| `content.publish.any` | Publish any row                                      |
+| `content.manage`      | Full content admin — manage tables, fields, all rows |
 
 Pages and the page roster are gated by `pages.edit` / `pages.publish` separately.
 
@@ -173,12 +198,12 @@ Pages and the page roster are gated by `pages.edit` / `pages.publish` separately
 
 Four system roles, defined in `SYSTEM_ROLES`:
 
-| Role    | id        | Capabilities                                                                 | Special     |
-|---------|-----------|------------------------------------------------------------------------------|-------------|
-| Owner   | `owner`   | All `CORE_CAPABILITIES`                                                      | Owner-only `roles.manage`. Resyncs on every boot via `syncSystemRoles(db)`. |
-| Admin   | `admin`   | All except `roles.manage`                                                    | Force-resynced on every boot. Hand-edits restored at next boot. |
-| Client  | `client`  | `dashboard.read`, `site.read`, `site.content.edit`, `media.read`, `data.custom.tables.read` | Editable    |
-| Member  | `member`  | (none)                                                                       | Editable    |
+| Role   | id       | Capabilities                                                                                | Special                                                                     |
+| ------ | -------- | ------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------- |
+| Owner  | `owner`  | All `CORE_CAPABILITIES`                                                                     | Owner-only `roles.manage`. Resyncs on every boot via `syncSystemRoles(db)`. |
+| Admin  | `admin`  | All except `roles.manage`                                                                   | Force-resynced on every boot. Hand-edits restored at next boot.             |
+| Client | `client` | `dashboard.read`, `site.read`, `site.content.edit`, `media.read`, `data.custom.tables.read` | Editable                                                                    |
+| Member | `member` | (none)                                                                                      | Editable                                                                    |
 
 `listRoles(db)` returns the built-ins in rank order (`owner`, `admin`, `client`, `member`), followed by custom roles alphabetized by name. Custom roles can be created via `roles.manage` (Owner-only). Roles are persisted in the `roles` table with `capabilities_json: CoreCapability[]`.
 
@@ -331,11 +356,11 @@ Lockouts are per-account (keyed on `users.id`), not per-IP. The IP rate limit (`
 
 `server/auth/rateLimit.ts` exports three pre-configured limiters:
 
-| Limiter                | Key                      | Limit       | Window     |
-|------------------------|--------------------------|-------------|------------|
-| `loginRateLimit`       | `<ip>\|<email>` tuple    | 5 attempts  | 15 minutes |
-| `loginPerIpRateLimit`  | `<ip>`                   | 30 attempts | 10 minutes |
-| `mfaRateLimit`         | `<ip>`                   | 10 attempts | 10 minutes |
+| Limiter               | Key                   | Limit       | Window     |
+| --------------------- | --------------------- | ----------- | ---------- |
+| `loginRateLimit`      | `<ip>\|<email>` tuple | 5 attempts  | 15 minutes |
+| `loginPerIpRateLimit` | `<ip>`                | 30 attempts | 10 minutes |
+| `mfaRateLimit`        | `<ip>`                | 10 attempts | 10 minutes |
 
 `RateLimiter` is a token bucket. Use `RateLimiter.consume(key)` — returns `{ allowed, retryAfterMs }`.
 
@@ -371,7 +396,7 @@ function corsHeaders(origin: string | null): Record<string, string> {
     'Access-Control-Allow-Credentials': 'true',
     'Access-Control-Allow-Methods': 'GET, POST, PUT, PATCH, DELETE, OPTIONS',
     'Access-Control-Allow-Headers': 'Content-Type',
-    'Vary': 'Origin',
+    Vary: 'Origin',
   }
 }
 ```
@@ -387,24 +412,35 @@ A misconfigured `VITE_ALLOWED_ORIGIN` can never silently open the API up because
 Each handler group uses the shared `runRouteTable` dispatcher (`server/handlers/cms/routeTable.ts`). Declare a flat route table, one entry per `(method, path)`, and call `runRouteTable`:
 
 ```ts
-async function handleListSubscribers(req: Request, db: DbClient, _params: RouteParams): Promise<Response> {
+async function handleListSubscribers(
+  req: Request,
+  db: DbClient,
+  _params: RouteParams,
+): Promise<Response> {
   const user = await requireCapability(req, db, 'content.manage')
   if (user instanceof Response) return user
   // ... read
 }
 
-async function handleCreateSubscriber(req: Request, db: DbClient, _params: RouteParams): Promise<Response> {
+async function handleCreateSubscriber(
+  req: Request,
+  db: DbClient,
+  _params: RouteParams,
+): Promise<Response> {
   const user = await requireAnyCapability(req, db, ['content.create', 'content.manage'])
   if (user instanceof Response) return user
   // ... write
 }
 
 const SUBSCRIBERS_ROUTES: readonly Route<[]>[] = [
-  { method: 'GET',  pattern: `${CMS_API_PREFIX}/subscribers`, handler: handleListSubscribers },
+  { method: 'GET', pattern: `${CMS_API_PREFIX}/subscribers`, handler: handleListSubscribers },
   { method: 'POST', pattern: `${CMS_API_PREFIX}/subscribers`, handler: handleCreateSubscriber },
 ]
 
-export async function handleSubscribersRoutes(req: Request, db: DbClient): Promise<Response | null> {
+export async function handleSubscribersRoutes(
+  req: Request,
+  db: DbClient,
+): Promise<Response | null> {
   return runRouteTable(req, db, SUBSCRIBERS_ROUTES)
 }
 ```
@@ -438,34 +474,38 @@ The client sees `401 { error: 'step_up_required' }` and pops the StepUp dialog; 
 const user = await requireAuthenticatedUser(req, db)
 if (user instanceof Response) return user
 
-user.id              // string — users.id
-user.email           // string
-user.capabilities    // CoreCapability[] — flattened from role + grants
+user.id // string — users.id
+user.email // string
+user.capabilities // CoreCapability[] — flattened from role + grants
 ```
 
 ### Check capability without responding
 
 ```ts
-if (userHasCapability(user, 'media.read')) { /* … */ }
-if (userHasAnyCapability(user, SITE_WRITE_CAPABILITIES)) { /* … */ }
+if (userHasCapability(user, 'media.read')) {
+  /* … */
+}
+if (userHasAnyCapability(user, SITE_WRITE_CAPABILITIES)) {
+  /* … */
+}
 ```
 
 ---
 
 ## Forbidden patterns
 
-| Pattern                                                          | Use instead                                                |
-|------------------------------------------------------------------|------------------------------------------------------------|
-| `const user = ...; if (!user) return 401` (ad-hoc auth check)    | `await requireCapability(req, db, '...')`                  |
-| Gating on role string (`user.role === 'admin'`)                  | Gate on capability — roles are sets of capabilities        |
-| Storing the raw session token in the DB                          | Store `hashSessionToken(rawToken)` — only the cookie carries the raw value |
-| Returning `{ error: err.message }` from the login handler        | Return generic message — leaked details help credential stuffing |
-| Skipping `originAllowed(req)` on a state-changing endpoint       | The CMS dispatcher already runs the check; don't bypass it |
-| Bypassing `mfaRateLimit` for MFA verification                    | Always call `mfaRateLimit.consume(key)` first              |
-| Skipping `evaluateLockState` at the MFA step                     | A locked account must be rejected before any code is checked — the per-account lockout covers both the password and MFA steps |
-| Failing MFA without calling `evaluateFailedAttempt`              | Failed codes must feed the lockout counter — same as bad passwords |
-| Hand-rolling a session timeout in a handler                      | The `sessions` row's `expires_at` is the source of truth   |
-| Granting all capabilities to a "superuser" custom role           | Use the Owner role — that's its job. Custom roles should be scoped. |
+| Pattern                                                       | Use instead                                                                                                                   |
+| ------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
+| `const user = ...; if (!user) return 401` (ad-hoc auth check) | `await requireCapability(req, db, '...')`                                                                                     |
+| Gating on role string (`user.role === 'admin'`)               | Gate on capability — roles are sets of capabilities                                                                           |
+| Storing the raw session token in the DB                       | Store `hashSessionToken(rawToken)` — only the cookie carries the raw value                                                    |
+| Returning `{ error: err.message }` from the login handler     | Return generic message — leaked details help credential stuffing                                                              |
+| Skipping `originAllowed(req)` on a state-changing endpoint    | The CMS dispatcher already runs the check; don't bypass it                                                                    |
+| Bypassing `mfaRateLimit` for MFA verification                 | Always call `mfaRateLimit.consume(key)` first                                                                                 |
+| Skipping `evaluateLockState` at the MFA step                  | A locked account must be rejected before any code is checked — the per-account lockout covers both the password and MFA steps |
+| Failing MFA without calling `evaluateFailedAttempt`           | Failed codes must feed the lockout counter — same as bad passwords                                                            |
+| Hand-rolling a session timeout in a handler                   | The `sessions` row's `expires_at` is the source of truth                                                                      |
+| Granting all capabilities to a "superuser" custom role        | Use the Owner role — that's its job. Custom roles should be scoped.                                                           |
 
 ---
 

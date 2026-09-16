@@ -2,7 +2,10 @@ import { afterEach, beforeEach, describe, expect, it } from 'bun:test'
 import { mkdtemp, rm } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
-import { createCapabilityTestHarness, type CapabilityTestHarness } from '../../../src/__tests__/helpers/capabilityHarness'
+import {
+  createCapabilityTestHarness,
+  type CapabilityTestHarness,
+} from '../../../src/__tests__/helpers/capabilityHarness'
 import { getDraftSite, saveDraftSite } from '../../repositories/site'
 import { readArtefact, readStaticAsset } from '../../publish/staticArtefact'
 import { createConnector } from './connectors/store'
@@ -42,11 +45,9 @@ async function callMcp(
   method: string,
   params: unknown,
 ): Promise<RpcResponse> {
-  const response = await handleMcpHttp(
-    rpcRequest(token, method, params),
-    harness.db,
-    { uploadsDir },
-  )
+  const response = await handleMcpHttp(rpcRequest(token, method, params), harness.db, {
+    uploadsDir,
+  })
   if (!response) throw new Error('MCP HTTP handler did not claim its endpoint')
   expect(response.status).toBe(200)
   const text = await response.text()
@@ -102,20 +103,18 @@ describe('site_publish MCP tool', () => {
       capabilities: {},
       clientInfo: { name: 'publish-test', version: '0' },
     })
-    const result = await callMcp(
-      harness,
-      uploadsDir,
-      token,
-      'tools/call',
-      { name: 'site_publish', arguments: {} },
-    )
+    const result = await callMcp(harness, uploadsDir, token, 'tools/call', {
+      name: 'site_publish',
+      arguments: {},
+    })
     expect(result.result?.isError).toBeFalsy()
     expect(JSON.stringify(result.result?.content)).toContain('publishedPages')
 
     const html = await readArtefact(uploadsDir, '/')
     expect(html).not.toBeNull()
-    const cssPaths = [...(html ?? '').matchAll(/href="(\/_instatic\/css\/[^"]+\.css)"/g)]
-      .map((match) => match[1]!)
+    const cssPaths = [...(html ?? '').matchAll(/href="(\/_instatic\/css\/[^"]+\.css)"/g)].map(
+      (match) => match[1]!,
+    )
     const cssAssets = await Promise.all(cssPaths.map((path) => readStaticAsset(uploadsDir, path)))
     const css = cssAssets
       .filter((asset): asset is Uint8Array => asset !== null)

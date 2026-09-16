@@ -35,8 +35,10 @@ export async function handleDataRoutes(
   db: DbClient,
   options: CmsHandlerOptions = {},
 ): Promise<Response | null> {
-  return (await handleDataMetaRoutes(req, db))
-    ?? (await handleDataSearchRoute(req, db))
-    ?? (await handleDataTableRoutes(req, db))
-    ?? (await handleDataRowRoutes(req, db, options))
+  return (
+    (await handleDataMetaRoutes(req, db)) ??
+    (await handleDataSearchRoute(req, db)) ??
+    (await handleDataTableRoutes(req, db)) ??
+    (await handleDataRowRoutes(req, db, options))
+  )
 }

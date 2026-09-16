@@ -81,11 +81,11 @@ A single hook returns the full workspace state:
 
 ```ts
 const {
-  folders,        // tree of folders + All files + Trash
-  assets,         // current filter results
-  selection,      // Set<assetId> + primary
-  filter,         // type / folder / date / query
-  upload,         // queue + progress
+  folders, // tree of folders + All files + Trash
+  assets, // current filter results
+  selection, // Set<assetId> + primary
+  filter, // type / folder / date / query
+  upload, // queue + progress
   // … plus actions: rename, move, delete, replace, tag, etc.
 } = useMediaWorkspace()
 ```
@@ -108,12 +108,12 @@ Drag/drop logic is split across two layers:
 
 Drop rules enforced by `canMoveFolderTo`:
 
-| Drop attempt | Allowed |
-|---|---|
-| Folder onto itself | No — self-drop |
-| Folder onto its current parent | No — no-op move |
-| Folder into one of its own descendants | No — cycle |
-| Any other folder target | Yes |
+| Drop attempt                           | Allowed         |
+| -------------------------------------- | --------------- |
+| Folder onto itself                     | No — self-drop  |
+| Folder onto its current parent         | No — no-op move |
+| Folder into one of its own descendants | No — cycle      |
+| Any other folder target                | Yes             |
 
 Asset drops are accepted when the caller has `media.write`; `commitDropPayload` calls `moveAssetsToFolder(assetIds, targetFolderId)`. Dropping on **All files** moves assets/folders back to the root (`targetFolderId: null`).
 
@@ -130,13 +130,13 @@ Storage remains `media_asset_folders` (many-to-many), but the canvas move intera
 
 Smart folders are virtual views in the sidebar that match assets by predicate rather than by folder membership. They appear in the **Library** section of `MediaFolderPanel` (above the folder tree), alongside "All files", and use the same `FolderSelection` union type (`SmartFolderId`). The predicate for each ID lives in `src/admin/pages/media/utils/smartFolders.ts`.
 
-| Smart folder ID          | Label               | Matches                                          | Scope       |
-|--------------------------|---------------------|--------------------------------------------------|-------------|
-| `smart:missing-alt`      | Missing alt text    | `altText.trim()` is empty                        | Images only |
-| `smart:missing-title`    | Missing title       | `title.trim()` is empty                          | Images only |
-| `smart:untagged`         | Untagged            | `tags` array is empty                            | All assets  |
-| `smart:large-files`      | Large files         | `sizeBytes > 1 MiB`                              | All assets  |
-| `smart:recently-replaced`| Recently replaced   | `replacedAt !== null`                            | All assets  |
+| Smart folder ID           | Label             | Matches                   | Scope       |
+| ------------------------- | ----------------- | ------------------------- | ----------- |
+| `smart:missing-alt`       | Missing alt text  | `altText.trim()` is empty | Images only |
+| `smart:missing-title`     | Missing title     | `title.trim()` is empty   | Images only |
+| `smart:untagged`          | Untagged          | `tags` array is empty     | All assets  |
+| `smart:large-files`       | Large files       | `sizeBytes > 1 MiB`       | All assets  |
+| `smart:recently-replaced` | Recently replaced | `replacedAt !== null`     | All assets  |
 
 "Images only" means the predicate short-circuits to `false` for any `mimeType` that doesn't start with `image/`. Fonts, documents, videos, and audio files are never matched by the image-metadata smart folders even when those fields are empty.
 
@@ -148,10 +148,10 @@ The count badge shown next to each smart folder in the sidebar is computed clien
 
 Each floating window has a unique `FloatingPanelId` (`'mediaDetachedInspector' | 'mediaUploadQueue' | 'mediaBulkEdit'`), uses `useDraggablePanel(id)` for position, and gets its position persisted via `workspaceLayoutStorage.ts`. Visibility differs by window:
 
-| Window          | How visibility is determined                                                                    |
-|-----------------|-------------------------------------------------------------------------------------------------|
-| `MediaViewerWindow` | Derived during render: `selectedAssetId !== null && selectedAssetIds.size <= 1`. Closing clears the selection. No `useState`. |
-| `BulkEditWindow`    | Derived during render: `selectedAssetIds.size >= 2`. Mutually exclusive with the viewer. No `useState`. |
+| Window              | How visibility is determined                                                                                                                                              |
+| ------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `MediaViewerWindow` | Derived during render: `selectedAssetId !== null && selectedAssetIds.size <= 1`. Closing clears the selection. No `useState`.                                             |
+| `BulkEditWindow`    | Derived during render: `selectedAssetIds.size >= 2`. Mutually exclusive with the viewer. No `useState`.                                                                   |
 | `UploadQueueWindow` | `uploadQueueOpen` in local `useState`. Auto-opens via `useEffect` when uploads start; stays open after completion until the user dismisses it. Toolbar button toggles it. |
 
 The viewer and bulk-edit are derived rather than stored because "closed" is identical to "no selection" — every close path calls `workspace.clearSelection()`. Deriving avoids an extra render commit and the one-frame open lag that appeared with the old `setState`-in-effect approach.
@@ -166,31 +166,31 @@ Media data lives in dedicated tables (not in `data_tables` — they predate the 
 
 ### `media_assets`
 
-| Column                | Type (PG)     | Type (SQLite)   | Notes                                                                                           |
-|-----------------------|---------------|-----------------|-------------------------------------------------------------------------------------------------|
-| `id`                  | `text` PK     | `text` PK       |                                                                                                 |
-| `filename`            | `text`        | `text`          | Original upload filename                                                                        |
+| Column                | Type (PG)     | Type (SQLite)   | Notes                                                                                                                         |
+| --------------------- | ------------- | --------------- | ----------------------------------------------------------------------------------------------------------------------------- |
+| `id`                  | `text` PK     | `text` PK       |                                                                                                                               |
+| `filename`            | `text`        | `text`          | Original upload filename                                                                                                      |
 | `public_path`         | `text`        | `text`          | URL the browser uses: `/uploads/...` for local-disk; `/_instatic/media/<adapterId>/<storagePath>` for non-public-url adapters |
-| `mime_type`           | `text`        | `text`          |                                                                                                 |
-| `size_bytes`          | `bigint`      | `integer`       |                                                                                                 |
-| `storage_path`        | `text`        | `text`          | Adapter-internal handle (local basename or S3 key). Never exposed to the browser.              |
-| `storage_adapter_id`  | `text`        | `text`          | Id of the adapter that wrote this asset. Empty string = built-in local-disk.                   |
-| `externally_hosted`   | `boolean`     | `integer` (0/1) | True when bytes live outside the host's `uploads/` dir (`'public-url'` adapters).              |
-| `uploaded_by_user_id` | `text`        | `text`          | Nullable FK to `users`.                                                                         |
-| `alt_text`            | `text`        | `text`          | Required for accessibility                                                                      |
-| `caption`             | `text`        | `text`          | Optional                                                                                        |
-| `title`               | `text`        | `text`          | Optional; falls back to filename                                                                |
-| `tags_json`           | `jsonb`       | `text`          | `string[]`, sorted lowercase                                                                    |
-| `width`               | `integer`     | `integer`       | Nullable, populated on image upload                                                             |
-| `height`              | `integer`     | `integer`       | Nullable                                                                                        |
-| `duration_ms`         | `integer`     | `integer`       | Nullable, for video / audio                                                                     |
-| `dominant_color`      | `text`        | `text`          | Nullable, `#rrggbb`. Computed server-side on upload                                             |
-| `blur_hash`           | `text`        | `text`          | Nullable. Used for skeleton placeholders                                                        |
-| `variants_json`       | `jsonb`       | `text`          | `MediaVariant[]` — each entry carries `width`, `height`, `format`, `path`, `sizeBytes`, `storagePath`, `storageAdapterId` |
-| `poster_path`         | `text`        | `text`          | Nullable. URL for video poster frame                                                            |
-| `deleted_at`          | `timestamptz` | `text`          | Nullable. Non-null = soft-deleted (in Trash)                                                    |
-| `replaced_at`         | `timestamptz` | `text`          | Nullable. Set when binary is swapped via "Replace file"                                         |
-| `created_at`          | `timestamptz` | `text`          |                                                                                                 |
+| `mime_type`           | `text`        | `text`          |                                                                                                                               |
+| `size_bytes`          | `bigint`      | `integer`       |                                                                                                                               |
+| `storage_path`        | `text`        | `text`          | Adapter-internal handle (local basename or S3 key). Never exposed to the browser.                                             |
+| `storage_adapter_id`  | `text`        | `text`          | Id of the adapter that wrote this asset. Empty string = built-in local-disk.                                                  |
+| `externally_hosted`   | `boolean`     | `integer` (0/1) | True when bytes live outside the host's `uploads/` dir (`'public-url'` adapters).                                             |
+| `uploaded_by_user_id` | `text`        | `text`          | Nullable FK to `users`.                                                                                                       |
+| `alt_text`            | `text`        | `text`          | Required for accessibility                                                                                                    |
+| `caption`             | `text`        | `text`          | Optional                                                                                                                      |
+| `title`               | `text`        | `text`          | Optional; falls back to filename                                                                                              |
+| `tags_json`           | `jsonb`       | `text`          | `string[]`, sorted lowercase                                                                                                  |
+| `width`               | `integer`     | `integer`       | Nullable, populated on image upload                                                                                           |
+| `height`              | `integer`     | `integer`       | Nullable                                                                                                                      |
+| `duration_ms`         | `integer`     | `integer`       | Nullable, for video / audio                                                                                                   |
+| `dominant_color`      | `text`        | `text`          | Nullable, `#rrggbb`. Computed server-side on upload                                                                           |
+| `blur_hash`           | `text`        | `text`          | Nullable. Used for skeleton placeholders                                                                                      |
+| `variants_json`       | `jsonb`       | `text`          | `MediaVariant[]` — each entry carries `width`, `height`, `format`, `path`, `sizeBytes`, `storagePath`, `storageAdapterId`     |
+| `poster_path`         | `text`        | `text`          | Nullable. URL for video poster frame                                                                                          |
+| `deleted_at`          | `timestamptz` | `text`          | Nullable. Non-null = soft-deleted (in Trash)                                                                                  |
+| `replaced_at`         | `timestamptz` | `text`          | Nullable. Set when binary is swapped via "Replace file"                                                                       |
+| `created_at`          | `timestamptz` | `text`          |                                                                                                                               |
 
 ### `media_folders`
 
@@ -230,25 +230,25 @@ JSON columns end in `_json` per the convention — see [docs/reference/database-
 
 ### Handlers
 
-| Handler                          | Routes                                                     |
-|----------------------------------|------------------------------------------------------------|
-| `server/handlers/cms/media.ts`   | `GET/POST/PATCH/DELETE /admin/api/cms/media[/:id]`         |
-| `server/handlers/cms/mediaFolders.ts` | `GET/POST/PATCH/DELETE /admin/api/cms/media/folders[/:id]` |
-| `server/handlers/cms/mediaUpload.ts`, `mediaUploadDispatch.ts`, `mediaUploadExecutor.ts` | `POST /admin/api/cms/media/upload` + dispatcher / executor pipeline |
+| Handler                                                                                         | Routes                                                                      |
+| ----------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------- |
+| `server/handlers/cms/media.ts`                                                                  | `GET/POST/PATCH/DELETE /admin/api/cms/media[/:id]`                          |
+| `server/handlers/cms/mediaFolders.ts`                                                           | `GET/POST/PATCH/DELETE /admin/api/cms/media/folders[/:id]`                  |
+| `server/handlers/cms/mediaUpload.ts`, `mediaUploadDispatch.ts`, `mediaUploadExecutor.ts`        | `POST /admin/api/cms/media/upload` + dispatcher / executor pipeline         |
 | `server/handlers/cms/mediaStorageAdmin.ts`, `mediaStorageMigration.ts`, `mediaStorageReader.ts` | `/admin/api/cms/media/storage[/...]` — manage adapters, kick off migrations |
-| `server/handlers/cms/mediaVariants.ts` | Variant manifest read for an asset                    |
+| `server/handlers/cms/mediaVariants.ts`                                                          | Variant manifest read for an asset                                          |
 
 Folder routes (`/admin/api/cms/media/folders/...`) are matched **before** asset routes (`/admin/api/cms/media/:id`) because the latter would otherwise eat them. Same for storage routes (`/admin/api/cms/media/storage/...`). See `server/handlers/cms/index.ts`.
 
 ### Repositories
 
-| File                                              | Owns                                                                           |
-|---------------------------------------------------|--------------------------------------------------------------------------------|
-| `server/repositories/mediaAssetMapping.ts`        | Single source of truth for the `media_assets` DB projection: `MEDIA_ASSET_COLUMNS`, `MEDIA_ASSET_INSERT_COLUMNS`, `MediaAssetRow`, `mapMediaAssetRow()`, `parseVariants()`, `parseTags()`. Shared by both the admin repository and the publisher's prefetch — ensures both layers see an identical asset shape. |
-| `server/repositories/media.ts`                    | `MediaAsset` + `MediaVariant` domain types; all `media_assets` CRUD queries   |
-| `server/repositories/mediaFolders.ts`             | `media_folders` + `media_asset_folders`                                        |
-| `server/repositories/mediaMigration.ts`           | Migrating assets between storage adapters                                      |
-| `server/repositories/mediaStorageAdapters.ts`     | Adapter registry persistence                                                   |
+| File                                          | Owns                                                                                                                                                                                                                                                                                                            |
+| --------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `server/repositories/mediaAssetMapping.ts`    | Single source of truth for the `media_assets` DB projection: `MEDIA_ASSET_COLUMNS`, `MEDIA_ASSET_INSERT_COLUMNS`, `MediaAssetRow`, `mapMediaAssetRow()`, `parseVariants()`, `parseTags()`. Shared by both the admin repository and the publisher's prefetch — ensures both layers see an identical asset shape. |
+| `server/repositories/media.ts`                | `MediaAsset` + `MediaVariant` domain types; all `media_assets` CRUD queries                                                                                                                                                                                                                                     |
+| `server/repositories/mediaFolders.ts`         | `media_folders` + `media_asset_folders`                                                                                                                                                                                                                                                                         |
+| `server/repositories/mediaMigration.ts`       | Migrating assets between storage adapters                                                                                                                                                                                                                                                                       |
+| `server/repositories/mediaStorageAdapters.ts` | Adapter registry persistence                                                                                                                                                                                                                                                                                    |
 
 ### Upload pipeline
 
@@ -321,7 +321,7 @@ The redirect handler is `tryServeMediaRedirect` in `server/router.ts`. The redir
    - Add the column to `MEDIA_ASSET_COLUMNS`.
    - Add it to `MediaAssetRow`.
    - Map it in `mapMediaAssetRow()`.
-   If it's also written at create time, add it to `MEDIA_ASSET_INSERT_COLUMNS` and the `CreateMediaAssetInput` in `server/repositories/media.ts`.
+     If it's also written at create time, add it to `MEDIA_ASSET_INSERT_COLUMNS` and the `CreateMediaAssetInput` in `server/repositories/media.ts`.
 4. If the column is client-visible, extend the wire schema in `src/core/persistence/cmsMedia.ts` (`CmsMediaAssetWire`) and add the field to `normalizeCmsMediaAsset()`.
 5. Add a setter handler in `server/handlers/cms/media.ts` if the field is user-editable.
 6. Expose it in the asset viewer (`MediaViewerWindow`) and bulk-edit window (`BulkEditWindow`) if appropriate.
@@ -347,15 +347,15 @@ See [docs/features/plugin-system.md](plugin-system.md). The plugin SDK's `api.cm
 
 ## Forbidden patterns
 
-| Pattern                                                              | Use instead                                                 |
-|----------------------------------------------------------------------|-------------------------------------------------------------|
-| Storing media metadata as JSON on the page tree                      | `media_assets` row with a foreign key                       |
-| Hardcoding `/uploads/...` URLs in modules                            | Use the asset's `public_path` (the host owns the URL shape) |
-| Filling `<img>` `srcset` manually                                    | Use `variants_json` + the publisher's `mediaPresentation.ts`|
-| Adding a docked panel to the Media page                              | Use a floating window — Media is canvas-style by design     |
+| Pattern                                                                       | Use instead                                                                         |
+| ----------------------------------------------------------------------------- | ----------------------------------------------------------------------------------- |
+| Storing media metadata as JSON on the page tree                               | `media_assets` row with a foreign key                                               |
+| Hardcoding `/uploads/...` URLs in modules                                     | Use the asset's `public_path` (the host owns the URL shape)                         |
+| Filling `<img>` `srcset` manually                                             | Use `variants_json` + the publisher's `mediaPresentation.ts`                        |
+| Adding a docked panel to the Media page                                       | Use a floating window — Media is canvas-style by design                             |
 | Calling `api.cms.media.*` from a plugin without the matching media permission | Declare `media.storage.adapter`, `media.url.transform`, or `media.variant.delegate` |
-| Treating `deleted_at IS NOT NULL` rows as gone                       | They're in Trash; restore is supported until purge          |
-| Skipping `parent_id, slug` uniqueness when creating folders          | The unique constraint enforces it — handle the error path   |
+| Treating `deleted_at IS NOT NULL` rows as gone                                | They're in Trash; restore is supported until purge                                  |
+| Skipping `parent_id, slug` uniqueness when creating folders                   | The unique constraint enforces it — handle the error path                           |
 
 ---
 

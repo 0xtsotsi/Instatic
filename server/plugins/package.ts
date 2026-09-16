@@ -1,7 +1,5 @@
 import { strFromU8, unzipSync } from 'fflate'
-import {
-  parsePluginManifest,
-} from '@core/plugins/manifest'
+import { parsePluginManifest } from '@core/plugins/manifest'
 import { assertSandboxSafe } from '@core/plugins/sandboxScan'
 import type { PluginManifest } from '@core/plugin-sdk'
 

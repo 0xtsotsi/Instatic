@@ -61,9 +61,10 @@ function wrapSql(sql: SQL): DbClient {
     rawSql: string,
     params?: unknown[],
   ): Promise<DbResult<Row>> => {
-    const rows = params !== undefined
-      ? await sql.unsafe<Row[]>(rawSql, params as unknown[])
-      : await sql.unsafe<Row[]>(rawSql)
+    const rows =
+      params !== undefined
+        ? await sql.unsafe<Row[]>(rawSql, params as unknown[])
+        : await sql.unsafe<Row[]>(rawSql)
     return { rows: rows.map(normalizePostgresRow), rowCount: resultRowCount(rows) }
   }
 

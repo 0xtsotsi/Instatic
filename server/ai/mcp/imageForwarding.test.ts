@@ -16,7 +16,8 @@ import { buildMcpServer } from './server'
 import { createEditorBridgeStream } from './editorBridge'
 
 const dec = new TextDecoder()
-const PNG_B64 = 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg=='
+const PNG_B64 =
+  'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg=='
 
 async function readUntil(
   reader: ReadableStreamDefaultReader<Uint8Array>,
@@ -57,7 +58,9 @@ describe('MCP image forwarding', () => {
     const bridgeId = ready.bridgeId as string
 
     const server = buildMcpServer({
-      db, userId: 'u1', connectorId: 'c1',
+      db,
+      userId: 'u1',
+      connectorId: 'c1',
       capabilities: ['ai.chat', 'ai.tools.write', 'site.read', 'site.structure.edit'],
     })
     const [clientT, serverT] = InMemoryTransport.createLinkedPair()
@@ -67,7 +70,10 @@ describe('MCP image forwarding', () => {
 
     // Fire the tool call and, concurrently, play the editor: read the relayed
     // request and post back a result carrying an image.
-    const callPromise = client.callTool({ name: 'site_render_snapshot', arguments: { breakpointId: 'desktop' } })
+    const callPromise = client.callTool({
+      name: 'site_render_snapshot',
+      arguments: { breakpointId: 'desktop' },
+    })
 
     const toolRequest = await readUntil(reader, (e) => e.type === 'toolRequest')
     expect(toolRequest.toolName).toBe('site_render_snapshot')

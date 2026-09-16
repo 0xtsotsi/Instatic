@@ -5,7 +5,11 @@ import { publishPage } from '@core/publisher'
 import { buildRouteFrame } from '@core/templates/contextFrames'
 import { buildPublishedSiteCssBundle } from './siteCssBundle'
 import { buildPublishedSiteModuleJsMap } from './moduleJsBundle'
-import { resolveTemplateChain, resolveNotFoundTemplate, composeTemplateChain } from '@core/templates'
+import {
+  resolveTemplateChain,
+  resolveNotFoundTemplate,
+  composeTemplateChain,
+} from '@core/templates'
 import type { TemplateRenderDataContext } from '@core/templates/dynamicBindings'
 import { prefetchLoopData, publishedDataRowToLoopItem } from './loopPrefetch'
 import { prefetchMediaAssets } from './mediaPrefetch'
@@ -90,14 +94,21 @@ async function renderMergedTemplate(
   snapshot: PublishedPageSnapshot,
   templateContext: TemplateRenderDataContext | undefined,
   ctx: RenderPublishedSnapshotContext,
-): Promise<{ html: string; jsModuleIds: string[]; publishVersion: number; cssBundle: SiteCssBundle }> {
+): Promise<{
+  html: string
+  jsModuleIds: string[]
+  publishVersion: number
+  cssBundle: SiteCssBundle
+}> {
   const publishVersion = ctx.publishVersion ?? getPublishVersion()
   const moduleJsMap = buildPublishedSiteModuleJsMap(snapshot.site, registry)
   const [loopData, mediaAssets] = await Promise.all([
     prefetchLoopData(merged, snapshot.site, ctx.db, ctx.url),
     prefetchMediaAssets(merged, snapshot.site, registry, ctx.db),
   ])
-  const cssBundle = buildPublishedSiteCssBundle(snapshot.site, registry, merged, publishVersion, { mediaAssets })
+  const cssBundle = buildPublishedSiteCssBundle(snapshot.site, registry, merged, publishVersion, {
+    mediaAssets,
+  })
   const published = publishPage(merged, snapshot.site, registry, {
     templateContext,
     runtimeAssets: snapshot.runtimeAssets,

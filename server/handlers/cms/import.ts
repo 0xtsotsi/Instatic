@@ -30,10 +30,7 @@
 import { mkdir, writeFile } from 'node:fs/promises'
 import { dirname } from 'node:path'
 import type { DbClient } from '../../db/client'
-import {
-  validateAndSanitizeMediaBytes,
-  resolveMediaWriteTarget,
-} from './importMediaValidation'
+import { validateAndSanitizeMediaBytes, resolveMediaWriteTarget } from './importMediaValidation'
 import { requireCapability, requireStepUp, userHasCapability } from '../../auth/authz'
 import { saveDraftSite } from '../../repositories/site'
 import {
@@ -50,10 +47,7 @@ import {
   type DataRowImportInput,
 } from '../../repositories/data/rows'
 import { importMediaAsset, assignAssetToFolders } from '../../repositories/media'
-import {
-  deleteAllDataRowRedirects,
-  importDataRowRedirect,
-} from '../../repositories/data/publish'
+import { deleteAllDataRowRedirects, importDataRowRedirect } from '../../repositories/data/publish'
 import { deleteAllMediaFolders, importMediaFolder } from '../../repositories/mediaFolders'
 import { jsonResponse, readValidatedBody } from '../../http'
 import { parseValue } from '@core/utils/typeboxHelpers'
@@ -133,7 +127,10 @@ export async function handleImportRoute(
   // Parse and validate the bundle body
   const bundle = await readValidatedBody(req, SiteBundleSchema)
   if (!bundle) {
-    return jsonResponse({ error: 'Invalid bundle: body does not conform to SiteBundleSchema' }, { status: 400 })
+    return jsonResponse(
+      { error: 'Invalid bundle: body does not conform to SiteBundleSchema' },
+      { status: 400 },
+    )
   }
 
   // Bundles that carry a site shell additionally require

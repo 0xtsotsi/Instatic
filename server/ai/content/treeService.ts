@@ -44,7 +44,10 @@ async function resolvePageTreeField(
 }
 
 /** Map the canonical content actor onto saveDataRowDraft's (user, plugin) slots. */
-function actorToSaveArgs(actor: ContentEntryActor): { actorUserId: string | null; pluginActorId: string | null } {
+function actorToSaveArgs(actor: ContentEntryActor): {
+  actorUserId: string | null
+  pluginActorId: string | null
+} {
   if (actor.kind === 'user') return { actorUserId: actor.userId, pluginActorId: null }
   if (actor.kind === 'plugin') return { actorUserId: null, pluginActorId: actor.pluginId }
   return { actorUserId: null, pluginActorId: null } // system
@@ -74,7 +77,9 @@ export async function mutatePageTree(
 
   const initial = row.cells[fieldId]
   if (!initial || typeof initial !== 'object') {
-    throw new Error(`Field "${fieldId}" on entry "${entryId}" is empty — cannot mutate a missing tree`)
+    throw new Error(
+      `Field "${fieldId}" on entry "${entryId}" is empty — cannot mutate a missing tree`,
+    )
   }
   // Deep-clone so in-place mutations never surface on the cached row reference.
   let tree = parsePageNodeTree(structuredClone(initial), `entry "${entryId}" field "${fieldId}"`)

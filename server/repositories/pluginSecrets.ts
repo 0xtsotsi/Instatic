@@ -24,10 +24,7 @@
  */
 
 import type { DbClient } from '../db/client'
-import {
-  decryptSecret,
-  encryptSecret,
-} from '../secrets/encryption'
+import { decryptSecret, encryptSecret } from '../secrets/encryption'
 import {
   getMasterKeyFingerprint,
   loadMasterKey,
@@ -60,9 +57,7 @@ export class PluginSecretError extends Error {
   }
 }
 
-function secretEncryptionConfigurationError(
-  err: MasterKeyConfigurationError,
-): PluginSecretError {
+function secretEncryptionConfigurationError(err: MasterKeyConfigurationError): PluginSecretError {
   return new PluginSecretError(
     `Plugin secret encryption is not configured: ${err.message.replace('[secrets/masterKey] ', '')}`,
     500,
@@ -157,7 +152,10 @@ export async function resolvePluginSecretsForRuntime(
     masterKey = await loadMasterKey()
     currentFingerprint = await getMasterKeyFingerprint()
   } catch (err) {
-    console.error(`[plugin:${pluginId}] master key unavailable; plugin secrets withheld from runtime:`, err)
+    console.error(
+      `[plugin:${pluginId}] master key unavailable; plugin secrets withheld from runtime:`,
+      err,
+    )
     return {}
   }
 
@@ -169,7 +167,7 @@ export async function resolvePluginSecretsForRuntime(
     if (row.key_fingerprint !== currentFingerprint) {
       console.error(
         `[plugin:${pluginId}] secret setting "${row.setting_id}" was encrypted with a ` +
-        `different master key — re-enter it in the plugin's settings.`,
+          `different master key — re-enter it in the plugin's settings.`,
       )
       continue
     }
@@ -179,7 +177,10 @@ export async function resolvePluginSecretsForRuntime(
         iv: row.iv,
       })
     } catch (err) {
-      console.error(`[plugin:${pluginId}] failed to decrypt secret setting "${row.setting_id}":`, err)
+      console.error(
+        `[plugin:${pluginId}] failed to decrypt secret setting "${row.setting_id}":`,
+        err,
+      )
     }
   }
   return out

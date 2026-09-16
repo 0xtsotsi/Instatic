@@ -77,7 +77,7 @@ function readMasterKeyBytes(): Uint8Array {
   if (process.env.NODE_ENV === 'production') {
     throw new MasterKeyConfigurationError(
       `[secrets/masterKey] ${ENV_VAR_NAME} is required in production. ` +
-      'Generate one with: bun run scripts/generate-secret-key.ts',
+        'Generate one with: bun run scripts/generate-secret-key.ts',
     )
   }
 
@@ -101,7 +101,7 @@ function readOrCreateDevKey(path: string): Uint8Array {
   }
   console.warn(
     `[secrets/masterKey] Generated a new dev master key at ${path}. ` +
-    `Set ${ENV_VAR_NAME} for production.`,
+      `Set ${ENV_VAR_NAME} for production.`,
   )
   return fresh
 }
@@ -113,15 +113,15 @@ function parseAndValidateBase64(value: string, source: string): Uint8Array {
   } catch (err) {
     throw new MasterKeyConfigurationError(
       `[secrets/masterKey] ${source} is not valid base64. ` +
-      'Generate a new key with: bun run scripts/generate-secret-key.ts',
+        'Generate a new key with: bun run scripts/generate-secret-key.ts',
       { cause: err },
     )
   }
   if (bytes.length !== REQUIRED_KEY_BYTES) {
     throw new MasterKeyConfigurationError(
       `[secrets/masterKey] ${source} decoded to ${bytes.length} bytes; ` +
-      `must be exactly ${REQUIRED_KEY_BYTES}. ` +
-      'Generate a new key with: bun run scripts/generate-secret-key.ts',
+        `must be exactly ${REQUIRED_KEY_BYTES}. ` +
+        'Generate a new key with: bun run scripts/generate-secret-key.ts',
     )
   }
   return bytes

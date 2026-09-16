@@ -10,14 +10,19 @@ import { describe, expect, it } from 'bun:test'
 import { createSafeFetcher, type SafeFetcherOptions } from './safeFetcher'
 
 type FetchImpl = (input: string | URL | Request, init?: RequestInit) => Promise<Response>
-type DnsLookup = (hostname: string, options: { all: true; verbatim: true }) => Promise<{ address: string; family: number }[]>
+type DnsLookup = (
+  hostname: string,
+  options: { all: true; verbatim: true },
+) => Promise<{ address: string; family: number }[]>
 
 /** Default mock DNS: returns a single public IPv4 for any hostname. */
 const mockDnsPublic: DnsLookup = async () => [{ address: '93.184.216.34', family: 4 }]
 /** Mock DNS that resolves a hostname to a private IP — for DNS-rebinding tests. */
 const mockDnsPrivate: DnsLookup = async () => [{ address: '10.0.0.1', family: 4 }]
 /** Mock DNS that fails — for error-path tests. */
-const mockDnsFail: DnsLookup = async () => { throw new Error('ENOTFOUND') }
+const mockDnsFail: DnsLookup = async () => {
+  throw new Error('ENOTFOUND')
+}
 
 describe('createSafeFetcher', () => {
   it('fails closed when the URL host is outside allowedHosts', async () => {
@@ -38,11 +43,9 @@ describe('createSafeFetcher', () => {
   })
 
   it('supports one-label wildcards in allowedHosts', async () => {
-    const fetcher = createSafeFetcher(
-      async () => new Response('ok'),
-      mockDnsPublic,
-      { allowedHosts: ['*.example.com'] },
-    )
+    const fetcher = createSafeFetcher(async () => new Response('ok'), mockDnsPublic, {
+      allowedHosts: ['*.example.com'],
+    })
 
     expect((await fetcher.fetch('https://cdn.example.com/file.png')).ok).toBe(true)
     expect((await fetcher.fetch('https://a.cdn.example.com/file.png')).ok).toBe(false)
@@ -152,16 +155,19 @@ describe('createSafeFetcher', () => {
   })
 
   it('returns "asset too large" when the response body exceeds maxBytes', async () => {
-    const bigFetch: FetchImpl = async () =>
-      new Response(new Uint8Array(1000), { status: 200 })
-    const fetcher = createSafeFetcher(bigFetch, mockDnsPublic, { maxBytes: 100 } satisfies SafeFetcherOptions)
+    const bigFetch: FetchImpl = async () => new Response(new Uint8Array(1000), { status: 200 })
+    const fetcher = createSafeFetcher(bigFetch, mockDnsPublic, {
+      maxBytes: 100,
+    } satisfies SafeFetcherOptions)
     const result = await fetcher.fetch('https://example.com/big.bin')
     expect(result.ok).toBe(false)
     expect(result.error).toBe('asset too large')
   })
 
   it('returns ok:false when the fetchImpl throws, without leaking an exception', async () => {
-    const throwingFetch: FetchImpl = async () => { throw new Error('boom') }
+    const throwingFetch: FetchImpl = async () => {
+      throw new Error('boom')
+    }
     const fetcher = createSafeFetcher(throwingFetch, mockDnsPublic)
     const result = await fetcher.fetch('https://example.com/x')
     expect(result.ok).toBe(false)
@@ -180,9 +186,15 @@ describe('createSafeFetcher', () => {
     const redirectFetch: FetchImpl = async (_input) => {
       callCount++
       if (callCount === 1) {
-        return new Response('', { status: 302, headers: { location: 'https://example.com/final.png' } })
+        return new Response('', {
+          status: 302,
+          headers: { location: 'https://example.com/final.png' },
+        })
       }
-      return new Response('redirected-body', { status: 200, headers: { 'content-type': 'image/png' } })
+      return new Response('redirected-body', {
+        status: 200,
+        headers: { 'content-type': 'image/png' },
+      })
     }
     const fetcher = createSafeFetcher(redirectFetch, mockDnsPublic)
     const result = await fetcher.fetch('https://example.com/start.png')

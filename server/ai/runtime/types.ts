@@ -174,7 +174,14 @@ export type AiStreamEvent =
    * billing (you pay input per round).
    * Billing only; the "context used" meter is driven by `context` (below).
    */
-  | { type: 'usage'; promptTokens: number; completionTokens: number; costUsd?: number; cacheReadTokens?: number; cacheCreationTokens?: number }
+  | {
+      type: 'usage'
+      promptTokens: number
+      completionTokens: number
+      costUsd?: number
+      cacheReadTokens?: number
+      cacheCreationTokens?: number
+    }
   /**
    * Per-round context size — emitted ONCE PER provider round-trip (a turn with
    * tool calls has several), carrying THAT round's input buckets. The "context
@@ -183,7 +190,13 @@ export type AiStreamEvent =
    * injects the provider-normalised `contextTokens` on the wire copy. Drives
    * the live meter during a turn; `usage` stays billing.
    */
-  | { type: 'context'; promptTokens: number; cacheReadTokens?: number; cacheCreationTokens?: number; contextTokens?: number }
+  | {
+      type: 'context'
+      promptTokens: number
+      cacheReadTokens?: number
+      cacheCreationTokens?: number
+      contextTokens?: number
+    }
   /** Terminal error — stream is about to end abnormally. */
   | { type: 'error'; message: string }
   /** Stream ended cleanly. */
@@ -207,4 +220,3 @@ export interface AiBrowserBridge {
 // Aggregated usage — drivers report token counts so the handler can persist
 // per-message + per-conversation totals and compute cost from pricing.ts.
 // ---------------------------------------------------------------------------
-

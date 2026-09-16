@@ -93,26 +93,26 @@ Callers splice the fragment into the page tree via `insertImportedNodes(parentId
 
 `HTML_TO_MODULE_RULES` in `src/core/htmlImport/rules.ts` is a declarative array of `ImportRule` objects. The walker tests each element against the rules in order; the first match wins. The last rule is always `*`, so every element is guaranteed to match.
 
-| Selector | Module | Props set | Recurse |
-|---|---|---|---|
-| `instatic-outlet` | `base.outlet` | none (the CMS content outlet) | **No** |
-| `instatic-loop` | `base.loop` | `sourceId`, `filters.tableId`, `orderBy`, `direction`, `limit`, `offset`, `pagination`, `pageSize`, optional `tag` / `customTag` from `data-*` attrs | Yes |
-| `h1`–`h6`, `p`, `span`, `small`, `strong`, `em` | `base.text` | `text` = `el.textContent`, `tag` = tag name | No |
-| `a` with class `btn` | `base.button` | `label` = `el.textContent`, `href`, `target` | No |
-| `a` (no `btn` class) | `base.link` | `text` = `el.textContent`, `href`, `target` | No |
-| `img` | `base.image` | `src` = `src` attribute only | No |
-| `form` | `base.form` | `mode`, `formId`, CMS data attrs, custom `action` / `method` | Yes |
-| `label` | `base.label` unless wrapping elements, then `base.container` | `text`, `targetMode`, `targetId` | No for plain labels; yes for wrapper labels |
-| `input` | `base.input`, `base.checkbox`, `base.radio`, `base.submit`, or `base.button` | Native form attrs modeled by the target module | No |
-| `textarea` | `base.textarea` | `fieldId`, `name`, `id`, `placeholder`, `value`, validation attrs | No |
-| `select` | `base.select` | `fieldId`, `name`, `id`, `required`, `disabled`, `multiple` | Yes |
-| `optgroup` | `base.option-group` | `label`, `disabled` | Yes |
-| `option` | `base.option` | `value`, `label`, `selected`, `disabled` | No |
-| `button` | `base.button`, or `base.submit` when submit-type / inside a form without a type | `label`, `disabled` | No |
-| `ul`, `ol` | `base.container` | `tag` = tag name | Yes |
-| `div`, `section`, `article`, `main`, `header`, `footer`, `nav`, `aside` | `base.container` | `tag` = tag name | Yes |
-| `area`, `base`, `br`, `col`, `embed`, `hr`, `link`, `meta`, `param`, `source`, `track`, `wbr` (void elements) | `base.container` | `tag: 'custom'`, `customTag` = tag name | **No** |
-| `*` (catch-all) | `base.container` | `tag: 'custom'`, `customTag` = tag name | Yes |
+| Selector                                                                                                      | Module                                                                          | Props set                                                                                                                                            | Recurse                                     |
+| ------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------- |
+| `instatic-outlet`                                                                                             | `base.outlet`                                                                   | none (the CMS content outlet)                                                                                                                        | **No**                                      |
+| `instatic-loop`                                                                                               | `base.loop`                                                                     | `sourceId`, `filters.tableId`, `orderBy`, `direction`, `limit`, `offset`, `pagination`, `pageSize`, optional `tag` / `customTag` from `data-*` attrs | Yes                                         |
+| `h1`–`h6`, `p`, `span`, `small`, `strong`, `em`                                                               | `base.text`                                                                     | `text` = `el.textContent`, `tag` = tag name                                                                                                          | No                                          |
+| `a` with class `btn`                                                                                          | `base.button`                                                                   | `label` = `el.textContent`, `href`, `target`                                                                                                         | No                                          |
+| `a` (no `btn` class)                                                                                          | `base.link`                                                                     | `text` = `el.textContent`, `href`, `target`                                                                                                          | No                                          |
+| `img`                                                                                                         | `base.image`                                                                    | `src` = `src` attribute only                                                                                                                         | No                                          |
+| `form`                                                                                                        | `base.form`                                                                     | `mode`, `formId`, CMS data attrs, custom `action` / `method`                                                                                         | Yes                                         |
+| `label`                                                                                                       | `base.label` unless wrapping elements, then `base.container`                    | `text`, `targetMode`, `targetId`                                                                                                                     | No for plain labels; yes for wrapper labels |
+| `input`                                                                                                       | `base.input`, `base.checkbox`, `base.radio`, `base.submit`, or `base.button`    | Native form attrs modeled by the target module                                                                                                       | No                                          |
+| `textarea`                                                                                                    | `base.textarea`                                                                 | `fieldId`, `name`, `id`, `placeholder`, `value`, validation attrs                                                                                    | No                                          |
+| `select`                                                                                                      | `base.select`                                                                   | `fieldId`, `name`, `id`, `required`, `disabled`, `multiple`                                                                                          | Yes                                         |
+| `optgroup`                                                                                                    | `base.option-group`                                                             | `label`, `disabled`                                                                                                                                  | Yes                                         |
+| `option`                                                                                                      | `base.option`                                                                   | `value`, `label`, `selected`, `disabled`                                                                                                             | No                                          |
+| `button`                                                                                                      | `base.button`, or `base.submit` when submit-type / inside a form without a type | `label`, `disabled`                                                                                                                                  | No                                          |
+| `ul`, `ol`                                                                                                    | `base.container`                                                                | `tag` = tag name                                                                                                                                     | Yes                                         |
+| `div`, `section`, `article`, `main`, `header`, `footer`, `nav`, `aside`                                       | `base.container`                                                                | `tag` = tag name                                                                                                                                     | Yes                                         |
+| `area`, `base`, `br`, `col`, `embed`, `hr`, `link`, `meta`, `param`, `source`, `track`, `wbr` (void elements) | `base.container`                                                                | `tag: 'custom'`, `customTag` = tag name                                                                                                              | **No**                                      |
+| `*` (catch-all)                                                                                               | `base.container`                                                                | `tag: 'custom'`, `customTag` = tag name                                                                                                              | Yes                                         |
 
 **Key details:**
 
@@ -126,7 +126,7 @@ Callers splice the fragment into the page tree via `insertImportedNodes(parentId
 - **Form elements import as form primitives.** Third-party `<form>` elements default to `base.form` in `custom` mode, so they do not become CMS submission endpoints until an author binds them to a data table. Published CMS-native forms can round-trip their `data-instatic-*` form metadata. Plain labels become `base.label`; labels that wrap controls become a `base.container` with `customTag:'label'` so nested inputs are not dropped.
 - **Void elements** (`<br>`, `<hr>`, etc.) have their own rule that sits before the catch-all. They map to `base.container` with `tag:'custom'` + the real tag name, but with `recurse:false` so the produced node has no children. `<input>` is not part of this fallback anymore; it imports through the form-control rule. The canvas renderer (`ContainerEditor`) also guards against passing children (including the empty-container placeholder) to void element tags, because React throws if you do so.
 - The catch-all (`*`) handles `li`, `figure`, `blockquote`, `table`, `dialog`, and anything else not listed. It uses `tag: 'custom'` + `customTag` so `resolveHtmlTag` in `base.container` emits the real element name. Using `tag: 'div'` + `customTag` would render `<div>` instead.
-- The pure `walkAndMap` step copies element class *names* onto `node.classIds` (`Array.from(el.classList)`) — it is registry-agnostic and infers no styles. The store action that splices the fragment in (`insertImportedNodes`) then converts those names to real class ids (see [Class linking](#class-linking-name--id)).
+- The pure `walkAndMap` step copies element class _names_ onto `node.classIds` (`Array.from(el.classList)`) — it is registry-agnostic and infers no styles. The store action that splices the fragment in (`insertImportedNodes`) then converts those names to real class ids (see [Class linking](#class-linking-name--id)).
 
 ---
 
@@ -134,13 +134,13 @@ Callers splice the fragment into the page tree via `insertImportedNodes(parentId
 
 `stripUnsafe` (`src/core/htmlImport/stripUnsafe.ts`) mutates the parsed document before the walker runs. CSS is harvested first (see the pipeline above), so `<style>` and `style="…"` are removed from the DOM but **not dropped from the import**:
 
-| Construct | Treatment |
-|---|---|
-| `<script>` elements | Stripped — counted as `stripped.scripts` |
-| Inline `on*` attributes (`onclick`, `onload`, …) | Stripped — counted as `stripped.inlineHandlers` |
-| `<style>` elements | CSS harvested into `result.styleCss` (then parsed into registry rules); the element is removed |
-| `style="…"` attributes | Declarations harvested onto `node.inlineStyles`; the attribute is removed |
-| HTML comments and processing instructions | Stripped silently — no count |
+| Construct                                        | Treatment                                                                                      |
+| ------------------------------------------------ | ---------------------------------------------------------------------------------------------- |
+| `<script>` elements                              | Stripped — counted as `stripped.scripts`                                                       |
+| Inline `on*` attributes (`onclick`, `onload`, …) | Stripped — counted as `stripped.inlineHandlers`                                                |
+| `<style>` elements                               | CSS harvested into `result.styleCss` (then parsed into registry rules); the element is removed |
+| `style="…"` attributes                           | Declarations harvested onto `node.inlineStyles`; the attribute is removed                      |
+| HTML comments and processing instructions        | Stripped silently — no count                                                                   |
 
 The AI agent should not use stripped constructs for behavior. If an edit needs JavaScript, it writes a real runtime script with `write_code_asset({ type: "script", ... })` and verifies targeting with `inspect_code_runtime` instead of embedding `<script>` or `onclick` in an HTML import. Module scripts import npm packages with bare specifiers and declare them in the same `write_code_asset` call's `dependencies` map.
 
@@ -154,13 +154,13 @@ After insert, `ImportHtmlModal` builds a toast body from the added-selector coun
 
 The importer is "approximate by construction". Several inputs do not survive the round-trip:
 
-| Input | What happens | Why |
-|---|---|---|
-| `alt=""` on `<img>` | Dropped | `base.image` has no `alt` prop — alt text is stored on the media library asset |
-| Safe HTML attributes not modeled by the matched module (`id`, ARIA attrs, `role`, custom attrs, `data-*`, etc.) | Preserved in `props.htmlAttributes` on base container/text/link/button/image nodes and editable in the Properties panel Attributes view. `class` names become registry classes, inline `style` declarations become `node.inlineStyles`, event handlers are stripped, reserved editor/runtime `data-*` names are not imported, and attributes already owned by the module (for example `href` on links and `src` on images) stay in their first-class module props. | The module schema owns modeled props; `htmlAttributes` is the safe escape hatch for extra authored attributes |
-| Exact inline whitespace around mixed content (`<div>Hello <em>world</em></div>`) | Approximated | Each text run becomes a `base.text` child with `tag: 'none'` and whitespace collapsed to single spaces. True parent-edge indentation is trimmed, but a single boundary space is preserved around element siblings so `Hello <em>world</em>` does not become `Helloworld`. The text itself is **preserved** and publishes without an extra wrapper. |
-| Whitespace-only text (newlines/indentation between tags) | Dropped | It carries no content — collapsing it would add empty text nodes to every pretty-printed snippet |
-| Void elements (`<br>`, `<hr>`, etc.) | Imported as a childless `base.container` node with `tag:'custom'` and the real tag name as `customTag`. No children, no empty-container placeholder. `<input>` imports as a form primitive instead. | React throws if children are rendered inside void element tags; the dedicated void-element rule (before the catch-all) sets `recurse:false` and the canvas renderer skips children entirely for void tags. |
+| Input                                                                                                           | What happens                                                                                                                                                                                                                                                                                                                                                                                                                                                       | Why                                                                                                                                                                                                                                                                                                                                                |
+| --------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `alt=""` on `<img>`                                                                                             | Dropped                                                                                                                                                                                                                                                                                                                                                                                                                                                            | `base.image` has no `alt` prop — alt text is stored on the media library asset                                                                                                                                                                                                                                                                     |
+| Safe HTML attributes not modeled by the matched module (`id`, ARIA attrs, `role`, custom attrs, `data-*`, etc.) | Preserved in `props.htmlAttributes` on base container/text/link/button/image nodes and editable in the Properties panel Attributes view. `class` names become registry classes, inline `style` declarations become `node.inlineStyles`, event handlers are stripped, reserved editor/runtime `data-*` names are not imported, and attributes already owned by the module (for example `href` on links and `src` on images) stay in their first-class module props. | The module schema owns modeled props; `htmlAttributes` is the safe escape hatch for extra authored attributes                                                                                                                                                                                                                                      |
+| Exact inline whitespace around mixed content (`<div>Hello <em>world</em></div>`)                                | Approximated                                                                                                                                                                                                                                                                                                                                                                                                                                                       | Each text run becomes a `base.text` child with `tag: 'none'` and whitespace collapsed to single spaces. True parent-edge indentation is trimmed, but a single boundary space is preserved around element siblings so `Hello <em>world</em>` does not become `Helloworld`. The text itself is **preserved** and publishes without an extra wrapper. |
+| Whitespace-only text (newlines/indentation between tags)                                                        | Dropped                                                                                                                                                                                                                                                                                                                                                                                                                                                            | It carries no content — collapsing it would add empty text nodes to every pretty-printed snippet                                                                                                                                                                                                                                                   |
+| Void elements (`<br>`, `<hr>`, etc.)                                                                            | Imported as a childless `base.container` node with `tag:'custom'` and the real tag name as `customTag`. No children, no empty-container placeholder. `<input>` imports as a form primitive instead.                                                                                                                                                                                                                                                                | React throws if children are rendered inside void element tags; the dedicated void-element rule (before the catch-all) sets `recurse:false` and the canvas renderer skips children entirely for void tags.                                                                                                                                         |
 
 These losses are deliberate. The importer is a structural bootstrap, not a fidelity snapshot.
 
@@ -175,6 +175,7 @@ Three entry points all open the same `ImportHtmlModal`:
 3. **Canvas context menu** — same as DOM panel, via `CanvasRoot.handlePasteHtml`.
 
 The modal is a two-column dialog — HTML editor on the left (wider), tree preview on the right (narrower):
+
 - **CodeMirror HTML editor** (left column) — paste or type HTML. Error alerts appear inline in the column header when insertion fails.
 - **Tree preview** (right column) — 200 ms debounced DOM-style tree view using the same row components as the Layers panel. Updates as the user types.
 - **Insertion target** — taken from the opener's `parentId`; Spotlight defaults to the page root. There is no parent picker in the modal.
@@ -188,11 +189,13 @@ same dialog chrome with a two-column loading skeleton so opening the command
 has immediate feedback:
 
 ```tsx
-{importHtmlModalOpen && (
-  <Suspense fallback={<ImportHtmlModalLoading />}>
-    <ImportHtmlModal />
-  </Suspense>
-)}
+{
+  importHtmlModalOpen && (
+    <Suspense fallback={<ImportHtmlModalLoading />}>
+      <ImportHtmlModal />
+    </Suspense>
+  )
+}
 ```
 
 ---
@@ -225,12 +228,12 @@ The importer preserves CSS across two layers, both gated by `isEmittableProperty
 
 ## Forbidden patterns
 
-| Pattern | Use instead |
-|---|---|
-| Calling `walkAndMap` before `stripUnsafe` | Call `importHtml(source)` — it runs both in the correct order |
-| Importing `parseHtml` or `walkAndMap` from inside `src/core/` via a deep path | Import through the barrel: `import { importHtml } from '@core/htmlImport'` |
-| Adding a server-side DOM import to `parseHtml.ts` | If server-side parsing is needed, add a guarded dynamic import at the call site — `parseHtml.ts` must stay importable in the browser bundle without bundling a DOM library |
-| Storing `alt` text on `base.image` nodes produced by the importer | `base.image` has no `alt` prop; alt lives on the media library asset |
+| Pattern                                                                       | Use instead                                                                                                                                                                |
+| ----------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Calling `walkAndMap` before `stripUnsafe`                                     | Call `importHtml(source)` — it runs both in the correct order                                                                                                              |
+| Importing `parseHtml` or `walkAndMap` from inside `src/core/` via a deep path | Import through the barrel: `import { importHtml } from '@core/htmlImport'`                                                                                                 |
+| Adding a server-side DOM import to `parseHtml.ts`                             | If server-side parsing is needed, add a guarded dynamic import at the call site — `parseHtml.ts` must stay importable in the browser bundle without bundling a DOM library |
+| Storing `alt` text on `base.image` nodes produced by the importer             | `base.image` has no `alt` prop; alt lives on the media library asset                                                                                                       |
 
 ---
 

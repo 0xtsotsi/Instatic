@@ -130,7 +130,10 @@ async function handleSubmit(req: Request, db: DbClient): Promise<Response> {
     values,
   })
   if (!validation.ok) {
-    return jsonResponse({ error: 'Invalid form values', errors: validation.errors }, { status: 400 })
+    return jsonResponse(
+      { error: 'Invalid form values', errors: validation.errors },
+      { status: 400 },
+    )
   }
 
   const row = await createDataRow(db, {

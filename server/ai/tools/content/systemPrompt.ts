@@ -69,7 +69,9 @@ function buildDynamicSuffix(snap: ContentSnapshot): string {
   if (snap.activeDocument) {
     lines.push(formatActiveDocument(snap.activeDocument))
   } else {
-    lines.push('No document is open. Use content_list_documents + content_set_active_document, or content_create_document.')
+    lines.push(
+      'No document is open. Use content_list_documents + content_set_active_document, or content_create_document.',
+    )
   }
   return lines.join('\n')
 }
@@ -109,9 +111,5 @@ function formatFieldValue(value: unknown, type: string): string {
  * Build the content-scope system prompt as the cacheable 3-element form.
  */
 export function buildContentSystemPrompt(snap: ContentSnapshot): string[] {
-  return [
-    STATIC_PROMPT_PREFIX,
-    SYSTEM_PROMPT_DYNAMIC_BOUNDARY,
-    buildDynamicSuffix(snap),
-  ]
+  return [STATIC_PROMPT_PREFIX, SYSTEM_PROMPT_DYNAMIC_BOUNDARY, buildDynamicSuffix(snap)]
 }

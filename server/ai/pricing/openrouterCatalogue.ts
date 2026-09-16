@@ -124,9 +124,7 @@ export async function fetchOpenRouterCatalogue(): Promise<ModelCatalogue> {
         cacheWritePerMTok: perMTok(model.pricing?.input_cache_write),
       },
       contextWindow:
-        model.context_length && Number.isFinite(model.context_length)
-          ? model.context_length
-          : null,
+        model.context_length && Number.isFinite(model.context_length) ? model.context_length : null,
     })
   }
   return catalogue

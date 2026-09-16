@@ -41,9 +41,12 @@ const CaptureInput = Type.Object(
   {
     url: Type.String({ format: 'uri', description: 'Absolute http(s) URL to capture.' }),
     mode: Type.Optional(
-      Type.Union([Type.Literal('dom+styles'), Type.Literal('dom-only'), Type.Literal('styles-only')], {
-        description: 'What to return. Defaults to dom+styles.',
-      }),
+      Type.Union(
+        [Type.Literal('dom+styles'), Type.Literal('dom-only'), Type.Literal('styles-only')],
+        {
+          description: 'What to return. Defaults to dom+styles.',
+        },
+      ),
     ),
     scope: Type.Optional(
       Type.Union([Type.Literal('element'), Type.Literal('subtree'), Type.Literal('page')], {
@@ -54,7 +57,11 @@ const CaptureInput = Type.Object(
       Type.String({ description: 'CSS selector for element/subtree scope.' }),
     ),
     assetsMax: Type.Optional(
-      Type.Integer({ minimum: 0, maximum: 100, description: 'Cap on asset downloads. Default 25.' }),
+      Type.Integer({
+        minimum: 0,
+        maximum: 100,
+        description: 'Cap on asset downloads. Default 25.',
+      }),
     ),
     interactions: Type.Optional(
       Type.Array(
@@ -81,7 +88,11 @@ const CaptureInput = Type.Object(
           },
           { additionalProperties: false },
         ),
-        { maxLength: 50, description: 'Pre-capture interactions applied after navigation and before extraction (SPA support).' },
+        {
+          maxLength: 50,
+          description:
+            'Pre-capture interactions applied after navigation and before extraction (SPA support).',
+        },
       ),
     ),
   },
@@ -108,7 +119,14 @@ export const captureTool: AiTool = {
   inputSchema: CaptureInput,
   requiredCapabilities: CAPS,
   handler: async (input, ctx: ToolContext): Promise<CaptureOutput> => {
-    const { url, mode = 'dom+styles', scope = 'page', selector, assetsMax = 25, interactions } = input as CaptureInputInternal
+    const {
+      url,
+      mode = 'dom+styles',
+      scope = 'page',
+      selector,
+      assetsMax = 25,
+      interactions,
+    } = input as CaptureInputInternal
 
     // Boundary validation: scope/subtree/element require a selector; the
     // selector itself must pass validateSelector. Both checks fire BEFORE
@@ -123,12 +141,12 @@ export const captureTool: AiTool = {
       }
     }
     // Reference targetForScope so ESLint counts it as used; the symbol is
-// only consumed via the re-export on line 21 (captureTool.test.ts
-// imports it from this module). Without this, `targetForScope` would
-// be flagged as unused and the import line would be removed by --fix.
-void targetForScope
+    // only consumed via the re-export on line 21 (captureTool.test.ts
+    // imports it from this module). Without this, `targetForScope` would
+    // be flagged as unused and the import line would be removed by --fix.
+    void targetForScope
 
-// Production fetcher: launch a real Playwright browser. The orchestrator
+    // Production fetcher: launch a real Playwright browser. The orchestrator
     // owns the lifecycle (close in its own finally block).
     const fetcher = await createPlaywrightFetcher()
     return runCapture(

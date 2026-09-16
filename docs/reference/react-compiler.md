@@ -20,9 +20,9 @@ The **React Compiler is enabled** for the whole app (`babel({ presets: [reactCom
 
 Memoization legitimately stays in exactly three cases. **Keep it, and add a one-line comment saying why** so the next reader (and the linters) know it's deliberate.
 
-1. **The value/function is referenced in a hook dependency array.** The static `react-hooks/exhaustive-deps` rule can't see the compiler's runtime memoization, so it still demands a stable identity for anything in a `useEffect`/`useMemo`/`useCallback` dep array. Wrapping a *function* used as a dep in `useCallback` (plus the transitive closure it depends on) is required to keep `bun run lint` clean. Only **functions** trip the rule — a plain value feeding a dep array can be inlined.
+1. **The value/function is referenced in a hook dependency array.** The static `react-hooks/exhaustive-deps` rule can't see the compiler's runtime memoization, so it still demands a stable identity for anything in a `useEffect`/`useMemo`/`useCallback` dep array. Wrapping a _function_ used as a dep in `useCallback` (plus the transitive closure it depends on) is required to keep `bun run lint` clean. Only **functions** trip the rule — a plain value feeding a dep array can be inlined.
 
-2. **A `React.memo` re-render bailout on a hot, list-rendered component** (e.g. a recursive per-node canvas/tree renderer rendered O(N) times). `React.memo` skips re-rendering on equal props — a *different* mechanism from the compiler's within-component memoization — so dropping it on an O(N) critical path is not behavior-preserving without runtime perf validation. Rare; justify in a comment. Examples: `NodeRenderer`, `DomPanel/TreeNode`, `AgentPanel`'s `MessageBubble`/`MarkdownTextBubble`.
+2. **A `React.memo` re-render bailout on a hot, list-rendered component** (e.g. a recursive per-node canvas/tree renderer rendered O(N) times). `React.memo` skips re-rendering on equal props — a _different_ mechanism from the compiler's within-component memoization — so dropping it on an O(N) critical path is not behavior-preserving without runtime perf validation. Rare; justify in a comment. Examples: `NodeRenderer`, `DomPanel/TreeNode`, `AgentPanel`'s `MessageBubble`/`MarkdownTextBubble`.
 
 3. **A lint escape hatch the compiler/linters force.** Two sub-cases:
    - **`react-hooks/refs`**: a render-scoped event handler that reads/writes a ref (`someRef.current = …`) trips "Cannot access refs during render" when written as a bare function, because the linter can't tell the closure only runs at event time. Wrapping it in `useCallback` satisfies the rule. (See `CanvasLiveSurface`'s pointer handlers.)
@@ -35,7 +35,7 @@ Enforcement is **`eslint-plugin-react-compiler` + `eslint-plugin-react-hooks`**,
 - `eslint-plugin-react-compiler` flags functions the compiler had to bail out on.
 - `react-hooks/exhaustive-deps` and `react-hooks/refs` enforce exceptions (1) and (3).
 
-`react-doctor`'s `react-compiler-no-manual-memoization` rule *also* flags manual memoization, but it cannot recognize the three exceptions above, so it false-positives on them. It is therefore configured as an **advisory warning** (`react-doctor.config.json`), not an error gate — it surfaces genuinely-gratuitous memoization on new code without blocking on the legitimate exceptions. Treat a new `useMemo`/`useCallback`/`memo()` outside the three exceptions as drift and remove it.
+`react-doctor`'s `react-compiler-no-manual-memoization` rule _also_ flags manual memoization, but it cannot recognize the three exceptions above, so it false-positives on them. It is therefore configured as an **advisory warning** (`react-doctor.config.json`), not an error gate — it surfaces genuinely-gratuitous memoization on new code without blocking on the legitimate exceptions. Treat a new `useMemo`/`useCallback`/`memo()` outside the three exceptions as drift and remove it.
 
 ---
 

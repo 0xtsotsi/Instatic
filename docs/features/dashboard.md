@@ -72,16 +72,16 @@ src/core/dashboard/
 ```css
 .gridLayout {
   --row-h: 70px;
-  --gap:   1px;                         /* 16px in customize mode */
-  display:               grid;
+  --gap: 1px; /* 16px in customize mode */
+  display: grid;
   grid-template-columns: repeat(12, 1fr);
-  grid-auto-rows:        var(--row-h);
-  gap:                   var(--gap);
+  grid-auto-rows: var(--row-h);
+  gap: var(--gap);
 }
 .cell {
   grid-column: var(--col) / span var(--span);
-  grid-row:    var(--row) / span var(--rows);
-  background:  transparent;             /* the widget body provides the surface */
+  grid-row: var(--row) / span var(--rows);
+  background: transparent; /* the widget body provides the surface */
 }
 ```
 
@@ -105,41 +105,41 @@ Each widget is a `DashboardWidgetDefinition`:
 
 ```ts
 interface DashboardWidgetDefinition {
-  id:           string                          // 'storage', 'pages', 'activity', ...
-  ownerId:      string                          // 'core' for first-party widgets
-  name:         string                          // 'Storage usage', 'Pages', ...
-  description:  string
-  icon:         PixelArtIconComponent
-  defaultSize:  DashboardWidgetSize             // initial column span
-  tint:         DashboardWidgetTint             // 'mint' | 'lilac' | 'sky' | 'peach'
-  render:       React.ComponentType<DashboardWidgetRendererProps>
+  id: string // 'storage', 'pages', 'activity', ...
+  ownerId: string // 'core' for first-party widgets
+  name: string // 'Storage usage', 'Pages', ...
+  description: string
+  icon: PixelArtIconComponent
+  defaultSize: DashboardWidgetSize // initial column span
+  tint: DashboardWidgetTint // 'mint' | 'lilac' | 'sky' | 'peach'
+  render: React.ComponentType<DashboardWidgetRendererProps>
 }
 ```
 
-| Size  | Columns |
-|-------|---------|
-| 3     | quarter |
-| 4     | third   |
-| 6     | half    |
-| 8     | two-thirds |
-| 12    | full    |
+| Size | Columns    |
+| ---- | ---------- |
+| 3    | quarter    |
+| 4    | third      |
+| 6    | half       |
+| 8    | two-thirds |
+| 12   | full       |
 
 `tint` maps to `mint` / `lilac` / `sky` / `peach`, which `Widget` turns into `--accent-1` through `--accent-4` for the title dot and chart accents. First-party widgets import pixel-art icon components directly. Plugin widgets use the SDK's `iconName` string, which the host resolves through `src/admin/pages/dashboard/widgetIcons.ts` before registering the same host definition.
 
 ### First-party widgets
 
-| id         | Registry span | Seeded layout | Tint  | Shows |
-|------------|---------------|---------------|-------|-------|
-| `storage`  | 6             | 12 × 4        | sky   | Total disk usage plus media/plugin/database breakdown |
-| `pages`    | 3             | 3 × 3         | lilac | Published, draft, scheduled, and trailing-week page counts |
-| `posts`    | 3             | 3 × 3         | peach | Total posts, category count, scheduled count, and 28-day bars |
-| `media`    | 3             | 3 × 3         | peach | File count, total bytes, and latest thumbnails |
-| `status`   | 3             | 3 × 3         | mint  | Local site/build/backup/plugin status rows |
+| id         | Registry span | Seeded layout | Tint  | Shows                                                              |
+| ---------- | ------------- | ------------- | ----- | ------------------------------------------------------------------ |
+| `storage`  | 6             | 12 × 4        | sky   | Total disk usage plus media/plugin/database breakdown              |
+| `pages`    | 3             | 3 × 3         | lilac | Published, draft, scheduled, and trailing-week page counts         |
+| `posts`    | 3             | 3 × 3         | peach | Total posts, category count, scheduled count, and 28-day bars      |
+| `media`    | 3             | 3 × 3         | peach | File count, total bytes, and latest thumbnails                     |
+| `status`   | 3             | 3 × 3         | mint  | Local site/build/backup/plugin status rows                         |
 | `activity` | 4             | 6 × 5         | peach | Recent audit-backed admin activity; endpoint requires `audit.read` |
-| `publish`  | 4             | 6 × 5         | sky   | Scheduled, recently published, and draft content rows |
-| `plugins`  | 4             | 6 × 5         | mint  | Installed plugin counts and lifecycle-state rows |
-| `domain`   | 3             | 6 × 3         | sky   | Local primary-domain and HTTPS verification rows |
-| `ai-usage` | 3             | Library only  | lilac | This-month AI spend, chats, top scope, and daily spend sparkline |
+| `publish`  | 4             | 6 × 5         | sky   | Scheduled, recently published, and draft content rows              |
+| `plugins`  | 4             | 6 × 5         | mint  | Installed plugin counts and lifecycle-state rows                   |
+| `domain`   | 3             | 6 × 3         | sky   | Local primary-domain and HTTPS verification rows                   |
+| `ai-usage` | 3             | Library only  | lilac | This-month AI spend, chats, top scope, and daily spend sparkline   |
 
 `Registry span` is the widget's `defaultSize`, used when the user drops it from the Block Library. `Seeded layout` is the fresh-user grid in `useDashboardLayout.ts`; `ai-usage` is first-party but intentionally starts in the Block Library instead of the default grid.
 
@@ -199,12 +199,12 @@ Resize math snaps to integer column / row deltas in `useDashboardLayout.ts`. The
 
 `useDashboardLayout(...)` is the source of truth for widget positions, sizes, and order.
 
-| Action            | What it writes                                          |
-|-------------------|---------------------------------------------------------|
-| Move widget       | `{ widgetId, col, row }`                                |
-| Resize widget     | `{ widgetId, span, rows }`                              |
-| Add from library  | Append `DashboardItem` to the user's layout            |
-| Remove widget     | Remove from layout; widget returns to library          |
+| Action           | What it writes                                |
+| ---------------- | --------------------------------------------- |
+| Move widget      | `{ widgetId, col, row }`                      |
+| Resize widget    | `{ widgetId, span, rows }`                    |
+| Add from library | Append `DashboardItem` to the user's layout   |
+| Remove widget    | Remove from layout; widget returns to library |
 
 The layout is persisted server-side in the `user_preferences` table under key `dashboard-layout`. The endpoint is `PUT /admin/api/cms/me/preferences/dashboard-layout` (handled by `handleUserPreferencesRoutes`).
 
@@ -220,23 +220,23 @@ New users start with a default layout (first-party widgets pre-positioned). `use
 
 The dashboard fans out into **per-domain** endpoints under `/admin/api/cms/dashboard/<domain>`. Each widget owns one hook (`usePagesStats`, `useMediaStats`, `useStorageStats`, …) which hits exactly one endpoint, so widgets unblock independently and the slowest reader (Activity) never holds up the rest:
 
-| Endpoint                    | Hook                     | Capability gate | Response shape (summary) |
-|-----------------------------|--------------------------|-----------------|--------------------------|
-| `/dashboard/pages`          | `usePagesStats`          | authenticated user | `{ total, published, drafts, scheduled, deltaPublishedThisWeek }` |
-| `/dashboard/posts`          | `usePostsStats`          | authenticated user | `{ total, categories, scheduled, daily28 }` |
-| `/dashboard/media`          | `useMediaStats`          | `media.read` | `{ count, totalBytes, latestThumbs[] }` |
-| `/dashboard/plugins`        | `usePluginsStats`        | `plugins.read` | `{ total, active, disabled, errored, rows[] }` |
+| Endpoint                    | Hook                     | Capability gate    | Response shape (summary)                                                                     |
+| --------------------------- | ------------------------ | ------------------ | -------------------------------------------------------------------------------------------- |
+| `/dashboard/pages`          | `usePagesStats`          | authenticated user | `{ total, published, drafts, scheduled, deltaPublishedThisWeek }`                            |
+| `/dashboard/posts`          | `usePostsStats`          | authenticated user | `{ total, categories, scheduled, daily28 }`                                                  |
+| `/dashboard/media`          | `useMediaStats`          | `media.read`       | `{ count, totalBytes, latestThumbs[] }`                                                      |
+| `/dashboard/plugins`        | `usePluginsStats`        | `plugins.read`     | `{ total, active, disabled, errored, rows[] }`                                               |
 | `/dashboard/storage`        | `useStorageStats`        | authenticated user | `{ imageBytes, videoBytes, documentBytes, pluginBytes, databaseBytes, totalBytes, dialect }` |
-| `/dashboard/publish-lineup` | `usePublishLineupStats`  | authenticated user | `{ rows: [{ id, path, status, at }] }` |
-| `/dashboard/activity`       | `useRecentActivityStats` | `audit.read` | `{ rows: [{ id, action, actor, targetCode, targetText, createdAt }] }` |
+| `/dashboard/publish-lineup` | `usePublishLineupStats`  | authenticated user | `{ rows: [{ id, path, status, at }] }`                                                       |
+| `/dashboard/activity`       | `useRecentActivityStats` | `audit.read`       | `{ rows: [{ id, action, actor, targetCode, targetText, createdAt }] }`                       |
 
 Non-CMS first-party widgets:
 
-| Widget | Data source | Notes |
-|--------|-------------|-------|
+| Widget     | Data source                                               | Notes                                                                   |
+| ---------- | --------------------------------------------------------- | ----------------------------------------------------------------------- |
 | `ai-usage` | `listAiAudit(startOfMonthIso())` -> `/admin/api/ai/audit` | Maps a 403 from missing `ai.audit.read` to a no-permission empty state. |
-| `domain` | Local component rows | Shows the current placeholder primary-domain / HTTPS rows. |
-| `status` | Local component rows | Shows the current placeholder site/build/backup/plugin status rows. |
+| `domain`   | Local component rows                                      | Shows the current placeholder primary-domain / HTTPS rows.              |
+| `status`   | Local component rows                                      | Shows the current placeholder site/build/backup/plugin status rows.     |
 
 ### Timezone-aware day bucketing
 
@@ -339,7 +339,7 @@ Dashboard widget definitions do not carry a `requires` field. Gate sensitive dat
 
 ```ts
 const DASHBOARD_READERS = {
-  'activity': { reader: readRecentActivity, capability: 'audit.read' },
+  activity: { reader: readRecentActivity, capability: 'audit.read' },
 }
 ```
 
@@ -361,16 +361,16 @@ The hook has no in-page reset control. It starts from `DEFAULT_LAYOUT` on every 
 
 ## Forbidden patterns
 
-| Pattern                                                            | Use instead                                              |
-|--------------------------------------------------------------------|----------------------------------------------------------|
-| Recreating the borderless-tile-card look manually                  | `<Widget tint="...">`                                    |
-| Using `--bg-body` (pure black) as a widget body fill             | `--bg-surface-2` — the gap reveals the parent       |
-| Hovering changes a border instead of a tone                        | Background tone lift (`-surface-2` → `-3`)               |
-| Inventing a new size (e.g. 5 columns)                              | Stay with the factor-of-12 grid sizes                    |
-| Dispatching dashboard data through the editor store                | Use the per-widget hooks in `useDashboardStats.ts` — the dashboard is self-contained |
-| Adding pages-specific UI to a widget                               | Widgets are for read-only KPIs / activity. Use a workspace for editing. |
-| Hardcoding a widget's position outside the default layout           | Add it to `DEFAULT_LAYOUT` in `useDashboardLayout`; users can move it. |
-| Reading `useEditorStore` from inside a widget                      | The dashboard is in the admin shell, not the editor — the editor store isn't mounted here. |
+| Pattern                                                   | Use instead                                                                                |
+| --------------------------------------------------------- | ------------------------------------------------------------------------------------------ |
+| Recreating the borderless-tile-card look manually         | `<Widget tint="...">`                                                                      |
+| Using `--bg-body` (pure black) as a widget body fill      | `--bg-surface-2` — the gap reveals the parent                                              |
+| Hovering changes a border instead of a tone               | Background tone lift (`-surface-2` → `-3`)                                                 |
+| Inventing a new size (e.g. 5 columns)                     | Stay with the factor-of-12 grid sizes                                                      |
+| Dispatching dashboard data through the editor store       | Use the per-widget hooks in `useDashboardStats.ts` — the dashboard is self-contained       |
+| Adding pages-specific UI to a widget                      | Widgets are for read-only KPIs / activity. Use a workspace for editing.                    |
+| Hardcoding a widget's position outside the default layout | Add it to `DEFAULT_LAYOUT` in `useDashboardLayout`; users can move it.                     |
+| Reading `useEditorStore` from inside a widget             | The dashboard is in the admin shell, not the editor — the editor store isn't mounted here. |
 
 ---
 

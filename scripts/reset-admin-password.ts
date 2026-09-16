@@ -214,6 +214,8 @@ async function main(): Promise<void> {
 }
 
 main().catch((err) => {
-  process.stderr.write(`[reset-admin-password] ${err instanceof Error ? err.stack ?? err.message : String(err)}\n`)
+  process.stderr.write(
+    `[reset-admin-password] ${err instanceof Error ? (err.stack ?? err.message) : String(err)}\n`,
+  )
   process.exit(1)
 })

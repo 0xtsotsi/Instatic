@@ -245,10 +245,7 @@ export function toPublicUser(user: AuthUser): CmsUser {
 }
 
 export async function listUsers(db: DbClient): Promise<CmsUser[]> {
-  const rows = await queryUsers(
-    db,
-    'where users.deleted_at is null order by users.created_at asc',
-  )
+  const rows = await queryUsers(db, 'where users.deleted_at is null order by users.created_at asc')
   return rows.map((row) => toPublicUser(rowToUser(row)))
 }
 
@@ -318,13 +315,13 @@ export async function updateUser(
   const email = input.email === undefined ? current.email : input.email.trim()
   const emailNormalized = normalizeEmail(email)
   if (!emailNormalized.includes('@')) throw new UserMutationError('Invalid email')
-  const displayName = input.displayName === undefined
-    ? current.displayName
-    : input.displayName.trim() || email
+  const displayName =
+    input.displayName === undefined ? current.displayName : input.displayName.trim() || email
   const status = input.status ?? current.status
   const roleId = input.roleId ?? current.role.id
   const passwordHash = input.passwordHash ?? current.passwordHash
-  const passwordUpdatedAt = input.passwordHash === undefined ? current.passwordUpdatedAt : new Date()
+  const passwordUpdatedAt =
+    input.passwordHash === undefined ? current.passwordUpdatedAt : new Date()
 
   const result = await db`
     update users
@@ -402,10 +399,7 @@ export async function enableUserTotpMfa(
   return reloadPublicUser(db, userId, result.rowCount)
 }
 
-export async function disableUserTotpMfa(
-  db: DbClient,
-  userId: string,
-): Promise<CmsUser | null> {
+export async function disableUserTotpMfa(db: DbClient, userId: string): Promise<CmsUser | null> {
   const result = await db`
     update users
     set mfa_enabled = ${false},

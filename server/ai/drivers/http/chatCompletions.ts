@@ -32,8 +32,7 @@ import { nanoid } from 'nanoid'
 // ---------------------------------------------------------------------------
 
 export type ChatContentPart =
-  | { type: 'text'; text: string }
-  | { type: 'image_url'; image_url: { url: string } }
+  { type: 'text'; text: string } | { type: 'image_url'; image_url: { url: string } }
 
 export type ChatToolCall = {
   id: string
@@ -75,7 +74,9 @@ export function mapChatHistory(systemPrompt: string[], messages: AiMessage[]): C
     } else if (msg.role === 'assistant') {
       out.push([assistantMessage(msg.content)])
     } else if (msg.role === 'tool') {
-      out.push([{ role: 'tool', tool_call_id: msg.toolCallId, content: toolOutputToString(msg.output) }])
+      out.push([
+        { role: 'tool', tool_call_id: msg.toolCallId, content: toolOutputToString(msg.output) },
+      ])
     }
     // role:'system' from the log is ignored — system is the prepended block.
   }
@@ -99,7 +100,10 @@ function userContent(blocks: AiContentBlock[]): string | ChatContentPart[] {
     if (block.kind === 'text') parts.push({ type: 'text', text: block.text })
     else if (block.kind === 'image') {
       // Base64 data URL — the OpenAI-compatible image_url part.
-      parts.push({ type: 'image_url', image_url: { url: `data:${block.mimeType};base64,${block.data}` } })
+      parts.push({
+        type: 'image_url',
+        image_url: { url: `data:${block.mimeType};base64,${block.data}` },
+      })
     }
   }
   return parts
@@ -299,7 +303,11 @@ export class ChatCompletionsTurnTranslator implements TurnTranslator<ChatTurn> {
     const chatToolCalls: ChatToolCall[] = []
     for (const index of this.order) {
       const acc = this.toolsByIndex.get(index)!
-      toolCalls.push({ id: acc.id, name: acc.name || 'tool', input: parseToolArguments(acc.arguments) })
+      toolCalls.push({
+        id: acc.id,
+        name: acc.name || 'tool',
+        input: parseToolArguments(acc.arguments),
+      })
       chatToolCalls.push({
         id: acc.id,
         type: 'function',

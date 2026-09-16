@@ -58,7 +58,9 @@ describe('sqlite adapter statement caching', () => {
     const write = await db`insert into j (id, payload_json) values (${'x'}, ${{ k: 1 }})`
     expect(write.rowCount).toBe(1)
 
-    const read = await db<{ payload_json: { k: number } }>`select payload_json from j where id = ${'x'}`
+    const read = await db<{
+      payload_json: { k: number }
+    }>`select payload_json from j where id = ${'x'}`
     expect(read.rows[0]?.payload_json).toEqual({ k: 1 })
   })
 })

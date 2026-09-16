@@ -1,9 +1,6 @@
 import DOMPurify from 'dompurify'
 import { GlobalWindow } from 'happy-dom'
-import {
-  configureRichtextSanitizer,
-  type DOMPurifyRuntime,
-} from '@core/sanitize'
+import { configureRichtextSanitizer, type DOMPurifyRuntime } from '@core/sanitize'
 
 type DOMPurifyFactory = (window: Window) => DOMPurifyRuntime
 

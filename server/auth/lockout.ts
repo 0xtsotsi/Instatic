@@ -103,10 +103,7 @@ export function evaluateFailedAttempt(
  * window has already elapsed (the column is *not* auto-cleared until the
  * next successful login — that's fine; this check is the gate).
  */
-export function evaluateLockState(
-  lockedUntil: string | null,
-  now: Date = new Date(),
-): LockState {
+export function evaluateLockState(lockedUntil: string | null, now: Date = new Date()): LockState {
   if (!lockedUntil) return { locked: false, retryAfterMs: 0 }
   const lockedUntilMs = Date.parse(lockedUntil)
   if (!Number.isFinite(lockedUntilMs)) return { locked: false, retryAfterMs: 0 }

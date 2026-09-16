@@ -75,7 +75,8 @@ describe('importStagedArchiveMediaEntries — media byte security validation', (
    * by the same sanitizeSvgBytes pass the upload pipeline uses.
    */
   it('SVG with <script> payload ends up sanitized on disk after staged import', async () => {
-    const svgWithScript = '<svg viewBox="0 0 10 10"><script>alert(1)</script><rect width="10" height="10"/></svg>'
+    const svgWithScript =
+      '<svg viewBox="0 0 10 10"><script>alert(1)</script><rect width="10" height="10"/></svg>'
     const svgBytes = enc.encode(svgWithScript)
     const stagedPath = join(stagingDir, '0.bin')
     await writeFile(stagedPath, svgBytes)

@@ -17,16 +17,10 @@ import {
   userHasCapability,
 } from '../../../auth/authz'
 import type { DbClient } from '../../../db/client'
-import {
-  createEditorBridgeStream,
-  type EditorBridgeScope,
-} from '../editorBridge'
+import { createEditorBridgeStream, type EditorBridgeScope } from '../editorBridge'
 
 const PATH = '/admin/api/ai/editor-bridge'
-const EditorBridgeScopeSchema = Type.Union([
-  Type.Literal('site'),
-  Type.Literal('content'),
-])
+const EditorBridgeScopeSchema = Type.Union([Type.Literal('site'), Type.Literal('content')])
 
 // Mirrors the Content workspace entry gate in `src/admin/access.ts` and
 // `requireDataAccess` in the server's data access layer.
@@ -70,9 +64,10 @@ async function handle(req: Request, db: DbClient): Promise<Response> {
 
   // Hosting a bridge requires access to the workspace whose live state the
   // browser tool will read or mutate.
-  const hasWorkspaceAccess = scope === 'site'
-    ? userHasCapability(userOrResponse, 'site.read')
-    : userHasAnyCapability(userOrResponse, CONTENT_BRIDGE_CAPABILITIES)
+  const hasWorkspaceAccess =
+    scope === 'site'
+      ? userHasCapability(userOrResponse, 'site.read')
+      : userHasAnyCapability(userOrResponse, CONTENT_BRIDGE_CAPABILITIES)
   if (!hasWorkspaceAccess) {
     return jsonResponse({ error: 'Forbidden' }, { status: 403 })
   }

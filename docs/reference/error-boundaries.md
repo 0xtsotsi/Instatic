@@ -23,15 +23,15 @@ The codebase uses **one** error boundary primitive — `src/ui/components/ErrorB
 ```tsx
 interface ErrorBoundaryProps {
   /** Unique location tag — appears in logs and the dev fallback */
-  location:    string
+  location: string
   /** Optional values that, when changed, reset the boundary */
-  resetKeys?:  unknown[]
+  resetKeys?: unknown[]
   /** Optional custom fallback */
-  fallback?:   (info: ErrorBoundaryFallbackInfo) => ReactNode
-  children:    ReactNode
+  fallback?: (info: ErrorBoundaryFallbackInfo) => ReactNode
+  children: ReactNode
 }
 
-<ErrorBoundary location="my-feature" resetKeys={[someKey]}>
+;<ErrorBoundary location="my-feature" resetKeys={[someKey]}>
   <MyFeature />
 </ErrorBoundary>
 ```
@@ -159,11 +159,11 @@ const root = createRoot(rootElement, {
 })
 ```
 
-| Callback           | When it fires                                                    | Toast?      |
-|--------------------|------------------------------------------------------------------|-------------|
-| `onCaughtError`    | After an `<ErrorBoundary>` catches                               | No (the boundary already toasted) |
-| `onUncaughtError`  | No boundary caught — the whole tree is broken                    | Yes — loud  |
-| `onRecoverableError`| React recovered (e.g. failed hydration → client render)         | No (logged) |
+| Callback             | When it fires                                           | Toast?                            |
+| -------------------- | ------------------------------------------------------- | --------------------------------- |
+| `onCaughtError`      | After an `<ErrorBoundary>` catches                      | No (the boundary already toasted) |
+| `onUncaughtError`    | No boundary caught — the whole tree is broken           | Yes — loud                        |
+| `onRecoverableError` | React recovered (e.g. failed hydration → client render) | No (logged)                       |
 
 `handleRootError` walks the error.cause chain via `flattenErrorChain`, logs the whole chain, and (if asked) pushes a toast.
 
@@ -227,7 +227,9 @@ Any change to `resetKeys` resets the boundary's internal error state. Use it for
     <div role="alert">
       <h2>This panel didn't load</h2>
       <p>{error.message}</p>
-      <Button variant="primary" onClick={reset}>Retry</Button>
+      <Button variant="primary" onClick={reset}>
+        Retry
+      </Button>
     </div>
   )}
 >
@@ -277,13 +279,13 @@ If the optional feature throws, render nothing. The error still logs (for diagno
 
 ## Logging conventions
 
-| Source         | Prefix                                                  |
-|----------------|---------------------------------------------------------|
-| Error boundary | `[<location>]`, e.g. `[admin-route]`, `[canvas]`        |
+| Source         | Prefix                                                                     |
+| -------------- | -------------------------------------------------------------------------- |
+| Error boundary | `[<location>]`, e.g. `[admin-route]`, `[canvas]`                           |
 | React root     | `[react-root:caught]`, `[react-root:uncaught]`, `[react-root:recoverable]` |
-| Async handler  | `[<module>] <description>:`, e.g. `[toolbar] Manual save failed:` |
-| Plugin worker  | `[plugin:<pluginId>]`, e.g. `[plugin:acme.workflow]`    |
-| Server         | `[<module>]`, e.g. `[router]`, `[server]`, `[plugin-host]` |
+| Async handler  | `[<module>] <description>:`, e.g. `[toolbar] Manual save failed:`          |
+| Plugin worker  | `[plugin:<pluginId>]`, e.g. `[plugin:acme.workflow]`                       |
+| Server         | `[<module>]`, e.g. `[router]`, `[server]`, `[plugin-host]`                 |
 
 The square-bracket prefix is **load-bearing** — log scrapers in production filter on it. Don't drop it.
 
@@ -291,17 +293,17 @@ The square-bracket prefix is **load-bearing** — log scrapers in production fil
 
 ## Forbidden patterns
 
-| Pattern                                                              | Use instead                                              |
-|----------------------------------------------------------------------|----------------------------------------------------------|
-| Inventing a new error-boundary primitive                             | One primitive — `@ui/components/ErrorBoundary`           |
-| Multiple boundaries with the same `location` value                   | Each location must be unique (gated)                     |
-| Removing a gated boundary placement                                  | Update the gate at the same time, with reason            |
-| `catch (err) {}` (silently swallowing in async)                      | Name it `catch (_err)` with a comment, or handle it      |
-| `console.log` for errors                                             | `console.error` with `[<module>]` prefix                 |
-| Throwing without a useful message                                     | Include the path / context (`'failed to load page X'`)   |
-| Re-throwing without `cause`                                          | `throw new Error('wrapped', { cause: err })` preserves the chain |
-| Using `error.message` directly without `instanceof Error` check      | `getErrorMessage(err, 'Unknown error')` from `@core/utils/errorMessage`   |
-| Using `alert(error.message)`                                          | `pushToast` or the error boundary fallback               |
+| Pattern                                                         | Use instead                                                             |
+| --------------------------------------------------------------- | ----------------------------------------------------------------------- |
+| Inventing a new error-boundary primitive                        | One primitive — `@ui/components/ErrorBoundary`                          |
+| Multiple boundaries with the same `location` value              | Each location must be unique (gated)                                    |
+| Removing a gated boundary placement                             | Update the gate at the same time, with reason                           |
+| `catch (err) {}` (silently swallowing in async)                 | Name it `catch (_err)` with a comment, or handle it                     |
+| `console.log` for errors                                        | `console.error` with `[<module>]` prefix                                |
+| Throwing without a useful message                               | Include the path / context (`'failed to load page X'`)                  |
+| Re-throwing without `cause`                                     | `throw new Error('wrapped', { cause: err })` preserves the chain        |
+| Using `error.message` directly without `instanceof Error` check | `getErrorMessage(err, 'Unknown error')` from `@core/utils/errorMessage` |
+| Using `alert(error.message)`                                    | `pushToast` or the error boundary fallback                              |
 
 ---
 

@@ -84,7 +84,6 @@ export { setPluginWorkerDbClient }
 // re-exported here for the lifecycle orchestration call sites below.
 export { primePluginSettingsCache }
 
-
 // ---------------------------------------------------------------------------
 // Plugin lifecycle helpers — wrappers around the worker host that resolve
 // the on-disk entrypoint path safely. Callers in `plugins.ts` use these
@@ -126,7 +125,10 @@ export async function loadPluginServerEntrypoint(
     settings: getCachedPluginSettings(manifest.id),
   })
   if (!result.ok) {
-    throw workerCallError(result.error ?? `Failed to load plugin "${manifest.id}" in worker`, result.stack)
+    throw workerCallError(
+      result.error ?? `Failed to load plugin "${manifest.id}" in worker`,
+      result.stack,
+    )
   }
   return true
 }
@@ -158,10 +160,7 @@ export async function runPluginLifecycle(
  * this in the upgrade flow between the old version's deactivate and the
  * new version's activate.
  */
-export async function runPluginMigrate(
-  pluginId: string,
-  fromVersion: string,
-): Promise<void> {
+export async function runPluginMigrate(pluginId: string, fromVersion: string): Promise<void> {
   await runMigrateInWorker(pluginId, fromVersion)
 }
 
@@ -248,9 +247,7 @@ export async function handleServerPluginRuntimeRequest(
     method: req.method,
     path: routePath,
     request: req,
-    user: user
-      ? { id: user.id, email: user.email, capabilities: user.capabilities }
-      : null,
+    user: user ? { id: user.id, email: user.email, capabilities: user.capabilities } : null,
   })
 }
 
@@ -434,10 +431,7 @@ export async function activateInstalledServerPlugins(
     // so server-rendered (publisher) and editor-rendered (canvas) pages can
     // use them immediately.  Failure is isolated: the server entrypoint can
     // still activate even if the pack fails.
-    if (
-      manifest.entrypoints?.modules &&
-      plugin.grantedPermissions.includes('modules.register')
-    ) {
+    if (manifest.entrypoints?.modules && plugin.grantedPermissions.includes('modules.register')) {
       try {
         const pack = await loadPluginModulePack(manifest, uploadsDir)
         if (pack) activateSandboxedPluginModulePack(manifest, pack)

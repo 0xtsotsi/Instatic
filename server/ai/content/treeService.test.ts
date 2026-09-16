@@ -10,7 +10,14 @@ const ENTRY_ID = 'page1'
 const INITIAL_TREE = {
   rootNodeId: 'root',
   nodes: {
-    root: { id: 'root', moduleId: 'base.body', props: {}, breakpointOverrides: {}, classIds: [], children: [] },
+    root: {
+      id: 'root',
+      moduleId: 'base.body',
+      props: {},
+      breakpointOverrides: {},
+      classIds: [],
+      children: [],
+    },
   },
 }
 
@@ -32,7 +39,9 @@ async function freshDb(): Promise<DbClient> {
 }
 
 let db: DbClient
-beforeEach(async () => { db = await freshDb() })
+beforeEach(async () => {
+  db = await freshDb()
+})
 
 describe('content tree service', () => {
   it('reads a page tree', async () => {
@@ -51,7 +60,14 @@ describe('content tree service', () => {
           kind: 'insertNode',
           parentId: 'root',
           index: 0,
-          node: { id: 'n_test', moduleId: 'base.text', props: {}, breakpointOverrides: {}, classIds: [], children: [] },
+          node: {
+            id: 'n_test',
+            moduleId: 'base.text',
+            props: {},
+            breakpointOverrides: {},
+            classIds: [],
+            children: [],
+          },
         },
       ],
       { kind: 'user', userId: 'u1' },
@@ -71,7 +87,11 @@ describe('content tree service', () => {
         'body',
         [{ kind: 'deleteNode', nodeId: 'root' }],
         { kind: 'user', userId: 'u1' },
-        { assertAccess: () => { throw new Error('denied') } },
+        {
+          assertAccess: () => {
+            throw new Error('denied')
+          },
+        },
       ),
     ).rejects.toThrow('denied')
   })

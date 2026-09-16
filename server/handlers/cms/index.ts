@@ -77,48 +77,48 @@ export async function handleCmsRequest(
   // Response handled the request; null means "this group didn't match,
   // try the next one".
   const response =
-    (await handleSetupRoutes(req, db))
-    ?? (await handleMeRoutes(req, db, options))
-    ?? (await handleAuthRoutes(req, db))
+    (await handleSetupRoutes(req, db)) ??
+    (await handleMeRoutes(req, db, options)) ??
+    (await handleAuthRoutes(req, db)) ??
     // User preferences sit next to /me/* because they share the same
     // self-targeted "anything an authenticated user can do to their own
     // account" surface. Routes mount under `/admin/api/cms/me/preferences/`.
-    ?? (await handleUserPreferencesRoutes(req, db))
-    ?? (await handleUsersRoutes(req, db))
-    ?? (await handleRolesRoutes(req, db))
-    ?? (await handleAuditRoutes(req, db))
-    ?? (await handleSiteRoutes(req, db))
+    (await handleUserPreferencesRoutes(req, db)) ??
+    (await handleUsersRoutes(req, db)) ??
+    (await handleRolesRoutes(req, db)) ??
+    (await handleAuditRoutes(req, db)) ??
+    (await handleSiteRoutes(req, db)) ??
     // The transactional whole-document save — must run before the pages/
     // components/layouts GET handlers only for tidiness; paths are distinct.
-    ?? (await handleSiteDocumentRoutes(req, db))
-    ?? (await handlePagesRoutes(req, db))
-    ?? (await handleComponentsRoutes(req, db))
-    ?? (await handleLayoutsRoutes(req, db))
-    ?? (await handleRuntimeRoutes(req, db))
+    (await handleSiteDocumentRoutes(req, db)) ??
+    (await handlePagesRoutes(req, db)) ??
+    (await handleComponentsRoutes(req, db)) ??
+    (await handleLayoutsRoutes(req, db)) ??
+    (await handleRuntimeRoutes(req, db)) ??
     // The folder routes match `/admin/api/cms/media/folders/...` so they must
     // run BEFORE the asset routes whose `/admin/api/cms/media/:id` pattern
     // would otherwise eat them (treating "folders" as an asset id). The
     // storage-admin routes (`/admin/api/cms/media/storage/...`) follow
     // the same rule — `/media/:id` would otherwise consume "storage".
-    ?? (await handleMediaFolderRoutes(req, db))
-    ?? (await handleMediaStorageAdminRoutes(req, db, options))
-    ?? (await handleMediaRoutes(req, db))
-    ?? (await handlePluginsRoutes(req, db, options))
-    ?? (await handleDataRoutes(req, db, options))
+    (await handleMediaFolderRoutes(req, db)) ??
+    (await handleMediaStorageAdminRoutes(req, db, options)) ??
+    (await handleMediaRoutes(req, db)) ??
+    (await handlePluginsRoutes(req, db, options)) ??
+    (await handleDataRoutes(req, db, options)) ??
     // Dashboard stats — read-only aggregate counts used by the admin
     // dashboard widgets. Lives after data routes so future routes
     // under `/data/...` can never accidentally shadow it.
-    ?? (await handleDashboardRoutes(req, db, options))
-    ?? (await handleFontsRoutes(req, db, options))
-    ?? (await handlePublishRoutes(req, db, options))
+    (await handleDashboardRoutes(req, db, options)) ??
+    (await handleFontsRoutes(req, db, options)) ??
+    (await handlePublishRoutes(req, db, options)) ??
     // Export and import are registered after data routes so their exact paths
     // `/export` and `/import` cannot conflict with any `/data/...` sub-routes.
     // Preview must come before import: `/import/preview` is a longer path that
     // would otherwise be consumed by the `/import` handler first.
-    ?? (await handleExportRoute(req, db, options))
-    ?? (await handleImportPreviewRoute(req, db))
-    ?? (await handleImportArchiveRoute(req, db, options))
-    ?? (await handleImportRoute(req, db, options))
+    (await handleExportRoute(req, db, options)) ??
+    (await handleImportPreviewRoute(req, db)) ??
+    (await handleImportArchiveRoute(req, db, options)) ??
+    (await handleImportRoute(req, db, options))
 
   return response ?? jsonResponse({ error: 'Not found' }, { status: 404 })
 }

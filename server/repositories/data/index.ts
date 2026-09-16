@@ -57,9 +57,6 @@ export {
 
 export type { ApplyDataRowChangesInput, DataRowWrite } from './rows'
 
-export {
-  getPublishedDataRowByRoute,
-  getDataRowRedirectByRoute,
-} from './publish'
+export { getPublishedDataRowByRoute, getDataRowRedirectByRoute } from './publish'
 
 export { nextDataRowVersionNumber } from './versions'

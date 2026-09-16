@@ -24,7 +24,11 @@ export function workerCallError(message: string, stack?: string): Error {
  * Format a worker failure for a `[plugin:<id>]` console line — the message,
  * plus the VM stack frames on following lines when the worker sent them.
  */
-export function describeWorkerError(error: string | undefined, stack: string | undefined, fallback: string): string {
+export function describeWorkerError(
+  error: string | undefined,
+  stack: string | undefined,
+  fallback: string,
+): string {
   const message = error ?? fallback
   return stack ? `${message}\n${stack}` : message
 }

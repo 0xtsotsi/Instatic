@@ -80,6 +80,7 @@ docker compose -f compose.prod.yml -f compose.tls.yml logs caddy
 ```
 
 Common issues:
+
 - **DNS not propagated** — `dig +short cms.example.com` from outside the server should return your IP.
 - **Port 80 blocked** — Let's Encrypt HTTP-01 needs port 80 reachable. UFW/iptables/cloud firewall rules.
 - **Rate limit** — Let's Encrypt limits cert issuance per domain per week. While testing, point Caddy at the staging directory by adding `acme_ca https://acme-staging-v02.api.letsencrypt.org/directory` inside the global `{ ... }` block of `Caddyfile`.

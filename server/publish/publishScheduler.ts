@@ -33,10 +33,7 @@ import type { DbClient } from '../db/client'
 import { withSchedulerLeaderLock } from '../db/advisoryLock'
 import { publishDataRow } from './publishRow'
 import { emitContentEntryUpdated } from './contentEvents'
-import {
-  cancelScheduledPublish,
-  listDuePublishSchedules,
-} from '../repositories/data/rows'
+import { cancelScheduledPublish, listDuePublishSchedules } from '../repositories/data/rows'
 
 // ---------------------------------------------------------------------------
 // Tunables
@@ -121,7 +118,10 @@ async function fireOne(db: DbClient, rowId: string, uploadsDir?: string): Promis
     // Revert to draft so the row stops being selected on subsequent
     // ticks. Operator sees it back in drafts and retries manually.
     await cancelScheduledPublish(db, rowId, null).catch((cancelErr) => {
-      console.error(`[publish-scheduler] failed to revert row ${rowId} after publish error:`, cancelErr)
+      console.error(
+        `[publish-scheduler] failed to revert row ${rowId} after publish error:`,
+        cancelErr,
+      )
     })
   }
 }

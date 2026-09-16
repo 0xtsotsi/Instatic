@@ -6,12 +6,12 @@ A complete backup includes the database and the uploaded media. The procedure de
 
 ## TL;DR
 
-| Deployment | Database backup | Upload backup |
-|---|---|---|
-| VPS SQLite Compose | Copy `/app/data/cms.db` from the `data` volume | Archive the `uploads` volume |
-| VPS Postgres Compose | `pg_dump` from the `postgres` service | Archive the `uploads` volume |
-| Railway SQLite | Back up the app volume mounted at `/app/storage` | Same app volume, under `/app/storage/uploads` |
-| Railway Postgres | Back up the Postgres service volume/database | Back up the app volume mounted at `/app/storage` |
+| Deployment           | Database backup                                  | Upload backup                                    |
+| -------------------- | ------------------------------------------------ | ------------------------------------------------ |
+| VPS SQLite Compose   | Copy `/app/data/cms.db` from the `data` volume   | Archive the `uploads` volume                     |
+| VPS Postgres Compose | `pg_dump` from the `postgres` service            | Archive the `uploads` volume                     |
+| Railway SQLite       | Back up the app volume mounted at `/app/storage` | Same app volume, under `/app/storage/uploads`    |
+| Railway Postgres     | Back up the Postgres service volume/database     | Back up the app volume mounted at `/app/storage` |
 
 ## Postgres mode — backup
 
@@ -113,18 +113,18 @@ Archive uploads exactly the same way as the Postgres mode (the `uploads` volume 
 
 ```yaml
 # Append to compose.sqlite.yml under `services:`
-  litestream:
-    image: litestream/litestream:latest
-    command: replicate
-    volumes:
-      - data:/data:ro
-      - ./litestream.yml:/etc/litestream.yml:ro
-    environment:
-      LITESTREAM_ACCESS_KEY_ID: ${S3_ACCESS_KEY_ID:?Set S3 access key in .env}
-      LITESTREAM_SECRET_ACCESS_KEY: ${S3_SECRET_ACCESS_KEY:?Set S3 secret key in .env}
-    depends_on:
-      - app
-    restart: unless-stopped
+litestream:
+  image: litestream/litestream:latest
+  command: replicate
+  volumes:
+    - data:/data:ro
+    - ./litestream.yml:/etc/litestream.yml:ro
+  environment:
+    LITESTREAM_ACCESS_KEY_ID: ${S3_ACCESS_KEY_ID:?Set S3 access key in .env}
+    LITESTREAM_SECRET_ACCESS_KEY: ${S3_SECRET_ACCESS_KEY:?Set S3 secret key in .env}
+  depends_on:
+    - app
+  restart: unless-stopped
 ```
 
 `litestream.yml`:
@@ -179,10 +179,10 @@ When Instatic runs on a provider that offers managed Postgres (Railway Postgres,
 
 Railway-specific paths:
 
-| Template | Database path | Upload path |
-|---|---|---|
-| SQLite | `/app/storage/data/cms.db` | `/app/storage/uploads` |
-| Postgres | Railway Postgres service | `/app/storage/uploads` |
+| Template | Database path              | Upload path            |
+| -------- | -------------------------- | ---------------------- |
+| SQLite   | `/app/storage/data/cms.db` | `/app/storage/uploads` |
+| Postgres | Railway Postgres service   | `/app/storage/uploads` |
 
 For uploads, back up whatever disk or volume is mounted at `UPLOADS_DIR`.
 

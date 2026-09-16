@@ -14,12 +14,7 @@
 import { parseValue, safeParseValue } from '@core/utils/typeboxHelpers'
 import { AiToolOutputSchema } from '@core/ai'
 import { toolAllowedForCapabilities } from '../../tools/capabilityGate'
-import type {
-  AiBrowserBridge,
-  AiTool,
-  AiToolOutput,
-  ToolContext,
-} from '../../runtime/types'
+import type { AiBrowserBridge, AiTool, AiToolOutput, ToolContext } from '../../runtime/types'
 import type { ToolContextBase } from '../types'
 
 /**
@@ -55,7 +50,10 @@ export async function executeAiTool(
 
   if (aiTool.execution === 'server') {
     if (!aiTool.handler) {
-      return { ok: false, error: `Tool ${aiTool.name} declares execution='server' but has no handler.` }
+      return {
+        ok: false,
+        error: `Tool ${aiTool.name} declares execution='server' but has no handler.`,
+      }
     }
     try {
       const ctx: ToolContext = { ...toolContextBase, signal }

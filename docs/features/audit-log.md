@@ -35,15 +35,15 @@ src/admin/pages/users/utils/audit.ts                   — Users → Audit title
 
 Every event has a typed `action` string. The closed union is the source of truth — adding an action means editing the schema.
 
-| Group           | Actions                                                                                   |
-|-----------------|-------------------------------------------------------------------------------------------|
-| Authentication  | `login.success`, `login.failure`, `login.locked`, `login.unlocked`, `login.rate_limited`, `logout` |
-| Users           | `user.create`, `user.update`, `user.delete`, `user.suspend`, `password.change`            |
-| Roles           | `role.create`, `role.update`, `role.delete`, `role.assign`                                |
-| Data            | `data.table.create`, `data.table.update`, `data.table.delete`, `data.row.create`, `data.row.update`, `data.row.delete`, `data.row.publish`, `data.row.schedule`, `data.row.schedule.cancel`, `data.row.status`, `data.row.move`, `data.author.assign` |
-| Publishing      | `publish`                                                                                 |
-| Plugins         | `plugin.install`, `plugin.update`, `plugin.enable`, `plugin.disable`, `plugin.delete`, `plugin.pack.install`, `plugin.settings.update` |
-| AI              | `ai.credential.created`, `ai.credential.updated`, `ai.credential.deleted`, `ai.credential.tested`, `ai.default.updated`, `ai.default.cleared`, `ai.chat.started`, `ai.chat.completed`, `ai.chat.failed`, `ai.mcp_connector.created`, `ai.mcp_connector.revoked` |
+| Group          | Actions                                                                                                                                                                                                                                                         |
+| -------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Authentication | `login.success`, `login.failure`, `login.locked`, `login.unlocked`, `login.rate_limited`, `logout`                                                                                                                                                              |
+| Users          | `user.create`, `user.update`, `user.delete`, `user.suspend`, `password.change`                                                                                                                                                                                  |
+| Roles          | `role.create`, `role.update`, `role.delete`, `role.assign`                                                                                                                                                                                                      |
+| Data           | `data.table.create`, `data.table.update`, `data.table.delete`, `data.row.create`, `data.row.update`, `data.row.delete`, `data.row.publish`, `data.row.schedule`, `data.row.schedule.cancel`, `data.row.status`, `data.row.move`, `data.author.assign`           |
+| Publishing     | `publish`                                                                                                                                                                                                                                                       |
+| Plugins        | `plugin.install`, `plugin.update`, `plugin.enable`, `plugin.disable`, `plugin.delete`, `plugin.pack.install`, `plugin.settings.update`                                                                                                                          |
+| AI             | `ai.credential.created`, `ai.credential.updated`, `ai.credential.deleted`, `ai.credential.tested`, `ai.default.updated`, `ai.default.cleared`, `ai.chat.started`, `ai.chat.completed`, `ai.chat.failed`, `ai.mcp_connector.created`, `ai.mcp_connector.revoked` |
 
 If you add a new action that fits an existing group, append to the union. New groups (e.g. media-related audit) extend the same union.
 
@@ -53,18 +53,18 @@ If you add a new action that fits an existing group, append to the union. New gr
 
 ```ts
 interface AuditEvent {
-  id:           string             // nanoid
-  action:       AuditAction        // closed enum
-  actorUserId:  string | null      // who did it; null for system events
-  targetId:     string | null      // what was affected (user id, row id, plugin id, …)
-  targetType:   string | null      // 'user' | 'row' | 'plugin' | …
-  metadata:     AuditMetadata      // flat record of supplementary fields
-  actorLabel:   string | null      // current or snapshot actor label for UI
-  targetLabel:  string | null      // current or snapshot target label for UI
+  id: string // nanoid
+  action: AuditAction // closed enum
+  actorUserId: string | null // who did it; null for system events
+  targetId: string | null // what was affected (user id, row id, plugin id, …)
+  targetType: string | null // 'user' | 'row' | 'plugin' | …
+  metadata: AuditMetadata // flat record of supplementary fields
+  actorLabel: string | null // current or snapshot actor label for UI
+  targetLabel: string | null // current or snapshot target label for UI
   metadataLabels: Record<string, string> // resolved labels for metadata ids
-  ipAddress:    string | null      // client IP at the time of the event
-  userAgent:    string | null
-  createdAt:    string             // ISO datetime
+  ipAddress: string | null // client IP at the time of the event
+  userAgent: string | null
+  createdAt: string // ISO datetime
 }
 ```
 
@@ -78,17 +78,17 @@ No nested objects. The constraint keeps audit queries cheap and lets the UI rend
 
 ### Common metadata keys
 
-| Action group         | Common metadata fields                                                            |
-|----------------------|-----------------------------------------------------------------------------------|
-| `login.*`            | `email`, `failureReason?`, `attemptCount?`                                        |
-| `user.*`             | `email`, `displayName`, `roleSlug`                                                |
-| `role.*`             | `slug`, `name`, `capabilities?`                                                   |
-| `data.row.*`         | `tableId`, `tableSlug`, `slug`, `status?`, `fromStatus?`, `toStatus?`             |
-| `publish`            | `pageId`, `slug`, `routeBase?`                                                    |
-| `plugin.*`           | `pluginId`, `version`, `permissions?`                                             |
-| `ai.credential.*`    | `providerId`, `authMode`, `displayLabel`; `tested` adds `ok`, `modelCount`, `error?` |
-| `ai.default.updated` | `scope`, `credentialId`, `modelId`, `auto?` (true when seeded at credential create) |
-| `ai.default.cleared` | `scope` |
+| Action group         | Common metadata fields                                                                                                      |
+| -------------------- | --------------------------------------------------------------------------------------------------------------------------- |
+| `login.*`            | `email`, `failureReason?`, `attemptCount?`                                                                                  |
+| `user.*`             | `email`, `displayName`, `roleSlug`                                                                                          |
+| `role.*`             | `slug`, `name`, `capabilities?`                                                                                             |
+| `data.row.*`         | `tableId`, `tableSlug`, `slug`, `status?`, `fromStatus?`, `toStatus?`                                                       |
+| `publish`            | `pageId`, `slug`, `routeBase?`                                                                                              |
+| `plugin.*`           | `pluginId`, `version`, `permissions?`                                                                                       |
+| `ai.credential.*`    | `providerId`, `authMode`, `displayLabel`; `tested` adds `ok`, `modelCount`, `error?`                                        |
+| `ai.default.updated` | `scope`, `credentialId`, `modelId`, `auto?` (true when seeded at credential create)                                         |
+| `ai.default.cleared` | `scope`                                                                                                                     |
 | `ai.chat.*`          | `scope`, `conversationId`, `providerId`, `modelId`; `completed`/`failed` add `promptTokens`, `completionTokens`, `costUsd?` |
 
 These aren't enforced by the schema (any flat key is valid) — they're conventions to keep the UI consistent.
@@ -101,16 +101,16 @@ These aren't enforced by the schema (any flat key is valid) — they're conventi
 import { createAuditEvent } from '../repositories/audit'
 
 await createAuditEvent(db, {
-  action:      'data.row.publish',
+  action: 'data.row.publish',
   actorUserId: user.id,
-  targetId:    row.id,
-  targetType:  'row',
-  metadata:    {
-    tableId:   row.tableId,
+  targetId: row.id,
+  targetType: 'row',
+  metadata: {
+    tableId: row.tableId,
     tableSlug: 'posts',
-    slug:      row.slug,
+    slug: row.slug,
     fromStatus: 'draft',
-    toStatus:   'published',
+    toStatus: 'published',
   },
   ipAddress: clientIp(req),
   userAgent: req.headers.get('user-agent'),
@@ -156,10 +156,10 @@ The handler gates on `audit.read`. The Users → Audit tab calls this endpoint d
 
 ## UI surfaces
 
-| Surface                             | What it shows                                                  |
-|-------------------------------------|----------------------------------------------------------------|
-| Dashboard → Activity widget         | Latest 10 operational events, excluding login/logout noise      |
-| Users → Audit tab (`/admin/users`)  | Latest 100 audit events with title, actor, details, and time    |
+| Surface                            | What it shows                                                |
+| ---------------------------------- | ------------------------------------------------------------ |
+| Dashboard → Activity widget        | Latest 10 operational events, excluding login/logout noise   |
+| Users → Audit tab (`/admin/users`) | Latest 100 audit events with title, actor, details, and time |
 
 The Dashboard widget is display-only and curated for operational changes; the Users → Audit tab is the broader read-only event feed. The underlying events are stored individually and append-only.
 
@@ -195,13 +195,13 @@ The `metadata_json` column ends in `_json` per the convention. See [docs/referen
 
 ```ts
 await createAuditEvent(db, {
-  action:      'publish',
+  action: 'publish',
   actorUserId: user.id,
-  targetId:    page.id,
-  targetType:  'page',
-  metadata:    { slug: page.slug, routeBase: table.routeBase ?? '' },
-  ipAddress:   clientIp(req),
-  userAgent:   req.headers.get('user-agent'),
+  targetId: page.id,
+  targetType: 'page',
+  metadata: { slug: page.slug, routeBase: table.routeBase ?? '' },
+  ipAddress: clientIp(req),
+  userAgent: req.headers.get('user-agent'),
 })
 ```
 
@@ -230,15 +230,15 @@ If a plugin needs its own per-plugin event log, use `api.cms.storage.collection(
 
 ## Forbidden patterns
 
-| Pattern                                                                | Use instead                                                   |
-|------------------------------------------------------------------------|---------------------------------------------------------------|
-| Nested objects in `metadata`                                            | Flat keys. Use `row.tableId` not `row: { tableId }`.          |
-| Updating an existing `audit_events` row                                | Append-only. Add a new event if you need a correction.        |
-| Filtering events by free-text search across `metadata_json`            | Add a specific indexed column or a typed action               |
-| Logging events that should be `console.error`                          | `[<module>] error: ...` for errors. Audit is for user actions.|
-| Recording read events that aren't compliance-required                  | Reads are noisy. Don't record unless the policy says you must.|
-| `console.log` to "leave a trail"                                       | Use `createAuditEvent` if it's a real audit event             |
-| Hiding audit failures by default                                       | Await the audit write unless the caller has an explicit best-effort reason |
+| Pattern                                                     | Use instead                                                                |
+| ----------------------------------------------------------- | -------------------------------------------------------------------------- |
+| Nested objects in `metadata`                                | Flat keys. Use `row.tableId` not `row: { tableId }`.                       |
+| Updating an existing `audit_events` row                     | Append-only. Add a new event if you need a correction.                     |
+| Filtering events by free-text search across `metadata_json` | Add a specific indexed column or a typed action                            |
+| Logging events that should be `console.error`               | `[<module>] error: ...` for errors. Audit is for user actions.             |
+| Recording read events that aren't compliance-required       | Reads are noisy. Don't record unless the policy says you must.             |
+| `console.log` to "leave a trail"                            | Use `createAuditEvent` if it's a real audit event                          |
+| Hiding audit failures by default                            | Await the audit write unless the caller has an explicit best-effort reason |
 
 ---
 

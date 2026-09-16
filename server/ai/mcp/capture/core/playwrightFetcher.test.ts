@@ -22,15 +22,25 @@ import { afterEach, beforeEach, describe, expect, it, mock } from 'bun:test'
 const fakeBrowser = {
   newContext: async () => ({
     newPage: async () => ({
-      route: async () => { /* noop */ },
-      goto: async () => { /* noop */ },
+      route: async () => {
+        /* noop */
+      },
+      goto: async () => {
+        /* noop */
+      },
       content: async () => '<html></html>',
       evaluate: async () => [],
-      close: async () => { /* noop */ },
+      close: async () => {
+        /* noop */
+      },
     }),
-    close: async () => { /* noop */ },
+    close: async () => {
+      /* noop */
+    },
   }),
-  close: async () => { /* noop */ },
+  close: async () => {
+    /* noop */
+  },
 }
 
 mock.module('playwright-core', () => ({

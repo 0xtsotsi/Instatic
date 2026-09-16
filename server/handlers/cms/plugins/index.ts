@@ -38,25 +38,15 @@ import type { DbClient } from '../../../db/client'
 import type { CoreCapability } from '../../../auth/capabilities'
 import type { AuthUser } from '../../../repositories/users'
 import { requireCapability, requireStepUp } from '../../../auth/authz'
-import {
-  handleServerPluginRuntimeRequest,
-  setPluginWorkerDbClient,
-} from '../../../plugins/runtime'
+import { handleServerPluginRuntimeRequest, setPluginWorkerDbClient } from '../../../plugins/runtime'
 import { jsonResponse } from '../../../http'
 import { type CmsHandlerOptions } from '../shared'
 import { runRouteTable, type Route } from '../routeTable'
-import {
-  handleInspectPackage,
-  handlePackageInstall,
-  handlePluginsCollection,
-} from './install'
+import { handleInspectPackage, handlePackageInstall, handlePluginsCollection } from './install'
 import { handlePluginPackInstall } from './pack'
 import { handlePluginItem, handlePluginRestart } from './state'
 import { handlePluginSettings } from './settings'
-import {
-  handlePluginRecordItem,
-  handlePluginRecordsCollection,
-} from './records'
+import { handlePluginRecordItem, handlePluginRecordsCollection } from './records'
 import { handlePluginEventsStream } from './events'
 import {
   handlePluginSchedulePause,
@@ -73,16 +63,21 @@ import {
 // inert there); the route table reads the named groups (`id`, `rid`, `rec`,
 // `sid`) to feed each handler's positional args.
 const PLUGIN_ITEM_PATTERN = /^\/admin\/api\/cms\/plugins\/(?<id>[^/]+)$/
-const PLUGIN_RECORDS_PATTERN = /^\/admin\/api\/cms\/plugins\/(?<id>[^/]+)\/resources\/(?<rid>[^/]+)\/records$/
-const PLUGIN_RECORD_ITEM_PATTERN = /^\/admin\/api\/cms\/plugins\/(?<id>[^/]+)\/resources\/(?<rid>[^/]+)\/records\/(?<rec>[^/]+)$/
+const PLUGIN_RECORDS_PATTERN =
+  /^\/admin\/api\/cms\/plugins\/(?<id>[^/]+)\/resources\/(?<rid>[^/]+)\/records$/
+const PLUGIN_RECORD_ITEM_PATTERN =
+  /^\/admin\/api\/cms\/plugins\/(?<id>[^/]+)\/resources\/(?<rid>[^/]+)\/records\/(?<rec>[^/]+)$/
 const PLUGIN_RUNTIME_PATTERN = /^\/admin\/api\/cms\/plugins\/([^/]+)\/runtime(?:\/.*)?$/
 const PLUGIN_PACK_INSTALL_PATTERN = /^\/admin\/api\/cms\/plugins\/(?<id>[^/]+)\/pack\/install$/
 const PLUGIN_SETTINGS_PATTERN = /^\/admin\/api\/cms\/plugins\/(?<id>[^/]+)\/settings$/
 const PLUGIN_RESTART_PATTERN = /^\/admin\/api\/cms\/plugins\/(?<id>[^/]+)\/restart$/
 const PLUGIN_SCHEDULES_PATTERN = /^\/admin\/api\/cms\/plugins\/(?<id>[^/]+)\/schedules$/
-const PLUGIN_SCHEDULE_RUN_NOW_PATTERN = /^\/admin\/api\/cms\/plugins\/(?<id>[^/]+)\/schedules\/(?<sid>[^/]+)\/run-now$/
-const PLUGIN_SCHEDULE_PAUSE_PATTERN = /^\/admin\/api\/cms\/plugins\/(?<id>[^/]+)\/schedules\/(?<sid>[^/]+)\/pause$/
-const PLUGIN_SCHEDULE_RESUME_PATTERN = /^\/admin\/api\/cms\/plugins\/(?<id>[^/]+)\/schedules\/(?<sid>[^/]+)\/resume$/
+const PLUGIN_SCHEDULE_RUN_NOW_PATTERN =
+  /^\/admin\/api\/cms\/plugins\/(?<id>[^/]+)\/schedules\/(?<sid>[^/]+)\/run-now$/
+const PLUGIN_SCHEDULE_PAUSE_PATTERN =
+  /^\/admin\/api\/cms\/plugins\/(?<id>[^/]+)\/schedules\/(?<sid>[^/]+)\/pause$/
+const PLUGIN_SCHEDULE_RESUME_PATTERN =
+  /^\/admin\/api\/cms\/plugins\/(?<id>[^/]+)\/schedules\/(?<sid>[^/]+)\/resume$/
 const PLUGIN_EVENTS_PATH = '/admin/api/cms/plugins/events'
 
 // The bare `/plugins/:id` route must NOT claim the reserved single-segment
@@ -197,25 +192,101 @@ function resolvePluginRoutePolicy(method: string, pathname: string): PluginRoute
 const PLUGIN_ADMIN_PATH = '/admin/api/cms/plugins'
 
 const PLUGIN_ROUTES: readonly Route<[CmsHandlerOptions, AuthUser]>[] = [
-  { method: 'GET', pattern: PLUGIN_ADMIN_PATH, handler: (req, db, _p, _o, user) => handlePluginsCollection(req, db, user) },
-  { method: 'POST', pattern: PLUGIN_ADMIN_PATH, handler: (req, db, _p, _o, user) => handlePluginsCollection(req, db, user) },
-  { method: 'POST', pattern: `${PLUGIN_ADMIN_PATH}/inspect-package`, handler: (req) => handleInspectPackage(req) },
-  { method: 'POST', pattern: `${PLUGIN_ADMIN_PATH}/package`, handler: (req, db, _p, options, user) => handlePackageInstall(req, db, options, user) },
-  { method: 'POST', pattern: PLUGIN_PACK_INSTALL_PATTERN, handler: (req, db, p, options, user) => handlePluginPackInstall(req, db, options, user, p.id) },
-  { method: 'GET', pattern: PLUGIN_SETTINGS_PATTERN, handler: (req, db, p, _o, user) => handlePluginSettings(req, db, user, p.id) },
-  { method: 'PUT', pattern: PLUGIN_SETTINGS_PATTERN, handler: (req, db, p, _o, user) => handlePluginSettings(req, db, user, p.id) },
-  { method: 'POST', pattern: PLUGIN_RESTART_PATTERN, handler: (req, db, p, options, user) => handlePluginRestart(req, db, options, user, p.id) },
-  { method: 'POST', pattern: PLUGIN_SCHEDULE_RUN_NOW_PATTERN, handler: (req, db, p) => handlePluginScheduleRunNow(req, db, p.id, p.sid) },
-  { method: 'POST', pattern: PLUGIN_SCHEDULE_PAUSE_PATTERN, handler: (req, db, p) => handlePluginSchedulePause(req, db, p.id, p.sid) },
-  { method: 'POST', pattern: PLUGIN_SCHEDULE_RESUME_PATTERN, handler: (req, db, p) => handlePluginScheduleResume(req, db, p.id, p.sid) },
-  { method: 'GET', pattern: PLUGIN_SCHEDULES_PATTERN, handler: (req, db, p) => handlePluginSchedulesList(req, db, p.id) },
-  { method: 'GET', pattern: PLUGIN_EVENTS_PATH, handler: async (req) => handlePluginEventsStream(req) },
-  { method: 'PATCH', pattern: PLUGIN_RECORD_ITEM_PATTERN, handler: (req, db, p) => handlePluginRecordItem(req, db, p.id, p.rid, p.rec) },
-  { method: 'DELETE', pattern: PLUGIN_RECORD_ITEM_PATTERN, handler: (req, db, p) => handlePluginRecordItem(req, db, p.id, p.rid, p.rec) },
-  { method: 'GET', pattern: PLUGIN_RECORDS_PATTERN, handler: (req, db, p) => handlePluginRecordsCollection(req, db, p.id, p.rid) },
-  { method: 'POST', pattern: PLUGIN_RECORDS_PATTERN, handler: (req, db, p) => handlePluginRecordsCollection(req, db, p.id, p.rid) },
-  { method: 'PATCH', pattern: PLUGIN_ITEM_DISPATCH_PATTERN, handler: (req, db, p, options, user) => handlePluginItem(req, db, options, user, p.id) },
-  { method: 'DELETE', pattern: PLUGIN_ITEM_DISPATCH_PATTERN, handler: (req, db, p, options, user) => handlePluginItem(req, db, options, user, p.id) },
+  {
+    method: 'GET',
+    pattern: PLUGIN_ADMIN_PATH,
+    handler: (req, db, _p, _o, user) => handlePluginsCollection(req, db, user),
+  },
+  {
+    method: 'POST',
+    pattern: PLUGIN_ADMIN_PATH,
+    handler: (req, db, _p, _o, user) => handlePluginsCollection(req, db, user),
+  },
+  {
+    method: 'POST',
+    pattern: `${PLUGIN_ADMIN_PATH}/inspect-package`,
+    handler: (req) => handleInspectPackage(req),
+  },
+  {
+    method: 'POST',
+    pattern: `${PLUGIN_ADMIN_PATH}/package`,
+    handler: (req, db, _p, options, user) => handlePackageInstall(req, db, options, user),
+  },
+  {
+    method: 'POST',
+    pattern: PLUGIN_PACK_INSTALL_PATTERN,
+    handler: (req, db, p, options, user) => handlePluginPackInstall(req, db, options, user, p.id),
+  },
+  {
+    method: 'GET',
+    pattern: PLUGIN_SETTINGS_PATTERN,
+    handler: (req, db, p, _o, user) => handlePluginSettings(req, db, user, p.id),
+  },
+  {
+    method: 'PUT',
+    pattern: PLUGIN_SETTINGS_PATTERN,
+    handler: (req, db, p, _o, user) => handlePluginSettings(req, db, user, p.id),
+  },
+  {
+    method: 'POST',
+    pattern: PLUGIN_RESTART_PATTERN,
+    handler: (req, db, p, options, user) => handlePluginRestart(req, db, options, user, p.id),
+  },
+  {
+    method: 'POST',
+    pattern: PLUGIN_SCHEDULE_RUN_NOW_PATTERN,
+    handler: (req, db, p) => handlePluginScheduleRunNow(req, db, p.id, p.sid),
+  },
+  {
+    method: 'POST',
+    pattern: PLUGIN_SCHEDULE_PAUSE_PATTERN,
+    handler: (req, db, p) => handlePluginSchedulePause(req, db, p.id, p.sid),
+  },
+  {
+    method: 'POST',
+    pattern: PLUGIN_SCHEDULE_RESUME_PATTERN,
+    handler: (req, db, p) => handlePluginScheduleResume(req, db, p.id, p.sid),
+  },
+  {
+    method: 'GET',
+    pattern: PLUGIN_SCHEDULES_PATTERN,
+    handler: (req, db, p) => handlePluginSchedulesList(req, db, p.id),
+  },
+  {
+    method: 'GET',
+    pattern: PLUGIN_EVENTS_PATH,
+    handler: async (req) => handlePluginEventsStream(req),
+  },
+  {
+    method: 'PATCH',
+    pattern: PLUGIN_RECORD_ITEM_PATTERN,
+    handler: (req, db, p) => handlePluginRecordItem(req, db, p.id, p.rid, p.rec),
+  },
+  {
+    method: 'DELETE',
+    pattern: PLUGIN_RECORD_ITEM_PATTERN,
+    handler: (req, db, p) => handlePluginRecordItem(req, db, p.id, p.rid, p.rec),
+  },
+  {
+    method: 'GET',
+    pattern: PLUGIN_RECORDS_PATTERN,
+    handler: (req, db, p) => handlePluginRecordsCollection(req, db, p.id, p.rid),
+  },
+  {
+    method: 'POST',
+    pattern: PLUGIN_RECORDS_PATTERN,
+    handler: (req, db, p) => handlePluginRecordsCollection(req, db, p.id, p.rid),
+  },
+  {
+    method: 'PATCH',
+    pattern: PLUGIN_ITEM_DISPATCH_PATTERN,
+    handler: (req, db, p, options, user) => handlePluginItem(req, db, options, user, p.id),
+  },
+  {
+    method: 'DELETE',
+    pattern: PLUGIN_ITEM_DISPATCH_PATTERN,
+    handler: (req, db, p, options, user) => handlePluginItem(req, db, options, user, p.id),
+  },
 ]
 
 // ---------------------------------------------------------------------------

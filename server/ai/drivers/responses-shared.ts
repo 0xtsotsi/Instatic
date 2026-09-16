@@ -74,9 +74,7 @@ export type ResponsesTurn = ResponsesInputItem[]
  * to improve routing for repeated prefixes.
  */
 export function joinInstructions(systemPrompt: string[]): string {
-  return systemPrompt
-    .filter((s) => s !== SYSTEM_PROMPT_DYNAMIC_BOUNDARY)
-    .join('\n\n')
+  return systemPrompt.filter((s) => s !== SYSTEM_PROMPT_DYNAMIC_BOUNDARY).join('\n\n')
 }
 
 // ---------------------------------------------------------------------------
@@ -303,10 +301,19 @@ export class ResponsesTurnTranslator implements TurnTranslator<ResponsesTurn> {
   finish(): TurnResult<ResponsesTurn> {
     const items: ResponsesTurn = []
     if (this.text) {
-      items.push({ type: 'message', role: 'assistant', content: [{ type: 'output_text', text: this.text }] })
+      items.push({
+        type: 'message',
+        role: 'assistant',
+        content: [{ type: 'output_text', text: this.text }],
+      })
     }
     for (const call of this.calls) {
-      items.push({ type: 'function_call', call_id: call.call_id, name: call.name, arguments: call.arguments })
+      items.push({
+        type: 'function_call',
+        call_id: call.call_id,
+        name: call.name,
+        arguments: call.arguments,
+      })
     }
     return {
       // The loop continues while the turn produced function_call items.

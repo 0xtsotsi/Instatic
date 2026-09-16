@@ -26,7 +26,7 @@ A self-hosted CMS where the visual editor, content engine, and publisher all liv
   <img src="https://img.youtube.com/vi/zyjCF_TaLlg/maxresdefault.jpg" alt="Watch the Instatic interface demo on YouTube" width="100%">
 </a>
 
-*Watch the introductory video about Instatic on YouTube.*
+_Watch the introductory video about Instatic on YouTube._
 
 </div>
 
@@ -48,18 +48,18 @@ Railway is the fastest way to get Instatic live. Pick a template, hit the button
 
 <img src="docs/assets/readme/railway-deploy.gif" alt="Deploying Instatic to Railway — from template to a live CMS in under a minute" width="80%">
 
-*One minute to live. Unedited.*
+_One minute to live. Unedited._
 
 </div>
 
 <br>
 
-| Provider | Database | Best for | Deploy |
-|---|---|---|---|
-| **Railway** · *Recommended* | SQLite | A single site — blog, portfolio, small business | [Deploy →](https://railway.com/deploy/instatic-cms-sqlite?referralCode=Zm9bVJ&utm_medium=integration&utm_source=template&utm_campaign=generic) |
-| **Railway** | Postgres | Multiple authors, managed backups, room to grow | [Deploy →](https://railway.com/deploy/instatic-cms-postgres?referralCode=Zm9bVJ&utm_medium=integration&utm_source=template&utm_campaign=generic) |
-| **Render** | SQLite or Postgres | Teams that prefer Render services, disks, and managed Postgres | [Guide →](docs/deployment/render.md) |
-| **Docker / VPS** | SQLite or Postgres | Bring-your-own server, Caddy TLS, custom backup policy | [Guide →](docs/deployment/vps.md) |
+| Provider                    | Database           | Best for                                                       | Deploy                                                                                                                                           |
+| --------------------------- | ------------------ | -------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **Railway** · _Recommended_ | SQLite             | A single site — blog, portfolio, small business                | [Deploy →](https://railway.com/deploy/instatic-cms-sqlite?referralCode=Zm9bVJ&utm_medium=integration&utm_source=template&utm_campaign=generic)   |
+| **Railway**                 | Postgres           | Multiple authors, managed backups, room to grow                | [Deploy →](https://railway.com/deploy/instatic-cms-postgres?referralCode=Zm9bVJ&utm_medium=integration&utm_source=template&utm_campaign=generic) |
+| **Render**                  | SQLite or Postgres | Teams that prefer Render services, disks, and managed Postgres | [Guide →](docs/deployment/render.md)                                                                                                             |
+| **Docker / VPS**            | SQLite or Postgres | Bring-your-own server, Caddy TLS, custom backup policy         | [Guide →](docs/deployment/vps.md)                                                                                                                |
 
 SQLite is the right default for most sites. Reach for Postgres when you've got a team of authors or want managed database backups.
 
@@ -211,17 +211,17 @@ APIs and workflows can still shift before 1.0. If that makes you nervous, wait f
 
 One Bun server. A React admin built with Vite. A publisher that emits pages you'd be happy to have written yourself.
 
-| | |
-|---|---|
-| **Runtime** | Bun, for both server and tooling |
-| **Language** | TypeScript everywhere |
-| **Admin app** | React 19 (React Compiler on), Vite, Zustand + Mutative, CodeMirror, dnd-kit |
-| **Server** | `Bun.serve` with a hand-written router |
-| **Database** | SQLite or Postgres — one `DbClient` interface, picked by `DATABASE_URL` |
-| **Validation** | TypeBox at every untyped boundary; schemas are the source of truth |
-| **Plugins** | QuickJS-WASM backend sandbox, owner-granted permissions, explicit `editor.code` for admin-window code |
-| **AI** | Provider-agnostic drivers over raw HTTP/SSE, no vendor SDKs |
-| **Output** | Semantic HTML, compact CSS, baked static files plus auto-detected dynamic holes |
+|                |                                                                                                       |
+| -------------- | ----------------------------------------------------------------------------------------------------- |
+| **Runtime**    | Bun, for both server and tooling                                                                      |
+| **Language**   | TypeScript everywhere                                                                                 |
+| **Admin app**  | React 19 (React Compiler on), Vite, Zustand + Mutative, CodeMirror, dnd-kit                           |
+| **Server**     | `Bun.serve` with a hand-written router                                                                |
+| **Database**   | SQLite or Postgres — one `DbClient` interface, picked by `DATABASE_URL`                               |
+| **Validation** | TypeBox at every untyped boundary; schemas are the source of truth                                    |
+| **Plugins**    | QuickJS-WASM backend sandbox, owner-granted permissions, explicit `editor.code` for admin-window code |
+| **AI**         | Provider-agnostic drivers over raw HTTP/SSE, no vendor SDKs                                           |
+| **Output**     | Semantic HTML, compact CSS, baked static files plus auto-detected dynamic holes                       |
 
 The codebase is opinionated, and the opinions are enforced in code. Architectural rules live in `src/__tests__/architecture/` as actual tests, so the structure that keeps the output clean can't quietly rot.
 

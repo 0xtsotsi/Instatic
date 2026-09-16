@@ -181,13 +181,13 @@ The provider-neutral v1 policy is defined once in `src/core/ai/userImage.ts` and
 
 Each entry in **Settings → AI → Providers** stores one credential. The provider id is fixed; the auth mode and input fields are derived from it — the UI never asks you to choose.
 
-| Provider | Label in UI | Auth mode | Required field | Optional field | Model discovery |
-|---|---|---|---|---|---|
-| `anthropic` | Anthropic (Claude) | `apiKey` | API key (`sk-ant-…`) | — | Static `claude-*` catalogue enriched with OpenRouter prices + context windows |
-| `openai` | OpenAI | `apiKey` | API key (`sk-…`) | — | Static `gpt-*` / `o*` catalogue enriched with OpenRouter prices + context windows |
-| `openrouter` | OpenRouter | `apiKey` | API key (`sk-or-…`) | — | Live `GET /api/v1/models` (cross-provider; native cost reporting) |
-| `ollama` | Ollama (local) | `baseUrl` | Base URL (e.g. `http://localhost:11434`) | API key (bearer, for proxied deployments) | Live `GET {baseUrl}/api/tags`, with `POST {baseUrl}/api/show` capability lookup per model; static fallback list when unreachable |
-| `openai-compatible` | Custom Provider | `baseUrl` | Base URL — any host serving the OpenAI `/v1/chat/completions` wire protocol | API key (bearer; cloud services need one, local servers often don't) | Live `GET {baseUrl}/v1/models` (standard OpenAI list shape); model `id` used as label |
+| Provider            | Label in UI        | Auth mode | Required field                                                              | Optional field                                                       | Model discovery                                                                                                                  |
+| ------------------- | ------------------ | --------- | --------------------------------------------------------------------------- | -------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
+| `anthropic`         | Anthropic (Claude) | `apiKey`  | API key (`sk-ant-…`)                                                        | —                                                                    | Static `claude-*` catalogue enriched with OpenRouter prices + context windows                                                    |
+| `openai`            | OpenAI             | `apiKey`  | API key (`sk-…`)                                                            | —                                                                    | Static `gpt-*` / `o*` catalogue enriched with OpenRouter prices + context windows                                                |
+| `openrouter`        | OpenRouter         | `apiKey`  | API key (`sk-or-…`)                                                         | —                                                                    | Live `GET /api/v1/models` (cross-provider; native cost reporting)                                                                |
+| `ollama`            | Ollama (local)     | `baseUrl` | Base URL (e.g. `http://localhost:11434`)                                    | API key (bearer, for proxied deployments)                            | Live `GET {baseUrl}/api/tags`, with `POST {baseUrl}/api/show` capability lookup per model; static fallback list when unreachable |
+| `openai-compatible` | Custom Provider    | `baseUrl` | Base URL — any host serving the OpenAI `/v1/chat/completions` wire protocol | API key (bearer; cloud services need one, local servers often don't) | Live `GET {baseUrl}/v1/models` (standard OpenAI list shape); model `id` used as label                                            |
 
 **Custom Provider** (id `openai-compatible`) is the generic adapter for any endpoint that speaks the OpenAI chat/completions wire protocol — Groq (`https://api.groq.com/openai`), Together, DeepSeek, Mistral, Fireworks, self-hosted vLLM, LM Studio, and others. Capabilities default to `{ toolCalling: true, visionInput: false, toolResultImages: false, promptCache: false, streaming: true }`; the operator is responsible for selecting a model that actually supports tool calling. Because arbitrary endpoints are not in the OpenRouter catalogue, no context-window enrichment is available and the context meter stays hidden for these models.
 
@@ -275,9 +275,9 @@ Before each `sendAgentMessage` call, `buildCurrentPageContext(get)` (in `pageCon
 ```ts
 // SiteAgentSnapshot = Static<typeof SiteAgentSnapshotSchema>
 type SiteAgentSnapshot = {
-  page: Page           // active page with full nodes map
+  page: Page // active page with full nodes map
   currentDocument: AgentDocumentRef
-  site: SiteDocument   // breakpoints, styleRules, settings intact; non-active pages emptied
+  site: SiteDocument // breakpoints, styleRules, settings intact; non-active pages emptied
   selectedNodeId: string | null
   activeBreakpointId: string
 }
@@ -287,7 +287,7 @@ Only the active page carries full `nodes`. Non-active pages keep metadata (`id`,
 
 **Server-side validation.** The chat handler validates the incoming snapshot against `SiteAgentSnapshotSchema` via `safeParseValue` (a soft boundary). A malformed or absent snapshot falls back silently to an empty placeholder — the stream continues with `Untitled` page context rather than crashing. `SiteAgentSnapshotSchema` lives in `src/admin/pages/site/agent/siteAgentSnapshot.ts` and is the source of truth for the type; there is no parallel `interface SiteAgentSnapshot`.
 
-**Mid-turn refresh.** The snapshot is rebuilt once per `sendAgentMessage`, but a single turn runs many tool calls, and browser tools mutate the live store *during* the turn. To keep server-side catalog tools (`site_list_documents`, `site_list_tokens`, …) from seeing stale turn-start state, the browser re-captures `buildSnapshot()` after **every** browser tool and posts it with the tool result (`postToolResult(..., snapshot)`). The server threads it through `resolveBridgeToolResult(..., snapshot)` → the bridge's `onSnapshot` → `toolContextBase.snapshot` (a mutable per-turn field). Because `executeAiTool` re-reads `toolContextBase` for each call, the next catalog tool sees the state the previous browser tool produced. Without this, a catalog read after a write (e.g. `site_list_documents` right after `site_add_page`) returned the document set from the start of the turn.
+**Mid-turn refresh.** The snapshot is rebuilt once per `sendAgentMessage`, but a single turn runs many tool calls, and browser tools mutate the live store _during_ the turn. To keep server-side catalog tools (`site_list_documents`, `site_list_tokens`, …) from seeing stale turn-start state, the browser re-captures `buildSnapshot()` after **every** browser tool and posts it with the tool result (`postToolResult(..., snapshot)`). The server threads it through `resolveBridgeToolResult(..., snapshot)` → the bridge's `onSnapshot` → `toolContextBase.snapshot` (a mutable per-turn field). Because `executeAiTool` re-reads `toolContextBase` for each call, the next catalog tool sees the state the previous browser tool produced. Without this, a catalog read after a write (e.g. `site_list_documents` right after `site_add_page`) returned the document set from the start of the turn.
 
 ---
 
@@ -298,15 +298,16 @@ Only the active page carries full `nodes`. Non-active pages keep metadata (`id`,
 ```ts
 // Request body
 {
-  conversationId: string   // ai_conversations row id
-  prompt:         string
-  snapshot:       unknown   // scope-specific: SiteAgentSnapshot or ContentSnapshot
+  conversationId: string // ai_conversations row id
+  prompt: string
+  snapshot: unknown // scope-specific: SiteAgentSnapshot or ContentSnapshot
 }
 
 // Response: NDJSON stream of ServerStreamEvent (one JSON line + '\n' each)
 ```
 
 The handler (`server/ai/handlers/chat.ts`):
+
 1. CSRF-checks and requires `ai.chat`.
 2. Loads the conversation row (credentialId, modelId) and the full persisted message history (`listMessagesForConversation` → `buildMessageHistory` → `AiMessage[]`).
 3. Decrypts the credential and resolves the driver.
@@ -366,14 +367,14 @@ Requires `ai.tools.write`. Calls `resolveBridgeToolResult(bridgeId, requestId, r
 
 Resolved server-side from the posted `SiteAgentSnapshot` or the data repositories via `ctx.db`. No browser round-trip. Results are returned directly to the model. Full annotated HTML reads are browser-backed because the live browser store owns every page/template/visual-component tree.
 
-| Tool              | What it returns                                                         |
-|-------------------|-------------------------------------------------------------------------|
-| `site_list_documents`  | Editable document refs for pages, templates, and visual components. Each item includes `{ document: { type, id }, title, rootNodeId, active, current, summary, template? }`; pass those refs to `site_read_document` / `site_open_document` |
-| `site_list_modules`    | Module registry (id, name, category, props schema, defaults); `category` filter |
-| `site_list_breakpoints`| Configured breakpoints + active id                                      |
-| `site_list_post_types` | Routable collections eligible as a `postTypes` template target — `{ slug, label, routeBase, kind }` per entry, filtered to a non-empty `routeBase`. Queries the data repositories via `ctx.db` |
+| Tool                     | What it returns                                                                                                                                                                                                                                                                                |
+| ------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `site_list_documents`    | Editable document refs for pages, templates, and visual components. Each item includes `{ document: { type, id }, title, rootNodeId, active, current, summary, template? }`; pass those refs to `site_read_document` / `site_open_document`                                                    |
+| `site_list_modules`      | Module registry (id, name, category, props schema, defaults); `category` filter                                                                                                                                                                                                                |
+| `site_list_breakpoints`  | Configured breakpoints + active id                                                                                                                                                                                                                                                             |
+| `site_list_post_types`   | Routable collections eligible as a `postTypes` template target — `{ slug, label, routeBase, kind }` per entry, filtered to a non-empty `routeBase`. Queries the data repositories via `ctx.db`                                                                                                 |
 | `site_list_loop_sources` | Loop source ids, source fields, order/filter options, and data-table field catalogs with valid `{currentEntry.field}` tokens. For post/custom table loops, use source id `data.rows`, the returned table `id` as `<instatic-loop data-table-id>`, and the returned tokens inside the loop body |
-| `site_list_tokens`     | Design tokens: colors (with shades/tints), typography/spacing scale steps, font tokens — each with CSS variable + utility classes; optional `family` filter (`colors`\|`typography`\|`spacing`\|`fonts`) |
+| `site_list_tokens`       | Design tokens: colors (with shades/tints), typography/spacing scale steps, font tokens — each with CSS variable + utility classes; optional `family` filter (`colors`\|`typography`\|`spacing`\|`fonts`)                                                                                       |
 
 ### Site browser tools — 29, browser-bridged
 
@@ -381,18 +382,18 @@ All 29 tools carry `execution: 'browser'` in their `AiTool` definition. The serv
 
 **Documents**
 
-| Tool              | Input                                  | Success `data`                        | What it does                                           |
-|-------------------|----------------------------------------|---------------------------------------|--------------------------------------------------------|
-| `site_read_document`   | `{ document?: { type, id }, part? }`   | `{ document, title, html, css, pageInfo }` | Read a page/template/visual-component document as annotated HTML (`uid="<nodeId>"`) plus compact CSS without switching the visible canvas. Omit `document` to read the current editor document. Result is size-budgeted; call again with `part: pageInfo.nextPart` until `nextPart` is `null` |
-| `site_open_document`   | `{ document: { type, id } }`           | `{ document }`                        | Visibly switch the editor to a page/template/visual component. Use before `site_render_snapshot` when the target is not current |
+| Tool                 | Input                                | Success `data`                             | What it does                                                                                                                                                                                                                                                                                  |
+| -------------------- | ------------------------------------ | ------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `site_read_document` | `{ document?: { type, id }, part? }` | `{ document, title, html, css, pageInfo }` | Read a page/template/visual-component document as annotated HTML (`uid="<nodeId>"`) plus compact CSS without switching the visible canvas. Omit `document` to read the current editor document. Result is size-budgeted; call again with `part: pageInfo.nextPart` until `nextPart` is `null` |
+| `site_open_document` | `{ document: { type, id } }`         | `{ document }`                             | Visibly switch the editor to a page/template/visual component. Use before `site_render_snapshot` when the target is not current                                                                                                                                                               |
 
 **Structure (HTML-native)**
 
-| Tool              | Input                                  | Success `data`                        | What it does                                           |
-|-------------------|----------------------------------------|---------------------------------------|--------------------------------------------------------|
-| `site_insert_html`      | `{ parentId, index?, html }`           | `{ nodeIds }` or `{ cssRulesCreated, cssRulesUpdated }` | Parse HTML (+ any `<style>` CSS) → import as `PageNode`s under `parentId`. Custom `<instatic-loop>` elements import as real Loop nodes; `<instatic-outlet>` imports as a template outlet. A `<style>`-only payload (no elements) upserts CSS rules without inserting nodes (prefer `site_apply_css` for that) |
-| `site_get_node_html`     | `{ nodeId }`                           | `{ html }`                            | Render subtree to HTML via the publisher's `renderNode`|
-| `site_replace_node_html` | `{ nodeId, html }`                     | `{ nodeIds }` or `{ cssRulesCreated, cssRulesUpdated }` | Delete existing children; re-import HTML under the same parent. A `<style>`-only payload upserts CSS rules WITHOUT touching the children |
+| Tool                     | Input                        | Success `data`                                          | What it does                                                                                                                                                                                                                                                                                                  |
+| ------------------------ | ---------------------------- | ------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `site_insert_html`       | `{ parentId, index?, html }` | `{ nodeIds }` or `{ cssRulesCreated, cssRulesUpdated }` | Parse HTML (+ any `<style>` CSS) → import as `PageNode`s under `parentId`. Custom `<instatic-loop>` elements import as real Loop nodes; `<instatic-outlet>` imports as a template outlet. A `<style>`-only payload (no elements) upserts CSS rules without inserting nodes (prefer `site_apply_css` for that) |
+| `site_get_node_html`     | `{ nodeId }`                 | `{ html }`                                              | Render subtree to HTML via the publisher's `renderNode`                                                                                                                                                                                                                                                       |
+| `site_replace_node_html` | `{ nodeId, html }`           | `{ nodeIds }` or `{ cssRulesCreated, cssRulesUpdated }` | Delete existing children; re-import HTML under the same parent. A `<style>`-only payload upserts CSS rules WITHOUT touching the children                                                                                                                                                                      |
 
 Styling rides on the `html` payload — there is no separate `classes` parameter. The executor runs `importHtml(html)`, which harvests any `<style>` block's CSS, then hands it to `cssToStyleRules`. That classifier routes each selector:
 
@@ -415,10 +416,16 @@ Selectors are matched by their exact emitted text across rule kinds. `.grad`, `.
 **Loops through HTML.** A repeated list is authored with the custom importer marker:
 
 ```html
-<instatic-loop data-source-id="data.rows" data-table-id="<table id>" data-order-by="publishedAt" data-direction="desc" data-limit="3">
+<instatic-loop
+  data-source-id="data.rows"
+  data-table-id="<table id>"
+  data-order-by="publishedAt"
+  data-direction="desc"
+  data-limit="3"
+>
   <article>
     <a href="{currentEntry.permalink}">
-      <img src="{currentEntry.featuredMedia}">
+      <img src="{currentEntry.featuredMedia}" />
       <h3>{currentEntry.title}</h3>
     </a>
   </article>
@@ -429,33 +436,33 @@ The agent calls `site_list_loop_sources` first to get the valid source id, data 
 
 **Node edits**
 
-| Tool              | Input                                      | Success `data`          | What it does                                               |
-|-------------------|--------------------------------------------|-------------------------|------------------------------------------------------------|
-| `site_update_node_props` | `{ nodeId, breakpointId?, patch }`         | none                    | Shallow-merge props; `breakpointId` requires schema `breakpointOverridable: true` |
-| `site_move_node`        | `{ nodeId, newParentId, newIndex }`        | none                    | Re-parent or reorder; `newIndex` is 0-based               |
-| `site_delete_node`      | `{ nodeId }`                               | none                    | Remove node and all descendants                            |
-| `site_duplicate_node`   | `{ nodeId, count? }`                       | `{ nodeId, nodeIds }`   | Clone subtree 1–50 times right after the source           |
-| `site_rename_node`      | `{ nodeId, label }`                        | none                    | Set the node's display label in the DOM panel (editor-only)|
+| Tool                     | Input                               | Success `data`        | What it does                                                                      |
+| ------------------------ | ----------------------------------- | --------------------- | --------------------------------------------------------------------------------- |
+| `site_update_node_props` | `{ nodeId, breakpointId?, patch }`  | none                  | Shallow-merge props; `breakpointId` requires schema `breakpointOverridable: true` |
+| `site_move_node`         | `{ nodeId, newParentId, newIndex }` | none                  | Re-parent or reorder; `newIndex` is 0-based                                       |
+| `site_delete_node`       | `{ nodeId }`                        | none                  | Remove node and all descendants                                                   |
+| `site_duplicate_node`    | `{ nodeId, count? }`                | `{ nodeId, nodeIds }` | Clone subtree 1–50 times right after the source                                   |
+| `site_rename_node`       | `{ nodeId, label }`                 | none                  | Set the node's display label in the DOM panel (editor-only)                       |
 
 **CSS + class assignment**
 
-| Tool          | Input                 | Success `data`                          | What it does                                          |
-|---------------|-----------------------|-----------------------------------------|-------------------------------------------------------|
+| Tool                | Input                                                                                                                                        | Success `data`                                                                    | What it does                                                                                      |
+| ------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------- |
 | `site_apply_css`    | `{ operation:'merge'\|'replace', css }` or `{ operation:'delete', selectors }` or `{ operation:'remove-properties', selectors, properties }` | `{ cssRulesCreated?, cssRulesUpdated?, cssRulesDeleted?, cssPropertiesRemoved? }` | Merge/replace authored CSS, delete exact rules, or remove selected properties across all contexts |
-| `site_assign_class` | `{ nodeId, classId }` | none                                    | Attach an existing class to a node; `classId` accepts id or name|
-| `site_remove_class` | `{ nodeId, classId }` | none                                    | Detach a class from a node (the class itself remains) |
+| `site_assign_class` | `{ nodeId, classId }`                                                                                                                        | none                                                                              | Attach an existing class to a node; `classId` accepts id or name                                  |
+| `site_remove_class` | `{ nodeId, classId }`                                                                                                                        | none                                                                              | Detach a class from a node (the class itself remains)                                             |
 
 **Code assets**
 
 Scripts and user stylesheets live in `site.files[]`; runtime targeting and loading options live in `site.runtime.scripts` / `site.runtime.styles`. These tools expose that existing Code Editor storage to the agent, so behavior such as theme toggles, tabs, menus, filters, and DOM-ready interactions is authored as a real runtime script instead of attempted through HTML import.
 
-| Tool                   | Input                                      | Success `data`                          | What it does                                          |
-|------------------------|--------------------------------------------|-----------------------------------------|-------------------------------------------------------|
-| `site_list_code_assets`     | `{ type?: 'script' \| 'style' }`           | `{ assets }`                            | List runtime code assets with file ids, paths, full-content hashes, sizes, timestamps, and runtime config |
-| `site_read_code_asset`      | `{ fileId? \| path?, part?, maxChars? }`   | `{ fileId, path, type, content, hash, runtime, pageInfo }` | Read an exact script/stylesheet content slice. The `hash` is for the full file; page through with `pageInfo.nextPart` |
-| `site_write_code_asset`     | `{ path, type, content, runtime?, dependencies? }` | asset summary + `{ action, dependencies }` | Create or replace a runtime script/stylesheet and normalize its runtime config. Existing paths are updated, new paths are created. For module scripts, `dependencies` is a package-name → version/range map added to `site.packageJson.dependencies` |
-| `site_patch_code_asset`     | `{ fileId? \| path?, expectedHash, replacements }` | asset summary + `{ replacements }` | Apply exact text replacements only when `expectedHash` matches the latest content. Ambiguous matches require a wider `oldText` or explicit `replaceAll:true` |
-| `site_inspect_code_runtime` | `{ document?: { type, id } }`              | `{ pageId, document, scripts, styles }` | Report which runtime scripts/stylesheets apply to the current page/template or supplied page/template document ref |
+| Tool                        | Input                                              | Success `data`                                             | What it does                                                                                                                                                                                                                                         |
+| --------------------------- | -------------------------------------------------- | ---------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `site_list_code_assets`     | `{ type?: 'script' \| 'style' }`                   | `{ assets }`                                               | List runtime code assets with file ids, paths, full-content hashes, sizes, timestamps, and runtime config                                                                                                                                            |
+| `site_read_code_asset`      | `{ fileId? \| path?, part?, maxChars? }`           | `{ fileId, path, type, content, hash, runtime, pageInfo }` | Read an exact script/stylesheet content slice. The `hash` is for the full file; page through with `pageInfo.nextPart`                                                                                                                                |
+| `site_write_code_asset`     | `{ path, type, content, runtime?, dependencies? }` | asset summary + `{ action, dependencies }`                 | Create or replace a runtime script/stylesheet and normalize its runtime config. Existing paths are updated, new paths are created. For module scripts, `dependencies` is a package-name → version/range map added to `site.packageJson.dependencies` |
+| `site_patch_code_asset`     | `{ fileId? \| path?, expectedHash, replacements }` | asset summary + `{ replacements }`                         | Apply exact text replacements only when `expectedHash` matches the latest content. Ambiguous matches require a wider `oldText` or explicit `replaceAll:true`                                                                                         |
+| `site_inspect_code_runtime` | `{ document?: { type, id } }`                      | `{ pageId, document, scripts, styles }`                    | Report which runtime scripts/stylesheets apply to the current page/template or supplied page/template document ref                                                                                                                                   |
 
 `site_insert_html` / `site_replace_node_html` intentionally strip `<script>` elements and inline event handlers (`onclick`, `onload`, etc.). When a request needs behavior, the agent should use `site_write_code_asset({ type: "script", ... })` and then `site_inspect_code_runtime`, not raw `<script>` tags or event attributes in HTML.
 
@@ -475,38 +482,38 @@ Agents should not use npm CDN URLs such as `esm.sh`, `unpkg`, or jsDelivr for pa
 
 **Pages**
 
-| Tool            | Input                             | Success `data` | What it does                                               |
-|-----------------|-----------------------------------|----------------|------------------------------------------------------------|
-| `site_add_page`       | `{ title, slug? }`                | `{ pageId, rootNodeId }` | Create an empty page and make it active. Slug is auto-uniqued. Build into it via `site_insert_html({ parentId: rootNodeId, … })` |
-| `site_delete_page`    | `{ pageId }`                      | none           | Delete page; fails if it would leave the site with 0 pages |
-| `site_rename_page`    | `{ pageId, title, slug? }`        | none           | Change title/slug; `slug="index"` makes this the homepage  |
-| `site_duplicate_page` | `{ pageId, title, slug? }`        | `{ pageId }`   | Deep-clone page (all nodes, props, class assignments)      |
+| Tool                  | Input                      | Success `data`           | What it does                                                                                                                     |
+| --------------------- | -------------------------- | ------------------------ | -------------------------------------------------------------------------------------------------------------------------------- |
+| `site_add_page`       | `{ title, slug? }`         | `{ pageId, rootNodeId }` | Create an empty page and make it active. Slug is auto-uniqued. Build into it via `site_insert_html({ parentId: rootNodeId, … })` |
+| `site_delete_page`    | `{ pageId }`               | none                     | Delete page; fails if it would leave the site with 0 pages                                                                       |
+| `site_rename_page`    | `{ pageId, title, slug? }` | none                     | Change title/slug; `slug="index"` makes this the homepage                                                                        |
+| `site_duplicate_page` | `{ pageId, title, slug? }` | `{ pageId }`             | Deep-clone page (all nodes, props, class assignments)                                                                            |
 
 **Templates (CMS layouts)**
 
 A template is a page carrying a `target` plus a single `<instatic-outlet>` where matched content flows in. These bridge to the editor's `convertPageToTemplate` / `convertTemplateToPage` store actions. The outlet itself is placed via `site_insert_html` — the importer maps the custom `<instatic-outlet>` element to a `base.outlet` node (see [html-import.md](html-import.md) and [templates.md](templates.md)). No save-time outlet guard: a template with no outlet simply doesn't apply at render time.
 
-| Tool                | Input                                                                 | Success `data` | What it does                                              |
-|---------------------|----------------------------------------------------------------------|----------------|----------------------------------------------------------|
-| `site_set_page_template`   | `{ pageId, target: {kind:'everywhere'} \| {kind:'postTypes', tableSlugs:[…]}, priority? }` | none | Convert a page to a template (or update its target/priority). `priority` defaults to 100. Get post-type slugs from `site_list_post_types` |
-| `site_clear_page_template` | `{ pageId }`                                                         | none           | Revert a template to an ordinary page (drops target + dynamic bindings); errors if the page is not a template |
+| Tool                       | Input                                                                                      | Success `data` | What it does                                                                                                                              |
+| -------------------------- | ------------------------------------------------------------------------------------------ | -------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
+| `site_set_page_template`   | `{ pageId, target: {kind:'everywhere'} \| {kind:'postTypes', tableSlugs:[…]}, priority? }` | none           | Convert a page to a template (or update its target/priority). `priority` defaults to 100. Get post-type slugs from `site_list_post_types` |
+| `site_clear_page_template` | `{ pageId }`                                                                               | none           | Revert a template to an ordinary page (drops target + dynamic bindings); errors if the page is not a template                             |
 
 **Design system (tokens)**
 
 The agent works **design-system-first**: it establishes or reuses tokens, then references them (`var(--<slug>)`, `--text-*`, `--space-*`, `var(--<font-var>)`) instead of hardcoding hex/px/font-family. Colors and fonts are list-shaped (one entry per token); typography and spacing are scale-shaped (a group config from which the framework generates per-step values). All four are **create-or-update** — keyed by color `slug`, font `variable`, or scale group — so re-runs patch in place. The executor dispatches to the framework/font store actions (`createFrameworkColorToken`, `create/updateFrameworkTypographyGroup`, `create/updateFrameworkSpacingGroup`, `addFont`/`createFontToken`).
 
-| Tool                | Input                                                                 | Success `data`                              | What it does                                          |
-|---------------------|----------------------------------------------------------------------|---------------------------------------------|-------------------------------------------------------|
-| `site_set_color_tokens`  | `{ tokens: [{ slug, lightValue, category?, darkValue?, darkModeEnabled? }] }` | `{ tokens: [{ slug, ref, action }] }` | Create/update color tokens → `var(--<slug>)` + utilities/variants |
-| `site_set_font_tokens`   | `{ tokens: [{ name, variable?, fallback?, googleFamily?, variants?, subsets?, familyId? }] }` | `{ tokens: [{ name, variable, ref, installed?, action }] }` | Create/update font tokens. `googleFamily` installs a new web font via `POST /admin/api/cms/fonts/install` then binds the token; `familyId` references an already-installed family; neither = fallback-only. Prefer exactly one of `googleFamily`/`familyId`; if both are sent, `googleFamily` wins and the stale `familyId` is ignored |
-| `site_set_type_scale`    | `{ groupId?, namingConvention?, steps?, baseScaleIndex?, min?: { fontSize?, scaleRatio? }, max?: {…} }` | `{ groupId, action, namingConvention, generatedVars }` | Configure the typography scale → `--text-*`. Creates the group if none exists, else updates it |
-| `site_set_spacing_scale` | `{ groupId?, namingConvention?, steps?, baseScaleIndex?, min?: { size?, scaleRatio? }, max?: {…} }` | `{ groupId, action, namingConvention, generatedVars }` | Configure the spacing scale → `--space-*`. Same shape as `site_set_type_scale` but `min`/`max` carry `size` |
+| Tool                     | Input                                                                                                   | Success `data`                                              | What it does                                                                                                                                                                                                                                                                                                                           |
+| ------------------------ | ------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `site_set_color_tokens`  | `{ tokens: [{ slug, lightValue, category?, darkValue?, darkModeEnabled? }] }`                           | `{ tokens: [{ slug, ref, action }] }`                       | Create/update color tokens → `var(--<slug>)` + utilities/variants                                                                                                                                                                                                                                                                      |
+| `site_set_font_tokens`   | `{ tokens: [{ name, variable?, fallback?, googleFamily?, variants?, subsets?, familyId? }] }`           | `{ tokens: [{ name, variable, ref, installed?, action }] }` | Create/update font tokens. `googleFamily` installs a new web font via `POST /admin/api/cms/fonts/install` then binds the token; `familyId` references an already-installed family; neither = fallback-only. Prefer exactly one of `googleFamily`/`familyId`; if both are sent, `googleFamily` wins and the stale `familyId` is ignored |
+| `site_set_type_scale`    | `{ groupId?, namingConvention?, steps?, baseScaleIndex?, min?: { fontSize?, scaleRatio? }, max?: {…} }` | `{ groupId, action, namingConvention, generatedVars }`      | Configure the typography scale → `--text-*`. Creates the group if none exists, else updates it                                                                                                                                                                                                                                         |
+| `site_set_spacing_scale` | `{ groupId?, namingConvention?, steps?, baseScaleIndex?, min?: { size?, scaleRatio? }, max?: {…} }`     | `{ groupId, action, namingConvention, generatedVars }`      | Configure the spacing scale → `--space-*`. Same shape as `site_set_type_scale` but `min`/`max` carry `size`                                                                                                                                                                                                                            |
 
 **Capture**
 
-| Tool              | Input                 | Success `data` | What it does                                                     |
-|-------------------|-----------------------|----------------|------------------------------------------------------------------|
-| `site_render_snapshot` | `{ breakpointId?, nodeId? }`   | `{ breakpointId, nodeId?, label, width, capturedAt, layout, screenshot }` + optional `images[]` | Inspect the rendered canvas: always returns geometry, warnings, and per-node computed styles including background image/clip and WebKit text-mask values; capable providers also receive a PNG. `breakpointId` renders any configured viewport through a deterministic one-shot frame at its exact width, independent of Live mode or collapsed/disabled frames. `nodeId` crops to one subtree while preserving ancestor paint. Unknown ids error. Pair computed evidence with `site_read_document` source CSS when debugging the cascade |
+| Tool                   | Input                        | Success `data`                                                                                  | What it does                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
+| ---------------------- | ---------------------------- | ----------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `site_render_snapshot` | `{ breakpointId?, nodeId? }` | `{ breakpointId, nodeId?, label, width, capturedAt, layout, screenshot }` + optional `images[]` | Inspect the rendered canvas: always returns geometry, warnings, and per-node computed styles including background image/clip and WebKit text-mask values; capable providers also receive a PNG. `breakpointId` renders any configured viewport through a deterministic one-shot frame at its exact width, independent of Live mode or collapsed/disabled frames. `nodeId` crops to one subtree while preserving ancestor paint. Unknown ids error. Pair computed evidence with `site_read_document` source CSS when debugging the cascade |
 
 ### Auto-navigation
 
@@ -524,28 +531,28 @@ Content-scope tools are registered under `server/ai/tools/content/`. They use th
 
 **Server-side content reads — 7**
 
-| Tool | What it returns |
-|---|---|
-| `content_list_collections` | Visible content collections (`postType` and `page` tables only) with id, slug, label, kind, row count, and primary field id |
-| `content_get_collection_schema` | One collection's field schema, including per-field type metadata and select/media/relation extras |
-| `content_list_documents` | Light document rows in a collection, filterable by status/author and paginated by limit/offset |
-| `content_get_document` | One document's full state: field values, status, author, slug, timestamps |
-| `content_search_documents` | Free-text lookup across document slugs, projected to light document summaries |
-| `content_list_users` | Active users available as authors; gated by `users.manage` |
-| `content_list_media` | Existing media assets for media fields; gated by `media.read`; upload remains a user/media-workspace action |
+| Tool                            | What it returns                                                                                                             |
+| ------------------------------- | --------------------------------------------------------------------------------------------------------------------------- |
+| `content_list_collections`      | Visible content collections (`postType` and `page` tables only) with id, slug, label, kind, row count, and primary field id |
+| `content_get_collection_schema` | One collection's field schema, including per-field type metadata and select/media/relation extras                           |
+| `content_list_documents`        | Light document rows in a collection, filterable by status/author and paginated by limit/offset                              |
+| `content_get_document`          | One document's full state: field values, status, author, slug, timestamps                                                   |
+| `content_search_documents`      | Free-text lookup across document slugs, projected to light document summaries                                               |
+| `content_list_users`            | Active users available as authors; gated by `users.manage`                                                                  |
+| `content_list_media`            | Existing media assets for media fields; gated by `media.read`; upload remains a user/media-workspace action                 |
 
 **Browser-bridged content writes/navigation — 8**
 
-| Tool | What it does |
-|---|---|
-| `content_create_document` | Creates a draft in a collection, optionally with initial fields/status, then switches the UI to the new document |
-| `content_delete_document` | Soft-deletes a document; restore remains available through the Trash UI |
-| `content_set_document_status` | Changes status (`draft`, `unpublished`, `published`, `scheduled`); scheduled status requires `scheduledAt` |
-| `content_set_document_field` | Writes one field; body values are markdown and are converted by the browser bridge |
-| `content_set_document_fields` | Batch-writes multiple fields in one save |
-| `content_set_document_author` | Reassigns author; gated by the same author-management capability path as the HTTP UI |
-| `content_set_active_document` | Loads a document by id across post-type collections and commits the live editor focus before subsequent writes |
-| `content_set_active_collection` | Switches the sidebar focus to a collection |
+| Tool                            | What it does                                                                                                     |
+| ------------------------------- | ---------------------------------------------------------------------------------------------------------------- |
+| `content_create_document`       | Creates a draft in a collection, optionally with initial fields/status, then switches the UI to the new document |
+| `content_delete_document`       | Soft-deletes a document; restore remains available through the Trash UI                                          |
+| `content_set_document_status`   | Changes status (`draft`, `unpublished`, `published`, `scheduled`); scheduled status requires `scheduledAt`       |
+| `content_set_document_field`    | Writes one field; body values are markdown and are converted by the browser bridge                               |
+| `content_set_document_fields`   | Batch-writes multiple fields in one save                                                                         |
+| `content_set_document_author`   | Reassigns author; gated by the same author-management capability path as the HTTP UI                             |
+| `content_set_active_document`   | Loads a document by id across post-type collections and commits the live editor focus before subsequent writes   |
+| `content_set_active_collection` | Switches the sidebar focus to a collection                                                                       |
 
 The content system prompt is markdown-native: it tells the model to exchange body content as standard markdown, to read schemas before writing unfamiliar fields, and to prefer `content_set_document_fields` for whole-post generation. The prompt is built with the same `[staticPrefix, SYSTEM_PROMPT_DYNAMIC_BOUNDARY, dynamicSuffix]` shape as the Site prompt so provider prompt caching works the same way.
 
@@ -568,14 +575,17 @@ Every request uses `AgentSnapshotFrame`, an offscreen one-shot `IframeFrameSurfa
 ## System prompt
 
 `server/ai/tools/site/systemPrompt.ts` builds a 3-element array:
+
 ```ts
-[staticPrefix, SYSTEM_PROMPT_DYNAMIC_BOUNDARY, dynamicSuffix]
+;[staticPrefix, SYSTEM_PROMPT_DYNAMIC_BOUNDARY, dynamicSuffix]
 ```
+
 Drivers that support explicit prompt-cache controls (Anthropic) apply `cache_control` to the static prefix automatically. OpenAI concatenates the prompt parts and sends a stable `prompt_cache_key` derived from the scope + toolset so repeated prefixes route more consistently. Other drivers concatenate the three strings. Content is intentionally static across providers — every observable behaviour comes from the tool definitions, not prompt knobs.
 
 `SYSTEM_PROMPT_DYNAMIC_BOUNDARY` is the literal `'__SYSTEM_PROMPT_DYNAMIC_BOUNDARY__'`, declared **once** in `server/ai/runtime/types.ts` and imported everywhere — prompt builders and every driver. A duplicate definition would silently break prompt caching on whichever driver drifted. Gated by `ai-driver-shared-helpers.test.ts`.
 
 **Static prefix key rules** (full text lives in `server/ai/tools/site/systemPrompt.ts`):
+
 - **Design system first.** Establish or reuse tokens before/while building (`site_set_color_tokens`, `site_set_type_scale`, `site_set_spacing_scale`, `site_set_font_tokens`), then reference them in CSS (`var(--<slug>)`, `var(--text-l)`, `var(--space-m)`, `var(--<font-var>)`) instead of raw hex/px/font-family. The dynamic suffix's `Tokens —` line shows what already exists; `(none …)` means no design system yet.
 - Structure as HTML (`site_insert_html` / `site_replace_node_html`); style with CSS in the same payload — a `<style>` block and/or `class=` attributes referencing the design tokens. The importer classifies selectors, so the agent never hand-builds classes at insert time.
 - `<style>` blocks inside imported HTML are parsed: a bare `.foo {}` rule becomes a Selectors-panel class bound to `class="foo"`; any other selector (`.hero a`, `a:hover`, `@media …`) becomes an ambient rule, and supported `@keyframes` publish as raw keyframes CSS. `style=` attributes land on the node's inline styles. These are applied — not stripped.
@@ -589,6 +599,7 @@ Drivers that support explicit prompt-cache controls (Anthropic) apply `cache_con
 - Reply rule: 1–2 narrating sentences only. No raw HTML/CSS/JSON in the reply.
 
 **Dynamic suffix** (built per request by `buildDynamicSuffix(snap: SiteAgentSnapshot)`):
+
 ```text
 Page: "My Site" · root: <rootNodeId> · selected: <nodeId|none>
 · active breakpoint: <id> · all breakpoints: [<id>@<width>px, …]
@@ -596,6 +607,7 @@ Page: "My Site" · root: <rootNodeId> · selected: <nodeId|none>
 · Pages: [<id>=<slug> (active), <id>=<slug>, …]
 · Tokens — colors: [primary=…, ink=…]; type --text-*: [xs, s, m, …]; spacing --space-*: […]; fonts: [--font-heading→Inter]
 ```
+
 The static prefix is cache-friendly (unchanged across prompts for the same provider). Anthropic marks only that prefix with `cache_control`; OpenAI relies on automatic prefix caching plus `prompt_cache_key`. The dynamic suffix carries per-request state. The `Tokens —` digest is a compact, always-inlined summary of the site's design tokens (`describeAgentTokens(snap.site)`) so the agent sees the design system every turn without a `site_list_tokens` round-trip; when no tokens exist it reads `Tokens: (none — no design system yet; establish one first …)`. `site_list_tokens` remains the on-demand full-detail read (variants, utility classes).
 
 ---
@@ -623,9 +635,7 @@ The same importer that powers the Agent's `site_insert_html` tool also powers th
 // agentSliceConfig.site.ts — wired in store.ts via createAgentSlice(siteAgentSliceConfig)
 export const siteAgentSliceConfig: AgentSliceConfig = {
   scope: 'site',
-  buildSnapshot: () => buildCurrentPageContext(
-    () => getAgentStoreApi<EditorStore>().getState(),
-  ),
+  buildSnapshot: () => buildCurrentPageContext(() => getAgentStoreApi<EditorStore>().getState()),
   dispatchTool: executeAgentTool,
   noProviderMessage: 'No AI provider configured for the site editor. …',
 }
@@ -642,50 +652,50 @@ Key slice state and actions:
 ```ts
 interface AgentSlice {
   // ── UI state ──────────────────────────────────────────────────────────
-  isAgentOpen:               boolean
-  isAgentStreaming:          boolean
-  agentMessages:             AgentMessage[]
-  agentError:                string | null
+  isAgentOpen: boolean
+  isAgentStreaming: boolean
+  agentMessages: AgentMessage[]
+  agentError: string | null
   /** Active ai_conversations row id — created lazily on first send. */
-  agentConversationId:       string | null
+  agentConversationId: string | null
   /** Active (credentialId, modelId) surfaced by the model picker. */
-  agentActiveCredentialId:   string | null
-  agentActiveModelId:        string | null
+  agentActiveCredentialId: string | null
+  agentActiveModelId: string | null
   /** Conversation summaries for the history popover. */
-  agentConversations:        ConversationView[]
+  agentConversations: ConversationView[]
   /** Current-context snapshot plus cumulative conversation billing totals. */
   agentUsage: {
-    contextTokens:           number | null
-    contextCredentialId:     string | null
-    contextModelId:          string | null
-    promptTokens:            number
-    completionTokens:        number
-    cacheReadTokens:         number
-    cacheCreationTokens:     number
-    costUsd:                 number
+    contextTokens: number | null
+    contextCredentialId: string | null
+    contextModelId: string | null
+    promptTokens: number
+    completionTokens: number
+    cacheReadTokens: number
+    cacheCreationTokens: number
+    costUsd: number
   }
   /** Blocks Send/navigation while a history load or delete may replace the active chat. */
   isAgentConversationPending: boolean
   /** Blocks Send/navigation while an existing chat's model PUT is pending. */
-  isAgentProviderPending:     boolean
+  isAgentProviderPending: boolean
   /** Incremented when a conversation is replaced so local text/image drafts remount cleanly. */
-  agentComposerEpoch:        number
+  agentComposerEpoch: number
 
   // ── Actions ───────────────────────────────────────────────────────────
-  openAgent():                                         void
-  closeAgent():                                        void
-  toggleAgent():                                       void
-  sendAgentMessage(content: AiUserContentBlock[]):     Promise<{ accepted: boolean }>
-  abortAgent():                                        void
-  clearAgentMessages():                                void
-  startNewAgentConversation():                         void
-  loadAgentConversations():                            Promise<void>
-  loadAgentConversation(id: string):                   Promise<void>
-  deleteAgentConversation(id: string):                 Promise<void>
+  openAgent(): void
+  closeAgent(): void
+  toggleAgent(): void
+  sendAgentMessage(content: AiUserContentBlock[]): Promise<{ accepted: boolean }>
+  abortAgent(): void
+  clearAgentMessages(): void
+  startNewAgentConversation(): void
+  loadAgentConversations(): Promise<void>
+  loadAgentConversation(id: string): Promise<void>
+  deleteAgentConversation(id: string): Promise<void>
   /** Change which credential + model is active. Updates the conversation row if one exists; stages the values for the next create if not. Also clears `agentError` so a sticky "no provider" error doesn't keep the composer disabled after the user picks a model. */
   setAgentProvider(credentialId: string, modelId: string): Promise<void>
   /** Preload the per-scope default (credentialId, modelId) from GET /admin/api/ai/defaults. No-op when a conversation or explicit pick is already active. Called by AgentPanel on open. */
-  loadScopeDefault():                                  Promise<void>
+  loadScopeDefault(): Promise<void>
 }
 ```
 
@@ -736,7 +746,7 @@ The `<ContextMeter>` is a five-segment battery-style status beside the image act
   - Anthropic reports `input_tokens` excluding cache buckets, so the true total is `promptTokens + cacheReadTokens + cacheCreationTokens`.
   - OpenAI / OpenRouter / Ollama / Custom Provider report `input_tokens` as the full input; `promptTokens` alone is the total.
 
-**Live context, cumulative billing.** A turn makes one provider round-trip per tool batch. The tool loop emits a `context` event **each round** carrying THAT round's input buckets; the chat handler injects the normalised `contextTokens` and the browser updates the meter on every round — so the remaining-capacity battery drains *during* a long tool loop instead of only at the end. The measurement is the LATEST round's input, never the sum across rounds (which would over-count, since each round re-sends the growing context). The terminal `usage` event is **billing only**: prompt/completion/cache counts are summed across rounds. Before forwarding that terminal event, the persister resolves authoritative cache-aware spend (or accepts OpenRouter's native cost), writes the usage, then includes the resolved `costUsd` on the wire. The browser accumulates those totals in `agentUsage`; `loadAgentConversation` hydrates the same totals from `ConversationView`. The tooltip labels the sections “Context remaining” and “Conversation billing” so the two token meanings cannot be confused.
+**Live context, cumulative billing.** A turn makes one provider round-trip per tool batch. The tool loop emits a `context` event **each round** carrying THAT round's input buckets; the chat handler injects the normalised `contextTokens` and the browser updates the meter on every round — so the remaining-capacity battery drains _during_ a long tool loop instead of only at the end. The measurement is the LATEST round's input, never the sum across rounds (which would over-count, since each round re-sends the growing context). The terminal `usage` event is **billing only**: prompt/completion/cache counts are summed across rounds. Before forwarding that terminal event, the persister resolves authoritative cache-aware spend (or accepts OpenRouter's native cost), writes the usage, then includes the resolved `costUsd` on the wire. The browser accumulates those totals in `agentUsage`; `loadAgentConversation` hydrates the same totals from `ConversationView`. The tooltip labels the sections “Context remaining” and “Conversation billing” so the two token meanings cannot be confused.
 
 Five equal bands approximate remaining capacity: an empty conversation has all five filled, then the display drains by fifths until no capacity remains. More than 40% remaining is healthy, 20–40% warns, and below 20% is danger. An unmeasured model switch uses five neutral segments until its first response. The keyboard-focusable details button exposes the exact remaining/window counts and percentage in its accessible name; segment count is only the compact visual approximation.
 
@@ -779,15 +789,15 @@ unblocks deletion of the credential that had been protected by the default FK.
 
 ## Forbidden patterns
 
-| Pattern | Use instead |
-|---|---|
-| Importing any provider SDK (`@anthropic-ai/sdk`, `@anthropic-ai/claude-agent-sdk`, `@openai/agents`, `@openrouter/agent`) | Banned repo-wide — no exceptions, including inside `server/ai/drivers/`. Drivers talk directly to the REST API. Gated by `ai-driver-isolation.test.ts`. |
-| Importing `@modelcontextprotocol/sdk` outside `server/ai/mcp/` | The MCP SDK is scoped to Instatic's MCP server implementation only. Drivers and browser code must not import it. Gated by `ai-driver-isolation.test.ts`. |
-| Importing `zod` anywhere | Banned repo-wide — TypeBox schemas pass directly as JSON Schema to every provider. Gated by `ai-driver-isolation.test.ts`. |
-| Writing a private `parseToolArguments` / `parseJsonOrEmpty` copy inside a driver | Import `parseToolArguments` from `./http/toolArgs`. Private copies diverge silently — the same malformed model output produces different outcomes per provider. Gated by `ai-driver-shared-helpers.test.ts`. |
-| Redefining `SYSTEM_PROMPT_DYNAMIC_BOUNDARY` in a driver or prompt builder | Import it from `server/ai/runtime/types.ts`. One source — if a driver or builder drifts the literal, prompt caching silently breaks for that driver. Gated by `ai-driver-shared-helpers.test.ts`. |
-| Routing a write tool as a server-side read (resolving from snapshot) | Write tools are `execution: 'browser'` — they must go through the bridge. The Site editor store or Content workspace bridge is the write authority. |
-| Using invented breakpoint ids in `breakpointStyles` (`"mobile"`, `"desktop"`, etc.) | Use verbatim ids from the dynamic suffix. Invalid ids are rejected by the executor. |
+| Pattern                                                                                                                   | Use instead                                                                                                                                                                                                  |
+| ------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Importing any provider SDK (`@anthropic-ai/sdk`, `@anthropic-ai/claude-agent-sdk`, `@openai/agents`, `@openrouter/agent`) | Banned repo-wide — no exceptions, including inside `server/ai/drivers/`. Drivers talk directly to the REST API. Gated by `ai-driver-isolation.test.ts`.                                                      |
+| Importing `@modelcontextprotocol/sdk` outside `server/ai/mcp/`                                                            | The MCP SDK is scoped to Instatic's MCP server implementation only. Drivers and browser code must not import it. Gated by `ai-driver-isolation.test.ts`.                                                     |
+| Importing `zod` anywhere                                                                                                  | Banned repo-wide — TypeBox schemas pass directly as JSON Schema to every provider. Gated by `ai-driver-isolation.test.ts`.                                                                                   |
+| Writing a private `parseToolArguments` / `parseJsonOrEmpty` copy inside a driver                                          | Import `parseToolArguments` from `./http/toolArgs`. Private copies diverge silently — the same malformed model output produces different outcomes per provider. Gated by `ai-driver-shared-helpers.test.ts`. |
+| Redefining `SYSTEM_PROMPT_DYNAMIC_BOUNDARY` in a driver or prompt builder                                                 | Import it from `server/ai/runtime/types.ts`. One source — if a driver or builder drifts the literal, prompt caching silently breaks for that driver. Gated by `ai-driver-shared-helpers.test.ts`.            |
+| Routing a write tool as a server-side read (resolving from snapshot)                                                      | Write tools are `execution: 'browser'` — they must go through the bridge. The Site editor store or Content workspace bridge is the write authority.                                                          |
+| Using invented breakpoint ids in `breakpointStyles` (`"mobile"`, `"desktop"`, etc.)                                       | Use verbatim ids from the dynamic suffix. Invalid ids are rejected by the executor.                                                                                                                          |
 
 ---
 

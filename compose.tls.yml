@@ -24,9 +24,9 @@ services:
     image: caddy:2-alpine
     restart: unless-stopped
     ports:
-      - "80:80"
-      - "443:443"
-      - "443:443/udp"
+      - '80:80'
+      - '443:443'
+      - '443:443/udp'
     environment:
       DOMAIN: ${DOMAIN:?Set DOMAIN in .env to enable TLS, e.g. cms.example.com}
       LETSENCRYPT_EMAIL: ${LETSENCRYPT_EMAIL:-}
@@ -51,7 +51,7 @@ services:
       # probe — it only checks that the Caddy process is up. We don't probe
       # ${DOMAIN} from inside the container because the cert may legitimately
       # not be ready yet during the first few seconds.
-      test: ["CMD", "wget", "-q", "--spider", "http://127.0.0.1:2019/config/"]
+      test: ['CMD', 'wget', '-q', '--spider', 'http://127.0.0.1:2019/config/']
       interval: 30s
       timeout: 5s
       retries: 3

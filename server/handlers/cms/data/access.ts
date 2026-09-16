@@ -67,10 +67,7 @@ const DATA_EDIT_CAPABILITIES = [
   'content.manage',
 ] satisfies CoreCapability[]
 
-const DATA_REASSIGN_CAPABILITIES = [
-  'content.edit.any',
-  'content.manage',
-] satisfies CoreCapability[]
+const DATA_REASSIGN_CAPABILITIES = ['content.edit.any', 'content.manage'] satisfies CoreCapability[]
 
 const DATA_PUBLISH_CAPABILITIES = [
   'content.publish.own',
@@ -104,7 +101,10 @@ const TABLE_READ_CAPABILITIES = [
  * read/manage cap (custom or system) is sufficient to enter; per-table
  * visibility is decided by `canReadTable`.
  */
-export async function requireDataTablesRead(req: Request, db: DbClient): Promise<AuthUser | Response> {
+export async function requireDataTablesRead(
+  req: Request,
+  db: DbClient,
+): Promise<AuthUser | Response> {
   return requireAnyCapability(req, db, TABLE_READ_CAPABILITIES)
 }
 
@@ -112,7 +112,10 @@ export async function requireDataTablesRead(req: Request, db: DbClient): Promise
  * Create a CUSTOM table. System tables are seeded, never created, so creation
  * always gates on the custom-manage cap.
  */
-export async function requireCustomTablesManager(req: Request, db: DbClient): Promise<AuthUser | Response> {
+export async function requireCustomTablesManager(
+  req: Request,
+  db: DbClient,
+): Promise<AuthUser | Response> {
   return requireCapability(req, db, 'data.custom.tables.manage')
 }
 
@@ -133,7 +136,10 @@ export function canReadTable(user: AuthUser, table: Pick<DataTable, 'system'>): 
  * fields are immutable for everyone (`assertSystemTableUpdateAllowed`).
  */
 export function canManageTable(user: AuthUser, table: Pick<DataTable, 'system'>): boolean {
-  return userHasCapability(user, table.system ? 'data.system.tables.manage' : 'data.custom.tables.manage')
+  return userHasCapability(
+    user,
+    table.system ? 'data.system.tables.manage' : 'data.custom.tables.manage',
+  )
 }
 
 /**
@@ -151,7 +157,10 @@ export function hasContentRowAccess(user: AuthUser): boolean {
  * (different route base) and is structurally distinct from editing a
  * row's cells.
  */
-export async function requireDataRowMover(req: Request, db: DbClient): Promise<AuthUser | Response> {
+export async function requireDataRowMover(
+  req: Request,
+  db: DbClient,
+): Promise<AuthUser | Response> {
   return requireCapability(req, db, 'data.rows.move')
 }
 
@@ -163,11 +172,17 @@ export async function requireDataCreator(req: Request, db: DbClient): Promise<Au
   return requireCapability(req, db, 'content.create')
 }
 
-export async function requireDataAuthorManager(req: Request, db: DbClient): Promise<AuthUser | Response> {
+export async function requireDataAuthorManager(
+  req: Request,
+  db: DbClient,
+): Promise<AuthUser | Response> {
   return requireAnyCapability(req, db, DATA_REASSIGN_CAPABILITIES)
 }
 
-export async function requireDataPublisher(req: Request, db: DbClient): Promise<AuthUser | Response> {
+export async function requireDataPublisher(
+  req: Request,
+  db: DbClient,
+): Promise<AuthUser | Response> {
   return requireAnyCapability(req, db, DATA_PUBLISH_CAPABILITIES)
 }
 
@@ -180,16 +195,22 @@ function ownsDataRow(user: AuthUser, row: OwnedDataRow): boolean {
 }
 
 export function canReadDataRow(user: AuthUser, row: OwnedDataRow): boolean {
-  return canSeeAllDataRows(user) ||
+  return (
+    canSeeAllDataRows(user) ||
     (ownsDataRow(user, row) && userHasAnyCapability(user, DATA_OWN_READ_CAPABILITIES))
+  )
 }
 
 export function canEditDataRow(user: AuthUser, row: OwnedDataRow): boolean {
-  return userHasAnyCapability(user, ['content.edit.any', 'content.manage']) ||
+  return (
+    userHasAnyCapability(user, ['content.edit.any', 'content.manage']) ||
     (ownsDataRow(user, row) && userHasCapability(user, 'content.edit.own'))
+  )
 }
 
 export function canPublishDataRow(user: AuthUser, row: OwnedDataRow): boolean {
-  return userHasCapability(user, 'content.publish.any') ||
+  return (
+    userHasCapability(user, 'content.publish.any') ||
     (ownsDataRow(user, row) && userHasCapability(user, 'content.publish.own'))
+  )
 }

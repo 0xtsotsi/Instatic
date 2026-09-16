@@ -2,7 +2,7 @@ import { describe, expect, it } from 'bun:test'
 import { binaryResponse, toArrayBuffer } from './binary'
 
 describe('toArrayBuffer', () => {
-  it('copies only the view\'s range when given a sub-view of a larger buffer', () => {
+  it("copies only the view's range when given a sub-view of a larger buffer", () => {
     // The bug the copy prevents: a Uint8Array can be a window into a bigger
     // backing store (non-zero byteOffset, byteLength < buffer.byteLength).
     // Handing `.buffer` straight to a consumer would leak the sibling bytes.
@@ -37,7 +37,7 @@ describe('toArrayBuffer', () => {
 })
 
 describe('binaryResponse', () => {
-  it('serves exactly the view\'s bytes with the given headers', async () => {
+  it("serves exactly the view's bytes with the given headers", async () => {
     const backing = new Uint8Array([9, 8, 7, 6, 5])
     const view = backing.subarray(1, 4) // [8, 7, 6]
 

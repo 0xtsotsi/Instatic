@@ -24,15 +24,17 @@ export const TableCreateBodySchema = Type.Object({
   fields: Type.Optional(Type.Unknown()),
 })
 
-export const TablePatchBodySchema = Type.Partial(Type.Object({
-  name: Type.String(),
-  slug: Type.String(),
-  routeBase: Type.String(),
-  singularLabel: Type.String(),
-  pluralLabel: Type.String(),
-  primaryFieldId: Type.String(),
-  fields: Type.Unknown(),
-}))
+export const TablePatchBodySchema = Type.Partial(
+  Type.Object({
+    name: Type.String(),
+    slug: Type.String(),
+    routeBase: Type.String(),
+    singularLabel: Type.String(),
+    pluralLabel: Type.String(),
+    primaryFieldId: Type.String(),
+    fields: Type.Unknown(),
+  }),
+)
 
 export const RowUpsertBodySchema = Type.Object({
   cells: Type.Optional(Type.Record(Type.String(), Type.Unknown())),

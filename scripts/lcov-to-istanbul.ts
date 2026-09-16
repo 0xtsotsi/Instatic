@@ -138,9 +138,7 @@ function lineRange(line: number): IstanbulRange {
 function toIstanbul(records: LcovFileRecord[]): IstanbulCoverage {
   const out: IstanbulCoverage = {}
   for (const record of records) {
-    const absolutePath = isAbsolute(record.path)
-      ? record.path
-      : resolve(PROJECT_ROOT, record.path)
+    const absolutePath = isAbsolute(record.path) ? record.path : resolve(PROJECT_ROOT, record.path)
 
     const fnMap: Record<string, IstanbulFunction> = {}
     const f: Record<string, number> = {}
@@ -191,10 +189,7 @@ async function main() {
   await writeFile(outputPath, JSON.stringify(istanbul), 'utf-8')
 
   const fileCount = Object.keys(istanbul).length
-  const fnCount = Object.values(istanbul).reduce(
-    (sum, file) => sum + Object.keys(file.f).length,
-    0,
-  )
+  const fnCount = Object.values(istanbul).reduce((sum, file) => sum + Object.keys(file.f).length, 0)
   console.log(
     `[lcov-to-istanbul] ${inputPath} → ${outputPath}\n` +
       `  ${fileCount} files, ${fnCount} functions`,

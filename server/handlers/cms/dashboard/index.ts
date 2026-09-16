@@ -57,7 +57,6 @@ import type { DashboardRequestContext } from './types'
 // useDashboardStats.ts` mirrors them by hand) can import from the
 // folder barrel rather than reaching into the types file directly.
 
-
 type DashboardReader = (
   db: DbClient,
   options: CmsHandlerOptions,
@@ -101,13 +100,13 @@ interface DashboardEndpoint {
 //                       behaviour leaked this to every authenticated user
 //                       via the dashboard — A2 fix.
 const DASHBOARD_READERS: Record<string, DashboardEndpoint> = {
-  'pages':          { reader: readPagesStats,     capability: null },
-  'posts':          { reader: readPostsStats,     capability: null },
-  'media':          { reader: readMediaStats,     capability: 'media.read' },
-  'plugins':        { reader: readPluginsStats,   capability: 'plugins.read' },
-  'storage':        { reader: readStorageStats,   capability: null },
-  'publish-lineup': { reader: readPublishLineup,  capability: null },
-  'activity':       { reader: readRecentActivity, capability: 'audit.read' },
+  pages: { reader: readPagesStats, capability: null },
+  posts: { reader: readPostsStats, capability: null },
+  media: { reader: readMediaStats, capability: 'media.read' },
+  plugins: { reader: readPluginsStats, capability: 'plugins.read' },
+  storage: { reader: readStorageStats, capability: null },
+  'publish-lineup': { reader: readPublishLineup, capability: null },
+  activity: { reader: readRecentActivity, capability: 'audit.read' },
 }
 
 export async function handleDashboardRoutes(
@@ -126,9 +125,10 @@ export async function handleDashboardRoutes(
   // Per-endpoint capability gate. `null` capability falls back to the
   // authenticated-user floor; everything else uses requireCapability so
   // the widget hides when the caller's role lacks the cap.
-  const user = endpoint.capability === null
-    ? await requireAuthenticatedUser(req, db)
-    : await requireCapability(req, db, endpoint.capability)
+  const user =
+    endpoint.capability === null
+      ? await requireAuthenticatedUser(req, db)
+      : await requireCapability(req, db, endpoint.capability)
   if (user instanceof Response) return user
 
   const ctx: DashboardRequestContext = {

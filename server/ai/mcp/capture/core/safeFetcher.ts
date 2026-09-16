@@ -61,7 +61,10 @@ function isPrivateLiteral(host: string): boolean {
 }
 
 type FetchImpl = (input: string | URL | Request, init?: RequestInit) => Promise<Response>
-type DnsLookup = (hostname: string, options: { all: true; verbatim: true }) => Promise<{ address: string; family: number }[]>
+type DnsLookup = (
+  hostname: string,
+  options: { all: true; verbatim: true },
+) => Promise<{ address: string; family: number }[]>
 
 const MAX_REDIRECTS_DEFAULT = 3
 const REDIRECT_STATUSES: ReadonlySet<number> = new Set([301, 302, 303, 307, 308])
@@ -81,7 +84,8 @@ function hostMatchesAllowlist(host: string, allowedHosts: ReadonlyArray<string>)
 
 export function createSafeFetcher(
   fetchImpl: FetchImpl = (input, init) => globalThis.fetch(input as never, init),
-  dnsLookup: DnsLookup = (hostname, options) => lookup(hostname, options) as unknown as Promise<{ address: string; family: number }[]>,
+  dnsLookup: DnsLookup = (hostname, options) =>
+    lookup(hostname, options) as unknown as Promise<{ address: string; family: number }[]>,
   opts: SafeFetcherOptions = {},
 ): AssetFetcher {
   const maxRedirects = opts.maxRedirects ?? MAX_REDIRECTS_DEFAULT
@@ -205,7 +209,10 @@ export function createSafeFetcher(
           }
           const bytes = new Uint8Array(total)
           let off = 0
-          for (const c of chunks) { bytes.set(c, off); off += c.byteLength }
+          for (const c of chunks) {
+            bytes.set(c, off)
+            off += c.byteLength
+          }
           return { ok: true, bytes, contentType: res.headers.get('content-type') ?? undefined }
         } catch (err) {
           return { ok: false, error: err instanceof Error ? err.message : String(err) }

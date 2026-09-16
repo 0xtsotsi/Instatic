@@ -9,7 +9,11 @@
  */
 
 import { nanoid } from 'nanoid'
-import type { ServerPluginLifecycleHook, PluginManifest, PluginSettingsValues } from '@core/plugin-sdk'
+import type {
+  ServerPluginLifecycleHook,
+  PluginManifest,
+  PluginSettingsValues,
+} from '@core/plugin-sdk'
 import { loopSourceRegistry } from '@core/loops/registry'
 import { hookBus } from '@core/plugins/hookBus'
 import { mediaStorageRegistry } from '@core/plugins/mediaStorageRegistry'
@@ -94,7 +98,11 @@ export async function unloadPluginInWorker(pluginId: string): Promise<void> {
     // tearing down the host record, so naked sockets don't outlive the
     // plugin record they belonged to.
     for (const ctrl of entry.inflightFetches.values()) {
-      try { ctrl.abort(new Error(`Plugin "${pluginId}" unloaded`)) } catch { /* ignore */ }
+      try {
+        ctrl.abort(new Error(`Plugin "${pluginId}" unloaded`))
+      } catch {
+        /* ignore */
+      }
     }
     entry.inflightFetches.clear()
     hookBus.unregisterPlugin(pluginId)
@@ -117,7 +125,11 @@ export async function unloadPluginInWorker(pluginId: string): Promise<void> {
   } catch {
     // worker may have already crashed — terminate is still safe
   }
-  try { w.terminate() } catch {/* may already be terminated */}
+  try {
+    w.terminate()
+  } catch {
+    /* may already be terminated */
+  }
   workers.delete(pluginId)
 }
 
@@ -158,10 +170,7 @@ export async function runLifecycleInWorker(
   }
 }
 
-export async function runMigrateInWorker(
-  pluginId: string,
-  fromVersion: string,
-): Promise<void> {
+export async function runMigrateInWorker(pluginId: string, fromVersion: string): Promise<void> {
   const result = await requestFromWorker(
     pluginId,
     { kind: 'run-migrate', correlationId: nanoid(), pluginId, fromVersion },

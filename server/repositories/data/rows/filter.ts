@@ -43,13 +43,7 @@ interface ListDataRowsWithFilterResult {
 const FIELD_KEY_RE = /^[a-zA-Z_][a-zA-Z0-9_]*$/
 
 /** Row-level columns plugins are allowed to order by directly. */
-const ROW_LEVEL_ORDER_KEYS = new Set([
-  'slug',
-  'status',
-  'created_at',
-  'updated_at',
-  'published_at',
-])
+const ROW_LEVEL_ORDER_KEYS = new Set(['slug', 'status', 'created_at', 'updated_at', 'published_at'])
 
 /**
  * List rows in a table with operator-object filters, sort, and pagination.

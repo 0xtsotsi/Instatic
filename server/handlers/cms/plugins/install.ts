@@ -28,11 +28,7 @@ import {
   setPluginLifecycleStatus,
 } from '../../../repositories/plugins'
 import { parsePluginManifest } from '@core/plugins/manifest'
-import type {
-  InstalledPlugin,
-  PluginManifest,
-  PluginPermission,
-} from '@core/plugin-sdk'
+import type { InstalledPlugin, PluginManifest, PluginPermission } from '@core/plugin-sdk'
 import { readPluginPackage } from '../../../plugins/package'
 import {
   loadPluginModulePack,
@@ -107,7 +103,10 @@ export async function handlePluginsCollection(
         version: plugin.version,
         occurredAt: new Date().toISOString(),
       })
-      return jsonResponse({ plugin: await presentPluginSecrets(db, plugin), ...(await pluginsPayload(db)) }, { status: 201 })
+      return jsonResponse(
+        { plugin: await presentPluginSecrets(db, plugin), ...(await pluginsPayload(db)) },
+        { status: 201 },
+      )
     } catch (err) {
       return badRequest(getErrorMessage(err, 'Invalid plugin manifest'))
     }
@@ -212,10 +211,19 @@ async function installFreshFromPackage(ctx: InstallContext): Promise<Response> {
     pluginPackage.files,
   )
   const installed = await installPlugin(db, manifest, grantedPermissions)
-  const installLifecycle = await runPluginLifecycleHook(db, installed, options, 'install', 'installed')
+  const installLifecycle = await runPluginLifecycleHook(
+    db,
+    installed,
+    options,
+    'install',
+    'installed',
+  )
   if (!installLifecycle.ok) {
     return jsonResponse(
-      { plugin: await presentPluginSecrets(db, installLifecycle.plugin), ...(await pluginsPayload(db)) },
+      {
+        plugin: await presentPluginSecrets(db, installLifecycle.plugin),
+        ...(await pluginsPayload(db)),
+      },
       { status: 201 },
     )
   }
@@ -323,8 +331,8 @@ async function installUpgradeFromPackage(ctx: UpgradeContext): Promise<Response>
       await runPluginMigrate(pluginId, fromVersion)
     }
     if (
-      upgradedManifest.entrypoints?.modules
-      && upgradedManifest.grantedPermissions?.includes('modules.register')
+      upgradedManifest.entrypoints?.modules &&
+      upgradedManifest.grantedPermissions?.includes('modules.register')
     ) {
       // Module pack failure is logged but doesn't abort activate — the
       // server-side hooks may still work without a registered module pack.
@@ -468,8 +476,8 @@ async function rollbackUpgrade(args: {
     const restoredManifest = pluginManifestWithGrants(restored)
     await primePluginSettingsCache(db, restored)
     if (
-      restoredManifest.entrypoints?.modules
-      && restoredManifest.grantedPermissions?.includes('modules.register')
+      restoredManifest.entrypoints?.modules &&
+      restoredManifest.grantedPermissions?.includes('modules.register')
     ) {
       const pack = await loadPluginModulePack(restoredManifest, options.uploadsDir)
       if (pack) activateSandboxedPluginModulePack(restoredManifest, pack)

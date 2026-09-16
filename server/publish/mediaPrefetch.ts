@@ -19,7 +19,10 @@
 
 import type { Page, SiteDocument } from '@core/page-tree'
 import type { IModuleRegistry } from '@core/module-engine'
-import { collectNodeBackgroundImagePaths, collectSiteStyleBackgroundImagePaths } from '@core/publisher'
+import {
+  collectNodeBackgroundImagePaths,
+  collectSiteStyleBackgroundImagePaths,
+} from '@core/publisher'
 import { walkRenderTree } from './renderTreeWalk'
 import type { DbClient } from '../db/client'
 import type { MediaAsset } from '../repositories/media'
@@ -79,9 +82,9 @@ export async function prefetchMediaAssets(
 
   // `collectMediaPaths` already returns a Set, so the paths are unique.
   const pathsToFetch = [...paths]
-  const placeholders = pathsToFetch.map((_, i) =>
-    db.dialect === 'postgres' ? `$${i + 1}` : '?'
-  ).join(', ')
+  const placeholders = pathsToFetch
+    .map((_, i) => (db.dialect === 'postgres' ? `$${i + 1}` : '?'))
+    .join(', ')
   // Bespoke batched-by-`public_path` SELECT (the render path resolves by stored
   // URL, not asset id, and legitimately skips the folder-id join). It maps
   // through the SAME canonical `mapMediaAssetRow` as the repository, so the
@@ -94,7 +97,7 @@ export async function prefetchMediaAssets(
      where public_path in (${placeholders}) and deleted_at is null`,
     pathsToFetch,
   )
-  const byPath = new Map(rows.map(r => [r.public_path, r]))
+  const byPath = new Map(rows.map((r) => [r.public_path, r]))
   for (const path of pathsToFetch) {
     const row = byPath.get(path)
     if (row) map.set(path, mapMediaAssetRow(row))

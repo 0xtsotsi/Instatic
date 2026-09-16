@@ -12,7 +12,7 @@ A template is an ordinary `pages` row carrying a `target` (everywhere, one/more 
 - **Chain resolver:** `resolveTemplateChain(site, ctx)` in `src/core/templates/templateMatching.ts` → `Page[]` ordered outer → inner. At most one template per breadth level (highest priority wins, document order breaks ties). Two breadth levels today: `everywhere` (outermost) → `postTypes` (innermost).
 - **404 resolver:** `resolveNotFoundTemplate(site)` → the highest-priority `notFound` template or null. A `notFound` template never enters a route chain — the public router renders it directly when a GET falls through every route (see "The Not found (404) template" below).
 - **Chain composer:** `composeTemplateChain(chain, terminal)` in `src/core/templates/templateCompose.ts` → one merged `Page` ready for `publishPage`.
-- **`base.outlet`** is the polymorphic outlet content flows into. A template *should* contain one. Having NO outlet is not blocked (you add it after converting the page to a template — requiring it first would be circular). The editor enforces a one-outlet-per-document invariant at the store's mutation chokepoints (`insertNode`, `duplicateNode(s)`, `pasteNode`), each surfacing a warning toast when blocked; the module pickers additionally render the outlet as a disabled tile with the reason (non-template page, VC mode, or outlet already placed) so authors rarely hit the block at all. The composer remains defensive for data pre-dating the guard: no outlet → template skipped; multiple → first wins.
+- **`base.outlet`** is the polymorphic outlet content flows into. A template _should_ contain one. Having NO outlet is not blocked (you add it after converting the page to a template — requiring it first would be circular). The editor enforces a one-outlet-per-document invariant at the store's mutation chokepoints (`insertNode`, `duplicateNode(s)`, `pasteNode`), each surfacing a warning toast when blocked; the module pickers additionally render the outlet as a disabled tile with the reason (non-template page, VC mode, or outlet already placed) so authors rarely hit the block at all. The composer remains defensive for data pre-dating the guard: no outlet → template skipped; multiple → first wins.
 - Template pages are never served at their own slug; the live router and the static bake both skip them.
 - Dynamic bindings and token interpolation work exactly as before — the merged tree is a plain page tree.
 - **`templateTargetLabel(page)`** returns a short human-readable string for a template's target (e.g. `"Everywhere"` or `"posts, news"`); import from `@core/templates`.
@@ -44,13 +44,13 @@ server/publish/publicRenderer.ts       — chain-aware render paths
 // src/core/page-tree/pageTemplate.ts
 type TemplateTarget =
   | { kind: 'everywhere' }
-  | { kind: 'postTypes'; tableSlugs: string[] }   // ≥1 slug
-  | { kind: 'notFound' }                          // the public 404 page
+  | { kind: 'postTypes'; tableSlugs: string[] } // ≥1 slug
+  | { kind: 'notFound' } // the public 404 page
 
 interface PageTemplateConfig {
   enabled: true
   target: TemplateTarget
-  priority: number   // higher = preferred when multiple match the same breadth level
+  priority: number // higher = preferred when multiple match the same breadth level
 }
 ```
 
@@ -62,11 +62,11 @@ A `Page` carries `template?: PageTemplateConfig`. When `template.enabled === tru
 
 In the `data_rows` table the `pages` system table stores template config in three columns:
 
-| Column            | Type    | Description                                           |
-|-------------------|---------|-------------------------------------------------------|
-| `templateEnabled` | boolean | `true` when this page is a template                   |
-| `templateTarget`  | JSON    | Serialized `TemplateTarget` — `{ kind, tableSlugs? }` |
-| `templatePriority`| number  | Higher wins when multiple templates match one level   |
+| Column             | Type    | Description                                           |
+| ------------------ | ------- | ----------------------------------------------------- |
+| `templateEnabled`  | boolean | `true` when this page is a template                   |
+| `templateTarget`   | JSON    | Serialized `TemplateTarget` — `{ kind, tableSlugs? }` |
+| `templatePriority` | number  | Higher wins when multiple templates match one level   |
 
 `templateTarget` is a single JSON column that replaced three earlier separate fields (`templateContext`, `templateTableSlug`, `templateConditions`). The row⇄page adapter parses it through `parsePageTemplate`.
 
@@ -77,14 +77,12 @@ In the `data_rows` table the `pages` system table stores template config in thre
 `resolveTemplateChain(site, ctx)` walks the two breadth levels (outer → inner) and picks the highest-priority matching template at each level:
 
 ```ts
-type RouteResolutionContext =
-  | { kind: 'page' }
-  | { kind: 'entry'; tableSlug: string }
+type RouteResolutionContext = { kind: 'page' } | { kind: 'entry'; tableSlug: string }
 ```
 
-| Route kind | Breadth 0 (everywhere) | Breadth 1 (postTypes) |
-|------------|------------------------|------------------------|
-| `page`     | matched if exists      | never matched          |
+| Route kind | Breadth 0 (everywhere) | Breadth 1 (postTypes)                       |
+| ---------- | ---------------------- | ------------------------------------------- |
+| `page`     | matched if exists      | never matched                               |
 | `entry`    | matched if exists      | matched if `tableSlugs.includes(tableSlug)` |
 
 Within a level, the template with the highest `priority` wins; document order breaks ties.
@@ -99,11 +97,12 @@ Within a level, the template with the highest `priority` wins; document order br
 
 ```ts
 type TerminalContent =
-  | { kind: 'page'; page: Page }   // inject a normal page's content into the chain
-  | { kind: 'entry' }              // leave the innermost base.outlet to render currentEntry.body
+  | { kind: 'page'; page: Page } // inject a normal page's content into the chain
+  | { kind: 'entry' } // leave the innermost base.outlet to render currentEntry.body
 ```
 
 Splice rule (applied from innermost outward):
+
 - Templates with **no `base.outlet`** are filtered out of the chain first — an unfinished template can't host content, so it simply doesn't apply (never an error). If that leaves the chain empty, a page renders as-is and an entry renders its innermost matched template as chrome only.
 - Each remaining template's **first `base.outlet` node** is the splice point; any extra outlets are left in place and render empty.
 - The inner content is spliced at the outlet position. Inner node ids are re-keyed with a prefix so merged trees never have collisions.
@@ -165,11 +164,11 @@ Render paths: `server/publish/publicRenderer.ts` — `renderPublishedSnapshot` (
 
 ### Chain for each route kind (v1)
 
-| Route | Chain (outer→inner) | Terminal |
-|-------|--------------------|----|
-| `/about` (page)          | `[everywhere-layout?]`                           | the `/about` page tree |
-| `/posts/hello` (entry)   | `[everywhere-layout?, posts-entry-template]`     | `{ kind: 'entry' }` — outlet renders the row body |
-| any unmatched GET (404)  | `[everywhere-layout?]`                           | the `notFound` template's tree |
+| Route                   | Chain (outer→inner)                          | Terminal                                          |
+| ----------------------- | -------------------------------------------- | ------------------------------------------------- |
+| `/about` (page)         | `[everywhere-layout?]`                       | the `/about` page tree                            |
+| `/posts/hello` (entry)  | `[everywhere-layout?, posts-entry-template]` | `{ kind: 'entry' }` — outlet renders the row body |
+| any unmatched GET (404) | `[everywhere-layout?]`                       | the `notFound` template's tree                    |
 
 If no `everywhere` layout exists, a plain page renders exactly as a page with no templates. If no postTypes template exists for a route, the entry URL 404s.
 
@@ -197,10 +196,10 @@ Context frames are unchanged from before templates were added — the merged tre
 
 ```ts
 interface TemplateRenderDataContext {
-  page?:        PageFrame       // page id, slug, title, templateTableSlug
-  site?:        SiteFrame       // site name, settings, breakpoints
-  route?:       RouteFrame      // URL path, slug, segments, and query params
-  entryStack:   LoopItem[]      // pushed by loops + entry route render
+  page?: PageFrame // page id, slug, title, templateTableSlug
+  site?: SiteFrame // site name, settings, breakpoints
+  route?: RouteFrame // URL path, slug, segments, and query params
+  entryStack: LoopItem[] // pushed by loops + entry route render
 }
 ```
 
@@ -210,13 +209,13 @@ See the "Dynamic bindings" section below for the full source table.
 
 ### Available binding sources
 
-| Source         | Frame                     | Use case                                                |
-|----------------|---------------------------|---------------------------------------------------------|
-| `currentEntry` | Top of `entryStack`       | Inside loops, inside entry templates                    |
-| `parentEntry`  | Second-from-top           | Nested loops                                            |
-| `site`         | `ctx.site`                | Anywhere — site name, primary color                     |
-| `route`        | `ctx.route`               | URL-driven (`route.segments`, `route.slug`, `route.query.*`) |
-| `page`         | `ctx.page`                | Current page metadata                                   |
+| Source         | Frame               | Use case                                                     |
+| -------------- | ------------------- | ------------------------------------------------------------ |
+| `currentEntry` | Top of `entryStack` | Inside loops, inside entry templates                         |
+| `parentEntry`  | Second-from-top     | Nested loops                                                 |
+| `site`         | `ctx.site`          | Anywhere — site name, primary color                          |
+| `route`        | `ctx.route`         | URL-driven (`route.segments`, `route.slug`, `route.query.*`) |
+| `page`         | `ctx.page`          | Current page metadata                                        |
 
 ---
 
@@ -264,7 +263,7 @@ The design canvas renders the active document the way it publishes: **inside its
 
 - `resolveEditorWrapperTemplates(site, activeDoc)` (`canvasComposition.ts`) returns the templates that WRAP the active document, outermost-first — the editor-side mirror of `resolveTemplateChain`. Editing a page, a `postTypes` template, or a `notFound` template ⇒ wrapped by the `everywhere` layout; editing the `everywhere` layout ⇒ nothing wraps it.
 - Wrappers render **read-only** via `ReadOnlyNodeTree` with the editable document spliced into the innermost wrapper's `base.outlet` (the `outletSlot` prop replaces the outlet node, mirroring `spliceIntoOutlet`). Only the active document's nodes keep `data-node-id` + handlers, so selection / hover / DnD stay scoped to it; the chrome is pixel-identical but non-interactive.
-- Body ownership mirrors the publisher: the iframe `<body>` carries the OUTERMOST wrapper body's classes, and the active document renders as its body *children* (its own `base.body` is dropped, just as the composer drops the inner body).
+- Body ownership mirrors the publisher: the iframe `<body>` carries the OUTERMOST wrapper body's classes, and the active document renders as its body _children_ (its own `base.body` is dropped, just as the composer drops the inner body).
 - `ReadOnlyNodeTree` (`src/modules/base/utils/ReadOnlyNodeTree.tsx`) is the shared non-interactive tree renderer — also used by `VCInlineTree` for inlined Visual Component bodies. It mirrors the publisher's per-node output: `classIds` resolve to class names, `inlineStyles` are applied as the element's `style` (via `bagToReactStyle` from `@core/publisher`, the same sanitisation gate as the published `style="…"` attribute), template bindings/tokens resolve against the canvas render context when one is provided, and `base.loop` nodes use the same live preview items as the editable canvas. Composed content (template chrome, outlet previews, VC bodies) therefore renders with the same styles and dynamic data as the editable canvas and the published page.
 - **Navigation guard:** the canvas iframe is an editing surface, never a browsing surface. `IframeFrameSurface` installs a capture-phase `click`/`auxclick`/`submit` listener on the iframe document that `preventDefault`s link navigation and form submission (without `stopPropagation`, so node selection still works) — so clicking a logo/link in the read-only template chrome, an inlined component, or any authored content never reloads the frame. Applies to both the design canvas and the live/preview frame.
 - **Read-only affordance:** `ReadOnlyNodeTree` stamps `data-instatic-readonly-{label,kind,id}` on every read-only element (the source is named by `CanvasComposedTree`, `OutletEditor`, and `VCInlineTree`). `BreakpointFrame` shows a cursor-following `CursorTooltip` ("Part of X — double-click to edit") on hover, and `IframeFrameSurface` opens the source on double-click (`onReadonlyOpen` → `openPageInCanvas` / `setActiveDocument`). The read-only markers ride the optional fields on `NodeWrapperProps`.
@@ -280,7 +279,7 @@ Neither mode has a Confirm step — a single click is the action.
 
 **Auto-scope:** when the active page is a `postTypes` template, the picker auto-scopes to the first targeted table. Field rows appear directly under a `"<TableName> fields"` group header with a chip labelled `"Current row — <TableName>"`. No source-selection step is shown.
 
-**Unscoped state:** when the node is outside a loop or template context, table fields are not offered. A footer hint reads: *"Wrap in a Loop or open a postType template to bind to row fields."*
+**Unscoped state:** when the node is outside a loop or template context, table fields are not offered. A footer hint reads: _"Wrap in a Loop or open a postType template to bind to row fields."_
 
 Loop nodes supply `availableFields` / `sourceLabel` props to show loop-specific synthetic fields in a `"<SourceLabel> fields"` group in the same single-pane layout.
 
@@ -296,11 +295,11 @@ The **Site Explorer** panel (`src/admin/pages/site/panels/SiteExplorerPanel/`) s
 
 Right-click a page row → **Use as template** → the **Template settings** dialog opens:
 
-| Field | Description |
-|---|---|
+| Field      | Description                                                                                                                                              |
+| ---------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Applies to | `Everywhere` (outer layout for all pages and entries), `Post types` (entry template for ≥1 post-type tables), or `Not found (404)` (the public 404 page) |
-| Post types | Checkbox list of all post-type tables — visible when "Post types" is selected |
-| Priority | Higher number wins when multiple templates match the same breadth level |
+| Post types | Checkbox list of all post-type tables — visible when "Post types" is selected                                                                            |
+| Priority   | Higher number wins when multiple templates match the same breadth level                                                                                  |
 
 The dialog has no outlet requirement — save is never gated on outlet count. Add `base.outlet` after the page is already a template (the outlet block is only meaningful on templates; requiring it before save would be circular). See [base.outlet](#baseoutlet) for how the composer handles templates with missing or multiple outlets.
 
@@ -378,15 +377,15 @@ node.props.text = 'Posted by {currentEntry.author.displayName} on {currentEntry.
 
 ## Forbidden patterns
 
-| Pattern | Use instead |
-|---------|------------|
-| Reading `currentEntry` from a module's `render` without bindings | Set `dynamicBindings` on the node — keeps the schema honest |
-| Hardcoding a template's slug in server handlers | Use `resolveTemplateChain(site, ctx)` |
-| Creating a template page via raw `INSERT INTO pages` | Use the Site workspace template dialog |
-| Walking a deep binding path with `JSON.parse(JSON.stringify(...))` | Use `walkFieldPath(frame, 'a.b.c')` |
-| Expecting to visit a template page at its own slug | Template pages are never directly routable — the live router and bake loop both skip them |
-| Inlining `page.template?.target.kind === 'everywhere' ? … : …` in UI code | Use `templateTargetLabel(page)` from `@core/templates` |
-| Adding a save-time guard that blocks a template without an outlet | Don't — it's circular (you add the outlet after the page becomes a template). The composer degrades gracefully for zero-outlet templates. Duplicate-outlet insertion IS blocked by the editor insert guard and store backstop. |
+| Pattern                                                                   | Use instead                                                                                                                                                                                                                    |
+| ------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Reading `currentEntry` from a module's `render` without bindings          | Set `dynamicBindings` on the node — keeps the schema honest                                                                                                                                                                    |
+| Hardcoding a template's slug in server handlers                           | Use `resolveTemplateChain(site, ctx)`                                                                                                                                                                                          |
+| Creating a template page via raw `INSERT INTO pages`                      | Use the Site workspace template dialog                                                                                                                                                                                         |
+| Walking a deep binding path with `JSON.parse(JSON.stringify(...))`        | Use `walkFieldPath(frame, 'a.b.c')`                                                                                                                                                                                            |
+| Expecting to visit a template page at its own slug                        | Template pages are never directly routable — the live router and bake loop both skip them                                                                                                                                      |
+| Inlining `page.template?.target.kind === 'everywhere' ? … : …` in UI code | Use `templateTargetLabel(page)` from `@core/templates`                                                                                                                                                                         |
+| Adding a save-time guard that blocks a template without an outlet         | Don't — it's circular (you add the outlet after the page becomes a template). The composer degrades gracefully for zero-outlet templates. Duplicate-outlet insertion IS blocked by the editor insert guard and store backstop. |
 
 ---
 

@@ -60,7 +60,10 @@ describe('editor bridge', () => {
     const requestId = toolRequest.requestId as string
 
     // Simulate the editor POSTing its result back.
-    const matched = resolveBridgeToolResult(bridgeId, requestId, { ok: true, data: { inserted: 1 } })
+    const matched = resolveBridgeToolResult(bridgeId, requestId, {
+      ok: true,
+      data: { inserted: 1 },
+    })
     expect(matched).toBe(true)
 
     const result = await callPromise
@@ -76,7 +79,11 @@ describe('editor bridge', () => {
     const siteCtrl = new AbortController()
     const contentCtrl = new AbortController()
     const siteReader = createEditorBridgeStream(userId, 'site', siteCtrl.signal).getReader()
-    const contentReader = createEditorBridgeStream(userId, 'content', contentCtrl.signal).getReader()
+    const contentReader = createEditorBridgeStream(
+      userId,
+      'content',
+      contentCtrl.signal,
+    ).getReader()
 
     await Promise.all([
       readUntil(siteReader, (e) => e.type === 'bridgeReady'),
