@@ -1,20 +1,11 @@
 import { expect, test, type Locator, type Page } from '@playwright/test'
 import { createServer, type Server } from 'node:http'
-import {
-  ANONYMOUS_STATE,
-  completeStepUp,
-  login,
-  loginAs,
-} from './helpers'
+import { ANONYMOUS_STATE, completeStepUp, login, loginAs } from './helpers'
 import { openSiteEditor } from './helpers/editor'
 
 const OFFLINE_OLLAMA_URL = 'http://127.0.0.1:1'
 
-async function addOllamaCredential(
-  page: Page,
-  label: string,
-  baseUrl = OFFLINE_OLLAMA_URL,
-) {
+async function addOllamaCredential(page: Page, label: string, baseUrl = OFFLINE_OLLAMA_URL) {
   await page.getByRole('button', { name: 'Add credential' }).click()
 
   const dialog = page.getByRole('dialog', { name: 'Add AI credential' })
@@ -74,38 +65,46 @@ async function startFakeOllamaServer(
         })
 
         if (toolCall && requests.chats === 1) {
-          res.write(`data: ${JSON.stringify({
-            choices: [
-              {
-                delta: {
-                  tool_calls: [
-                    {
-                      index: 0,
-                      id: toolCall.id,
-                      type: 'function',
-                      function: {
-                        name: toolCall.name,
-                        arguments: JSON.stringify(toolCall.input),
+          res.write(
+            `data: ${JSON.stringify({
+              choices: [
+                {
+                  delta: {
+                    tool_calls: [
+                      {
+                        index: 0,
+                        id: toolCall.id,
+                        type: 'function',
+                        function: {
+                          name: toolCall.name,
+                          arguments: JSON.stringify(toolCall.input),
+                        },
                       },
-                    },
-                  ],
+                    ],
+                  },
+                  finish_reason: null,
                 },
-                finish_reason: null,
-              },
-            ],
-          })}\n\n`)
-          res.write(`data: ${JSON.stringify({
-            choices: [{ delta: {}, finish_reason: 'tool_calls' }],
-            usage: { prompt_tokens: 20, completion_tokens: 5 },
-          })}\n\n`)
+              ],
+            })}\n\n`,
+          )
+          res.write(
+            `data: ${JSON.stringify({
+              choices: [{ delta: {}, finish_reason: 'tool_calls' }],
+              usage: { prompt_tokens: 20, completion_tokens: 5 },
+            })}\n\n`,
+          )
           res.end('data: [DONE]\n\n')
           return
         }
 
-        res.write(`data: ${JSON.stringify({
-          choices: [{ delta: { content: responseText }, finish_reason: null }],
-        })}\n\n`)
-        res.write('data: {"choices":[{"delta":{},"finish_reason":"stop"}],"usage":{"prompt_tokens":123,"completion_tokens":45}}\n\n')
+        res.write(
+          `data: ${JSON.stringify({
+            choices: [{ delta: { content: responseText }, finish_reason: null }],
+          })}\n\n`,
+        )
+        res.write(
+          'data: {"choices":[{"delta":{},"finish_reason":"stop"}],"usage":{"prompt_tokens":123,"completion_tokens":45}}\n\n',
+        )
         res.end('data: [DONE]\n\n')
       })
       return
@@ -198,7 +197,12 @@ async function createUser(
 }
 
 async function openReadableSiteEditor(page: Page): Promise<void> {
-  if (!(await page.getByTestId('canvas-root').isVisible({ timeout: 1_000 }).catch(() => false))) {
+  if (
+    !(await page
+      .getByTestId('canvas-root')
+      .isVisible({ timeout: 1_000 })
+      .catch(() => false))
+  ) {
     await page.goto('/admin/site')
   }
   await expect(page.getByTestId('canvas-root')).toBeVisible({ timeout: 20_000 })
@@ -248,9 +252,7 @@ function escapeRegExp(value: string): string {
  * Ollama base-URL credential, see the safe credential projection, and delete it.
  */
 test.describe('AI settings', () => {
-  test('creates and deletes an Ollama provider credential (AI-001)', async ({
-    page,
-  }) => {
+  test('creates and deletes an Ollama provider credential (AI-001)', async ({ page }) => {
     const suffix = Date.now().toString(36)
     const label = `E2E Ollama ${suffix}`
 
@@ -278,9 +280,7 @@ test.describe('AI settings', () => {
     })
   })
 
-  test('sets and reloads a data-scope default model (AI-002)', async ({
-    page,
-  }) => {
+  test('sets and reloads a data-scope default model (AI-002)', async ({ page }) => {
     const suffix = Date.now().toString(36)
     const label = `E2E Defaults Ollama ${suffix}`
 
@@ -341,9 +341,7 @@ test.describe('AI settings', () => {
     })
   })
 
-  test('streams a site chat and renders audit usage rollups (AI-004, AI-006)', async ({
-    page,
-  }) => {
+  test('streams a site chat and renders audit usage rollups (AI-004, AI-006)', async ({ page }) => {
     const fakeOllama = await startFakeOllamaServer()
     const suffix = Date.now().toString(36)
     const label = `E2E Live Ollama ${suffix}`
@@ -403,7 +401,8 @@ test.describe('AI settings', () => {
             const res = await fetch(`/admin/api/ai/conversations/${conversation.id}`, {
               method: 'DELETE',
             })
-            if (!res.ok) throw new Error(`Failed to delete conversation ${conversation.id}: ${res.status}`)
+            if (!res.ok)
+              throw new Error(`Failed to delete conversation ${conversation.id}: ${res.status}`)
           }
           for (const scope of ['site', 'content', 'data', 'plugin']) {
             const res = await fetch(`/admin/api/ai/defaults/${scope}`, { method: 'DELETE' })
@@ -421,9 +420,7 @@ test.describe('AI settings', () => {
     }
   })
 
-  test('returns a browser tool result to the model loop (AI-005)', async ({
-    page,
-  }) => {
+  test('returns a browser tool result to the model loop (AI-005)', async ({ page }) => {
     const fakeOllama = await startFakeOllamaServer('E2E bridge reply.', {
       id: 'call_site_read_document',
       name: 'site_read_document',
@@ -487,7 +484,8 @@ test.describe('AI settings', () => {
             const res = await fetch(`/admin/api/ai/conversations/${conversation.id}`, {
               method: 'DELETE',
             })
-            if (!res.ok) throw new Error(`Failed to delete conversation ${conversation.id}: ${res.status}`)
+            if (!res.ok)
+              throw new Error(`Failed to delete conversation ${conversation.id}: ${res.status}`)
           }
           for (const scope of ['site', 'content', 'data', 'plugin']) {
             const res = await fetch(`/admin/api/ai/defaults/${scope}`, { method: 'DELETE' })
@@ -547,10 +545,7 @@ test.describe('AI settings', () => {
 
         await assistantPanel.getByRole('button', { name: 'Conversation history' }).click()
         const menu = page.getByRole('menu', { name: 'Conversation history' })
-        const savedChat = menu
-          .getByRole('menuitemradio')
-          .filter({ hasText: prompt })
-          .first()
+        const savedChat = menu.getByRole('menuitemradio').filter({ hasText: prompt }).first()
         await expect(savedChat).toBeVisible()
         await savedChat.click()
 
@@ -609,11 +604,7 @@ test.describe.serial('AI write-tool capability filtering', () => {
     try {
       await test.step('owner creates a temporary provider-setup chat persona', async () => {
         await login(page)
-        await createRole(page, roleName, [
-          'View site',
-          'Use AI chat',
-          'Manage AI providers',
-        ])
+        await createRole(page, roleName, ['View site', 'Use AI chat', 'Manage AI providers'])
         await createUser(page, {
           email,
           displayName: roleName,
@@ -636,10 +627,7 @@ test.describe.serial('AI write-tool capability filtering', () => {
         })
 
         await test.step('owner removes provider setup so the persona keeps ai.chat only', async () => {
-          await setRoleCapabilities(page, roleName, [
-            'View site',
-            'Use AI chat',
-          ])
+          await setRoleCapabilities(page, roleName, ['View site', 'Use AI chat'])
         })
 
         await test.step('persona sends a site assistant message after the downgrade', async () => {

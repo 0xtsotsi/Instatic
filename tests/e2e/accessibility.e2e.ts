@@ -46,9 +46,7 @@ test.describe('keyboard access', () => {
 })
 
 test.describe('keyboard shell navigation', () => {
-  test('navigates the admin shell with keyboard controls (A11Y-002)', async ({
-    page,
-  }) => {
+  test('navigates the admin shell with keyboard controls (A11Y-002)', async ({ page }) => {
     await page.goto('/admin/site')
     await expectEditorReady(page)
 
@@ -136,11 +134,7 @@ test.describe('public responsive', () => {
   })
 })
 
-async function activateToolbarLink(
-  page: Page,
-  name: string,
-  url: RegExp,
-): Promise<void> {
+async function activateToolbarLink(page: Page, name: string, url: RegExp): Promise<void> {
   const link = page.getByTestId('toolbar').getByRole('link', { name })
   await expect(link).toBeVisible()
   await link.focus()

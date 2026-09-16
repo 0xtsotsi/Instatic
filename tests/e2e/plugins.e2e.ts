@@ -403,9 +403,11 @@ test.describe.serial('packaged plugin surfaces', () => {
 
     const titleField = page.getByLabel('Title')
     await page.getByRole('button', { name: 'Create Approval' }).click()
-    await expect.poll(async () =>
-      titleField.evaluate((input) => (input as HTMLInputElement).validity.valueMissing)
-    ).toBe(true)
+    await expect
+      .poll(async () =>
+        titleField.evaluate((input) => (input as HTMLInputElement).validity.valueMissing),
+      )
+      .toBe(true)
 
     await titleField.fill(recordTitle)
     await page.getByLabel('Score').fill('7')
@@ -419,7 +421,9 @@ test.describe.serial('packaged plugin surfaces', () => {
     await expect(recordsRegion.getByText('7', { exact: true })).toBeVisible()
     await expect(recordsRegion.getByText('2026-07-01', { exact: true })).toBeVisible()
     await expect(recordsRegion.getByText('Yes', { exact: true })).toBeVisible()
-    await expect(recordsRegion.getByText('Created from the PLUGIN-004 browser smoke.')).toBeVisible()
+    await expect(
+      recordsRegion.getByText('Created from the PLUGIN-004 browser smoke.'),
+    ).toBeVisible()
 
     await recordsRegion.getByRole('button', { name: `Delete ${recordTitle}` }).click()
     await expect(recordsRegion.getByText(recordTitle)).toHaveCount(0)

@@ -32,10 +32,7 @@ async function expectMobileAccountMenuContained(page: Page): Promise<void> {
 test.describe('auth session lifecycle', () => {
   test.use({ storageState: ANONYMOUS_STATE })
 
-  test('revokes the signed-out session across tabs (AUTH-003)', async ({
-    page,
-    browser,
-  }) => {
+  test('revokes the signed-out session across tabs (AUTH-003)', async ({ page, browser }) => {
     await login(page)
     await expectLoggedIn(page)
 
@@ -65,9 +62,7 @@ test.describe('auth session lifecycle', () => {
     }
   })
 
-  test('keeps account-menu sign out reachable at mobile width (AUTH-003)', async ({
-    page,
-  }) => {
+  test('keeps account-menu sign out reachable at mobile width (AUTH-003)', async ({ page }) => {
     await page.setViewportSize({ width: 390, height: 844 })
     await login(page)
     await expectLoggedIn(page)

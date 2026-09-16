@@ -16,8 +16,7 @@ export const OWNER = {
 } as const
 
 /** Public (visitor-facing) origin. Different port → always a fresh context. */
-export const PUBLIC_BASE_URL =
-  process.env.E2E_PUBLIC_BASE_URL ?? 'http://127.0.0.1:3002'
+export const PUBLIC_BASE_URL = process.env.E2E_PUBLIC_BASE_URL ?? 'http://127.0.0.1:3002'
 
 /**
  * Saved owner authentication state. The `setup` project writes this after

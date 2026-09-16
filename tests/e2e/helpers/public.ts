@@ -24,9 +24,7 @@ export async function visitPublicPage(
     assert?: (page: import('@playwright/test').Page) => Promise<void>
   },
 ): Promise<void> {
-  const context = await browser.newContext(
-    options.viewport ? { viewport: options.viewport } : {},
-  )
+  const context = await browser.newContext(options.viewport ? { viewport: options.viewport } : {})
   const visitor = await context.newPage()
   try {
     await visitor.goto(`${PUBLIC_BASE_URL}${options.path ?? '/'}`)

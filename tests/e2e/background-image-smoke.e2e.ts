@@ -54,19 +54,23 @@ test.describe('background image smoke', () => {
 
     const picker = page.getByTestId('media-picker-modal')
     await expect(picker).toBeVisible()
-    await picker
-      .locator('input[type="file"]')
-      .setInputFiles({
-        name: filename,
-        mimeType: 'image/png',
-        buffer: await largePng(),
-      })
+    await picker.locator('input[type="file"]').setInputFiles({
+      name: filename,
+      mimeType: 'image/png',
+      buffer: await largePng(),
+    })
     await picker.getByRole('button', { name: `Open ${filename}` }).click()
     await picker.getByRole('button', { name: 'Use selected' }).click()
     await expect(picker).toBeHidden()
 
     await setClassTextProperty(page, styleSearch, 'backgroundSize', 'background size', 'cover')
-    await setClassTextProperty(page, styleSearch, 'backgroundPosition', 'background position', 'center')
+    await setClassTextProperty(
+      page,
+      styleSearch,
+      'backgroundPosition',
+      'background position',
+      'center',
+    )
 
     const editorCss = await expectOptimizedCanvasClassCss(page, className)
     expect(editorCss).not.toMatch(/background-image:\s*url\("[^"]+\.png"\)/)
@@ -91,21 +95,23 @@ test.describe('background image smoke', () => {
         variantCount: expect.any(Number),
       }),
     )
-    expect(mediaSummary.find((asset) => asset.filename === filename)?.variantCount).toBeGreaterThan(0)
+    expect(mediaSummary.find((asset) => asset.filename === filename)?.variantCount).toBeGreaterThan(
+      0,
+    )
     const reloadedCss = await observedOptimizedCanvasClassCss(page, className)
-    expect.soft(
-      reloadedCss,
-      'persisted canvas class CSS should use image-set candidates after reload',
-    ).toMatch(/background-image:\s*image-set\(.*\.webp/i)
-    expect.soft(
-      reloadedCss,
-      'persisted canvas class CSS should not keep the original PNG declaration',
-    ).not.toMatch(/background-image:\s*url\(["'][^"']+\.png["']\)/)
+    expect
+      .soft(reloadedCss, 'persisted canvas class CSS should use image-set candidates after reload')
+      .toMatch(/background-image:\s*image-set\(.*\.webp/i)
+    expect
+      .soft(reloadedCss, 'persisted canvas class CSS should not keep the original PNG declaration')
+      .not.toMatch(/background-image:\s*url\(["'][^"']+\.png["']\)/)
     const reloadedBackground = await observedOptimizedBackground(reloadedButton)
-    expect.soft(
-      reloadedBackground,
-      'persisted canvas computed background should use optimized image-set candidates after reload',
-    ).toMatch(/image-set\(.*\.webp/i)
+    expect
+      .soft(
+        reloadedBackground,
+        'persisted canvas computed background should use optimized image-set candidates after reload',
+      )
+      .toMatch(/image-set\(.*\.webp/i)
     await page.screenshot({ path: `${proofDir}/03-editor-reload.png`, fullPage: true })
 
     await publishDraft(page)
@@ -160,7 +166,9 @@ async function largePng(): Promise<Buffer> {
             channels: 4,
             background: { r: 236, g: 196, b: 74, alpha: 0.92 },
           },
-        }).png().toBuffer(),
+        })
+          .png()
+          .toBuffer(),
         left: 120,
         top: 140,
       },
@@ -186,20 +194,16 @@ async function setClassTextProperty(
 
 async function expectOptimizedBackground(locator: Locator): Promise<string> {
   await expect
-    .poll(
-      async () => locator.evaluate((el) => getComputedStyle(el).backgroundImage),
-      { timeout: 20_000 },
-    )
+    .poll(async () => locator.evaluate((el) => getComputedStyle(el).backgroundImage), {
+      timeout: 20_000,
+    })
     .toMatch(/image-set\(.*\.webp/i)
   return locator.evaluate((el) => getComputedStyle(el).backgroundImage)
 }
 
 async function expectOptimizedCanvasClassCss(page: Page, className: string): Promise<string> {
   await expect
-    .poll(
-      async () => classCssSnippet(await canvasClassCss(page), className),
-      { timeout: 20_000 },
-    )
+    .poll(async () => classCssSnippet(await canvasClassCss(page), className), { timeout: 20_000 })
     .toMatch(/background-image:\s*image-set\(.*\.webp/i)
   return classCssSnippet(await canvasClassCss(page), className)
 }
@@ -221,7 +225,7 @@ async function observedOptimizedBackground(locator: Locator): Promise<string> {
 }
 
 async function canvasClassCss(page: Page): Promise<string> {
-  return await canvasFrame(page).locator('style#mc-classes').textContent() ?? ''
+  return (await canvasFrame(page).locator('style#mc-classes').textContent()) ?? ''
 }
 
 function classCssSnippet(css: string, className: string): string {
@@ -230,11 +234,13 @@ function classCssSnippet(css: string, className: string): string {
   return css.slice(index, index + 2_000)
 }
 
-async function mediaVariantSummary(page: Page): Promise<Array<{
-  filename: string
-  publicPath: string
-  variantCount: number
-}>> {
+async function mediaVariantSummary(page: Page): Promise<
+  Array<{
+    filename: string
+    publicPath: string
+    variantCount: number
+  }>
+> {
   return page.evaluate(async () => {
     const response = await fetch('/admin/api/cms/media', { credentials: 'include' })
     if (!response.ok) throw new Error(`Media list failed: ${response.status}`)
@@ -263,17 +269,21 @@ async function mediaVariantSummary(page: Page): Promise<Array<{
 }
 
 async function publicStylesheetText(page: Page): Promise<string> {
-  const hrefs = await page.locator('link[rel="stylesheet"]').evaluateAll((nodes) =>
-    nodes
-      .map((node) => node instanceof HTMLLinkElement ? node.href : '')
-      .filter((href) => href.includes('/_instatic/css/')),
-  )
+  const hrefs = await page
+    .locator('link[rel="stylesheet"]')
+    .evaluateAll((nodes) =>
+      nodes
+        .map((node) => (node instanceof HTMLLinkElement ? node.href : ''))
+        .filter((href) => href.includes('/_instatic/css/')),
+    )
   const bodies = await page.evaluate(async (urls) => {
-    return Promise.all(urls.map(async (url) => {
-      const response = await fetch(url)
-      if (!response.ok) throw new Error(`CSS fetch failed: ${response.status} ${url}`)
-      return response.text()
-    }))
+    return Promise.all(
+      urls.map(async (url) => {
+        const response = await fetch(url)
+        if (!response.ok) throw new Error(`CSS fetch failed: ${response.status} ${url}`)
+        return response.text()
+      }),
+    )
   }, hrefs)
   return bodies.join('\n')
 }

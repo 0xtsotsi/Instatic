@@ -133,9 +133,7 @@ test.describe('users and roles', () => {
     }
   })
 
-  test('user creation requires successful step-up before mutating (CAP-003)', async ({
-    page,
-  }) => {
+  test('user creation requires successful step-up before mutating (CAP-003)', async ({ page }) => {
     await login(page)
     const email = `stepup-${Date.now().toString(36)}@example.com`
 
@@ -169,9 +167,7 @@ test.describe('users and roles', () => {
     await expect(page.getByText(email)).toBeVisible()
   })
 
-  test('user creation step-up stays usable at mobile width (CAP-003)', async ({
-    page,
-  }) => {
+  test('user creation step-up stays usable at mobile width (CAP-003)', async ({ page }) => {
     await page.setViewportSize({ width: 390, height: 844 })
     await login(page)
     const email = `stepup-mobile-${Date.now().toString(36)}@example.com`
@@ -240,10 +236,7 @@ test.describe('users and roles', () => {
     await expect(page.getByText(staleEmail)).toBeVisible()
   })
 
-  test('a limited user only reaches granted workspaces (CAP-001)', async ({
-    page,
-    browser,
-  }) => {
+  test('a limited user only reaches granted workspaces (CAP-001)', async ({ page, browser }) => {
     await login(page)
     const { email, password } = await createLimitedSiteMediaUser(page, 'limited')
 
@@ -264,9 +257,7 @@ test.describe('users and roles', () => {
         // redirects away from /admin/users.
         await limited.goto('/admin/users')
         await expect(limited).not.toHaveURL(/\/admin\/users/)
-        await expect(
-          limited.getByRole('heading', { name: 'All Users' }),
-        ).toHaveCount(0)
+        await expect(limited.getByRole('heading', { name: 'All Users' })).toHaveCount(0)
       } finally {
         await context.close()
       }
@@ -301,9 +292,7 @@ test.describe('users and roles', () => {
     }
   })
 
-  test('owner creates, edits, and deletes a custom role (USERS-002)', async ({
-    page,
-  }) => {
+  test('owner creates, edits, and deletes a custom role (USERS-002)', async ({ page }) => {
     await login(page)
     const suffix = Date.now().toString(36)
     const roleName = `Role lifecycle ${suffix}`
@@ -353,9 +342,7 @@ test.describe('users and roles', () => {
     })
   })
 
-  test('role management stays usable at mobile width (USERS-002)', async ({
-    page,
-  }) => {
+  test('role management stays usable at mobile width (USERS-002)', async ({ page }) => {
     await page.setViewportSize({ width: 390, height: 844 })
     await login(page)
     const roleName = `Role mobile ${Date.now().toString(36)}`
@@ -412,9 +399,7 @@ test.describe('users and roles', () => {
     await expect(auditTable.getByText('user.create')).toHaveCount(0)
   })
 
-  test('audit tab keeps event history usable at mobile width (USERS-003)', async ({
-    page,
-  }) => {
+  test('audit tab keeps event history usable at mobile width (USERS-003)', async ({ page }) => {
     await page.setViewportSize({ width: 390, height: 844 })
     await login(page)
     const suffix = Date.now().toString(36)
@@ -547,11 +532,7 @@ async function openUserAction(page: Page, displayName: string, action: string): 
     .click()
 }
 
-async function expectLoginRejected(
-  page: Page,
-  email: string,
-  password: string,
-): Promise<void> {
+async function expectLoginRejected(page: Page, email: string, password: string): Promise<void> {
   await page.goto('/admin')
   await expect(page.getByRole('heading', { name: 'Admin Login' })).toBeVisible()
   await page.getByLabel('Email').fill(email)
@@ -611,19 +592,18 @@ async function expectRoleDialogMobileLayout(dialog: Locator): Promise<void> {
     const firstList = capabilitySection?.querySelector('ul')
     const firstItems = Array.from(firstList?.children ?? []).slice(0, 2)
     const itemRects = firstItems.map((item) => item.getBoundingClientRect())
-    const capabilityRowRects = Array.from(
-      capabilitySection?.querySelectorAll('label') ?? [],
-    ).map((label) => label.getBoundingClientRect())
+    const capabilityRowRects = Array.from(capabilitySection?.querySelectorAll('label') ?? []).map(
+      (label) => label.getBoundingClientRect(),
+    )
 
     return {
       pageOverflow: documentElement.scrollWidth - viewportWidth,
       dialogContained: dialogRect.left >= -1 && dialogRect.right <= viewportWidth + 1,
       capabilitySectionVisible: Boolean(capabilitySection),
-      firstListStacksRows: itemRects.length < 2
-        || (
-          Math.abs(itemRects[0]!.left - itemRects[1]!.left) <= 1
-          && itemRects[1]!.top > itemRects[0]!.top
-        ),
+      firstListStacksRows:
+        itemRects.length < 2 ||
+        (Math.abs(itemRects[0]!.left - itemRects[1]!.left) <= 1 &&
+          itemRects[1]!.top > itemRects[0]!.top),
       capabilityRowsContained: capabilityRowRects.every(
         (rect) => rect.left >= dialogRect.left - 1 && rect.right <= dialogRect.right + 1,
       ),
@@ -655,10 +635,8 @@ async function expectStepUpDialogMobileLayout(dialog: Locator): Promise<void> {
 
     return {
       pageOverflow: documentElement.scrollWidth - viewportWidth,
-      dialogContainedHorizontally:
-        dialogRect.left >= -1 && dialogRect.right <= viewportWidth + 1,
-      dialogContainedVertically:
-        dialogRect.top >= -1 && dialogRect.bottom <= viewportHeight + 1,
+      dialogContainedHorizontally: dialogRect.left >= -1 && dialogRect.right <= viewportWidth + 1,
+      dialogContainedVertically: dialogRect.top >= -1 && dialogRect.bottom <= viewportHeight + 1,
       requiredControlsPresent: controls.length === 3,
       controlsContained: controlRects.every(
         (rect) => rect.left >= dialogRect.left - 1 && rect.right <= dialogRect.right + 1,

@@ -58,12 +58,12 @@ function totpCode(secret: string, now = Date.now()): string {
   counterBytes.writeBigUInt64BE(BigInt(counter))
   const digest = createHmac('sha1', decodeBase32(secret)).update(counterBytes).digest()
   const offset = digest[digest.length - 1]! & 0x0f
-  const value = (
-    ((digest[offset]! & 0x7f) << 24)
-    | ((digest[offset + 1]! & 0xff) << 16)
-    | ((digest[offset + 2]! & 0xff) << 8)
-    | (digest[offset + 3]! & 0xff)
-  ) % 1_000_000
+  const value =
+    (((digest[offset]! & 0x7f) << 24) |
+      ((digest[offset + 1]! & 0xff) << 16) |
+      ((digest[offset + 2]! & 0xff) << 8) |
+      (digest[offset + 3]! & 0xff)) %
+    1_000_000
   return value.toString().padStart(6, '0')
 }
 
@@ -78,9 +78,10 @@ async function completeStepUpWithMfa(page: Page, secret: string): Promise<void> 
 
 async function completeStepUpWithMfaIfOpened(page: Page, secret: string): Promise<void> {
   const dialog = page.getByTestId('step-up-dialog')
-  const opened = await dialog
-    .waitFor({ state: 'visible', timeout: 1_000 })
-    .then(() => true, () => false)
+  const opened = await dialog.waitFor({ state: 'visible', timeout: 1_000 }).then(
+    () => true,
+    () => false,
+  )
   if (!opened) return
   await page.getByTestId('step-up-password').fill(ACCOUNT_PERSONA.password)
   await page.getByTestId('step-up-mfa-code').fill(totpCode(secret))
@@ -133,10 +134,7 @@ interface AccountActivityUser {
   role: string
 }
 
-async function createAccountActivityUser(
-  page: Page,
-  user: AccountActivityUser,
-): Promise<void> {
+async function createAccountActivityUser(page: Page, user: AccountActivityUser): Promise<void> {
   await page.goto('/admin/users')
   await page.getByRole('button', { name: 'Create User', exact: true }).click()
   await page.locator('input[name="new-user-email-address"]').fill(user.email)
@@ -148,11 +146,7 @@ async function createAccountActivityUser(
   await expect(page.getByText(user.email)).toBeVisible()
 }
 
-async function submitLoginAttempt(
-  page: Page,
-  email: string,
-  password: string,
-): Promise<void> {
+async function submitLoginAttempt(page: Page, email: string, password: string): Promise<void> {
   await page.getByLabel('Email').fill(email)
   await page.getByLabel('Password').fill(password)
   await page.getByRole('button', { name: 'Sign In' }).click()
@@ -314,9 +308,7 @@ test.describe('account', () => {
     await expect(page.getByTestId('profile-avatar-upload')).toHaveText(/upload picture/i)
   })
 
-  test('keeps profile picture controls usable at mobile width (ACCOUNT-002)', async ({
-    page,
-  }) => {
+  test('keeps profile picture controls usable at mobile width (ACCOUNT-002)', async ({ page }) => {
     await page.setViewportSize({ width: 390, height: 844 })
     await login(page)
     await page.goto('/admin/account')
@@ -347,9 +339,7 @@ test.describe('account', () => {
   })
 
   test.describe('security', () => {
-    test('starts and cancels MFA setup without enabling MFA (ADMIN-003)', async ({
-      page,
-    }) => {
+    test('starts and cancels MFA setup without enabling MFA (ADMIN-003)', async ({ page }) => {
       await login(page)
       await page.goto('/admin/account')
       await page.getByTestId('account-tab-security').click()
@@ -382,9 +372,7 @@ test.describe('account', () => {
       await expect(page.getByTestId('security-recovery-regenerate')).toBeDisabled()
     })
 
-    test('updates and persists the step-up policy window (ACCOUNT-005)', async ({
-      page,
-    }) => {
+    test('updates and persists the step-up policy window (ACCOUNT-005)', async ({ page }) => {
       await login(page)
       await page.goto('/admin/account')
       await page.getByTestId('account-tab-security').click()
@@ -414,9 +402,7 @@ test.describe('account', () => {
       await expect(page.getByTestId('security-step-up-window')).toHaveValue('15 minutes')
     })
 
-    test('keeps step-up policy controls usable at mobile width (ACCOUNT-005)', async ({
-      page,
-    }) => {
+    test('keeps step-up policy controls usable at mobile width (ACCOUNT-005)', async ({ page }) => {
       await page.setViewportSize({ width: 390, height: 844 })
       await login(page)
       await page.goto('/admin/account')
@@ -564,9 +550,7 @@ test.describe('account', () => {
         await expect(page.getByRole('heading', { name: 'Active devices' })).toBeVisible()
         const sessionsTable = page.getByRole('table', { name: 'Active sessions' })
         await expect(sessionsTable).toContainText('Current')
-        await expect(
-          sessionsTable.getByRole('button', { name: 'Sign out' }).first(),
-        ).toBeVisible()
+        await expect(sessionsTable.getByRole('button', { name: 'Sign out' }).first()).toBeVisible()
 
         const signOutOthers = page.getByTestId('account-sessions-sign-out-others')
         await expect(signOutOthers).toBeEnabled()
@@ -584,10 +568,7 @@ test.describe('account', () => {
       }
     })
 
-    test('keeps active devices usable at mobile width (AUTH-004)', async ({
-      page,
-      browser,
-    }) => {
+    test('keeps active devices usable at mobile width (AUTH-004)', async ({ page, browser }) => {
       await page.setViewportSize({ width: 390, height: 844 })
       await login(page)
 
@@ -603,9 +584,7 @@ test.describe('account', () => {
         const sessionsTable = page.getByRole('table', { name: 'Active sessions' })
         await expect(sessionsTable).toBeVisible()
         await expect(sessionsTable).toContainText('Current')
-        await expect(
-          sessionsTable.getByRole('button', { name: 'Sign out' }).first(),
-        ).toBeVisible()
+        await expect(sessionsTable.getByRole('button', { name: 'Sign out' }).first()).toBeVisible()
         await expectContainedHorizontalScroller(sessionsTable)
       } finally {
         await otherContext.close()
@@ -712,15 +691,11 @@ test.describe('account', () => {
       await page.getByLabel('Email').fill(ACCOUNT_PERSONA.email)
       await page.getByLabel('Password').fill(ACCOUNT_PERSONA.password)
       await page.getByRole('button', { name: 'Sign In' }).click()
-      await expect(
-        page.getByRole('heading', { name: 'Two-Factor Authentication' }),
-      ).toBeVisible()
+      await expect(page.getByRole('heading', { name: 'Two-Factor Authentication' })).toBeVisible()
       const loginCodeInput = page.getByTestId('admin-mfa-code')
       await page.getByRole('button', { name: 'Verify' }).click()
       await expect(loginCodeInput).toBeFocused()
-      await expect(
-        page.getByRole('heading', { name: 'Two-Factor Authentication' }),
-      ).toBeVisible()
+      await expect(page.getByRole('heading', { name: 'Two-Factor Authentication' })).toBeVisible()
       const emptyCodeValidity = await loginCodeInput.evaluate((element) => {
         const input = element as HTMLInputElement
         return {
@@ -737,9 +712,7 @@ test.describe('account', () => {
       await loginCodeInput.fill(wrongLoginCode)
       await page.getByRole('button', { name: 'Verify' }).click()
       await expect(page.getByRole('alert')).toHaveText('Invalid authentication code')
-      await expect(
-        page.getByRole('heading', { name: 'Two-Factor Authentication' }),
-      ).toBeVisible()
+      await expect(page.getByRole('heading', { name: 'Two-Factor Authentication' })).toBeVisible()
 
       await loginCodeInput.fill(totpCode(secret))
       await page.getByRole('button', { name: 'Verify' }).click()
@@ -774,9 +747,7 @@ test.describe('account', () => {
       await page.getByLabel('Email').fill(ACCOUNT_PERSONA.email)
       await page.getByLabel('Password').fill(ACCOUNT_PERSONA.password)
       await page.getByRole('button', { name: 'Sign In' }).click()
-      await expect(
-        page.getByRole('heading', { name: 'Two-Factor Authentication' }),
-      ).toBeVisible()
+      await expect(page.getByRole('heading', { name: 'Two-Factor Authentication' })).toBeVisible()
       await page.getByTestId('admin-mfa-code').fill(totpCode(secret))
       await page.getByRole('button', { name: 'Verify' }).click()
       await expectLoggedIn(page)
@@ -831,9 +802,7 @@ test.describe('account', () => {
       await page.getByLabel('Password').fill(ACCOUNT_PERSONA.password)
       await page.getByRole('button', { name: 'Sign In' }).click()
 
-      await expect(
-        page.getByRole('heading', { name: 'Two-Factor Authentication' }),
-      ).toBeVisible()
+      await expect(page.getByRole('heading', { name: 'Two-Factor Authentication' })).toBeVisible()
       await expect(page.getByTestId('admin-mfa-code')).toBeVisible()
       await expect(page.getByRole('button', { name: 'Verify' })).toBeVisible()
       await expectMfaLoginMobileLayout(page)
@@ -856,7 +825,9 @@ test.describe('account', () => {
       await expect(page.getByTestId('security-recovery-regenerate')).toBeDisabled()
     })
 
-    test('uses a recovery code once and rejects reuse on MFA login (AUTH-002)', async ({ page }) => {
+    test('uses a recovery code once and rejects reuse on MFA login (AUTH-002)', async ({
+      page,
+    }) => {
       await login(page)
       await page.goto('/admin/account')
       await page.getByTestId('account-tab-security').click()
@@ -871,9 +842,7 @@ test.describe('account', () => {
       await page.getByLabel('Email').fill(ACCOUNT_PERSONA.email)
       await page.getByLabel('Password').fill(ACCOUNT_PERSONA.password)
       await page.getByRole('button', { name: 'Sign In' }).click()
-      await expect(
-        page.getByRole('heading', { name: 'Two-Factor Authentication' }),
-      ).toBeVisible()
+      await expect(page.getByRole('heading', { name: 'Two-Factor Authentication' })).toBeVisible()
       await page.getByTestId('admin-mfa-code').fill(recoveryCode)
       await page.getByRole('button', { name: 'Verify' }).click()
       await expectLoggedIn(page)
@@ -889,9 +858,7 @@ test.describe('account', () => {
       await page.getByLabel('Email').fill(ACCOUNT_PERSONA.email)
       await page.getByLabel('Password').fill(ACCOUNT_PERSONA.password)
       await page.getByRole('button', { name: 'Sign In' }).click()
-      await expect(
-        page.getByRole('heading', { name: 'Two-Factor Authentication' }),
-      ).toBeVisible()
+      await expect(page.getByRole('heading', { name: 'Two-Factor Authentication' })).toBeVisible()
       await page.getByTestId('admin-mfa-code').fill(recoveryCode)
       await page.getByRole('button', { name: 'Verify' }).click()
       await expect(page.getByRole('alert')).toHaveText('Invalid authentication code')
@@ -1021,8 +988,8 @@ async function expectContainedHorizontalScroller(table: Locator): Promise<void> 
     const wrapperRect = wrapper.getBoundingClientRect()
     const pageOverflow = documentElement.scrollWidth - documentElement.clientWidth
     const tableRect = element.getBoundingClientRect()
-    const reachesTableEnd = Math.ceil(wrapper.scrollLeft + wrapper.clientWidth)
-      >= Math.floor(element.scrollWidth)
+    const reachesTableEnd =
+      Math.ceil(wrapper.scrollLeft + wrapper.clientWidth) >= Math.floor(element.scrollWidth)
 
     wrapper.scrollLeft = initialScrollLeft
 
@@ -1048,30 +1015,22 @@ async function expectProfileMobileLayout(page: Page): Promise<void> {
     const documentElement = document.documentElement
     const viewportWidth = documentElement.clientWidth
     const profileSection = Array.from(element.querySelectorAll('section')).find((section) =>
-      section.querySelector('#account-profile-title')
+      section.querySelector('#account-profile-title'),
     )
     const sectionRect = profileSection?.getBoundingClientRect()
     const uploadButton = profileSection?.querySelector('[data-testid="profile-avatar-upload"]')
     const removeButton = profileSection?.querySelector('[data-testid="profile-avatar-remove"]')
     const hint = Array.from(profileSection?.querySelectorAll('p') ?? []).find((paragraph) =>
-      paragraph.textContent?.includes('5 MB')
+      paragraph.textContent?.includes('5 MB'),
     )
     const displayName = profileSection?.querySelector('[data-testid="profile-display-name"]')
     const email = profileSection?.querySelector('[data-testid="profile-email"]')
     const saveButton = profileSection?.querySelector('[data-testid="profile-save"]')
     const status = profileSection?.querySelector('[data-testid="profile-status"]')
-    const requiredControls = [
-      uploadButton,
-      hint,
-      displayName,
-      email,
-      saveButton,
-    ]
-    const visibleControls = [
-      ...requiredControls,
-      removeButton,
-      status,
-    ].filter((item): item is Element => item !== null && item !== undefined)
+    const requiredControls = [uploadButton, hint, displayName, email, saveButton]
+    const visibleControls = [...requiredControls, removeButton, status].filter(
+      (item): item is Element => item !== null && item !== undefined,
+    )
 
     const controlRects = visibleControls.map((item) => item.getBoundingClientRect())
 
@@ -1083,8 +1042,8 @@ async function expectProfileMobileLayout(page: Page): Promise<void> {
         : false,
       requiredControlsPresent: requiredControls.every(Boolean),
       controlsContained: Boolean(
-        sectionRect
-        && controlRects.every(
+        sectionRect &&
+        controlRects.every(
           (rect) => rect.left >= sectionRect.left - 1 && rect.right <= sectionRect.right + 1,
         ),
       ),
@@ -1135,18 +1094,14 @@ async function expectStepUpPolicyMobileLayout(card: Locator, menu?: Locator): Pr
       cardContained: cardRect.left >= -1 && cardRect.right <= viewportWidth + 1,
       controlsPresent: Boolean(toggleRect && selectRect),
       controlsContained: Boolean(
-        toggleRect
-        && selectRect
-        && toggleRect.left >= cardRect.left - 1
-        && toggleRect.right <= cardRect.right + 1
-        && selectRect.left >= cardRect.left - 1
-        && selectRect.right <= cardRect.right + 1,
+        toggleRect &&
+        selectRect &&
+        toggleRect.left >= cardRect.left - 1 &&
+        toggleRect.right <= cardRect.right + 1 &&
+        selectRect.left >= cardRect.left - 1 &&
+        selectRect.right <= cardRect.right + 1,
       ),
-      controlsStacked: Boolean(
-        toggleRect
-        && selectRect
-        && selectRect.top > toggleRect.bottom
-      ),
+      controlsStacked: Boolean(toggleRect && selectRect && selectRect.top > toggleRect.bottom),
     }
   })
 
@@ -1164,19 +1119,21 @@ async function expectStepUpPolicyMobileLayout(card: Locator, menu?: Locator): Pr
     const viewportHeight = window.innerHeight
     const menuRect = element.getBoundingClientRect()
     const optionRects = Array.from(element.querySelectorAll('[role="option"]')).map((option) =>
-      option.getBoundingClientRect()
+      option.getBoundingClientRect(),
     )
 
     return {
       pageOverflow: documentElement.scrollWidth - viewportWidth,
       menuContained:
-        menuRect.left >= -1
-        && menuRect.right <= viewportWidth + 1
-        && menuRect.top >= -1
-        && menuRect.bottom <= viewportHeight + 1,
-      optionsReachable: optionRects.length === 4 && optionRects.every(
-        (rect) => rect.left >= menuRect.left - 1 && rect.right <= menuRect.right + 1,
-      ),
+        menuRect.left >= -1 &&
+        menuRect.right <= viewportWidth + 1 &&
+        menuRect.top >= -1 &&
+        menuRect.bottom <= viewportHeight + 1,
+      optionsReachable:
+        optionRects.length === 4 &&
+        optionRects.every(
+          (rect) => rect.left >= menuRect.left - 1 && rect.right <= menuRect.right + 1,
+        ),
     }
   })
 
@@ -1198,8 +1155,8 @@ async function expectMfaSetupDialogMobileLayout(dialog: Locator): Promise<void> 
     const copyButton = element.querySelector('[data-testid="security-mfa-copy-secret"]')
     const codeInput = element.querySelector('[data-testid="security-mfa-code"]')
     const submitButton = element.querySelector('[data-testid="security-mfa-submit"]')
-    const cancelButton = Array.from(element.querySelectorAll('button')).find((button) =>
-      button.textContent?.trim() === 'Cancel'
+    const cancelButton = Array.from(element.querySelectorAll('button')).find(
+      (button) => button.textContent?.trim() === 'Cancel',
     )
     const link = element.querySelector('a[href^="otpauth://"]')
 
@@ -1221,26 +1178,24 @@ async function expectMfaSetupDialogMobileLayout(dialog: Locator): Promise<void> 
     const bodyAfterScrollRect = body?.getBoundingClientRect()
     const inputAfterScrollRect = codeInput?.getBoundingClientRect()
     const codeInputReachable = Boolean(
-      bodyAfterScrollRect
-      && inputAfterScrollRect
-      && inputAfterScrollRect.top >= bodyAfterScrollRect.top - 1
-      && inputAfterScrollRect.bottom <= bodyAfterScrollRect.bottom + 1,
+      bodyAfterScrollRect &&
+      inputAfterScrollRect &&
+      inputAfterScrollRect.top >= bodyAfterScrollRect.top - 1 &&
+      inputAfterScrollRect.bottom <= bodyAfterScrollRect.bottom + 1,
     )
     if (body) body.scrollTop = originalScrollTop
 
     return {
       pageOverflow: documentElement.scrollWidth - viewportWidth,
-      dialogContainedHorizontally:
-        dialogRect.left >= -1 && dialogRect.right <= viewportWidth + 1,
-      dialogContainedVertically:
-        dialogRect.top >= -1 && dialogRect.bottom <= viewportHeight + 1,
+      dialogContainedHorizontally: dialogRect.left >= -1 && dialogRect.right <= viewportWidth + 1,
+      dialogContainedVertically: dialogRect.top >= -1 && dialogRect.bottom <= viewportHeight + 1,
       bodyContainedHorizontally: bodyRect
         ? bodyRect.left >= dialogRect.left - 1 && bodyRect.right <= dialogRect.right + 1
         : false,
       allRequiredElementsPresent: requiredElements.every(Boolean),
       requiredElementsContainedHorizontally: Boolean(
-        bodyRect
-        && horizontalRects.every(
+        bodyRect &&
+        horizontalRects.every(
           (rect) => rect.left >= bodyRect.left - 1 && rect.right <= bodyRect.right + 1,
         ),
       ),
@@ -1267,7 +1222,7 @@ async function expectMfaLoginMobileLayout(page: Page): Promise<void> {
     const form = element.querySelector('form')
     const codeInput = element.querySelector('[data-testid="admin-mfa-code"]')
     const verifyButton = Array.from(element.querySelectorAll('button')).find((button) =>
-      button.textContent?.trim().includes('Verify')
+      button.textContent?.trim().includes('Verify'),
     )
     const alert = element.querySelector('[role="alert"]')
 
@@ -1294,17 +1249,17 @@ async function expectMfaLoginMobileLayout(page: Page): Promise<void> {
       panelContainedVertically: panelRect
         ? panelRect.top >= -1 && panelRect.bottom <= viewportHeight + 1
         : false,
-      requiredElementsPresent: Boolean(headingRect && formRect && codeInputRect && verifyButtonRect),
+      requiredElementsPresent: Boolean(
+        headingRect && formRect && codeInputRect && verifyButtonRect,
+      ),
       requiredElementsContained: Boolean(
-        panelRect
-        && containedRects.every(
+        panelRect &&
+        containedRects.every(
           (rect) => rect.left >= panelRect.left - 1 && rect.right <= panelRect.right + 1,
         ),
       ),
       challengeControlsStacked: Boolean(
-        codeInputRect
-        && verifyButtonRect
-        && verifyButtonRect.top > codeInputRect.bottom,
+        codeInputRect && verifyButtonRect && verifyButtonRect.top > codeInputRect.bottom,
       ),
       verifyButtonReachable: verifyButtonRect
         ? verifyButtonRect.bottom <= viewportHeight + 1
@@ -1334,10 +1289,8 @@ async function expectPasswordDialogMobileLayout(dialog: Locator): Promise<void> 
 
     return {
       pageOverflow: documentElement.scrollWidth - viewportWidth,
-      dialogContainedHorizontally:
-        dialogRect.left >= -1 && dialogRect.right <= viewportWidth + 1,
-      dialogContainedVertically:
-        dialogRect.top >= -1 && dialogRect.bottom <= viewportHeight + 1,
+      dialogContainedHorizontally: dialogRect.left >= -1 && dialogRect.right <= viewportWidth + 1,
+      dialogContainedVertically: dialogRect.top >= -1 && dialogRect.bottom <= viewportHeight + 1,
       controlsContained: controlRects.every(
         (rect) => rect.left >= dialogRect.left - 1 && rect.right <= dialogRect.right + 1,
       ),

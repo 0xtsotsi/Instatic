@@ -15,9 +15,10 @@ import { OWNER } from './constants'
 export async function completeSetupOrLogin(page: Page): Promise<void> {
   await page.goto('/admin')
   const setupHeading = page.getByRole('heading', { name: 'Set Up CMS' })
-  const onSetup = await setupHeading
-    .waitFor({ state: 'visible', timeout: 15_000 })
-    .then(() => true, () => false)
+  const onSetup = await setupHeading.waitFor({ state: 'visible', timeout: 15_000 }).then(
+    () => true,
+    () => false,
+  )
 
   if (onSetup) {
     await page.getByLabel('Site name').fill(OWNER.siteName)
@@ -36,11 +37,7 @@ export async function login(page: Page): Promise<void> {
 }
 
 /** Log in as a specific account through the admin login form. */
-export async function loginAs(
-  page: Page,
-  email: string,
-  password: string,
-): Promise<void> {
+export async function loginAs(page: Page, email: string, password: string): Promise<void> {
   await page.goto('/admin')
   await expect(page.getByRole('heading', { name: 'Admin Login' })).toBeVisible()
   await page.getByLabel('Email').fill(email)
@@ -54,14 +51,12 @@ export async function loginAs(
  * publish, create user/role, install — open this; the prompt rotates the session
  * token, which is why callers run on a fresh login.
  */
-export async function completeStepUp(
-  page: Page,
-  password: string = OWNER.password,
-): Promise<void> {
+export async function completeStepUp(page: Page, password: string = OWNER.password): Promise<void> {
   const dialog = page.getByTestId('step-up-dialog')
-  const opened = await dialog
-    .waitFor({ state: 'visible', timeout: 2_000 })
-    .then(() => true, () => false)
+  const opened = await dialog.waitFor({ state: 'visible', timeout: 2_000 }).then(
+    () => true,
+    () => false,
+  )
   if (!opened) return
   await page.getByTestId('step-up-password').fill(password)
   await page.getByTestId('step-up-confirm').click()

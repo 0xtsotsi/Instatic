@@ -26,9 +26,7 @@ import {
  * the homepage or interfere with one another on the shared database.
  */
 test.describe('visual builder', () => {
-  test('inserts container, text, and image modules (BUILDER-001)', async ({
-    page,
-  }) => {
+  test('inserts container, text, and image modules (BUILDER-001)', async ({ page }) => {
     await openBlankPage(page, 'Builder insert')
 
     await insertNotchModule(page, 'container')
@@ -97,9 +95,7 @@ test.describe('visual builder', () => {
     await expect(dialog).toBeHidden()
   })
 
-  test('drags a module picker item into a canvas container (SITE-005 drag)', async ({
-    page,
-  }) => {
+  test('drags a module picker item into a canvas container (SITE-005 drag)', async ({ page }) => {
     const nestedText = `Dropped into container ${Date.now().toString(36)}`
 
     await openBlankPage(page, 'Module picker drag')
@@ -112,9 +108,7 @@ test.describe('visual builder', () => {
     const containerNodeId = await containerRow.getAttribute('data-instatic-node-id')
     expect(containerNodeId, 'Container row should expose a canvas node id').toBeTruthy()
 
-    const containerCanvas = canvasFrame(page).locator(
-      `[data-node-id="${containerNodeId}"]`,
-    )
+    const containerCanvas = canvasFrame(page).locator(`[data-node-id="${containerNodeId}"]`)
     await expect(containerCanvas.getByText('Empty container', { exact: true })).toBeVisible()
     const containerBox = await containerCanvas.boundingBox()
     expect(containerBox, 'Canvas Container needs a measurable drop target').not.toBeNull()
@@ -143,9 +137,7 @@ test.describe('visual builder', () => {
     await expect(containerCanvas.getByText(nestedText, { exact: true })).toBeVisible()
   })
 
-  test('selects a node in the tree and edits its text (BUILDER-002)', async ({
-    page,
-  }) => {
+  test('selects a node in the tree and edits its text (BUILDER-002)', async ({ page }) => {
     const headline = 'Selectable headline'
     const edited = 'Edited headline'
 
@@ -226,9 +218,7 @@ test.describe('visual builder', () => {
     await expect(redoButton).toHaveAttribute('aria-disabled', 'true')
   })
 
-  test('runs direct panel and canvas clipboard shortcuts (BUILDER-005)', async ({
-    page,
-  }) => {
+  test('runs direct panel and canvas clipboard shortcuts (BUILDER-005)', async ({ page }) => {
     await openBlankPage(page, 'Builder shortcuts')
 
     const shortcutModifier = process.platform === 'darwin' ? 'Meta' : 'Control'
@@ -368,9 +358,7 @@ test.describe('visual builder', () => {
     await expectCanvasTextOrder(page, [gamma, alpha, beta])
   })
 
-  test('reorders selected layers from the canvas drag handle (BUILDER-004)', async ({
-    page,
-  }) => {
+  test('reorders selected layers from the canvas drag handle (BUILDER-004)', async ({ page }) => {
     const suffix = Date.now().toString(36)
     const alpha = `Canvas Alpha ${suffix}`
     const beta = `Canvas Beta ${suffix}`
@@ -397,11 +385,9 @@ test.describe('visual builder', () => {
 
     await page.mouse.move(start.x, start.y)
     await page.mouse.down()
-    await page.mouse.move(
-      gammaBox!.x + gammaBox!.width / 2,
-      gammaBox!.y + gammaBox!.height - 2,
-      { steps: 8 },
-    )
+    await page.mouse.move(gammaBox!.x + gammaBox!.width / 2, gammaBox!.y + gammaBox!.height - 2, {
+      steps: 8,
+    })
     await expect(page.locator('[data-position="after"]')).toBeVisible()
     await page.mouse.up()
 
@@ -510,9 +496,9 @@ test.describe('visual builder', () => {
         await createPostDraft(page, postTitle, postSlug, bodyText)
         await page.getByRole('button', { name: 'Publish post' }).click()
         await completeStepUp(page)
-        await expect(
-          page.getByRole('button', { name: 'Published', exact: true }),
-        ).toBeDisabled({ timeout: 20_000 })
+        await expect(page.getByRole('button', { name: 'Published', exact: true })).toBeDisabled({
+          timeout: 20_000,
+        })
       })
 
       await test.step('create a high-priority Posts template from the Site panel', async () => {
@@ -531,7 +517,10 @@ test.describe('visual builder', () => {
         await dialog.getByRole('button', { name: 'Save' }).click()
 
         await expect(dialog).toBeHidden()
-        await expect(page.getByTestId('document-switcher')).toHaveAttribute('placeholder', templateName)
+        await expect(page.getByTestId('document-switcher')).toHaveAttribute(
+          'placeholder',
+          templateName,
+        )
       })
 
       await test.step('insert title and body bindings into the template canvas', async () => {
@@ -550,7 +539,9 @@ test.describe('visual builder', () => {
         await bindingMenu.getByRole('button').filter({ hasText: 'Title' }).first().click()
         await page.keyboard.press('Escape')
 
-        await expect(page.locator('#ctrl-text')).toHaveValue('Template headline: {currentEntry.title}')
+        await expect(page.locator('#ctrl-text')).toHaveValue(
+          'Template headline: {currentEntry.title}',
+        )
         await expect(
           canvasFrame(page).getByText(`Template headline: ${postTitle}`, { exact: true }),
         ).toBeVisible()
@@ -662,7 +653,8 @@ test.describe('visual builder', () => {
 
       await test.step('rename and delete the saved layout without affecting inserted content', async () => {
         await openSavedLayoutContextMenu(page, layoutName)
-        await page.getByRole('menu', { name: `${layoutName} options` })
+        await page
+          .getByRole('menu', { name: `${layoutName} options` })
           .getByRole('menuitem', { name: /^Rename/ })
           .click()
 
@@ -740,9 +732,7 @@ test.describe('visual builder', () => {
       await selectorRow.click()
 
       await page.getByLabel('Search class style properties to add').fill('font size')
-      const fontSizeInput = page
-        .getByTestId('css-property-row-fontSize')
-        .getByLabel('Font size')
+      const fontSizeInput = page.getByTestId('css-property-row-fontSize').getByLabel('Font size')
       await fontSizeInput.fill('28px')
       await fontSizeInput.blur()
       await expect(canvasHeadline).toHaveCSS('font-size', '28px')
@@ -800,9 +790,7 @@ test.describe('visual builder', () => {
       await selectorRow.click()
 
       await page.getByLabel('Search class style properties to add').fill('font size')
-      const fontSizeInput = page
-        .getByTestId('css-property-row-fontSize')
-        .getByLabel('Font size')
+      const fontSizeInput = page.getByTestId('css-property-row-fontSize').getByLabel('Font size')
       await fontSizeInput.fill('30px')
       await fontSizeInput.blur()
       await expect(canvasHeadline).toHaveCSS('font-size', '30px')
@@ -861,10 +849,7 @@ test.describe('visual builder', () => {
       await expect(canvasHeadline).toHaveAttribute('data-track', trackValue)
 
       await propertiesPanel.getByRole('button', { name: 'Add attribute' }).click()
-      await propertiesPanel
-        .getByRole('textbox', { name: 'Attribute name' })
-        .first()
-        .fill('onclick')
+      await propertiesPanel.getByRole('textbox', { name: 'Attribute name' }).first().fill('onclick')
       await propertiesPanel.getByRole('textbox', { name: 'onclick value' }).fill('alert(1)')
       await expect(propertiesPanel.getByRole('alert')).toContainText(
         'Event handler attributes are not allowed.',
@@ -894,10 +879,7 @@ test.describe('visual builder', () => {
       })
     })
 
-    test('publishes state pseudo selector styles (SITE-011)', async ({
-      page,
-      browser,
-    }) => {
+    test('publishes state pseudo selector styles (SITE-011)', async ({ page, browser }) => {
       await login(page)
       const suffix = Date.now().toString(36)
       const label = `Hover link ${suffix}`
@@ -921,9 +903,7 @@ test.describe('visual builder', () => {
       await selectorRow.click()
 
       await page.getByLabel('Search class style properties to add').fill('font size')
-      const fontSizeInput = page
-        .getByTestId('css-property-row-fontSize')
-        .getByLabel('Font size')
+      const fontSizeInput = page.getByTestId('css-property-row-fontSize').getByLabel('Font size')
       await fontSizeInput.fill('31px')
       await fontSizeInput.blur()
 
@@ -964,17 +944,13 @@ test.describe('visual builder', () => {
 
       await switchEditingContext(page, 'Desktop')
       await page.getByLabel('Search class style properties to add').fill('font size')
-      let fontSizeInput = page
-        .getByTestId('css-property-row-fontSize')
-        .getByLabel('Font size')
+      let fontSizeInput = page.getByTestId('css-property-row-fontSize').getByLabel('Font size')
       await fontSizeInput.fill('20px')
       await fontSizeInput.blur()
       await expect(desktopButton).toHaveCSS('font-size', '20px')
 
       await switchEditingContext(page, 'Mobile')
-      fontSizeInput = page
-        .getByTestId('css-property-row-fontSize')
-        .getByLabel('Font size')
+      fontSizeInput = page.getByTestId('css-property-row-fontSize').getByLabel('Font size')
       await fontSizeInput.fill('33px')
       await fontSizeInput.blur()
 
@@ -1119,9 +1095,7 @@ test.describe('visual builder', () => {
       await propertiesPanel.getByLabel('New property name').fill('123bad')
       await propertiesPanel.getByLabel('New property value').fill(customValue)
       await propertiesPanel.getByRole('button', { name: 'Add', exact: true }).click()
-      await expect(propertiesPanel.getByRole('alert')).toHaveText(
-        'Not a valid CSS property name.',
-      )
+      await expect(propertiesPanel.getByRole('alert')).toHaveText('Not a valid CSS property name.')
       await propertiesPanel.getByLabel('New property name').fill(customProperty)
       await propertiesPanel.getByLabel('New property value').fill(customValue)
       await propertiesPanel.getByRole('button', { name: 'Add', exact: true }).click()
@@ -1177,9 +1151,7 @@ test.describe('visual builder', () => {
 
       const styleSearch = page.getByLabel('Search class style properties to add')
       await styleSearch.fill('font size')
-      const fontSizeInput = page
-        .getByTestId('css-property-row-fontSize')
-        .getByLabel('Font size')
+      const fontSizeInput = page.getByTestId('css-property-row-fontSize').getByLabel('Font size')
       await fontSizeInput.fill('24px')
       await fontSizeInput.blur()
       await expect(desktopButton).toHaveCSS('font-size', '24px')
@@ -1279,17 +1251,18 @@ test.describe('visual builder', () => {
       await openLayersPanel(page)
       const tree = page.getByRole('tree', { name: 'Page element tree' })
       await expect(tree.getByRole('treeitem', { name: 'Text' })).toHaveCount(2)
-      await expect(canvasFrame(page).getByText('Tablet-width insert', { exact: true })).toBeVisible()
-      await expect(canvasFrame(page).getByText('Second tablet-width insert', { exact: true })).toBeVisible()
+      await expect(
+        canvasFrame(page).getByText('Tablet-width insert', { exact: true }),
+      ).toBeVisible()
+      await expect(
+        canvasFrame(page).getByText('Second tablet-width insert', { exact: true }),
+      ).toBeVisible()
     })
   })
 })
 
 /** Create a fresh page and open it in the canvas, ready for inserting modules. */
-async function openBlankPage(
-  page: Page,
-  label: string,
-): Promise<{ name: string; slug: string }> {
+async function openBlankPage(page: Page, label: string): Promise<{ name: string; slug: string }> {
   await openSiteEditor(page)
   const suffix = Date.now().toString(36)
   const name = `${label} ${suffix}`
@@ -1325,9 +1298,10 @@ async function createPostDraft(
   await page.keyboard.type(body)
 
   await page.getByRole('button', { name: 'More publishing actions' }).click()
-  const saveResponse = page.waitForResponse((response) =>
-    /\/admin\/api\/cms\/data\/rows\/[^/]+$/.test(new URL(response.url()).pathname) &&
-    response.request().method() === 'PATCH',
+  const saveResponse = page.waitForResponse(
+    (response) =>
+      /\/admin\/api\/cms\/data\/rows\/[^/]+$/.test(new URL(response.url()).pathname) &&
+      response.request().method() === 'PATCH',
   )
   await page.getByTestId('toolbar-content-save-draft-action').click()
   expect((await saveResponse).ok()).toBe(true)
@@ -1345,20 +1319,19 @@ async function centerOf(locator: Locator): Promise<{ x: number; y: number }> {
   }
 }
 
-async function expectCanvasTextOrder(
-  page: Page,
-  orderedText: readonly string[],
-): Promise<void> {
-  await expect.poll(async () => {
-    const bodyText = (await canvasFrame(page).locator('body').textContent()) ?? ''
-    let cursor = -1
-    for (const text of orderedText) {
-      const next = bodyText.indexOf(text, cursor + 1)
-      if (next === -1) return false
-      cursor = next
-    }
-    return true
-  }).toBe(true)
+async function expectCanvasTextOrder(page: Page, orderedText: readonly string[]): Promise<void> {
+  await expect
+    .poll(async () => {
+      const bodyText = (await canvasFrame(page).locator('body').textContent()) ?? ''
+      let cursor = -1
+      for (const text of orderedText) {
+        const next = bodyText.indexOf(text, cursor + 1)
+        if (next === -1) return false
+        cursor = next
+      }
+      return true
+    })
+    .toBe(true)
 }
 
 async function switchEditingContext(page: Page, label: 'Desktop' | 'Mobile'): Promise<void> {
@@ -1375,9 +1348,7 @@ async function switchEditingContext(page: Page, label: 'Desktop' | 'Mobile'): Pr
 async function selectSelectorForBulk(selectorsPanel: Locator, className: string): Promise<void> {
   const editRow = selectorsPanel.getByRole('button', { name: `Edit selector .${className}` })
   await editRow.hover()
-  await selectorsPanel
-    .getByRole('checkbox', { name: `Select selector .${className}` })
-    .click()
+  await selectorsPanel.getByRole('checkbox', { name: `Select selector .${className}` }).click()
 }
 
 async function confirmDeleteIfShown(page: Page, title: string): Promise<void> {
@@ -1421,9 +1392,10 @@ async function expectComputedCustomProperty(
 ): Promise<void> {
   await expect
     .poll(async () =>
-      locator.evaluate((element, propertyName) =>
-        getComputedStyle(element).getPropertyValue(propertyName).trim(),
-      property),
+      locator.evaluate(
+        (element, propertyName) => getComputedStyle(element).getPropertyValue(propertyName).trim(),
+        property,
+      ),
     )
     .toBe(expectedValue)
 }

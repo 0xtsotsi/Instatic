@@ -30,9 +30,7 @@ type DashboardLayoutSaveItem = Static<typeof DashboardLayoutSaveItemSchema>
  * the same surface stays contained on a 390px mobile viewport.
  */
 test.describe('dashboard', () => {
-  test('renders first-party metric widgets and mobile layout (DASH-001)', async ({
-    page,
-  }) => {
+  test('renders first-party metric widgets and mobile layout (DASH-001)', async ({ page }) => {
     await page.goto('/admin/dashboard')
     await expect(page).toHaveURL(/\/admin\/dashboard$/)
 
@@ -118,9 +116,7 @@ test.describe('dashboard', () => {
     })
   })
 
-  test('customizes the widget grid and persists changes (DASH-002)', async ({
-    page,
-  }) => {
+  test('customizes the widget grid and persists changes (DASH-002)', async ({ page }) => {
     await page.goto('/admin/dashboard')
     await expect(page).toHaveURL(/\/admin\/dashboard$/)
     await expect(page.getByText('09 blocks')).toBeVisible()
@@ -260,9 +256,9 @@ test.describe('dashboard', () => {
 
       await page.reload()
       await expect(page.getByRole('heading', { name: 'Overview' })).toBeVisible()
-      await expect(
-        page.getByRole('heading', { name: 'Finish setting up your site' }),
-      ).toHaveCount(0)
+      await expect(page.getByRole('heading', { name: 'Finish setting up your site' })).toHaveCount(
+        0,
+      )
     })
   })
 })
@@ -308,10 +304,11 @@ async function waitForDashboardLayoutSave(
   page: Page,
   action: () => Promise<void>,
 ): Promise<DashboardLayoutSaveBody> {
-  const responsePromise = page.waitForResponse((response) =>
-    response.url().includes('/admin/api/cms/me/preferences/dashboard-layout') &&
-    response.request().method() === 'PUT' &&
-    response.status() === 200,
+  const responsePromise = page.waitForResponse(
+    (response) =>
+      response.url().includes('/admin/api/cms/me/preferences/dashboard-layout') &&
+      response.request().method() === 'PUT' &&
+      response.status() === 200,
   )
   await action()
   const response = await responsePromise

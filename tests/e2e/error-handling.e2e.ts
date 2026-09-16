@@ -7,9 +7,7 @@ import { openSiteEditor, openSitePanel } from './helpers'
  * Explorer; broader form/error sweeps stay in the agent-run protocol.
  */
 test.describe('error handling', () => {
-  test('shows recoverable field-level page slug validation errors (REL-002)', async ({
-    page,
-  }) => {
+  test('shows recoverable field-level page slug validation errors (REL-002)', async ({ page }) => {
     const suffix = Date.now().toString(36)
     const pageName = `Validation Recovery ${suffix}`
     const validSlug = `validation-recovery-${suffix}`
@@ -43,8 +41,6 @@ test.describe('error handling', () => {
     await createButton.click()
 
     await expect(dialog).toBeHidden()
-    await expect(
-      page.getByRole('treeitem', { name: `Open page ${pageName}` }),
-    ).toBeVisible()
+    await expect(page.getByRole('treeitem', { name: `Open page ${pageName}` })).toBeVisible()
   })
 })

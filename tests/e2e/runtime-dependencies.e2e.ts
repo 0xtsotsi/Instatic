@@ -1,4 +1,11 @@
-import { expect, test, type Browser, type Locator, type Page, type Response } from '@playwright/test'
+import {
+  expect,
+  test,
+  type Browser,
+  type Locator,
+  type Page,
+  type Response,
+} from '@playwright/test'
 import { Type } from '@sinclair/typebox'
 import { Value } from '@sinclair/typebox/value'
 import {
@@ -42,7 +49,10 @@ test.describe('runtime dependencies', () => {
 
     await openSiteEditor(page)
     await createPage(page, pageName, slug)
-    await createRuntimeScript(page, `site014-${suffix}`, `
+    await createRuntimeScript(
+      page,
+      `site014-${suffix}`,
+      `
 import confetti from 'canvas-confetti'
 
 const marker = document.createElement('p')
@@ -50,9 +60,12 @@ marker.textContent = '${marker}'
 marker.setAttribute('data-site014-runtime', 'loaded')
 marker.dataset.confettiType = typeof confetti
 document.body.append(marker)
-`)
+`,
+    )
 
-    await expect(page.getByLabel('Script imports').getByText('canvas-confetti').first()).toBeVisible({
+    await expect(
+      page.getByLabel('Script imports').getByText('canvas-confetti').first(),
+    ).toBeVisible({
       timeout: 10_000,
     })
     await page.getByTestId('panel-close-code-editor').click()
@@ -79,7 +92,9 @@ document.body.append(marker)
     })
   })
 
-  test('keeps missing dependency controls reachable at mobile width (SITE-014)', async ({ page }) => {
+  test('keeps missing dependency controls reachable at mobile width (SITE-014)', async ({
+    page,
+  }) => {
     test.setTimeout(60_000)
 
     await page.setViewportSize({ width: 390, height: 844 })
@@ -89,10 +104,15 @@ document.body.append(marker)
     await openSiteEditor(page)
     await createPage(page, `Mobile runtime deps ${suffix}`, `mobile-runtime-deps-${suffix}`)
     const mobilePackage = 'left-pad'
-    await createRuntimeScript(page, `site014-mobile-${suffix}`, `
+    await createRuntimeScript(
+      page,
+      `site014-mobile-${suffix}`,
+      `
 import leftPad from 'left-pad'
 document.body.dataset.site014MobileDependencyType = typeof leftPad
-`, mobilePackage)
+`,
+      mobilePackage,
+    )
 
     await expect(page.getByLabel('Script imports').getByText(mobilePackage).first()).toBeVisible({
       timeout: 10_000,
@@ -174,17 +194,21 @@ async function verifyPublishedRuntimeDependency({
     if (!packageUrl) throw new Error('Published importmap did not include canvas-confetti')
     expect(packageUrl).toMatch(/^\/_instatic\/runtime\/cache\/[0-9a-f]{24}\/canvas-confetti\//)
 
-    await visitor.evaluate((src) => new Promise<void>((resolve, reject) => {
-      const script = document.createElement('script')
-      script.type = 'module'
-      script.src = src
-      script.onload = () => resolve()
-      script.onerror = () => reject(new Error(`Failed to load ${src}`))
-      document.head.append(script)
-    }), packageUrl)
+    await visitor.evaluate(
+      (src) =>
+        new Promise<void>((resolve, reject) => {
+          const script = document.createElement('script')
+          script.type = 'module'
+          script.src = src
+          script.onload = () => resolve()
+          script.onerror = () => reject(new Error(`Failed to load ${src}`))
+          document.head.append(script)
+        }),
+      packageUrl,
+    )
 
-    const cacheResponse = runtimeCacheResponses.find((response) =>
-      new URL(response.url()).pathname === packageUrl,
+    const cacheResponse = runtimeCacheResponses.find(
+      (response) => new URL(response.url()).pathname === packageUrl,
     )
     expect(cacheResponse, `expected browser response for ${packageUrl}`).toBeTruthy()
     expect(cacheResponse?.status()).toBe(200)

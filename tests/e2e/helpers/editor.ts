@@ -36,10 +36,7 @@ export function canvasFrame(page: Page): FrameLocator {
 }
 
 /** A design-mode canvas iframe for a specific breakpoint. */
-export function canvasFrameForBreakpoint(
-  page: Page,
-  breakpointId: string,
-): FrameLocator {
+export function canvasFrameForBreakpoint(page: Page, breakpointId: string): FrameLocator {
   return page
     .getByTestId(`canvas-frame-${breakpointId}`)
     .frameLocator('iframe[title^="Canvas frame"]')
@@ -63,10 +60,7 @@ export async function insertNotchModule(
  * items carry a stable `data-module-id`, so we pick by module id rather than by
  * the localized item label.
  */
-export async function insertModuleViaPicker(
-  page: Page,
-  moduleId: string,
-): Promise<void> {
+export async function insertModuleViaPicker(page: Page, moduleId: string): Promise<void> {
   await page.getByTestId('canvas-notch-add-btn').click()
   const dialog = page.getByRole('dialog', { name: 'Add to canvas' })
   await expect(dialog).toBeVisible()
@@ -109,9 +103,7 @@ export async function openExplorerTab(page: Page, tab: ExplorerTab): Promise<voi
 /** Open the Code Explorer tab (stylesheets + scripts). */
 export async function openCodePanel(page: Page): Promise<void> {
   await openExplorerTab(page, 'Code')
-  await expect(
-    page.getByRole('button', { name: 'New stylesheet', exact: true }),
-  ).toBeVisible()
+  await expect(page.getByRole('button', { name: 'New stylesheet', exact: true })).toBeVisible()
 }
 
 /** Select a layer in the DOM/layers tree by its display name. */
@@ -124,11 +116,7 @@ export async function selectTreeLayer(page: Page, name: string): Promise<void> {
  * `data-testid="property-control-<prop>"` wrapper. Waits for the wrapper so the
  * correct node is selected before typing.
  */
-export async function setPropValue(
-  page: Page,
-  prop: string,
-  value: string,
-): Promise<void> {
+export async function setPropValue(page: Page, prop: string, value: string): Promise<void> {
   await expect(page.getByTestId(`property-control-${prop}`)).toBeVisible()
   await page.locator(`#ctrl-${prop}`).fill(value)
 }
@@ -148,11 +136,7 @@ export async function openSitePanel(page: Page): Promise<void> {
  * Create a new page from the Site Explorer and open it in the canvas. Returns
  * once the new page's tree item is selected. Assumes the Site editor is open.
  */
-export async function createPage(
-  page: Page,
-  name: string,
-  slug: string,
-): Promise<void> {
+export async function createPage(page: Page, name: string, slug: string): Promise<void> {
   await openSitePanel(page)
   await page.getByRole('button', { name: 'New page', exact: true }).click()
   const dialog = page.getByRole('dialog', { name: 'New page' })
@@ -161,9 +145,7 @@ export async function createPage(
   await dialog.getByLabel('Slug').fill(slug)
   await dialog.getByRole('button', { name: 'Create' }).click()
   await expect(dialog).toBeHidden()
-  await expect(
-    page.getByRole('treeitem', { name: `Open page ${name}` }),
-  ).toBeVisible()
+  await expect(page.getByRole('treeitem', { name: `Open page ${name}` })).toBeVisible()
 }
 
 /** Save the current draft and wait for the "Draft saved" status. */
@@ -177,9 +159,10 @@ export async function saveDraft(page: Page): Promise<void> {
     await page.keyboard.press('Escape')
   }
   await expect(saveAction).toBeVisible()
-  const saveResponse = page.waitForResponse((response) =>
-    new URL(response.url()).pathname === '/admin/api/cms/site-document' &&
-    response.request().method() === 'PUT',
+  const saveResponse = page.waitForResponse(
+    (response) =>
+      new URL(response.url()).pathname === '/admin/api/cms/site-document' &&
+      response.request().method() === 'PUT',
   )
   await saveAction.click()
   expect((await saveResponse).ok()).toBe(true)
@@ -198,9 +181,10 @@ export async function publishDraft(page: Page): Promise<void> {
   await publishButton.click()
 
   const stepUpDialog = page.getByTestId('step-up-dialog')
-  const stepUpOpened = await stepUpDialog
-    .waitFor({ state: 'visible', timeout: 10_000 })
-    .then(() => true, () => false)
+  const stepUpOpened = await stepUpDialog.waitFor({ state: 'visible', timeout: 10_000 }).then(
+    () => true,
+    () => false,
+  )
   if (stepUpOpened) {
     await page.getByTestId('step-up-password').fill(OWNER.password)
     await page.getByTestId('step-up-confirm').click()

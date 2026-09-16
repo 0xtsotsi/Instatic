@@ -68,9 +68,9 @@ test.describe('forms', () => {
     await test.step('verify the submission appears in the Data workspace', async () => {
       await page.goto('/admin/data')
       await openCustomTable(page, tableName)
-      await expect(
-        page.getByRole('row').filter({ hasText: visitorName }),
-      ).toBeVisible({ timeout: 20_000 })
+      await expect(page.getByRole('row').filter({ hasText: visitorName })).toBeVisible({
+        timeout: 20_000,
+      })
     })
   })
 
@@ -127,9 +127,9 @@ test.describe('forms', () => {
     await test.step('verify only the accepted retry appears in the Data workspace', async () => {
       await page.goto('/admin/data')
       await openCustomTable(page, tableName)
-      await expect(
-        page.getByRole('row').filter({ hasText: visitorName }),
-      ).toBeVisible({ timeout: 20_000 })
+      await expect(page.getByRole('row').filter({ hasText: visitorName })).toBeVisible({
+        timeout: 20_000,
+      })
     })
   })
 })
@@ -147,10 +147,7 @@ async function createCustomDataTable(page: Page, tableName: string): Promise<voi
   await openCustomTable(page, tableName)
 }
 
-async function openBlankPage(
-  page: Page,
-  label: string,
-): Promise<{ name: string; slug: string }> {
+async function openBlankPage(page: Page, label: string): Promise<{ name: string; slug: string }> {
   await openSiteEditor(page)
   const suffix = Date.now().toString(36)
   const name = `${label} ${suffix}`
@@ -175,11 +172,7 @@ async function selectPropertyOption(
   await expect(control).toHaveValue(optionName)
 }
 
-async function selectLabeledOption(
-  page: Page,
-  label: string,
-  optionName: string,
-): Promise<void> {
+async function selectLabeledOption(page: Page, label: string, optionName: string): Promise<void> {
   const control = page.getByLabel(label)
   await expect(control).toBeVisible({ timeout: 20_000 })
   await control.click()
@@ -201,9 +194,9 @@ async function submitPublicForm(
     await expectPublishedFormAssets(visitor, assetResponses)
     await visitor.getByPlaceholder('Your name').fill(visitorName)
     await visitor.getByRole('button', { name: 'Send lead' }).click()
-    await expect(
-      visitor.getByRole('status').filter({ hasText: successMessage }),
-    ).toBeVisible({ timeout: 20_000 })
+    await expect(visitor.getByRole('status').filter({ hasText: successMessage })).toBeVisible({
+      timeout: 20_000,
+    })
   } finally {
     await context.close()
   }
@@ -231,9 +224,9 @@ async function submitTimedPublicFormOnMobile(
 
     await visitor.waitForTimeout(1_200)
     await visitor.getByRole('button', { name: 'Send lead' }).click()
-    await expect(
-      visitor.getByRole('status').filter({ hasText: successMessage }),
-    ).toBeVisible({ timeout: 20_000 })
+    await expect(visitor.getByRole('status').filter({ hasText: successMessage })).toBeVisible({
+      timeout: 20_000,
+    })
     await expectNoPageHorizontalOverflow(visitor)
   } finally {
     await context.close()
@@ -264,9 +257,7 @@ async function expectPublishedFormAssets(
   page: Page,
   responses: PublicAssetResponse[],
 ): Promise<void> {
-  await expect(
-    page.locator('link[rel="stylesheet"][href*="/_instatic/css/reset-"]'),
-  ).toHaveCount(1)
+  await expect(page.locator('link[rel="stylesheet"][href*="/_instatic/css/reset-"]')).toHaveCount(1)
   await expect(page.locator('script[src*="/_instatic/module-js/base.form.js"]')).toHaveCount(1)
   await expectPublicAssetResponse(responses, /^\/_instatic\/css\/.+\.css$/, 'text/css')
   await expectPublicAssetResponse(
@@ -281,19 +272,24 @@ async function expectPublicAssetResponse(
   pathPattern: RegExp,
   contentTypePart: string,
 ): Promise<void> {
-  await expect.poll(() =>
-    responses.some((response) =>
-      pathPattern.test(response.path) &&
-      response.status === 200 &&
-      response.contentType.includes(contentTypePart),
-    ),
-  ).toBe(true)
+  await expect
+    .poll(() =>
+      responses.some(
+        (response) =>
+          pathPattern.test(response.path) &&
+          response.status === 200 &&
+          response.contentType.includes(contentTypePart),
+      ),
+    )
+    .toBe(true)
 }
 
 async function expectNoPageHorizontalOverflow(page: Page): Promise<void> {
   await expect
     .poll(async () =>
-      page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth + 1),
+      page.evaluate(
+        () => document.documentElement.scrollWidth <= document.documentElement.clientWidth + 1,
+      ),
     )
     .toBe(true)
 }

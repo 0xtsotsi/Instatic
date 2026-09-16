@@ -27,11 +27,15 @@ test.describe('site files and code editor', () => {
 
     await openSiteEditor(page)
     await createPage(page, pageName, slug)
-    await createStylesheet(page, `site013-${suffix}`, `
+    await createStylesheet(
+      page,
+      `site013-${suffix}`,
+      `
 html body {
   background-color: ${background};
 }
-`)
+`,
+    )
 
     await saveDraft(page)
     await publishDraft(page)

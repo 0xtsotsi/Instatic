@@ -63,14 +63,8 @@ test.describe.serial('capability boundaries', () => {
       await login(ownerPage)
       pageName = await seedCapabilityPage(ownerPage, suffix, seededText, secondText)
 
-      await createRole(ownerPage, personas.content.roleName, [
-        'View site',
-        'Edit site content',
-      ])
-      await createRole(ownerPage, personas.style.roleName, [
-        'View site',
-        'Edit site styles',
-      ])
+      await createRole(ownerPage, personas.content.roleName, ['View site', 'Edit site content'])
+      await createRole(ownerPage, personas.style.roleName, ['View site', 'Edit site styles'])
       await createRole(ownerPage, personas.structure.roleName, [
         'View site',
         'Edit site structure',
@@ -90,24 +84,18 @@ test.describe.serial('capability boundaries', () => {
     }
   })
 
-  test('content editor can edit copy but not style or structure (CAP-002)', async ({
-    browser,
-  }) => {
+  test('content editor can edit copy but not style or structure (CAP-002)', async ({ browser }) => {
     await withPersona(browser, personas.content, async (personaPage) => {
       await openNamedPage(personaPage, pageName)
       await canvasFrame(personaPage).getByText(seededText, { exact: true }).click()
       await setPropValue(personaPage, 'text', contentText)
       await expectAbsentOrDisabled(personaPage.getByTestId('canvas-notch-text-btn'))
-      await expect(
-        personaPage.getByText('Styles are read-only for your role'),
-      ).toBeVisible()
+      await expect(personaPage.getByText('Styles are read-only for your role')).toBeVisible()
 
       await saveDraft(personaPage)
       await personaPage.reload()
       await openNamedPage(personaPage, pageName)
-      await expect(
-        canvasFrame(personaPage).getByText(contentText, { exact: true }),
-      ).toBeVisible()
+      await expect(canvasFrame(personaPage).getByText(contentText, { exact: true })).toBeVisible()
     })
   })
 
@@ -141,9 +129,7 @@ test.describe.serial('capability boundaries', () => {
     })
   })
 
-  test('structure editor can insert layers but not edit copy (CAP-002)', async ({
-    browser,
-  }) => {
+  test('structure editor can insert layers but not edit copy (CAP-002)', async ({ browser }) => {
     await withPersona(browser, personas.structure, async (personaPage) => {
       await openNamedPage(personaPage, pageName)
       await canvasFrame(personaPage).getByText(contentText, { exact: true }).click()
@@ -326,10 +312,14 @@ test.describe.serial('media capability boundaries', () => {
       ])
       await expect(replaceDialog).toBeHidden()
 
-      const replacedViewer = personaPage.getByRole('dialog', { name: `Viewer: ${replaceNextFilename}` })
+      const replacedViewer = personaPage.getByRole('dialog', {
+        name: `Viewer: ${replaceNextFilename}`,
+      })
       await expect(replacedViewer).toBeVisible()
       await expect(replacedViewer).toContainText('Replaced')
-      await expect(personaPage.getByRole('button', { name: `Open ${replaceNextFilename}` })).toBeVisible()
+      await expect(
+        personaPage.getByRole('button', { name: `Open ${replaceNextFilename}` }),
+      ).toBeVisible()
     })
   })
 
@@ -358,7 +348,9 @@ test.describe.serial('media capability boundaries', () => {
         waitForMediaDelete(personaPage),
         activeMenu.getByRole('menuitem', { name: 'Delete' }).click(),
       ])
-      await expect(personaPage.getByRole('button', { name: `Open ${deleteFilename}` })).toHaveCount(0)
+      await expect(personaPage.getByRole('button', { name: `Open ${deleteFilename}` })).toHaveCount(
+        0,
+      )
 
       await personaPage.getByTestId('media-folder-row-trash').click()
       const trashedAsset = personaPage.getByRole('button', { name: `Open ${deleteFilename}` })
@@ -371,7 +363,9 @@ test.describe.serial('media capability boundaries', () => {
         waitForMediaDelete(personaPage),
         trashMenu.getByRole('menuitem', { name: 'Delete' }).click(),
       ])
-      await expect(personaPage.getByRole('button', { name: `Open ${deleteFilename}` })).toHaveCount(0)
+      await expect(personaPage.getByRole('button', { name: `Open ${deleteFilename}` })).toHaveCount(
+        0,
+      )
       await expect(personaPage.getByText('Trash is empty')).toBeVisible()
     })
   })
@@ -553,15 +547,11 @@ test.describe.serial('content row move capability boundaries', () => {
       await entry.click({ button: 'right' })
       const menu = personaPage.getByRole('menu', { name: 'Content item options' })
       await expect(menu).toBeVisible()
-      await expect(
-        menu.getByRole('menuitem', { name: 'Move to collection' }),
-      ).toHaveCount(0)
+      await expect(menu.getByRole('menuitem', { name: 'Move to collection' })).toHaveCount(0)
     })
   })
 
-  test('content mover can move an entry between collections (CAP-004)', async ({
-    browser,
-  }) => {
+  test('content mover can move an entry between collections (CAP-004)', async ({ browser }) => {
     await withPersona(browser, personas.mover, async (personaPage) => {
       await openContentWorkspace(personaPage)
       await selectContentCollection(personaPage, sourceCollectionName)
@@ -730,9 +720,7 @@ test.describe.serial('plugin capability boundaries', () => {
     }
   })
 
-  test('plugin reader can browse without install controls (CAP-005)', async ({
-    browser,
-  }) => {
+  test('plugin reader can browse without install controls (CAP-005)', async ({ browser }) => {
     await withPersona(browser, personas.reader, async (personaPage) => {
       await openPluginsWorkspace(personaPage)
       await expect(personaPage.getByRole('button', { name: 'Upload Plugin' })).toHaveCount(0)
@@ -761,9 +749,7 @@ test.describe.serial('plugin capability boundaries', () => {
     })
   })
 
-  test('plugin installer can access upload controls (CAP-005)', async ({
-    browser,
-  }) => {
+  test('plugin installer can access upload controls (CAP-005)', async ({ browser }) => {
     await withPersona(browser, personas.installer, async (personaPage) => {
       await openPluginsWorkspace(personaPage)
       await expect(personaPage.getByRole('button', { name: 'Upload Plugin' })).toBeVisible()
@@ -866,9 +852,7 @@ test.describe.serial('plugin capability boundaries', () => {
         permissions: [],
       })
 
-      await expect(
-        personaPage.getByRole('heading', { name: `Review ${pluginName}` }),
-      ).toBeVisible()
+      await expect(personaPage.getByRole('heading', { name: `Review ${pluginName}` })).toBeVisible()
       await expect(installedPluginHeading(personaPage, pluginName)).toHaveCount(0)
 
       await personaPage.getByRole('button', { name: 'Approve and Install' }).click()
@@ -888,9 +872,9 @@ test.describe.serial('plugin capability boundaries', () => {
       await personaPage.getByTestId('step-up-password').fill(personas.installer.password)
       await personaPage.getByTestId('step-up-confirm').click()
       await expect(stepUpDialog).toBeHidden({ timeout: 20_000 })
-      await expect(
-        personaPage.getByRole('heading', { name: `Review ${pluginName}` }),
-      ).toHaveCount(0)
+      await expect(personaPage.getByRole('heading', { name: `Review ${pluginName}` })).toHaveCount(
+        0,
+      )
       await expect(installedPluginHeading(personaPage, pluginName)).toBeVisible()
     })
   })
@@ -944,7 +928,10 @@ test.describe.serial('AI capability boundaries', () => {
   test.setTimeout(180_000)
 
   const suffix = Date.now().toString(36)
-  const personas: Record<'siteReader' | 'chatReader' | 'providerManager' | 'auditor', PersonaAccount> = {
+  const personas: Record<
+    'siteReader' | 'chatReader' | 'providerManager' | 'auditor',
+    PersonaAccount
+  > = {
     siteReader: {
       roleName: `CAP AI Site Reader ${suffix}`,
       email: `cap-ai-site-reader-${suffix}@example.com`,
@@ -974,16 +961,9 @@ test.describe.serial('AI capability boundaries', () => {
     try {
       await login(ownerPage)
       await createRole(ownerPage, personas.siteReader.roleName, ['View site'])
-      await createRole(ownerPage, personas.chatReader.roleName, [
-        'View site',
-        'Use AI chat',
-      ])
-      await createRole(ownerPage, personas.providerManager.roleName, [
-        'Manage AI providers',
-      ])
-      await createRole(ownerPage, personas.auditor.roleName, [
-        'Read AI audit log',
-      ])
+      await createRole(ownerPage, personas.chatReader.roleName, ['View site', 'Use AI chat'])
+      await createRole(ownerPage, personas.providerManager.roleName, ['Manage AI providers'])
+      await createRole(ownerPage, personas.auditor.roleName, ['Read AI audit log'])
       for (const persona of Object.values(personas)) {
         await createUser(ownerPage, {
           email: persona.email,
@@ -1006,15 +986,11 @@ test.describe.serial('AI capability boundaries', () => {
     })
   })
 
-  test('site reader with ai.chat can open the assistant panel (CAP-005)', async ({
-    browser,
-  }) => {
+  test('site reader with ai.chat can open the assistant panel (CAP-005)', async ({ browser }) => {
     await withPersona(browser, personas.chatReader, async (personaPage) => {
       await openReadableSiteEditor(personaPage)
       await personaPage.getByTestId('panel-rail-agent').click()
-      await expect(
-        personaPage.getByRole('complementary', { name: 'AI Assistant' }),
-      ).toBeVisible()
+      await expect(personaPage.getByRole('complementary', { name: 'AI Assistant' })).toBeVisible()
     })
   })
 
@@ -1127,7 +1103,12 @@ async function openNamedPage(page: Page, name: string): Promise<void> {
 }
 
 async function openReadableSiteEditor(page: Page): Promise<void> {
-  if (!(await page.getByTestId('canvas-root').isVisible({ timeout: 1_000 }).catch(() => false))) {
+  if (
+    !(await page
+      .getByTestId('canvas-root')
+      .isVisible({ timeout: 1_000 })
+      .catch(() => false))
+  ) {
     await page.goto('/admin/site')
   }
   await expect(page.getByTestId('canvas-root')).toBeVisible({ timeout: 20_000 })
@@ -1278,9 +1259,7 @@ async function openReplaceImportReview(
 }
 
 function siteImportDialog(page: Page, name: 'Import site' | 'Review import') {
-  return page
-    .getByRole('dialog', { name })
-    .or(page.getByRole('alertdialog', { name }))
+  return page.getByRole('dialog', { name }).or(page.getByRole('alertdialog', { name }))
 }
 
 async function expectDataTablePresence(
@@ -1288,9 +1267,11 @@ async function expectDataTablePresence(
   tableName: string,
   shouldExist: boolean,
 ): Promise<void> {
-  await expect.poll(async () => dataTableExists(page, tableName), {
-    timeout: 20_000,
-  }).toBe(shouldExist)
+  await expect
+    .poll(async () => dataTableExists(page, tableName), {
+      timeout: 20_000,
+    })
+    .toBe(shouldExist)
 }
 
 async function dataTableExists(page: Page, tableName: string): Promise<boolean> {
@@ -1328,26 +1309,25 @@ async function uploadMediaFile(page: Page, filename: string): Promise<void> {
 }
 
 async function waitForMediaReplace(page: Page): Promise<void> {
-  await page.waitForResponse((response) =>
-    response.request().method() === 'POST' &&
-    response.url().includes('/admin/api/cms/media/') &&
-    response.url().endsWith('/replace') &&
-    response.ok(),
+  await page.waitForResponse(
+    (response) =>
+      response.request().method() === 'POST' &&
+      response.url().includes('/admin/api/cms/media/') &&
+      response.url().endsWith('/replace') &&
+      response.ok(),
   )
 }
 
 async function waitForMediaDelete(page: Page): Promise<void> {
-  await page.waitForResponse((response) =>
-    response.request().method() === 'DELETE' &&
-    response.url().includes('/admin/api/cms/media/') &&
-    response.ok(),
+  await page.waitForResponse(
+    (response) =>
+      response.request().method() === 'DELETE' &&
+      response.url().includes('/admin/api/cms/media/') &&
+      response.ok(),
   )
 }
 
-async function uploadPluginManifest(
-  page: Page,
-  manifest: Record<string, unknown>,
-): Promise<void> {
+async function uploadPluginManifest(page: Page, manifest: Record<string, unknown>): Promise<void> {
   await page.getByLabel('Plugin file').setInputFiles({
     name: `${String(manifest.id)}.plugin.json`,
     mimeType: 'application/json',
@@ -1397,9 +1377,7 @@ async function installReviewedPluginPackage(
 }
 
 function installedPluginHeading(page: Page, pluginName: string) {
-  return page
-    .locator('[aria-label="Installed plugins"]')
-    .getByRole('heading', { name: pluginName })
+  return page.locator('[aria-label="Installed plugins"]').getByRole('heading', { name: pluginName })
 }
 
 function installedPluginCard(page: Page, pluginName: string) {

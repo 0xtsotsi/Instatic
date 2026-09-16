@@ -18,9 +18,7 @@ import {
  * reused database from a previous run.
  */
 test.describe('page management', () => {
-  test('creates a new page and opens it in the canvas (PAGE-001)', async ({
-    page,
-  }) => {
+  test('creates a new page and opens it in the canvas (PAGE-001)', async ({ page }) => {
     const name = uniqueName('About')
     const slug = uniqueSlug('about')
 
@@ -48,9 +46,7 @@ test.describe('page management', () => {
     await expect(item).toHaveCount(0)
   })
 
-  test('renames a page and opens it under the new name (PAGE-002)', async ({
-    page,
-  }) => {
+  test('renames a page and opens it under the new name (PAGE-002)', async ({ page }) => {
     const original = uniqueName('Pricing')
     const renamed = uniqueName('Plans')
     const slug = uniqueSlug('pricing')
@@ -59,9 +55,7 @@ test.describe('page management', () => {
     await createPage(page, original, slug)
 
     await test.step('rename via the context menu', async () => {
-      await page
-        .getByRole('treeitem', { name: `Open page ${original}` })
-        .click({ button: 'right' })
+      await page.getByRole('treeitem', { name: `Open page ${original}` }).click({ button: 'right' })
       await page.getByRole('menuitem', { name: 'Rename' }).click()
 
       const renameInput = page.getByRole('textbox', {
@@ -76,9 +70,7 @@ test.describe('page management', () => {
         name: `Open page ${renamed}`,
       })
       await expect(renamedItem).toBeVisible()
-      await expect(
-        page.getByRole('treeitem', { name: `Open page ${original}` }),
-      ).toHaveCount(0)
+      await expect(page.getByRole('treeitem', { name: `Open page ${original}` })).toHaveCount(0)
 
       await openPage(renamedItem)
     })

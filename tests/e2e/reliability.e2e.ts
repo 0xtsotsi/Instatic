@@ -15,9 +15,7 @@ import {
  * replacement for deeper crash/error-boundary audits.
  */
 test.describe('reliability', () => {
-  test('reloads during normal editing and recovers the canvas (REL-001)', async ({
-    page,
-  }) => {
+  test('reloads during normal editing and recovers the canvas (REL-001)', async ({ page }) => {
     const suffix = Date.now().toString(36)
     const pageName = `Reload Recovery ${suffix}`
     const slug = `reload-recovery-${suffix}`

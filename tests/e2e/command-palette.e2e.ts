@@ -14,9 +14,7 @@ import { createPage, insertNotchModule, openSiteEditor } from './helpers'
  */
 const OPEN_KEY = process.platform === 'darwin' ? 'Meta+k' : 'Control+k'
 test.describe('command palette', () => {
-  test('opens with the shortcut and closes with Esc (SPOT-001)', async ({
-    page,
-  }) => {
+  test('opens with the shortcut and closes with Esc (SPOT-001)', async ({ page }) => {
     await page.goto('/admin/dashboard')
 
     const palette = await openPalette(page)
@@ -44,9 +42,7 @@ test.describe('command palette', () => {
     await expect(palette(page)).toBeHidden()
   })
 
-  test('requires a two-Enter confirm for a destructive command (SPOT-004)', async ({
-    page,
-  }) => {
+  test('requires a two-Enter confirm for a destructive command (SPOT-004)', async ({ page }) => {
     const name = `Palette Delete ${Date.now().toString(36)}`
 
     // Create a throwaway page so "Delete current page" has a safe target that is
@@ -65,21 +61,15 @@ test.describe('command palette', () => {
     // First Enter arms the confirm; it does not delete yet.
     await page.keyboard.press('Enter')
     await expect(palette(page).getByRole('alert')).toHaveText(/again to confirm/)
-    await expect(
-      page.getByRole('treeitem', { name: `Open page ${name}` }),
-    ).toBeVisible()
+    await expect(page.getByRole('treeitem', { name: `Open page ${name}` })).toBeVisible()
 
     // Second Enter runs it: the palette closes and the page is gone.
     await page.keyboard.press('Enter')
     await expect(palette(page)).toBeHidden()
-    await expect(
-      page.getByRole('treeitem', { name: `Open page ${name}` }),
-    ).toHaveCount(0)
+    await expect(page.getByRole('treeitem', { name: `Open page ${name}` })).toHaveCount(0)
   })
 
-  test('clears destructive confirmation after the timeout (SPOT-005)', async ({
-    page,
-  }) => {
+  test('clears destructive confirmation after the timeout (SPOT-005)', async ({ page }) => {
     const name = `Palette Timeout ${Date.now().toString(36)}`
 
     await openSiteEditor(page)
@@ -101,14 +91,10 @@ test.describe('command palette', () => {
       timeout: 6_500,
     })
     await expect(deleteCommand).not.toContainText('Press ↵ again to confirm')
-    await expect(
-      page.getByRole('treeitem', { name: `Open page ${name}` }),
-    ).toBeVisible()
+    await expect(page.getByRole('treeitem', { name: `Open page ${name}` })).toBeVisible()
   })
 
-  test('shows an empty state for a no-match query (SPOT-006)', async ({
-    page,
-  }) => {
+  test('shows an empty state for a no-match query (SPOT-006)', async ({ page }) => {
     await page.goto('/admin/dashboard')
 
     await openPalette(page)
@@ -136,9 +122,7 @@ test.describe('command palette', () => {
     ).toBeVisible()
   })
 
-  test('boosts selected-layer commands near the top (SPOT-007)', async ({
-    page,
-  }) => {
+  test('boosts selected-layer commands near the top (SPOT-007)', async ({ page }) => {
     await page.goto('/admin/dashboard')
     await openPalette(page)
     await expect(page.getByRole('option', { name: /Duplicate layer/ })).toHaveCount(0)
@@ -147,16 +131,16 @@ test.describe('command palette', () => {
 
     await openSiteEditor(page)
     await insertNotchModule(page, 'text')
-    await expect(
-      page.getByRole('button', { name: 'Duplicate selected layers' }),
-    ).toBeVisible()
+    await expect(page.getByRole('button', { name: 'Duplicate selected layers' })).toBeVisible()
 
     await openPalette(page)
     const options = palette(page).getByRole('option')
-    await expect.poll(async () => {
-      const visibleOptions = await options.allTextContents()
-      return visibleOptions.slice(0, 5).join('\n')
-    }).toContain('Duplicate layer')
+    await expect
+      .poll(async () => {
+        const visibleOptions = await options.allTextContents()
+        return visibleOptions.slice(0, 5).join('\n')
+      })
+      .toContain('Duplicate layer')
   })
 
   test('opens over the AI assistant panel and restores panel focus (SPOT-009)', async ({
@@ -207,9 +191,7 @@ test.describe('command palette', () => {
     await expect(palette(page)).toBeHidden()
   })
 
-  test('shows async provider skeletons until results resolve (SPOT-010)', async ({
-    page,
-  }) => {
+  test('shows async provider skeletons until results resolve (SPOT-010)', async ({ page }) => {
     let releaseContentSearch: () => void = () => {}
     const contentSearchReleased = new Promise<void>((resolve) => {
       releaseContentSearch = resolve
@@ -240,9 +222,11 @@ test.describe('command palette', () => {
     await openPalette(page)
     await input(page).fill('async skeleton probe')
 
-    const contentSkeleton = page.getByRole('group', {
-      name: 'Content',
-    }).and(page.locator('[aria-busy="true"]'))
+    const contentSkeleton = page
+      .getByRole('group', {
+        name: 'Content',
+      })
+      .and(page.locator('[aria-busy="true"]'))
     await expect(contentSkeleton).toBeVisible({ timeout: 2_000 })
 
     releaseContentSearch()
@@ -323,9 +307,7 @@ test.describe('command palette', () => {
     expect(Number.parseFloat(markContrast.outlineWidth)).toBeGreaterThanOrEqual(1)
   })
 
-  test('boosts a recently run command to the top on reopen (SPOT-008)', async ({
-    page,
-  }) => {
+  test('boosts a recently run command to the top on reopen (SPOT-008)', async ({ page }) => {
     await page.goto('/admin/dashboard')
 
     await openPalette(page)
@@ -337,9 +319,7 @@ test.describe('command palette', () => {
     // of the list (it outranks the default first nav command, "Go to Site editor").
     await page.goto('/admin/dashboard')
     await openPalette(page)
-    await expect(palette(page).getByRole('option').first()).toContainText(
-      'Go to Content',
-    )
+    await expect(palette(page).getByRole('option').first()).toContainText('Go to Content')
   })
 })
 

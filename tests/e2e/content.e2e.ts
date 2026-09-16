@@ -23,9 +23,7 @@ import {
  * setup guidance.
  */
 test.describe('content', () => {
-  test('creates a post that saves and persists (CONTENT-001)', async ({
-    page,
-  }) => {
+  test('creates a post that saves and persists (CONTENT-001)', async ({ page }) => {
     // Saving a draft does not step-up, so this runs on the shared owner state.
     const title = `E2E Post ${Date.now().toString(36)}`
     await createPostDraft(page, title, 'Body written by the automated content test.')
@@ -52,17 +50,23 @@ test.describe('content', () => {
       const bodyEditor = page.getByTestId('content-body-editor')
       await bodyEditor.click()
       await page.keyboard.type('/h2')
-      await page.getByTestId('content-slash-menu').getByRole('option', {
-        name: /Heading 2/,
-      }).click()
+      await page
+        .getByTestId('content-slash-menu')
+        .getByRole('option', {
+          name: /Heading 2/,
+        })
+        .click()
       await page.keyboard.type('Release notes')
       await expect(bodyEditor.locator('h2')).toHaveText('Release notes')
 
       await page.keyboard.press('Enter')
       await page.keyboard.type('/data')
-      await page.getByTestId('content-slash-menu').getByRole('option', {
-        name: /Data token/,
-      }).click()
+      await page
+        .getByTestId('content-slash-menu')
+        .getByRole('option', {
+          name: /Data token/,
+        })
+        .click()
       await expect(bodyEditor).toContainText('{currentEntry.title}')
     })
 
@@ -89,14 +93,12 @@ test.describe('content', () => {
     const setupAlert = assistantPanel.getByRole('alert')
     await expect(setupAlert.getByText('Connect an AI provider')).toBeVisible()
     await expect(
-      setupAlert.getByText('Add a provider credential, then choose a default model before starting a chat.'),
+      setupAlert.getByText(
+        'Add a provider credential, then choose a default model before starting a chat.',
+      ),
     ).toBeVisible()
-    await expect(
-      assistantPanel.getByRole('button', { name: 'Open AI settings' }),
-    ).toBeVisible()
-    await expect(
-      assistantPanel.getByLabel('Message to AI assistant'),
-    ).toBeDisabled()
+    await expect(assistantPanel.getByRole('button', { name: 'Open AI settings' })).toBeVisible()
+    await expect(assistantPanel.getByLabel('Message to AI assistant')).toBeDisabled()
     await expect(assistantPanel.getByRole('button', { name: 'Send' })).toBeDisabled()
   })
 
@@ -135,13 +137,11 @@ test.describe('content', () => {
         await expect(liveCanvas).toBeVisible()
 
         const liveFrame = liveCanvas.frameLocator('iframe[title="Live preview"]')
-        await expect(
-          liveFrame.getByRole('heading', { name: draftTitle }),
-        ).toBeVisible({ timeout: 20_000 })
+        await expect(liveFrame.getByRole('heading', { name: draftTitle })).toBeVisible({
+          timeout: 20_000,
+        })
         await expect(liveFrame.getByText(draftOnlyBody)).toBeVisible()
-        await expect(
-          liveFrame.getByLabel('Post body (live preview)'),
-        ).toBeVisible()
+        await expect(liveFrame.getByLabel('Post body (live preview)')).toBeVisible()
       })
     })
   })
@@ -150,9 +150,7 @@ test.describe('content', () => {
   test.describe('publishing', () => {
     test.use({ storageState: ANONYMOUS_STATE })
 
-    test('publishes a post and shows the published state (CONTENT-002)', async ({
-      page,
-    }) => {
+    test('publishes a post and shows the published state (CONTENT-002)', async ({ page }) => {
       await login(page)
       const title = `E2E Publish ${Date.now().toString(36)}`
       await createPostDraft(page, title, 'Body for the publish test.')
@@ -161,7 +159,12 @@ test.describe('content', () => {
         await page.getByRole('button', { name: 'Publish post' }).click()
 
         const stepUp = page.getByTestId('step-up-dialog')
-        if (await stepUp.waitFor({ state: 'visible', timeout: 10_000 }).then(() => true, () => false)) {
+        if (
+          await stepUp.waitFor({ state: 'visible', timeout: 10_000 }).then(
+            () => true,
+            () => false,
+          )
+        ) {
           await page.getByTestId('step-up-password').fill(OWNER.password)
           await page.getByTestId('step-up-confirm').click()
           await expect(stepUp).toBeHidden({ timeout: 20_000 })
@@ -170,9 +173,9 @@ test.describe('content', () => {
 
       // The publish action settles into a disabled "Published" button and the
       // entry's row reports the published status in the list.
-      await expect(
-        page.getByRole('button', { name: 'Published', exact: true }),
-      ).toBeDisabled({ timeout: 20_000 })
+      await expect(page.getByRole('button', { name: 'Published', exact: true })).toBeDisabled({
+        timeout: 20_000,
+      })
       await expect(entryRow(page, title)).toContainText('published')
     })
 
@@ -259,29 +262,28 @@ test.describe('content', () => {
         await page.getByRole('button', { name: 'Publish post' }).click()
 
         const stepUp = page.getByTestId('step-up-dialog')
-        if (await stepUp.waitFor({ state: 'visible', timeout: 10_000 }).then(() => true, () => false)) {
+        if (
+          await stepUp.waitFor({ state: 'visible', timeout: 10_000 }).then(
+            () => true,
+            () => false,
+          )
+        ) {
           await page.getByTestId('step-up-password').fill(OWNER.password)
           await page.getByTestId('step-up-confirm').click()
           await expect(stepUp).toBeHidden({ timeout: 20_000 })
         }
 
-        await expect(
-          page.getByRole('button', { name: 'Published', exact: true }),
-        ).toBeDisabled({ timeout: 20_000 })
+        await expect(page.getByRole('button', { name: 'Published', exact: true })).toBeDisabled({
+          timeout: 20_000,
+        })
 
         await visitPublicPage(browser, {
           path: `/posts/${slug}`,
           visibleText: [title, boldText, italicText],
           assert: async (visitor) => {
-            await expect(
-              visitor.getByRole('heading', { name: title }),
-            ).toBeVisible()
-            await expect(
-              visitor.locator('strong').filter({ hasText: boldText }),
-            ).toBeVisible()
-            await expect(
-              visitor.locator('em').filter({ hasText: italicText }),
-            ).toBeVisible()
+            await expect(visitor.getByRole('heading', { name: title })).toBeVisible()
+            await expect(visitor.locator('strong').filter({ hasText: boldText })).toBeVisible()
+            await expect(visitor.locator('em').filter({ hasText: italicText })).toBeVisible()
           },
         })
       })
@@ -398,9 +400,9 @@ test.describe('content', () => {
       await test.step('publish the post so template preview and public routes use saved row data', async () => {
         await page.getByRole('button', { name: 'Publish post' }).click()
         await completeStepUp(page)
-        await expect(
-          page.getByRole('button', { name: 'Published', exact: true }),
-        ).toBeDisabled({ timeout: 20_000 })
+        await expect(page.getByRole('button', { name: 'Published', exact: true })).toBeDisabled({
+          timeout: 20_000,
+        })
       })
 
       await test.step('insert the custom field from the Site builder binding picker', async () => {
@@ -410,8 +412,13 @@ test.describe('content', () => {
         await page.getByRole('button', { name: 'Insert binding for Text' }).click()
 
         const bindingMenu = page.getByRole('menu', { name: 'Insert binding for Text' })
-        await expect(bindingMenu.getByLabel('Scoped to Posts')).toContainText(/Current row\s+.\s+Posts/)
-        const customFieldOption = bindingMenu.getByRole('button').filter({ hasText: fieldLabel }).first()
+        await expect(bindingMenu.getByLabel('Scoped to Posts')).toContainText(
+          /Current row\s+.\s+Posts/,
+        )
+        const customFieldOption = bindingMenu
+          .getByRole('button')
+          .filter({ hasText: fieldLabel })
+          .first()
         await expect(customFieldOption).toBeVisible()
         await customFieldOption.click()
         await page.keyboard.press('Escape')
@@ -439,11 +446,7 @@ test.describe('content', () => {
  * Create a post draft with a title and body and save it, leaving it selected
  * and visible in the entry list. Assumes the user is logged in.
  */
-async function createPostDraft(
-  page: Page,
-  title: string,
-  body: string,
-): Promise<void> {
+async function createPostDraft(page: Page, title: string, body: string): Promise<void> {
   await page.goto('/admin/content')
 
   await test.step('create a new post', async () => {
@@ -479,11 +482,7 @@ async function createPostDraftWithSlug(
   })
 }
 
-async function addPostsTextField(
-  page: Page,
-  fieldId: string,
-  fieldLabel: string,
-): Promise<void> {
+async function addPostsTextField(page: Page, fieldId: string, fieldLabel: string): Promise<void> {
   await page.goto('/admin/data')
   await expect(page.getByTestId('data-left-sidebar')).toBeVisible({ timeout: 20_000 })
 
@@ -535,9 +534,10 @@ async function createPostsTemplate(
 
 async function saveSelectedDraft(page: Page, title: string): Promise<void> {
   await page.getByRole('button', { name: 'More publishing actions' }).click()
-  const saveResponse = page.waitForResponse((response) =>
-    /\/admin\/api\/cms\/data\/rows\/[^/]+$/.test(new URL(response.url()).pathname) &&
-    response.request().method() === 'PATCH',
+  const saveResponse = page.waitForResponse(
+    (response) =>
+      /\/admin\/api\/cms\/data\/rows\/[^/]+$/.test(new URL(response.url()).pathname) &&
+      response.request().method() === 'PATCH',
   )
   await page.getByTestId('toolbar-content-save-draft-action').click()
   expect((await saveResponse).ok()).toBe(true)

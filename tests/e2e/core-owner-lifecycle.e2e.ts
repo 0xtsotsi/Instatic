@@ -30,10 +30,7 @@ const DRAFT_ONLY_TEXT = 'Automated E2E draft only headline'
 test.describe('core owner lifecycle', () => {
   test.use({ storageState: ANONYMOUS_STATE })
 
-  test('logs in, edits, publishes, and keeps later drafts private', async ({
-    page,
-    browser,
-  }) => {
+  test('logs in, edits, publishes, and keeps later drafts private', async ({ page, browser }) => {
     await test.step('log in as the owner', async () => {
       await login(page)
       await openSiteEditor(page)

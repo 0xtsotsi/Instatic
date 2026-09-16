@@ -16,9 +16,7 @@ const EDITOR_LAYOUT_STORAGE_KEY = 'instatic-editor-layout-v2'
  * Read-only navigation — runs as the owner via the shared auth state.
  */
 test.describe('admin navigation', () => {
-  test('moves between Site, Content, Plugins, Users, and Account', async ({
-    page,
-  }) => {
+  test('moves between Site, Content, Plugins, Users, and Account', async ({ page }) => {
     await page.goto('/admin/site')
     await expectEditorReady(page)
     await expectActiveSection(page, 'Site')
@@ -127,7 +125,10 @@ test.describe('admin navigation', () => {
 
     try {
       await page.goto('/admin/content')
-      previousLayout = await page.evaluate((key) => localStorage.getItem(key), EDITOR_LAYOUT_STORAGE_KEY)
+      previousLayout = await page.evaluate(
+        (key) => localStorage.getItem(key),
+        EDITOR_LAYOUT_STORAGE_KEY,
+      )
       await page.evaluate((key) => localStorage.removeItem(key), EDITOR_LAYOUT_STORAGE_KEY)
       await page.reload()
       await expect(page.getByTestId('content-explorer-panel')).toBeVisible({ timeout: 20_000 })
@@ -182,10 +183,9 @@ test.describe('admin navigation', () => {
         await expect(page.getByTestId('content-explorer-panel')).toBeVisible({ timeout: 20_000 })
         await expect(leftSidebar).toHaveAttribute('data-expanded', 'true')
         await expect(rightSidebar).toHaveAttribute('data-expanded', 'true')
-        await expect(page.getByRole('separator', { name: 'Resize content sidebar' })).toHaveAttribute(
-          'aria-valuenow',
-          '520',
-        )
+        await expect(
+          page.getByRole('separator', { name: 'Resize content sidebar' }),
+        ).toHaveAttribute('aria-valuenow', '520')
         await expect(page.getByRole('separator', { name: 'Resize right sidebar' })).toHaveAttribute(
           'aria-valuenow',
           '300',
@@ -222,13 +222,15 @@ test.describe('admin navigation', () => {
         )
       })
     } finally {
-      await page.evaluate(
-        ({ key, value }) => {
-          if (value === null) localStorage.removeItem(key)
-          else localStorage.setItem(key, value)
-        },
-        { key: EDITOR_LAYOUT_STORAGE_KEY, value: previousLayout },
-      ).catch(() => {})
+      await page
+        .evaluate(
+          ({ key, value }) => {
+            if (value === null) localStorage.removeItem(key)
+            else localStorage.setItem(key, value)
+          },
+          { key: EDITOR_LAYOUT_STORAGE_KEY, value: previousLayout },
+        )
+        .catch(() => {})
     }
   })
 })
@@ -306,7 +308,7 @@ test.describe('admin settings', () => {
 
         const savedPrefs = await page.evaluate((key) => {
           const raw = localStorage.getItem(key)
-          return raw ? JSON.parse(raw) as Record<string, unknown> : {}
+          return raw ? (JSON.parse(raw) as Record<string, unknown>) : {}
         }, EDITOR_PREFS_KEY)
         expect(savedPrefs.autoSave).toBe(false)
         expect(savedPrefs.autoSaveDelay).toBe('15')
@@ -324,12 +326,10 @@ test.describe('admin settings', () => {
           'aria-checked',
           'false',
         )
-        await expect(
-          reloadedDialog.getByRole('combobox', { name: 'Auto-save delay' }),
-        ).toHaveValue('15 seconds')
-        await expect(reloadedDialog.getByRole('combobox', { name: 'Theme' })).toHaveValue(
-          'Light',
+        await expect(reloadedDialog.getByRole('combobox', { name: 'Auto-save delay' })).toHaveValue(
+          '15 seconds',
         )
+        await expect(reloadedDialog.getByRole('combobox', { name: 'Theme' })).toHaveValue('Light')
         await expect(reloadedDialog.getByRole('combobox', { name: 'UI density' })).toHaveValue(
           'Comfortable',
         )
@@ -399,23 +399,21 @@ test.describe('admin settings', () => {
         )
       })
     } finally {
-      await page.evaluate(
-        ({ key, value }) => {
-          if (value === null) localStorage.removeItem(key)
-          else localStorage.setItem(key, value)
-        },
-        { key: EDITOR_PREFS_KEY, value: previousPrefs },
-      ).catch(() => {})
+      await page
+        .evaluate(
+          ({ key, value }) => {
+            if (value === null) localStorage.removeItem(key)
+            else localStorage.setItem(key, value)
+          },
+          { key: EDITOR_PREFS_KEY, value: previousPrefs },
+        )
+        .catch(() => {})
     }
   })
 })
 
 /** Click a section link in the toolbar and confirm the workspace took over. */
-async function navigateSection(
-  page: Page,
-  name: string,
-  path: string,
-): Promise<void> {
+async function navigateSection(page: Page, name: string, path: string): Promise<void> {
   await test.step(`navigate to ${name}`, async () => {
     await page.getByTestId('toolbar').getByRole('link', { name }).click()
     await expect(page).toHaveURL(new RegExp(`${path}$`))
@@ -482,7 +480,7 @@ async function chooseComboboxOption(
 
 async function expectPageContained(
   page: Page,
-  viewport: { width: number, height: number } = { width: 390, height: 844 },
+  viewport: { width: number; height: number } = { width: 390, height: 844 },
 ): Promise<void> {
   const metrics = await page.evaluate(() => {
     const doc = document.documentElement
@@ -532,21 +530,23 @@ async function expectStoredWorkspaceLayout(
     activeLeftPanel: string
   },
 ): Promise<void> {
-  await expect.poll(async () => {
-    return page.evaluate((key) => {
-      const raw = localStorage.getItem(key)
-      if (!raw) return null
-      const parsed = JSON.parse(raw) as {
-        workspaces?: {
-          content?: {
-            leftWidth?: number
-            rightWidth?: number
-            rightOpen?: boolean
-            activeLeftPanel?: string | null
+  await expect
+    .poll(async () => {
+      return page.evaluate((key) => {
+        const raw = localStorage.getItem(key)
+        if (!raw) return null
+        const parsed = JSON.parse(raw) as {
+          workspaces?: {
+            content?: {
+              leftWidth?: number
+              rightWidth?: number
+              rightOpen?: boolean
+              activeLeftPanel?: string | null
+            }
           }
         }
-      }
-      return parsed.workspaces?.content ?? null
-    }, EDITOR_LAYOUT_STORAGE_KEY)
-  }).toMatchObject(expected)
+        return parsed.workspaces?.content ?? null
+      }, EDITOR_LAYOUT_STORAGE_KEY)
+    })
+    .toMatchObject(expected)
 }

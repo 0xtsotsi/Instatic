@@ -71,9 +71,7 @@ test.describe('media', () => {
     })
 
     // The editor canvas previews the chosen asset from /uploads.
-    await expect(
-      canvasFrame(page).locator('img[src*="/uploads/"]').first(),
-    ).toBeVisible()
+    await expect(canvasFrame(page).locator('img[src*="/uploads/"]').first()).toBeVisible()
 
     await saveDraft(page)
     await publishDraft(page)
@@ -82,9 +80,7 @@ test.describe('media', () => {
     await visitPublishedMediaPage(browser, slug)
   })
 
-  test('rejects an unsupported upload with clear feedback (MEDIA-002)', async ({
-    page,
-  }) => {
+  test('rejects an unsupported upload with clear feedback (MEDIA-002)', async ({ page }) => {
     await login(page)
     await page.goto('/admin/media')
 
@@ -136,9 +132,7 @@ test.describe('media', () => {
     })
 
     // Both image modules render the reused asset from /uploads.
-    await expect(
-      canvasFrame(page).locator('img[src*="/uploads/"]'),
-    ).toHaveCount(2)
+    await expect(canvasFrame(page).locator('img[src*="/uploads/"]')).toHaveCount(2)
   })
 
   test('applies an uploaded asset from the docked Media Explorer to a selected image (SITE-015)', async ({
@@ -184,9 +178,7 @@ test.describe('media', () => {
     await visitPublishedMediaPage(browser, slug)
   })
 
-  test('edits media metadata and persists it after reload (MEDIA-004)', async ({
-    page,
-  }) => {
+  test('edits media metadata and persists it after reload (MEDIA-004)', async ({ page }) => {
     const suffix = Date.now().toString(36)
     const originalFilename = `metadata-${suffix}.png`
     const renamedFilename = `metadata-renamed-${suffix}.png`
@@ -218,10 +210,7 @@ test.describe('media', () => {
     await fillMediaMetadataField(page, viewer, 'Caption', caption)
 
     await viewer.getByLabel('Add tag').fill(tag)
-    await Promise.all([
-      waitForMediaPatch(page),
-      viewer.getByLabel('Add tag').press('Enter'),
-    ])
+    await Promise.all([waitForMediaPatch(page), viewer.getByLabel('Add tag').press('Enter')])
     await expect(viewer.getByRole('list', { name: 'Selected tags' })).toContainText(tag)
 
     await page.reload()
@@ -236,9 +225,7 @@ test.describe('media', () => {
     await expect(viewer.getByRole('list', { name: 'Selected tags' })).toContainText(tag)
   })
 
-  test('keeps the media metadata viewer usable at mobile width (MEDIA-004)', async ({
-    page,
-  }) => {
+  test('keeps the media metadata viewer usable at mobile width (MEDIA-004)', async ({ page }) => {
     test.setTimeout(60_000)
     const suffix = Date.now().toString(36)
     const filename = `mobile-metadata-${suffix}.png`
@@ -275,10 +262,7 @@ test.describe('media', () => {
     await fillMediaMetadataField(page, viewer, 'Title', title)
     await fillMediaMetadataField(page, viewer, 'Alt text', altText)
     await viewer.getByLabel('Add tag').fill(tag)
-    await Promise.all([
-      waitForMediaPatch(page),
-      viewer.getByLabel('Add tag').press('Enter'),
-    ])
+    await Promise.all([waitForMediaPatch(page), viewer.getByLabel('Add tag').press('Enter')])
 
     await expect(viewer.getByLabel('Title')).toHaveValue(title)
     await expect(viewer.getByLabel('Alt text')).toHaveValue(altText)
@@ -286,9 +270,7 @@ test.describe('media', () => {
     await expectMobileViewerContained(page, viewer)
   })
 
-  test('replaces, deletes, restores, and purges an asset (MEDIA-005)', async ({
-    page,
-  }) => {
+  test('replaces, deletes, restores, and purges an asset (MEDIA-005)', async ({ page }) => {
     const suffix = Date.now().toString(36)
     const filename = `replace-delete-${suffix}.png`
     const replacementFilename = `replacement-${suffix}.png`
@@ -337,7 +319,10 @@ test.describe('media', () => {
     await openAssetMenu(trashedAsset, page)
     await Promise.all([
       waitForMediaRestore(page),
-      page.getByRole('menu', { name: 'Media item options' }).getByRole('menuitem', { name: 'Restore' }).click(),
+      page
+        .getByRole('menu', { name: 'Media item options' })
+        .getByRole('menuitem', { name: 'Restore' })
+        .click(),
     ])
     await expect(page.getByRole('button', { name: `Open ${replacementFilename}` })).toHaveCount(0)
 
@@ -350,15 +335,16 @@ test.describe('media', () => {
     await openAssetMenu(page.getByRole('button', { name: `Open ${replacementFilename}` }), page)
     await Promise.all([
       waitForMediaDelete(page),
-      page.getByRole('menu', { name: 'Media item options' }).getByRole('menuitem', { name: 'Delete' }).click(),
+      page
+        .getByRole('menu', { name: 'Media item options' })
+        .getByRole('menuitem', { name: 'Delete' })
+        .click(),
     ])
     await expect(page.getByRole('button', { name: `Open ${replacementFilename}` })).toHaveCount(0)
     await expect(page.getByText('Trash is empty')).toBeVisible()
   })
 
-  test('keeps replace and trash restore usable at mobile width (MEDIA-005)', async ({
-    page,
-  }) => {
+  test('keeps replace and trash restore usable at mobile width (MEDIA-005)', async ({ page }) => {
     test.setTimeout(60_000)
     const suffix = Date.now().toString(36)
     const filename = `mobile-lifecycle-${suffix}.png`
@@ -390,7 +376,9 @@ test.describe('media', () => {
     const replaceDialog = page.getByRole('dialog', { name: 'Replace file' })
     await expect(replaceDialog).toBeVisible()
     await expectMobileDialogContained(page, replaceDialog)
-    await expect(replaceDialog.getByRole('button', { name: 'Choose replacement file' })).toBeVisible()
+    await expect(
+      replaceDialog.getByRole('button', { name: 'Choose replacement file' }),
+    ).toBeVisible()
     await replaceDialog
       .locator('input[type="file"]')
       .setInputFiles({ name: replacementFilename, mimeType: 'image/png', buffer: PNG_1X1 })
@@ -414,7 +402,10 @@ test.describe('media', () => {
     await openAssetKeyboardMenu(replacedAsset, page)
     await Promise.all([
       waitForMediaDelete(page),
-      page.getByRole('menu', { name: 'Media item options' }).getByRole('menuitem', { name: 'Delete' }).click(),
+      page
+        .getByRole('menu', { name: 'Media item options' })
+        .getByRole('menuitem', { name: 'Delete' })
+        .click(),
     ])
     await expect(page.getByRole('button', { name: `Open ${replacementFilename}` })).toHaveCount(0)
 
@@ -424,7 +415,10 @@ test.describe('media', () => {
     await openAssetKeyboardMenu(trashedAsset, page)
     await Promise.all([
       waitForMediaRestore(page),
-      page.getByRole('menu', { name: 'Media item options' }).getByRole('menuitem', { name: 'Restore' }).click(),
+      page
+        .getByRole('menu', { name: 'Media item options' })
+        .getByRole('menuitem', { name: 'Restore' })
+        .click(),
     ])
     await expect(page.getByRole('button', { name: `Open ${replacementFilename}` })).toHaveCount(0)
 
@@ -433,9 +427,7 @@ test.describe('media', () => {
     await expectMobilePageContained(page)
   })
 
-  test('shows built-in storage configuration on a clean install (MEDIA-006)', async ({
-    page,
-  }) => {
+  test('shows built-in storage configuration on a clean install (MEDIA-006)', async ({ page }) => {
     await page.addInitScript(() => {
       localStorage.removeItem('instatic-editor-layout-v2')
     })
@@ -457,18 +449,16 @@ test.describe('media', () => {
       ).toHaveValue('Local disk (built-in)')
     }
 
-    await expect(
-      panel.getByRole('combobox', { name: 'Variant delegate' }),
-    ).toHaveValue('Local sharp ladder (built-in)')
+    await expect(panel.getByRole('combobox', { name: 'Variant delegate' })).toHaveValue(
+      'Local sharp ladder (built-in)',
+    )
     await expect(panel.getByText('No variant delegate plugins installed yet.')).toBeVisible()
     await expect(panel.getByText(/No external storage adapters installed/)).toBeVisible()
     await expect(panel.getByRole('button', { name: 'Test connection' })).toHaveCount(0)
     await expect(panel.getByRole('button', { name: /Migrate/ })).toHaveCount(0)
   })
 
-  test('keeps the built-in storage panel usable at mobile width (MEDIA-006)', async ({
-    page,
-  }) => {
+  test('keeps the built-in storage panel usable at mobile width (MEDIA-006)', async ({ page }) => {
     test.setTimeout(60_000)
 
     await page.addInitScript(() => {
@@ -512,9 +502,7 @@ test.describe('media', () => {
     await expectMobilePageContained(page)
   })
 
-  test('sanitizes SVG uploads before serving them publicly (MEDIA-007)', async ({
-    page,
-  }) => {
+  test('sanitizes SVG uploads before serving them publicly (MEDIA-007)', async ({ page }) => {
     const filename = `unsafe-svg-${Date.now().toString(36)}.svg`
 
     await login(page)
@@ -579,16 +567,23 @@ async function visitPublishedMediaPage(browser: Browser, slug: string): Promise<
     const publicImage = visitor.locator('img[src*="/uploads/"]').first()
     await expect(publicImage).toBeVisible()
     await expect(publicImage).toHaveJSProperty('complete', true)
-    await expect.poll(async () =>
-      publicImage.evaluate((image) => image instanceof HTMLImageElement ? image.naturalWidth : 0),
-    ).toBeGreaterThan(0)
-    await expect.poll(() =>
-      assetResponses.some((response) =>
-        response.path.startsWith('/uploads/') &&
-        response.status === 200 &&
-        response.contentType.includes('image/png'),
-      ),
-    ).toBe(true)
+    await expect
+      .poll(async () =>
+        publicImage.evaluate((image) =>
+          image instanceof HTMLImageElement ? image.naturalWidth : 0,
+        ),
+      )
+      .toBeGreaterThan(0)
+    await expect
+      .poll(() =>
+        assetResponses.some(
+          (response) =>
+            response.path.startsWith('/uploads/') &&
+            response.status === 200 &&
+            response.contentType.includes('image/png'),
+        ),
+      )
+      .toBe(true)
   } finally {
     await context.close()
   }
@@ -602,10 +597,7 @@ async function fillMediaMetadataField(
 ): Promise<void> {
   const field = scope.getByLabel(label)
   await field.fill(value)
-  await Promise.all([
-    waitForMediaPatch(page),
-    field.blur(),
-  ])
+  await Promise.all([waitForMediaPatch(page), field.blur()])
 }
 
 async function expectMobileViewerContained(page: Page, viewer: Locator): Promise<void> {
@@ -660,18 +652,20 @@ async function expectMobilePageContained(page: Page): Promise<void> {
 }
 
 async function waitForMediaPatch(page: Page): Promise<void> {
-  await page.waitForResponse((response) =>
-    response.request().method() === 'PATCH' &&
-    response.url().includes('/admin/api/cms/media/') &&
-    response.ok(),
+  await page.waitForResponse(
+    (response) =>
+      response.request().method() === 'PATCH' &&
+      response.url().includes('/admin/api/cms/media/') &&
+      response.ok(),
   )
 }
 
 async function waitForMediaUpload(page: Page): Promise<void> {
-  await page.waitForResponse((response) =>
-    response.request().method() === 'POST' &&
-    response.url().endsWith('/admin/api/cms/media') &&
-    response.ok(),
+  await page.waitForResponse(
+    (response) =>
+      response.request().method() === 'POST' &&
+      response.url().endsWith('/admin/api/cms/media') &&
+      response.ok(),
   )
 }
 
@@ -679,7 +673,10 @@ async function deleteVisibleAsset(page: Page, filename: string): Promise<void> {
   await openAssetMenu(page.getByRole('button', { name: `Open ${filename}` }), page)
   await Promise.all([
     waitForMediaDelete(page),
-    page.getByRole('menu', { name: 'Media item options' }).getByRole('menuitem', { name: 'Delete' }).click(),
+    page
+      .getByRole('menu', { name: 'Media item options' })
+      .getByRole('menuitem', { name: 'Delete' })
+      .click(),
   ])
 }
 
@@ -702,35 +699,39 @@ async function closeUploadQueueIfOpen(page: Page): Promise<void> {
 }
 
 async function waitForMediaReplace(page: Page): Promise<void> {
-  await page.waitForResponse((response) =>
-    response.request().method() === 'POST' &&
-    response.url().includes('/admin/api/cms/media/') &&
-    response.url().endsWith('/replace') &&
-    response.ok(),
+  await page.waitForResponse(
+    (response) =>
+      response.request().method() === 'POST' &&
+      response.url().includes('/admin/api/cms/media/') &&
+      response.url().endsWith('/replace') &&
+      response.ok(),
   )
 }
 
 async function waitForMediaRestore(page: Page): Promise<void> {
-  await page.waitForResponse((response) =>
-    response.request().method() === 'POST' &&
-    response.url().includes('/admin/api/cms/media/') &&
-    response.url().endsWith('/restore') &&
-    response.ok(),
+  await page.waitForResponse(
+    (response) =>
+      response.request().method() === 'POST' &&
+      response.url().includes('/admin/api/cms/media/') &&
+      response.url().endsWith('/restore') &&
+      response.ok(),
   )
 }
 
 async function waitForMediaDelete(page: Page): Promise<void> {
-  await page.waitForResponse((response) =>
-    response.request().method() === 'DELETE' &&
-    response.url().includes('/admin/api/cms/media/') &&
-    response.ok(),
+  await page.waitForResponse(
+    (response) =>
+      response.request().method() === 'DELETE' &&
+      response.url().includes('/admin/api/cms/media/') &&
+      response.ok(),
   )
 }
 
 async function waitForMediaStorageState(page: Page): Promise<void> {
-  await page.waitForResponse((response) =>
-    response.request().method() === 'GET' &&
-    response.url().endsWith('/admin/api/cms/media/storage') &&
-    response.ok(),
+  await page.waitForResponse(
+    (response) =>
+      response.request().method() === 'GET' &&
+      response.url().endsWith('/admin/api/cms/media/storage') &&
+      response.ok(),
   )
 }

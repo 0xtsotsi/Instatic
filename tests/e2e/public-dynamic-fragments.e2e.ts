@@ -66,9 +66,7 @@ async function expectDynamicFragmentVisitor(
     viewport?: { width: number; height: number }
   },
 ): Promise<void> {
-  const context = await browser.newContext(
-    options.viewport ? { viewport: options.viewport } : {},
-  )
+  const context = await browser.newContext(options.viewport ? { viewport: options.viewport } : {})
   const visitor = await context.newPage()
   const holeResponses: PublicResponseRecord[] = []
   const runtimeResponses: PublicResponseRecord[] = []
@@ -99,12 +97,16 @@ async function expectDynamicFragmentVisitor(
     await expect(visitor.locator('[data-testid="canvas-root"]')).toHaveCount(0)
     await expectNoHorizontalOverflow(visitor)
 
-    await expect.poll(() => runtimeResponses.length, {
-      message: 'hole runtime asset response observed',
-    }).toBeGreaterThan(0)
-    await expect.poll(() => holeResponses.length, {
-      message: 'hole fragment response observed',
-    }).toBeGreaterThan(0)
+    await expect
+      .poll(() => runtimeResponses.length, {
+        message: 'hole runtime asset response observed',
+      })
+      .toBeGreaterThan(0)
+    await expect
+      .poll(() => holeResponses.length, {
+        message: 'hole fragment response observed',
+      })
+      .toBeGreaterThan(0)
 
     const runtime = runtimeResponses[0]!
     expect(runtime.status).toBe(200)
@@ -133,9 +135,11 @@ function responseRecord(
 }
 
 async function expectNoHorizontalOverflow(page: Page): Promise<void> {
-  await expect.poll(async () => {
-    return page.evaluate(() => (
-      document.documentElement.scrollWidth <= document.documentElement.clientWidth + 1
-    ))
-  }).toBe(true)
+  await expect
+    .poll(async () => {
+      return page.evaluate(
+        () => document.documentElement.scrollWidth <= document.documentElement.clientWidth + 1,
+      )
+    })
+    .toBe(true)
 }
