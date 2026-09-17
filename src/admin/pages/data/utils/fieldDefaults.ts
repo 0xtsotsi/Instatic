@@ -46,6 +46,12 @@ export function emptyCellValue(field: DataField): unknown {
     case 'fieldSchema':
       return []
 
+    // listField stores an array of sub-rows; the full mini-grid editor lands
+    // in step 2. The cell shape is `unknown[]` per DataFieldSchema, so an
+    // empty array is the safe default for both new rows and reads.
+    case 'listField':
+      return []
+
     default: {
       const _exhaustive: never = field
       void _exhaustive

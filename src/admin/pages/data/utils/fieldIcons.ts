@@ -32,6 +32,10 @@ const FIELD_ICONS: Record<DataFieldType, IconComponent> = {
   // Structural field types: visual page-node tree and component parameter schema.
   pageTree: LayoutSolidIcon,
   fieldSchema: BracesIcon,
+  // listField stores a JSON array of sub-rows — reuse the braces icon
+  // (same "structured cell" mental model as fieldSchema) until step 2 picks
+  // a dedicated glyph.
+  listField: BracesIcon,
 }
 
 export function getFieldIcon(type: DataFieldType): IconComponent {

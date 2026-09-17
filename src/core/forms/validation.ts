@@ -134,6 +134,7 @@ function coerceFieldValue(field: DataField, value: unknown): CoerceResult {
       return { ok: true, value: String(value) }
     case 'pageTree':
     case 'fieldSchema':
+    case 'listField':
       return {
         ok: false,
         code: 'unsupported_field',

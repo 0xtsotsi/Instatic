@@ -32,6 +32,7 @@ export const FIELD_TYPE_LABELS: Record<DataFieldType, string> = {
   relation: 'Relation',
   pageTree: 'Page tree',
   fieldSchema: 'Field schema',
+  listField: 'List of rows',
 }
 
 export function isMandatoryField(fieldId: string): boolean {

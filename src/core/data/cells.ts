@@ -121,3 +121,26 @@ export function readFieldSchemaCell(cells: DataRowCells, fieldId: string): DataF
     return result.ok ? [result.value] : []
   })
 }
+
+/**
+ * Read a `listField` cell value. Returns the array of sub-row records, each
+ * already narrowed to `Record<string, unknown>`.
+ *
+ * A list cell is `unknown[]` per `DataFieldSchema` — sub-row shape is not
+ * validated here because the per-row schema is dynamic (the `itemFields`
+ * defined on the `listField` definition). The full per-row validation
+ * lands with the mini-grid editor in step 2; for now we just guard the
+ * top-level array shape and drop any non-object rows so the display
+ * renderer never crashes on legacy / corrupt data.
+ */
+export function readListFieldCell(
+  cells: DataRowCells,
+  fieldId: string,
+): Array<Record<string, unknown>> {
+  const raw = cells[fieldId]
+  if (!Array.isArray(raw)) return []
+  return raw.filter(
+    (item): item is Record<string, unknown> =>
+      typeof item === 'object' && item !== null && !Array.isArray(item),
+  )
+}

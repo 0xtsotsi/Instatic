@@ -100,6 +100,8 @@ function previewValueForField(field: DataField): unknown {
       return null
     case 'fieldSchema':
       return []
+    case 'listField':
+      return []
     default: {
       // Exhaustive check: TypeScript will error here if a new field type
       // is added to the discriminated union without a case above.

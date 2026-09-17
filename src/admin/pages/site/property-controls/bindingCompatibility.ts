@@ -71,7 +71,7 @@ export const BINDING_COMPATIBILITY: Record<PropertyControlKind, readonly DataFie
   // Structural (document-level) types: not scalar-bindable, listed here for
   // coverage-test completeness only — the picker excludes them from the
   // binding catalog via buildMetaFields in src/core/data/fields.ts.
-  group: ['pageTree', 'fieldSchema'],
+  group: ['pageTree', 'fieldSchema', 'listField'],
 }
 
 /**

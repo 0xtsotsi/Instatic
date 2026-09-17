@@ -80,10 +80,17 @@ function buildMetaFields(fields: DataField[], tableSlugById: Map<string, string>
       }
       if (field.allowMultiple !== undefined) entry.allowMultiple = field.allowMultiple
       result.push(entry)
-    } else if (field.type === 'pageTree' || field.type === 'fieldSchema') {
+    } else if (
+      field.type === 'pageTree' ||
+      field.type === 'fieldSchema' ||
+      field.type === 'listField'
+    ) {
       // Structural types — not part of the instatic binding catalog.
       // pageTree and fieldSchema cells hold whole documents (tree/field array),
       // not scalar values that can be bound to a property control.
+      // listField cells hold an array of sub-rows; binding them as a single
+      // scalar would discard the rest of the array, so they are exposed only
+      // via the dedicated loop source (step 3), not the picker.
       continue
     } else {
       result.push({ id: field.id, label: field.label, type: field.type })

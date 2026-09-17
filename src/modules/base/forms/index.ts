@@ -44,6 +44,17 @@ const FormPropsSchema = Type.Object({
   redirectUrl: Type.String({ default: '' }),
   honeypotName: Type.String({ default: 'company' }),
   minSubmitSeconds: Type.Number({ default: 2 }),
+  /**
+   * When true, the form is rendered as a wizard of steps. Controls are
+   * grouped by their `stepId`; one step is visible at a time and a
+   * prev/next nav controls progression.
+   */
+  multistep: Type.Boolean({ default: false }),
+  /**
+   * Optional id of the step to display first. Empty string = fall back to the
+   * first step in declaration order.
+   */
+  initialStep: Type.String({ default: '' }),
 })
 
 type FormProps = Static<typeof FormPropsSchema>
@@ -227,6 +238,16 @@ export const FormModule: ModuleDefinition<FormProps> = {
       type: 'number',
       label: 'Minimum fill seconds',
       condition: { field: 'mode', eq: 'cms' },
+    },
+    multistep: {
+      type: 'toggle',
+      label: 'Multistep form',
+      condition: { field: 'mode', eq: 'cms' },
+    },
+    initialStep: {
+      type: 'text',
+      label: 'Initial step id',
+      condition: { field: 'multistep', eq: true },
     },
   },
   propsSchema: FormPropsSchema,

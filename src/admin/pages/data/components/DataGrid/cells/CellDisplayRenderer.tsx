@@ -16,6 +16,7 @@ import type { ReactElement } from 'react'
 import {
   readBooleanCell,
   readFieldSchemaCell,
+  readListFieldCell,
   readNodeTreeCell,
   readNumberCell,
   readStringArrayCell,
@@ -445,6 +446,15 @@ export function CellDisplayRenderer({
       const params = readFieldSchemaCell(cells, field.id)
       if (params.length === 0) return <Empty />
       const label = params.length === 1 ? '1 param' : `${params.length} params`
+      return <span className={styles.text}>{label}</span>
+    }
+    case 'listField': {
+      // Mini-grid editor lands in step 2; for now show a count placeholder
+      // so the grid renders something instead of throwing on the discriminated
+      // exhaustiveness check.
+      const rows = readListFieldCell(cells, field.id)
+      if (rows.length === 0) return <Empty />
+      const label = rows.length === 1 ? '1 row' : `${rows.length} rows`
       return <span className={styles.text}>{label}</span>
     }
     default: {

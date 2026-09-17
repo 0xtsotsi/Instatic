@@ -19,6 +19,7 @@ import { MediaCell } from './MediaCell'
 import { RelationCell } from './RelationCell'
 import { PageTreeCell } from './PageTreeCell'
 import { FieldSchemaCell } from './FieldSchemaCell'
+import { ListFieldCell } from './ListFieldCell'
 
 /**
  * Additional props that are only meaningful for specific cell types but are
@@ -92,6 +93,12 @@ export function CellEditorRenderer({
 
     case 'fieldSchema':
       return <FieldSchemaCell field={field} {...rest} onOpenFieldEditor={onOpenFieldEditor} />
+
+    case 'listField':
+      // Full mini-grid editor lands in step 2. For now render a read-only
+      // row-count affordance so authors can inspect existing cells without
+      // the exhaustiveness check failing the build.
+      return <ListFieldCell field={field} {...rest} />
 
     default: {
       // Exhaustive check: TypeScript will error here if a new field type

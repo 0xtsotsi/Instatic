@@ -196,6 +196,17 @@ export function applyEditState(
       return { type: 'pageTree', ...common }
     case 'fieldSchema':
       return { type: 'fieldSchema', ...common }
+    case 'listField':
+      // Mini-grid editor + field-edit UI land in step 2. For now just round-trip
+      // the shape so a saved field re-reads as a valid DataField.
+      return {
+        type: 'listField',
+        ...common,
+        itemFields: field.itemFields,
+        ...(field.minItems !== undefined ? { minItems: field.minItems } : {}),
+        ...(field.maxItems !== undefined ? { maxItems: field.maxItems } : {}),
+        ...(field.defaultValue !== undefined ? { defaultValue: field.defaultValue } : {}),
+      }
     default: {
       const _exhaustive: never = field
       void _exhaustive

@@ -221,6 +221,56 @@ const FieldSchemaFieldSchema = Type.Object({
   ...FieldCommonProps,
 })
 
+/**
+ * Sub-field of a {@link ListFieldSchema} — a single column inside each
+ * repeated sub-row. Mirrors a subset of `DataFieldSchema` because list sub-rows
+ * are intentionally a flat, authoring-friendly shape (no nested lists, no
+ * relations, no structural types).
+ */
+const ListFieldItemFieldSchema = Type.Object({
+  id: Type.String(),
+  label: Type.String(),
+  required: Type.Optional(Type.Boolean()),
+  description: Type.Optional(Type.String()),
+  type: Type.Union([
+    Type.Literal('text'),
+    Type.Literal('longText'),
+    Type.Literal('number'),
+    Type.Literal('boolean'),
+    Type.Literal('url'),
+    Type.Literal('email'),
+    Type.Literal('select'),
+  ]),
+  options: Type.Optional(Type.Array(Type.Object({ id: Type.String(), label: Type.String() }))),
+})
+
+/**
+ * List Field — stores an array of sub-rows on a `DataTable` row. Each sub-row
+ * is a `Record<itemFieldId, unknown>` keyed by the sub-field's `id`.
+ *
+ * Cell value shape: `cells_json[fieldId]: Array<Record<itemFieldId, unknown>>`.
+ * Stored as `unknown[]` (not a strict record type) so cells stay JSON-friendly
+ * across migrations — matches the existing `cells_json: Record<string, unknown>`
+ * pattern.
+ *
+ * List fields are admin-side sub-row collections and are not writable from
+ * public forms. The `coerceFieldValue` branch in `src/core/forms/validation.ts`
+ * rejects form submissions against them with `unsupported_field`, mirroring
+ * the `pageTree` / `fieldSchema` pattern.
+ *
+ * Render-side: a new loop source at `src/core/loops/sources/listField.ts`
+ * (id `data.listField`) iterates the cell, reusing the existing `base.loop`
+ * render path with `currentEntry.<listFieldId>[i].<subFieldId>` bindings.
+ */
+const ListFieldSchema = Type.Object({
+  type: Type.Literal('listField'),
+  ...FieldCommonProps,
+  defaultValue: Type.Optional(Type.Array(Type.Unknown())),
+  minItems: Type.Optional(Type.Number()),
+  maxItems: Type.Optional(Type.Number()),
+  itemFields: Type.Array(ListFieldItemFieldSchema),
+})
+
 export const DataFieldSchema = Type.Union([
   TextFieldSchema,
   LongTextFieldSchema,
@@ -237,6 +287,7 @@ export const DataFieldSchema = Type.Union([
   RelationFieldSchema,
   PageTreeFieldSchema,
   FieldSchemaFieldSchema,
+  ListFieldSchema,
 ])
 
 export type DataField = Static<typeof DataFieldSchema>
@@ -265,6 +316,7 @@ export const DATA_FIELD_TYPES = [
   'relation',
   'pageTree',
   'fieldSchema',
+  'listField',
 ] as const
 
 export type DataFieldType = (typeof DATA_FIELD_TYPES)[number]
