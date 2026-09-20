@@ -1135,4 +1135,35 @@ export const sqliteMigrations: Migration[] = [
       insert into site_sync_state (id, seq) values (1, 0);
     `,
   },
+  {
+    // Visitor canvas annotations — mirror of the PG `021_node_annotations`
+    // migration. See that file for the rationale. SQLite-specific deltas:
+    // `timestamptz` → TEXT, `bigint` → INTEGER, default timestamps use
+    // `strftime('%Y-%m-%dT%H:%M:%fZ','now')` to match the existing pattern
+    // (see migration `003_data_table_columns`).
+    id: '021_node_annotations',
+    sql: `
+      create table if not exists node_annotations (
+        id text primary key,
+        site_id text not null references site(id),
+        page_id text not null,
+        node_id text not null,
+        publish_version integer not null,
+        parent_id text references node_annotations(id),
+        author_name text not null,
+        author_email_hash text not null,
+        body text not null,
+        status text not null default 'open',
+        created_at text not null default (strftime('%Y-%m-%dT%H:%M:%fZ', 'now')),
+        updated_at text not null default (strftime('%Y-%m-%dT%H:%M:%fZ', 'now')),
+        resolved_at text,
+        constraint node_annotations_status_check check (status in ('open', 'resolved'))
+      );
+
+      create index if not exists node_annotations_page_idx
+        on node_annotations (site_id, page_id, status);
+      create index if not exists node_annotations_thread_idx
+        on node_annotations (parent_id);
+    `,
+  },
 ]

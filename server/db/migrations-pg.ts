@@ -1071,4 +1071,47 @@ export const pgMigrations: Migration[] = [
       insert into site_sync_state (id, seq) values (1, 0);
     `,
   },
+  {
+    // Visitor canvas annotations. One row per public-side comment pinned to a
+    // specific node on a specific page (matched by `node_id` against the
+    // published page's `nodes` map). Replies reuse `parent_id` to thread.
+    //
+    // Lives outside `data_rows` because annotations are site-scoped system
+    // state with no schema flexibility — a dedicated table avoids polluting
+    // the user's `data_tables` list and keeps the spam-dedup `email_hash`
+    // index narrow.
+    //
+    // `publish_version` is stamped on every insert so the editor can restore
+    // annotations against a historical page version without confusing them
+    // with current ones (mirrors the per-version pattern in
+    // `server/forms/handler.ts:findPublishedFormSnapshot`).
+    //
+    // Note: the parent FK references this same table (self-reference). SQLite
+    // accepts this without deferred constraints because FK enforcement runs
+    // on row insert, after the referenced row already exists.
+    id: '021_node_annotations',
+    sql: `
+      create table if not exists node_annotations (
+        id text primary key,
+        site_id text not null references site(id),
+        page_id text not null,
+        node_id text not null,
+        publish_version bigint not null,
+        parent_id text references node_annotations(id),
+        author_name text not null,
+        author_email_hash text not null,
+        body text not null,
+        status text not null default 'open',
+        created_at timestamptz not null default now(),
+        updated_at timestamptz not null default now(),
+        resolved_at timestamptz,
+        constraint node_annotations_status_check check (status in ('open', 'resolved'))
+      );
+
+      create index if not exists node_annotations_page_idx
+        on node_annotations (site_id, page_id, status);
+      create index if not exists node_annotations_thread_idx
+        on node_annotations (parent_id);
+    `,
+  },
 ]
