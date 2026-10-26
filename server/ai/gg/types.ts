@@ -74,6 +74,7 @@ export type GgToolDefinition = Tool
  *   anthropic        → 'anthropic'
  *   openai           → 'openai'
  *   openrouter       → 'openrouter'
+ *   requesty         → 'openai' (Requesty speaks the OpenAI Responses dialect)
  *   ollama           → 'openai' (Ollama speaks the openai-compatible SSE dialect)
  *   openai-compatible → 'openai'
  */
@@ -85,6 +86,7 @@ export function mapProviderId(instaticProviderId: string): GgProviderId {
       return 'openai'
     case 'openrouter':
       return 'openrouter'
+    case 'requesty':
     case 'ollama':
     case 'openai-compatible':
       return 'openai'

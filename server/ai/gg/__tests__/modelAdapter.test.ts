@@ -51,6 +51,7 @@ describe('mapProviderId', () => {
     expect(mapProviderId('anthropic')).toBe('anthropic')
     expect(mapProviderId('openai')).toBe('openai')
     expect(mapProviderId('openrouter')).toBe('openrouter')
+    expect(mapProviderId('requesty')).toBe('openai')
     expect(mapProviderId('ollama')).toBe('openai')
     expect(mapProviderId('openai-compatible')).toBe('openai')
   })

@@ -22,6 +22,7 @@ const VALID_PROVIDERS: AiProviderId[] = [
   'openai',
   'ollama',
   'openrouter',
+  'requesty',
   'openai-compatible',
 ]
 
