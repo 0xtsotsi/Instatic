@@ -72,6 +72,32 @@ describe('requesty driver', () => {
     })
   })
 
+  it('listModels reads the base tier when rates are only in the pricing array', async () => {
+    globalThis.fetch = (async () =>
+      new Response(
+        JSON.stringify({
+          data: [
+            {
+              id: 'anthropic/claude-sonnet-4-5',
+              api: 'chat',
+              context_window: 200000,
+              pricing: [
+                { prompt_tokens_threshold: 200000, input_price: 6e-6, output_price: 2.25e-5 },
+                { prompt_tokens_threshold: 0, input_price: 3e-6, output_price: 1.5e-5 },
+              ],
+            },
+          ],
+        }),
+        { status: 200 },
+      )) as unknown as typeof fetch
+
+    const models = await requestyDriver.listModels(creds('rqsty-sk-test'))
+    expect(models).toHaveLength(1)
+    // base tier (threshold 0): 3e-6 * 1e6 = 3 ; 1.5e-5 * 1e6 = 15
+    expect(models[0]?.pricing?.inputPerMTok).toBeCloseTo(3, 6)
+    expect(models[0]?.pricing?.outputPerMTok).toBeCloseTo(15, 6)
+  })
+
   it('listModels drops non-chat catalogue entries (e.g. embeddings)', async () => {
     globalThis.fetch = (async () =>
       new Response(
