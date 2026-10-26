@@ -125,6 +125,20 @@ const RequestyModelSchema = Type.Object(
     // USD per single token (e.g. 1.5e-7); the picker shows per-million.
     input_price: Type.Optional(Type.Number()),
     output_price: Type.Optional(Type.Number()),
+    // Some models publish rates only as tiers keyed by prompt size; the entry
+    // with the lowest `prompt_tokens_threshold` is the base rate.
+    pricing: Type.Optional(
+      Type.Array(
+        Type.Object(
+          {
+            prompt_tokens_threshold: Type.Optional(Type.Number()),
+            input_price: Type.Optional(Type.Number()),
+            output_price: Type.Optional(Type.Number()),
+          },
+          { additionalProperties: true },
+        ),
+      ),
+    ),
   },
   { additionalProperties: true },
 )
@@ -168,8 +182,12 @@ async function fetchRequestyModels(
     // Requesty publishes prices + context windows inline, so the picker is
     // enriched straight from this fetch (Anthropic/OpenAI are enriched by the
     // models handler from the shared catalogue instead, since their APIs omit both).
-    const inputPerMTok = perMTok(model.input_price)
-    const outputPerMTok = perMTok(model.output_price)
+    // Top-level rates win; otherwise fall back to the base tier of `pricing`.
+    const baseTier = [...(model.pricing ?? [])]
+      .filter((tier) => tier.input_price !== undefined && tier.output_price !== undefined)
+      .sort((x, y) => (x.prompt_tokens_threshold ?? 0) - (y.prompt_tokens_threshold ?? 0))[0]
+    const inputPerMTok = perMTok(model.input_price ?? baseTier?.input_price)
+    const outputPerMTok = perMTok(model.output_price ?? baseTier?.output_price)
     return {
       id: model.id,
       label: model.description ?? model.id,
